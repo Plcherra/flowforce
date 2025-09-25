@@ -1,0 +1,305 @@
+
+import { CustomSection } from '@/types/templates';
+
+export const AVAILABLE_SECTIONS: CustomSection[] = [
+  // Core sections - always available
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+    description: 'Main overview and analytics',
+    icon: 'LayoutDashboard',
+    path: '/dashboard',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 1,
+    category: 'core'
+  },
+  {
+    id: 'messages',
+    name: 'Messages & Communication',
+    description: 'Team messaging and announcements',
+    icon: 'MessageSquare',
+    path: '/messages',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 2,
+    category: 'core'
+  },
+  {
+    id: 'tasks',
+    name: 'Task Management',
+    description: 'Project and task tracking',
+    icon: 'CheckSquare',
+    path: '/tasks',
+    permissions: ['viewOwnTasks'],
+    enabled: true,
+    order: 3,
+    category: 'core'
+  },
+  {
+    id: 'goals',
+    name: 'Goals & Objectives',
+    description: 'Track team goals and achievements',
+    icon: 'Target',
+    path: '/goals',
+    permissions: ['viewOwnTasks'],
+    enabled: true,
+    order: 4,
+    category: 'core'
+  },
+
+  // Industry-specific sections
+  {
+    id: 'scheduling',
+    name: 'Scheduling & Time Tracking',
+    description: 'Shift scheduling and time management',
+    icon: 'Calendar',
+    path: '/scheduling',
+    permissions: ['viewOwnSchedules'],
+    enabled: false,
+    order: 10,
+    category: 'industry'
+  },
+  {
+    id: 'shift-management',
+    name: 'Shift Management',
+    description: 'Advanced shift planning for restaurants',
+    icon: 'Clock',
+    path: '/shifts',
+    permissions: ['viewTeamSchedules'],
+    enabled: false,
+    order: 11,
+    category: 'industry',
+    templateId: 'restaurant'
+  },
+  {
+    id: 'staff-roles',
+    name: 'Staff Roles & Positions',
+    description: 'Manage restaurant positions and roles',
+    icon: 'Users',
+    path: '/staff-roles',
+    permissions: ['manageUsers'],
+    enabled: false,
+    order: 12,
+    category: 'industry',
+    templateId: 'restaurant'
+  },
+  {
+    id: 'inventory',
+    name: 'Inventory Management',
+    description: 'Stock and inventory tracking',
+    icon: 'Package',
+    path: '/inventory',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 20,
+    category: 'industry'
+  },
+  {
+    id: 'sales',
+    name: 'Sales Tracking',
+    description: 'Sales performance and analytics',
+    icon: 'TrendingUp',
+    path: '/sales',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 21,
+    category: 'industry',
+    templateId: 'retail'
+  },
+  {
+    id: 'projects',
+    name: 'Project Management',
+    description: 'Manage client projects and deliverables',
+    icon: 'FolderOpen',
+    path: '/projects',
+    permissions: ['viewOwnTasks'],
+    enabled: false,
+    order: 22,
+    category: 'industry',
+    templateId: 'office'
+  },
+  {
+    id: 'patient-management',
+    name: 'Patient Management',
+    description: 'Patient records and appointments',
+    icon: 'UserCheck',
+    path: '/patients',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 23,
+    category: 'industry',
+    templateId: 'healthcare'
+  },
+  {
+    id: 'cookbook',
+    name: 'CookBook',
+    description: 'Menu items, prep recipes and PAR planner',
+    icon: 'book-open',
+    path: '/cookbook',
+    permissions: [],
+    enabled: true,
+    order: 24,
+    category: 'operations'
+  },
+  {
+    id: 'production',
+    name: 'Production Tracking',
+    description: 'Monitor production lines and output',
+    icon: 'Activity',
+    path: '/production',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 24,
+    category: 'industry',
+    templateId: 'manufacturing'
+  },
+  {
+    id: 'quality-control',
+    name: 'Quality Control',
+    description: 'Quality assurance and testing',
+    icon: 'Shield',
+    path: '/quality',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 25,
+    category: 'industry',
+    templateId: 'manufacturing'
+  },
+  {
+    id: 'safety',
+    name: 'Safety Management',
+    description: 'Safety protocols and incident tracking',
+    icon: 'AlertTriangle',
+    path: '/safety',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 26,
+    category: 'industry',
+    templateId: 'manufacturing'
+  },
+  {
+    id: 'compliance',
+    name: 'Compliance Tracking',
+    description: 'Regulatory compliance and audits',
+    icon: 'FileCheck',
+    path: '/compliance',
+    permissions: ['viewTeamProfiles'],
+    enabled: false,
+    order: 30,
+    category: 'industry'
+  },
+  {
+    id: 'customer-service',
+    name: 'Customer Service',
+    description: 'Customer support and feedback',
+    icon: 'Headphones',
+    path: '/customer-service',
+    permissions: ['viewOwnProfile'],
+    enabled: false,
+    order: 31,
+    category: 'industry',
+    templateId: 'retail'
+  },
+  {
+    id: 'staff-training',
+    name: 'Staff Training',
+    description: 'Training programs and progress tracking',
+    icon: 'GraduationCap',
+    path: '/training',
+    permissions: ['viewOwnProfile'],
+    enabled: false,
+    order: 32,
+    category: 'industry'
+  },
+
+  // Always available advanced sections
+  {
+    id: 'expenses',
+    name: 'Expense Management',
+    description: 'Track and approve expenses',
+    icon: 'DollarSign',
+    path: '/expenses',
+    permissions: ['viewOwnExpenses'],
+    enabled: true,
+    order: 40,
+    category: 'core'
+  },
+  {
+    id: 'forms',
+    name: 'Digital Forms',
+    description: 'Custom forms and document management',
+    icon: 'FileText',
+    path: '/forms',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 41,
+    category: 'operations'
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics & Insights',
+    description: 'Business insights and reporting',
+    icon: 'BarChart3',
+    path: '/analytics',
+    permissions: ['viewTeamProfiles'],
+    enabled: true,
+    order: 50,
+    category: 'core'
+  },
+  {
+    id: 'reports',
+    name: 'Reports',
+    description: 'Generate and schedule reports',
+    icon: 'FileBarChart',
+    path: '/reports',
+    permissions: ['viewTeamProfiles'],
+    enabled: true,
+    order: 51,
+    category: 'core'
+  },
+  {
+    id: 'learning',
+    name: 'Learning Center',
+    description: 'Training and development resources',
+    icon: 'BookOpen',
+    path: '/learning',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 60,
+    category: 'core'
+  },
+  {
+    id: 'certifications',
+    name: 'Certifications',
+    description: 'Professional certifications and licenses',
+    icon: 'Award',
+    path: '/certifications',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 61,
+    category: 'core'
+  },
+  {
+    id: 'recognition',
+    name: 'Recognition & Rewards',
+    description: 'Employee recognition programs',
+    icon: 'Star',
+    path: '/recognition',
+    permissions: ['viewOwnProfile'],
+    enabled: true,
+    order: 62,
+    category: 'core'
+  },
+  {
+    id: 'performance',
+    name: 'Performance Management',
+    description: 'Performance reviews and goals',
+    icon: 'Target',
+    path: '/performance',
+    permissions: ['viewTeamProfiles'],
+    enabled: true,
+    order: 63,
+    category: 'core'
+  }
+];

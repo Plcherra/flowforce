@@ -1,0 +1,524 @@
+
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "employees": "Mitarbeiter",
+    "scheduling": "Planung",
+    "tasks": "Aufgaben",
+  "goals": "Ziele",
+  "financialManagement": "Finanzmanagement",
+  "inventory": "Inventar",
+  "payments": "Zahlungen",
+  "purchaseOrders": "Bestellungen",
+  "invoices": "Rechnungen",
+  "costAnalysis": "Kostenanalyse",
+    "expenses": "Ausgaben",
+  "messages": "Nachrichten",
+  "events": "Ereignisse",
+  "meetings": "Meetings",
+    "analytics": "Analysen",
+    "reports": "Berichte",
+    "forms": "Formulare",
+    "performance": "Leistung",
+    "recognition": "Anerkennung",
+    "learning": "Lernzentrum",
+    "certifications": "Zertifizierungen",
+    "aiInsights": "KI-Insights",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden",
+    "signIn": "Anmelden",
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "viewCertificate": "Zertifikat Anzeigen",
+    "startCertification": "Zertifizierung Starten"
+  },
+  "navigation": {
+    "communication": "Kommunikation",
+    "operations": "Operationen",
+    "hrDevelopment": "Personal & Entwicklung",
+    "analyticsReports": "Analysen & Berichte",
+    "adminSetup": "Admin & Einrichtung",
+    "userManagement": "Benutzerverwaltung",
+    "inviteEmployee": "Mitarbeiter Einladen",
+    "sectionsPermissions": "Bereiche & Berechtigungen",
+    "systemSettings": "Systemeinstellungen"
+  },
+  "landing": {
+    "usedBy": "Verwendet von 1.200+ Standorten weltweit",
+    "operationsMade": "Durchgeführte Operationen",
+    "simple": "Einfach.",
+    "subtitle": "FlowForce vereint Mitarbeiterverwaltung, Planung und Arbeitsabläufe in einer mächtigen Plattform. Organisieren Sie Ihr Team produktiv in Minuten, nicht Monaten.",
+    "registerCompany": "Ihr Unternehmen Registrieren",
+    "watchDemo": "Demo Ansehen",
+    "fasterScheduling": "Schnellere Planung",
+    "averageSetup": "Durchschnittliche Einrichtungszeit",
+    "uptimeGuarantee": "Verfügbarkeitsgarantie",
+    "everythingNeeds": "Alles Was Ihr Unternehmen Braucht",
+    "sixModules": "Sechs mächtige Module, die nahtlos zusammenarbeiten, um jeden Aspekt Ihrer Geschäftsabläufe zu optimieren.",
+    "learnMore": "Mehr Erfahren",
+    "features": "Funktionen",
+    "templatesNav": "Vorlagen",
+    "industries": "Branchen",
+    "pricing": "Preise",
+    "resources": "Ressourcen",
+    "startFreeTrial": "Kostenlose Testversion Starten",
+    "quickSetup": {
+      "title": "In Minuten Starten",
+      "subtitle": "Unser optimierter Einrichtungsprozess macht Ihre gesamte Organisation schneller einsatzbereit als jede andere Plattform.",
+      "signUp": {
+        "title": "Anmelden",
+        "description": "Erstellen Sie Ihr Firmenkonto in unter 60 Sekunden mit unserem optimierten Onboarding."
+      },
+      "configure": {
+        "title": "Rollen Konfigurieren",
+        "description": "Richten Sie Ihre Teamstruktur, Berechtigungen und Arbeitsabläufe mit unseren intelligenten Vorlagen ein."
+      },
+      "goLive": {
+        "title": "Live Gehen",
+        "description": "Beginnen Sie sofort mit der Verwaltung Ihrer Operationen - ohne Lernkurve für Ihr Team."
+      }
+    },
+    "industries": {
+      "title": "Für Ihre Branche Gebaut",
+      "subtitle": "Starten Sie schneller mit vorkonfigurierten Vorlagen, die speziell für Ihren Geschäftsbereich entwickelt wurden.",
+      "explore": "Erkunden",
+      "template": "Vorlage",
+      "retail": {
+        "title": "Einzelhandel",
+        "description": "Kassensystem-Integration, Bestandsverfolgung und Multi-Standort-Management.",
+        "features": {
+          "alerts": "Schichtabdeckungs-Benachrichtigungen",
+          "tracking": "Verkaufsleistungs-Verfolgung",
+          "automation": "Bestandsautomatisierung"
+        }
+      },
+      "hospitality": {
+        "title": "Gastronomie",
+        "description": "Tischverwaltung, Küchenabläufe und Gästeservice-Optimierung.",
+        "features": {
+          "kitchen": "Küchen-Display-Systeme",
+          "scheduling": "Kellner-Planung",
+          "feedback": "Gäste-Feedback-Verfolgung"
+        }
+      },
+      "healthcare": {
+        "title": "Gesundheitswesen",
+        "description": "Patientenbetreuungs-Koordination, Compliance-Verfolgung und Personal-Zertifizierungsmanagement.",
+        "features": {
+          "compliance": "DSGVO-Konformität",
+          "tracking": "Patientenfluss-Verfolgung",
+          "alerts": "Zertifizierungs-Benachrichtigungen"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Geliebt von Wachsenden Unternehmen",
+      "subtitle": "Schließen Sie sich Tausenden von Unternehmen an, die ihre Abläufe mit FlowForce transformiert haben.",
+      "trustedBy": "Vertraut von Branchenführern",
+      "quotes": {
+        "klausWeber": "FlowForce hat unsere Abläufe komplett transformiert. Wir gingen vom Chaos zur organisierten Effizienz in nur zwei Wochen. Unsere Planungskonflikte sind um 90% gesunken.",
+        "sabineSchneider": "Allein das Aufgabenverwaltungssystem sparte uns 15 Stunden pro Woche. Die Automatisierungsfunktionen sind unglaublich und das Team hat es sofort übernommen.",
+        "thomasMuller": "Die beste Investition, die wir für unsere Kliniken gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über ihre täglichen Verantwortlichkeiten.",
+        "andreaWagner": "Die Implementierung war nahtlos und der ROI war sofort da. Wir sehen 25% bessere Effizienz in allen unseren Einzelhandelsstandorten.",
+        "michaelBauer": "FlowForce skaliert perfekt mit uns. Von 50 auf 200 Mitarbeiter, es bewältigt alles ohne einen Takt zu verpassen. Ein Spielveränderer für Wachstum."
+      }
+    },
+    "useCases": {
+      "badge": "Echte Ergebnisse",
+      "title": "Messbare Auswirkung auf Ihr Unternehmen",
+      "subtitle": "Sehen Sie, wie FlowForce greifbare Verbesserungen in allen Aspekten Ihrer Abläufe liefert.",
+      "fasterScheduling": {
+        "title": "Schnellere Planung",
+        "description": "Automatische Konflikterkennung und intelligente Vorschläge reduzieren die Planungszeit"
+      },
+      "timeSaved": {
+        "title": "Wöchentlich Gesparte Zeit",
+        "description": "Optimierte Arbeitsabläufe und Automatisierung eliminieren repetitive administrative Aufgaben"
+      },
+      "locationsManaged": {
+        "title": "Verwaltete Standorte",
+        "description": "Multi-Standort-Unternehmen vertrauen FlowForce für zentralisierte Abläufe"
+      },
+      "costReduction": {
+        "title": "Kostenreduzierung",
+        "description": "Geringere Verwaltungskosten und verbesserte Ressourcenzuteilung"
+      },
+      "taskCompletion": {
+        "title": "Aufgabenabschluss",
+        "description": "Klare Verantwortlichkeit und automatisierte Erinnerungen stellen sicher, dass nichts übersehen wird"
+      },
+      "averageResponse": {
+        "title": "Durchschnittliche Antwort",
+        "description": "Echtzeit-Benachrichtigungen halten Teams verbunden und reaktionsfähig"
+      },
+      "stats": {
+        "employeesManaged": "Verwaltete Mitarbeiter",
+        "tasksCompleted": "Abgeschlossene Aufgaben",
+        "customerSatisfaction": "Kundenzufriedenheit",
+        "supportAvailable": "Support Verfügbar"
+      }
+    }
+  },
+  "resources": {
+    "title": "Ressourcen & Support",
+    "subtitle": "Alles was Sie brauchen, um mit FlowForce erfolgreich zu sein - von Einführungsanleitungen bis zu fortgeschrittenen Tutorials.",
+    "loadingMessage": "Lade Ressourcen...",
+    "documentation": {
+      "title": "Dokumentation",
+      "description": "Umfassende Anleitungen und API-Referenzen"
+    },
+    "blog": {
+      "title": "Blog & Updates",
+      "description": "Neueste Nachrichten, Tipps und bewährte Praktiken"
+    },
+    "videos": {
+      "title": "Video-Tutorials",
+      "description": "Visuelle Anleitungen zur Beherrschung von FlowForce"
+    },
+    "downloads": {
+      "title": "Downloads",
+      "description": "Tools und Ressourcen zur Verbesserung Ihrer Erfahrung"
+    },
+    "help": {
+      "title": "Benötigen Sie Mehr Hilfe?",
+      "subtitle": "Können Sie nicht finden, was Sie suchen? Wir sind hier, um zu helfen.",
+      "contactSupport": {
+        "title": "Support Kontaktieren",
+        "description": "Erhalten Sie direkte Hilfe von unserem Support-Team",
+        "content": "Senden Sie uns eine E-Mail an support@flowforce.com oder nutzen Sie unseren Live-Chat."
+      },
+      "communityForum": {
+        "title": "Community-Forum",
+        "description": "Verbinden Sie sich mit anderen FlowForce-Benutzern",
+        "content": "Teilen Sie Tipps, stellen Sie Fragen und lernen Sie von der Community."
+      },
+      "scheduleDemo": {
+        "title": "Demo Planen",
+        "description": "Erhalten Sie eine personalisierte Vorführung",
+        "content": "Buchen Sie eine Einzelsitzung mit unseren Experten."
+      }
+    },
+    "details": {
+      "readMore": "Mehr Lesen",
+      "readTime": "Min",
+      "type": "Typ",
+      "author": "Autor",
+      "duration": "Dauer",
+      "publishDate": "Veröffentlicht",
+      "comingSoon": "Demnächst",
+      "videoInProduction": "Dieses Video wird derzeit produziert.",
+      "notFound": "nicht gefunden",
+      "requestedNotFound": "Der angeforderte {{type}} konnte nicht gefunden werden."
+    }
+  },
+  "features": {
+    "title": "Kraftvolle Funktionen für Moderne Teams",
+    "subtitle": "Entdecken Sie, wie FlowForces umfassendes Funktionsset Ihre Geschäftsabläufe transformieren kann.",
+    "employeeManagement": {
+      "title": "Mitarbeiterverwaltung",
+      "description": "Vollständige Profile, Rollenverwaltung und Organisationsstruktur mit leistungsstarker Suche und Filterung.",
+      "details": "Verwalten Sie Ihre gesamte Belegschaft mit umfassenden Mitarbeiterprofilen, rollenbasierten Berechtigungen und Organigrammen. Verfolgen Sie Zertifizierungen, Fähigkeiten und Leistungsmetriken an einem Ort."
+    },
+    "shiftScheduling": {
+      "title": "Schichtplanung",
+      "description": "Visuelle Drag-and-Drop-Planung mit automatischer Konflikterkennung und Überstundenverwaltung.",
+      "details": "Erstellen Sie mühelos Zeitpläne mit unserer intuitiven Drag-and-Drop-Oberfläche. Erkennen Sie automatisch Konflikte, verwalten Sie Überstunden und stellen Sie angemessene Abdeckung mit intelligenten Planungsalgorithmen sicher."
+    },
+    "taskManagement": {
+      "title": "Aufgabenverwaltung",
+      "description": "Workflow-Automatisierung mit Aufgabenabhängigkeiten, Genehmigungen und Echtzeit-Fortschrittsverfolgung.",
+      "details": "Optimieren Sie Abläufe mit automatisierten Workflows, Aufgabenabhängigkeiten und Genehmigungsprozessen. Verfolgen Sie den Fortschritt in Echtzeit und stellen Sie sicher, dass nichts übersehen wird."
+    },
+    "internalCommunication": {
+      "title": "Interne Kommunikation",
+      "description": "Team-Messaging, Unternehmensankündigungen und abteilungsspezifische Kommunikationskanäle.",
+      "details": "Halten Sie Ihr Team mit integriertem Messaging, unternehmensweiten Ankündigungen und abteilungsspezifischen Kanälen verbunden. Stellen Sie sicher, dass wichtige Informationen die richtigen Personen zur richtigen Zeit erreichen."
+    },
+    "digitalForms": {
+      "title": "Digitale Formulare",
+      "description": "Benutzerdefinierter Formular-Builder mit bedingter Logik, digitalen Signaturen und automatischer PDF-Generierung.",
+      "details": "Erstellen Sie benutzerdefinierte Formulare mit bedingter Logik, sammeln Sie digitale Signaturen und generieren Sie automatisch PDFs. Optimieren Sie Papierkram und eliminieren Sie manuelle Dateneingabe."
+    }
+  },
+  "footer": {
+    "stayUpdated": "Auf dem Laufenden bleiben",
+    "newsletterText": "Erhalten Sie die neuesten Produktupdates, Brancheneinblicke und operative Tipps in Ihr Postfach.",
+    "enterEmail": "E-Mail eingeben",
+    "subscribe": "Abonnieren",
+    "product": "Produkt",
+    "company": "Unternehmen",
+    "support": "Support",
+    "allRightsReserved": "© 2024 FlowForce. Alle Rechte vorbehalten.",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfService": "Nutzungsbedingungen",
+    "cookiePolicy": "Cookie-Richtlinie"
+  },
+  "registration": {
+    "title": "Unternehmensregistrierung",
+    "subtitle": "Richten Sie Ihren Arbeitsbereich in Minuten ein",
+    "userInfo": {
+      "title": "Ihre Informationen",
+      "description": "Erzählen Sie uns von sich",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen"
+    },
+    "companyInfo": {
+      "title": "Unternehmensdetails",
+      "description": "Erzählen Sie uns von Ihrem Unternehmen",
+      "name": "Firmenname",
+      "industry": "Branche",
+      "size": "Unternehmensgröße",
+      "description": "Beschreibung",
+      "website": "Website",
+      "phone": "Telefonnummer"
+    },
+    "template": {
+      "title": "Vorlage wählen",
+      "description": "Wählen Sie eine Vorlage, die zu Ihrem Unternehmen passt",
+      "custom": "Benutzerdefinierte Vorlage",
+      "retail": "Einzelhandelsoperationen",
+      "restaurant": "Restaurantmanagement",
+      "manufacturing": "Fertigung",
+      "healthcare": "Gesundheitswesen",
+      "education": "Bildung"
+    },
+    "branding": {
+      "title": "Branding anpassen",
+      "description": "Machen Sie es zu Ihrem mit benutzerdefinierten Farben und Logo",
+      "uploadLogo": "Logo hochladen",
+      "primaryColor": "Primärfarbe",
+      "secondaryColor": "Sekundärfarbe"
+    },
+    "sections": {
+      "title": "Arbeitsbereich-Abschnitte",
+      "description": "Wählen Sie die Funktionen, die Sie benötigen",
+      "communication": "Kommunikation",
+      "operations": "Operationen",
+      "hr": "HR & Entwicklung",
+      "analytics": "Analytik"
+    },
+    "roles": {
+      "title": "Rollen einrichten",
+      "description": "Benutzerrollen und Berechtigungen definieren",
+      "addRole": "Rolle hinzufügen",
+      "roleName": "Rollenname",
+      "permissions": "Berechtigungen"
+    },
+    "review": {
+      "title": "Überprüfen und Abschließen",
+      "description": "Überprüfen Sie Ihre Einstellungen und schließen Sie die Einrichtung ab",
+      "creating": "Ihr Arbeitsbereich wird erstellt...",
+      "complete": "Einrichtung abschließen"
+    },
+    "navigation": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "cancel": "Abbrechen",
+      "tryAgain": "Erneut versuchen"
+    }
+  },
+  "onboarding": {
+    "sidebar": {
+      "whatYoureDoing": "Was Sie tun",
+      "selectedTemplate": "Ausgewählte Vorlage",
+      "progress": "Fortschritt"
+    },
+    "wizard": {
+      "title": "FlowForce",
+      "subtitle": "Erweiterte Unternehmenseinrichtung",
+      "description": "Konfigurieren Sie Ihren Unternehmensarbeitsbereich mit branchenspezifischen Vorlagen",
+      "stepOf": "Schritt {{current}} von {{total}}",
+      "cancel": "Abbrechen",
+      "back": "Zurück",
+      "next": "Weiter",
+      "complete": "Einrichtung abschließen",
+      "creating": "Erstellen...",
+      "settingUp": "Ihr Unternehmensarbeitsbereich wird eingerichtet..."
+    },
+    "steps": {
+      "info": {
+        "title": "Informationen",
+        "description": "Ihre Informationen und Unternehmensdetails"
+      },
+      "template": {
+        "title": "Vorlage",
+        "description": "Wählen Sie Ihre Unternehmensvorlage"
+      },
+      "custom": {
+        "title": "Benutzerdefiniert",
+        "description": "Benutzerdefinierte Vorlage erstellen"
+      },
+      "sections": {
+        "title": "Abschnitte",
+        "description": "Passen Sie Ihre Arbeitsbereich-Abschnitte an"
+      },
+      "roles": {
+        "title": "Rollen",
+        "description": "Rollen und Positionen einrichten"
+      },
+      "review": {
+        "title": "Überprüfung",
+        "description": "Überprüfen und Einrichtung abschließen"
+      }
+    },
+    "userInfo": {
+      "title": "Lassen Sie uns beginnen",
+      "description": "Erzählen Sie uns von sich und Ihrem Unternehmen, um Ihren Arbeitsbereich einzurichten",
+      "personalInfo": "Ihre Informationen",
+      "companyInfo": "Unternehmensinformationen",
+      "fields": {
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail-Adresse",
+        "password": "Passwort",
+        "companyName": "Firmenname",
+        "industry": "Branche",
+        "size": "Unternehmensgröße",
+        "description": "Unternehmensbeschreibung",
+        "website": "Website",
+        "phone": "Telefon"
+      },
+      "placeholders": {
+        "firstName": "Geben Sie Ihren Vornamen ein",
+        "lastName": "Geben Sie Ihren Nachnamen ein",
+        "email": "Geben Sie Ihre E-Mail-Adresse ein",
+        "password": "Erstellen Sie ein Passwort (min. 6 Zeichen)",
+        "companyName": "Geben Sie Ihren Firmennamen ein",
+        "industry": "Branche auswählen",
+        "size": "Größe auswählen",
+        "description": "Kurze Beschreibung Ihres Unternehmens...",
+        "website": "https://ihrunternehmen.de",
+        "phone": "+49 (030) 123-4567",
+        "customIndustry": "Geben Sie Ihre Branche ein"
+      },
+      "required": "*",
+      "companySizes": {
+        "1-10": "1-10 Mitarbeiter",
+        "11-50": "11-50 Mitarbeiter",
+        "51-200": "51-200 Mitarbeiter",
+        "201-500": "201-500 Mitarbeiter",
+        "500+": "500+ Mitarbeiter"
+      },
+      "industries": {
+        "technology": "Technologie",
+        "healthcare": "Gesundheitswesen",
+        "finance": "Finanzen",
+        "education": "Bildung",
+        "manufacturing": "Fertigung",
+        "retail": "Einzelhandel",
+        "foodBeverage": "Lebensmittel und Getränke",
+        "professionalServices": "Professionelle Dienstleistungen",
+        "construction": "Bauwesen",
+        "other": "Andere"
+      }
+    },
+    "templateSelection": {
+      "title": "Wählen Sie Ihre Unternehmensvorlage",
+      "description": "Wählen Sie eine branchenspezifische Vorlage, um mit vorkonfigurierten Abschnitten und Workflows zu beginnen"
+    },
+    "customTemplate": {
+      "title": "Erstellen Sie Ihre benutzerdefinierte Vorlage",
+      "description": "Erstellen Sie eine personalisierte Vorlage, die auf die spezifischen Bedürfnisse Ihres Unternehmens zugeschnitten ist",
+      "templateInfo": "Vorlageninformationen",
+      "templateName": "Vorlagenname",
+      "templateDescription": "Vorlagenbeschreibung",
+      "namePlaceholder": "Vorlagennamen eingeben",
+      "descriptionPlaceholder": "Beschreiben Sie Ihre benutzerdefinierte Vorlage..."
+    },
+    "sectionCustomization": {
+      "title": "Arbeitsbereich-Abschnitte anpassen",
+      "description": "Wählen und konfigurieren Sie die Abschnitte, die Sie für Ihr Unternehmen benötigen",
+      "availableSections": "Verfügbare Abschnitte",
+      "selectedSections": "Ausgewählte Abschnitte",
+      "enableSection": "{{name}} aktivieren",
+      "disableSection": "{{name}} deaktivieren",
+      "noSectionsSelected": "Keine Abschnitte ausgewählt",
+      "selectSections": "Wählen Sie mindestens einen Abschnitt aus, um fortzufahren"
+    },
+    "roleSetup": {
+      "title": "Rollen und Positionen konfigurieren",
+      "description": "Definieren Sie Benutzerrollen und Organisationsstruktur für Ihr Unternehmen",
+      "rolesAndPermissions": "Rollen und Berechtigungen",
+      "positionHierarchy": "Positionshierarchie",
+      "addRole": "Rolle hinzufügen",
+      "addPosition": "Position hinzufügen",
+      "editRole": "Rolle bearbeiten",
+      "editPosition": "Position bearbeiten",
+      "roleName": "Rollenname",
+      "roleDescription": "Rollenbeschreibung",
+      "permissions": "Berechtigungen",
+      "positionTitle": "Positionstitel",
+      "department": "Abteilung",
+      "reportsTo": "Berichtet an",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "noRoles": "Keine Rollen konfiguriert",
+      "noPositions": "Keine Positionen konfiguriert",
+      "createFirst": "Erstellen Sie Ihre erste {{type}}, um zu beginnen"
+    },
+    "review": {
+      "title": "Konfiguration überprüfen und abschließen",
+      "description": "Überprüfen Sie Ihre Konfiguration und schließen Sie die Einrichtung Ihres Arbeitsbereichs ab",
+      "companyDetails": "Unternehmensdetails",
+      "selectedTemplate": "Ausgewählte Vorlage",
+      "customTemplate": "Benutzerdefinierte Vorlage",
+      "workspaceSections": "Arbeitsbereich-Abschnitte",
+      "rolesAndPositions": "Rollen und Positionen",
+      "roles": "Rollen",
+      "positions": "Positionen",
+      "setupComplete": "Einrichtung abgeschlossen!",
+      "successMessage": "Ihr FlowForce-Arbeitsbereich wurde erfolgreich konfiguriert.",
+      "getStarted": "Loslegen",
+      "backToDashboard": "Zurück zum Dashboard"
+    },
+    "validation": {
+      "completeRequired": "Bitte füllen Sie alle erforderlichen Felder aus",
+      "errors": {
+        "firstName": "Vorname ist erforderlich",
+        "lastName": "Nachname ist erforderlich",
+        "email": "Gültige E-Mail ist erforderlich",
+        "password": "Passwort muss mindestens 6 Zeichen haben",
+        "companyName": "Firmenname ist erforderlich",
+        "industry": "Branche ist erforderlich",
+        "size": "Unternehmensgröße ist erforderlich",
+        "template": "Vorlagenauswahl ist erforderlich",
+        "sections": "Mindestens ein Abschnitt muss ausgewählt werden",
+        "templateName": "Vorlagenname ist erforderlich",
+        "templateDescription": "Vorlagenbeschreibung ist erforderlich"
+      }
+    }
+  },
+  "auth": {
+    "businessPlatform": "Geschäftsabläufe-Plattform",
+    "inviteMessage": "Sie wurden eingeladen, einem Unternehmen beizutreten!",
+    "termsMessage": "Mit der Anmeldung stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "emailPlaceholder": "E-Mail eingeben",
+    "passwordPlaceholder": "Passwort eingeben",
+    "signingIn": "Anmeldung läuft...",
+    "signIn": {
+      "title": "Anmelden",
+      "description": "Zugang zu Ihrem FlowForce-Konto"
+    },
+    "getStarted": {
+      "title": "Erste Schritte",
+      "description": "Wählen Sie, wie Sie mit FlowForce beginnen möchten"
+    },
+    "registerCompany": {
+      "title": "Ihr Unternehmen registrieren",
+      "description": "Neuen Geschäftsarbeitsbereich einrichten"
+    },
+    "orSignIn": "oder melden Sie sich bei einem bestehenden Konto an"
+  }
+}

@@ -1,0 +1,521 @@
+
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "profile": "Profilo",
+    "employees": "Dipendenti",
+    "scheduling": "Pianificazione",
+    "tasks": "Compiti",
+  "goals": "Obiettivi",
+  "financialManagement": "Gestione Finanziaria",
+  "inventory": "Inventario",
+  "payments": "Pagamenti",
+  "purchaseOrders": "Ordini di Acquisto",
+  "invoices": "Fatture",
+  "costAnalysis": "Analisi dei Costi",
+    "expenses": "Spese",
+    "messages": "Messaggi",
+    "analytics": "Analisi",
+    "reports": "Report",
+    "forms": "Moduli",
+    "performance": "Prestazioni",
+    "recognition": "Riconoscimento",
+    "learning": "Centro di Apprendimento",
+    "certifications": "Certificazioni",
+    "aiInsights": "Insights IA",
+    "settings": "Impostazioni",
+    "signOut": "Disconnetti",
+    "signIn": "Accedi",
+    "loading": "Caricamento...",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "back": "Indietro",
+    "continue": "Continua",
+    "viewCertificate": "Visualizza Certificato",
+    "startCertification": "Inizia Certificazione"
+  },
+  "resources": {
+    "title": "Risorse e Supporto",
+    "subtitle": "Tutto ciò di cui hai bisogno per avere successo con FlowForce - dalle guide introduttive ai tutorial avanzati.",
+    "loadingMessage": "Caricamento risorse...",
+    "documentation": {
+      "title": "Documentazione",
+      "description": "Guide complete e riferimenti API"
+    },
+    "blog": {
+      "title": "Blog e Aggiornamenti",
+      "description": "Ultime notizie, suggerimenti e migliori pratiche"
+    },
+    "videos": {
+      "title": "Tutorial Video",
+      "description": "Guide visuali per padroneggiare FlowForce"
+    },
+    "downloads": {
+      "title": "Download",
+      "description": "Strumenti e risorse per migliorare la tua esperienza"
+    },
+    "help": {
+      "title": "Hai Bisogno di Più Aiuto?",
+      "subtitle": "Non riesci a trovare quello che cerchi? Siamo qui per aiutarti.",
+      "contactSupport": {
+        "title": "Contatta il Supporto",
+        "description": "Ricevi aiuto diretto dal nostro team di supporto",
+        "content": "Inviaci un'email a support@flowforce.com o usa la nostra chat dal vivo."
+      },
+      "communityForum": {
+        "title": "Forum della Comunità",
+        "description": "Connettiti con altri utenti di FlowForce",
+        "content": "Condividi suggerimenti, fai domande e impara dalla comunità."
+      },
+      "scheduleDemo": {
+        "title": "Pianifica una Demo",
+        "description": "Ottieni una dimostrazione personalizzata",
+        "content": "Prenota una sessione individuale con i nostri esperti."
+      }
+    },
+    "details": {
+      "readMore": "Leggi di Più",
+      "readTime": "min",
+      "type": "Tipo",
+      "author": "Autore",
+      "duration": "Durata",
+      "publishDate": "Pubblicato",
+      "comingSoon": "Prossimamente",
+      "videoInProduction": "Questo video è attualmente in produzione.",
+      "notFound": "non trovato",
+      "requestedNotFound": "Il {{type}} richiesto non è stato trovato."
+    }
+  },
+  "landing": {
+    "usedBy": "Utilizzato da oltre 1.200 sedi in tutto il mondo",
+    "operationsMade": "Operazioni Rese",
+    "simple": "Semplici.",
+    "subtitle": "FlowForce unifica la gestione dei dipendenti, la pianificazione e i flussi di lavoro in un'unica piattaforma potente. Organizza e rendi produttivo il tuo team in minuti, non mesi.",
+    "registerCompany": "Registra la Tua Azienda",
+    "watchDemo": "Guarda la Demo",
+    "fasterScheduling": "Pianificazione più veloce",
+    "averageSetup": "Tempo medio di configurazione",
+    "uptimeGuarantee": "Garanzia di uptime",
+    "everythingNeeds": "Tutto ciò di cui la Tua Azienda ha Bisogno",
+    "sixModules": "Sei moduli potenti che lavorano insieme senza soluzione di continuità per ottimizzare tutti gli aspetti delle operazioni aziendali.",
+    "learnMore": "Scopri di Più",
+    "features": "Funzionalità",
+    "templatesNav": "Modelli",
+    "industries": "Industrie",
+    "pricing": "Prezzi",
+    "resources": "Risorse",
+    "startFreeTrial": "Inizia Prova Gratuita",
+    "quickSetup": {
+      "title": "Inizia in Minuti",
+      "subtitle": "Il nostro processo di configurazione semplificato rende operativa la tua intera organizzazione più velocemente di qualsiasi altra piattaforma.",
+      "signUp": {
+        "title": "Registrati",
+        "description": "Crea il tuo account aziendale in meno di 60 secondi con il nostro onboarding semplificato."
+      },
+      "configure": {
+        "title": "Configura Ruoli", 
+        "description": "Imposta la struttura del tuo team, i permessi e i flussi di lavoro utilizzando i nostri modelli intelligenti."
+      },
+      "goLive": {
+        "title": "Vai Live",
+        "description": "Inizia a gestire le tue operazioni immediatamente senza curva di apprendimento per il tuo team."
+      }
+    },
+    "industries": {
+      "title": "Costruito per la Tua Industria",
+      "subtitle": "Inizia più velocemente con template preconfigurati progettati specificamente per il tuo settore aziendale.",
+      "explore": "Esplora",
+      "template": "Template",
+      "retail": {
+        "title": "Retail",
+        "description": "Integrazione punto vendita, tracciamento inventario e gestione multi-location.",
+        "features": {
+          "alerts": "Avvisi di copertura turni",
+          "tracking": "Tracciamento prestazioni vendite",
+          "automation": "Automazione inventario"
+        }
+      },
+      "hospitality": {
+        "title": "Ospitalità",
+        "description": "Gestione tavoli, flussi cucina e ottimizzazione servizio ospiti.",
+        "features": {
+          "kitchen": "Sistemi display cucina",
+          "scheduling": "Pianificazione server",
+          "feedback": "Tracciamento feedback ospiti"
+        }
+      },
+      "healthcare": {
+        "title": "Sanità",
+        "description": "Coordinamento cure pazienti, tracciamento conformità e gestione certificazioni personale.",
+        "features": {
+          "compliance": "Conformità HIPAA",
+          "tracking": "Tracciamento flusso pazienti",
+          "alerts": "Avvisi certificazione"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Amato dalle Aziende in Crescita",
+      "subtitle": "Unisciti a migliaia di aziende che hanno trasformato le loro operazioni con FlowForce.",
+      "trustedBy": "Apprezzato dai leader del settore",
+      "quotes": {
+        "sarahChen": "FlowForce ha trasformato completamente le nostre operazioni. Siamo passati dal caos all'efficienza organizzata in sole due settimane. I nostri conflitti di pianificazione sono diminuiti del 90%.",
+        "michaelRodriguez": "Solo il sistema di gestione delle attività ci ha fatto risparmiare 15 ore a settimana. Le funzionalità di automazione sono incredibili e il team l'ha adottato istantaneamente.",
+        "amandaFoster": "Il miglior investimento che abbiamo fatto per le nostre cliniche. Il flusso dei pazienti è migliorato drasticamente e il nostro staff ha finalmente chiarezza sulle loro responsabilità quotidiane.",
+        "jamesPark": "L'implementazione è stata perfetta e il ROI è stato immediato. Stiamo vedendo un'efficienza del 25% migliore in tutti i nostri punti vendita.",
+        "lisaThompson": "FlowForce si adatta perfettamente a noi. Da 50 a 200 dipendenti, gestisce tutto senza perdere un colpo. Un game-changer per la crescita.",
+        "marcoRossi": "L'implementazione è stata perfetta e il ROI immediato. Stiamo vedendo il 25% di efficienza in più in tutte le nostre sedi milanesi.",
+        "giuliaBianchi": "FlowForce ha rivoluzionato la gestione dei turni. Coordinare i nostri 15 ristoranti romani non è mai stato così semplice.",
+        "lucaFerrari": "Come direttore medico, avevo bisogno di una soluzione conforme alle normative sanitarie italiane. FlowForce ha superato tutte le nostre aspettative.",
+        "francescaEsposito": "Il risparmio di tempo è incredibile. Quello che prima richiedeva ore per coordinare i negozi, ora lo facciamo in minuti.",
+        "davideConti": "FlowForce ci ha aiutato a crescere in modo sostenibile. È lo strumento perfetto per le aziende italiane in rapida espansione."
+      }
+    },
+    "useCases": {
+      "badge": "Risultati Reali",
+      "title": "Impatto Misurabile sul Tuo Business",
+      "subtitle": "Vedi come FlowForce fornisce miglioramenti tangibili in ogni aspetto delle tue operazioni.",
+      "fasterScheduling": {
+        "title": "Pianificazione Più Veloce",
+        "description": "Rilevamento automatico dei conflitti e suggerimenti intelligenti riducono il tempo di pianificazione"
+      },
+      "timeSaved": {
+        "title": "Tempo Settimanale Risparmiato",
+        "description": "Flussi di lavoro ottimizzati e automazione eliminano compiti amministrativi ripetitivi"
+      },
+      "locationsManaged": {
+        "title": "Sedi Gestite",
+        "description": "Aziende multi-sede si affidano a FlowForce per operazioni centralizzate"
+      },
+      "costReduction": {
+        "title": "Riduzione Costi",
+        "description": "Minori costi amministrativi e migliore allocazione delle risorse"
+      },
+      "taskCompletion": {
+        "title": "Completamento Attività",
+        "description": "Responsabilità chiara e promemoria automatizzati assicurano che nulla venga trascurato"
+      },
+      "averageResponse": {
+        "title": "Risposta Media",
+        "description": "Notifiche in tempo reale mantengono i team connessi e reattivi"
+      },
+      "stats": {
+        "employeesManaged": "Dipendenti Gestiti",
+        "tasksCompleted": "Attività Completate",
+        "customerSatisfaction": "Soddisfazione Cliente",
+        "supportAvailable": "Supporto Disponibile"
+      }
+    }
+  },
+  "features": {
+    "title": "Funzionalità Potenti per Team Moderni",
+    "subtitle": "Scopri come il set completo di funzionalità di FlowForce può trasformare le operazioni della tua azienda.",
+    "employeeManagement": {
+      "title": "Gestione Dipendenti",
+      "description": "Profili completi, gestione ruoli e struttura organizzativa con ricerca e filtri potenti.",
+      "details": "Gestisci tutta la tua forza lavoro con profili completi dei dipendenti, permessi basati sui ruoli e organigrammi. Traccia certificazioni, competenze e metriche delle prestazioni in un unico posto."
+    },
+    "shiftScheduling": {
+      "title": "Pianificazione Turni",
+      "description": "Pianificazione visuale drag-and-drop con rilevamento automatico dei conflitti e gestione straordinari.",
+      "details": "Crea orari senza sforzo con la nostra interfaccia intuitiva drag-and-drop. Rileva automaticamente i conflitti, gestisci gli straordinari e assicura copertura adeguata con algoritmi di pianificazione intelligenti."
+    },
+    "taskManagement": {
+      "title": "Gestione Attività",
+      "description": "Automazione workflow con dipendenze attività, approvazioni e tracciamento progresso in tempo reale.",
+      "details": "Ottimizza le operazioni con workflow automatizzati, dipendenze delle attività e processi di approvazione. Traccia il progresso in tempo reale e assicurati che nulla passi inosservato."
+    },
+    "internalCommunication": {
+      "title": "Comunicazione Interna",
+      "description": "Messaggistica team, annunci aziendali e canali di comunicazione specifici per reparto.",
+      "details": "Mantieni il tuo team connesso con messaggistica integrata, annunci aziendali e canali specifici per reparto. Assicurati che le informazioni importanti raggiungano le persone giuste al momento giusto."
+    },
+    "digitalForms": {
+      "title": "Moduli Digitali",
+      "description": "Builder moduli personalizzato con logica condizionale, firme digitali e generazione automatica PDF.",
+      "details": "Crea moduli personalizzati con logica condizionale, raccogli firme digitali e genera automaticamente PDF. Ottimizza la burocrazia ed elimina l'inserimento manuale dei dati."
+    },
+    "analyticsReporting": {
+      "title": "Analytics e Report",
+      "description": "Dashboard in tempo reale, report personalizzati e insights azionabili per ottimizzare le tue operazioni.",
+      "details": "Prendi decisioni basate sui dati con analytics completi, report personalizzati e dashboard in tempo reale. Ottieni insights azionabili per ottimizzare le tue operazioni e migliorare l'efficienza."
+    }
+  },
+  "footer": {
+    "stayUpdated": "Rimani Aggiornato",
+    "newsletterText": "Ricevi gli ultimi aggiornamenti sui prodotti, insights del settore e consigli operativi nella tua casella di posta.",
+    "enterEmail": "Inserisci la tua email",
+    "subscribe": "Iscriviti",
+    "product": "Prodotto",
+    "company": "Azienda",
+    "support": "Supporto",
+    "allRightsReserved": "© 2024 FlowForce. Tutti i diritti riservati.",
+    "privacyPolicy": "Informativa Privacy",
+    "termsOfService": "Termini di Servizio",
+    "cookiePolicy": "Politica Cookie"
+  },
+  "registration": {
+    "title": "Registrazione Aziendale",
+    "subtitle": "Configura il tuo spazio di lavoro in minuti",
+    "userInfo": {
+      "title": "Le Tue Informazioni",
+      "description": "Parlaci di te",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Indirizzo Email",
+      "password": "Password",
+      "confirmPassword": "Conferma Password"
+    },
+    "companyInfo": {
+      "title": "Dettagli Aziendali",
+      "description": "Parlaci della tua azienda",
+      "name": "Nome Azienda",
+      "industry": "Settore",
+      "size": "Dimensioni Azienda",
+      "description": "Descrizione",
+      "website": "Sito Web",
+      "phone": "Numero di Telefono"
+    },
+    "template": {
+      "title": "Scegli Template",
+      "description": "Seleziona un template che si adatta alla tua azienda",
+      "custom": "Template Personalizzato",
+      "retail": "Operazioni Retail",
+      "restaurant": "Gestione Ristorante",
+      "manufacturing": "Manifattura",
+      "healthcare": "Assistenza Sanitaria",
+      "education": "Educazione"
+    },
+    "branding": {
+      "title": "Personalizza Brand",
+      "description": "Rendilo tuo con colori e logo personalizzati",
+      "uploadLogo": "Carica Logo",
+      "primaryColor": "Colore Primario",
+      "secondaryColor": "Colore Secondario"
+    },
+    "sections": {
+      "title": "Sezioni Spazio di Lavoro",
+      "description": "Scegli le funzionalità di cui hai bisogno",
+      "communication": "Comunicazione",
+      "operations": "Operazioni",
+      "hr": "HR e Sviluppo",
+      "analytics": "Analisi"
+    },
+    "roles": {
+      "title": "Configura Ruoli",
+      "description": "Definisci ruoli utente e permessi",
+      "addRole": "Aggiungi Ruolo",
+      "roleName": "Nome Ruolo",
+      "permissions": "Permessi"
+    },
+    "review": {
+      "title": "Rivedi e Completa",
+      "description": "Rivedi le tue impostazioni e completa la configurazione",
+      "creating": "Creazione del tuo spazio di lavoro...",
+      "complete": "Completa Configurazione"
+    },
+    "navigation": {
+      "back": "Indietro",
+      "next": "Avanti",
+      "cancel": "Annulla",
+      "tryAgain": "Riprova"
+    }
+  },
+  "onboarding": {
+    "sidebar": {
+      "whatYoureDoing": "Cosa stai facendo",
+      "selectedTemplate": "Template Selezionato",
+      "progress": "Progresso"
+    },
+    "wizard": {
+      "title": "FlowForce",
+      "subtitle": "Configurazione Aziendale Avanzata",
+      "description": "Configura il tuo spazio di lavoro aziendale con template specifici del settore",
+      "stepOf": "Passaggio {{current}} di {{total}}",
+      "cancel": "Annulla",
+      "back": "Indietro",
+      "next": "Avanti",
+      "complete": "Completa Configurazione",
+      "creating": "Creazione...",
+      "settingUp": "Configurazione del tuo spazio di lavoro aziendale..."
+    },
+    "steps": {
+      "info": {
+        "title": "Informazioni",
+        "description": "Le tue informazioni e dettagli aziendali"
+      },
+      "template": {
+        "title": "Template",
+        "description": "Scegli il tuo template aziendale"
+      },
+      "custom": {
+        "title": "Personalizzato",
+        "description": "Crea template personalizzato"
+      },
+      "sections": {
+        "title": "Sezioni",
+        "description": "Personalizza le sezioni del tuo spazio di lavoro"
+      },
+      "roles": {
+        "title": "Ruoli",
+        "description": "Configura ruoli e posizioni"
+      },
+      "review": {
+        "title": "Revisione",
+        "description": "Rivedi e completa la configurazione"
+      }
+    },
+    "userInfo": {
+      "title": "Iniziamo",
+      "description": "Parlaci di te e della tua azienda per configurare il tuo spazio di lavoro",
+      "personalInfo": "Le Tue Informazioni",
+      "companyInfo": "Informazioni Aziendali",
+      "fields": {
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "Indirizzo Email",
+        "password": "Password",
+        "companyName": "Nome Azienda",
+        "industry": "Settore",
+        "size": "Dimensioni Azienda",
+        "description": "Descrizione Azienda",
+        "website": "Sito Web",
+        "phone": "Telefono"
+      },
+      "placeholders": {
+        "firstName": "Inserisci il tuo nome",
+        "lastName": "Inserisci il tuo cognome",
+        "email": "Inserisci il tuo indirizzo email",
+        "password": "Crea una password (min. 6 caratteri)",
+        "companyName": "Inserisci il nome della tua azienda",
+        "industry": "Seleziona settore",
+        "size": "Seleziona dimensioni",
+        "description": "Breve descrizione della tua azienda...",
+        "website": "https://tuaazienda.it",
+        "phone": "+39 02 1234567",
+        "customIndustry": "Inserisci il tuo settore"
+      },
+      "required": "*",
+      "companySizes": {
+        "1-10": "1-10 dipendenti",
+        "11-50": "11-50 dipendenti",
+        "51-200": "51-200 dipendenti",
+        "201-500": "201-500 dipendenti",
+        "500+": "500+ dipendenti"
+      },
+      "industries": {
+        "technology": "Tecnologia",
+        "healthcare": "Assistenza Sanitaria",
+        "finance": "Finanza",
+        "education": "Educazione",
+        "manufacturing": "Manifattura",
+        "retail": "Retail",
+        "foodBeverage": "Cibo e Bevande",
+        "professionalServices": "Servizi Professionali",
+        "construction": "Costruzioni",
+        "other": "Altro"
+      }
+    },
+    "templateSelection": {
+      "title": "Scegli il Tuo Template Aziendale",
+      "description": "Seleziona un template specifico del settore per iniziare con sezioni e workflow preconfigurati"
+    },
+    "customTemplate": {
+      "title": "Crea il Tuo Template Personalizzato",
+      "description": "Crea un template personalizzato su misura per le esigenze specifiche della tua azienda",
+      "templateInfo": "Informazioni Template",
+      "templateName": "Nome Template",
+      "templateDescription": "Descrizione Template",
+      "namePlaceholder": "Inserisci nome template",
+      "descriptionPlaceholder": "Descrivi il tuo template personalizzato..."
+    },
+    "sectionCustomization": {
+      "title": "Personalizza Sezioni Spazio di Lavoro",
+      "description": "Seleziona e configura le sezioni di cui hai bisogno per la tua azienda",
+      "availableSections": "Sezioni Disponibili",
+      "selectedSections": "Sezioni Selezionate",
+      "enableSection": "Abilita {{name}}",
+      "disableSection": "Disabilita {{name}}",
+      "noSectionsSelected": "Nessuna sezione selezionata",
+      "selectSections": "Seleziona almeno una sezione per continuare"
+    },
+    "roleSetup": {
+      "title": "Configura Ruoli e Posizioni",
+      "description": "Definisci ruoli utente e struttura organizzativa per la tua azienda",
+      "rolesAndPermissions": "Ruoli e Permessi",
+      "positionHierarchy": "Gerarchia Posizioni",
+      "addRole": "Aggiungi Ruolo",
+      "addPosition": "Aggiungi Posizione",
+      "editRole": "Modifica Ruolo",
+      "editPosition": "Modifica Posizione",
+      "roleName": "Nome Ruolo",
+      "roleDescription": "Descrizione Ruolo",
+      "permissions": "Permessi",
+      "positionTitle": "Titolo Posizione",
+      "department": "Dipartimento",
+      "reportsTo": "Riporta a",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "delete": "Elimina",
+      "noRoles": "Nessun ruolo configurato",
+      "noPositions": "Nessuna posizione configurata",
+      "createFirst": "Crea il tuo primo {{type}} per iniziare"
+    },
+    "review": {
+      "title": "Rivedi e Completa Configurazione",
+      "description": "Rivedi la tua configurazione e completa la configurazione del tuo spazio di lavoro",
+      "companyDetails": "Dettagli Aziendali",
+      "selectedTemplate": "Template Selezionato",
+      "customTemplate": "Template Personalizzato",
+      "workspaceSections": "Sezioni Spazio di Lavoro",
+      "rolesAndPositions": "Ruoli e Posizioni",
+      "roles": "Ruoli",
+      "positions": "Posizioni",
+      "setupComplete": "Configurazione Completata!",
+      "successMessage": "Il tuo spazio di lavoro FlowForce è stato configurato con successo.",
+      "getStarted": "Inizia",
+      "backToDashboard": "Torna al Dashboard"
+    },
+    "validation": {
+      "completeRequired": "Si prega di completare tutti i campi obbligatori",
+      "errors": {
+        "firstName": "Il nome è richiesto",
+        "lastName": "Il cognome è richiesto",
+        "email": "È richiesta un'email valida",
+        "password": "La password deve avere almeno 6 caratteri",
+        "companyName": "Il nome dell'azienda è richiesto",
+        "industry": "Il settore è richiesto",
+        "size": "Le dimensioni dell'azienda sono richieste",
+        "template": "La selezione del template è richiesta",
+        "sections": "Deve essere selezionata almeno una sezione",
+        "templateName": "Il nome del template è richiesto",
+        "templateDescription": "La descrizione del template è richiesta"
+      }
+    }
+  },
+  "auth": {
+    "businessPlatform": "Piattaforma Operazioni Aziendali",
+    "inviteMessage": "Sei stato invitato a unirti a un'azienda!",
+    "termsMessage": "Registrandoti, accetti i nostri termini di servizio e l'informativa sulla privacy.",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "Inserisci la tua email",
+    "passwordPlaceholder": "Inserisci la tua password",
+    "signingIn": "Accesso in corso...",
+    "signIn": {
+      "title": "Accedi",
+      "description": "Accedi al tuo account FlowForce"
+    },
+    "getStarted": {
+      "title": "Inizia",
+      "description": "Scegli come iniziare con FlowForce"
+    },
+    "registerCompany": {
+      "title": "Registra la Tua Azienda",
+      "description": "Configura un nuovo spazio di lavoro aziendale"
+    },
+    "orSignIn": "o accedi a un account esistente"
+  }
+}

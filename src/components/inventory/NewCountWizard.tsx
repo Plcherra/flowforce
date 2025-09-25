@@ -1,0 +1,494 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Calculator, MapPin, Package, CheckCircle2, CalendarIcon, Clock } from 'lucide-react';
+import { useInventoryCounts } from '@/hooks/inventory/useInventoryCounts';
+import { useInventoryCategories } from '@/hooks/inventory/useInventoryCategories';
+import { useInventoryLocations } from '@/hooks/inventory/useInventoryLocations';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+interface NewCountWizardProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+
+export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState('type');
+  const [countData, setCountData] = useState({
+    type: '',
+    locations: [] as string[],
+    categories: [] as string[],
+    notes: '',
+    assignees: [] as string[],
+    scheduledDate: undefined as Date | undefined,
+    scheduledTime: '09:00'
+  });
+  const [isNowModeActive, setIsNowModeActive] = useState(false);
+  const { createCount } = useInventoryCounts();
+  const { data: categories } = useInventoryCategories();
+  const { data: locations } = useInventoryLocations();
+  const [creating, setCreating] = useState(false);
+  
+  // Load count types from localStorage or use defaults
+  const [countTypes, setCountTypes] = useState<string[]>([]);
+  const [newCountType, setNewCountType] = useState('');
+
+  // Real-time clock for "now mode"
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isNowModeActive) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const currentTime = now.toTimeString().slice(0, 5); // Format as HH:MM
+        setCountData(prev => ({ 
+          ...prev, 
+          scheduledTime: currentTime,
+          scheduledDate: now
+        }));
+      }, 1000); // Update every second
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isNowModeActive]);
+
+  // Initialize count types from localStorage on mount
+  useEffect(() => {
+    const savedTypes = localStorage.getItem('inventory-count-types');
+    if (savedTypes) {
+      setCountTypes(JSON.parse(savedTypes));
+    } else {
+      // Set default types only if none are saved
+      const defaultTypes = ['Full Count', 'Cycle Count', 'Spot Check'];
+      setCountTypes(defaultTypes);
+      localStorage.setItem('inventory-count-types', JSON.stringify(defaultTypes));
+    }
+  }, []);
+
+  // Save count types to localStorage whenever they change
+  useEffect(() => {
+    if (countTypes.length > 0) {
+      localStorage.setItem('inventory-count-types', JSON.stringify(countTypes));
+    }
+  }, [countTypes]);
+
+  const handleNext = () => {
+    const steps = ['type', 'locations', 'schedule', 'review'];
+    const currentIndex = steps.indexOf(currentStep);
+    if (currentIndex < steps.length - 1) {
+      setCurrentStep(steps[currentIndex + 1]);
+    }
+  };
+
+  const handleBack = () => {
+    const steps = ['type', 'locations', 'schedule', 'review'];
+    const currentIndex = steps.indexOf(currentStep);
+    if (currentIndex > 0) {
+      setCurrentStep(steps[currentIndex - 1]);
+    }
+  };
+
+  const handleLocationToggle = (locationId: string) => {
+    setCountData(prev => ({
+      ...prev,
+      locations: prev.locations.includes(locationId)
+        ? prev.locations.filter(id => id !== locationId)
+        : [...prev.locations, locationId]
+    }));
+  };
+
+  const handleCategoryToggle = (category: string) => {
+    setCountData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category]
+    }));
+  };
+
+  const addCountType = () => {
+    if (newCountType && !countTypes.includes(newCountType)) {
+      setCountTypes(prev => [...prev, newCountType]);
+      setCountData(prev => ({ ...prev, type: newCountType }));
+      setNewCountType('');
+    }
+  };
+
+  const removeCountType = (typeToRemove: string) => {
+    const updatedTypes = countTypes.filter(t => t !== typeToRemove);
+    setCountTypes(updatedTypes);
+    
+    // Clear selection if deleted type was selected
+    if (countData.type === typeToRemove) {
+      setCountData(prev => ({ ...prev, type: '' }));
+    }
+    
+    // Update localStorage immediately
+    localStorage.setItem('inventory-count-types', JSON.stringify(updatedTypes));
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 'type':
+        return countData.type;
+      case 'locations':
+        return countData.locations.length > 0 || countData.categories.length > 0;
+      case 'schedule':
+        return true; // Schedule is optional, can always proceed
+      default:
+        return true;
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            New Inventory Count
+          </DialogTitle>
+          <DialogDescription>
+            Set up a new inventory count that will start immediately
+          </DialogDescription>
+        </DialogHeader>
+
+        <Tabs value={currentStep} onValueChange={setCurrentStep}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="type" disabled={false}>Type</TabsTrigger>
+            <TabsTrigger value="locations" disabled={!countData.type}>Scope</TabsTrigger>
+            <TabsTrigger value="schedule" disabled={!canProceed()}>Date/Time</TabsTrigger>
+            <TabsTrigger value="review" disabled={!canProceed()}>Review</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="type" className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label>Count Type</Label>
+                <div className="space-y-3 mt-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add new count type..."
+                      value={newCountType}
+                      onChange={(e) => setNewCountType(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addCountType()}
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={addCountType}
+                      disabled={!newCountType}
+                      size="sm"
+                    >
+                      +
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2">
+                    {countTypes.map((type) => (
+                      <div
+                        key={type}
+                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all hover:bg-accent/50 ${
+                          countData.type === type 
+                            ? 'ring-2 ring-primary bg-primary/5 border-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => setCountData(prev => ({ ...prev, type }))}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium">{type}</span>
+                          {countData.type === type && (
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeCountType(type);
+                          }}
+                          className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          -
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="locations" className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Locations
+                </Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  {locations?.map((location) => (
+                    <div key={location.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={location.id}
+                        checked={countData.locations.includes(location.id)}
+                        onCheckedChange={() => handleLocationToggle(location.id)}
+                      />
+                      <Label htmlFor={location.id} className="text-sm font-normal">
+                        {location.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Categories
+                </Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  {categories?.map((category) => (
+                    <div key={category.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={category.id}
+                        checked={countData.categories.includes(category.id)}
+                        onCheckedChange={() => handleCategoryToggle(category.id)}
+                      />
+                      <Label htmlFor={category.id} className="text-sm font-normal">
+                        {category.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Add any special instructions or notes for this count..."
+                  value={countData.notes}
+                  onChange={(e) => setCountData(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="schedule" className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-2",
+                        !countData.scheduledDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {countData.scheduledDate ? format(countData.scheduledDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={countData.scheduledDate}
+                      onSelect={(date) => setCountData(prev => ({ ...prev, scheduledDate: date }))}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Time
+                </Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    type="time"
+                    value={countData.scheduledTime}
+                    onChange={(e) => setCountData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant={isNowModeActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      if (isNowModeActive) {
+                        // Turn off now mode
+                        setIsNowModeActive(false);
+                      } else {
+                        // Turn on now mode - set current time and date immediately
+                        const now = new Date();
+                        const currentTime = now.toTimeString().slice(0, 5);
+                        setCountData(prev => ({ 
+                          ...prev, 
+                          scheduledTime: currentTime,
+                          scheduledDate: now
+                        }));
+                        setIsNowModeActive(true);
+                      }
+                    }}
+                  >
+                    Now
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  {countData.scheduledDate 
+                    ? `Count will start on ${format(countData.scheduledDate, "PPP")} at ${countData.scheduledTime}`
+                    : "Count will start immediately upon creation"
+                  }
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="review" className="space-y-4">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Count Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Type:</span>
+                      <p>{countData.type}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Locations:</span>
+                      <p>{countData.locations.map(id => locations?.find(l => l.id === id)?.name).join(', ')}</p>
+                    </div>
+                     <div>
+                       <span className="font-medium">Start Time:</span>
+                       <p>{countData.scheduledDate 
+                         ? `${format(countData.scheduledDate, "PPP")} at ${countData.scheduledTime}`
+                         : "Immediately upon creation"
+                       }</p>
+                     </div>
+                  </div>
+                  
+                  {countData.categories.length > 0 && (
+                    <div>
+                      <span className="font-medium">Categories:</span>
+                      <p className="text-sm">{countData.categories.map(id => categories?.find(c => c.id === id)?.name).join(', ')}</p>
+                    </div>
+                  )}
+                  
+                  {countData.notes && (
+                    <div>
+                      <span className="font-medium">Notes:</span>
+                      <p className="text-sm">{countData.notes}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-between pt-4">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 'type'}
+          >
+            Back
+          </Button>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            
+            {currentStep === 'review' ? (
+                  <Button 
+                     onClick={async () => {
+                       setCreating(true);
+                         try {
+                           // Create count data with scheduled or current date/time
+                           let scheduledDateTime;
+                           if (isNowModeActive) {
+                             // Use actual current time if in "now mode"
+                             scheduledDateTime = new Date();
+                           } else {
+                             // Use scheduled time
+                             scheduledDateTime = countData.scheduledDate 
+                               ? new Date(`${countData.scheduledDate.toDateString()} ${countData.scheduledTime}`)
+                               : new Date();
+                           }
+                           
+                           const countDataWithDate = {
+                             ...countData,
+                             scheduleDate: scheduledDateTime.toISOString()
+                           };
+                           const createdCount = await createCount(countDataWithDate);
+                          onOpenChange(false);
+                           // Reset form
+                           setCountData({
+                             type: '',
+                             locations: [],
+                             categories: [],
+                             notes: '',
+                             assignees: [],
+                             scheduledDate: undefined,
+                             scheduledTime: '09:00'
+                           });
+                           setIsNowModeActive(false);
+                         setCurrentStep('type');
+          // Navigate to the count page
+          if (createdCount?.id) {
+            navigate(`/inventory/counts/${createdCount.id}`);
+          }
+                       } catch (error) {
+                         // Error already handled in hook
+                       } finally {
+                         setCreating(false);
+                       }
+                     }}
+                    disabled={creating}
+                  >
+                    {creating ? 'Creating...' : 'Create Count'}
+                  </Button>
+            ) : (
+              <Button onClick={handleNext} disabled={!canProceed()}>
+                Next
+              </Button>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

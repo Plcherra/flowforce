@@ -1,0 +1,707 @@
+
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "employees": "Employees",
+    "scheduling": "Scheduling",
+    "tasks": "Tasks",
+    "goals": "Goals",
+    "itemsSetup": "Items & Setup",
+    "purchasing": "Purchasing",
+    "inventoryActions": "Inventory Actions",
+    "inventory": "Inventory",
+    "payments": "Payments",
+    "purchaseOrders": "Purchase Orders",
+    "invoices": "Invoices",
+    "costAnalysis": "Cost Analysis",
+    "expenses": "Expenses",
+    "messages": "Messages",
+    "events": "Events",
+    "meetings": "Meetings",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "forms": "Forms",
+    "performance": "Performance",
+    "recognition": "Recognition",
+    "learning": "Learning Center",
+    "certifications": "Certifications",
+    "aiInsights": "AI Insights",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "continue": "Continue",
+    "custom": "Custom",
+    "customBranding": "Custom branding and colors",
+    "flexibleSections": "Flexible section configuration",
+    "uniqueLayouts": "Unique workflow layouts",
+    "sections": "Sections",
+    "more": "more",
+    "defaultRoles": "Default Roles",
+    "viewCertificate": "View Certificate",
+    "startCertification": "Start Certification"
+  },
+  "navigation": {
+    "communication": "Communication",
+    "operations": "Operations",
+    "hrDevelopment": "HR & Development",
+    "financial": "Financial",
+    "accounting": "Accounting",
+    "analyticsReports": "Analytics & Reports",
+    "adminSetup": "Admin & Setup",
+    "userManagement": "User Management",
+    "inviteEmployee": "Invite Employee",
+    "sectionsPermissions": "Sections & Permissions",
+    "systemSettings": "System Settings"
+  },
+  "landing": {
+    "usedBy": "Used by 1,200+ locations worldwide",
+    "operationsMade": "Operations Made",
+    "simple": "Simple.",
+    "subtitle": "FlowForce unifies employee management, scheduling, and workflows into one powerful platform. Get your team organized and productive in minutes, not months.",
+    "registerCompany": "Register Your Company",
+    "watchDemo": "Watch Demo",
+    "fasterScheduling": "Faster scheduling",
+    "averageSetup": "Average setup time",
+    "uptimeGuarantee": "Uptime guarantee",
+    "everythingNeeds": "Everything Your Business Needs",
+    "sixModules": "Six powerful modules that work together seamlessly to streamline every aspect of your business operations.",
+    "learnMore": "Learn More",
+    "features": "Features",
+    "templatesNav": "Templates",
+    "industries": "Industries",
+    "pricing": "Pricing",
+    "resources": "Resources",
+    "startFreeTrial": "Start Free Trial",
+    "quickSetup": {
+      "title": "Get Started in Minutes",
+      "subtitle": "Our streamlined setup process gets your entire organization operational faster than any other platform.",
+      "signUp": {
+        "title": "Sign Up",
+        "description": "Create your company account in under 60 seconds with our streamlined onboarding."
+      },
+      "configure": {
+        "title": "Configure Roles", 
+        "description": "Set up your team structure, permissions, and workflows using our intelligent templates."
+      },
+      "goLive": {
+        "title": "Go Live",
+        "description": "Start managing your operations immediately with zero learning curve for your team."
+      }
+    },
+    "industries": {
+      "title": "Built for Your Industry",
+      "subtitle": "Get started faster with pre-configured templates designed specifically for your business vertical.",
+      "explore": "Explore",
+      "template": "Template",
+      "retail": {
+        "title": "Retail",
+        "description": "Point-of-sale integration, inventory tracking, and multi-location management.",
+        "features": {
+          "alerts": "Shift coverage alerts",
+          "tracking": "Sales performance tracking", 
+          "automation": "Inventory automation"
+        }
+      },
+      "hospitality": {
+        "title": "Hospitality",
+        "description": "Table management, kitchen workflows, and guest service optimization.",
+        "features": {
+          "kitchen": "Kitchen display systems",
+          "scheduling": "Server scheduling",
+          "feedback": "Guest feedback tracking"
+        }
+      },
+      "healthcare": {
+        "title": "Healthcare", 
+        "description": "Patient care coordination, compliance tracking, and staff certification management.",
+        "features": {
+          "compliance": "HIPAA compliance",
+          "tracking": "Patient flow tracking",
+          "alerts": "Certification alerts"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Loved by Growing Businesses",
+      "subtitle": "Join thousands of companies that have transformed their operations with FlowForce.",
+      "trustedBy": "Trusted by industry leaders",
+      "quotes": {
+        "sarahChen": "FlowForce transformed our operations completely. We went from chaos to organized efficiency in just two weeks. Our scheduling conflicts dropped by 90%.",
+        "michaelRodriguez": "The task management system alone saved us 15 hours per week. The automation features are incredible and the team adopted it instantly.",
+        "amandaFoster": "Best investment we've made for our clinics. Patient flow improved dramatically and our staff finally has clarity on their daily responsibilities.",
+        "jamesPark": "Implementation was seamless and the ROI was immediate. We're seeing 25% better efficiency across all our retail locations.",
+        "lisaThompson": "FlowForce scales with us perfectly. From 50 to 200 employees, it handles everything without missing a beat. Game-changer for growth."
+      }
+    },
+    "useCases": {
+      "badge": "Real Results",
+      "title": "Measurable Impact on Your Business",
+      "subtitle": "See how FlowForce delivers tangible improvements to every aspect of your operations.",
+      "fasterScheduling": {
+        "title": "Faster Scheduling",
+        "description": "Automated conflict detection and smart suggestions reduce scheduling time"
+      },
+      "timeSaved": {
+        "title": "Weekly Time Saved",
+        "description": "Streamlined workflows and automation eliminate repetitive administrative tasks"
+      },
+      "locationsManaged": {
+        "title": "Locations Managed",
+        "description": "Multi-location businesses trust FlowForce for centralized operations"
+      },
+      "costReduction": {
+        "title": "Cost Reduction",
+        "description": "Lower administrative overhead and improved resource allocation"
+      },
+      "taskCompletion": {
+        "title": "Task Completion",
+        "description": "Clear accountability and automated reminders ensure nothing falls through"
+      },
+      "averageResponse": {
+        "title": "Average Response",
+        "description": "Real-time notifications keep teams connected and responsive"
+      },
+      "stats": {
+        "employeesManaged": "Employees Managed",
+        "tasksCompleted": "Tasks Completed",
+        "customerSatisfaction": "Customer Satisfaction",
+        "supportAvailable": "Support Available"
+      }
+    }
+  },
+  "resources": {
+    "title": "Resources & Support",
+    "subtitle": "Everything you need to succeed with FlowForce - from getting started guides to advanced tutorials.",
+    "loadingMessage": "Loading resources...",
+    "documentation": {
+      "title": "Documentation",
+      "description": "Comprehensive guides and API references"
+    },
+    "blog": {
+      "title": "Blog & Updates",
+      "description": "Latest news, tips, and best practices"
+    },
+    "videos": {
+      "title": "Video Tutorials",
+      "description": "Visual guides to help you master FlowForce"
+    },
+    "downloads": {
+      "title": "Downloads",
+      "description": "Tools and resources to enhance your experience"
+    },
+    "help": {
+      "title": "Need More Help?",
+      "subtitle": "Can't find what you're looking for? We're here to help.",
+      "contactSupport": {
+        "title": "Contact Support",
+        "description": "Get direct help from our support team",
+        "content": "Email us at support@flowforce.com or use our live chat."
+      },
+      "communityForum": {
+        "title": "Community Forum",
+        "description": "Connect with other FlowForce users",
+        "content": "Share tips, ask questions, and learn from the community."
+      },
+      "scheduleDemo": {
+        "title": "Schedule a Demo",
+        "description": "Get a personalized walkthrough",
+        "content": "Book a one-on-one session with our experts."
+      }
+    },
+    "details": {
+      "readMore": "Read More",
+      "readTime": "min",
+      "type": "Type",
+      "author": "Author",
+      "duration": "Duration",
+      "publishDate": "Published",
+      "comingSoon": "Coming Soon",
+      "videoInProduction": "This video is currently being produced.",
+      "notFound": "not found",
+      "requestedNotFound": "The requested {{type}} could not be found."
+    }
+  },
+  "features": {
+    "title": "Powerful Features for Modern Teams",
+    "subtitle": "Discover how FlowForce's comprehensive feature set can transform your business operations.",
+    "employeeManagement": {
+      "title": "Employee Management",
+      "description": "Complete profiles, role management, and organizational structure with powerful search and filtering.",
+      "details": "Manage your entire workforce with comprehensive employee profiles, role-based permissions, and organizational charts. Track certifications, skills, and performance metrics all in one place."
+    },
+    "shiftScheduling": {
+      "title": "Shift Scheduling", 
+      "description": "Visual drag-and-drop scheduling with automated conflict detection and overtime management.",
+      "details": "Create schedules effortlessly with our intuitive drag-and-drop interface. Automatically detect conflicts, manage overtime, and ensure proper coverage with intelligent scheduling algorithms."
+    },
+    "taskManagement": {
+      "title": "Task Management",
+      "description": "Workflow automation with task dependencies, approvals, and real-time progress tracking.",
+      "details": "Streamline operations with automated workflows, task dependencies, and approval processes. Track progress in real-time and ensure nothing falls through the cracks."
+    },
+    "internalCommunication": {
+      "title": "Internal Communication",
+      "description": "Team messaging, company announcements, and department-specific communication channels.",
+      "details": "Keep your team connected with integrated messaging, company-wide announcements, and department-specific channels. Ensure important information reaches the right people at the right time."
+    },
+    "digitalForms": {
+      "title": "Digital Forms",
+      "description": "Custom form builder with conditional logic, digital signatures, and automated PDF generation.",
+      "details": "Create custom forms with conditional logic, collect digital signatures, and automatically generate PDFs. Streamline paperwork and eliminate manual data entry."
+    },
+    "analyticsReporting": {
+      "title": "Analytics & Reporting",
+      "description": "Real-time dashboards, custom reports, and actionable insights to optimize your operations.",
+      "details": "Make data-driven decisions with comprehensive analytics, custom reports, and real-time dashboards. Get actionable insights to optimize your operations and improve efficiency."
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon", 
+      "evening": "Good evening"
+    },
+    "welcome": "Welcome to your FlowForce dashboard",
+    "stats": {
+      "totalEmployees": "Total Employees",
+      "activeEmployees": "active",
+      "departments": "Departments",
+      "activeDepartments": "Active departments",
+      "todaysShifts": "Today's Shifts",
+      "scheduledToday": "Scheduled today",
+      "pendingRequests": "Pending Requests",
+      "timeOffRequests": "Time off requests",
+      "currentTime": "Current Time"
+    },
+    "profile": {
+      "title": "Your Profile",
+      "description": "View and manage your employee profile",
+      "position": "Position",
+      "employeeId": "Employee ID",
+      "department": "Department",
+      "employmentStatus": "Employment Status",
+      "hireDate": "Hire Date",
+      "assigned": "Assigned",
+      "unassigned": "Unassigned",
+      "notSet": "Not set"
+    },
+    "features": {
+      "title": "FlowForce v2.0 - AI-Powered Operations",
+      "description": "Advanced AI insights, smart automation, and predictive analytics",
+      "aiInsights": "AI Insights",
+      "aiInsightsDesc": "Smart analytics and recommendations",
+      "chatAssistant": "Chat Assistant",
+      "chatAssistantDesc": "Ask questions about your operations",
+      "performanceAnalytics": "Performance Analytics",
+      "performanceAnalyticsDesc": "What-if scenarios and radar charts"
+    }
+  },
+  "certifications": {
+    "title": "Certifications & Badges",
+    "description": "Track your professional achievements and certifications",
+    "earned": "Earned",
+    "inProgress": "In Progress",
+    "available": "Available",
+    "issuedBy": "Issued by",
+    "earnedDate": "Earned",
+    "complete": "complete",
+    "customerServiceSpecialist": {
+      "name": "Customer Service Specialist",
+      "description": "Certified in advanced customer service techniques"
+    },
+    "teamLeadership": {
+      "name": "Team Leadership",
+      "description": "Leadership and team management certification"
+    },
+    "safetyCompliance": {
+      "name": "Safety Compliance",
+      "description": "Workplace safety and compliance certification"
+    }
+  },
+  "inventory": {
+    "title": "Inventory Management",
+    "description": "Manage inventory items, track stock levels, and handle purchase orders",
+    "accessDenied": "Access Denied",
+    "noPermission": "You don't have permission to access inventory management.",
+    "inventoryItems": "Inventory Items",
+    "transactions": "Transactions",
+    "purchaseOrders": "Purchase Orders",
+    "recentTransactions": "Recent Transactions",
+    "transactionHistory": "Transaction history will be displayed here.",
+    "purchaseOrderManagement": "Purchase order management will be displayed here."
+  },
+  "admin": {
+    "title": "Admin Console",
+    "description": "Manage users, roles, and system settings",
+    "accessDenied": "Access Denied",
+    "noPermission": "You don't have permission to access the admin console."
+  },
+  "footer": {
+    "stayUpdated": "Stay Updated",
+    "newsletterText": "Get the latest product updates, industry insights, and operational tips delivered to your inbox.",
+    "enterEmail": "Enter your email",
+    "subscribe": "Subscribe",
+    "product": "Product",
+    "company": "Company",
+    "support": "Support",
+    "allRightsReserved": "© 2024 FlowForce. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy"
+  },
+  "registration": {
+    "title": "Company Registration",
+    "subtitle": "Set up your workspace in minutes",
+    "userInfo": {
+      "title": "Your Information",
+      "description": "Tell us about yourself",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password"
+    },
+    "companyInfo": {
+      "title": "Company Details",
+      "description": "Tell us about your company",
+      "name": "Company Name",
+      "industry": "Industry",
+      "size": "Company Size",
+      "description": "Description",
+      "website": "Website",
+      "phone": "Phone Number"
+    },
+    "template": {
+      "title": "Choose Template",
+      "description": "Select a template that fits your business",
+      "custom": "Custom Template",
+      "retail": "Retail Operations",
+      "restaurant": "Restaurant Management",
+      "manufacturing": "Manufacturing",
+      "healthcare": "Healthcare",
+      "education": "Education"
+    },
+    "branding": {
+      "title": "Customize Branding",
+      "description": "Make it yours with custom colors and logo",
+      "uploadLogo": "Upload Logo",
+      "primaryColor": "Primary Color",
+      "secondaryColor": "Secondary Color"
+    },
+    "sections": {
+      "title": "Workspace Sections",
+      "description": "Choose which features you need",
+      "communication": "Communication",
+      "operations": "Operations", 
+      "hr": "HR & Development",
+      "analytics": "Analytics"
+    },
+    "roles": {
+      "title": "Setup Roles",
+      "description": "Define user roles and permissions",
+      "addRole": "Add Role",
+      "roleName": "Role Name",
+      "permissions": "Permissions"
+    },
+    "review": {
+      "title": "Review & Complete",
+      "description": "Review your settings and complete setup",
+      "creating": "Creating your workspace...",
+      "complete": "Complete Setup"
+    },
+    "navigation": {
+      "back": "Back",
+      "next": "Next", 
+      "cancel": "Cancel",
+      "tryAgain": "Try Again"
+    }
+  },
+  "onboarding": {
+    "sidebar": {
+      "whatYoureDoing": "What you're doing",
+      "selectedTemplate": "Selected Template", 
+      "progress": "Progress"
+    },
+    "wizard": {
+      "title": "FlowForce",
+      "subtitle": "Enhanced Company Setup",
+      "description": "Configure your business workspace with industry-specific templates",
+      "stepOf": "Step {{current}} of {{total}}",
+      "cancel": "Cancel",
+      "back": "Back",
+      "next": "Next",
+      "complete": "Complete Setup",
+      "creating": "Creating...",
+      "settingUp": "Setting up your company workspace..."
+    },
+    "steps": {
+      "info": {
+        "title": "Info",
+        "description": "Your information and company details"
+      },
+      "template": {
+        "title": "Template",
+        "description": "Choose your business template"
+      },
+      "custom": {
+        "title": "Custom",
+        "description": "Build custom template"
+      },
+      "sections": {
+        "title": "Sections",
+        "description": "Customize your workspace sections"
+      },
+      "roles": {
+        "title": "Roles",
+        "description": "Setup roles and positions"
+      },
+      "review": {
+        "title": "Review",
+        "description": "Review and complete setup"
+      }
+    },
+    "userInfo": {
+      "title": "Let's Get Started",
+      "description": "Tell us about yourself and your company to set up your workspace",
+      "personalInfo": "Your Information",
+      "companyInfo": "Company Information",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "password": "Password",
+        "companyName": "Company Name",
+        "industry": "Industry",
+        "size": "Company Size",
+        "description": "Company Description",
+        "website": "Website",
+        "phone": "Phone"
+      },
+      "placeholders": {
+        "firstName": "Enter your first name",
+        "lastName": "Enter your last name",
+        "email": "Enter your email address",
+        "password": "Create a password (min. 6 characters)",
+        "companyName": "Enter your company name",
+        "industry": "Select industry",
+        "size": "Select size",
+        "description": "Brief description of your company...",
+        "website": "https://yourcompany.com",
+        "phone": "+1 (555) 123-4567",
+        "customIndustry": "Enter your industry"
+      },
+      "required": "*",
+      "companySizes": {
+        "1-10": "1-10 employees",
+        "11-50": "11-50 employees",
+        "51-200": "51-200 employees",
+        "201-500": "201-500 employees",
+        "500+": "500+ employees"
+      },
+      "industries": {
+        "technology": "Technology",
+        "healthcare": "Healthcare",
+        "finance": "Finance",
+        "education": "Education",
+        "manufacturing": "Manufacturing",
+        "retail": "Retail",
+        "foodBeverage": "Food & Beverage",
+        "professionalServices": "Professional Services",
+        "construction": "Construction",
+        "other": "Other"
+      }
+    },
+    "templateSelection": {
+      "title": "Choose Your Business Template",
+      "description": "Select an industry-specific template to get started with pre-configured sections and workflows"
+    },
+    "customTemplate": {
+      "title": "Build Your Custom Template",
+      "description": "Create a personalized template tailored to your specific business needs",
+      "templateInfo": "Template Information",
+      "templateName": "Template Name",
+      "templateDescription": "Template Description",
+      "namePlaceholder": "Enter template name",
+      "descriptionPlaceholder": "Describe your custom template..."
+    },
+    "branding": {
+      "title": "Customize Your Brand",
+      "description": "Create a unique look and feel for your company's workspace",
+      "tabs": {
+        "logo": "Logo",
+        "colors": "Colors",
+        "typography": "Typography",
+        "layout": "Layout",
+        "advanced": "Advanced"
+      },
+      "logo": {
+        "title": "Company Logo",
+        "description": "Upload your company logo (recommended: 200x60px, PNG/SVG)",
+        "uploadText": "Click to upload or drag and drop",
+        "supportedFormats": "PNG, JPG, SVG up to 2MB",
+        "removeLogo": "Remove Logo"
+      },
+      "colors": {
+        "title": "Color Scheme",
+        "description": "Define your brand colors that will be used throughout the application",
+        "primary": "Primary Color",
+        "secondary": "Secondary Color",
+        "accent": "Accent Color"
+      },
+      "typography": {
+        "title": "Typography",
+        "description": "Choose fonts that reflect your brand personality",
+        "fontFamily": "Font Family",
+        "headerStyle": "Header Style",
+        "sampleHeading": "Sample Heading",
+        "sampleText": "This is how your text will look with the selected font family and colors. Your workspace will use this typography throughout the interface.",
+        "accentPreview": "Accent color and font preview",
+        "fontLabel": "Font:",
+        "headerStyles": {
+          "modern": {
+            "label": "Modern",
+            "description": "Clean lines, minimal shadows"
+          },
+          "classic": {
+            "label": "Classic", 
+            "description": "Traditional, serif elements"
+          },
+          "minimal": {
+            "label": "Minimal",
+            "description": "Ultra-clean, no borders"
+          },
+          "bold": {
+            "label": "Bold",
+            "description": "Strong shadows, thick borders"
+          }
+        },
+        "previewHeader": "Header Preview"
+      },
+      "layout": {
+        "title": "Layout Style",
+        "description": "Customize the overall layout and component styles",
+        "sidebarStyle": "Sidebar Style",
+        "cardStyle": "Card Style",
+        "backgroundPattern": "Background Pattern",
+        "sidebarStyles": {
+          "expanded": {
+            "label": "Expanded",
+            "description": "Full-width sidebar with labels"
+          },
+          "collapsed": {
+            "label": "Collapsed",
+            "description": "Icon-only sidebar, hover to expand"
+          },
+          "floating": {
+            "label": "Floating",
+            "description": "Floating sidebar with rounded edges"
+          }
+        },
+        "cardStyles": {
+          "rounded": "Rounded",
+          "sharp": "Sharp",
+          "elevated": "Elevated"
+        },
+        "backgroundPatterns": {
+          "none": "None",
+          "dots": "Dots",
+          "lines": "Lines",
+          "gradient": "Gradient"
+        }
+      }
+    },
+    "sections": {
+      "title": "Customize Your Workspace Sections",
+      "description": "Choose which sections to include in your workspace and create custom ones",
+      "availableSections": "Available Sections",
+      "customSections": "Custom Sections",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selected": "{{count}} selected",
+      "templateBadge": "Template",
+      "customBadge": "Custom",
+      "addCustomSection": "Add Custom Section",
+      "hideBuilder": "Hide Builder"
+    },
+    "roles": {
+      "title": "Setup Company Roles & Positions",
+      "description": "Define the roles in your organization and add specific positions within each role. You can customize the default roles or create new ones. Minimum 4 roles required."
+    },
+    "review": {
+      "title": "Review Your Setup",
+      "description": "Review all your configuration before completing the setup",
+      "sections": {
+        "company": "Company Information",
+        "template": "Selected Template",
+        "branding": "Branding",
+        "workspaceSections": "Workspace Sections",
+        "roles": "Roles & Positions"
+      }
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email address",
+      "password": "Password must be at least 6 characters",
+      "completeRequired": "Please complete all required fields",
+      "selectTemplate": "Please select a template to continue",
+      "selectSections": "Please select at least one section",
+      "minimumRoles": "Minimum 4 roles required",
+      "errors": {
+        "firstName": "First name is required",
+        "lastName": "Last name is required",
+        "email": "Valid email is required",
+        "password": "Password must be at least 6 characters",
+        "companyName": "Company name is required",
+        "industry": "Industry is required",
+        "size": "Company size is required"
+      }
+    },
+    "messages": {
+      "accountCreated": "Account Created Successfully!",
+      "accountCreatedDescription": "{{companyName}} has been set up. Please sign in to continue.",
+      "welcomeTitle": "Welcome to FlowForce!",
+      "welcomeDescription": "{{companyName}} has been set up successfully. Welcome to your new workspace!",
+      "setupError": "Setup Error",
+      "accountCreationFailed": "Account Creation Failed",
+      "setupErrorDescription": "There was an error setting up your company. Please try again.",
+      "emailExists": "An account with this email already exists. Please use a different email or sign in.",
+      "roleError": "There was an issue setting up your company roles. Please check your role configuration.",
+      "positionError": "There was an issue setting up your company positions. Please check your position configuration."
+    },
+    "fallbacks": {
+      "selectTemplateFirst": "Please select a template first",
+      "loadingTemplate": "Loading template...",
+      "noTemplateSelected": "No template selected"
+    }
+  },
+  "auth": {
+    "businessPlatform": "Business Operations Platform",
+    "inviteMessage": "You've been invited to join a company!",
+    "termsMessage": "By signing up, you agree to our terms of service and privacy policy.",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signingIn": "Signing in...",
+    "signIn": {
+      "title": "Sign In",
+      "description": "Access your FlowForce account"
+    },
+    "getStarted": {
+      "title": "Get Started",
+      "description": "Choose how you'd like to begin with FlowForce"
+    },
+    "registerCompany": {
+      "title": "Register Your Company",
+      "description": "Set up a new business workspace"
+    },
+    "orSignIn": "or sign in to existing account"
+  }
+}

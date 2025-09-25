@@ -1,0 +1,347 @@
+{
+  "common": {
+    "dashboard": "Panel de Control",
+    "profile": "Perfil",
+    "employees": "Empleados",
+    "scheduling": "Programación",
+    "tasks": "Tareas",
+  "goals": "Objetivos",
+  "financialManagement": "Gestión Financiera",
+  "inventory": "Inventario",
+  "payments": "Pagos",
+  "purchaseOrders": "Órdenes de Compra",
+  "invoices": "Facturas",
+  "costAnalysis": "Análisis de Costos",
+    "expenses": "Gastos",
+    "messages": "Mensajes",
+    "analytics": "Analíticas",
+    "reports": "Reportes",
+    "forms": "Formularios",
+    "performance": "Rendimiento",
+    "recognition": "Reconocimiento",
+    "learning": "Centro de Aprendizaje",
+    "certifications": "Certificaciones",
+    "aiInsights": "Insights de IA",
+    "settings": "Configuración",
+    "signOut": "Cerrar Sesión",
+    "signIn": "Iniciar Sesión",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "viewCertificate": "Ver Certificado",
+    "startCertification": "Iniciar Certificación"
+  },
+  "navigation": {
+    "communication": "Comunicación",
+    "operations": "Operaciones",
+    "hrDevelopment": "RRHH y Desarrollo",
+    "analyticsReports": "Analíticas y Reportes",
+    "adminSetup": "Admin y Configuración",
+    "userManagement": "Gestión de Usuarios",
+    "inviteEmployee": "Invitar Empleado",
+    "sectionsPermissions": "Secciones y Permisos",
+    "systemSettings": "Configuración del Sistema"
+  },
+  "landing": {
+    "usedBy": "Usado por más de 1,200 ubicaciones en todo el mundo",
+    "operationsMade": "Operaciones Realizadas",
+    "simple": "Simple.",
+    "subtitle": "FlowForce unifica la gestión de empleados, programación y flujos de trabajo en una plataforma poderosa. Organiza y hace productivo a tu equipo en minutos, no meses.",
+    "registerCompany": "Registra tu Empresa",
+    "watchDemo": "Ver Demo",
+    "fasterScheduling": "Programación más rápida",
+    "averageSetup": "Tiempo promedio de configuración",
+    "uptimeGuarantee": "Garantía de tiempo de actividad",
+    "everythingNeeds": "Todo lo que tu Negocio Necesita",
+    "sixModules": "Seis módulos poderosos que trabajan juntos sin problemas para optimizar todos los aspectos de las operaciones de tu negocio.",
+    "learnMore": "Aprender Más",
+    "features": "Características",
+    "templatesNav": "Plantillas",
+    "industries": "Industrias",
+    "pricing": "Precios",
+    "resources": "Recursos",
+    "startFreeTrial": "Iniciar Prueba Gratuita",
+    "quickSetup": {
+      "title": "Comienza en Minutos",
+      "subtitle": "Nuestro proceso de configuración simplificado hace que toda tu organización sea operativa más rápido que cualquier otra plataforma.",
+      "signUp": {
+        "title": "Regístrate",
+        "description": "Crea tu cuenta empresarial en menos de 60 segundos con nuestra incorporación simplificada."
+      },
+      "configure": {
+        "title": "Configurar Roles", 
+        "description": "Configura la estructura de tu equipo, permisos y flujos de trabajo usando nuestras plantillas inteligentes."
+      },
+      "goLive": {
+        "title": "Ponerse en Marcha",
+        "description": "Comienza a gestionar tus operaciones inmediatamente sin curva de aprendizaje para tu equipo."
+      }
+    },
+    "industries": {
+      "title": "Construido para Tu Industria",
+      "subtitle": "Comienza más rápido con plantillas preconfiguradas diseñadas específicamente para tu sector empresarial.",
+      "explore": "Explorar",
+      "template": "Plantilla",
+      "retail": {
+        "title": "Comercio",
+        "description": "Integración de punto de venta, seguimiento de inventario y gestión de múltiples ubicaciones.",
+        "features": {
+          "alerts": "Alertas de cobertura de turnos",
+          "tracking": "Seguimiento de rendimiento de ventas",
+          "automation": "Automatización de inventario"
+        }
+      },
+      "hospitality": {
+        "title": "Hospitalidad",
+        "description": "Gestión de mesas, flujos de cocina y optimización del servicio al huésped.",
+        "features": {
+          "kitchen": "Sistemas de pantalla de cocina",
+          "scheduling": "Programación de meseros",
+          "feedback": "Seguimiento de comentarios de huéspedes"
+        }
+      },
+      "healthcare": {
+        "title": "Salud",
+        "description": "Coordinación de atención al paciente, seguimiento de cumplimiento y gestión de certificaciones del personal.",
+        "features": {
+          "compliance": "Cumplimiento HIPAA",
+          "tracking": "Seguimiento de flujo de pacientes",
+          "alerts": "Alertas de certificación"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Amado por Empresas en Crecimiento",
+      "subtitle": "Únete a miles de empresas que han transformado sus operaciones con FlowForce.",
+      "trustedBy": "Confiado por líderes de la industria",
+      "quotes": {
+        "sarahChen": "FlowForce transformó completamente nuestras operaciones. Pasamos del caos a la eficiencia organizada en solo dos semanas. Nuestros conflictos de programación se redujeron en un 90%.",
+        "michaelRodriguez": "Solo el sistema de gestión de tareas nos ahorró 15 horas por semana. Las características de automatización son increíbles y el equipo lo adoptó instantáneamente.",
+        "amandaFoster": "La mejor inversión que hemos hecho para nuestras clínicas. El flujo de pacientes mejoró dramáticamente y nuestro personal finalmente tiene claridad sobre sus responsabilidades diarias.",
+        "jamesPark": "La implementación fue perfecta y el ROI fue inmediato. Estamos viendo una eficiencia 25% mejor en todas nuestras ubicaciones de venta.",
+        "lisaThompson": "FlowForce se escala perfectamente con nosotros. De 50 a 200 empleados, maneja todo sin perder el ritmo. Un cambio de juego para el crecimiento.",
+        "carlosGarcia": "La implementación fue perfecta y el retorno de la inversión inmediato. Estamos viendo un 25% más de eficiencia en todas nuestras ubicaciones de café.",
+        "mariaLopez": "FlowForce transformó completamente nuestra gestión de turnos. Ahora coordinamos 15 restaurantes sin esfuerzo y nuestros empleados están más satisfechos.",
+        "alejandroMartinez": "Como director médico, necesitaba una solución que cumpliera con las normativas sanitarias españolas. FlowForce superó todas nuestras expectativas de seguridad.",
+        "anaRuiz": "El ahorro de tiempo es increíble. Lo que antes nos tomaba horas en coordinación de tiendas, ahora lo hacemos en minutos.",
+        "pedroSanchez": "FlowForce nos ayudó a crecer de manera sostenible. Es la herramienta perfecta para empresas españolas en expansión rápida."
+      }
+    },
+    "useCases": {
+      "badge": "Resultados Reales",
+      "title": "Impacto Medible en Tu Negocio",
+      "subtitle": "Ve cómo FlowForce ofrece mejoras tangibles en todos los aspectos de tus operaciones.",
+      "fasterScheduling": {
+        "title": "Programación Más Rápida",
+        "description": "Detección automática de conflictos y sugerencias inteligentes reducen el tiempo de programación"
+      },
+      "timeSaved": {
+        "title": "Tiempo Semanal Ahorrado",
+        "description": "Flujos de trabajo optimizados y automatización eliminan tareas administrativas repetitivas"
+      },
+      "locationsManaged": {
+        "title": "Ubicaciones Gestionadas",
+        "description": "Empresas multi-ubicación confían en FlowForce para operaciones centralizadas"
+      },
+      "costReduction": {
+        "title": "Reducción de Costos",
+        "description": "Menor sobrecarga administrativa y mejor asignación de recursos"
+      },
+      "taskCompletion": {
+        "title": "Finalización de Tareas",
+        "description": "Responsabilidad clara y recordatorios automatizados aseguran que nada se pase por alto"
+      },
+      "averageResponse": {
+        "title": "Respuesta Promedio",
+        "description": "Notificaciones en tiempo real mantienen a los equipos conectados y responsivos"
+      },
+      "stats": {
+        "employeesManaged": "Empleados Gestionados",
+        "tasksCompleted": "Tareas Completadas",
+        "customerSatisfaction": "Satisfacción del Cliente",
+        "supportAvailable": "Soporte Disponible"
+      }
+    }
+  },
+  "resources": {
+    "title": "Recursos y Soporte",
+    "subtitle": "Todo lo que necesitas para tener éxito con FlowForce - desde guías de inicio hasta tutoriales avanzados.",
+    "loadingMessage": "Cargando recursos...",
+    "documentation": {
+      "title": "Documentación",
+      "description": "Guías completas y referencias de API"
+    },
+    "blog": {
+      "title": "Blog y Actualizaciones",
+      "description": "Últimas noticias, consejos y mejores prácticas"
+    },
+    "videos": {
+      "title": "Tutoriales en Video",
+      "description": "Guías visuales para dominar FlowForce"
+    },
+    "downloads": {
+      "title": "Descargas",
+      "description": "Herramientas y recursos para mejorar tu experiencia"
+    },
+    "help": {
+      "title": "¿Necesitas Más Ayuda?",
+      "subtitle": "¿No encuentras lo que buscas? Estamos aquí para ayudar.",
+      "contactSupport": {
+        "title": "Contactar Soporte",
+        "description": "Obtén ayuda directa de nuestro equipo de soporte",
+        "content": "Envíanos un email a support@flowforce.com o usa nuestro chat en vivo."
+      },
+      "communityForum": {
+        "title": "Foro de la Comunidad",
+        "description": "Conecta con otros usuarios de FlowForce",
+        "content": "Comparte consejos, haz preguntas y aprende de la comunidad."
+      },
+      "scheduleDemo": {
+        "title": "Programar una Demo",
+        "description": "Obtén una demostración personalizada",
+        "content": "Reserva una sesión uno a uno con nuestros expertos."
+      }
+    },
+    "details": {
+      "readMore": "Leer Más",
+      "readTime": "min",
+      "type": "Tipo",
+      "author": "Autor",
+      "duration": "Duración",
+      "publishDate": "Publicado",
+      "comingSoon": "Próximamente",
+      "videoInProduction": "Este video está actualmente en producción.",
+      "notFound": "no encontrado",
+      "requestedNotFound": "El {{type}} solicitado no se pudo encontrar."
+    }
+  },
+  "features": {
+    "title": "Características Poderosas para Equipos Modernos",
+    "subtitle": "Descubre cómo el conjunto completo de características de FlowForce puede transformar las operaciones de tu negocio.",
+    "employeeManagement": {
+      "title": "Gestión de Empleados",
+      "description": "Perfiles completos, gestión de roles y estructura organizacional con búsqueda y filtrado potentes.",
+      "details": "Gestiona toda tu fuerza laboral con perfiles completos de empleados, permisos basados en roles y organigramas. Rastrea certificaciones, habilidades y métricas de rendimiento en un solo lugar."
+    },
+    "shiftScheduling": {
+      "title": "Programación de Turnos",
+      "description": "Programación visual de arrastrar y soltar con detección automática de conflictos y gestión de horas extra.",
+      "details": "Crea horarios sin esfuerzo con nuestra interfaz intuitiva de arrastrar y soltar. Detecta automáticamente conflictos, gestiona horas extra y asegura cobertura adecuada con algoritmos inteligentes de programación."
+    },
+    "taskManagement": {
+      "title": "Gestión de Tareas",
+      "description": "Automatización de flujo de trabajo con dependencias de tareas, aprobaciones y seguimiento de progreso en tiempo real.",
+      "details": "Optimiza operaciones con flujos de trabajo automatizados, dependencias de tareas y procesos de aprobación. Rastrea el progreso en tiempo real y asegúrate de que nada se pase por alto."
+    },
+    "internalCommunication": {
+      "title": "Comunicación Interna",
+      "description": "Mensajería de equipo, anuncios de empresa y canales de comunicación específicos por departamento.",
+      "details": "Mantén a tu equipo conectado con mensajería integrada, anuncios para toda la empresa y canales específicos por departamento. Asegúrate de que la información importante llegue a las personas correctas en el momento correcto."
+    },
+    "digitalForms": {
+      "title": "Formularios Digitales",
+      "description": "Constructor de formularios personalizado con lógica condicional, firmas digitales y generación automática de PDF.",
+      "details": "Crea formularios personalizados con lógica condicional, recopila firmas digitales y genera automáticamente PDFs. Optimiza el papeleo y elimina la entrada manual de datos."
+    },
+    "analyticsReporting": {
+      "title": "Análisis e Informes",
+      "description": "Paneles en tiempo real, informes personalizados e insights accionables para optimizar tus operaciones.",
+      "details": "Toma decisiones basadas en datos con análisis completos, informes personalizados y paneles en tiempo real. Obtén insights accionables para optimizar tus operaciones y mejorar la eficiencia."
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Buenos días",
+      "afternoon": "Buenas tardes",
+      "evening": "Buenas noches"
+    },
+    "welcome": "Bienvenido a tu panel de FlowForce"
+  },
+  "registration": {
+    "title": "Registro de Empresa",
+    "subtitle": "Configura tu espacio de trabajo en minutos"
+  },
+  "onboarding": {
+    "sidebar": {
+      "whatYoureDoing": "Lo que estás haciendo",
+      "selectedTemplate": "Plantilla Seleccionada",
+      "progress": "Progreso"
+    },
+    "wizard": {
+      "title": "FlowForce",
+      "subtitle": "Configuración Empresarial Mejorada",
+      "description": "Configura tu espacio de trabajo empresarial con plantillas específicas de la industria",
+      "stepOf": "Paso {{current}} de {{total}}",
+      "cancel": "Cancelar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "complete": "Completar Configuración",
+      "creating": "Creando...",
+      "settingUp": "Configurando tu espacio de trabajo empresarial..."
+    },
+    "userInfo": {
+      "title": "Empecemos",
+      "description": "Cuéntanos sobre ti y tu empresa para configurar tu espacio de trabajo"
+    },
+    "templateSelection": {
+      "title": "Elige Tu Plantilla de Negocio",
+      "description": "Selecciona una plantilla específica de la industria para comenzar con secciones y flujos de trabajo preconfigurados"
+    },
+    "validation": {
+      "completeRequired": "Por favor completa todos los campos requeridos",
+      "errors": {
+        "firstName": "El nombre es requerido",
+        "lastName": "El apellido es requerido",
+        "email": "Email válido es requerido",
+        "password": "La contraseña debe tener al menos 6 caracteres",
+        "companyName": "El nombre de la empresa es requerido",
+        "industry": "La industria es requerida",
+        "size": "El tamaño de la empresa es requerido",
+        "template": "La selección de plantilla es requerida",
+        "sections": "Al menos una sección debe estar seleccionada",
+        "templateName": "El nombre de la plantilla es requerido",
+        "templateDescription": "La descripción de la plantilla es requerida"
+      }
+    }
+  },
+  "footer": {
+    "stayUpdated": "Mantente Actualizado",
+    "newsletterText": "Recibe las últimas actualizaciones de productos, insights de la industria y consejos operacionales en tu bandeja de entrada.",
+    "enterEmail": "Ingresa tu email",
+    "subscribe": "Suscribirse",
+    "product": "Producto",
+    "company": "Empresa",
+    "support": "Soporte",
+    "allRightsReserved": "© 2024 FlowForce. Todos los derechos reservados.",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "cookiePolicy": "Política de Cookies"
+  },
+  "auth": {
+    "businessPlatform": "Plataforma de Operaciones Empresariales",
+    "inviteMessage": "¡Has sido invitado a unirte a una empresa!",
+    "termsMessage": "Al registrarte, aceptas nuestros términos de servicio y política de privacidad.",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "signingIn": "Iniciando sesión...",
+    "signIn": {
+      "title": "Iniciar Sesión",
+      "description": "Accede a tu cuenta de FlowForce"
+    },
+    "getStarted": {
+      "title": "Comenzar",
+      "description": "Elige cómo te gustaría comenzar con FlowForce"
+    },
+    "registerCompany": {
+      "title": "Registra Tu Empresa",
+      "description": "Configura un nuevo espacio de trabajo empresarial"
+    },
+    "orSignIn": "o inicia sesión en una cuenta existente"
+  }
+}
