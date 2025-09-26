@@ -1,6 +1,38 @@
 import { create } from 'zustand';
 import { CompanyUpdate } from '@/types/companyUpdates';
-import { mockCompanyUpdates } from '@/data/mockCompanyUpdates';
+
+const STORAGE_KEY = 'connectflow:company-updates';
+
+const loadInitialUpdates = (): CompanyUpdate[] => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Failed to load stored company updates', error);
+    return [];
+  }
+};
+
+const persistUpdates = (updates: CompanyUpdate[]) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updates));
+  } catch (error) {
+    console.warn('Failed to persist company updates', error);
+  }
+};
 
 interface CompanyUpdatesStore {
   updates: CompanyUpdate[];
@@ -14,7 +46,7 @@ interface CompanyUpdatesStore {
 }
 
 export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
-  updates: mockCompanyUpdates,
+  updates: loadInitialUpdates(),
   loading: false,
 
   addUpdate: (updateData) => set((state) => {
@@ -26,36 +58,47 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
       publishDate: new Date().toISOString()
     };
 
-    return {
-      updates: [newUpdate, ...state.updates]
-    };
+    const updates = [newUpdate, ...state.updates];
+    persistUpdates(updates);
+
+    return { updates };
   }),
 
-  removeUpdate: (id) => set((state) => ({
-    updates: state.updates.filter(update => update.id !== id)
-  })),
+  removeUpdate: (id) => set((state) => {
+    const updates = state.updates.filter(update => update.id !== id);
+    persistUpdates(updates);
+    return { updates };
+  }),
 
-  togglePin: (id) => set((state) => ({
-    updates: state.updates.map(update =>
+  togglePin: (id) => set((state) => {
+    const updates = state.updates.map((update) =>
       update.id === id ? { ...update, isPinned: !update.isPinned } : update
-    )
-  })),
+    );
+    persistUpdates(updates);
+    return { updates };
+  }),
 
-  likeUpdate: (id) => set((state) => ({
-    updates: state.updates.map(update =>
+  likeUpdate: (id) => set((state) => {
+    const updates = state.updates.map((update) =>
       update.id === id ? { ...update, likes: update.likes + 1 } : update
-    )
-  })),
+    );
+    persistUpdates(updates);
+    return { updates };
+  }),
 
-  incrementViews: (id) => set((state) => ({
-    updates: state.updates.map(update =>
+  incrementViews: (id) => set((state) => {
+    const updates = state.updates.map((update) =>
       update.id === id ? { ...update, views: update.views + 1 } : update
-    )
-  })),
+    );
+    persistUpdates(updates);
+    return { updates };
+  }),
 
-  incrementComments: (id) => set((state) => ({
-    updates: state.updates.map(update =>
+  incrementComments: (id) => set((state) => {
+    const updates = state.updates.map((update) =>
       update.id === id ? { ...update, comments: update.comments + 1 } : update
-    )
-  })),
+    );
+    persistUpdates(updates);
+    return { updates };
+  }),
 }));

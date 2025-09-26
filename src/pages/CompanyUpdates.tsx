@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { useCan } from '@/hooks/useCan';
+import { useProfile } from '@/hooks/useProfile';
 import { CompanyUpdate } from '@/types/companyUpdates';
 import { formatDistanceToNow } from 'date-fns';
 import CreateUpdateWizard from '@/components/updates/CreateUpdateWizard';
@@ -30,6 +31,7 @@ import { WizardFormData } from '@/components/updates/CreateUpdateWizard';
 export default function CompanyUpdates() {
   const isMobile = useIsMobile();
   const { can } = useCan();
+  const { profile } = useProfile();
   const [searchTerm, setSearchTerm] = useState('');
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});
@@ -45,6 +47,15 @@ export default function CompanyUpdates() {
     markAsViewed,
     createUpdate
   } = useCompanyUpdates();
+
+  const canCreateUpdate = useMemo(() => {
+    if (can('systemSettings') || can('manageCompany')) {
+      return true;
+    }
+
+    const role = (profile?.role || '').toLowerCase();
+    return ['owner', 'company_admin', 'admin', 'manager'].includes(role);
+  }, [can, profile?.role]);
 
   const handleUpdateComplete = (formData: WizardFormData) => {
     createUpdate({
@@ -156,7 +167,7 @@ export default function CompanyUpdates() {
                   <p className="text-sm text-muted-foreground">Latest news & announcements</p>
                 </div>
               </div>
-              {can('systemSettings') && (
+              {canCreateUpdate && (
                 <Button 
                   size={isMobile ? "sm" : "default"} 
                   className="shrink-0"
@@ -351,6 +362,11 @@ export default function CompanyUpdates() {
                   : 'Company updates and announcements will appear here.'
                 }
               </p>
+              {!searchTerm && canCreateUpdate && (
+                <Button className="mt-6" onClick={() => setCreateWizardOpen(true)}>
+                  Create your first update
+                </Button>
+              )}
             </div>
           )}
         </div>

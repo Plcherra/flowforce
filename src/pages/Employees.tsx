@@ -21,7 +21,6 @@ import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizon
 import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
 import { UserProfileDrawer } from '@/components/users/UserProfileDrawer';
 import type { Tables } from '@/integrations/supabase/types';
-import { mockDepartments, mockEmployees } from '@/data/mockEmployees';
 
 type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;
@@ -83,19 +82,11 @@ export default function Employees() {
         .select('*')
         .order('first_name');
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        setEmployees(mockEmployees);
-        return;
-      }
-
-      setEmployees(data);
+      if (error) throw error;
+      setEmployees(data || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
-      setEmployees(mockEmployees);
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
@@ -107,19 +98,11 @@ export default function Employees() {
         .from('departments')
         .select('*');
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        setDepartments(mockDepartments);
-        return;
-      }
-
-      setDepartments(data);
+      if (error) throw error;
+      setDepartments(data || []);
     } catch (error) {
       console.error('Error fetching departments:', error);
-      setDepartments(mockDepartments);
+      setDepartments([]);
     }
   };
 

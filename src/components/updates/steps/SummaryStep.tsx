@@ -1,31 +1,23 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  FileText, 
-  Users, 
-  Calendar, 
-  Clock, 
-  Bell, 
-  MessageSquare, 
-  Eye, 
-  Share, 
-  CheckCircle,
-  Send,
-  Loader2
+import {
+  FileText,
+  Users,
+  Clock,
+  Bell,
+  MessageSquare,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { WizardFormData } from '../CreateUpdateWizard';
 
 interface SummaryStepProps {
   formData: WizardFormData;
-  onSubmit: () => void;
-  isSubmitting: boolean;
 }
 
-export function SummaryStep({ formData, onSubmit, isSubmitting }: SummaryStepProps) {
+export function SummaryStep({ formData }: SummaryStepProps) {
   const getRecipientSummary = () => {
     if (formData.recipients.type === 'all') {
       return 'All employees (130)';
@@ -215,30 +207,7 @@ export function SummaryStep({ formData, onSubmit, isSubmitting }: SummaryStepPro
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-center pt-6">
-        <Button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          size="lg"
-          className="min-w-[200px]"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Publishing...
-            </>
-          ) : (
-            <>
-              <Send className="h-4 w-4 mr-2" />
-              {formData.publishingSettings.publishNow ? 'Publish Now' : 'Schedule Update'}
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Final Notes */}
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-muted-foreground/30 bg-muted/20 px-4 py-3 text-center text-sm text-muted-foreground">
         <p>
           {formData.publishingSettings.publishNow 
             ? 'Your update will be published immediately after confirmation.'

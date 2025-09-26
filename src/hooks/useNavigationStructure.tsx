@@ -21,11 +21,23 @@ export interface NavigationSection {
   items: NavigationItem[];
 }
 
-const canonicalizePath = (href: string) =>
-  (href || '')
-    .replace(/^\/*/, '')
-    .replace(/\/?$/, '')
-    .split('?')[0];
+const canonicalizePath = (href: string) => {
+  if (!href) {
+    return '';
+  }
+
+  const [path] = href.split('?');
+  const segments = path
+    .split('/')
+    .map(part => part.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (segments[0] === 'app') {
+    segments.shift();
+  }
+
+  return segments.join('/');
+};
 
 export function useNavigationStructure() {
   const { hasRole } = usePermissions();
@@ -108,6 +120,12 @@ export function useNavigationStructure() {
             translationKey: item.translationKey,
           }));
 
+        const staticNames = new Set(
+          staticItems
+            .map(item => (item.name || '').trim().toLowerCase())
+            .filter(Boolean)
+        );
+
         // Get canonical paths to avoid duplicates
         const canonicalPaths = new Set(
           section.items.map(item => canonicalizePath(item.href))
@@ -115,21 +133,69 @@ export function useNavigationStructure() {
 
         // Process custom sections
         const customItems: NavigationItem[] = getFilteredCustomSections(section.translationKey)
-          .map(customSection => ({
-            id: `custom-${customSection.id}`,
-            name: customSection.name || 'Unnamed Section',
-            href: `/section${customSection.path}`,
-            icon: customSection.icon,
-          }));
+          .map((customSection) => {
+            const rawPath = (customSection.path || '').trim();
+            if (!rawPath) {
+              return null;
+            }
+
+            const resolvedPath = rawPath.startsWith('/') || rawPath.startsWith('http')
+              ? rawPath
+              : `/${rawPath}`;
+
+            const canonical = canonicalizePath(resolvedPath);
+            const canonicalTail = canonical.split('/').pop() || '';
+            const normalizedName = (customSection.name || '').trim().toLowerCase();
+
+            if (!canonical || canonicalPaths.has(canonical) || staticNames.has(normalizedName)) {
+              return null;
+            }
+
+            if (canonicalTail === 'company-updates' || normalizedName === 'company updates') {
+              return null;
+            }
+
+            let href = resolvedPath;
+            if (canonicalTail === 'employee-directory' || normalizedName === 'employee directory') {
+              href = '/employee-directory';
+            }
+
+            canonicalPaths.add(canonical);
+
+            return {
+              id: `custom-${customSection.id}`,
+              name: customSection.name || 'Unnamed Section',
+              href,
+              icon: customSection.icon,
+            };
+          })
+          .filter((item): item is NavigationItem => item !== null);
 
         // Process file-based sections
         const fileItems: NavigationItem[] = getFilteredFileSections(section.translationKey, canonicalPaths)
-          .map(fileSection => ({
-            id: `file-${fileSection.href}`,
-            name: fileSection.name,
-            href: fileSection.href,
-            icon: fileSection.icon,
-          }));
+          .map(fileSection => {
+            const canonical = canonicalizePath(fileSection.href || '');
+            const canonicalTail = canonical.split('/').pop() || '';
+            const normalizedName = (fileSection.name || '').trim().toLowerCase();
+
+            if (!canonical || canonicalPaths.has(canonical) || staticNames.has(normalizedName)) {
+              return null;
+            }
+
+            if (canonicalTail === 'company-updates' || normalizedName === 'company updates') {
+              return null;
+            }
+
+            canonicalPaths.add(canonical);
+
+            return {
+              id: `file-${fileSection.href}`,
+              name: fileSection.name,
+              href: fileSection.href,
+              icon: fileSection.icon,
+            } as NavigationItem;
+          })
+          .filter((item): item is NavigationItem => item !== null);
 
         const combinedItems = [...staticItems, ...customItems, ...fileItems].filter((item) => {
           const canonical = canonicalizePath(item.href);

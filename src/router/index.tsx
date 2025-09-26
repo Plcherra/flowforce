@@ -359,6 +359,10 @@ export const router = createBrowserRouter([
         element: <Navigate to="/app/permission-demo" replace />,
       },
       {
+        path: "employee-directory",
+        element: <Navigate to="/app/employees" replace />,
+      },
+      {
         path: "*",
         element: <Navigate to="/app/dashboard" replace />,
       },

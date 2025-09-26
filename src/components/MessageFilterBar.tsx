@@ -1,16 +1,19 @@
 import { Button } from '@/components/ui/button';
 
+type FilterKey = 'all' | 'unread' | 'teams' | 'helpdesk';
+
 type Props = {
-  active: 'all' | 'unread' | 'teams' | 'helpdesk';
-  onChange: (v: Props['active']) => void;
+  active: FilterKey;
+  onChange: (value: FilterKey) => void;
+  labels?: Partial<Record<FilterKey, string>>;
 };
 
-export function MessageFilterBar({ active, onChange }: Props) {
-  const items: Array<{ key: Props['active']; label: string }> = [
-    { key: 'all', label: 'All' },
-    { key: 'unread', label: 'Unread' },
-    { key: 'teams', label: 'Teams' },
-    { key: 'helpdesk', label: 'Help Desk' },
+export function MessageFilterBar({ active, onChange, labels }: Props) {
+  const items: Array<{ key: FilterKey; label: string }> = [
+    { key: 'all', label: labels?.all ?? 'All' },
+    { key: 'unread', label: labels?.unread ?? 'Unread' },
+    { key: 'teams', label: labels?.teams ?? 'Teams' },
+    { key: 'helpdesk', label: labels?.helpdesk ?? 'Help Desk' },
   ];
   return (
     <div className="flex flex-wrap gap-2">
@@ -27,4 +30,3 @@ export function MessageFilterBar({ active, onChange }: Props) {
     </div>
   );
 }
-

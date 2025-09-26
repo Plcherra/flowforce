@@ -35,7 +35,7 @@ export default function Dashboard() {
       loadingTitle="Loading Dashboard"
       loadingDescription="Setting up your workspace..."
     >
-      <div className={`${isMobile ? 'p-3 space-y-3' : 'p-6 space-y-4'} max-w-7xl mx-auto`}>
+      <div className={`${isMobile ? 'px-3 py-4 space-y-4' : 'px-6 py-6 space-y-6'} max-w-7xl mx-auto`}>
         <ErrorBoundary>
           <DashboardHeader />
         </ErrorBoundary>
@@ -44,38 +44,38 @@ export default function Dashboard() {
           <DashboardStats stats={stats} loading={statsLoading} />
         </ErrorBoundary>
 
-        {/* Main Dashboard Grid - Row 1 */}
-        <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
-          <ErrorBoundary>
-            <AIInsightsPanel type="dashboard" className="h-[320px]" />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <PerformanceRadarChart className="h-[400px]" />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <ProfileCard className="h-[320px]" />
-          </ErrorBoundary>
-        </div>
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[2fr_1fr]">
+          <div className="space-y-4">
+            <ErrorBoundary>
+              <OperationsHealthCard
+                className="min-h-[260px]"
+                stats={stats}
+                loading={statsLoading}
+              />
+            </ErrorBoundary>
 
-        {/* Main Dashboard Grid - Row 2 */}
-        <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'md:grid-cols-2 lg:grid-cols-3 gap-4'}`}>
-          <ErrorBoundary>
-            <CompanyUpdatesCard className="h-[400px]" />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <ActivityCard className="h-[320px]" />
-          </ErrorBoundary>
-          
-          <ErrorBoundary>
-            <OperationsHealthCard
-              className="h-fit"
-              stats={stats}
-              loading={statsLoading}
-            />
-          </ErrorBoundary>
+            <ErrorBoundary>
+              <PerformanceRadarChart className="min-h-[320px]" />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <CompanyUpdatesCard />
+            </ErrorBoundary>
+          </div>
+
+          <div className="space-y-4">
+            <ErrorBoundary>
+              <AIInsightsPanel type="dashboard" className="min-h-[240px]" />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <ProfileCard className="min-h-[220px]" />
+            </ErrorBoundary>
+
+            <ErrorBoundary>
+              <ActivityCard className="min-h-[220px]" />
+            </ErrorBoundary>
+          </div>
         </div>
       </div>
 

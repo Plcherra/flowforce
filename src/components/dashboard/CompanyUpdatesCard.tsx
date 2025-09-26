@@ -37,10 +37,6 @@ interface CompanyUpdate {
   category: string;
   readBy?: string[];
 }
-
-// No demo data — start empty until backend integration
-const EMPTY_UPDATES: CompanyUpdate[] = [];
-
 const getTypeIcon = (type: CompanyUpdate['type']) => {
   const iconMap = {
     announcement: Bell,

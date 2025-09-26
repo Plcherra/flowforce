@@ -2,6 +2,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
+export type MessageReply = {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: string; // ISO string
+};
+
 export type Message = {
   id: string;
   subject: string;
@@ -11,6 +18,7 @@ export type Message = {
   category: 'general' | 'helpdesk' | 'payroll' | 'hr' | 'urgent';
   status: 'open' | 'closed';
   unread?: boolean;
+  replies?: MessageReply[];
 };
 
 const categoryIcon: Record<Message['category'], string> = {
@@ -55,4 +63,3 @@ export function MessageCard({ message, onClick }: { message: Message; onClick: (
     </Card>
   );
 }
-
