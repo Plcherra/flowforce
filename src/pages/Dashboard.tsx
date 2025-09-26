@@ -7,7 +7,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats';
 import ProfileCard from '@/components/dashboard/ProfileCard';
 import ActivityCard from '@/components/dashboard/ActivityCard';
 import CompanyUpdatesCard from '@/components/dashboard/CompanyUpdatesCard';
-import FeaturesCard from '@/components/dashboard/FeaturesCard';
+import OperationsHealthCard from '@/components/dashboard/OperationsHealthCard';
 import { useDashboardData } from '@/hooks/useDashboardData.tsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -70,7 +70,11 @@ export default function Dashboard() {
           </ErrorBoundary>
           
           <ErrorBoundary>
-            <FeaturesCard className="h-fit" />
+            <OperationsHealthCard
+              className="h-fit"
+              stats={stats}
+              loading={statsLoading}
+            />
           </ErrorBoundary>
         </div>
       </div>

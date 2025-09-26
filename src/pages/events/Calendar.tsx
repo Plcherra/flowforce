@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search, CalendarDays } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
+import { SchedulingProvider } from '@/contexts/SchedulingContext';
 
 export default function EventsCalendarPage() {
   const isMobile = useIsMobile();
@@ -56,7 +57,9 @@ export default function EventsCalendarPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <SchedulingCalendar />
+                  <SchedulingProvider>
+                    <SchedulingCalendar />
+                  </SchedulingProvider>
                 </CardContent>
               </Card>
             </div>

@@ -12,7 +12,7 @@ interface AppShellProps {
 
 export default function AppShell({ children }: AppShellProps) {
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         {/* Persistent Sidebar - never remounts */}
         <AppSidebar />

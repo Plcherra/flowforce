@@ -3,6 +3,7 @@ import { WeeklySchedulingChecklist } from './WeeklySchedulingChecklist';
 import { SchedulingWorkflow } from './SchedulingWorkflow';
 import { RoleTemplates } from './RoleTemplates';
 import { SchedulingCalendar } from './SchedulingCalendar';
+import { SchedulingProvider } from '@/contexts/SchedulingContext';
 import { SchedulingNotifications } from './SchedulingNotifications';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckSquare, Workflow, Users, Calendar, Bell } from 'lucide-react';
@@ -114,7 +115,9 @@ export function WeeklySchedulingDashboard() {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <SchedulingCalendar />
+          <SchedulingProvider>
+            <SchedulingCalendar />
+          </SchedulingProvider>
         </TabsContent>
       </Tabs>
     </div>

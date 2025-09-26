@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarDays, Plus, Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
+import { SchedulingProvider } from '@/contexts/SchedulingContext';
 import { useEvents } from '@/hooks/useEvents';
 
 function demoEvent() {
@@ -97,7 +98,9 @@ export default function EventsCalendarPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <SchedulingCalendar />
+                <SchedulingProvider>
+                  <SchedulingCalendar />
+                </SchedulingProvider>
               </CardContent>
             </Card>
           </div>
@@ -128,4 +131,3 @@ export default function EventsCalendarPage() {
     </div>
   );
 }
-

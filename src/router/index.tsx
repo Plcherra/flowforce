@@ -20,12 +20,16 @@ const Meetings = lazy(() => import('@/pages/events/Meetings'));
 const Employees = lazy(() => import('@/pages/Employees'));
 const InviteEmployee = lazy(() => import('@/pages/InviteEmployee'));
 const PositionManagement = lazy(() => import('@/pages/PositionManagement'));
+const Goals = lazy(() => import('@/pages/Goals'));
+const Tasks = lazy(() => import('@/pages/Tasks'));
 const Performance = lazy(() => import('@/pages/Performance'));
 const TimeOff = lazy(() => import('@/pages/TimeOff'));
 const Recognition = lazy(() => import('@/pages/Recognition'));
 const Expenses = lazy(() => import('@/pages/Expenses'));
 const Forms = lazy(() => import('@/pages/Forms'));
 const CompanyUpdates = lazy(() => import('@/pages/CompanyUpdates'));
+const Analytics = lazy(() => import('@/pages/Analytics'));
+const Reports = lazy(() => import('@/pages/Reports'));
 const InventoryActions = lazy(() => import('@/pages/InventoryActions'));
 const InventoryCountExecution = lazy(() => import('@/pages/InventoryCountExecution'));
 const ItemsSetup = lazy(() => import('@/pages/ItemsSetup'));
@@ -120,12 +124,20 @@ export const router = createBrowserRouter([
             element: <Employees />,
           },
           {
+            path: "goals",
+            element: <Goals />,
+          },
+          {
             path: "invite-employee",
             element: <InviteEmployee />,
           },
           {
             path: "position-management",
             element: <PositionManagement />,
+          },
+          {
+            path: "tasks",
+            element: <Tasks />,
           },
           {
             path: "performance",
@@ -150,6 +162,14 @@ export const router = createBrowserRouter([
           {
             path: "company-updates",
             element: <CompanyUpdates />,
+          },
+          {
+            path: "analytics",
+            element: <Analytics />,
+          },
+          {
+            path: "reports",
+            element: <Reports />,
           },
           {
             path: "inventory-actions",

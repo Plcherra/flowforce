@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { CompanyUpdate } from '@/types/companyUpdates';
+import { mockCompanyUpdates } from '@/data/mockCompanyUpdates';
 
 interface CompanyUpdatesStore {
   updates: CompanyUpdate[];
@@ -13,7 +14,7 @@ interface CompanyUpdatesStore {
 }
 
 export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
-  updates: [],
+  updates: mockCompanyUpdates,
   loading: false,
 
   addUpdate: (updateData) => set((state) => {

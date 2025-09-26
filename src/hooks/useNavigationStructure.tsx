@@ -21,6 +21,12 @@ export interface NavigationSection {
   items: NavigationItem[];
 }
 
+const canonicalizePath = (href: string) =>
+  (href || '')
+    .replace(/^\/*/, '')
+    .replace(/\/?$/, '')
+    .split('?')[0];
+
 export function useNavigationStructure() {
   const { hasRole } = usePermissions();
   const { can } = useCan();
@@ -74,7 +80,7 @@ export function useNavigationStructure() {
     
     return dynamic.filter((it) => {
       const slug = (it.href || '').split('/')[2] || '';
-      const path = (it.href || '').replace(/^\//, '').split('/')[0];
+      const path = canonicalizePath(it.href || '');
       const itemName = (it.name || '').toLowerCase();
       
       return !customSlugs.has(slug) && 
@@ -86,6 +92,8 @@ export function useNavigationStructure() {
   };
 
   const navigationStructure: NavigationSection[] = useMemo(() => {
+    const includedPaths = new Set<string>();
+
     return navigationSections
       .filter(section => isSectionVisible(section))
       .map(section => {
@@ -102,7 +110,7 @@ export function useNavigationStructure() {
 
         // Get canonical paths to avoid duplicates
         const canonicalPaths = new Set(
-          section.items.map(item => item.href.replace(/^\//, '').split('/')[0])
+          section.items.map(item => canonicalizePath(item.href))
         );
 
         // Process custom sections
@@ -123,11 +131,23 @@ export function useNavigationStructure() {
             icon: fileSection.icon,
           }));
 
+        const combinedItems = [...staticItems, ...customItems, ...fileItems].filter((item) => {
+          const canonical = canonicalizePath(item.href);
+          if (!canonical) {
+            return false;
+          }
+          if (includedPaths.has(canonical)) {
+            return false;
+          }
+          includedPaths.add(canonical);
+          return true;
+        });
+
         return {
           id: section.translationKey,
           title: section.title,
           translationKey: section.translationKey,
-          items: [...staticItems, ...customItems, ...fileItems],
+          items: combinedItems,
         };
       })
       .filter(section => section.items.length > 0); // Only include sections with visible items

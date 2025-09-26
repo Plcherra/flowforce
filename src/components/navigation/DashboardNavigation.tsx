@@ -16,7 +16,7 @@ export function DashboardNavigation({ isActive }: DashboardNavigationProps) {
   const isCollapsed = sidebarState === 'collapsed';
 
   const handleNavigation = () => {
-    navigate('/dashboard');
+    navigate('/app/dashboard');
   };
 
   return (
