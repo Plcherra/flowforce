@@ -157,7 +157,7 @@ export function useNavigationStructure() {
 
             let href = resolvedPath;
             if (canonicalTail === 'employee-directory' || normalizedName === 'employee directory') {
-              href = '/employee-directory';
+              href = '/employees';
             }
 
             canonicalPaths.add(canonical);

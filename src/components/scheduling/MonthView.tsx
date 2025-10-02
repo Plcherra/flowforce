@@ -13,9 +13,10 @@ interface MonthViewProps {
   onSelectShift: (shiftId: string) => void;
   filters: SchedulingFilters;
   isMobile?: boolean;
+  hideShiftActions?: boolean;
 }
 
-export function MonthView({ schedules, selectedDate, onSelectShift, filters, isMobile = false }: MonthViewProps) {
+export function MonthView({ schedules, selectedDate, onSelectShift, filters, isMobile = false, hideShiftActions = false }: MonthViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const monthStart = startOfMonth(selectedDate);
@@ -129,31 +130,35 @@ export function MonthView({ schedules, selectedDate, onSelectShift, filters, isM
                 )}
               </div>
 
-              {/* Quick add button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full mt-2 h-6 text-xs opacity-0 hover:opacity-100 transition-opacity"
-                onClick={() => {
-                  setQuickAddDate(day);
-                  setShowAddShift(true);
-                }}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
+              {/* Quick add button (hidden for events-only calendar) */}
+              {!hideShiftActions && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full mt-2 h-6 text-xs opacity-0 hover:opacity-100 transition-opacity"
+                  onClick={() => {
+                    setQuickAddDate(day);
+                    setShowAddShift(true);
+                  }}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           );
         })}
       </div>
       {/* Centralized Add Shift Dialog */}
-      <AddShiftDialog
-        open={showAddShift}
-        onOpenChange={(open) => {
-          setShowAddShift(open);
-          if (!open) setQuickAddDate(null);
-        }}
-        selectedDate={quickAddDate || selectedDate}
-      />
+      {!hideShiftActions && (
+        <AddShiftDialog
+          open={showAddShift}
+          onOpenChange={(open) => {
+            setShowAddShift(open);
+            if (!open) setQuickAddDate(null);
+          }}
+          selectedDate={quickAddDate || selectedDate}
+        />
+      )}
     </div>
   );
 }

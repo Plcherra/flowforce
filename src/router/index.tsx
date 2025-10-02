@@ -15,8 +15,7 @@ const CompanyRegistration = lazy(() => import('@/pages/CompanyRegistration'));
 
 // Lazy load all other pages
 const Messages = lazy(() => import('@/pages/MessagesPage'));
-const Calendar = lazy(() => import('@/pages/events/Calendar'));
-const Meetings = lazy(() => import('@/pages/events/Meetings'));
+const EventsHub = lazy(() => import('@/pages/events/EventsHub'));
 const Employees = lazy(() => import('@/pages/Employees'));
 const InviteEmployee = lazy(() => import('@/pages/InviteEmployee'));
 const PositionManagement = lazy(() => import('@/pages/PositionManagement'));
@@ -96,7 +95,7 @@ export const router = createBrowserRouter([
       {
         path: "app",
         element: (
-          <ErrorBoundary>
+          <ErrorBoundary showDetails={import.meta.env.DEV}>
             <ProtectedRoute>
               <AppShell />
             </ProtectedRoute>
@@ -113,11 +112,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "calendar",
-            element: <Calendar />,
+            element: <EventsHub />,
           },
           {
             path: "meetings",
-            element: <Meetings />,
+            element: <EventsHub />,
           },
           {
             path: "employees",

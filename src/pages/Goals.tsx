@@ -10,6 +10,8 @@ import { GoalDetailsDialog } from '@/components/goals/GoalDetailsDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
 import type { Tables } from '@/integrations/supabase/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 type Goal = Tables<'goals'>;
 
@@ -20,6 +22,8 @@ export default function Goals() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'completed' | 'draft'>('all');
+  const [query, setQuery] = useState('');
 
   const handleEdit = (goal: Goal) => {
     setSelectedGoal(goal);
@@ -45,9 +49,17 @@ export default function Goals() {
     setShowDetailsDialog(true);
   };
 
-  const activeGoals = goals.filter(goal => goal.status === 'active');
-  const completedGoals = goals.filter(goal => goal.status === 'completed');
-  const draftGoals = goals.filter(goal => goal.status === 'draft');
+  const normalized = goals.filter(g => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return (
+      (g.title || '').toLowerCase().includes(q) ||
+      (g.description || '').toLowerCase().includes(q)
+    );
+  });
+  const activeGoals = normalized.filter(goal => goal.status === 'active');
+  const completedGoals = normalized.filter(goal => goal.status === 'completed');
+  const draftGoals = normalized.filter(goal => goal.status === 'draft');
 
   const stats = {
     total: goals.length,
@@ -123,6 +135,27 @@ export default function Goals() {
         </Card>
       </div>
 
+      {/* Filters */}
+      <div className={`${isMobile ? 'px-4' : ''}`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="draft">Drafts</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className={`${isMobile ? '' : 'w-72'}`}>
+            <Input
+              placeholder="Search goals..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Goals Content */}
       <div className={isMobile ? 'px-4' : ''}>
         {goals.length === 0 ? (
@@ -141,64 +174,36 @@ export default function Goals() {
             </CardContent>
           </Card>
         ) : (
-          <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
-            {/* Active Goals */}
-            {activeGoals.length > 0 && (
-              <div>
-                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4`}>Active Goals</h2>
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                  {activeGoals.map((goal) => (
-                    <GoalCard
-                      key={goal.id}
-                      goal={goal}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onAddTask={handleAddTask}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
+          <Tabs value={activeTab}>
+            <TabsContent value="all">
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+                {normalized.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
+                ))}
               </div>
-            )}
-
-            {/* Draft Goals */}
-            {draftGoals.length > 0 && (
-              <div>
-                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4`}>Draft Goals</h2>
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                  {draftGoals.map((goal) => (
-                    <GoalCard
-                      key={goal.id}
-                      goal={goal}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onAddTask={handleAddTask}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
+            </TabsContent>
+            <TabsContent value="active">
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+                {activeGoals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
+                ))}
               </div>
-            )}
-
-            {/* Completed Goals */}
-            {completedGoals.length > 0 && (
-              <div>
-                <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4`}>Completed Goals</h2>
-                <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                  {completedGoals.map((goal) => (
-                    <GoalCard
-                      key={goal.id}
-                      goal={goal}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onAddTask={handleAddTask}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
+            </TabsContent>
+            <TabsContent value="completed">
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+                {completedGoals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
+                ))}
               </div>
-            )}
-          </div>
+            </TabsContent>
+            <TabsContent value="draft">
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+                {draftGoals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 

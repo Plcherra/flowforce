@@ -4,6 +4,7 @@ import { WeekView } from './WeekView';
 import { MonthView } from './MonthView';
 import { DayView } from './DayView';
 import { Schedule, SchedulingFilters } from '@/types/common';
+import type { AppEvent } from '@/hooks/useEvents';
 
 type ViewType = 'month' | 'week' | 'day' | 'year';
 
@@ -15,6 +16,8 @@ interface CalendarGridProps {
   filters: SchedulingFilters;
   loading: boolean;
   isMobile?: boolean;
+  overlayEvents?: AppEvent[];
+  hideShiftActions?: boolean;
 }
 
 export function CalendarGrid({
@@ -24,7 +27,9 @@ export function CalendarGrid({
   onSelectShift,
   filters,
   loading,
-  isMobile = false
+  isMobile = false,
+  overlayEvents,
+  hideShiftActions = false
 }: CalendarGridProps) {
   const renderCalendarView = () => {
     const commonProps = {
@@ -32,7 +37,9 @@ export function CalendarGrid({
       selectedDate,
       onSelectShift,
       filters,
-      isMobile
+      isMobile,
+      overlayEvents,
+      hideShiftActions
     };
 
     switch (currentView) {

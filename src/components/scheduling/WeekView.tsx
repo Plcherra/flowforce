@@ -1,11 +1,12 @@
 
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Clock, Users, Plus } from 'lucide-react';
 import { Schedule, SchedulingFilters, ScheduleAssignment } from '@/types/common';
+import type { AppEvent } from '@/hooks/useEvents';
 import { AddShiftDialog } from './AddShiftDialog';
 import { getShiftColor, getHourlyUsers, calculateCoverageStats, UserProfile } from '@/utils/schedulingUtils';
 
@@ -15,9 +16,11 @@ interface WeekViewProps {
   onSelectShift: (shiftId: string) => void;
   filters: SchedulingFilters;
   isMobile?: boolean;
+  overlayEvents?: AppEvent[];
+  hideShiftActions?: boolean;
 }
 
-export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMobile = false }: WeekViewProps) {
+export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMobile = false, overlayEvents = [], hideShiftActions = false }: WeekViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const weekStart = startOfWeek(selectedDate);
@@ -34,10 +37,14 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
     return calculateCoverageStats(dayShifts);
   }, [schedules]);
 
+  const getEventsForDay = useMemo(() => (day: Date) => {
+    return overlayEvents.filter(ev => isSameDay(new Date(ev.start), day));
+  }, [overlayEvents]);
+
   if (isMobile) {
     // Mobile: Show simplified horizontal scrollable week view
-    return (
-      <div className="space-y-4">
+  return (
+    <div className="space-y-4">
         {/* Mobile week header */}
         <div className="overflow-x-auto">
           <div className="flex space-x-2 pb-2" style={{ minWidth: '700px' }}>
@@ -164,6 +171,15 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
                   }`}>
                     {stats.totalHeadcount}/{stats.requiredHeadcount} staff
                   </div>
+                  {(() => {
+                    const evs = getEventsForDay(day);
+                    if (evs.length === 0) return null;
+                    return (
+                      <div className="text-[11px] text-primary/80">
+                        {evs.length} event{evs.length > 1 ? 's' : ''}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -171,158 +187,120 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
         })}
       </div>
 
-      {/* Time slots and shifts */}
+      {/* Time slots and shifts - unified grid by rows to keep heights aligned */}
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-8 min-h-[600px]">
-          {/* Employees column */}
-          <div className="border-r bg-muted/30">
-            {/* Get unique employees who have shifts this week */}
-            {(() => {
-              const employeeMap = new Map();
-              
-              // Collect all employees from all shifts this week
-              weekDays.forEach(day => {
-                const dayShifts = getShiftsForDay(day);
-                dayShifts.forEach(shift => {
-                  if (shift.assignments && shift.assignments.length > 0) {
-                    shift.assignments.forEach((assignment: ScheduleAssignment) => {
-                      if (assignment.user) {
-                        const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
-                        employeeMap.set(userId, {
-                          id: assignment.user.id || userId,
-                          first_name: assignment.user.first_name || 'Unknown',
-                          last_name: assignment.user.last_name || 'Employee',
-                          avatar_url: assignment.user.avatar_url
-                        });
-                      }
-                    });
-                  } else {
-                    // Show unassigned shifts as "Unassigned"
-                    employeeMap.set('unassigned', {
-                      id: 'unassigned',
-                      first_name: 'Unassigned',
-                      last_name: 'Shifts',
-                      avatar_url: null
-                    });
+        {(() => {
+          // Build a unified list of employees across the week, including an 'unassigned' bucket
+          const employeeMap = new Map<string, { id: string; first_name: string; last_name: string; avatar_url: string | null }>();
+          weekDays.forEach(day => {
+            const dayShifts = getShiftsForDay(day);
+            dayShifts.forEach(shift => {
+              if (shift.assignments && shift.assignments.length > 0) {
+                shift.assignments.forEach((assignment: ScheduleAssignment) => {
+                  if (assignment.user) {
+                    const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
+                    if (!employeeMap.has(userId)) {
+                      employeeMap.set(userId, {
+                        id: assignment.user.id || userId,
+                        first_name: assignment.user.first_name || 'Unknown',
+                        last_name: assignment.user.last_name || 'Employee',
+                        avatar_url: assignment.user.avatar_url || null,
+                      });
+                    }
                   }
                 });
-              });
-              
-              const employees = Array.from(employeeMap.values());
-              
-              return employees.map((employee) => (
-                <div key={employee.id} className="h-16 border-b border-border p-3 flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={employee.avatar_url} />
-                    <AvatarFallback className="text-sm">
-                      {employee.first_name[0]}{employee.last_name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {employee.first_name} {employee.last_name}
-                    </div>
-                  </div>
-                </div>
-              ));
-            })()}
-          </div>
+              } else {
+                if (!employeeMap.has('unassigned')) {
+                  employeeMap.set('unassigned', {
+                    id: 'unassigned',
+                    first_name: 'Unassigned',
+                    last_name: 'Shifts',
+                    avatar_url: null,
+                  });
+                }
+              }
+            });
+          });
+          const employees = Array.from(employeeMap.values());
 
-          {/* Day columns */}
-          {weekDays.map((day) => (
-            <div key={day.toISOString()} className="border-r">
-              {(() => {
-                // Get unique employees for consistent row mapping
-                const employeeMap = new Map();
-                weekDays.forEach(weekDay => {
-                  const dayShifts = getShiftsForDay(weekDay);
-                  dayShifts.forEach(shift => {
-                    if (shift.assignments && shift.assignments.length > 0) {
-                      shift.assignments.forEach((assignment: ScheduleAssignment) => {
-                        if (assignment.user) {
-                          const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
-                          employeeMap.set(userId, {
-                            id: assignment.user.id || userId,
-                            first_name: assignment.user.first_name || 'Unknown',
-                            last_name: assignment.user.last_name || 'Employee',
-                            avatar_url: assignment.user.avatar_url
-                          });
+          return (
+            <div className="min-h-[600px]">
+              <div className="grid grid-cols-8">
+                {employees.map((employee) => (
+                  <Fragment key={employee.id}>
+                    <div className="border-r border-border bg-muted/30 p-3 flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={employee.avatar_url || undefined} />
+                        <AvatarFallback className="text-sm">
+                          {employee.first_name[0]}{employee.last_name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {employee.first_name} {employee.last_name}
+                        </div>
+                      </div>
+                    </div>
+                    {weekDays.map((day) => {
+                      const employeeShifts = getShiftsForDay(day).filter(shift => {
+                        if (employee.id === 'unassigned') {
+                          return !shift.assignments || shift.assignments.length === 0;
                         }
+                        return shift.assignments?.some((assignment: ScheduleAssignment) =>
+                          assignment.user && (assignment.user.id === employee.id || `${assignment.user.first_name}-${assignment.user.last_name}` === employee.id)
+                        );
                       });
-                    } else {
-                      employeeMap.set('unassigned', {
-                        id: 'unassigned',
-                        first_name: 'Unassigned',
-                        last_name: 'Shifts',
-                        avatar_url: null
-                      });
-                    }
-                  });
-                });
-                const employees = Array.from(employeeMap.values());
-                
-                return employees.map((employee) => {
-                  // Get shifts for this employee on this day
-                  const employeeShifts = getShiftsForDay(day).filter(shift => {
-                    if (employee.id === 'unassigned') {
-                      return !shift.assignments || shift.assignments.length === 0;
-                    }
-                    return shift.assignments?.some((assignment: ScheduleAssignment) => 
-                      assignment.user && (assignment.user.id === employee.id || 
-                      `${assignment.user.first_name}-${assignment.user.last_name}` === employee.id)
-                    );
-                  });
-                  
-                  return (
-                    <div key={`${day.toISOString()}-${employee.id}`} className="h-16 border-b border-gray-100 p-1 relative">
-                      {employeeShifts.map((shift) => (
-                        <div
-                          key={shift.id}
-                          className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-white text-xs"
-                          style={{
-                            backgroundColor: getShiftColor(shift),
-                            opacity: shift.is_published ? 1 : 0.7
-                          }}
-                          onClick={() => onSelectShift(shift.id)}
-                        >
-                          <div className="font-medium truncate mb-1">
-                            {shift.title || shift.job_position?.name || 'Shift'}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs opacity-90">
-                            <Clock className="h-3 w-3" />
-                            {format(new Date(shift.start_time), 'HH:mm')} - 
-                            {format(new Date(shift.end_time), 'HH:mm')}
-                          </div>
-                          {!shift.is_published && (
-                            <Badge variant="secondary" className="text-xs mt-1">
-                              Draft
-                            </Badge>
+                      return (
+                        <div key={`cell-${day.toISOString()}-${employee.id}`} className="border-r border-b border-gray-100 p-1">
+                          {employeeShifts.length === 0 ? (
+                            <div className="h-16" />
+                          ) : (
+                            employeeShifts.map((shift) => (
+                              <div
+                                key={shift.id}
+                                className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-white text-xs"
+                                style={{
+                                  backgroundColor: getShiftColor(shift),
+                                  opacity: shift.is_published ? 1 : 0.9,
+                                }}
+                                onClick={() => onSelectShift(shift.id)}
+                              >
+                                <div className="font-medium truncate mb-1">
+                                  {shift.title || shift.job_position?.name || 'Shift'}
+                                </div>
+                                <div className="flex items-center gap-1 text-[11px] opacity-90">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(shift.start_time), 'HH:mm')} - {format(new Date(shift.end_time), 'HH:mm')}
+                                </div>
+                                {!shift.is_published && (
+                                  <Badge variant="secondary" className="text-[10px] mt-1">
+                                    Draft
+                                  </Badge>
+                                )}
+                              </div>
+                            ))
                           )}
                         </div>
-                      ))}
-                      
-                      {employeeShifts.length === 0 && employee.id !== 'unassigned' && (
-                        <div className="h-full flex items-center justify-center text-xs text-gray-400">
-                          {/* Empty cell for employees with no shifts */}
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
+                      );
+                    })}
+                  </Fragment>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
       {/* Centralized Add Shift Dialog */}
-      <AddShiftDialog
-        open={showAddShift}
-        onOpenChange={(open) => {
-          setShowAddShift(open);
-          if (!open) setQuickAddDate(null);
-        }}
-        selectedDate={quickAddDate || selectedDate}
-      />
+      {!hideShiftActions && (
+        <AddShiftDialog
+          open={showAddShift}
+          onOpenChange={(open) => {
+            setShowAddShift(open);
+            if (!open) setQuickAddDate(null);
+          }}
+          selectedDate={quickAddDate || selectedDate}
+        />
+      )}
     </div>
   );
 }

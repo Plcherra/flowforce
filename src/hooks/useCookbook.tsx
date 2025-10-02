@@ -35,10 +35,9 @@ export function useCookbook() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load demo data regardless of auth so the page always works in dev/demo
   useEffect(() => {
-    if (user) {
-      fetchData();
-    }
+    fetchData();
   }, [user]);
 
   const fetchData = async () => {

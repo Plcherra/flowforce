@@ -15,9 +15,10 @@ interface DayViewProps {
   onSelectShift: (shiftId: string) => void;
   filters: SchedulingFilters;
   isMobile?: boolean;
+  hideShiftActions?: boolean;
 }
 
-export function DayView({ schedules, selectedDate, onSelectShift, filters, isMobile = false }: DayViewProps) {
+export function DayView({ schedules, selectedDate, onSelectShift, filters, isMobile = false, hideShiftActions = false }: DayViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const dayShifts = schedules.filter(schedule => 
     isSameDay(parseISO(schedule.start_time), selectedDate)
@@ -94,14 +95,18 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
           {dayShifts.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No shifts scheduled</h4>
-              <p className="text-sm text-gray-500 mb-4">
-                Add shifts for {format(selectedDate, 'MMMM d')} to get started
-              </p>
-              <Button onClick={() => setShowAddShift(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Shift
-              </Button>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">No events scheduled</h4>
+              {!hideShiftActions && (
+                <>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Add shifts for {format(selectedDate, 'MMMM d')} to get started
+                  </p>
+                  <Button onClick={() => setShowAddShift(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Shift
+                  </Button>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -181,11 +186,13 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
         </div>
       </div>
       {/* Centralized Add Shift Dialog */}
-      <AddShiftDialog
-        open={showAddShift}
-        onOpenChange={setShowAddShift}
-        selectedDate={selectedDate}
-      />
+      {!hideShiftActions && (
+        <AddShiftDialog
+          open={showAddShift}
+          onOpenChange={setShowAddShift}
+          selectedDate={selectedDate}
+        />
+      )}
     </div>
   );
 }

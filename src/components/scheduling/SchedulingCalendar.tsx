@@ -8,12 +8,16 @@ import { useSchedules } from '@/hooks/scheduling/useSchedules';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ViewType, Schedule } from '@/types/scheduling-unified';
 import { useScheduling } from '@/contexts/SchedulingContext';
+import { useEvents } from '@/hooks/useEvents';
 
 interface SchedulingCalendarProps {
   onCreateShift?: () => void;
+  hideShiftActions?: boolean;
+  externalDetails?: boolean;
+  onShiftSelect?: (shiftId: string | null) => void;
 }
 
-export function SchedulingCalendar({ onCreateShift }: SchedulingCalendarProps = {}) {
+export function SchedulingCalendar({ onCreateShift, hideShiftActions = false, externalDetails = false, onShiftSelect }: SchedulingCalendarProps = {}) {
   const { schedules, loading } = useScheduling();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<ViewType>(isMobile ? 'day' : 'week');
@@ -30,6 +34,9 @@ export function SchedulingCalendar({ onCreateShift }: SchedulingCalendarProps = 
   // Transform raw schedules to match expected interface
   const transformedSchedules: Schedule[] = schedules;
 
+  const { events } = useEvents();
+  const overlayEvents = events.filter(e => e.type === 'vendor' || e.type === 'meeting' || e.type === 'event');
+
   const handleDateChange = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
     if (direction === 'prev') {
@@ -40,8 +47,13 @@ export function SchedulingCalendar({ onCreateShift }: SchedulingCalendarProps = 
     setSelectedDate(newDate);
   };
 
-  const selectedSchedule = selectedShift ? 
+  const selectedSchedule = selectedShift ?
     transformedSchedules.find(s => s.id === selectedShift) : null;
+
+  const handleSelectShift = (id: string | null) => {
+    setSelectedShift(id);
+    if (onShiftSelect) onShiftSelect(id);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,6 +66,7 @@ export function SchedulingCalendar({ onCreateShift }: SchedulingCalendarProps = 
         isMobile={isMobile}
         dateRangeText={selectedDate.toDateString()}
         showFilters={showFilters}
+        hideToolbar={hideShiftActions}
       />
 
       <ViewSelector
@@ -75,28 +88,30 @@ export function SchedulingCalendar({ onCreateShift }: SchedulingCalendarProps = 
             currentView={currentView}
             schedules={transformedSchedules as any}
             selectedDate={selectedDate}
-            onSelectShift={setSelectedShift}
+            onSelectShift={handleSelectShift}
             filters={filters}
             loading={loading}
             isMobile={isMobile}
+            overlayEvents={overlayEvents}
+            hideShiftActions={hideShiftActions}
           />
         </div>
 
-        {selectedShift && selectedSchedule && !isMobile && (
+        {selectedShift && selectedSchedule && !isMobile && !externalDetails && (
           <div className="w-96">
             <ShiftDetailsPanel
               shiftId={selectedShift}
-              onClose={() => setSelectedShift(null)}
+              onClose={() => handleSelectShift(null)}
             />
           </div>
         )}
       </div>
 
-      {selectedShift && selectedSchedule && isMobile && (
+      {selectedShift && selectedSchedule && isMobile && !externalDetails && (
         <div className="fixed inset-0 bg-background z-50 overflow-auto">
           <ShiftDetailsPanel
             shiftId={selectedShift}
-            onClose={() => setSelectedShift(null)}
+            onClose={() => handleSelectShift(null)}
           />
         </div>
       )}

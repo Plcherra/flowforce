@@ -26,7 +26,7 @@ export default function AppShell({ children }: AppShellProps) {
           
           {/* Main Content - with scroll restoration and loading states */}
           <main className="flex-1 overflow-y-auto h-[calc(100dvh-3rem)]">
-            <ErrorBoundary>
+            <ErrorBoundary showDetails={import.meta.env.DEV}>
               <Suspense fallback={
                 <div className="p-6">
                   <LoadingSpinner text="Loading page..." />

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { EmployeeSelector } from './EmployeeSelector';
 import { 
   X, 
@@ -19,10 +20,12 @@ import {
   Eye, 
   Trash2,
   Calendar as CalendarIcon,
-  Plus
+  Plus,
+  Minus
 } from 'lucide-react';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { format } from 'date-fns';
+import { useEvents } from '@/hooks/useEvents';
 
 interface ShiftDetailsPanelProps {
   shiftId: string;
@@ -31,8 +34,10 @@ interface ShiftDetailsPanelProps {
 
 export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) {
   const { schedules, updateSchedule, deleteSchedule } = useScheduling();
+  const { getEventsForShift, toggleChecklistItem, createVendorVisit, linkVisitToShifts, updateEvent, deleteEvent } = useEvents();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [eventEdits, setEventEdits] = useState<Record<string, { title: string; location?: string }>>({});
 
   const shift = schedules.find(s => s.id === shiftId);
 
@@ -72,6 +77,19 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString()
       });
+
+      // Persist edits for linked events (title/location) using same Save action
+      const linked = getEventsForShift(shift.id);
+      for (const ev of linked) {
+        const edit = eventEdits[ev.id];
+        if (!edit) continue;
+        const updates: any = {};
+        if (typeof edit.title === 'string' && edit.title !== ev.title) updates.title = edit.title;
+        if (typeof edit.location === 'string' && edit.location !== ev.location) updates.location = edit.location;
+        if (Object.keys(updates).length > 0) {
+          await updateEvent(ev.id, updates);
+        }
+      }
     } catch (error) {
       console.error('Error saving shift:', error);
     } finally {
@@ -123,6 +141,18 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
       </Card>
     );
   }
+
+  const linkedEvents = shift ? getEventsForShift(shift.id) : [];
+
+  useEffect(() => {
+    // Initialize edit buffer when linked events change
+    const buf: Record<string, { title: string; location?: string }> = {};
+    linkedEvents.forEach(ev => {
+      buf[ev.id] = { title: ev.title || '', location: ev.location };
+    });
+    setEventEdits(buf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shiftId, linkedEvents.length]);
 
   return (
     <Card className="h-full">
@@ -221,6 +251,102 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
                   Position ID: {shift.position_id}
                 </Badge>
               )}
+            </div>
+
+            {/* Linked Events */}
+            <div className="space-y-2 border rounded-md p-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium">Linked Events</h4>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={async () => {
+                    const start = new Date(shift.start_time);
+                    const end = new Date(shift.end_time);
+                    const ev = await createVendorVisit({
+                      title: 'Vendor Visit (demo)',
+                      description: 'Demo vendor linked to this shift',
+                      start: start.toISOString(),
+                      end: end.toISOString(),
+                      location: shift.location || 'Site',
+                      vendor: { name: 'Demo Vendor' },
+                      related_shift_ids: [shift.id],
+                      checklist: [
+                        { id: 'sv1', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
+                        { id: 'vd1', text: 'Perform service tasks', done: false, who: 'vendor' }
+                      ]
+                    });
+                    await linkVisitToShifts(ev.id, [shift.id]);
+                  }}
+                  title="Add vendor visit"
+                  aria-label="Add vendor visit"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {linkedEvents.length === 0 && (
+                <p className="text-xs text-muted-foreground">No events linked to this shift.</p>
+              )}
+
+              {linkedEvents.map((ev) => (
+                <div key={ev.id} className="rounded-md border p-2 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={eventEdits[ev.id]?.title ?? ev.title}
+                        onChange={(e) => setEventEdits((s) => ({ ...s, [ev.id]: { ...(s[ev.id] || { title: '' }), title: e.target.value } }))}
+                        className="h-8 text-sm"
+                        placeholder="Event title"
+                      />
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {new Date(ev.start).toLocaleString()} {ev.end ? '– ' + new Date(ev.end).toLocaleTimeString() : ''}
+                      </div>
+                      <div className="mt-2">
+                        <Input
+                          value={eventEdits[ev.id]?.location ?? ev.location ?? ''}
+                          onChange={(e) => setEventEdits((s) => ({ ...s, [ev.id]: { ...(s[ev.id] || { title: ev.title }), location: e.target.value } }))}
+                          className="h-8 text-sm"
+                          placeholder="Location"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="capitalize">{ev.type || 'event'}</Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete event"
+                        aria-label="Delete event"
+                        onClick={async () => {
+                          if (confirm('Delete this linked event?')) {
+                            await deleteEvent(ev.id);
+                          }
+                        }}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {ev.checklist && ev.checklist.length > 0 && (
+                    <div className="space-y-1">
+                      {ev.checklist.map(item => (
+                        <label key={item.id} className="flex items-center gap-2 text-xs">
+                          <Checkbox
+                            checked={item.done}
+                            onCheckedChange={(v) => toggleChecklistItem(ev.id, item.id, Boolean(v))}
+                          />
+                          <span>{item.text}</span>
+                          {item.who && (
+                            <Badge variant="secondary" className="ml-2 capitalize">{item.who}</Badge>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </TabsContent>
 

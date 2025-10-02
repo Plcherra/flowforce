@@ -237,129 +237,127 @@ export default function CreateUpdateWizard({ open, onOpenChange, onComplete }: C
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-5xl overflow-hidden border-none p-0 shadow-2xl">
-        <div className="flex h-[85vh] flex-col md:flex-row">
-          <aside className="hidden w-72 border-r border-border/60 bg-muted/40 p-6 md:block">
-            <nav className="space-y-4">
+        <div className="flex h-[85vh] flex-col">
+          <header className="flex items-start justify-between border-b border-border px-6 py-4">
+            <div>
+              <DialogTitle className="text-xl font-semibold">Create company update</DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                Follow the guided steps to craft an announcement, choose recipients, and publish it when you&apos;re ready.
+              </DialogDescription>
+              <Badge variant="outline" className="mt-3">
+                Step {currentStep + 1} of {STEPS.length}
+              </Badge>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDialogChange(false)}
+              disabled={isSubmitting}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </header>
+
+          <div className="border-b border-border/60 px-6 py-3">
+            <nav className="flex items-center gap-2 overflow-x-auto pb-1">
               {STEPS.map((step, index) => {
                 const Icon = step.icon;
                 const isCurrent = index === currentStep;
                 const isComplete = index < currentStep;
 
                 return (
-                  <div
+                  <button
                     key={step.id}
+                    type="button"
+                    onClick={() => {
+                      if (index <= currentStep) {
+                        setCurrentStep(index);
+                      }
+                    }}
                     className={cn(
-                      'rounded-2xl border bg-background/80 p-4 shadow-sm transition-colors',
-                      isCurrent && 'border-primary bg-primary/10 shadow-md',
-                      isComplete && 'border-primary/50 bg-primary/5 text-primary'
+                      'group flex min-w-[140px] items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors',
+                      isCurrent && 'border-primary bg-primary/10 text-primary shadow-sm',
+                      isComplete && !isCurrent && 'border-primary/60 bg-primary/5 text-primary',
+                      index > currentStep && 'border-border text-muted-foreground'
                     )}
+                    aria-current={isCurrent ? 'step' : undefined}
                   >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          'flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold',
-                          isComplete
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : isCurrent
-                              ? 'border-primary bg-primary/20 text-primary'
-                              : 'border-border text-muted-foreground'
-                        )}
-                      >
-                        {isComplete ? <CheckCircle className="h-4 w-4" /> : index + 1}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold leading-tight">{step.name}</p>
-                        <p className="text-xs text-muted-foreground leading-snug">
-                          {step.description}
-                        </p>
-                      </div>
-                      <Icon className="ml-auto h-4 w-4 text-muted-foreground/70" />
-                    </div>
-                  </div>
+                    <span
+                      className={cn(
+                        'flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors',
+                        isComplete
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : isCurrent
+                            ? 'border-primary bg-primary/20 text-primary'
+                            : 'border-border text-muted-foreground'
+                      )}
+                    >
+                      {isComplete ? <CheckCircle className="h-3 w-3" /> : index + 1}
+                    </span>
+                    <span className="truncate text-left font-semibold">
+                      {step.name}
+                    </span>
+                    <Icon className="hidden h-4 w-4 text-muted-foreground/70 lg:block" />
+                  </button>
                 );
               })}
             </nav>
-            <p className="mt-8 text-xs text-muted-foreground">
-              Tip: You can revisit earlier steps at any time. Your entries stay intact until you publish or close the wizard.
-            </p>
-          </aside>
+          </div>
 
-          <div className="flex flex-1 flex-col">
-            <header className="flex items-start justify-between border-b border-border px-6 py-4">
-              <div>
-                <DialogTitle className="text-xl font-semibold">Create company update</DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                  Follow the guided steps to craft an announcement, choose recipients, and publish it when you&apos;re ready.
-                </DialogDescription>
-                <Badge variant="outline" className="mt-3">
-                  Step {currentStep + 1} of {STEPS.length}
-                </Badge>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDialogChange(false)}
-                disabled={isSubmitting}
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -24 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
               >
-                <X className="h-4 w-4" />
-              </Button>
-            </header>
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -24 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  {renderStep()}
-                </motion.div>
-              </AnimatePresence>
+          <footer className="flex flex-col gap-4 border-t border-border bg-muted/20 px-6 py-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-1 items-center gap-3">
+              <span className="min-w-[120px] text-xs font-semibold text-muted-foreground">
+                Completion {Math.round(progress)}%
+              </span>
+              <Progress value={progress} className="h-2 flex-1" />
             </div>
 
-            <footer className="flex flex-col gap-4 border-t border-border bg-muted/20 px-6 py-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-1 items-center gap-3">
-                <span className="min-w-[120px] text-xs font-semibold text-muted-foreground">
-                  Completion {Math.round(progress)}%
-                </span>
-                <Progress value={progress} className="h-2 flex-1" />
-              </div>
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={goBack}
+                disabled={currentStep === 0 || isSubmitting}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
 
-              <div className="flex items-center justify-end gap-3">
-                <Button
-                  variant="outline"
-                  onClick={goBack}
-                  disabled={currentStep === 0 || isSubmitting}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
+              {currentStep < STEPS.length - 1 ? (
+                <Button onClick={goNext} disabled={!canProceedToNext() || isSubmitting}>
+                  Next step
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-
-                {currentStep < STEPS.length - 1 ? (
-                  <Button onClick={goNext} disabled={!canProceedToNext() || isSubmitting}>
-                    Next step
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button onClick={handleSubmit} disabled={isSubmitting || !canProceedToNext()}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Publishing…
-                      </>
-                    ) : (
-                      <>
-                        Publish update
-                        <CheckCircle className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-            </footer>
-          </div>
+              ) : (
+                <Button onClick={handleSubmit} disabled={isSubmitting || !canProceedToNext()}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Publishing…
+                    </>
+                  ) : (
+                    <>
+                      Publish update
+                      <CheckCircle className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </footer>
         </div>
       </DialogContent>
     </Dialog>

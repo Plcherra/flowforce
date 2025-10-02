@@ -11,7 +11,8 @@ export function useCompanyUpdates() {
     togglePin: togglePinStore, 
     likeUpdate: likeUpdateStore,
     incrementViews,
-    incrementComments
+    incrementComments,
+    updateStatus
   } = useCompanyUpdatesStore();
   
   const [comments, setComments] = useState<UpdateComment[]>([]);
@@ -54,6 +55,10 @@ export function useCompanyUpdates() {
     removeUpdate(updateId);
   };
 
+  const archiveUpdate = async (updateId: string) => {
+    updateStatus(updateId, 'archived');
+  };
+
   const createUpdate = (updateData: Omit<CompanyUpdate, 'id' | 'createdAt' | 'updatedAt' | 'publishDate' | 'status' | 'likes' | 'comments' | 'views' | 'assignedEmployees' | 'createdBy' | 'author'>) => {
     const fullUpdateData = {
       ...updateData,
@@ -85,6 +90,7 @@ export function useCompanyUpdates() {
     markAsViewed,
     togglePin,
     deleteUpdate,
+    archiveUpdate,
     createUpdate
   };
 }

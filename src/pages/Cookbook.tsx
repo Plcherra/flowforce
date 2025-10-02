@@ -14,7 +14,7 @@ import { ChefHat, BookOpen, Clock, Plus, Search, Filter, Timer, Users, DollarSig
 import { useState } from 'react';
 
 export default function Cookbook() {
-  const { prepItems, menuItems } = useCookbook();
+  const { prepItems, menuItems, loading, error } = useCookbook();
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
   const [isCreateRecipeDialogOpen, setIsCreateRecipeDialogOpen] = useState(false);
@@ -84,6 +84,14 @@ export default function Cookbook() {
             <DailyCountDialog items={prepItems} />
           </div>
         </div>
+
+        {error && (
+          <Card className="border-destructive/30">
+            <CardContent className="p-4 text-destructive text-sm">
+              Failed to load cookbook data. Showing demo content.
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -323,4 +331,3 @@ export default function Cookbook() {
     </div>
   );
 }
-

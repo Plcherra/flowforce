@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <LanguageProvider>

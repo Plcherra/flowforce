@@ -5,6 +5,12 @@ export interface CompanyUpdate {
   type: 'announcement' | 'news' | 'event' | 'policy';
   priority: 'high' | 'medium' | 'low';
   status: 'published' | 'draft' | 'scheduled' | 'archived';
+  backgroundStyle?: {
+    type: 'solid' | 'gradient' | 'pattern';
+    primary: string;
+    secondary?: string;
+    pattern?: string;
+  };
   author: {
     id: string;
     name: string;

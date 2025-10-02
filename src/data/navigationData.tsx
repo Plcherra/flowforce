@@ -53,8 +53,7 @@ export const navigationSections: NavigationSection[] = [
     translationKey: 'communication',
     items: [
       { name: 'Messages', href: '/messages', icon: MessageSquare, translationKey: 'messages' },
-      { name: 'Calendar', href: '/calendar', icon: CalendarDays, translationKey: 'calendar' },
-      { name: 'Meetings', href: '/meetings', icon: Video, translationKey: 'meetings' },
+      { name: 'Events & Meetings', href: '/calendar', icon: CalendarDays, translationKey: 'calendar' },
       { name: 'Company Updates', href: '/company-updates', icon: Megaphone, translationKey: 'companyUpdates' },
     ],
   },

@@ -13,6 +13,7 @@ interface ScheduleHeaderProps {
   selectedDate: Date;
   currentView: string;
   isMobile?: boolean;
+  hideToolbar?: boolean;
 }
 
 export function ScheduleHeader({
@@ -23,7 +24,8 @@ export function ScheduleHeader({
   onToggleFilters,
   selectedDate,
   currentView,
-  isMobile = false
+  isMobile = false,
+  hideToolbar = false
 }: ScheduleHeaderProps) {
   const { can } = useCan();
 
@@ -55,7 +57,7 @@ export function ScheduleHeader({
             {dateRangeText}
           </span>
           
-          {can('editSchedules') && (
+          {can('editSchedules') && !hideToolbar && (
             <SchedulingToolbar 
               selectedDate={selectedDate}
               currentView={currentView}
@@ -92,7 +94,7 @@ export function ScheduleHeader({
           <Filter className="mr-2 h-4 w-4" />
           Filters
         </Button>
-        {can('editSchedules') && (
+        {can('editSchedules') && !hideToolbar && (
           <SchedulingToolbar 
             selectedDate={selectedDate}
             currentView={currentView}

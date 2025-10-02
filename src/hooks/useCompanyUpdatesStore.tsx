@@ -43,6 +43,7 @@ interface CompanyUpdatesStore {
   likeUpdate: (id: string) => void;
   incrementViews: (id: string) => void;
   incrementComments: (id: string) => void;
+  updateStatus: (id: string, status: CompanyUpdate['status']) => void;
 }
 
 export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
@@ -97,6 +98,16 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
   incrementComments: (id) => set((state) => {
     const updates = state.updates.map((update) =>
       update.id === id ? { ...update, comments: update.comments + 1 } : update
+    );
+    persistUpdates(updates);
+    return { updates };
+  }),
+
+  updateStatus: (id, status) => set((state) => {
+    const updates = state.updates.map((update) =>
+      update.id === id
+        ? { ...update, status, updatedAt: new Date().toISOString() }
+        : update
     );
     persistUpdates(updates);
     return { updates };

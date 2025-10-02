@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -6,7 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu';
 import { 
   Heart, 
   MessageCircle, 
@@ -18,7 +27,10 @@ import {
   FileText,
   Search,
   Plus,
-  Filter
+  Filter,
+  MoreHorizontal,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { useCan } from '@/hooks/useCan';
@@ -27,12 +39,15 @@ import { CompanyUpdate } from '@/types/companyUpdates';
 import { formatDistanceToNow } from 'date-fns';
 import CreateUpdateWizard from '@/components/updates/CreateUpdateWizard';
 import { WizardFormData } from '@/components/updates/CreateUpdateWizard';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CompanyUpdates() {
   const isMobile = useIsMobile();
   const { can } = useCan();
   const { profile } = useProfile();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'feed' | 'grid' | 'list'>(isMobile ? 'feed' : 'feed');
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});
   const [likedUpdates, setLikedUpdates] = useState<Set<string>>(new Set());
@@ -45,7 +60,9 @@ export default function CompanyUpdates() {
     likeUpdate, 
     addComment, 
     markAsViewed,
-    createUpdate
+    createUpdate,
+    archiveUpdate,
+    deleteUpdate
   } = useCompanyUpdates();
 
   const canCreateUpdate = useMemo(() => {
@@ -64,6 +81,7 @@ export default function CompanyUpdates() {
       richContent: formData.richContent,
       type: formData.type,
       priority: formData.priority,
+      backgroundStyle: formData.backgroundStyle,
       isPinned: false
     });
   };
@@ -81,6 +99,18 @@ export default function CompanyUpdates() {
       default:
         return <Bell className="h-4 w-4" />;
     }
+  };
+
+  const getBackgroundCss = (bg?: CompanyUpdate['backgroundStyle']) => {
+    if (!bg) return undefined;
+    if (bg.type === 'gradient' && bg.secondary) {
+      return `linear-gradient(135deg, ${bg.primary}, ${bg.secondary})`;
+    }
+    if (bg.type === 'pattern') {
+      // Simple diagonal pattern overlay
+      return `${bg.primary}`;
+    }
+    return bg.primary;
   };
 
   const getTypeColor = (type: CompanyUpdate['type']) => {
@@ -123,6 +153,21 @@ export default function CompanyUpdates() {
 
   const getUpdateComments = (updateId: string) => {
     return comments.filter(comment => comment.updateId === updateId);
+  };
+
+  const handleArchive = (updateId: string) => {
+    archiveUpdate(updateId);
+    toast({ title: 'Update archived', description: 'The update has been moved out of the feed.' });
+  };
+
+  const handleDelete = (updateId: string) => {
+    const confirmed = window.confirm('Delete this update? This action cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    deleteUpdate(updateId);
+    toast({ title: 'Update deleted', description: 'The update has been removed permanently.' });
   };
 
   // Filter and sort updates
@@ -180,7 +225,7 @@ export default function CompanyUpdates() {
             </div>
             
             {/* Search and Filter */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -190,14 +235,17 @@ export default function CompanyUpdates() {
                   className="pl-10"
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
+              <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as any)}>
+                <ToggleGroupItem value="feed" aria-label="Feed view">Feed</ToggleGroupItem>
+                <ToggleGroupItem value="grid" aria-label="Grid view">Grid</ToggleGroupItem>
+                <ToggleGroupItem value="list" aria-label="List view">List</ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </div>
         </div>
 
-        {/* Updates Feed */}
+        {/* Updates */}
+        {viewMode === 'feed' && (
         <div className="px-4 py-6 space-y-4">
           {filteredUpdates.map((update) => {
             const updateComments = getUpdateComments(update.id);
@@ -205,34 +253,61 @@ export default function CompanyUpdates() {
             
             return (
               <Card key={update.id} className={`${update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}>
+                {/* Color banner */}
+                {update.backgroundStyle && (
+                  <div className="h-2 w-full" style={{ background: getBackgroundCss(update.backgroundStyle) }} />
+                )}
                 <CardHeader className="pb-3 px-4 pt-4">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarImage src={update.author.avatar} />
-                      <AvatarFallback className="text-xs">
-                        {update.author.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-sm truncate">{update.author.name}</h3>
-                        <Badge variant="outline" className="text-xs shrink-0">
-                          {update.author.role}
-                        </Badge>
-                        {update.isPinned && (
-                          <Pin className="h-3 w-3 text-primary shrink-0" />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(update.publishDate), { addSuffix: true })}
-                        </span>
-                        <Badge className={`text-xs ${getTypeColor(update.type)} flex items-center gap-1`}>
-                          {getUpdateIcon(update.type)}
-                          <span className="capitalize">{update.type}</span>
-                        </Badge>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarImage src={update.author.avatar} />
+                        <AvatarFallback className="text-xs">
+                          {update.author.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-sm truncate">{update.author.name}</h3>
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {update.author.role}
+                          </Badge>
+                          {update.isPinned && (
+                            <Pin className="h-3 w-3 text-primary shrink-0" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(update.publishDate), { addSuffix: true })}
+                          </span>
+                          <Badge className={`text-xs ${getTypeColor(update.type)} flex items-center gap-1`}>
+                            {getUpdateIcon(update.type)}
+                            <span className="capitalize">{update.type}</span>
+                          </Badge>
+                        </div>
                       </div>
                     </div>
+
+                    {canCreateUpdate && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem onClick={() => handleArchive(update.id)}>
+                            <Archive className="mr-2 h-4 w-4" />
+                            Archive
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleDelete(update.id)} className="text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </CardHeader>
 
@@ -370,6 +445,56 @@ export default function CompanyUpdates() {
             </div>
           )}
         </div>
+        )}
+
+        {viewMode === 'grid' && (
+          <div className="px-4 py-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {filteredUpdates.map((update) => (
+              <Card key={update.id} className="overflow-hidden cursor-pointer">
+                {update.backgroundStyle && (
+                  <div className="h-16" style={{ background: getBackgroundCss(update.backgroundStyle) }} />
+                )}
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className={`text-xs ${getTypeColor(update.type)}`}>{update.type}</Badge>
+                    {update.isPinned && <Pin className="h-3 w-3 text-primary" />}
+                  </div>
+                  <h3 className="font-semibold text-sm mb-1 line-clamp-2">{update.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-3">{update.content}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {viewMode === 'list' && (
+          <div className="px-4 py-6">
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Published</TableHead>
+                    <TableHead>Engagement</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUpdates.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">{u.title}</TableCell>
+                      <TableCell><Badge className={`text-xs ${getTypeColor(u.type)}`}>{u.type}</Badge></TableCell>
+                      <TableCell className="capitalize">{u.priority}</TableCell>
+                      <TableCell>{new Date(u.publishDate).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">👁 {u.views} • 👍 {u.likes} • 💬 {u.comments}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
       </div>
       
       <CreateUpdateWizard
