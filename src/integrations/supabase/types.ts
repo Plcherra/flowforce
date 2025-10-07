@@ -658,6 +658,69 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          doc_date: string | null
+          file_id: string
+          id: string
+          language: string | null
+          meta: Json
+          processing_error: string | null
+          processing_state: Database["public"]["Enums"]["document_processing_state"]
+          source: string | null
+          text_extracted: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          doc_date?: string | null
+          file_id: string
+          id?: string
+          language?: string | null
+          meta?: Json
+          processing_error?: string | null
+          processing_state?: Database["public"]["Enums"]["document_processing_state"]
+          source?: string | null
+          text_extracted?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          doc_date?: string | null
+          file_id?: string
+          id?: string
+          language?: string | null
+          meta?: Json
+          processing_error?: string | null
+          processing_state?: Database["public"]["Enums"]["document_processing_state"]
+          source?: string | null
+          text_extracted?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -731,6 +794,120 @@ export type Database = {
           {
             foreignKeyName: "expenses_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          company_id: string
+          created_at: string
+          details: Json
+          document_id: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          occurred_at: string | null
+          severity: Database["public"]["Enums"]["event_severity"]
+          summary: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          details?: Json
+          document_id?: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          occurred_at?: string | null
+          severity?: Database["public"]["Enums"]["event_severity"]
+          summary: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          details?: Json
+          document_id?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          occurred_at?: string | null
+          severity?: Database["public"]["Enums"]["event_severity"]
+          summary?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          checksum: string | null
+          company_id: string
+          file_size: number | null
+          filename: string
+          id: string
+          metadata: Json
+          mime_type: string | null
+          storage_path: string
+          updated_at: string
+          uploaded_at: string
+          uploader_id: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          company_id: string
+          file_size?: number | null
+          filename: string
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          storage_path: string
+          updated_at?: string
+          uploaded_at?: string
+          uploader_id?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          company_id?: string
+          file_size?: number | null
+          filename?: string
+          id?: string
+          metadata?: Json
+          mime_type?: string | null
+          storage_path?: string
+          updated_at?: string
+          uploaded_at?: string
+          uploader_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_uploader_id_fkey"
+            columns: ["uploader_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2808,6 +2985,60 @@ export type Database = {
           },
         ]
       }
+      ooda_cycles: {
+        Row: {
+          company_id: string
+          context: Json
+          created_at: string
+          end_at: string | null
+          id: string
+          owner_id: string | null
+          period: Database["public"]["Enums"]["ooda_period"]
+          start_at: string
+          status: Database["public"]["Enums"]["ooda_status"]
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          context?: Json
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          owner_id?: string | null
+          period: Database["public"]["Enums"]["ooda_period"]
+          start_at: string
+          status?: Database["public"]["Enums"]["ooda_status"]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          context?: Json
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          owner_id?: string | null
+          period?: Database["public"]["Enums"]["ooda_period"]
+          start_at?: string
+          status?: Database["public"]["Enums"]["ooda_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ooda_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ooda_cycles_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       position_assignments: {
         Row: {
           assigned_at: string | null
@@ -3901,9 +4132,13 @@ export type Database = {
           due_date: string | null
           estimated_hours: number | null
           id: string
+          links: Json
           parent_task_id: string | null
           priority: Database["public"]["Enums"]["task_priority"]
+          origin_document_id: string | null
+          origin_event_id: string | null
           status: Database["public"]["Enums"]["task_status"]
+          source: Database["public"]["Enums"]["task_source"]
           tags: string[] | null
           title: string
           updated_at: string
@@ -3921,9 +4156,13 @@ export type Database = {
           due_date?: string | null
           estimated_hours?: number | null
           id?: string
+          links?: Json
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
+          origin_document_id?: string | null
+          origin_event_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
+          source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -3941,9 +4180,13 @@ export type Database = {
           due_date?: string | null
           estimated_hours?: number | null
           id?: string
+          links?: Json
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
+          origin_document_id?: string | null
+          origin_event_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
+          source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -3976,6 +4219,20 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_origin_document_id_fkey"
+            columns: ["origin_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_origin_event_id_fkey"
+            columns: ["origin_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -4530,7 +4787,15 @@ export type Database = {
         | "it"
         | "customer_service"
         | "management"
+      document_processing_state: "pending" | "processing" | "ready" | "error"
       employment_status: "active" | "inactive" | "terminated" | "on_leave"
+      event_severity: "low" | "medium" | "high"
+      event_type:
+        | "incident"
+        | "customer_complaint"
+        | "prep_gap"
+        | "policy_violation"
+        | "other"
       field_type:
         | "text"
         | "email"
@@ -4579,6 +4844,8 @@ export type Database = {
         | "task"
         | "image_selection"
       form_status: "draft" | "published" | "archived"
+      ooda_period: "daily" | "weekly" | "monthly" | "quarterly"
+      ooda_status: "open" | "closed"
       schedule_status:
         | "scheduled"
         | "confirmed"
@@ -4587,6 +4854,7 @@ export type Database = {
         | "no_show"
       schedule_type: "shift" | "meeting" | "task" | "break" | "time_off"
       task_priority: "low" | "medium" | "high" | "urgent"
+      task_source: "manual" | "from_report" | "auto"
       task_status: "todo" | "in_progress" | "review" | "completed" | "cancelled"
       time_entry_type: "clock_in" | "clock_out" | "break_start" | "break_end"
       user_role:
@@ -4736,7 +5004,16 @@ export const Constants = {
         "customer_service",
         "management",
       ],
+      document_processing_state: ["pending", "processing", "ready", "error"],
       employment_status: ["active", "inactive", "terminated", "on_leave"],
+      event_severity: ["low", "medium", "high"],
+      event_type: [
+        "incident",
+        "customer_complaint",
+        "prep_gap",
+        "policy_violation",
+        "other",
+      ],
       field_type: [
         "text",
         "email",
@@ -4787,6 +5064,8 @@ export const Constants = {
         "image_selection",
       ],
       form_status: ["draft", "published", "archived"],
+      ooda_period: ["daily", "weekly", "monthly", "quarterly"],
+      ooda_status: ["open", "closed"],
       schedule_status: [
         "scheduled",
         "confirmed",
@@ -4796,6 +5075,7 @@ export const Constants = {
       ],
       schedule_type: ["shift", "meeting", "task", "break", "time_off"],
       task_priority: ["low", "medium", "high", "urgent"],
+      task_source: ["manual", "from_report", "auto"],
       task_status: ["todo", "in_progress", "review", "completed", "cancelled"],
       time_entry_type: ["clock_in", "clock_out", "break_start", "break_end"],
       user_role: [

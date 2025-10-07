@@ -21,11 +21,13 @@ import {
   Trash2,
   Calendar as CalendarIcon,
   Plus,
-  Minus
+  Minus,
+  ShieldAlert
 } from 'lucide-react';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { format } from 'date-fns';
 import { useEvents } from '@/hooks/useEvents';
+import type { CopilotDraftWarning, CopilotScheduleMetadata } from '@/services/scheduling/autoScheduler';
 
 interface ShiftDetailsPanelProps {
   shiftId: string;
@@ -40,6 +42,9 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
   const [eventEdits, setEventEdits] = useState<Record<string, { title: string; location?: string }>>({});
 
   const shift = schedules.find(s => s.id === shiftId);
+  const copilotRequirements = shift?.requirements as { copilot?: CopilotScheduleMetadata } | null | undefined;
+  const copilotMeta = copilotRequirements?.copilot;
+  const copilotWarnings: CopilotDraftWarning[] = copilotMeta?.warnings ?? [];
 
   const [formData, setFormData] = useState({
     title: '',
@@ -178,10 +183,44 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
 
           <TabsContent value="details" className="space-y-4">
             {/* Basic Information */}
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="title">Title</Label>
-                <Input
+              <div className="space-y-4">
+                {copilotMeta && (
+                  <div className="rounded-lg border border-border/60 bg-muted/30 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold">AI Copilot Draft</p>
+                        <p className="text-xs text-muted-foreground">
+                          Run {copilotMeta.runId?.slice?.(0, 8) ?? '—'} • {copilotMeta.status ?? 'draft-only'}
+                        </p>
+                      </div>
+                      <Badge variant="outline">Draft</Badge>
+                    </div>
+                    {copilotWarnings.length > 0 ? (
+                      <div className="space-y-2">
+                        {copilotWarnings.map((warning, index) => (
+                          <div
+                            key={`${warning.code}-${index}`}
+                            className="flex items-start gap-2 rounded border border-muted-foreground/30 bg-background p-2"
+                          >
+                            <ShieldAlert className={`mt-1 h-4 w-4 ${warning.severity === 'hard' ? 'text-destructive' : 'text-amber-500'}`} />
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                {warning.severity === 'hard' ? 'Blocking' : 'Advisory'} • {warning.code.replace(/_/g, ' ')}
+                              </p>
+                              <p className="text-sm text-foreground">{warning.message}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">No conflicts on this draft.</p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="title">Title</Label>
+                  <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}

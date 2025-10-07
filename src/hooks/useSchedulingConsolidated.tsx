@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import type { Tables } from '@/integrations/supabase/types';
+import { canViewScheduleDrafts } from '@/utils/authRoles';
 
 // Consolidated scheduling hook that replaces multiple separate hooks
 export function useSchedulingConsolidated() {
@@ -62,11 +63,19 @@ export function useSchedulingConsolidated() {
       if (!profile?.company_id) return;
 
       // Fetch schedules for the company
-      const { data: schedulesData, error } = await supabase
+      const canSeeDrafts = canViewScheduleDrafts(user);
+
+      let schedulesQuery = supabase
         .from('schedules')
         .select('*')
         .eq('company_id', profile.company_id)
         .order('start_time', { ascending: true });
+
+      if (!canSeeDrafts) {
+        schedulesQuery = schedulesQuery.eq('is_published', true);
+      }
+
+      const { data: schedulesData, error } = await schedulesQuery;
 
       if (error) throw error;
 

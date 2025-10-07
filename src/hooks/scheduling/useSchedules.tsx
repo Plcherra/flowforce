@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../useAuth';
 import type { Tables } from '@/integrations/supabase/types';
+import { canViewScheduleDrafts } from '@/utils/authRoles';
 
 type Schedule = Tables<'schedules'>;
 
@@ -23,7 +24,9 @@ export function useSchedules() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const canSeeDrafts = canViewScheduleDrafts(user);
+
+      let query = supabase
         .from('schedules')
         .select(`
           *,
@@ -36,6 +39,12 @@ export function useSchedules() {
           )
         `)
         .order('start_time', { ascending: true });
+
+      if (!canSeeDrafts) {
+        query = query.eq('is_published', true);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       

@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, FileText, Upload, X, Clock, Users, Star } from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
 import FormBuilderDialog from './FormBuilderDialog';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { importFormFromFile } from '@/services/forms/formImportService';
 
 interface CreateFormDialogProps {
   open: boolean;
@@ -81,16 +84,20 @@ const formTemplates: FormTemplate[] = [
 
 export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: CreateFormDialogProps) {
   const { createForm } = useForms();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<CreationStep>('select-method');
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [createdFormId, setCreatedFormId] = useState<string | null>(null);
+  const [formTitleOverride, setFormTitleOverride] = useState<string | null>(null);
 
   const resetDialog = () => {
     setCurrentStep('select-method');
     setSelectedTemplate(null);
     setUploadedFile(null);
     setCreatedFormId(null);
+    setFormTitleOverride(null);
   };
 
   const handleClose = (open: boolean) => {
@@ -100,18 +107,56 @@ export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: 
     onOpenChange(open);
   };
 
-  const createFormAndStartBuilder = async (title: string = "New Form", description: string = "") => {
-    const formData = {
-      title,
-      description: description || undefined,
-      department_id: undefined,
-      is_anonymous: false,
-    };
-    
-    const { data, error } = await createForm(formData);
-    if (!error && data) {
+  const createFormAndStartBuilder = async (
+    title: string = 'New Form',
+    description: string = '',
+    options?: { fromFile?: boolean },
+  ) => {
+    try {
+      if (options?.fromFile) {
+        if (!uploadedFile) {
+          throw new Error('No file selected for import');
+        }
+        if (!user) {
+          throw new Error('You must be signed in to import forms from files.');
+        }
+
+        const baseName = uploadedFile.name.replace(/\.[^/.]+$/, '');
+        const { form } = await importFormFromFile(uploadedFile, user.id);
+        setCreatedFormId(form.id);
+        setCurrentStep('build-fields');
+        setUploadedFile(null);
+        setFormTitleOverride(baseName);
+        onFormCreated?.(form.id);
+        toast({
+          title: 'Form imported',
+          description: `${uploadedFile.name} is ready for refinement.`,
+        });
+        return;
+      }
+
+      const formData = {
+        title,
+        description: description || undefined,
+        department_id: undefined,
+        is_anonymous: false,
+      };
+
+      const { data, error } = await createForm(formData);
+      if (error || !data) {
+        throw error ?? new Error('Failed to create form');
+      }
       setCreatedFormId(data.id);
       setCurrentStep('build-fields');
+      setFormTitleOverride(title);
+      onFormCreated?.(data.id);
+    } catch (error) {
+      console.error('Unable to create form', error);
+      toast({
+        title: 'Form creation failed',
+        description: error instanceof Error ? error.message : 'Unexpected error occurred.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -285,7 +330,11 @@ export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: 
       
       {uploadedFile && (
         <div className="flex justify-end">
-          <Button onClick={() => createFormAndStartBuilder(uploadedFile.name.replace(/\.[^/.]+$/, ""))}>
+          <Button
+            onClick={() =>
+              createFormAndStartBuilder(uploadedFile.name.replace(/\.[^/.]+$/, ''), '', { fromFile: true })
+            }
+          >
             Continue with File
           </Button>
         </div>
@@ -299,7 +348,7 @@ export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: 
         open={open} 
         onOpenChange={handleFormBuilderClose} 
         formId={createdFormId}
-        initialTitle={selectedTemplate?.name || uploadedFile?.name.replace(/\.[^/.]+$/, "") || "New Form"}
+        initialTitle={formTitleOverride || selectedTemplate?.name || 'New Form'}
         initialDescription={selectedTemplate?.description || ""}
       />
     );

@@ -24,6 +24,10 @@ export interface FeatureFlags {
     permissionOverrides: boolean;
     auditLogs: boolean;
   };
+  intelligence: {
+    oodaLoop: boolean;
+    connecteamFormsSync: boolean;
+  };
 }
 
 // Default feature flags - can be overridden by environment or user settings
@@ -51,6 +55,10 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     companyRoles: true,
     permissionOverrides: true,
     auditLogs: false,
+  },
+  intelligence: {
+    oodaLoop: true,
+    connecteamFormsSync: false,
   },
 };
 

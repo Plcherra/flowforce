@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useFeatureFlag } from '@/hooks/useFeatureFlags';
+import { OodaLoopPanel } from '@/components/ooda/OodaLoopPanel';
 
 interface AIInsightsPanelProps {
   type: 'dashboard' | 'scheduler' | 'expenses' | 'reports';
@@ -20,6 +22,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   const { can } = useCan();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const oodaEnabled = useFeatureFlag('intelligence.oodaLoop');
   const [insights, setInsights] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -164,8 +167,15 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     return null;
   }
 
-  return (
-    <Card className={`${className} h-fit`}>
+  const showOoda = oodaEnabled && (type === 'reports' || type === 'dashboard');
+
+  const cardClassName = ['h-fit'];
+  if (!showOoda && className) {
+    cardClassName.push(className);
+  }
+
+  const insightsCard = (
+    <Card className={cardClassName.join(' ')}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col space-y-2">
@@ -292,6 +302,12 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               </div>
             </div>
 
+            {insights && (
+              <div className="rounded-lg border bg-muted/30 p-3 text-sm leading-relaxed text-muted-foreground">
+                {insights}
+              </div>
+            )}
+
             {/* Action Button */}
             <Button 
               variant="ghost" 
@@ -313,5 +329,16 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
         )}
       </CardContent>
     </Card>
+  );
+
+  if (!showOoda) {
+    return <div className={className}>{insightsCard}</div>;
+  }
+
+  return (
+    <div className={`space-y-4 ${className ?? ''}`}>
+      {insightsCard}
+      <OodaLoopPanel />
+    </div>
   );
 }

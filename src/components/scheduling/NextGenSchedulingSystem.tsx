@@ -26,11 +26,13 @@ import { ComplianceMonitor } from './ComplianceMonitor';
 import { MobileStaffInterface } from './MobileStaffInterface';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AutoScheduleDialog } from './AutoScheduleDialog';
 
 export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: string }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('schedule');
   const [showChecklist, setShowChecklist] = useState(false);
+  const [showAutoScheduler, setShowAutoScheduler] = useState(false);
 
   const tabs = [
     {
@@ -90,7 +92,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                 <Clock className="h-3 w-3" />
                 Real-time
               </Badge>
-              <Button size="sm" className="flex items-center gap-2">
+              <Button size="sm" className="flex items-center gap-2" onClick={() => setShowAutoScheduler(true)}>
                 <Zap className="h-3 w-3" />
                 Auto-Schedule Week
               </Button>
@@ -161,6 +163,12 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
           <WeeklySchedulingChecklist />
         </DialogContent>
       </Dialog>
+
+      <AutoScheduleDialog
+        open={showAutoScheduler}
+        onOpenChange={setShowAutoScheduler}
+        defaultLocationId={locationFilter ?? undefined}
+      />
     </div>
   );
 }

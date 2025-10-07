@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
-type Task = Tables<'tasks'> & {
+type TaskRow = Tables<'tasks'>;
+
+type Task = TaskRow & {
   assigned_profile?: {
     first_name: string;
     last_name: string;
@@ -18,6 +20,7 @@ type Task = Tables<'tasks'> & {
   };
 };
 
+type TaskInsert = TablesInsert<'tasks'>;
 type TaskComment = Tables<'task_comments'>;
 
 export function useTasks() {
@@ -57,7 +60,7 @@ export function useTasks() {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'assigned_profile' | 'created_profile' | 'department'>) => {
+  const createTask = async (taskData: TaskInsert) => {
     try {
       const { data, error } = await supabase
         .from('tasks')
