@@ -22,7 +22,7 @@ export interface FormFieldData {
   field_order: number;
 }
 
-export interface FormSubmissionData extends Record<string, any> {}
+export type FormSubmissionData = Record<string, unknown>;
 
 export interface PositionPermissions {
   canManageSchedules: boolean;

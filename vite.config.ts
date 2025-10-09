@@ -7,6 +7,10 @@ const reactQuillEntry = path.resolve(
   __dirname,
   "node_modules/react-quill/lib/index.js",
 );
+const reactQuillSnowCss = path.resolve(
+  __dirname,
+  "node_modules/react-quill/dist/quill.snow.css",
+);
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -24,6 +28,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
       "react-quill": reactQuillEntry,
       "react-quill/lib/index.js": reactQuillEntry,
+      "react-quill/dist/quill.snow.css": reactQuillSnowCss,
     },
   },
   optimizeDeps: {

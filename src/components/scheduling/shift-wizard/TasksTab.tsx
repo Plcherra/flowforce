@@ -24,7 +24,13 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
 
   const addTask = () => {
     if (!newTask.title.trim()) return;
-    const task: ShiftTask = { id: Date.now().toString(), ...newTask } as ShiftTask;
+    const task: ShiftTask = {
+      id: Date.now().toString(),
+      title: newTask.title,
+      description: newTask.description,
+      priority: newTask.priority,
+      estimated_minutes: newTask.estimated_minutes,
+    };
     onAddTask(task);
     setNewTask({ title: '', description: '', priority: 'medium', estimated_minutes: 30 });
   };
@@ -44,7 +50,12 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
             rows={2}
           />
           <div className="flex space-x-2">
-            <Select value={newTask.priority} onValueChange={(value) => setNewTask({ ...newTask, priority: value as any })}>
+            <Select
+              value={newTask.priority}
+              onValueChange={(value) =>
+                setNewTask({ ...newTask, priority: value as ShiftTask['priority'] })
+              }
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -59,7 +70,12 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
               placeholder="Minutes"
               className="w-24"
               value={newTask.estimated_minutes}
-              onChange={(e) => setNewTask({ ...newTask, estimated_minutes: parseInt(e.target.value) || 0 })}
+              onChange={(event) =>
+                setNewTask({
+                  ...newTask,
+                  estimated_minutes: Number.parseInt(event.target.value, 10) || 0,
+                })
+              }
             />
             <Button type="button" onClick={addTask}>
               <Plus className="h-4 w-4" />
@@ -94,4 +110,3 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
     </div>
   );
 }
-

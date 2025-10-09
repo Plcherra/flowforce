@@ -226,7 +226,7 @@ function parseEvidenceValue(value: unknown): number | string | boolean | undefin
     }
 
     if (typeof value === 'object' && value !== null) {
-      // @ts-ignore - Postgrest may already return JSON object
+      // @ts-expect-error Postgrest may already return JSON object
       return value.value ?? value;
     }
   } catch (error) {

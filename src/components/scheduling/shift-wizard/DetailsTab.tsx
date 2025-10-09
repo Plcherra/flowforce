@@ -52,7 +52,9 @@ export function DetailsTab({ formData, setFormData, positions, distinctLocations
       if (!user) return;
 
       try {
-        const companyId = (user as any)?.user_metadata?.company_id || null;
+        const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+        const companyId =
+          typeof metadata['company_id'] === 'string' ? (metadata['company_id'] as string) : null;
         let query = supabase
           .from('shift_templates')
           .select('id, name, description, duration_hours, is_all_day, job_position_id, required_headcount, default_notes, color')

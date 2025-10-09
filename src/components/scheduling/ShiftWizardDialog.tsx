@@ -29,6 +29,9 @@ import { TasksTab } from './shift-wizard/TasksTab';
 import { NotesTab } from './shift-wizard/NotesTab';
 import type { ShiftTask, ShiftWizardFormData } from './shift-wizard/types';
 import { queryKeys } from '@/lib/queryKeys';
+import type { Tables } from '@/integrations/supabase/types';
+
+type UserUnavailabilityRow = Tables<'user_unavailability'>;
 
 interface ShiftWizardDialogProps {
   open?: boolean;
@@ -78,8 +81,10 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
 
   const { user } = useAuth();
   const { profile } = useProfile();
-  const companyId =
-    profile?.companyId ?? profile?.company_id ?? (user && (user as any)?.user_metadata?.company_id) ?? null;
+  const userMetadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+  const metadataCompanyId =
+    typeof userMetadata['company_id'] === 'string' ? (userMetadata['company_id'] as string) : null;
+  const companyId = profile?.companyId ?? profile?.company_id ?? metadataCompanyId ?? null;
 
   const { positions } = usePositions();
   const {
@@ -126,6 +131,16 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
     return { total: totalHours, net: netHours };
   }, [formData.breaks, formData.date, formData.end_time, formData.is_all_day, formData.start_time]);
 
+  const unavailabilityEntries = useMemo(
+    () =>
+      (unavailability ?? []).map((entry) => ({
+        user_id: (entry as UserUnavailabilityRow).user_id ?? null,
+        start_time: (entry as UserUnavailabilityRow).start_time,
+        end_time: (entry as UserUnavailabilityRow).end_time,
+      })),
+    [unavailability],
+  );
+
   const getShiftWindow = () => {
     const date = formData.date;
     const start = formData.is_all_day
@@ -139,10 +154,10 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
 
   const isUserAvailableForWindow = (userId: string) => {
     const { start, end } = getShiftWindow();
-    const items = unavailability?.filter((item: any) => item.user_id === userId) ?? [];
-    return !items.some((item: any) => {
-      const uaStart = new Date(item.start_time);
-      const uaEnd = new Date(item.end_time);
+    const items = unavailabilityEntries.filter((entry) => entry.user_id === userId);
+    return !items.some((entry) => {
+      const uaStart = new Date(entry.start_time);
+      const uaEnd = new Date(entry.end_time);
       return uaStart < end && uaEnd > start;
     });
   };
@@ -350,7 +365,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
                   {loading ? 'Saving...' : 'Save Draft'}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? 'Publishing…' : 'Publish'}
+                  {loading ? 'Publishing...' : 'Publish'}
                 </Button>
               </div>
             </div>
