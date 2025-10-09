@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getReplacementCandidates } from '@/services/scheduling/replacement';
 
 type UsersTabProps = {
   employees: any[];
@@ -37,7 +39,10 @@ export function UsersTab({
     if (!userViews.time && !userViews.qualified) {
       list = employees.slice();
     }
-    return list.filter((emp) => !formData.assigned_users.includes(emp.id));
+    list = list.filter((emp) => !formData.assigned_users.includes(emp.id));
+
+    const requiredLevel = formData.required_level ?? 1;
+    return getReplacementCandidates({ employees: list, requiredLevel });
   };
 
   const noCandidates = filteredCandidates().length === 0;
@@ -86,13 +91,28 @@ export function UsersTab({
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-primary">
-                            {employee.first_name[0]}
-                            {employee.last_name[0]}
+                            {employee.first_name?.[0] ?? '?'}
+                            {employee.last_name?.[0] ?? ''}
                           </span>
                         </div>
                         <div>
                           <p className="font-medium text-sm">{getEmployeeFullName(employee)}</p>
                           <p className="text-xs text-muted-foreground">{employee.position?.name || employee.role}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                            <Badge variant={employee.reliability && employee.reliability >= 70 ? 'default' : 'outline'} className="text-[10px]">
+                              Reliability {employee.reliability?.toFixed(0) ?? '--'}%
+                            </Badge>
+                            <Badge variant="secondary" className="text-[10px]">Level {employee.skillLevel ?? 1}</Badge>
+                          </div>
+                          {employee.badges && employee.badges.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {employee.badges.slice(0, 3).map((badgeCode) => (
+                                <Badge key={badgeCode} variant="outline" className="text-[10px]">
+                                  {badgeCode}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <Button
@@ -170,4 +190,3 @@ export function UsersTab({
     </div>
   );
 }
-

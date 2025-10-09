@@ -507,6 +507,132 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          entity: string
+          entity_id: string
+          id: string
+          meta: Json
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          entity: string
+          entity_id: string
+          id?: string
+          meta?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          entity?: string
+          entity_id?: string
+          id?: string
+          meta?: Json
+        }
+        Relationships: []
+      }
+      availability_exception: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          end_date: string
+          id: string
+          reason: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      availability_request: {
+        Row: {
+          created_at: string
+          decision_note: string | null
+          employee_id: string
+          id: string
+          manager_id: string | null
+          payload: Json
+          status: Database["public"]["Enums"]["availability_request_status"]
+          updated_at: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          decision_note?: string | null
+          employee_id: string
+          id?: string
+          manager_id?: string | null
+          payload?: Json
+          status?: Database["public"]["Enums"]["availability_request_status"]
+          updated_at?: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          decision_note?: string | null
+          employee_id?: string
+          id?: string
+          manager_id?: string | null
+          payload?: Json
+          status?: Database["public"]["Enums"]["availability_request_status"]
+          updated_at?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      org_prefs: {
+        Row: {
+          auto_lock_day_of_week: number
+          auto_lock_hour: number
+          availability_lock_mode: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_lock_day_of_week?: number
+          auto_lock_hour?: number
+          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_lock_day_of_week?: number
+          auto_lock_hour?: number
+          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_section_pages: {
         Row: {
           content: Json
@@ -3859,6 +3985,47 @@ export type Database = {
           },
         ]
       }
+      skill_matrix: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          last_review: string | null
+          level: number
+          role: string
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          last_review?: string | null
+          level?: number
+          role: string
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          last_review?: string | null
+          level?: number
+          role?: string
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_matrix_employee_fk"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_availability: {
         Row: {
           created_at: string | null
@@ -4777,6 +4944,10 @@ export type Database = {
       }
     }
     Enums: {
+      availability_lock_mode: "auto" | "open" | "lock"
+      availability_request_status: "pending" | "approved" | "denied"
+      employee_report_category: "performance" | "attendance" | "behavior" | "customer"
+      promotion_status: "pending" | "approved" | "rejected"
       approval_status: "pending" | "approved" | "rejected"
       department_type:
         | "hr"
@@ -5091,3 +5262,196 @@ export const Constants = {
     },
   },
 } as const
+      badge_catalog: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          min_level: number | null
+          role: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          min_level?: number | null
+          role?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          min_level?: number | null
+          role?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employee_badge: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          badge_code: string
+          created_at: string
+          employee_id: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_code: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_code?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_badge_awarded_by_fk"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_badge_badge_fk"
+            columns: ["badge_code"]
+            isOneToOne: false
+            referencedRelation: "badge_catalog"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "employee_badge_employee_fk"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_report: {
+        Row: {
+          category: Database["public"]["Enums"]["employee_report_category"]
+          created_at: string
+          created_by: string
+          date: string
+          employee_id: string
+          id: string
+          notes: string | null
+          severity: number
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["employee_report_category"]
+          created_at?: string
+          created_by: string
+          date: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          severity: number
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["employee_report_category"]
+          created_at?: string
+          created_by?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          severity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_report_created_by_fk"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_report_employee_fk"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotion_proposal: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          employee_id: string
+          id: string
+          proposed_level: number
+          proposed_role: string
+          rationale: string | null
+          status: Database["public"]["Enums"]["promotion_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          employee_id: string
+          id?: string
+          proposed_level: number
+          proposed_role: string
+          rationale?: string | null
+          status?: Database["public"]["Enums"]["promotion_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          employee_id?: string
+          id?: string
+          proposed_level?: number
+          proposed_role?: string
+          rationale?: string | null
+          status?: Database["public"]["Enums"]["promotion_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_proposal_decided_by_fk"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_proposal_employee_fk"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
