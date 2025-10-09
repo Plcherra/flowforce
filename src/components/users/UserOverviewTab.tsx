@@ -2,6 +2,7 @@ import { Mail, Phone, Building2, Calendar, MapPin, User, IdCard } from 'lucide-r
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { EngagementPanel } from '@/components/people/EngagementPanel';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Profile = Tables<'profiles'>;
@@ -35,6 +36,12 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
 
   return (
     <div className="space-y-6">
+      <EngagementPanel
+        employeeId={user.id}
+        role={user.role}
+        displayName={`${user.first_name} ${user.last_name}`.trim()}
+      />
+
       {/* Contact Information */}
       <Card>
         <CardHeader>

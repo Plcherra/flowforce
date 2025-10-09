@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,29 +23,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { LoadingSpinner } from '@/components/ui/loading-states';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
+import { SchedulingProvider, useScheduling } from '@/contexts/SchedulingContext';
 import { DEFAULT_ORG_ID, getLockStateForWeek, computeAutoLockThreshold } from '@/availability/lockEngine';
+import {
+  cloneGrid,
+  computeImpactScore,
+  gridFromAvailabilityRows,
+  hoursDelta,
+  rangesFromGrid,
+  type StaffAvailabilityRow,
+} from '@/availability/availabilityUtils';
+import type { AvailabilityGrid } from '@/components/availability/AvailabilityRequestForm';
 import { notifyEmployeeDecision } from '@/notifications/availability';
-import type {
-  AvailabilityException,
-  AvailabilityLockMode,
-  AvailabilityRequest,
-  OrgPrefs,
-} from '@/types/availability';
+import type { AvailabilityException, AvailabilityLockMode, AvailabilityRequest, OrgPrefs } from '@/types/availability';
 import { cn } from '@/lib/utils';
-
-interface StaffAvailabilityRow {
-  id: string;
-  user_id: string | null;
-  day_of_week: number | null;
-  start_time: string;
-  end_time: string;
-  week_start_date: string | null;
-}
-
-type AvailabilityGrid = Record<number, number[]>;
+import { queryKeys } from '@/lib/queryKeys';
 
 interface ManagerAvailabilityRequest extends AvailabilityRequest {
   employeeName: string;
@@ -60,78 +58,14 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 dayjs.extend(relativeTime);
 
-const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {
-  const next: AvailabilityGrid = {};
-  Object.entries(grid).forEach(([day, hours]) => {
-    next[Number(day)] = [...(hours ?? [])];
-  });
-  return next;
-};
-
-const gridFromAvailabilityRows = (rows: StaffAvailabilityRow[]): AvailabilityGrid => {
-  const grid: AvailabilityGrid = {};
-  rows.forEach((row) => {
-    if (row.day_of_week == null) return;
-    const dayIndex = row.day_of_week;
-    const startHour = Number(row.start_time.split(':')[0]);
-    const endHour = Number(row.end_time.split(':')[0]);
-    const hours: number[] = [];
-    for (let hour = startHour; hour < endHour; hour += 1) {
-      hours.push(hour);
-    }
-    grid[dayIndex] = Array.from(new Set([...(grid[dayIndex] ?? []), ...hours])).sort((a, b) => a - b);
-  });
-  return grid;
-};
-
-const rangesFromGrid = (
-  grid: AvailabilityGrid,
-): { dayOfWeek: number; startTime: string; endTime: string }[] => {
-  const ranges: { dayOfWeek: number; startTime: string; endTime: string }[] = [];
-
-  Object.entries(grid).forEach(([day, hours]) => {
-    const sorted = [...(hours ?? [])].sort((a, b) => a - b);
-    if (sorted.length === 0) return;
-    let rangeStart = sorted[0];
-    let prev = sorted[0];
-    for (let index = 1; index < sorted.length; index += 1) {
-      const current = sorted[index];
-      if (current !== prev + 1) {
-        ranges.push({
-          dayOfWeek: Number(day),
-          startTime: `${String(rangeStart).padStart(2, '0')}:00`,
-          endTime: `${String(prev + 1).padStart(2, '0')}:00`,
-        });
-        rangeStart = current;
-      }
-      prev = current;
-    }
-    ranges.push({
-      dayOfWeek: Number(day),
-      startTime: `${String(rangeStart).padStart(2, '0')}:00`,
-      endTime: `${String(prev + 1).padStart(2, '0')}:00`,
-    });
-  });
-
-  return ranges;
-};
-
-const hoursDelta = (original: AvailabilityGrid, desired: AvailabilityGrid): number => {
-  const sum = (grid: AvailabilityGrid) =>
-    Object.values(grid).reduce((acc, hours) => acc + (hours?.length ?? 0), 0);
-  return sum(desired) - sum(original);
-};
-
-const computeImpactScore = (original: AvailabilityGrid, desired: AvailabilityGrid): number => {
-  const delta = Math.abs(hoursDelta(original, desired));
-  return Math.min(100, delta * 8); // simple heuristic
-};
-
-async function invalidateAvailabilityQueries(queryClient: ReturnType<typeof useQueryClient>) {
+async function invalidateAvailabilityQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  orgId: string | null | undefined,
+) {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: ['availability-org-prefs'] }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.orgPrefs(orgId) }),
     queryClient.invalidateQueries({ queryKey: ['availability-requests'] }),
-    queryClient.invalidateQueries({ queryKey: ['availability-exceptions'] }),
+    queryClient.invalidateQueries({ queryKey: ['availability-exceptions', orgId ?? null] }),
   ]);
 }
 
@@ -151,11 +85,25 @@ const hourOptions = Array.from({ length: 24 }).map((_, index) => ({
 }));
 
 export default function ManageAvailabilityPage() {
+  return (
+    <SchedulingProvider>
+      <ManageAvailabilityContent />
+    </SchedulingProvider>
+  );
+}
+
+function ManageAvailabilityContent() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
+  const { loading: schedulingLoading, fetchStaffAvailability } = useScheduling();
   const queryClient = useQueryClient();
 
-  const orgId = DEFAULT_ORG_ID;
+  const orgId = profile?.companyId ?? profile?.company_id ?? DEFAULT_ORG_ID;
+  const resolvedRole = (profile?.role ?? '').toLowerCase();
+  const canManageAvailability = ['manager', 'owner', 'company_admin', 'admin'].includes(resolvedRole);
+  const hasOrgContext = Boolean(profile?.companyId ?? profile?.company_id);
+  const queriesEnabled = canManageAvailability && hasOrgContext && !profileLoading;
 
   const [pendingMode, setPendingMode] = useState<AvailabilityLockMode>('open');
   const [pendingDay, setPendingDay] = useState('4');
@@ -178,10 +126,11 @@ export default function ManageAvailabilityPage() {
       if (error) throw error;
       return data ?? [];
     },
+    enabled: queriesEnabled,
   });
 
   const orgPrefsQuery = useQuery({
-    queryKey: ['availability-org-prefs', orgId],
+    queryKey: queryKeys.orgPrefs(orgId),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('org_prefs')
@@ -214,6 +163,7 @@ export default function ManageAvailabilityPage() {
 
       return prefs;
     },
+    enabled: queriesEnabled,
   });
 
   const requestsQuery = useQuery({
@@ -295,6 +245,7 @@ export default function ManageAvailabilityPage() {
         };
       });
     },
+    enabled: queriesEnabled,
   });
 
   const exceptionsQuery = useQuery({
@@ -307,6 +258,7 @@ export default function ManageAvailabilityPage() {
       if (error) throw error;
       return (data ?? []) as AvailabilityException[];
     },
+    enabled: queriesEnabled,
   });
 
   const updatePrefsMutation = useMutation({
@@ -325,7 +277,8 @@ export default function ManageAvailabilityPage() {
         title: 'Lock settings updated',
         description: 'New availability lock configuration saved.',
       });
-      await invalidateAvailabilityQueries(queryClient);
+      await invalidateAvailabilityQueries(queryClient, orgId);
+      await fetchStaffAvailability();
     },
     onError: (error) => {
       console.error(error);
@@ -402,7 +355,8 @@ export default function ManageAvailabilityPage() {
         title: 'Request approved',
         description: 'Employee availability updated.',
       });
-      await invalidateAvailabilityQueries(queryClient);
+      await invalidateAvailabilityQueries(queryClient, orgId);
+      await fetchStaffAvailability();
     },
     onError: (error) => {
       console.error(error);
@@ -452,7 +406,8 @@ export default function ManageAvailabilityPage() {
         title: 'Request denied',
         description: 'The employee has been notified.',
       });
-      await invalidateAvailabilityQueries(queryClient);
+      await invalidateAvailabilityQueries(queryClient, orgId);
+      await fetchStaffAvailability();
     },
     onError: (error) => {
       console.error(error);
@@ -501,7 +456,8 @@ export default function ManageAvailabilityPage() {
         endDate: dayjs().add(7, 'day').format('YYYY-MM-DD'),
         reason: '',
       });
-      await invalidateAvailabilityQueries(queryClient);
+      await invalidateAvailabilityQueries(queryClient, orgId);
+      await fetchStaffAvailability();
     },
     onError: (error) => {
       console.error(error);
@@ -530,6 +486,90 @@ export default function ManageAvailabilityPage() {
       nextLock,
     };
   }, [orgPrefsQuery.data, pendingMode, pendingDay, pendingHour]);
+
+  if (profileLoading || schedulingLoading) {
+    return (
+      <div className="p-6">
+        <LoadingSpinner text="Loading availability management..." />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="border-destructive/40">
+          <ShieldAlert className="h-5 w-5 text-destructive" />
+          <AlertTitle>Profile not found</AlertTitle>
+          <AlertDescription>
+            We couldn&apos;t load your profile details. Refresh the page or contact an administrator if the
+            issue persists.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!hasOrgContext) {
+    return (
+      <div className="p-6">
+        <Alert className="border-primary/40">
+          <ShieldAlert className="h-5 w-5 text-primary" />
+          <AlertTitle>Organization context missing</AlertTitle>
+          <AlertDescription>
+            ConnectFlow needs an active company to manage availability. Add your company profile or reach out
+            to support for help.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!canManageAvailability) {
+    return (
+      <div className="p-6">
+        <Alert className="border-primary/40">
+          <ShieldAlert className="h-5 w-5 text-primary" />
+          <AlertTitle>Manager access required</AlertTitle>
+          <AlertDescription>
+            Only managers or owners can control team availability. Ask your administrator for the right
+            permissions if you believe this is a mistake.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (
+    queriesEnabled &&
+    (employeesQuery.isLoading || orgPrefsQuery.isLoading || requestsQuery.isLoading || exceptionsQuery.isLoading)
+  ) {
+    return (
+      <div className="p-6">
+        <LoadingSpinner text="Loading availability data..." />
+      </div>
+    );
+  }
+
+  const queryError =
+    (employeesQuery.error as Error | undefined) ??
+    (orgPrefsQuery.error as Error | undefined) ??
+    (requestsQuery.error as Error | undefined) ??
+    (exceptionsQuery.error as Error | undefined);
+
+  if (queriesEnabled && queryError) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="border-destructive/40">
+          <ShieldAlert className="h-5 w-5 text-destructive" />
+          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertDescription>
+            {queryError.message || 'We ran into an unexpected error while loading availability data.'}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 px-6 py-8">

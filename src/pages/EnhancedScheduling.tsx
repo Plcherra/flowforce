@@ -9,14 +9,14 @@ export default function EnhancedScheduling() {
   const isMobile = useIsMobile();
   const [params] = useSearchParams();
   const locationFilter = params.get('location') || undefined;
-  
+
   return (
-    <div>
-      <div className={isMobile ? 'p-2' : 'p-6'}>
-        <SchedulingProvider>
+    <SchedulingProvider>
+      <div>
+        <div className={isMobile ? 'p-2' : 'p-6'}>
           <NextGenSchedulingSystem locationFilter={locationFilter} />
-        </SchedulingProvider>
+        </div>
       </div>
-    </div>
+    </SchedulingProvider>
   );
 }

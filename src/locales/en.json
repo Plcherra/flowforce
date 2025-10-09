@@ -25,6 +25,7 @@
     "forms": "Forms",
     "performance": "Performance",
     "recognition": "Recognition",
+    "leaderboard": "Leaderboard",
     "timeOff": "Time Off",
     "learning": "Learning Center",
     "certifications": "Certifications",
@@ -65,6 +66,7 @@
     "userManagement": "User Management",
     "inviteEmployee": "Invite Employee",
     "sectionsPermissions": "Sections & Permissions",
+    "leaderboard": "Leaderboard",
     "systemSettings": "System Settings"
   },
   "landing": {

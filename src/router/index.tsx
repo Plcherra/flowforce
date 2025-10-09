@@ -25,6 +25,7 @@ const Performance = lazy(() => import('../pages/Performance.tsx'));
 const TimeOff = lazy(() => import('../pages/TimeOff.tsx'));
 const Recognition = lazy(() => import('../pages/Recognition.tsx'));
 const Expenses = lazy(() => import('../pages/Expenses.tsx'));
+const Leaderboard = lazy(() => import('../pages/Leaderboard.tsx'));
 // Use explicit path to avoid barrel/star export resolution issues
 // Import Forms eagerly to avoid dynamic import resolution issues in dev
 import Forms from '../pages/Forms.tsx';
@@ -37,6 +38,8 @@ const ItemsSetup = lazy(() => import('../pages/ItemsSetup.tsx'));
 const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));
 const EnhancedScheduling = lazy(() => import('../pages/EnhancedScheduling.tsx'));
 const ScheduleLobby = lazy(() => import('../pages/ScheduleLobby.tsx'));
+const Availability = lazy(() => import('../pages/availability/index.tsx'));
+const ManageAvailability = lazy(() => import('../pages/availability/manage.tsx'));
 const Certifications = lazy(() => import('../pages/Certifications.tsx'));
 const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
 const Resources = lazy(() => import('../pages/Resources.tsx'));
@@ -153,6 +156,10 @@ export const router = createBrowserRouter([
             element: <Recognition />,
           },
           {
+            path: "leaderboard",
+            element: <Leaderboard />,
+          },
+          {
             path: "expenses",
             element: <Expenses />,
           },
@@ -195,6 +202,14 @@ export const router = createBrowserRouter([
           {
             path: "schedule-lobby",
             element: <ScheduleLobby />,
+          },
+          {
+            path: "availability",
+            element: <Availability />,
+          },
+          {
+            path: "availability/manage",
+            element: <ManageAvailability />,
           },
           {
             path: "certifications",
@@ -282,6 +297,10 @@ export const router = createBrowserRouter([
       {
         path: "recognition",
         element: <Navigate to="/app/recognition" replace />,
+      },
+      {
+        path: "leaderboard",
+        element: <Navigate to="/app/leaderboard" replace />,
       },
       {
         path: "expenses",

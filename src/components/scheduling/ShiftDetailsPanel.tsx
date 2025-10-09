@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,17 +29,27 @@ import { format } from 'date-fns';
 import { useEvents } from '@/hooks/useEvents';
 import type { CopilotDraftWarning, CopilotScheduleMetadata } from '@/services/scheduling/autoScheduler';
 
+const vendorLabelLookup: Record<string, string> = {
+  ecolab: 'Ecolab Service',
+  electrician: 'Electrician',
+  cleaning: 'Cleaning Crew',
+  inspection: 'Health Inspection',
+  general: 'Vendor Visit',
+};
+
+const getVendorLabel = (vendorType: string) => vendorLabelLookup[vendorType] ?? vendorType.replace(/_/g, ' ');
+
 interface ShiftDetailsPanelProps {
   shiftId: string;
   onClose: () => void;
 }
 
 export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) {
-  const { schedules, updateSchedule, deleteSchedule } = useScheduling();
+  const { schedules, updateSchedule, deleteSchedule, vendorEvents } = useScheduling();
   const { getEventsForShift, toggleChecklistItem, createVendorVisit, linkVisitToShifts, updateEvent, deleteEvent } = useEvents();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
-  const [eventEdits, setEventEdits] = useState<Record<string, { title: string; location?: string }>>({});
+  const [eventEdits, setEventEdits] = useState<Record<string, { title: string; location?: string | null }>>({});
 
   const shift = schedules.find(s => s.id === shiftId);
   const copilotRequirements = shift?.requirements as { copilot?: CopilotScheduleMetadata } | null | undefined;
@@ -88,7 +98,7 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
       for (const ev of linked) {
         const edit = eventEdits[ev.id];
         if (!edit) continue;
-        const updates: any = {};
+        const updates: Partial<{ title: string; location?: string | null }> = {};
         if (typeof edit.title === 'string' && edit.title !== ev.title) updates.title = edit.title;
         if (typeof edit.location === 'string' && edit.location !== ev.location) updates.location = edit.location;
         if (Object.keys(updates).length > 0) {
@@ -107,7 +117,7 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
     
     setLoading(true);
     try {
-      await updateSchedule(shift.id, { is_published: true } as any);
+      await updateSchedule(shift.id, { is_published: true });
     } catch (error) {
       console.error('Error publishing shift:', error);
     } finally {
@@ -129,6 +139,25 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
     }
   };
 
+  const linkedEvents = useMemo(() => (shift ? getEventsForShift(shift.id) : []), [getEventsForShift, shift]);
+  const linkedVendorVisits = useMemo(
+    () => (shift ? vendorEvents.filter((event) => event.shift_id === shift.id) : []),
+    [shift, vendorEvents],
+  );
+
+  useEffect(() => {
+    if (!shift) {
+      setEventEdits({});
+      return;
+    }
+
+    const buffer: Record<string, { title: string; location?: string | null }> = {};
+    linkedEvents.forEach((event) => {
+      buffer[event.id] = { title: event.title || '', location: event.location ?? null };
+    });
+    setEventEdits(buffer);
+  }, [linkedEvents, shift]);
+
   if (!shift) {
     return (
       <Card>
@@ -146,18 +175,6 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
       </Card>
     );
   }
-
-  const linkedEvents = shift ? getEventsForShift(shift.id) : [];
-
-  useEffect(() => {
-    // Initialize edit buffer when linked events change
-    const buf: Record<string, { title: string; location?: string }> = {};
-    linkedEvents.forEach(ev => {
-      buf[ev.id] = { title: ev.title || '', location: ev.location };
-    });
-    setEventEdits(buf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shiftId, linkedEvents.length]);
 
   return (
     <Card className="h-full">
@@ -184,6 +201,26 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
           <TabsContent value="details" className="space-y-4">
             {/* Basic Information */}
               <div className="space-y-4">
+                {linkedVendorVisits.length > 0 && (
+                  <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">Vendor Visits</span>
+                      <Badge variant="outline">{linkedVendorVisits.length}</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {linkedVendorVisits.map((event) => (
+                        <div key={event.id} className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-muted-foreground">{getVendorLabel(event.vendor_type)}</span>
+                          <span className="text-muted-foreground">
+                            {event.event_date ? format(new Date(event.event_date), 'MMM d') : '—'} ·
+                            {' '}
+                            {(event.start_time ?? '').slice(0, 5) || '--'}-{(event.end_time ?? '').slice(0, 5) || '--'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {copilotMeta && (
                   <div className="rounded-lg border border-border/60 bg-muted/30 p-4 space-y-3">
                     <div className="flex items-center justify-between">

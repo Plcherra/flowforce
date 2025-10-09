@@ -10,6 +10,7 @@ import {
   Brain,
   TrendingUp,
   CalendarClock,
+  CalendarCheck,
   Star,
   Award,
   BookOpen,
@@ -19,6 +20,7 @@ import {
   ShoppingCart,
   DollarSign,
   BarChart3,
+  ClipboardCheck,
   UserCheck,
   Users,
   UserPlus,
@@ -27,6 +29,7 @@ import {
   Settings,
   Shield,
   Crown,
+  Trophy,
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -65,6 +68,14 @@ export const navigationSections: NavigationSection[] = [
       { name: 'Tasks', href: '/tasks', icon: CheckSquare, translationKey: 'tasks' },
       { name: 'Forms', href: '/forms', icon: FileText, translationKey: 'forms' },
       { name: 'Scheduling', href: '/enhanced-scheduling', icon: CalendarRange, translationKey: 'scheduling' },
+      { name: 'My Availability', href: '/availability', icon: CalendarCheck, translationKey: 'myAvailability' },
+      {
+        name: 'Manage Availability',
+        href: '/availability/manage',
+        icon: ClipboardCheck,
+        translationKey: 'manageAvailability',
+        roles: ['manager', 'admin', 'company_admin', 'owner'],
+      },
     ],
   },
   {
@@ -75,6 +86,7 @@ export const navigationSections: NavigationSection[] = [
       { name: 'Performance', href: '/performance', icon: TrendingUp, translationKey: 'performance', roles: ['supervisor', 'manager', 'company_admin'] },
       { name: 'Time Off', href: '/time-off', icon: CalendarClock, translationKey: 'timeOff' },
       { name: 'Recognition', href: '/recognition', icon: Star, translationKey: 'recognition' },
+      { name: 'Leaderboard', href: '/leaderboard', icon: Trophy, translationKey: 'leaderboard' },
       { name: 'Certifications', href: '/certifications', icon: Award, translationKey: 'certifications' },
       { name: 'Learning Center', href: '/learning-center', icon: BookOpen, translationKey: 'learning' },
     ],

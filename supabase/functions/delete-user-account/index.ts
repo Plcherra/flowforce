@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   const startTime = Date.now()
   let supabaseAdmin: any = null
   let userSession: any = null
-  let deletionStats: DeletionStats = {
+  const deletionStats: DeletionStats = {
     initialCounts: {},
     finalCounts: {},
     totalRecordsDeleted: 0,

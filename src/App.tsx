@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/hooks/useAuth';
+import { ProfileProvider } from '@/contexts/ProfileContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { LoadingSpinner } from '@/components/ui/loading-states';
@@ -23,8 +24,9 @@ function App() {
     <ErrorBoundary showDetails={import.meta.env.DEV}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <LanguageProvider>
-            <TooltipProvider>
+          <ProfileProvider>
+            <LanguageProvider>
+              <TooltipProvider>
               <div className="min-h-screen bg-background">
                 <Suspense fallback={
                   <div className="min-h-screen flex items-center justify-center">
@@ -42,8 +44,9 @@ function App() {
                 </Suspense>
                 <Toaster />
               </div>
-            </TooltipProvider>
-          </LanguageProvider>
+              </TooltipProvider>
+            </LanguageProvider>
+          </ProfileProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

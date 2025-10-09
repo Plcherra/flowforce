@@ -1,4 +1,6 @@
 
+// TODO: Remove after migrating to useSchedulingConsolidated.
+// Deprecated: prefer '@/hooks/scheduling/useSchedulingConsolidated'.
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
