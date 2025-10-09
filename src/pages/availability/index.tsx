@@ -26,12 +26,19 @@ export default function EmployeeAvailabilityPage() {
   );
 }
 
+const hasId = (value: unknown): value is { id: string } =>
+  typeof value === 'object' &&
+  value !== null &&
+  'id' in value &&
+  typeof (value as { id: unknown }).id === 'string';
+
 function EmployeeAvailabilityContent() {
   const { profile, loading: profileLoading } = useProfile();
-  const { loading: schedulingLoading, fetchStaffAvailability } = useScheduling();
+  const { loading: schedulingLoading, refetchAll } = useScheduling();
   const queryClient = useQueryClient();
 
-  const employeeId = profile?.userId ?? (profile as any)?.id ?? null;
+  const fallbackProfileId = hasId(profile) ? profile.id : null;
+  const employeeId = profile?.userId ?? fallbackProfileId;
   const orgId = profile?.companyId ?? profile?.company_id ?? DEFAULT_ORG_ID;
 
   const weekStart = useMemo(() => {
@@ -91,9 +98,9 @@ function EmployeeAvailabilityContent() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ['availability-grid', employeeId, weekStart] });
-      await fetchStaffAvailability();
+      await refetchAll();
     },
-    [employeeId, fetchStaffAvailability, queryClient, weekStart],
+    [employeeId, queryClient, refetchAll, weekStart],
   );
 
   if (profileLoading || schedulingLoading) {

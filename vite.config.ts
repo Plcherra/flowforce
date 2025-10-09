@@ -3,6 +3,11 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+const reactQuillEntry = path.resolve(
+  __dirname,
+  "node_modules/react-quill/lib/index.js",
+);
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -17,6 +22,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react-quill": reactQuillEntry,
+      "react-quill/lib/index.js": reactQuillEntry,
     },
+  },
+  optimizeDeps: {
+    include: ['react-quill'],
   },
 }));

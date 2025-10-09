@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ScheduleGuardrailEngine } from '@/services/guardrail/scheduleGuardrailEngine';
 
 describe('ScheduleGuardrailEngine', () => {
-  it('allows actions when criteria and constraints pass', () => {
+  it('blocks starting the draft until blockers are cleared', () => {
     const engine = new ScheduleGuardrailEngine('restaurant-weekly-schedule-v1');
 
     const result = engine.evaluate({
@@ -19,7 +19,8 @@ describe('ScheduleGuardrailEngine', () => {
       },
     });
 
-    expect(result.status).toBe('allowed');
+    expect(result.status).toBe('blocked');
+    expect(result.detail?.reason).toMatch(/Cannot start drafting the schedule/);
   });
 
   it('blocks actions when numeric criteria are below target', () => {
@@ -38,6 +39,7 @@ describe('ScheduleGuardrailEngine', () => {
 
     expect(result.status).toBe('blocked');
     expect(result.detail?.criterionId).toBe('coverage-targets-met');
+    expect(result.detail?.reason).toMatch(/below target/);
   });
 
   it('blocks publishing when GM approval is missing', () => {
@@ -45,7 +47,7 @@ describe('ScheduleGuardrailEngine', () => {
 
     const result = engine.evaluate({
       action: 'publish_schedule',
-      actorRole: 'operations_manager',
+      actorRole: 'general_manager',
       stepId: 'gm-review-approval',
       completedCriteria: {
         'gm-approval': false,
@@ -55,9 +57,10 @@ describe('ScheduleGuardrailEngine', () => {
 
     expect(result.status).toBe('blocked');
     expect(result.detail?.criterionId).toBe('gm-approval');
+    expect(result.detail?.reason).toMatch(/Missing evidence/);
   });
 
-  it('returns warnings for non-blocking constraints', () => {
+  it('blocks when blocking constraints apply to the action', () => {
     const engine = new ScheduleGuardrailEngine();
 
     const result = engine.evaluate({
@@ -66,7 +69,7 @@ describe('ScheduleGuardrailEngine', () => {
       completedCriteria: {},
     });
 
-    expect(['allowed', 'warning']).toContain(result.status);
+    expect(result.status).toBe('blocked');
+    expect(result.detail?.constraintId).toBe('overtime-approval');
   });
 });
-

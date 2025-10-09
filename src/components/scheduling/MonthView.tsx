@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Schedule, SchedulingFilters } from '@/types/common';
 import { useState } from 'react';
-import { AddShiftDialog } from './AddShiftDialog';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
 
 interface MonthViewProps {
   schedules: Schedule[];
@@ -150,7 +150,7 @@ export function MonthView({ schedules, selectedDate, onSelectShift, filters, isM
       </div>
       {/* Centralized Add Shift Dialog */}
       {!hideShiftActions && (
-        <AddShiftDialog
+        <ShiftWizardDialog
           open={showAddShift}
           onOpenChange={(open) => {
             setShowAddShift(open);

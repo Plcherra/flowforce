@@ -15,7 +15,7 @@ interface CreateVendorVisitDialogProps {
 }
 
 export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisitDialogProps) {
-  const { schedules } = useScheduling();
+  const { shifts } = useScheduling();
   const { createVendorVisit, linkVisitToShifts } = useEvents();
 
   const [title, setTitle] = useState('Vendor Visit');
@@ -45,14 +45,14 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
     const overlaps = (aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) => {
       return aStart <= bEnd && bStart <= aEnd;
     };
-    return (schedules || []).filter((sh) => {
+    return (shifts || []).filter((sh) => {
       const shS = new Date(sh.start_time);
       const shE = new Date(sh.end_time);
       const timeOk = overlaps(s, e, shS, shE);
       const locOk = !location || (sh.location || '').toLowerCase().includes(location.toLowerCase());
       return timeOk && locOk;
     }).slice(0, 20);
-  }, [schedules, start, end, location]);
+  }, [shifts, start, end, location]);
 
   const toggleShift = (id: string, next: boolean | string) => {
     const v = Boolean(next);
@@ -143,4 +143,3 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
     </Dialog>
   );
 }
-

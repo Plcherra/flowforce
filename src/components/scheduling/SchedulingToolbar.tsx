@@ -23,7 +23,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { AddShiftDialog } from './AddShiftDialog';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { WeekTemplateDialog } from './WeekTemplateDialog';
 import { ImportShiftsDialog } from './ImportShiftsDialog';
 
@@ -161,7 +161,7 @@ export function SchedulingToolbar({ selectedDate, currentView }: SchedulingToolb
       </div>
 
       {/* Dialogs */}
-      <AddShiftDialog 
+      <ShiftWizardDialog 
         open={showAddShift}
         onOpenChange={setShowAddShift}
         selectedDate={selectedDate}

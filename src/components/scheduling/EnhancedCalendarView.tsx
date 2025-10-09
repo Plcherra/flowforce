@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   Calendar, 
   Grid3X3, 
   LayoutGrid, 
@@ -21,12 +21,14 @@ import { format, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } fr
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
+type CalendarViewMode = 'month' | 'week' | 'staff';
+
 export function EnhancedCalendarView() {
-  const { schedules, loading } = useScheduling();
+  const { shifts, loading } = useScheduling();
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'month' | 'week' | 'staff'>('month');
+  const [currentView, setCurrentView] = useState<CalendarViewMode>('month');
   const [filters, setFilters] = useState({
     positions: [],
     users: [],
@@ -55,18 +57,19 @@ export function EnhancedCalendarView() {
       case 'month':
         return format(selectedDate, 'MMMM yyyy');
       case 'week':
-      case 'staff':
+      case 'staff': {
         const weekStart = new Date(selectedDate);
         weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
         return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+      }
       default:
         return '';
     }
   };
 
-  const viewConfig = {
+  const viewConfig: Record<CalendarViewMode, { icon: typeof LayoutGrid; label: string }> = {
     month: { icon: LayoutGrid, label: 'Month' },
     week: { icon: Grid3X3, label: 'Week' },
     staff: { icon: Users, label: 'Staff Grid' }
@@ -112,14 +115,14 @@ export function EnhancedCalendarView() {
 
             {/* View Selector */}
             <div className="flex items-center gap-2">
-              {Object.entries(viewConfig).map(([view, config]) => {
+              {(Object.entries(viewConfig) as Array<[CalendarViewMode, { icon: typeof LayoutGrid; label: string }]>).map(([view, config]) => {
                 const Icon = config.icon;
                 return (
                   <Button
                     key={view}
                     variant={currentView === view ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setCurrentView(view as any)}
+                    onClick={() => setCurrentView(view)}
                     className="flex items-center gap-2"
                   >
                     <Icon className="h-4 w-4" />
@@ -137,7 +140,7 @@ export function EnhancedCalendarView() {
           {/* Stats bar */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
             <div className="flex items-center gap-2">
-              <Badge variant="outline">{schedules.length} shifts</Badge>
+              <Badge variant="outline">{shifts.length} shifts</Badge>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
@@ -171,7 +174,7 @@ export function EnhancedCalendarView() {
             <>
               {currentView === 'month' && (
                 <MonthView
-                  schedules={schedules}
+                  schedules={shifts}
                   selectedDate={selectedDate}
                   onSelectShift={setSelectedShift}
                   filters={filters}
@@ -190,7 +193,7 @@ export function EnhancedCalendarView() {
               
               {currentView === 'staff' && (
                 <WeekView
-                  schedules={schedules}
+                  schedules={shifts}
                   selectedDate={selectedDate}
                   onSelectShift={setSelectedShift}
                   filters={filters}

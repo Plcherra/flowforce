@@ -45,13 +45,17 @@ interface ShiftDetailsPanelProps {
 }
 
 export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) {
-  const { schedules, updateSchedule, deleteSchedule, vendorEvents } = useScheduling();
+  const {
+    shifts,
+    vendorEvents,
+    mutations: { updateSchedule, deleteSchedule },
+  } = useScheduling();
   const { getEventsForShift, toggleChecklistItem, createVendorVisit, linkVisitToShifts, updateEvent, deleteEvent } = useEvents();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [eventEdits, setEventEdits] = useState<Record<string, { title: string; location?: string | null }>>({});
 
-  const shift = schedules.find(s => s.id === shiftId);
+  const shift = shifts.find((s) => s.id === shiftId);
   const copilotRequirements = shift?.requirements as { copilot?: CopilotScheduleMetadata } | null | undefined;
   const copilotMeta = copilotRequirements?.copilot;
   const copilotWarnings: CopilotDraftWarning[] = copilotMeta?.warnings ?? [];

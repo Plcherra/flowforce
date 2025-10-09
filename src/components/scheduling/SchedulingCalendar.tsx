@@ -4,7 +4,6 @@ import { ScheduleHeader } from './ScheduleHeader';
 import { ShiftDetailsPanel } from './ShiftDetailsPanel';
 import { ViewSelector } from './ViewSelector';
 import { SchedulingFilters } from './SchedulingFilters';
-import { useSchedules } from '@/hooks/scheduling/useSchedules';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ViewType, Schedule } from '@/types/scheduling-unified';
 import { useScheduling } from '@/contexts/SchedulingContext';
@@ -17,8 +16,13 @@ interface SchedulingCalendarProps {
   onShiftSelect?: (shiftId: string | null) => void;
 }
 
-export function SchedulingCalendar({ onCreateShift, hideShiftActions = false, externalDetails = false, onShiftSelect }: SchedulingCalendarProps = {}) {
-  const { schedules, loading } = useScheduling();
+export function SchedulingCalendar({
+  onCreateShift,
+  hideShiftActions = false,
+  externalDetails = false,
+  onShiftSelect,
+}: SchedulingCalendarProps = {}) {
+  const { shifts, loading } = useScheduling();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<ViewType>(isMobile ? 'day' : 'week');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -32,7 +36,7 @@ export function SchedulingCalendar({ onCreateShift, hideShiftActions = false, ex
   });
 
   // Transform raw schedules to match expected interface
-  const transformedSchedules: Schedule[] = schedules;
+  const transformedSchedules = shifts as unknown as Schedule[];
 
   const { events } = useEvents();
   const overlayEvents = events.filter(e => e.type === 'vendor' || e.type === 'meeting' || e.type === 'event');
@@ -86,7 +90,7 @@ export function SchedulingCalendar({ onCreateShift, hideShiftActions = false, ex
         <div className="flex-1">
           <CalendarGrid
             currentView={currentView}
-            schedules={transformedSchedules as any}
+            schedules={transformedSchedules}
             selectedDate={selectedDate}
             onSelectShift={handleSelectShift}
             filters={filters}

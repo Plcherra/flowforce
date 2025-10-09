@@ -77,14 +77,6 @@ vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
   }),
 }));
 
-vi.mock('@/hooks/scheduling/useShiftTemplates', () => ({
-  useShiftTemplates: () => ({ templates: [], loading: false, refetchTemplates: vi.fn() }),
-}));
-
-vi.mock('@/hooks/scheduling/useWeekTemplates', () => ({
-  useWeekTemplates: () => ({ templates: [], loading: false, refetchTemplates: vi.fn() }),
-}));
-
 vi.mock('@/hooks/useProfile', () => ({
   useProfile: () => ({
     profile: {
@@ -120,18 +112,17 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 function TestHarness() {
-  const { shifts, assignUserToShift, unassignUserFromShift } = useScheduling();
-  const assignments = shifts[0]?.assignments ?? [];
+  const { shifts, mutations } = useScheduling();
   return (
     <div>
-      <div data-testid="assignment-count">{assignments.length}</div>
-      <button data-testid="assign" onClick={() => assignUserToShift('shift-1', 'user-100')}>assign</button>
-      <button data-testid="unassign" onClick={() => unassignUserFromShift('shift-1', 'user-100')}>unassign</button>
+      <div data-testid="shift-count">{shifts.length}</div>
+      <button data-testid="assign" onClick={() => mutations.assign('shift-1', 'user-100')}>assign</button>
+      <button data-testid="unassign" onClick={() => mutations.unassign('shift-1', 'user-100')}>unassign</button>
     </div>
   );
 }
 
-describe('SchedulingContext optimistic assignments', () => {
+describe('SchedulingContext mutations passthrough', () => {
   beforeEach(() => {
     mocks.assignMock.mockClear();
     mocks.unassignMock.mockClear();
@@ -142,21 +133,20 @@ describe('SchedulingContext optimistic assignments', () => {
     cleanup();
   });
 
-  test('assign/unassign reflects immediately', async () => {
+  test('assign/unassign delegates to consolidated hook', async () => {
     render(
       <SchedulingProvider>
         <TestHarness />
       </SchedulingProvider>
     );
 
-    expect(screen.getByTestId('assignment-count').textContent).toBe('0');
+    expect(screen.getByTestId('shift-count').textContent).toBe('1');
 
     fireEvent.click(screen.getByTestId('assign'));
-
-    expect(screen.getByTestId('assignment-count').textContent).toBe('1');
+    await waitFor(() => expect(mocks.assignMock).toHaveBeenCalledWith('shift-1', 'user-100'));
 
     fireEvent.click(screen.getByTestId('unassign'));
 
-    expect(screen.getByTestId('assignment-count').textContent).toBe('0');
+    await waitFor(() => expect(mocks.unassignMock).toHaveBeenCalledWith('shift-1', 'user-100'));
   });
 });

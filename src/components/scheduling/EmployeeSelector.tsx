@@ -8,15 +8,18 @@ import { Check, Plus, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { cn } from '@/lib/utils';
+import type { AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
 
 interface EmployeeSelectorProps {
   shiftId: string;
-  selectedEmployees: any[];
+  selectedEmployees?: AssignmentWithUser[];
 }
 
 export function EmployeeSelector({ shiftId, selectedEmployees = [] }: EmployeeSelectorProps) {
   const { employees = [], loading, error } = useEmployees();
-  const { assignUserToShift, unassignUserFromShift } = useScheduling();
+  const {
+    mutations: { assign: assignUserToShift, unassign: unassignUserFromShift },
+  } = useScheduling();
   const [open, setOpen] = useState(false);
 
 

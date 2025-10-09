@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Users, Plus } from 'lucide-react';
 import { Schedule, SchedulingFilters, ScheduleAssignment } from '@/types/common';
 import { useState } from 'react';
-import { AddShiftDialog } from './AddShiftDialog';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor } from '@/utils/schedulingUtils';
 
 interface DayViewProps {
@@ -187,11 +187,7 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
       </div>
       {/* Centralized Add Shift Dialog */}
       {!hideShiftActions && (
-        <AddShiftDialog
-          open={showAddShift}
-          onOpenChange={setShowAddShift}
-          selectedDate={selectedDate}
-        />
+        <ShiftWizardDialog open={showAddShift} onOpenChange={setShowAddShift} selectedDate={selectedDate} />
       )}
     </div>
   );

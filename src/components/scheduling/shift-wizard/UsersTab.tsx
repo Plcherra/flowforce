@@ -5,25 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { getReplacementCandidates } from '@/services/scheduling/replacement';
 import type { Employee } from '@/hooks/useEmployees';
+import type { ShiftWizardFormData } from './types';
 
 type UsersTabProps = {
   employees: Employee[];
   employeesLoading: boolean;
   getEmployeesByPosition: (positionId: string) => Employee[];
   getEmployeeFullName: (employee: Employee) => string;
-  formData: {
-    assigned_users: string[];
-    job_position_id?: string;
-    required_level?: number;
-  };
-  setFormData: Dispatch<SetStateAction<{
-    assigned_users: string[];
-    job_position_id?: string;
-    required_level?: number;
-  }>>;
+  formData: ShiftWizardFormData;
+  setFormData: Dispatch<SetStateAction<ShiftWizardFormData>>;
   isUserAvailableForWindow: (userId: string) => boolean;
 };
 
@@ -185,12 +177,12 @@ export function UsersTab({
                           type="button"
                           size="sm"
                           variant="ghost"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            assigned_users: prev.assigned_users.filter((id) => id !== userId),
-                          }))
-                        }
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              assigned_users: prev.assigned_users.filter((id) => id !== userId),
+                            }))
+                          }
                         >
                           <X className="h-4 w-4" />
                         </Button>

@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Filter, Plus, Settings, Users, Briefcase } from 'lucide-react';
 import { PositionManagementDialog } from '@/components/positions/PositionManagementDialog';
 import { UserPositionAssignment } from '@/components/positions/UserPositionAssignment';
-import { AddShiftDialog } from './AddShiftDialog';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
 
 interface EnhancedScheduleHeaderProps {
   dateRangeText: string;
@@ -68,12 +68,12 @@ export function EnhancedScheduleHeader({
             <span className="hidden lg:inline">{showFilters ? 'Hide' : 'Show'} Filters</span>
           </Button>
           
-          <AddShiftDialog selectedDate={selectedDate}>
+          <ShiftWizardDialog selectedDate={selectedDate}>
             <Button size={isMobile ? "sm" : "sm"} className="flex-1 lg:flex-initial">
               <Plus className="h-4 w-4 lg:mr-2" />
               <span className="hidden lg:inline">Add Shift</span>
             </Button>
-          </AddShiftDialog>
+          </ShiftWizardDialog>
         </div>
       </div>
 

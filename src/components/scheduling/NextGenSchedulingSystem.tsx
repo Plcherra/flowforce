@@ -36,14 +36,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
   const [showChecklist, setShowChecklist] = useState(false);
   const [showAutoScheduler, setShowAutoScheduler] = useState(false);
   const { profile } = useProfile();
-  const {
-    shifts,
-    assignments,
-    timeOffRequests,
-    vendorEvents,
-    weekRange,
-    error: schedulingError,
-  } = useScheduling();
+  const { shifts, assignments, timeOff, vendorEvents, weekRange, error: schedulingError } = useScheduling();
 
   const isManager = useMemo(() => {
     const role = (profile?.role ?? '').toLowerCase();
@@ -60,7 +53,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     counts: {
       shifts: shifts.length,
       assignments: assignments.length,
-      timeOff: timeOffRequests.length,
+      timeOff: timeOff.length,
       vendorEvents: vendorEvents.length,
     },
   };

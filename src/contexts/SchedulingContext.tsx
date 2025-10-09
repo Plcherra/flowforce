@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -11,66 +11,63 @@ import {
   type VendorEventUpsertInput,
   type VendorEventWithMetadata,
 } from '@/hooks/scheduling/useSchedulingConsolidated';
-import { useShiftTemplates } from '@/hooks/scheduling/useShiftTemplates';
-import { useWeekTemplates } from '@/hooks/scheduling/useWeekTemplates';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-interface SchedulingContextType {
-  shifts: ShiftWithAssignments[];
-  schedules: ShiftWithAssignments[];
-  assignments: AssignmentWithUser[];
-  timeOffRequests: TimeOffWithUser[];
-  staffAvailability: UnavailabilityWithUser[];
-  unavailability: UnavailabilityWithUser[];
-  vendorEvents: VendorEventWithMetadata[];
-  shiftTemplates: Tables<'shift_templates'>[];
-  weekTemplates: Tables<'week_templates'>[];
-  loading: boolean;
-  error: string | null;
-  weekRange: { start: Date; end: Date };
-  isEmptyShifts: boolean;
-  isEmptyAssignments: boolean;
-  isEmptyTimeOff: boolean;
-  isEmptyUnavailability: boolean;
-  isEmptyVendorEvents: boolean;
-  isEmptyShiftTemplates: boolean;
-  isEmptyWeekTemplates: boolean;
-  refetchAll: () => Promise<void>;
-  fetchSchedules: () => Promise<void>;
-  fetchAssignments: () => Promise<void>;
-  fetchTimeOffRequests: () => Promise<void>;
-  fetchStaffAvailability: () => Promise<void>;
-  fetchShiftTemplates: () => Promise<void>;
-  fetchWeekTemplates: () => Promise<void>;
-  createShift: (payload: Omit<TablesInsert<'schedules'>, 'company_id' | 'created_by'>) => Promise<Tables<'schedules'> | null>;
-  createSchedule: (payload: Omit<TablesInsert<'schedules'>, 'company_id' | 'created_by'>) => Promise<Tables<'schedules'> | null>;
-  updateShift: (id: string, updates: TablesUpdate<'schedules'>) => Promise<Tables<'schedules'> | null>;
+type ShiftInsertPayload = Omit<TablesInsert<'schedules'>, 'company_id' | 'created_by'>;
+
+type SchedulingMutations = {
+  createSchedule: (payload: ShiftInsertPayload) => Promise<Tables<'schedules'> | null>;
   updateSchedule: (id: string, updates: TablesUpdate<'schedules'>) => Promise<Tables<'schedules'> | null>;
-  deleteShift: (id: string) => Promise<boolean>;
   deleteSchedule: (id: string) => Promise<boolean>;
-  assignUserToShift: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
-  unassignUserFromShift: (shiftId: string, userId: string) => Promise<boolean>;
   assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
   createVendorEvent: (payload: VendorEventUpsertInput) => Promise<VendorEventWithMetadata | null>;
-  upsertVendorEvent: (payload: VendorEventUpsertInput) => Promise<VendorEventWithMetadata | null>;
+  deleteVendorEvent: (id: string) => Promise<boolean>;
+  autoGenerateWeek: (params: { weekStart: string; preferences?: Record<string, unknown> }) => Promise<boolean>;
+  clearWeek: (params: { weekStart: string; weekEnd: string }) => Promise<boolean>;
+  addUnavailability: (payload: { userId: string; start: string; end: string; reason?: string | null }) => Promise<boolean>;
+  requestTimeOff: (payload: {
+    userId: string;
+    startDate: string;
+    endDate: string;
+    type: 'vacation' | 'sick' | 'personal' | 'other';
+    reason?: string | null;
+  }) => Promise<boolean>;
+  bulkCreateShifts: (payloads: ShiftInsertPayload[]) => Promise<boolean>;
+  copyWeek: (params: { sourceWeekStart: string; targetWeekStart: string }) => Promise<boolean>;
+  publishWeek: (params: { weekStart: string; weekEnd: string; isPublished: boolean }) => Promise<boolean>;
+  generateRecommendations: (scheduleId: string) => Promise<AIRecommendation[]>;
   approveTimeOff: (requestId: string, notes?: string) => Promise<boolean>;
-  getSchedulesByDateRange: (startDate: Date, endDate: Date) => ShiftWithAssignments[];
-  getSchedulesForDate: (date: Date) => ShiftWithAssignments[];
-  getTotalHoursForPeriod: (startDate: Date, endDate: Date) => number;
+  upsertVendorEvent: (payload: VendorEventUpsertInput) => Promise<VendorEventWithMetadata | null>;
+};
+
+interface SchedulingContextType {
+  shifts: ShiftWithAssignments[];
+  assignments: AssignmentWithUser[];
+  timeOff: TimeOffWithUser[];
+  unavailability: UnavailabilityWithUser[];
+  vendorEvents: VendorEventWithMetadata[];
+  loading: boolean;
+  error: string | null;
+  refetchAll: () => Promise<void>;
+  weekRange: { start: Date; end: Date };
+  mutations: SchedulingMutations;
 }
+
+type AIRecommendation = {
+  name: string;
+  score: number;
+  reasons?: string[];
+};
 
 const SchedulingContext = createContext<SchedulingContextType | undefined>(undefined);
 
 interface SchedulingProviderProps {
   children: React.ReactNode;
 }
-
-type ShiftInsertPayload = Omit<TablesInsert<'schedules'>, 'company_id' | 'created_by'>;
-type ShiftUpdatePayload = TablesUpdate<'schedules'>;
 
 export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const { profile } = useProfile();
@@ -91,7 +88,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     timeOffRequests,
     unavailability,
     vendorEvents,
-    loading: consolidatedLoading,
+    loading,
     error,
     refetchAll,
     assign,
@@ -104,93 +101,61 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     end: weekRange.end,
   });
 
-  const {
-    templates: rawShiftTemplates,
-    loading: shiftTemplatesLoading,
-    refetchTemplates: refetchShiftTemplates,
-  } = useShiftTemplates();
-
-  const {
-    templates: rawWeekTemplates,
-    loading: weekTemplatesLoading,
-    refetchTemplates: refetchWeekTemplates,
-  } = useWeekTemplates();
-
-  const shiftTemplates = useMemo(
-    () =>
-      companyId
-        ? rawShiftTemplates.filter((template) => !template.company_id || template.company_id === companyId)
-        : rawShiftTemplates,
-    [companyId, rawShiftTemplates],
-  );
-
-  const weekTemplates = useMemo(
-    () =>
-      companyId
-        ? rawWeekTemplates.filter((template) => !template.company_id || template.company_id === companyId)
-        : rawWeekTemplates,
-    [companyId, rawWeekTemplates],
-  );
-
-  const loading = consolidatedLoading || shiftTemplatesLoading || weekTemplatesLoading;
-
-  type OptimisticDiff = {
-    add: AssignmentWithUser[];
-    remove: string[]; // user ids
-  };
-
-  const [optimisticAssignments, setOptimisticAssignments] = useState<Record<string, OptimisticDiff>>({});
-  const optimisticRef = useRef(optimisticAssignments);
-
-  useEffect(() => {
-    optimisticRef.current = optimisticAssignments;
-  }, [optimisticAssignments]);
-
-  const isEmptyShifts = !consolidatedLoading && shifts.length === 0;
-  const isEmptyAssignments = !consolidatedLoading && assignments.length === 0;
-  const isEmptyTimeOff = !consolidatedLoading && timeOffRequests.length === 0;
-  const isEmptyUnavailability = !consolidatedLoading && unavailability.length === 0;
-  const isEmptyVendorEvents = !consolidatedLoading && vendorEvents.length === 0;
-  const isEmptyShiftTemplates = !shiftTemplatesLoading && shiftTemplates.length === 0;
-  const isEmptyWeekTemplates = !weekTemplatesLoading && weekTemplates.length === 0;
-
   const ensureCompanyContext = useCallback(() => {
-    if (!companyId || !user?.id) {
+    if (!companyId) {
       throw new Error('Company context is not available for scheduling operations.');
     }
-  }, [companyId, user?.id]);
+  }, [companyId]);
 
-  const createShift = useCallback(
+  const createSchedule = useCallback(
     async (payload: ShiftInsertPayload) => {
-      ensureCompanyContext();
-      const result = await upsertShift(payload as ShiftUpsertInput);
-      if (result) {
+      try {
+        const result = await upsertShift(payload as ShiftUpsertInput);
+        if (result) {
+          toast({
+            title: 'Shift created',
+            description: 'New shift added to the schedule.',
+          });
+        }
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create shift';
         toast({
-          title: 'Shift created',
-          description: 'New shift added to the schedule.',
+          title: 'Shift creation failed',
+          description: message,
+          variant: 'destructive',
         });
+        return null;
       }
-      return result;
     },
-    [ensureCompanyContext, toast, upsertShift],
+    [toast, upsertShift],
   );
 
-  const updateShift = useCallback(
-    async (id: string, updates: ShiftUpdatePayload) => {
-      ensureCompanyContext();
-      const result = await upsertShift({ id, ...updates } as ShiftUpsertInput);
-      if (result) {
+  const updateSchedule = useCallback(
+    async (id: string, updates: TablesUpdate<'schedules'>) => {
+      try {
+        const result = await upsertShift({ id, ...updates } as ShiftUpsertInput);
+        if (result) {
+          toast({
+            title: 'Shift updated',
+            description: 'Shift details saved successfully.',
+          });
+        }
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to update shift';
         toast({
-          title: 'Shift updated',
-          description: 'Shift details saved successfully.',
+          title: 'Shift update failed',
+          description: message,
+          variant: 'destructive',
         });
+        return null;
       }
-      return result;
     },
-    [ensureCompanyContext, toast, upsertShift],
+    [toast, upsertShift],
   );
 
-  const deleteShift = useCallback(
+  const deleteSchedule = useCallback(
     async (id: string) => {
       try {
         const { error: deleteError } = await supabase.from('schedules').delete().eq('id', id);
@@ -214,138 +179,346 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     [refetchAll, toast],
   );
 
-  const clearOptimisticEntry = useCallback((shiftId: string) => {
-    setOptimisticAssignments((prev) => {
-      const { [shiftId]: _removed, ...rest } = prev;
-      return rest;
-    });
-  }, []);
-
-  const applyOptimistic = useCallback(
-    (next: (current: Record<string, OptimisticDiff>) => Record<string, OptimisticDiff>) =>
-      setOptimisticAssignments((prev) => next(prev)),
-    [],
-  );
-
-  const assignUserToShift = useCallback(
-    async (shiftId: string, userId: string, status: string = 'assigned') => {
-      const optimisticAssignment: AssignmentWithUser = {
-        id: `optimistic-${shiftId}-${userId}`,
-        schedule_id: shiftId,
-        user_id: userId,
-        status,
-        assigned_at: new Date().toISOString(),
-        assigned_by: profile?.userId ?? null,
-        confirmed_at: null,
-        user: null,
-      };
-
-      const previous = optimisticRef.current[shiftId];
-
-      applyOptimistic((prev) => {
-        const current = prev[shiftId] ?? { add: [], remove: [] };
-        const filteredAdd = current.add.filter((entry) => entry.user_id !== userId);
-        const filteredRemove = current.remove.filter((id) => id !== userId);
-        return {
-          ...prev,
-          [shiftId]: {
-            add: [...filteredAdd, optimisticAssignment],
-            remove: filteredRemove,
-          },
-        };
-      });
-
-      try {
-        const success = await assign(shiftId, userId, status);
-        if (!success) {
-          throw new Error('Assignment failed');
-        }
-        await refetchAll();
-        clearOptimisticEntry(shiftId);
-        return true;
-      } catch (err) {
-        applyOptimistic((prev) => {
-          if (!previous) {
-            const { [shiftId]: _current, ...rest } = prev;
-            return rest;
-          }
-          return {
-            ...prev,
-            [shiftId]: previous,
-          };
-        });
-        toast({
-          title: 'Assignment failed',
-          description: err instanceof Error ? err.message : 'Unable to assign teammate to shift.',
-          variant: 'destructive',
-        });
-        return false;
-      }
-    },
-    [applyOptimistic, assign, clearOptimisticEntry, profile?.userId, refetchAll, toast],
-  );
-
-  const unassignUserFromShift = useCallback(
-    async (shiftId: string, userId: string) => {
-      const previous = optimisticRef.current[shiftId];
-
-      applyOptimistic((prev) => {
-        const current = prev[shiftId] ?? { add: [], remove: [] };
-        const filteredAdd = current.add.filter((entry) => entry.user_id !== userId);
-        const removeSet = new Set(current.remove);
-        removeSet.add(userId);
-        return {
-          ...prev,
-          [shiftId]: {
-            add: filteredAdd,
-            remove: Array.from(removeSet),
-          },
-        };
-      });
-
-      try {
-        const success = await unassign(shiftId, userId);
-        if (!success) {
-          throw new Error('Unassignment failed');
-        }
-        await refetchAll();
-        clearOptimisticEntry(shiftId);
-        return true;
-      } catch (err) {
-        applyOptimistic((prev) => {
-          if (!previous) {
-            const { [shiftId]: _current, ...rest } = prev;
-            return rest;
-          }
-          return {
-            ...prev,
-            [shiftId]: previous,
-          };
-        });
-        toast({
-          title: 'Unassign failed',
-          description: err instanceof Error ? err.message : 'Unable to unassign teammate from shift.',
-          variant: 'destructive',
-        });
-        return false;
-      }
-    },
-    [applyOptimistic, clearOptimisticEntry, refetchAll, toast, unassign],
-  );
-
   const createVendorEvent = useCallback(
     async (payload: VendorEventUpsertInput) => {
-      ensureCompanyContext();
-      const event = await upsertVendorEvent({ ...payload, company_id: companyId! });
-      if (event) {
+      try {
+        ensureCompanyContext();
+        const event = await upsertVendorEvent({ ...payload, company_id: companyId! });
+        if (event) {
+          toast({
+            title: 'Vendor visit scheduled',
+            description: 'Vendor event has been created.',
+          });
+        }
+        return event;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to schedule vendor event';
         toast({
-          title: 'Vendor visit scheduled',
-          description: 'Vendor event has been created.',
+          title: 'Vendor scheduling failed',
+          description: message,
+          variant: 'destructive',
         });
+        return null;
       }
-      return event;
     },
     [companyId, ensureCompanyContext, toast, upsertVendorEvent],
+  );
+
+  const deleteVendorEvent = useCallback(
+    async (id: string) => {
+      try {
+        ensureCompanyContext();
+        const { error: deleteError } = await supabase.from('vendor_event').delete().eq('id', id);
+        if (deleteError) throw deleteError;
+        await refetchAll();
+        toast({
+          title: 'Vendor visit removed',
+          description: 'Vendor event has been deleted.',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to delete vendor event';
+        toast({
+          title: 'Vendor removal failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [ensureCompanyContext, refetchAll, toast],
+  );
+
+  const autoGenerateWeek = useCallback(
+    async (params: { weekStart: string; preferences?: Record<string, unknown> }) => {
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('ai-scheduling-assistant', {
+          body: {
+            action: 'auto_schedule',
+            data: {
+              companyId: companyId ?? 'current',
+              weekStart: params.weekStart,
+              preferences: params.preferences ?? { balance: true, fairness: true },
+            },
+          },
+        });
+
+        if (fnError) throw fnError;
+
+        await refetchAll();
+        toast({
+          title: 'AI schedule generated',
+          description: data?.schedule?.shifts?.length
+            ? `${data.schedule.shifts.length} shifts created`
+            : 'Schedule optimization completed.',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to generate schedule';
+        toast({
+          title: 'Auto-scheduling failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [companyId, refetchAll, toast],
+  );
+
+  const bulkCreateShifts = useCallback(
+    async (payloads: ShiftInsertPayload[]) => {
+      if (!payloads.length) return true;
+
+      try {
+        await Promise.all(payloads.map((payload) => upsertShift(payload as ShiftUpsertInput)));
+        toast({
+          title: 'Shifts created',
+          description: `${payloads.length} shift${payloads.length === 1 ? '' : 's'} added to the schedule.`,
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create shifts';
+        toast({
+          title: 'Shift creation failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [toast, upsertShift],
+  );
+
+  const copyWeek = useCallback(
+    async (params: { sourceWeekStart: string; targetWeekStart: string }) => {
+      try {
+        ensureCompanyContext();
+        const sourceStart = new Date(params.sourceWeekStart);
+        const sourceEnd = new Date(sourceStart);
+        sourceEnd.setDate(sourceEnd.getDate() + 7);
+        const targetStart = new Date(params.targetWeekStart);
+        const offset = targetStart.getTime() - sourceStart.getTime();
+
+        const { data, error: queryError } = await supabase
+          .from('schedules')
+          .select('*')
+          .eq('company_id', companyId)
+          .gte('start_time', sourceStart.toISOString())
+          .lt('start_time', sourceEnd.toISOString());
+
+        if (queryError) throw queryError;
+
+        const payloads =
+          data
+            ?.filter((row) => row.start_time && row.end_time)
+            .map<ShiftInsertPayload>((row) => {
+              const start = new Date(row.start_time!);
+              const end = new Date(row.end_time!);
+              const nextStart = new Date(start.getTime() + offset);
+              const nextEnd = new Date(end.getTime() + offset);
+              return {
+                title: row.title ?? 'Shift',
+                role: row.role,
+                color: row.color ?? '#3b82f6',
+                start_time: nextStart.toISOString(),
+                end_time: nextEnd.toISOString(),
+                location: row.location ?? '',
+                is_all_day: row.is_all_day ?? false,
+                timezone: row.timezone ?? 'UTC',
+                required_headcount: row.required_headcount ?? 1,
+                notes: row.notes ?? null,
+                break_minutes: row.break_minutes ?? 0,
+                hourly_rate: row.hourly_rate ?? null,
+                is_published: false,
+                is_template: false,
+                template_id: null,
+                position_id: row.position_id ?? null,
+                status: row.status ?? 'scheduled',
+                user_id: null,
+                requirements: row.requirements ?? [],
+              };
+            }) ?? [];
+
+        await bulkCreateShifts(payloads);
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to copy week';
+        toast({
+          title: 'Copy failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [bulkCreateShifts, companyId, ensureCompanyContext, toast],
+  );
+
+  const clearWeek = useCallback(
+    async (params: { weekStart: string; weekEnd: string }) => {
+      try {
+        const { error: schedulesError } = await supabase
+          .from('schedules')
+          .delete()
+          .gte('start_time', params.weekStart)
+          .lt('start_time', params.weekEnd);
+        if (schedulesError) throw schedulesError;
+
+        const { error: vendorsError } = await supabase
+          .from('vendor_event')
+          .delete()
+          .gte('event_date', params.weekStart)
+          .lt('event_date', params.weekEnd);
+        if (vendorsError) throw vendorsError;
+
+        await refetchAll();
+        toast({
+          title: 'Week cleared',
+          description: 'Shifts and vendor events removed.',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to clear week';
+        toast({
+          title: 'Clear failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [refetchAll, toast],
+  );
+
+  const publishWeek = useCallback(
+    async (params: { weekStart: string; weekEnd: string; isPublished: boolean }) => {
+      try {
+        ensureCompanyContext();
+        const { error: updateError } = await supabase
+          .from('schedules')
+          .update({ is_published: params.isPublished })
+          .eq('company_id', companyId)
+          .gte('start_time', params.weekStart)
+          .lt('start_time', params.weekEnd);
+        if (updateError) throw updateError;
+        await refetchAll();
+        toast({
+          title: params.isPublished ? 'Week published' : 'Week unpublished',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to update publication status';
+        toast({
+          title: 'Action failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [companyId, ensureCompanyContext, refetchAll, toast],
+  );
+
+  const addUnavailability = useCallback(
+    async (payload: { userId: string; start: string; end: string; reason?: string | null }) => {
+      try {
+        const { error: insertError } = await supabase.from('user_unavailability').insert({
+          user_id: payload.userId,
+          start_time: payload.start,
+          end_time: payload.end,
+          reason: payload.reason ?? null,
+        });
+        if (insertError) throw insertError;
+        await refetchAll();
+        toast({
+          title: 'Unavailability added',
+          description: 'The unavailability has been recorded.',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to add unavailability';
+        toast({
+          title: 'Unavailability error',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [refetchAll, toast],
+  );
+
+  const requestTimeOff = useCallback(
+    async (payload: {
+      userId: string;
+      startDate: string;
+      endDate: string;
+      type: 'vacation' | 'sick' | 'personal' | 'other';
+      reason?: string | null;
+    }) => {
+      try {
+        const { error: insertError } = await supabase.from('time_off_requests').insert({
+          user_id: payload.userId,
+          start_date: payload.startDate,
+          end_date: payload.endDate,
+          type: payload.type,
+          reason: payload.reason ?? 'time off',
+          status: 'pending',
+          notes: null,
+          approved_by: null,
+          approved_at: null,
+        });
+        if (insertError) throw insertError;
+        await refetchAll();
+        toast({
+          title: 'Time off requested',
+          description: 'Time off request submitted.',
+        });
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to request time off';
+        toast({
+          title: 'Request failed',
+          description: message,
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    [refetchAll, toast],
+  );
+
+  const generateRecommendations = useCallback(
+    async (scheduleId: string) => {
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('ai-scheduling-assistant', {
+          body: {
+            action: 'generate_recommendations',
+            data: {
+              scheduleId,
+              companyId: companyId ?? 'current',
+            },
+          },
+        });
+
+        if (fnError) throw fnError;
+
+        const recommendations = Array.isArray(data?.recommendations)
+          ? (data.recommendations as AIRecommendation[])
+          : [];
+        return recommendations;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unable to fetch recommendations';
+        toast({
+          title: 'AI recommendations unavailable',
+          description: message,
+          variant: 'destructive',
+        });
+        return [];
+      }
+    },
+    [companyId, toast],
   );
 
   const approveTimeOff = useCallback(
@@ -382,148 +555,66 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     [refetchAll, toast, user?.id],
   );
 
-  const fetchSchedules = useCallback(async () => {
-    await refetchAll();
-  }, [refetchAll]);
-
-  const fetchAssignments = fetchSchedules;
-  const fetchTimeOff = fetchSchedules;
-  const fetchAvailability = fetchSchedules;
-
-  const fetchShiftTemplates = useCallback(async () => {
-    await refetchShiftTemplates();
-  }, [refetchShiftTemplates]);
-
-  const fetchWeekTemplates = useCallback(async () => {
-    await refetchWeekTemplates();
-  }, [refetchWeekTemplates]);
-
-  const getSchedulesByDateRange = useCallback(
-    (startDate: Date, endDate: Date) => {
-      const startDateValue = new Date(startDate);
-      const endDateValue = new Date(endDate);
-      return shifts.filter((shift) => {
-        const shiftDate = new Date(shift.start_time);
-        return shiftDate >= startDateValue && shiftDate <= endDateValue;
-      });
-    },
-    [shifts],
+  const mutations = useMemo<SchedulingMutations>(
+    () => ({
+      createSchedule,
+      updateSchedule,
+      deleteSchedule,
+      assign,
+      unassign,
+      createVendorEvent,
+      deleteVendorEvent,
+      autoGenerateWeek,
+      clearWeek,
+      addUnavailability,
+      requestTimeOff,
+      bulkCreateShifts,
+      copyWeek,
+      publishWeek,
+      generateRecommendations,
+      approveTimeOff,
+      upsertVendorEvent,
+    }),
+    [
+      addUnavailability,
+      approveTimeOff,
+      assign,
+      autoGenerateWeek,
+      bulkCreateShifts,
+      clearWeek,
+      copyWeek,
+      createSchedule,
+      createVendorEvent,
+      deleteSchedule,
+      deleteVendorEvent,
+      generateRecommendations,
+      publishWeek,
+      requestTimeOff,
+      unassign,
+      updateSchedule,
+      upsertVendorEvent,
+    ],
   );
 
-  const getSchedulesForDate = useCallback(
-    (date: Date) => {
-      const startDateValue = new Date(date);
-      startDateValue.setHours(0, 0, 0, 0);
-      const endDateValue = new Date(date);
-      endDateValue.setHours(23, 59, 59, 999);
-      return getSchedulesByDateRange(startDateValue, endDateValue);
-    },
-    [getSchedulesByDateRange],
-  );
-
-  const getTotalHoursForPeriod = useCallback(
-    (startDate: Date, endDate: Date) => {
-      const relevantShifts = getSchedulesByDateRange(startDate, endDate);
-      return relevantShifts.reduce((total, shift) => {
-        const startValue = new Date(shift.start_time);
-        const endValue = new Date(shift.end_time);
-        const hours = (endValue.getTime() - startValue.getTime()) / (1000 * 60 * 60);
-        return total + Math.max(hours, 0);
-      }, 0);
-    },
-    [getSchedulesByDateRange],
-  );
-
-  const effectiveShifts = useMemo(() => {
-    if (!Object.keys(optimisticAssignments).length) return shifts;
-    return shifts.map((shift) => {
-      const diff = optimisticAssignments[shift.id];
-      if (!diff) return shift;
-      const removeSet = new Set(diff.remove);
-      let updated = shift.assignments.filter((assignment) => !removeSet.has(assignment.user_id ?? ''));
-      diff.add.forEach((assignment) => {
-        if (!updated.some((existing) => existing.user_id === assignment.user_id)) {
-          updated = [...updated, assignment];
-        }
-      });
-      return { ...shift, assignments: updated };
-    });
-  }, [optimisticAssignments, shifts]);
-
-  const effectiveAssignments = useMemo(() => {
-    if (!Object.keys(optimisticAssignments).length) return assignments;
-    const removalsByShift = new Map<string, Set<string>>();
-    const additions: AssignmentWithUser[] = [];
-
-    Object.entries(optimisticAssignments).forEach(([shiftId, diff]) => {
-      if (diff.remove.length > 0) {
-        removalsByShift.set(shiftId, new Set(diff.remove));
-      }
-      additions.push(...diff.add);
-    });
-
-    const filtered = assignments.filter((assignment) => {
-      const shiftId = assignment.schedule_id ?? '';
-      const userId = assignment.user_id ?? '';
-      const removeSet = removalsByShift.get(shiftId);
-      if (removeSet?.has(userId)) return false;
-      return true;
-    });
-
-    return [...filtered, ...additions];
-  }, [assignments, optimisticAssignments]);
-
-  const contextValue: SchedulingContextType = {
-    shifts: effectiveShifts,
-    schedules: effectiveShifts,
-    assignments: effectiveAssignments,
-    timeOffRequests,
-    staffAvailability: unavailability,
+  const value: SchedulingContextType = {
+    shifts,
+    assignments,
+    timeOff: timeOffRequests,
     unavailability,
     vendorEvents,
-    shiftTemplates,
-    weekTemplates,
     loading,
     error,
-    weekRange,
-    isEmptyShifts,
-    isEmptyAssignments,
-    isEmptyTimeOff,
-    isEmptyUnavailability,
-    isEmptyVendorEvents,
-    isEmptyShiftTemplates,
-    isEmptyWeekTemplates,
     refetchAll,
-    fetchSchedules,
-    fetchAssignments,
-    fetchTimeOffRequests: fetchTimeOff,
-    fetchStaffAvailability: fetchAvailability,
-    fetchShiftTemplates,
-    fetchWeekTemplates,
-    createShift,
-    createSchedule: createShift,
-    updateShift,
-    updateSchedule: updateShift,
-    deleteShift,
-    deleteSchedule: deleteShift,
-    assignUserToShift,
-    unassignUserFromShift,
-    assign: assignUserToShift,
-    unassign: unassignUserFromShift,
-    createVendorEvent,
-    upsertVendorEvent,
-    approveTimeOff,
-    getSchedulesByDateRange,
-    getSchedulesForDate,
-    getTotalHoursForPeriod,
+    weekRange,
+    mutations,
   };
 
-  return <SchedulingContext.Provider value={contextValue}>{children}</SchedulingContext.Provider>;
+  return <SchedulingContext.Provider value={value}>{children}</SchedulingContext.Provider>;
 }
 
 export const useScheduling = () => {
   const context = useContext(SchedulingContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useScheduling must be used within a SchedulingProvider');
   }
   return context;

@@ -12,7 +12,7 @@ interface AutoScheduleState {
 
 export function useAutoScheduler() {
   const { user } = useAuth();
-  const { fetchSchedules } = useScheduling();
+  const { refetchAll } = useScheduling();
   const { toast } = useToast();
   const [state, setState] = useState<AutoScheduleState>({ loading: false, error: null, lastResult: null });
 
@@ -27,7 +27,7 @@ export function useAutoScheduler() {
 
     try {
       const result = await runCopilotAutoSchedule(user.id, params);
-      await fetchSchedules();
+      await refetchAll();
       setState({ loading: false, error: null, lastResult: result });
 
       toast({
@@ -42,7 +42,7 @@ export function useAutoScheduler() {
       toast({ title: 'Auto-schedule failed', description: message, variant: 'destructive' });
       return { data: null, error: message } as const;
     }
-  }, [user, fetchSchedules, toast]);
+  }, [user, refetchAll, toast]);
 
   return {
     autoScheduleWeek,

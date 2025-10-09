@@ -1,81 +1,28 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, Users, Plus, Zap, BarChart3, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, addDays, startOfWeek, isSameDay, differenceInMinutes } from 'date-fns';
+import { Calendar } from 'lucide-react';
+import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useEmployees } from '@/hooks/useEmployees';
-import { useProfile } from '@/hooks/useProfile';
-import { WeekTemplateDialog } from './WeekTemplateDialog';
-import { AddShiftDialog } from './AddShiftDialog';
-import { ImportShiftsDialog } from './ImportShiftsDialog';
-import { CalendarToolbar } from './calendar/CalendarToolbar';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ShiftDetailsPanel } from './ShiftDetailsPanel';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
+import { useScheduleBoard } from '@/hooks/scheduling/useScheduleBoard';
+import { ScheduleToolbar } from './drag-drop/ScheduleToolbar';
+import { AssignmentPanel } from './drag-drop/AssignmentPanel';
+import type {
+  ShiftTemplate,
+  VendorPaletteItem,
+  PendingVendorEvent,
+  VendorFormState,
+  AIRecommendation,
+} from './drag-drop/types';
 
 interface DragDropScheduleCalendarProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
   locationFilter?: string;
-}
-
-interface ShiftTemplate {
-  id: string;
-  name: string;
-  role: string;
-  color: string;
-  startTime: string;
-  endTime: string;
-  minStaff: number;
-  maxStaff: number;
-}
-
-interface VendorPaletteItem {
-  id: string;
-  label: string;
-  vendorType: string;
-  color: string;
-  defaultDurationHours: number;
-}
-
-interface Schedule {
-  id: string;
-  title: string;
-  role: string;
-  color: string;
-  start_time: string;
-  end_time: string;
-  assignments?: Array<{
-    userId: string;
-    userName: string;
-    status: string;
-  }>;
-  assigned_users?: Array<{
-    user_profile: {
-      first_name: string;
-      last_name: string;
-    };
-  }>;
 }
 
 const roleTemplates: ShiftTemplate[] = [
@@ -108,34 +55,10 @@ const toSqlTime = (value: string) => {
 
 export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationFilter }: DragDropScheduleCalendarProps) {
   const { toast } = useToast();
-  const {
-    shifts,
-    timeOffRequests,
-    unavailability: unavailabilityList,
-    vendorEvents,
-    loading,
-    createSchedule,
-    updateSchedule,
-    assign,
-    unassign,
-    createVendorEvent,
-    refetchAll,
-  } = useScheduling();
-  const { employees } = useEmployees();
-  const timeOff = timeOffRequests;
-  const schedules = shifts;
-  const { profile } = useProfile();
-  const companyId = profile?.company_id ?? null;
-
-  const [locations, setLocations] = useState<Array<{ id: string; name: string }>>([]);
   const [draggedVendor, setDraggedVendor] = useState<VendorPaletteItem | null>(null);
   const [vendorModalOpen, setVendorModalOpen] = useState(false);
-  const [pendingVendorEvent, setPendingVendorEvent] = useState<{
-    vendor: VendorPaletteItem;
-    start: Date;
-    end: Date;
-  } | null>(null);
-  const [vendorForm, setVendorForm] = useState({
+  const [pendingVendorEvent, setPendingVendorEvent] = useState<PendingVendorEvent | null>(null);
+  const [vendorForm, setVendorForm] = useState<VendorFormState>({
     locationId: '',
     notes: '',
     shiftId: '',
@@ -144,10 +67,9 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
   });
   const [draggedTemplate, setDraggedTemplate] = useState<ShiftTemplate | null>(null);
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
-  const [aiRecommendations, setAIRecommendations] = useState<any[]>([]);
+  const [aiRecommendations, setAIRecommendations] = useState<AIRecommendation[]>([]);
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [showShiftSheet, setShowShiftSheet] = useState(false);
-  const dragRef = useRef<HTMLDivElement>(null);
   // Simplify to a single "By Staff" view (no time view toggle)
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWeekTemplates, setShowWeekTemplates] = useState(false);
@@ -176,45 +98,43 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
   const [minimizedView, setMinimizedView] = useState(false);
   const [showDailyInfo, setShowDailyInfo] = useState(true);
   // Weekly summary moved to header; no footer bar
-  const [employeeQuery, setEmployeeQuery] = useState('');
 
-  const weekStart = startOfWeek(selectedDate);
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const hours = Array.from({ length: 17 }, (_, i) => i + 6); // 6 AM to 10 PM
-  const weekEnd = addDays(weekStart, 7);
-  const vendorEventsThisWeek = useMemo(() => {
-    return vendorEvents.filter((event) => {
-      const timestamp = event.event_date;
-      if (!timestamp) return false;
-      const eventDate = new Date(timestamp);
-      return eventDate >= weekStart && eventDate < weekEnd;
-    });
-  }, [vendorEvents, weekEnd, weekStart]);
+  const {
+    employees,
+    timeOffRequests,
+    unavailability: unavailabilityList,
+    vendorEvents,
+    vendorEventsThisWeek,
+    weekSchedules,
+    weekStart,
+    weekDays,
+    locations,
+    candidateVendorShifts,
+    unassignedShifts,
+    vendorEventsByShift,
+    disabledDates,
+    weekCsvContent,
+    weekCsvFilename,
+    loading,
+    actions,
+  } = useScheduleBoard({ selectedDate, locationFilter, pendingVendorEvent });
 
-  const candidateVendorShifts = useMemo(() => {
-    if (!pendingVendorEvent) return [] as Schedule[];
-    const eventStart = pendingVendorEvent.start;
-    const eventEnd = pendingVendorEvent.end;
-    return schedules
-      .filter((schedule: Schedule) => {
-        const scheduleStart = new Date(schedule.start_time);
-        const scheduleEnd = new Date(schedule.end_time);
-        return isSameDay(scheduleStart, eventStart) && scheduleStart < eventEnd && scheduleEnd > eventStart;
-      })
-      .sort((a: Schedule, b: Schedule) => {
-        const priorityRoles = ['supervisor', 'manager'];
-        const roleA = a.role?.toLowerCase?.() || '';
-        const roleB = b.role?.toLowerCase?.() || '';
-        const indexA = priorityRoles.indexOf(roleA);
-        const indexB = priorityRoles.indexOf(roleB);
-        if (indexA === indexB) {
-          return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
-        }
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        return indexA - indexB;
-      });
-  }, [pendingVendorEvent, schedules]);
+  const {
+    createSchedule,
+    updateSchedule,
+    assign,
+    unassign,
+    createVendorEvent,
+    addUnavailability: addUnavailabilityAction,
+    requestTimeOff: requestTimeOffAction,
+    bulkCreateShifts: bulkCreateShiftsAction,
+    generateRecommendations: generateRecommendationsAction,
+    refetchAll,
+    autoFillWeek: autoFillWeekAction,
+    copyPreviousWeek: copyPreviousWeekAction,
+    clearCurrentWeek: clearCurrentWeekAction,
+    publishWeekStatus: publishWeekStatusAction,
+  } = actions;
 
   useEffect(() => {
     if (!pendingVendorEvent) {
@@ -247,40 +167,6 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
     }
   }, [locations, vendorModalOpen]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadLocations = async () => {
-      if (!companyId) {
-        setLocations([]);
-        return;
-      }
-      const { data, error } = await supabase
-        .from('inv_locations')
-        .select('id, name')
-        .eq('company_id', companyId)
-        .order('name', { ascending: true });
-      if (error) {
-        console.error('Failed to load locations', error);
-        return;
-      }
-      if (isMounted) {
-        setLocations(data ?? []);
-      }
-    };
-
-    loadLocations();
-    return () => {
-      isMounted = false;
-    };
-  }, [companyId]);
-
-  // Filter schedules for current week
-  const filteredSchedules = schedules.filter(s => !locationFilter || (s.location || '') === locationFilter);
-  const weekSchedules = filteredSchedules.filter(schedule => {
-    const scheduleDate = new Date(schedule.start_time);
-    return weekDays.some(day => isSameDay(scheduleDate, day));
-  });
-
   const handleTemplateDragStart = (e: React.DragEvent, template: ShiftTemplate) => {
     setDraggedVendor(null);
     setDraggedTemplate(template);
@@ -298,80 +184,19 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
     e.dataTransfer.dropEffect = 'copy';
   };
 
-  const handleDrop = useCallback(async (e: React.DragEvent, day: Date, hour: number) => {
-    e.preventDefault();
+  const handleDropOnUserDay = useCallback(async (event: React.DragEvent, day: Date, userId: string) => {
+    event.preventDefault();
 
     if (draggedTemplate) {
-      const startTime = new Date(day);
-      startTime.setHours(hour, 0, 0, 0);
-      const endHour = parseInt(draggedTemplate.endTime.split(':')[0]);
-      const endTime = new Date(day);
-      endTime.setHours(endHour, 0, 0, 0);
-
-      try {
-        await createSchedule({
-          title: draggedTemplate.name,
-          role: draggedTemplate.role,
-          color: draggedTemplate.color,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          location: '',
-          is_all_day: false,
-          timezone: 'UTC',
-          required_headcount: draggedTemplate.minStaff,
-          notes: null,
-          break_minutes: 30,
-          hourly_rate: 15.0,
-          is_published: false,
-          is_template: false,
-          template_id: null,
-          position_id: null,
-          status: 'scheduled',
-          user_id: null,
-          requirements: [],
-        });
-
-        toast({
-          title: 'Shift created!',
-          description: `${draggedTemplate.name} added to ${format(day, 'EEE, MMM d')}`,
-        });
-      } catch (error) {
-        toast({
-          title: 'Error creating shift',
-          description: 'Please try again',
-          variant: 'destructive',
-        });
-      }
-
-      setDraggedTemplate(null);
-      return;
-    }
-
-    if (draggedVendor) {
-      const startTime = new Date(day);
-      startTime.setHours(hour, 0, 0, 0);
-      const endTime = new Date(startTime);
-      endTime.setHours(startTime.getHours() + draggedVendor.defaultDurationHours);
-      setPendingVendorEvent({ vendor: draggedVendor, start: startTime, end: endTime });
-      setVendorModalOpen(true);
-      setDraggedVendor(null);
-    }
-  }, [createSchedule, draggedTemplate, draggedVendor, toast]);
-
-  const handleDropOnUserDay = useCallback(async (e: React.DragEvent, day: Date, userId: string) => {
-    e.preventDefault();
-
-    if (draggedTemplate) {
-      const startHour = parseInt(draggedTemplate.startTime.split(':')[0]);
-      const endHour = parseInt(draggedTemplate.endTime.split(':')[0]);
-
+      const startHour = Number.parseInt(draggedTemplate.startTime.split(':')[0] ?? '9', 10);
+      const endHour = Number.parseInt(draggedTemplate.endTime.split(':')[0] ?? '17', 10);
       const startTime = new Date(day);
       startTime.setHours(startHour, 0, 0, 0);
       const endTime = new Date(day);
       endTime.setHours(endHour, 0, 0, 0);
 
       try {
-        const { data: newSchedule, error } = await createSchedule({
+        const newSchedule = await createSchedule({
           title: draggedTemplate.name,
           role: draggedTemplate.role,
           color: draggedTemplate.color,
@@ -391,20 +216,27 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
           status: 'scheduled',
           user_id: null,
           requirements: [],
-        } as any);
+        });
 
-        if (error || !newSchedule?.id) throw error || new Error('Failed to create shift');
+        if (!newSchedule?.id) {
+          throw new Error('Failed to create shift');
+        }
 
-        await assign(newSchedule.id, userId);
+        const success = await assign(newSchedule.id, userId);
+        if (!success) {
+          throw new Error('Unable to assign teammate to shift.');
+        }
+
+        await refetchAll();
 
         toast({
           title: 'Shift created and assigned!',
           description: `${draggedTemplate.name} → ${format(day, 'EEE, MMM d')}`,
         });
-      } catch (err) {
+      } catch (error) {
         toast({
           title: 'Error creating shift',
-          description: 'Please try again',
+          description: error instanceof Error ? error.message : 'Please try again',
           variant: 'destructive',
         });
       } finally {
@@ -422,34 +254,84 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
       setVendorModalOpen(true);
       setDraggedVendor(null);
     }
-  }, [assign, createSchedule, draggedTemplate, draggedVendor, toast]);
+  }, [assign, createSchedule, draggedTemplate, draggedVendor, refetchAll, toast]);
 
-  const getSchedulesForTimeSlot = (day: Date, hour: number) => {
-    return weekSchedules.filter(schedule => {
-      const scheduleStart = new Date(schedule.start_time);
-      const scheduleEnd = new Date(schedule.end_time);
-      const slotTime = new Date(day);
-      slotTime.setHours(hour, 0, 0, 0);
-      
-      return isSameDay(scheduleStart, day) && 
-             scheduleStart.getHours() <= hour && 
-             scheduleEnd.getHours() > hour;
-    });
-  };
+  const handleUnassignedDrop = useCallback(async (event: React.DragEvent, day: Date) => {
+    event.preventDefault();
 
-  const getDayStats = (day: Date) => {
-    const daySchedules = weekSchedules.filter(s => isSameDay(new Date(s.start_time), day));
-    const totalMinutes = daySchedules.reduce((sum, s: any) => {
-      const start = new Date(s.start_time);
-      const end = new Date(s.end_time);
-      return sum + Math.max(0, differenceInMinutes(end, start));
-    }, 0);
-    const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
-    const required = daySchedules.reduce((sum, s: any) => sum + (s.required_headcount || 1), 0);
-    const assigned = daySchedules.reduce((sum, s: any) => sum + ((s.assignments?.length) || 0), 0);
-    const ratio = required > 0 ? Math.min(1, assigned / required) : 0;
-    return { totalHours, required, assigned, ratio };
-  };
+    if (draggedTemplate) {
+      const startHour = Number.parseInt(draggedTemplate.startTime.split(':')[0] ?? '9', 10);
+      const endHour = Number.parseInt(draggedTemplate.endTime.split(':')[0] ?? '17', 10);
+      const startTime = new Date(day);
+      startTime.setHours(startHour, 0, 0, 0);
+      const endTime = new Date(day);
+      endTime.setHours(endHour, 0, 0, 0);
+
+      try {
+        const newSchedule = await createSchedule({
+          title: draggedTemplate.name,
+          role: draggedTemplate.role,
+          color: draggedTemplate.color,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          location: '',
+          is_all_day: false,
+          timezone: 'UTC',
+          required_headcount: draggedTemplate.minStaff,
+          notes: null,
+          break_minutes: 30,
+          hourly_rate: 15.0,
+          is_published: false,
+          is_template: false,
+          template_id: null,
+          position_id: null,
+          status: 'scheduled',
+          user_id: null,
+          requirements: [],
+        });
+
+        if (!newSchedule?.id) {
+          throw new Error('Failed to create shift');
+        }
+
+        await refetchAll();
+        toast({
+          title: 'Shift created!',
+          description: `${draggedTemplate.name} added to ${format(day, 'EEE, MMM d')}`,
+        });
+      } catch (error) {
+        toast({
+          title: 'Error creating shift',
+          description: error instanceof Error ? error.message : 'Please try again',
+          variant: 'destructive',
+        });
+      } finally {
+        setDraggedTemplate(null);
+      }
+      return;
+    }
+
+    if (draggedVendor) {
+      const startTime = new Date(day);
+      startTime.setHours(9, 0, 0, 0);
+      const endTime = new Date(startTime);
+      endTime.setHours(startTime.getHours() + draggedVendor.defaultDurationHours);
+      setPendingVendorEvent({ vendor: draggedVendor, start: startTime, end: endTime });
+      setVendorModalOpen(true);
+      setDraggedVendor(null);
+    }
+  }, [createSchedule, draggedTemplate, draggedVendor, refetchAll, toast]);
+
+  const handleBoardDrop = useCallback(
+    (event: React.DragEvent, day: Date, employeeId?: string) => {
+      if (employeeId) {
+        void handleDropOnUserDay(event, day, employeeId);
+      } else {
+        void handleUnassignedDrop(event, day);
+      }
+    },
+    [handleDropOnUserDay, handleUnassignedDrop],
+  );
 
   const openShiftDetails = (scheduleId: string) => {
     setSelectedShift(scheduleId);
@@ -457,146 +339,35 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
   };
 
   const generateAIRecommendations = async (scheduleId: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-scheduling-assistant', {
-        body: { 
-          action: 'generate_recommendations', 
-          data: { scheduleId, companyId: 'current' } 
-        }
-      });
-      
-      if (error) throw error;
-      setAIRecommendations(data.recommendations);
+    const recommendations = await generateRecommendationsAction(scheduleId);
+    if (recommendations.length > 0) {
+      setAIRecommendations(recommendations);
       setShowAIRecommendations(true);
       setSelectedShift(scheduleId);
-    } catch (error) {
-      toast({
-        title: "AI recommendations unavailable",
-        description: "Please try again later",
-        variant: "destructive",
-      });
     }
   };
 
-  const autoFillWeek = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-scheduling-assistant', {
-        body: { 
-          action: 'auto_schedule', 
-          data: { 
-            companyId: 'current',
-            weekStart: format(weekStart, 'yyyy-MM-dd'),
-            preferences: { balance: true, fairness: true }
-          } 
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "AI Schedule Generated!",
-        description: `Created ${data.schedule.shifts.length} optimized shifts`,
-      });
-    } catch (error) {
-      toast({
-        title: "Auto-scheduling failed",
-        description: "Please try manual scheduling",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const copyPreviousWeek = async () => {
-    const prevWeekStart = addDays(weekStart, -7);
-    const prevWeekDays = Array.from({ length: 7 }, (_, i) => addDays(prevWeekStart, i));
-    const prevWeekSchedules = filteredSchedules.filter(s => {
-      const d = new Date(s.start_time);
-      return prevWeekDays.some(day => isSameDay(d, day));
-    });
-    try {
-      await Promise.all(
-        prevWeekSchedules.map(async (s: any) => {
-          const start = new Date(s.start_time);
-          const end = new Date(s.end_time);
-          const newStart = addDays(start, 7);
-          const newEnd = addDays(end, 7);
-          await createSchedule({
-            ...s,
-            id: undefined as any,
-            start_time: newStart.toISOString(),
-            end_time: newEnd.toISOString(),
-            is_published: false,
-          } as any);
-        })
-      );
-      toast({ title: 'Copied previous week', description: `Duplicated ${prevWeekSchedules.length} shifts` });
-    } catch (e) {
-      toast({ title: 'Copy failed', description: 'Unable to copy previous week', variant: 'destructive' });
-    }
-  };
-
-  const clearWeek = async () => {
-    try {
-      await Promise.all(
-        weekSchedules.map(async (s: any) => {
-          if (s.assignments?.length) {
-            await Promise.all(
-              s.assignments.map((assignment: any) => unassign(s.id, assignment.user_id))
-            );
-          }
-          await supabase.from('schedules').delete().eq('id', s.id);
-        })
-      );
-      if (companyId) {
-        await supabase
-          .from('vendor_event')
-          .delete()
-          .eq('company_id', companyId)
-          .gte('event_date', format(weekStart, 'yyyy-MM-dd'))
-          .lt('event_date', format(weekEnd, 'yyyy-MM-dd'));
+  const handleTimeOffTypeChange = useCallback(
+    (value: string) => {
+      if (value === 'vacation' || value === 'sick' || value === 'personal' || value === 'other') {
+        setToType(value);
       }
-      await refetchAll();
-      toast({ title: 'Week cleared' });
-    } catch (e) {
-      toast({ title: 'Clear failed', variant: 'destructive' });
-    }
-  };
+    },
+    [setToType],
+  );
 
-  const publishWeek = async (published: boolean) => {
-    try {
-      await Promise.all(
-        weekSchedules.map((s: any) => updateSchedule(s.id, { is_published: published } as any))
-      );
-      toast({ title: published ? 'Week published' : 'Week unpublished' });
-    } catch (e) {
-      toast({ title: 'Action failed', variant: 'destructive' });
-    }
-  };
-
-  const exportWeekCsv = () => {
-    const rows = [
-      ['Title','Location','Start','End','Published','Required','Assigned'],
-      ...weekSchedules.map((s: any) => [
-        s.title || '',
-        s.location || '',
-        format(new Date(s.start_time), 'yyyy-MM-dd HH:mm'),
-        format(new Date(s.end_time), 'yyyy-MM-dd HH:mm'),
-        s.is_published ? 'Yes' : 'No',
-        s.required_headcount || 1,
-        s.assignments?.length || 0,
-      ])
-    ];
-    const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const exportWeekCsv = useCallback(() => {
+    if (!weekCsvContent) return;
+    const blob = new Blob([weekCsvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `schedule-week-${format(weekStart,'yyyy-MM-dd')}.csv`;
+    a.download = weekCsvFilename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [weekCsvContent, weekCsvFilename]);
 
   if (loading) {
     return (
@@ -623,358 +394,78 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full">
-      {/* Shift Templates Panel (toggleable) */}
-      {showTemplates && (
-      <Card className="lg:w-80 flex-shrink-0">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            Role Templates
-          </CardTitle>
-          <div className="flex gap-2">
-            <Button onClick={autoFillWeek} className="flex-1 text-xs">
-              <Zap className="h-3 w-3 mr-1" />
-              AI Fill Week
-            </Button>
-            <Button variant="outline" size="sm">
-              <BarChart3 className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await createVendorEvent({
-                    vendor_type: 'general',
-                    event_date: selectedDate.toISOString().split('T')[0],
-                    start_time: '09:00',
-                    end_time: '10:00',
-                    notes: 'Quick vendor visit',
-                  });
-                } catch (e) {
-                  toast({ title: 'Failed to log vendor visit', variant: 'destructive' });
-                }
-              }}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Vendor Visit
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {roleTemplates.map((template) => (
-            <div
-              key={template.id}
-              draggable
-              onDragStart={(e) => handleTemplateDragStart(e, template)}
-              className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
-              style={{ borderLeftColor: template.color, borderLeftWidth: '4px' }}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-sm">{template.name}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {template.role}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {template.startTime} - {template.endTime}
-                <Users className="h-3 w-3 ml-2" />
-                {template.minStaff}-{template.maxStaff}
-              </div>
-            </div>
-          ))}
-
-          <div className="pt-4 mt-4 border-t space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Vendor Visits</h3>
-              <Badge variant="outline">Drag to schedule</Badge>
-            </div>
-            {vendorPalette.map((vendor) => (
-              <div
-                key={vendor.id}
-                draggable
-                onDragStart={(e) => handleVendorDragStart(e, vendor)}
-                className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/40 transition-colors"
-                style={{ borderLeftColor: vendor.color, borderLeftWidth: '4px' }}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-sm">{vendor.label}</span>
-                  <Badge variant="secondary" className="text-[10px]" style={{ backgroundColor: vendor.color, color: '#fff' }}>
-                    Vendor
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Default duration · {vendor.defaultDurationHours}h
-                </p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      )}
+      <AssignmentPanel
+        showTemplates={showTemplates}
+        templates={roleTemplates}
+        vendors={vendorPalette}
+        onTemplateDragStart={handleTemplateDragStart}
+        onVendorDragStart={handleVendorDragStart}
+        onAutoFillWeek={autoFillWeekAction}
+        onQuickVendorVisit={async () => {
+          try {
+            await createVendorEvent({
+              vendor_type: 'general',
+              event_date: selectedDate.toISOString().split('T')[0],
+              start_time: '09:00',
+              end_time: '10:00',
+              notes: 'Quick vendor visit',
+            });
+          } catch (error) {
+            toast({ title: 'Failed to log vendor visit', variant: 'destructive' });
+          }
+        }}
+        showAIRecommendations={showAIRecommendations}
+        aiRecommendations={aiRecommendations}
+        onAssignFromAI={(recommendation) =>
+          toast({
+            title: 'Staff assigned!',
+            description: `${recommendation.name} has been assigned to this shift`,
+          })
+        }
+      />
 
       {/* Calendar Grid */}
       <Card className="flex-1">
-        <CalendarToolbar
+        <ScheduleToolbar
           weekStart={weekStart}
           selectedDate={selectedDate}
-          onDateChange={onDateChange}
           weekSchedules={weekSchedules}
           minimizedView={minimizedView}
-          setMinimizedView={setMinimizedView}
           showDailyInfo={showDailyInfo}
-          setShowDailyInfo={setShowDailyInfo}
-          onToggleTemplates={() => setShowTemplates(v => !v)}
+          onDateChange={onDateChange}
+          onToggleTemplates={() => setShowTemplates((value) => !value)}
           onOpenWeekTemplates={() => setShowWeekTemplates(true)}
-          onCopyPreviousWeek={copyPreviousWeek}
-          onAutoFillWeek={autoFillWeek}
-          onClearWeek={clearWeek}
-          onPublishWeek={publishWeek}
+          onCopyPreviousWeek={copyPreviousWeekAction}
+          onAutoFillWeek={autoFillWeekAction}
+          onClearWeek={clearCurrentWeekAction}
+          onPublishWeek={publishWeekStatusAction}
           onExportWeekCsv={exportWeekCsv}
-          onPrintWeek={() => window.print()}
           onOpenAddShift={() => setShowAddShift(true)}
           onOpenMultiAdd={() => setShowMultiAdd(true)}
           onOpenImportShifts={() => setShowImportShifts(true)}
           onOpenAddUnavailability={() => setShowAddUnavailability(true)}
           onOpenAddTimeOff={() => setShowAddTimeOff(true)}
+          onPrintWeek={() => window.print()}
+          setMinimizedView={setMinimizedView}
+          setShowDailyInfo={setShowDailyInfo}
         />
         <CardContent className="p-0">
-          {
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
-                {/* Header with days */}
-                <div className="grid grid-cols-8 border-b bg-background relative z-10">
-                  <div className="p-2 text-sm font-medium text-muted-foreground">
-                    <div className="flex flex-col gap-1">
-                      <span>Employee</span>
-                      <input
-                        className="w-full max-w-32 rounded border border-border px-2 py-1 text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-                        placeholder="Search users"
-                        value={employeeQuery}
-                        onChange={(e) => setEmployeeQuery(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  {weekDays.map((day) => (
-                    <div key={day.toISOString()} className="p-2 text-center border-l">
-                      <div className="font-medium text-sm">{format(day, 'EEE')}</div>
-                      <div className="text-xs text-muted-foreground">{format(day, 'MMM d')}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-end items-center gap-2 p-2 text-xs text-muted-foreground border-b">
-                  <span>Vendor visits this week:</span>
-                  <Badge variant="outline">{vendorEventsThisWeek.length}</Badge>
-                </div>
-
-                {weekSchedules.length === 0 ? (
-                  <div className="flex h-64 items-center justify-center border-l border-r border-b text-muted-foreground">
-                    <div className="text-center space-y-1">
-                      <h3 className="text-sm font-medium">No shifts scheduled this week</h3>
-                      <p className="text-xs">
-                        Drag a template onto a day to create the first shift.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Unassigned shifts row */}
-                    <div className="grid grid-cols-8 border-b bg-muted/20 relative z-0">
-                      <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center">
-                        Unassigned shifts
-                      </div>
-                  {weekDays.map((day) => {
-                    const unassigned = schedules.filter((s: any) => isSameDay(new Date(s.start_time), day) && (!s.assignments || s.assignments.length === 0));
-                    const unlinkedVendors = vendorEventsThisWeek.filter((event) => isSameDay(new Date(event.event_date), day) && !event.shift_id);
-                    return (
-                      <div key={`unassigned-${day.toISOString()}`} className="border-l border-r relative min-h-[48px] p-1">
-                        <div className="flex flex-wrap gap-1">
-                            {unassigned.map((u: any) => (
-                              <div 
-                                key={u.id} 
-                                className="relative z-10 rounded px-2 py-1 text-[11px] bg-background border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer" 
-                                title={u.start_time && u.end_time ? `${u.title || 'Shift'} - ${format(new Date(u.start_time), 'HH:mm')} to ${format(new Date(u.end_time), 'HH:mm')}` : 'Invalid shift time'}
-                                onClick={() => {
-                                  setSelectedShift(u.id);
-                                  setShowShiftSheet(true);
-                                }}
-                              >
-                                <div className="font-medium truncate">
-                                  {u.title || u.job_position?.name || 'Shift'}
-                                </div>
-                                <div className="text-xs opacity-75">
-                                  {u.start_time && u.end_time ? 
-                                    `${format(new Date(u.start_time), 'HH:mm')} - ${format(new Date(u.end_time), 'HH:mm')}` : 
-                                    'Invalid time'
-                                  }
-                                </div>
-                              </div>
-                            ))}
-                            {unlinkedVendors.map((event) => (
-                              <div
-                                key={event.id}
-                                className="relative z-10 rounded-full px-2 py-1 text-[10px] font-medium"
-                                style={{ backgroundColor: `${getVendorColor(event.vendor_type)}20`, color: getVendorColor(event.vendor_type) }}
-                              >
-                                Vendor · {getVendorLabel(event.vendor_type)}
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                    {/* Staff grid by day */}
-                    <div className="relative">
-                      {employees
-                        .filter(e => `${e.first_name} ${e.last_name}`.toLowerCase().includes(employeeQuery.toLowerCase()))
-                        .map((emp) => (
-                        <div key={emp.id} className="grid grid-cols-8 border-b min-h-[64px]">
-                          {/* Employee cell */}
-                          <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={emp.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {emp.first_name?.[0]}
-                                {emp.last_name?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="truncate">{emp.first_name} {emp.last_name}</span>
-                          </div>
-                          {weekDays.map((day) => {
-                            const shiftsForUserDay = schedules.filter((schedule: any) => {
-                              const isSame = isSameDay(new Date(schedule.start_time), day);
-                              const assigned = (schedule.assignments || []).some((a: any) => a.user_id === emp.id);
-                              return isSame && assigned;
-                            });
-                        const d = new Date(day);
-                        d.setHours(12, 0, 0, 0);
-
-                        const hasApprovedTimeOff = timeOff.some((t: any) => {
-                          if (t.user_id !== emp.id || t.status !== 'approved') return false;
-                          const start = new Date(t.start_date || t.start_time || t.created_at);
-                          const end = new Date(t.end_date || t.end_time || t.start_date || t.created_at);
-                          return d >= start && d <= end;
-                        });
-
-                        const hasUnavailability = unavailabilityList.some((item) => {
-                          if (item.user_id !== emp.id) return false;
-                          const start = new Date(item.start_time);
-                          const end = new Date(item.end_time);
-                          return d >= start && d <= end;
-                        });
-
-                        const isUnavailable = hasApprovedTimeOff || hasUnavailability;
-
-                            return (
-                              <div
-                                key={`${emp.id}-${day.toISOString()}`}
-                                className="border-l border-r relative min-h-[64px] hover:bg-muted/20 transition-colors p-1"
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDropOnUserDay(e, day, emp.id)}
-                              >
-                                 {isUnavailable && (
-                                   <div className="absolute inset-0 bg-red-100/80 text-red-700 text-[10px] flex items-start p-1 pointer-events-none z-5 border border-red-200">
-                                     Unavailable • All day
-                                   </div>
-                                 )}
-                                <div className="flex flex-wrap gap-1">
-                                {shiftsForUserDay.map((schedule: any) => {
-                                  const linkedVendors = vendorEventsThisWeek.filter((event) => event.shift_id === schedule.id);
-                                  return (
-                                  <div
-                                    key={schedule.id}
-                                    className="relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 bg-background border"
-                                    style={{ 
-                                      backgroundColor: (schedule.color || '#3b82f6') + '15',
-                                      borderLeft: `3px solid ${schedule.color || '#3b82f6'}`
-                                    }}
-                                    title={schedule.start_time && schedule.end_time ? `${schedule.title || 'Shift'} - ${format(new Date(schedule.start_time), 'HH:mm')} to ${format(new Date(schedule.end_time), 'HH:mm')}` : 'Invalid shift time'}
-                                    onClick={() => {
-                                      setSelectedShift(schedule.id);
-                                      setShowShiftSheet(true);
-                                    }}
-                                  >
-                                    <div className="font-medium truncate">
-                                      {schedule.title || schedule.job_position?.name || 'Shift'}
-                                    </div>
-                                    <div className="text-xs opacity-75">
-                                      {schedule.start_time && schedule.end_time ? 
-                                        `${format(new Date(schedule.start_time), 'HH:mm')} - ${format(new Date(schedule.end_time), 'HH:mm')}` : 
-                                        'Invalid time'
-                                      }
-                                    </div>
-                                    {linkedVendors.map((event) => (
-                                      <div
-                                        key={`${event.id}-chip`}
-                                        className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
-                                        style={{ backgroundColor: `${getVendorColor(event.vendor_type)}15`, color: getVendorColor(event.vendor_type) }}
-                                      >
-                                        Vendor · {getVendorLabel(event.vendor_type)}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  );
-                                })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          }
+          <WeekGrid
+            weekDays={weekDays}
+            employees={employees}
+            weekSchedules={weekSchedules}
+            unassignedShifts={unassignedShifts}
+            vendorEvents={vendorEventsThisWeek}
+            vendorEventsByShift={vendorEventsByShift}
+            disabledDates={disabledDates}
+            onShiftClick={openShiftDetails}
+            onDrop={handleBoardDrop}
+            onDragOver={handleDragOver}
+            getVendorLabel={getVendorLabel}
+            getVendorColor={getVendorColor}
+          />
         </CardContent>
       </Card>
-
-      {/* AI Recommendations Sidebar */}
-      {showAIRecommendations && (
-        <Card className="lg:w-80 flex-shrink-0 relative z-30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
-              AI Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {aiRecommendations.slice(0, 5).map((rec, index) => (
-              <div key={index} className="p-3 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">{rec.name}</span>
-                  <Badge variant={rec.score > 80 ? "default" : rec.score > 60 ? "secondary" : "outline"}>
-                    {rec.score}%
-                  </Badge>
-                </div>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  {rec.reasons?.map((reason: string, idx: number) => (
-                    <div key={idx}>• {reason}</div>
-                  ))}
-                </div>
-                <Button 
-                  size="sm" 
-                  className="w-full mt-2" 
-                  onClick={() => {
-                    // Assign user to shift logic here
-                    toast({
-                      title: "Staff assigned!",
-                      description: `${rec.name} has been assigned to this shift`,
-                    });
-                  }}
-                >
-                  Assign Staff
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Week Template Dialog */}
       <WeekTemplateDialog open={showWeekTemplates} onOpenChange={setShowWeekTemplates} selectedDate={selectedDate} />
@@ -989,7 +480,7 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
       )}
 
       {/* Add Shift Dialog */}
-      <AddShiftDialog open={showAddShift} onOpenChange={setShowAddShift} selectedDate={selectedDate} />
+      <ShiftWizardDialog open={showAddShift} onOpenChange={setShowAddShift} selectedDate={selectedDate} />
 
       {/* Import Shifts Dialog */}
       <ImportShiftsDialog open={showImportShifts} onOpenChange={setShowImportShifts} />
@@ -1039,42 +530,41 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
               <Button variant="outline" onClick={() => setShowMultiAdd(false)}>Cancel</Button>
               <Button
                 onClick={async () => {
-                  try {
-                    const startParts = multiStart.split(':');
-                    const endParts = multiEnd.split(':');
-                    for (const idx of multiDays) {
-                      const day = weekDays[idx];
-                      const start = new Date(day);
-                      start.setHours(parseInt(startParts[0]||'9'), parseInt(startParts[1]||'0'), 0, 0);
-                      const end = new Date(day);
-                      end.setHours(parseInt(endParts[0]||'17'), parseInt(endParts[1]||'0'), 0, 0);
-                      await createSchedule({
-                        title: multiTitle,
-                        role: 'Staff',
-                        color: '#3b82f6',
-                        start_time: start.toISOString(),
-                        end_time: end.toISOString(),
-                        location: locationFilter || '',
-                        is_all_day: false,
-                        timezone: 'UTC',
-                        required_headcount: multiHeadcount,
-                        notes: null,
-                        break_minutes: 30,
-                        hourly_rate: 15.0,
-                        is_published: false,
-                        is_template: false,
-                        template_id: null,
-                        position_id: null,
-                        status: 'scheduled',
-                        user_id: null,
-                        requirements: []
-                      } as any);
-                    }
-                    toast({ title: 'Shifts created', description: `${multiDays.length} day(s)` });
+                  const startParts = multiStart.split(':');
+                  const endParts = multiEnd.split(':');
+                  const payloads = multiDays.map((index) => {
+                    const day = weekDays[index];
+                    const start = new Date(day);
+                    start.setHours(Number.parseInt(startParts[0] ?? '9', 10), Number.parseInt(startParts[1] ?? '0', 10), 0, 0);
+                    const end = new Date(day);
+                    end.setHours(Number.parseInt(endParts[0] ?? '17', 10), Number.parseInt(endParts[1] ?? '0', 10), 0, 0);
+                    return {
+                      title: multiTitle,
+                      role: 'Staff',
+                      color: '#3b82f6',
+                      start_time: start.toISOString(),
+                      end_time: end.toISOString(),
+                      location: locationFilter ?? '',
+                      is_all_day: false,
+                      timezone: 'UTC',
+                      required_headcount: multiHeadcount,
+                      notes: null,
+                      break_minutes: 30,
+                      hourly_rate: 15.0,
+                      is_published: false,
+                      is_template: false,
+                      template_id: null,
+                      position_id: null,
+                      status: 'scheduled',
+                      user_id: null,
+                      requirements: [],
+                    } satisfies Parameters<typeof createSchedule>[0];
+                  });
+
+                  const success = await bulkCreateShiftsAction(payloads);
+                  if (success) {
                     setShowMultiAdd(false);
                     setMultiDays([]);
-                  } catch (e) {
-                    toast({ title: 'Failed to create shifts', description: 'Please try again', variant: 'destructive' });
                   }
                 }}
                 disabled={multiDays.length === 0}
@@ -1124,27 +614,19 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
               <Button variant="outline" onClick={() => setShowAddUnavailability(false)}>Cancel</Button>
               <Button
                 onClick={async () => {
-                  try {
-                    if (!uaUserId || !uaStart || !uaEnd) return;
-                    const { data: authResult } = await supabase.auth.getUser();
-                    await supabase.from('user_unavailability').insert({
-                      user_id: uaUserId,
-                      start_time: new Date(uaStart).toISOString(),
-                      end_time: new Date(uaEnd).toISOString(),
-                      reason: uaReason || 'unavailable',
-                      is_recurring: false,
-                      recurring_pattern: null,
-                      created_by: authResult?.user?.id ?? 'system',
-                    });
-                    await refetchAll();
-                    toast({ title: 'Unavailability added' });
+                  if (!uaUserId || !uaStart || !uaEnd) return;
+                  const success = await addUnavailabilityAction({
+                    userId: uaUserId,
+                    start: new Date(uaStart).toISOString(),
+                    end: new Date(uaEnd).toISOString(),
+                    reason: uaReason || null,
+                  });
+                  if (success) {
                     setShowAddUnavailability(false);
                     setUaUserId('');
                     setUaStart('');
                     setUaEnd('');
                     setUaReason('');
-                  } catch (e) {
-                    toast({ title: 'Failed to add unavailability', variant: 'destructive' });
                   }
                 }}
                 disabled={!uaUserId || !uaStart || !uaEnd}
@@ -1189,7 +671,7 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Type</Label>
-                <Select value={toType} onValueChange={(v) => setToType(v as any)}>
+                <Select value={toType} onValueChange={handleTimeOffTypeChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -1210,29 +692,21 @@ export function DragDropScheduleCalendar({ selectedDate, onDateChange, locationF
               <Button variant="outline" onClick={() => setShowAddTimeOff(false)}>Cancel</Button>
               <Button
                 onClick={async () => {
-                  try {
-                    if (!toUserId || !toStartDate || !toEndDate) return;
-                    await supabase.from('time_off_requests').insert({
-                      user_id: toUserId,
-                      start_date: new Date(toStartDate).toISOString(),
-                      end_date: new Date(toEndDate).toISOString(),
-                      type: toType,
-                      reason: toReason || 'time off',
-                      status: 'pending',
-                      notes: null,
-                      approved_by: null,
-                      approved_at: null,
-                    });
-                    await refetchAll();
-                    toast({ title: 'Time off requested' });
+                  if (!toUserId || !toStartDate || !toEndDate) return;
+                  const success = await requestTimeOffAction({
+                    userId: toUserId,
+                    startDate: new Date(toStartDate).toISOString(),
+                    endDate: new Date(toEndDate).toISOString(),
+                    type: toType,
+                    reason: toReason || null,
+                  });
+                  if (success) {
                     setShowAddTimeOff(false);
                     setToUserId('');
                     setToStartDate('');
                     setToEndDate('');
                     setToReason('');
                     setToType('vacation');
-                  } catch (e) {
-                    toast({ title: 'Failed to request time off', variant: 'destructive' });
                   }
                 }}
                 disabled={!toUserId || !toStartDate || !toEndDate}

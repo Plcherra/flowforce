@@ -15,7 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useScheduling } from '@/contexts/SchedulingContext';
+import { useWeekTemplates } from '@/hooks/scheduling/useWeekTemplates';
+import type { Tables } from '@/integrations/supabase/types';
 import { Save, Calendar, Eye } from 'lucide-react';
 
 interface WeekTemplateDialogProps {
@@ -24,13 +25,26 @@ interface WeekTemplateDialogProps {
   selectedDate: Date;
 }
 
+type WeekTemplateRecord = Tables<'week_templates'> & {
+  template_data?: {
+    metadata?: {
+      total_shifts?: number;
+    };
+  } | null;
+};
+
+const getTemplateShiftCount = (template: WeekTemplateRecord): number => {
+  const count = template.template_data?.metadata?.total_shifts;
+  return typeof count === 'number' ? count : 0;
+};
+
 export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTemplateDialogProps) {
-  const { weekTemplates, createSchedule } = useScheduling();
+  const { templates: weekTemplates } = useWeekTemplates();
   const [activeTab, setActiveTab] = useState('load');
   const [loading, setLoading] = useState(false);
   
   // Stub data for templates until fully implemented
-  const templates = weekTemplates || [];
+  const templates = (weekTemplates ?? []) as WeekTemplateRecord[];
 
   const [newTemplate, setNewTemplate] = useState({
     name: '',
@@ -66,7 +80,7 @@ export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTem
     }
   };
 
-  const handleLoadTemplate = (template: any) => {
+  const handleLoadTemplate = (template: WeekTemplateRecord) => {
     // In a real implementation, this would apply the template to the current week
     onOpenChange(false);
   };
@@ -101,9 +115,7 @@ export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTem
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <Badge variant="outline">
-                          {(template.template_data as any)?.metadata?.total_shifts || 0} shifts
-                        </Badge>
+                        <Badge variant="outline">{getTemplateShiftCount(template)} shifts</Badge>
                       </div>
                       {template.description && (
                         <CardDescription>{template.description}</CardDescription>

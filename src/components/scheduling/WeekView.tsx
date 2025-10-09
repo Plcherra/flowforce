@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Users, Plus } from 'lucide-react';
 import { Schedule, SchedulingFilters, ScheduleAssignment } from '@/types/common';
 import type { AppEvent } from '@/hooks/useEvents';
-import { AddShiftDialog } from './AddShiftDialog';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor, getHourlyUsers, calculateCoverageStats, UserProfile } from '@/utils/schedulingUtils';
 
 interface WeekViewProps {
@@ -292,7 +292,7 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
       </div>
       {/* Centralized Add Shift Dialog */}
       {!hideShiftActions && (
-        <AddShiftDialog
+        <ShiftWizardDialog
           open={showAddShift}
           onOpenChange={(open) => {
             setShowAddShift(open);
