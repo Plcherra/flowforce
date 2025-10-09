@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -31,19 +31,10 @@ export function useEmployees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchEmployees();
-    } else {
-      setEmployees([]);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       setError(null);
-      
+
       // Get current user's company to filter employees
       const { data: currentProfile } = await supabase
         .from('profiles')
@@ -181,7 +172,16 @@ export function useEmployees() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      fetchEmployees();
+    } else {
+      setEmployees([]);
+      setLoading(false);
+    }
+  }, [user, fetchEmployees]);
 
   const getEmployeesByPosition = (positionId: string) => {
     return employees.filter(emp => emp.position?.id === positionId);
@@ -197,6 +197,6 @@ export function useEmployees() {
     error,
     getEmployeesByPosition,
     getEmployeeFullName,
-    refetchEmployees: fetchEmployees
+    refetchEmployees: fetchEmployees,
   };
 }

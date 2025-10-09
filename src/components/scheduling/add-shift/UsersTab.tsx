@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -6,14 +7,23 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getReplacementCandidates } from '@/services/scheduling/replacement';
+import type { Employee } from '@/hooks/useEmployees';
 
 type UsersTabProps = {
-  employees: any[];
+  employees: Employee[];
   employeesLoading: boolean;
-  getEmployeesByPosition: (positionId: string) => any[];
-  getEmployeeFullName: (employee: any) => string;
-  formData: any;
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  getEmployeesByPosition: (positionId: string) => Employee[];
+  getEmployeeFullName: (employee: Employee) => string;
+  formData: {
+    assigned_users: string[];
+    job_position_id?: string;
+    required_level?: number;
+  };
+  setFormData: Dispatch<SetStateAction<{
+    assigned_users: string[];
+    job_position_id?: string;
+    required_level?: number;
+  }>>;
   isUserAvailableForWindow: (userId: string) => boolean;
 };
 
@@ -99,8 +109,11 @@ export function UsersTab({
                           <p className="font-medium text-sm">{getEmployeeFullName(employee)}</p>
                           <p className="text-xs text-muted-foreground">{employee.position?.name || employee.role}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                            <Badge variant={employee.reliability && employee.reliability >= 70 ? 'default' : 'outline'} className="text-[10px]">
-                              Reliability {employee.reliability?.toFixed(0) ?? '--'}%
+                            <Badge
+                              variant={employee.reliability && employee.reliability >= 70 ? 'default' : 'outline'}
+                              className="text-[10px]"
+                            >
+                              Reliability {(employee.reliability ?? 0).toFixed(0)}%
                             </Badge>
                             <Badge variant="secondary" className="text-[10px]">Level {employee.skillLevel ?? 1}</Badge>
                           </div>
@@ -120,7 +133,10 @@ export function UsersTab({
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          setFormData((prev: any) => ({ ...prev, assigned_users: [...prev.assigned_users, employee.id] }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            assigned_users: [...prev.assigned_users, employee.id],
+                          }));
                         }}
                       >
                         <Plus className="h-4 w-4" />
@@ -169,12 +185,12 @@ export function UsersTab({
                           type="button"
                           size="sm"
                           variant="ghost"
-                          onClick={() =>
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              assigned_users: prev.assigned_users.filter((id: string) => id !== userId),
-                            }))
-                          }
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            assigned_users: prev.assigned_users.filter((id) => id !== userId),
+                          }))
+                        }
                         >
                           <X className="h-4 w-4" />
                         </Button>
