@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Form = Tables<'forms'> & {
+type FormRow = Tables<'forms'> & {
   created_profile?: {
     first_name: string;
     last_name: string;
@@ -13,9 +13,10 @@ type Form = Tables<'forms'> & {
   department?: {
     name: string;
   };
-  _count?: {
-    submissions: number;
-  };
+  submissions?: {
+    count: number;
+    submitted_at?: string | null;
+  }[];
 };
 
 type FormField = Tables<'form_fields'>;
@@ -27,9 +28,14 @@ type FormSubmission = Tables<'form_submissions'> & {
   };
 };
 
+export type FormWithMeta = Omit<FormRow, 'submissions'> & {
+  submissions_count: number;
+  latest_submission_at: string | null;
+};
+
 export function useForms() {
   const { user } = useAuth();
-  const [forms, setForms] = useState<Form[]>([]);
+  const [forms, setForms] = useState<FormWithMeta[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,12 +54,25 @@ export function useForms() {
         .select(`
           *,
           created_profile:profiles!forms_created_by_fkey(first_name, last_name),
-          department:departments(name)
+          department:departments(name),
+          submissions:form_submissions(count, submitted_at)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .order('submitted_at', { foreignTable: 'form_submissions', ascending: false })
+        .limit(1, { foreignTable: 'form_submissions' });
 
       if (error) throw error;
-      setForms(data || []);
+
+      const normalized: FormWithMeta[] = (data || []).map((form) => {
+        const stats = form.submissions?.[0];
+        return {
+          ...form,
+          submissions_count: stats?.count ?? 0,
+          latest_submission_at: stats?.submitted_at ?? null,
+        };
+      });
+
+      setForms(normalized);
     } catch (error) {
       console.error('Error fetching forms:', error);
       toast({
@@ -104,7 +123,7 @@ export function useForms() {
     }
   };
 
-  const updateForm = async (formId: string, updates: Partial<Form>) => {
+  const updateForm = async (formId: string, updates: Partial<FormRow>) => {
     try {
       const { error } = await supabase
         .from('forms')
@@ -228,7 +247,7 @@ export function useForms() {
     }
   };
 
-  const submitForm = async (formId: string, submissionData: Record<string, any>) => {
+  const submitForm = async (formId: string, submissionData: Record<string, unknown>) => {
     try {
       const { data, error } = await supabase
         .from('form_submissions')

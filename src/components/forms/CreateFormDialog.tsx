@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription } from '@/components/ui/card';
@@ -15,6 +15,8 @@ interface CreateFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onFormCreated?: (formId: string) => void;
+  preferredMethod?: 'blank' | 'template' | 'upload';
+  onPreferredMethodHandled?: () => void;
 }
 
 type CreationStep = 'select-method' | 'template-selection' | 'file-upload' | 'build-fields';
@@ -82,7 +84,13 @@ const formTemplates: FormTemplate[] = [
   },
 ];
 
-export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: CreateFormDialogProps) {
+export default function CreateFormDialog({
+  open,
+  onOpenChange,
+  onFormCreated,
+  preferredMethod,
+  onPreferredMethodHandled,
+}: CreateFormDialogProps) {
   const { createForm } = useForms();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -107,7 +115,7 @@ export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: 
     onOpenChange(open);
   };
 
-  const createFormAndStartBuilder = async (
+  const createFormAndStartBuilder = useCallback(async (
     title: string = 'New Form',
     description: string = '',
     options?: { fromFile?: boolean },
@@ -158,7 +166,26 @@ export default function CreateFormDialog({ open, onOpenChange, onFormCreated }: 
         variant: 'destructive',
       });
     }
-  };
+  }, [createForm, onFormCreated, toast, uploadedFile, user]);
+
+  useEffect(() => {
+    if (!open || !preferredMethod) return;
+
+    if (preferredMethod === 'blank') {
+      void (async () => {
+        await createFormAndStartBuilder();
+        onPreferredMethodHandled?.();
+      })();
+      return;
+    }
+
+    if (preferredMethod === 'template') {
+      setCurrentStep('template-selection');
+    } else if (preferredMethod === 'upload') {
+      setCurrentStep('file-upload');
+    }
+    onPreferredMethodHandled?.();
+  }, [open, preferredMethod, createFormAndStartBuilder, onPreferredMethodHandled]);
 
   const handleFormBuilderClose = (open: boolean) => {
     if (!open && createdFormId) {

@@ -7,49 +7,51 @@ import { ResourceRoutes } from "@/routes/resourceRoutes";
 import { AppLayout } from '@/components/navigation/AppLayout';
 
 // Lazy load components
-const Index = lazy(() => import('@/pages/Index'));
-const Auth = lazy(() => import('@/pages/Auth'));
-const Register = lazy(() => import('@/pages/Register'));
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const CompanyRegistration = lazy(() => import('@/pages/CompanyRegistration'));
+const Index = lazy(() => import('../pages/Index.tsx'));
+const Auth = lazy(() => import('../pages/Auth.tsx'));
+const Register = lazy(() => import('../pages/Register.tsx'));
+const Dashboard = lazy(() => import('../pages/Dashboard.tsx'));
+const CompanyRegistration = lazy(() => import('../pages/CompanyRegistration.tsx'));
 
 // Lazy load all other pages
-const Messages = lazy(() => import('@/pages/MessagesPage'));
-const EventsHub = lazy(() => import('@/pages/events/EventsHub'));
-const Employees = lazy(() => import('@/pages/Employees'));
-const InviteEmployee = lazy(() => import('@/pages/InviteEmployee'));
-const PositionManagement = lazy(() => import('@/pages/PositionManagement'));
-const Goals = lazy(() => import('@/pages/Goals'));
-const Tasks = lazy(() => import('@/pages/Tasks'));
-const Performance = lazy(() => import('@/pages/Performance'));
-const TimeOff = lazy(() => import('@/pages/TimeOff'));
-const Recognition = lazy(() => import('@/pages/Recognition'));
-const Expenses = lazy(() => import('@/pages/Expenses'));
-const Forms = lazy(() => import('@/pages/Forms'));
-const CompanyUpdates = lazy(() => import('@/pages/CompanyUpdates'));
-const Analytics = lazy(() => import('@/pages/Analytics'));
-const Reports = lazy(() => import('@/pages/Reports'));
-const InventoryActions = lazy(() => import('@/pages/InventoryActions'));
-const InventoryCountExecution = lazy(() => import('@/pages/InventoryCountExecution'));
-const ItemsSetup = lazy(() => import('@/pages/ItemsSetup'));
-const Purchasing = lazy(() => import('@/pages/Purchasing'));
-const EnhancedScheduling = lazy(() => import('@/pages/EnhancedScheduling'));
-const ScheduleLobby = lazy(() => import('@/pages/ScheduleLobby'));
-const Certifications = lazy(() => import('@/pages/Certifications'));
-const LearningCenter = lazy(() => import('@/pages/LearningCenter'));
-const Resources = lazy(() => import('@/pages/Resources'));
-const Cookbook = lazy(() => import('@/pages/Cookbook'));
-const AIInsights = lazy(() => import('@/pages/AIInsights'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Admin = lazy(() => import('@/pages/Admin'));
-const SectionsPermissions = lazy(() => import('@/pages/SectionsPermissions'));
-const AddSection = lazy(() => import('@/pages/AddSection'));
-const PermissionDemo = lazy(() => import('@/pages/PermissionDemo'));
+const Messages = lazy(() => import('../pages/MessagesPage.tsx'));
+const EventsHub = lazy(() => import('../pages/events/EventsHub.tsx'));
+const Employees = lazy(() => import('../pages/Employees.tsx'));
+const InviteEmployee = lazy(() => import('../pages/InviteEmployee.tsx'));
+const PositionManagement = lazy(() => import('../pages/PositionManagement.tsx'));
+const Goals = lazy(() => import('../pages/Goals.tsx'));
+const Tasks = lazy(() => import('../pages/Tasks.tsx'));
+const Performance = lazy(() => import('../pages/Performance.tsx'));
+const TimeOff = lazy(() => import('../pages/TimeOff.tsx'));
+const Recognition = lazy(() => import('../pages/Recognition.tsx'));
+const Expenses = lazy(() => import('../pages/Expenses.tsx'));
+// Use explicit path to avoid barrel/star export resolution issues
+// Import Forms eagerly to avoid dynamic import resolution issues in dev
+import Forms from '../pages/Forms.tsx';
+const CompanyUpdates = lazy(() => import('../pages/CompanyUpdates.tsx'));
+const Analytics = lazy(() => import('../pages/Analytics.tsx'));
+const Reports = lazy(() => import('../pages/Reports.tsx'));
+const InventoryActions = lazy(() => import('../pages/InventoryActions.tsx'));
+const InventoryCountExecution = lazy(() => import('../pages/InventoryCountExecution.tsx'));
+const ItemsSetup = lazy(() => import('../pages/ItemsSetup.tsx'));
+const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));
+const EnhancedScheduling = lazy(() => import('../pages/EnhancedScheduling.tsx'));
+const ScheduleLobby = lazy(() => import('../pages/ScheduleLobby.tsx'));
+const Certifications = lazy(() => import('../pages/Certifications.tsx'));
+const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
+const Resources = lazy(() => import('../pages/Resources.tsx'));
+const Cookbook = lazy(() => import('../pages/Cookbook.tsx'));
+const AIInsights = lazy(() => import('../pages/AIInsights.tsx'));
+const Settings = lazy(() => import('../pages/Settings.tsx'));
+const Admin = lazy(() => import('../pages/Admin.tsx'));
+const SectionsPermissions = lazy(() => import('../pages/SectionsPermissions.tsx'));
+const AddSection = lazy(() => import('../pages/AddSection.tsx'));
+const PermissionDemo = lazy(() => import('../pages/PermissionDemo.tsx'));
 // Template components - use the page wrappers
-const TemplatesOverview = lazy(() => import('@/pages/Templates'));
-const TemplateDetail = lazy(() => import('@/pages/TemplateDetail'));
-const Features = lazy(() => import('@/pages/Features'));
-const Pricing = lazy(() => import('@/pages/Pricing'));
+const TemplatesOverview = lazy(() => import('../pages/Templates.tsx'));
+const TemplateDetail = lazy(() => import('../pages/TemplateDetail.tsx'));
+const Features = lazy(() => import('../pages/Features.tsx'));
+const Pricing = lazy(() => import('../pages/Pricing.tsx'));
 
 export const router = createBrowserRouter([
   {
