@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { UserOverviewTab } from './UserOverviewTab';
 import { UserPermissionsTab } from './UserPermissionsTab';
 import { UserAuditTab } from './UserAuditTab';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type Profile = Tables<'profiles'>;
 

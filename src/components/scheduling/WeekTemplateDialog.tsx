@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWeekTemplates } from '@/hooks/scheduling/useWeekTemplates';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import { Save, Calendar, Eye } from 'lucide-react';
 
 interface WeekTemplateDialogProps {

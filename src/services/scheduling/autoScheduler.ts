@@ -1,5 +1,5 @@
 import { addDays, differenceInHours, differenceInMinutes, format, formatISO, isBefore, startOfWeek } from 'date-fns';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSchedule, type ShiftSlot, type EmployeeProfile, type AssignedShift, type GenerateScheduleResult } from '@/server/schedule/engine';
 import { PolicyEngine } from '@/server/copilot/policy-engine';
@@ -364,7 +364,11 @@ function buildSummary(slots: ShiftSlot[], assignments: AssignedShift[], warnings
   };
 }
 
-export async function runCopilotAutoSchedule(userId: string, params: AutoScheduleParams): Promise<AutoScheduleResult> {
+export async function runCopilotAutoSchedule(
+  userId: string,
+  companyId: string,
+  params: AutoScheduleParams,
+): Promise<AutoScheduleResult> {
   const ruleset = getLocationRuleSet(params.locationId);
   if (!ruleset) {
     throw new Error(`No rule set configured for ${params.locationId}`);
@@ -375,18 +379,8 @@ export async function runCopilotAutoSchedule(userId: string, params: AutoSchedul
   const weekEndIso = formatISO(addDays(weekStart, 7), { representation: 'complete' });
   const runId = crypto.randomUUID();
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('company_id')
-    .eq('id', userId)
-    .single();
-
-  if (profileError) {
-    throw profileError;
-  }
-
-  if (!profile?.company_id) {
-    throw new Error('User profile missing company_id');
+  if (!companyId) {
+    throw new Error('User must belong to a company to run the copilot');
   }
 
   if (params.overwriteExisting !== false) {
@@ -446,7 +440,7 @@ export async function runCopilotAutoSchedule(userId: string, params: AutoSchedul
       notes: `Copilot draft ${runId}`,
       status: 'draft',
       is_published: false,
-      company_id: profile.company_id,
+      company_id: companyId,
       created_by: userId,
       timezone: ruleset.timezone,
       requirements: { copilot: copilotPayload },

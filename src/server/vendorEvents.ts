@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/server/supabaseAdmin';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 export type VendorEvent = Tables<'vendor_event'>;
 

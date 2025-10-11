@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
+import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Calendar, 
   Brain, 
@@ -48,7 +49,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
   const debugPayload = {
     userId: profile?.userId ?? 'anonymous',
     role: profile?.role ?? 'unknown',
-    companyId: profile?.companyId ?? profile?.company_id ?? 'unknown',
+    companyId: profile?.companyId ?? 'unknown',
     weekRange: { start: weekRangeStartIso, end: weekRangeEndIso },
     counts: {
       shifts: shifts.length,
@@ -58,6 +59,81 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     },
   };
   const lastApiError = schedulingError ?? 'none';
+
+  const hoursSummary = useMemo(() => {
+    const filterValue = locationFilter?.toLowerCase().trim() ?? null;
+    const filteredShifts = filterValue
+      ? shifts.filter((shift) => {
+          const locationName = (shift.location ?? '').toLowerCase();
+          const locationId = (shift as { location_id?: string }).location_id;
+          return (
+            locationName === filterValue ||
+            locationName.includes(filterValue) ||
+            (typeof locationId === 'string' && locationId.toLowerCase() === filterValue)
+          );
+        })
+      : shifts;
+
+    const dailyHours: Record<string, number> = {};
+    let totalHours = 0;
+    let totalLaborHours = 0;
+    let filledCount = 0;
+    let partialCount = 0;
+    let unfilledCount = 0;
+
+    filteredShifts.forEach((shift) => {
+      const start = shift.start_time ? new Date(shift.start_time) : null;
+      const end = shift.end_time ? new Date(shift.end_time) : null;
+      if (!start || !end) return;
+      const diffMs = end.getTime() - start.getTime();
+      if (Number.isNaN(diffMs) || diffMs <= 0) return;
+      const hours = diffMs / 36e5;
+      const headcount = shift.required_headcount ?? 1;
+      const laborHours = hours * headcount;
+
+      totalHours += hours;
+      totalLaborHours += laborHours;
+
+      const dayKey = start.toISOString().split('T')[0] ?? 'unknown';
+      dailyHours[dayKey] = (dailyHours[dayKey] ?? 0) + hours;
+
+      const assignedCount = Array.isArray(shift.assignments)
+        ? shift.assignments.length
+        : assignments.filter((assignment) => assignment.schedule_id === shift.id).length;
+
+      if (assignedCount >= headcount) {
+        filledCount += 1;
+      } else if (assignedCount > 0) {
+        partialCount += 1;
+      } else {
+        unfilledCount += 1;
+      }
+    });
+
+    const shiftCount = filteredShifts.length;
+    const averageShiftHours = shiftCount > 0 ? totalHours / shiftCount : 0;
+
+    return {
+      totalHours,
+      totalLaborHours,
+      averageShiftHours,
+      shiftCount,
+      dailyHours,
+      filledCount,
+      partialCount,
+      unfilledCount,
+    };
+  }, [assignments, locationFilter, shifts]);
+
+  const dailyHourEntries = useMemo(() => {
+    return Object.entries(hoursSummary.dailyHours)
+      .map(([day, hours]) => ({ day, hours }))
+      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
+  }, [hoursSummary.dailyHours]);
+
+  const appliedFilterLabel = locationFilter
+    ? `Filtered by: ${locationFilter}`
+    : 'All scheduled locations';
 
   const tabs = [
     {
@@ -170,6 +246,98 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
 
           {/* Tab Content */}
           <TabsContent value="schedule" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Weekly Hour Summary</CardTitle>
+                <CardDescription>{appliedFilterLabel}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Scheduled Hours</p>
+                    <p className="text-2xl font-semibold">
+                      {hoursSummary.totalHours > 0 ? hoursSummary.totalHours.toFixed(1) : '0.0'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Labor Hours (with headcount)</p>
+                    <p className="text-2xl font-semibold">
+                      {hoursSummary.totalLaborHours > 0 ? hoursSummary.totalLaborHours.toFixed(1) : '0.0'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Average Shift Length</p>
+                    <p className="text-2xl font-semibold">
+                      {hoursSummary.averageShiftHours > 0 ? hoursSummary.averageShiftHours.toFixed(1) : '0.0'} hrs
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Shifts Counted</p>
+                    <p className="text-2xl font-semibold">{hoursSummary.shiftCount}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-border/60 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Shift Coverage</p>
+                      <p className="text-xs text-muted-foreground">
+                        Filled vs in-progress vs open
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                        Filled&nbsp;({hoursSummary.filledCount})
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-amber-500" />
+                        Partial&nbsp;({hoursSummary.partialCount})
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-rose-500" />
+                        Open&nbsp;({hoursSummary.unfilledCount})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="flex h-full w-full">
+                      <div
+                        className="h-full bg-emerald-500 transition-all"
+                        style={{ width: `${coveragePercentages.filledPct}%` }}
+                      />
+                      <div
+                        className="h-full bg-amber-500 transition-all"
+                        style={{ width: `${coveragePercentages.partialPct}%` }}
+                      />
+                      <div
+                        className="h-full bg-rose-500 transition-all"
+                        style={{ width: `${coveragePercentages.openPct}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <p className="mb-3 text-sm font-medium text-muted-foreground">Daily Scheduled Hours</p>
+                  {dailyHourEntries.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No shifts scheduled for this period.</p>
+                  ) : (
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                      {dailyHourEntries.map(({ day, hours }) => (
+                        <div key={day} className="rounded-lg border border-border/60 p-3">
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(`${day}T00:00:00`), 'EEE, MMM d')}
+                          </p>
+                          <p className="mt-1 text-lg font-semibold">{hours.toFixed(1)} hrs</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex-1">
               <EnhancedCalendarView />
             </div>
@@ -214,3 +382,14 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     </div>
   );
 }
+  const coveragePercentages = useMemo(() => {
+    const total = hoursSummary.shiftCount || 1;
+    const filledPct = (hoursSummary.filledCount / total) * 100;
+    const partialPct = (hoursSummary.partialCount / total) * 100;
+    const openPct = (hoursSummary.unfilledCount / total) * 100;
+    return {
+      filledPct,
+      partialPct,
+      openPct,
+    };
+  }, [hoursSummary.filledCount, hoursSummary.partialCount, hoursSummary.shiftCount, hoursSummary.unfilledCount]);

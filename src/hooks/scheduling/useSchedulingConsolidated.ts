@@ -14,7 +14,7 @@ import type {
   VendorEventRow,
   ProfileSummary,
 } from './types';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type AssignmentRow = Tables<'schedule_assignments'>;
 type TimeOffRow = Tables<'time_off_requests'>;
@@ -107,7 +107,34 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
 
       let schedulesQuery = supabase
         .from('schedules')
-        .select('*')
+        .select(
+          [
+            'id',
+            'company_id',
+            'title',
+            'role',
+            'start_time',
+            'end_time',
+            'location',
+            'required_headcount',
+            'break_minutes',
+            'color',
+            'timezone',
+            'notes',
+            'created_at',
+            'created_by',
+            'updated_at',
+            'is_all_day',
+            'is_published',
+            'is_template',
+            'position_id',
+            'template_id',
+            'status',
+            'requirements',
+            'hourly_rate',
+            'user_id',
+          ].join(','),
+        )
         .eq('company_id', companyId)
         .order('start_time', { ascending: true });
 
@@ -124,7 +151,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
 
       let vendorEventsQuery = supabase
         .from('vendor_event')
-        .select('*')
+        .select('id, company_id, location_id, vendor_type, event_date, start_time, end_time, shift_id, notes, created_at')
         .eq('company_id', companyId)
         .order('event_date', { ascending: true })
         .order('start_time', { ascending: true });
@@ -159,7 +186,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
           ? Promise.resolve<{ data: TimeOffRow[] | null; error: null }>({ data: [], error: null })
           : supabase
               .from('time_off_requests')
-              .select('*')
+              .select(
+                'id, user_id, start_date, end_date, type, status, reason, notes, approved_at, approved_by, created_at, updated_at',
+              )
               .in('user_id', memberIds)
               .order('created_at', { ascending: false });
 
@@ -168,7 +197,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
           ? Promise.resolve<{ data: UnavailabilityRow[] | null; error: null }>({ data: [], error: null })
           : supabase
               .from('user_unavailability')
-              .select('*')
+              .select(
+                'id, user_id, created_by, start_time, end_time, reason, is_recurring, recurring_pattern, created_at, updated_at',
+              )
               .in('user_id', memberIds)
               .order('start_time', { ascending: true });
 

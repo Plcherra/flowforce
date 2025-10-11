@@ -3,6 +3,7 @@ import { runCopilotAutoSchedule, type AutoScheduleParams, type AutoScheduleResul
 import { useAuth } from '../useAuth';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useToast } from '../use-toast';
+import { useProfile } from '../useProfile';
 
 interface AutoScheduleState {
   loading: boolean;
@@ -13,6 +14,7 @@ interface AutoScheduleState {
 export function useAutoScheduler() {
   const { user } = useAuth();
   const { refetchAll } = useScheduling();
+  const { profile } = useProfile();
   const { toast } = useToast();
   const [state, setState] = useState<AutoScheduleState>({ loading: false, error: null, lastResult: null });
 
@@ -23,10 +25,17 @@ export function useAutoScheduler() {
       throw error;
     }
 
+    const companyId = profile?.companyId ?? null;
+    if (!companyId) {
+      const error = new Error('A company must be selected before running the copilot');
+      setState((prev) => ({ ...prev, error: error.message }));
+      throw error;
+    }
+
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const result = await runCopilotAutoSchedule(user.id, params);
+      const result = await runCopilotAutoSchedule(user.id, companyId, params);
       await refetchAll();
       setState({ loading: false, error: null, lastResult: result });
 
@@ -42,7 +51,7 @@ export function useAutoScheduler() {
       toast({ title: 'Auto-schedule failed', description: message, variant: 'destructive' });
       return { data: null, error: message } as const;
     }
-  }, [user, refetchAll, toast]);
+  }, [profile?.companyId, refetchAll, toast, user]);
 
   return {
     autoScheduleWeek,

@@ -24,12 +24,12 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "react-quill": reactQuillEntry,
-      "react-quill/lib/index.js": reactQuillEntry,
-      "react-quill/dist/quill.snow.css": reactQuillSnowCss,
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "react-quill/dist/quill.snow.css", replacement: reactQuillSnowCss },
+      { find: "react-quill/lib/index.js", replacement: reactQuillEntry },
+      { find: "react-quill", replacement: reactQuillEntry },
+    ],
   },
   optimizeDeps: {
     include: ['react-quill'],

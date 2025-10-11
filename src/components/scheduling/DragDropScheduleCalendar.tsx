@@ -1,16 +1,24 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { AssignmentPanel } from './drag-drop/AssignmentPanel';
+import { ScheduleToolbar } from './drag-drop/ScheduleToolbar';
+import { WeekGrid } from './drag-drop/WeekGrid';
+import { ShiftDetailsPanel } from './ShiftDetailsPanel';
+import { ShiftWizardDialog } from './ShiftWizardDialog';
+import { WeekTemplateDialog } from './WeekTemplateDialog';
+import { ImportShiftsDialog } from './ImportShiftsDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { ShiftDetailsPanel } from './ShiftDetailsPanel';
-import { ShiftWizardDialog } from './ShiftWizardDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { useScheduleBoard } from '@/hooks/scheduling/useScheduleBoard';
-import { ScheduleToolbar } from './drag-drop/ScheduleToolbar';
-import { AssignmentPanel } from './drag-drop/AssignmentPanel';
 import type {
   ShiftTemplate,
   VendorPaletteItem,

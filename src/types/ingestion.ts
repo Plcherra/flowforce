@@ -1,4 +1,4 @@
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 export type IngestedFile = Tables<'files'>;
 export type ExtractedDocument = Tables<'documents'>;

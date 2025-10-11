@@ -1,4 +1,4 @@
-import { format, isSameDay } from 'date-fns';
+import { differenceInMinutes, format, isSameDay } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { ShiftWithAssignments, VendorEventWithMetadata } from '@/hooks/scheduling/useSchedulingConsolidated';
 
@@ -35,6 +35,17 @@ const formatName = (employee: EmployeeSummary) =>
 const formatShiftWindow = (schedule: ShiftWithAssignments) => {
   if (!schedule.start_time || !schedule.end_time) return 'Invalid time';
   return `${format(new Date(schedule.start_time), 'HH:mm')} - ${format(new Date(schedule.end_time), 'HH:mm')}`;
+};
+
+const formatShiftDuration = (schedule: ShiftWithAssignments) => {
+  if (!schedule.start_time || !schedule.end_time) return '0 hrs';
+  const start = new Date(schedule.start_time);
+  const end = new Date(schedule.end_time);
+  const minutes = differenceInMinutes(end, start);
+  const hours = Math.max(0, minutes / 60);
+  if (!Number.isFinite(hours) || hours <= 0) return '0 hrs';
+  const rounded = hours >= 10 ? Math.round(hours) : Math.round(hours * 10) / 10;
+  return `${rounded.toFixed(rounded % 1 === 0 ? 0 : 1)} hrs`;
 };
 
 export function WeekGrid({
@@ -98,6 +109,10 @@ export function WeekGrid({
                     >
                       <div className="font-medium truncate">{schedule.title ?? schedule.job_position?.name ?? 'Shift'}</div>
                       <div className="text-xs opacity-75">{formatShiftWindow(schedule)}</div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {formatShiftDuration(schedule)}
+                        {schedule.required_headcount ? ` · ${schedule.required_headcount} req.` : ''}
+                      </div>
                     </button>
                   ))}
                   {unlinked.map((event) => (
@@ -167,8 +182,14 @@ export function WeekGrid({
                           title={formatShiftWindow(schedule)}
                           onClick={() => onShiftClick(schedule.id)}
                         >
-                          <div className="font-medium truncate">{schedule.title ?? schedule.job_position?.name ?? 'Shift'}</div>
+                          <div className="font-medium truncate">
+                            {schedule.title ?? schedule.job_position?.name ?? 'Shift'}
+                          </div>
                           <div className="text-xs opacity-75">{formatShiftWindow(schedule)}</div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {formatShiftDuration(schedule)}
+                            {schedule.required_headcount ? ` · ${schedule.required_headcount} req.` : ''}
+                          </div>
                           {(vendorEventsByShift.get(schedule.id) ?? []).map((event) => (
                             <div
                               key={`${event.id}-chip`}

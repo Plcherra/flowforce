@@ -18,7 +18,6 @@ import { Users } from 'lucide-react';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { usePositions } from '@/hooks/usePositions';
 import { useEmployees } from '@/hooks/useEmployees';
-import { useUnavailability } from '@/hooks/scheduling/useUnavailability';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,9 +28,6 @@ import { TasksTab } from './shift-wizard/TasksTab';
 import { NotesTab } from './shift-wizard/NotesTab';
 import type { ShiftTask, ShiftWizardFormData } from './shift-wizard/types';
 import { queryKeys } from '@/lib/queryKeys';
-import type { Tables } from '@/integrations/supabase/types';
-
-type UserUnavailabilityRow = Tables<'user_unavailability'>;
 
 interface ShiftWizardDialogProps {
   open?: boolean;
@@ -84,7 +80,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
   const userMetadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const metadataCompanyId =
     typeof userMetadata['company_id'] === 'string' ? (userMetadata['company_id'] as string) : null;
-  const companyId = profile?.companyId ?? profile?.company_id ?? metadataCompanyId ?? null;
+  const companyId = profile?.companyId ?? metadataCompanyId ?? null;
 
   const { positions } = usePositions();
   const {
@@ -93,10 +89,10 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
     getEmployeesByPosition,
     getEmployeeFullName,
   } = useEmployees();
-  const { unavailability } = useUnavailability();
   const {
     shifts,
     weekRange,
+    unavailability,
     refetchAll,
     mutations: { createSchedule, assign },
   } = useScheduling();
@@ -134,9 +130,9 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
   const unavailabilityEntries = useMemo(
     () =>
       (unavailability ?? []).map((entry) => ({
-        user_id: (entry as UserUnavailabilityRow).user_id ?? null,
-        start_time: (entry as UserUnavailabilityRow).start_time,
-        end_time: (entry as UserUnavailabilityRow).end_time,
+        user_id: entry.user_id ?? null,
+        start_time: entry.start_time,
+        end_time: entry.end_time,
       })),
     [unavailability],
   );

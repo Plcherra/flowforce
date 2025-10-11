@@ -16,7 +16,7 @@ import {
   type PermissionKey,
   type PermissionValue 
 } from '@/hooks/useUserPermissions';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type Profile = Tables<'profiles'>;
 

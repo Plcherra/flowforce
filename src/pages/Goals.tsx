@@ -9,7 +9,7 @@ import { EditGoalDialog } from '@/components/goals/EditGoalDialog';
 import { GoalDetailsDialog } from '@/components/goals/GoalDetailsDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 

@@ -12,7 +12,7 @@ import FormEditorPanel from '@/components/forms/editor/FormEditorPanel';
 import FormLivePreview from '@/components/forms/editor/FormLivePreview';
 import type { FormField } from '@/types/forms';
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 interface FormBuilderDialogProps {
   open: boolean;

@@ -61,7 +61,7 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
   const { employees } = useEmployees();
   const { profile } = useProfile();
 
-  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const companyId = profile?.companyId ?? null;
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [isLocationsLoading, setIsLocationsLoading] = useState(false);

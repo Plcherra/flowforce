@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/integrations/supabase/public-types';
 
 export const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001';
 

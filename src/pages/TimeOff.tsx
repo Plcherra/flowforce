@@ -13,7 +13,7 @@ import {
   X, 
   AlertCircle
 } from 'lucide-react';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import { format, parseISO, differenceInDays } from 'date-fns';
 
 type TimeOffRequest = Tables<'time_off_requests'>;

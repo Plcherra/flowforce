@@ -1,5 +1,5 @@
 // Unified scheduling types that match database schema exactly
-import type { Tables, Enums } from '@/integrations/supabase/types';
+import type { Tables, Enums } from '@/integrations/supabase/public-types';
 
 // Base types from database
 export type DbSchedule = Tables<'schedules'>;

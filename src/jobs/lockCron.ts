@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/server/supabaseAdmin';
 import { addWeeks, computeAutoLockThreshold, startOfIsoWeek } from '@/availability/lockEngine';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/integrations/supabase/public-types';
 
 type OrgPrefRow = Database['public']['Tables']['org_prefs']['Row'];
 

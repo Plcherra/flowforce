@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizontal, Truck } from 'lucide-react';
 import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
 import { UserProfileDrawer } from '@/components/users/UserProfileDrawer';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;

@@ -1,5 +1,5 @@
 // Data transformation utilities for scheduling system
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import type { Schedule, ScheduleStatus, DbSchedule } from '@/types/scheduling-unified';
 
 /**

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { User, Mail, Phone, Calendar, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type Profile = Tables<'profiles'> & {
   position?: {

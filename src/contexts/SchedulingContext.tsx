@@ -14,7 +14,7 @@ import {
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
 
 type ShiftInsertPayload = Omit<TablesInsert<'schedules'>, 'company_id' | 'created_by'>;
 
@@ -74,7 +74,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const companyId = profile?.companyId ?? null;
 
   const weekRange = useMemo(() => {
     const start = startOfWeek(new Date());

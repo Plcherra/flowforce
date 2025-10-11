@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 import { CompanyRole, Position, CompanyConfig, CompanySettings } from '@/types/common';
 import { handleError } from '@/utils/errorHandler';
 

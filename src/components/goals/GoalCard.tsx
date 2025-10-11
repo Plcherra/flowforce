@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CalendarIcon, MoreHorizontal, Target, Users, Award, Edit, Trash2, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 type Goal = Tables<'goals'>;
 

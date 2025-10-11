@@ -42,7 +42,7 @@ export function MessagesSidebar({
   onFilterChange,
   canShowAvailability,
   available,
-  onToggleAvailable
+  onToggleAvailable,
 }: MessagesSidebarProps) {
   const getChannelIcon = (type: string, isPrivate: boolean) => {
     if (isPrivate) return <Lock className="h-4 w-4" />;
@@ -51,27 +51,14 @@ export function MessagesSidebar({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="p-3 border-b border-gray-200 space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Messages</h2>
-          {/* Filters inline with title */}
-          {typeof onFilterChange === 'function' && activeFilter && (
-            <MessageFilterBar active={activeFilter} onChange={onFilterChange} />
-          )}
-        </div>
-        {/* Actions: search + create */}
-        <div className="flex items-center justify-between gap-2">
-          {typeof onQueryChange === 'function' && typeof query === 'string' && (
-            <Input className="w-48" placeholder="Search..." value={query} onChange={(e) => onQueryChange(e.target.value)} />
-          )}
-          <div className="flex gap-1">
-            <Button size="sm" variant="outline" onClick={onShowMessageSearch}>
-              <Search className="h-4 w-4" />
-            </Button>
+    <div className="flex h-full flex-col bg-card">
+      <div className="space-y-3 border-b border-border/60 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">Channels</h2>
+          <div className="flex items-center gap-2">
             {canShowAvailability && typeof onToggleAvailable === 'function' && (
-              <Button size="sm" variant="ghost" onClick={() => onToggleAvailable(!available)}>
-                {available ? 'Available' : 'Away'}
+              <Button size="sm" variant={available ? 'default' : 'outline'} onClick={() => onToggleAvailable(!available)}>
+                {available ? 'Available' : 'Set as Away'}
               </Button>
             )}
             <DropdownMenu>
@@ -80,32 +67,50 @@ export function MessagesSidebar({
                   <Plus className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={onShowDirectMessageDialog}>
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="mr-2 h-4 w-4" />
                   Direct Message
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onShowCreateDialog}>
-                  <Hash className="h-4 w-4 mr-2" />
+                  <Hash className="mr-2 h-4 w-4" />
                   Create Channel
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onShowCreateAnnouncement}>
-                  <Megaphone className="h-4 w-4 mr-2" />
+                  <Megaphone className="mr-2 h-4 w-4" />
                   Create Announcement
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
+
+        {typeof onFilterChange === 'function' && activeFilter && (
+          <MessageFilterBar active={activeFilter} onChange={onFilterChange} />
+        )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {typeof onQueryChange === 'function' && typeof query === 'string' && (
+            <Input
+              className="min-w-[160px] flex-1"
+              placeholder="Search channels..."
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+            />
+          )}
+          <Button size="sm" variant="outline" onClick={onShowMessageSearch}>
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-2">
+        <div className="space-y-1.5 p-3">
           {channels.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No channels yet</p>
+            <div className="py-10 text-center">
+              <p className="mb-4 text-muted-foreground">No channels yet</p>
               <Button onClick={onShowCreateDialog}>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Create Channel
               </Button>
             </div>
@@ -114,20 +119,20 @@ export function MessagesSidebar({
               {channels.map((channel) => (
                 <div
                   key={channel.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                    currentChannelId === channel.id ? 'bg-blue-50 border border-blue-200' : ''
+                  className={`flex cursor-pointer items-center space-x-3 rounded-lg p-3 transition-colors hover:bg-primary/5 ${
+                    currentChannelId === channel.id ? 'border border-primary/40 bg-primary/5 shadow-sm' : ''
                   }`}
                   onClick={() => onChannelSelect(channel.id)}
                 >
-                  <div className="text-gray-500">
+                  <div className="text-muted-foreground">
                     {getChannelIcon(channel.type, channel.is_private || false)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {channel.name}
                     </p>
                     {channel.description && (
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="truncate text-xs text-muted-foreground">
                         {channel.description}
                       </p>
                     )}
