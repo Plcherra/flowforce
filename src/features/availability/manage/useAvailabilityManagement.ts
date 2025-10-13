@@ -100,7 +100,7 @@ export function useAvailabilityManagement({
     enabled: queriesEnabled,
   });
 
-  const orgPrefsQuery = useQuery({
+  const orgPrefsQuery = useQuery<OrgPrefs | null>({
     queryKey: queryKeys.orgPrefs(orgId),
     queryFn: async () => {
       const { data, error } = await supabase
@@ -110,25 +110,18 @@ export function useAvailabilityManagement({
         .maybeSingle();
       if (error) throw error;
 
-      const prefs: OrgPrefs = data
-        ? {
-            id: data.id,
-            availabilityLockMode: data.availability_lock_mode as AvailabilityLockMode,
-            autoLockDayOfWeek: data.auto_lock_day_of_week ?? 4,
-            autoLockHour: data.auto_lock_hour ?? 17,
-            createdAt: '',
-            updatedAt: '',
-          }
-        : {
-            id: orgId ?? '',
-            availabilityLockMode: 'open',
-            autoLockDayOfWeek: 4,
-            autoLockHour: 17,
-            createdAt: '',
-            updatedAt: '',
-          };
+      if (!data) {
+        return null;
+      }
 
-      return prefs;
+      return {
+        id: data.id,
+        availabilityLockMode: data.availability_lock_mode as AvailabilityLockMode,
+        autoLockDayOfWeek: data.auto_lock_day_of_week ?? 4,
+        autoLockHour: data.auto_lock_hour ?? 17,
+        createdAt: '',
+        updatedAt: '',
+      };
     },
     enabled: queriesEnabled,
   });

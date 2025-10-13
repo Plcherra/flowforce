@@ -108,9 +108,11 @@ export function PolicyGate({
   fallback?: React.ReactNode;
 }) {
   const { allowed } = usePolicy(user, action, payload);
-  return allowed
-    ? React.createElement(React.Fragment, null, children)
-    : React.createElement(React.Fragment, null, fallback ?? null);
+  return React.createElement(
+    React.Fragment,
+    null,
+    allowed ? children : fallback ?? null,
+  );
 }
 
 export function WithPolicyButton({
@@ -127,10 +129,13 @@ export function WithPolicyButton({
 }) {
   const { allowed, reasons, loading } = usePolicy(user, action, payload);
   const title = !allowed ? (reasons && reasons.length > 0 ? reasons[0] : 'Action blocked by policy') : undefined;
-  return React.createElement('button', {
-    ...rest,
-    disabled: Boolean(disabled) || loading || !allowed,
-    title,
+  return React.createElement(
+    'button',
+    {
+      ...rest,
+      disabled: Boolean(disabled) || loading || !allowed,
+      title,
+    },
     children,
-  });
+  );
 }

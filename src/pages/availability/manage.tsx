@@ -10,6 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { ShieldAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 export default function ManageAvailabilityPage() {
   return (
@@ -107,6 +109,24 @@ function ManageAvailabilityContent() {
     );
   }
 
+  const orgPrefsError = management.orgPrefsQuery.error as PostgrestError | undefined;
+  const missingOrgPrefs = queriesEnabled && isMissingRelationError(orgPrefsError, 'org_prefs');
+
+  if (missingOrgPrefs) {
+    return (
+      <div className="p-6">
+        <Alert className="border-primary/40">
+          <ShieldAlert className="h-5 w-5 text-primary" />
+          <AlertTitle>Initialize availability preferences for your organization</AlertTitle>
+          <AlertDescription>
+            Provision the <code>org_prefs</code> table (see migration <code>20251023_create_org_prefs.sql</code>) to start
+            managing availability settings. Once the table is in place, refresh this page.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   const queryError =
     (management.employeesQuery.error as Error | undefined) ??
     (management.orgPrefsQuery.error as Error | undefined) ??
@@ -135,6 +155,30 @@ function ManageAvailabilityContent() {
           Manage lock behaviour, approve requests, and handle availability exceptions for your team.
         </p>
       </header>
+
+      {queriesEnabled && !management.orgPrefsQuery.data && (
+        <Alert className="flex flex-col gap-3 border-primary/40 bg-primary/5 text-primary">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="h-5 w-5 flex-shrink-0 text-primary" />
+            <div className="space-y-1">
+              <AlertTitle>Availability settings need setup</AlertTitle>
+              <AlertDescription className="text-sm text-primary/90">
+                We couldn&apos;t find lock preferences for this organization yet. Use your default selections to create
+                the first configuration so your team can start submitting availability.
+              </AlertDescription>
+            </div>
+          </div>
+          <div>
+            <Button
+              size="sm"
+              onClick={management.updateLockSettings}
+              disabled={management.updateLockSettingsPending}
+            >
+              {management.updateLockSettingsPending ? 'Initializing...' : 'Create default settings'}
+            </Button>
+          </div>
+        </Alert>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
         <LockControls
@@ -172,4 +216,27 @@ function ManageAvailabilityContent() {
       />
     </div>
   );
+}
+
+function isMissingRelationError(error: PostgrestError | undefined, relation: string) {
+  if (!error) return false;
+
+  const code = (error.code ?? '').toUpperCase();
+  const status = (error as { status?: number }).status;
+  const message = (error.message ?? '').toLowerCase();
+  const relationName = relation.toLowerCase();
+  const mentionsRelation =
+    message.includes(relationName) ||
+    message.includes(`"${relationName}"`) ||
+    message.includes(` ${relationName} `);
+
+  if (code === '42P01' || code === 'PGRST116') {
+    return true;
+  }
+
+  if (status === 404 && (mentionsRelation || message.includes('table or view not found'))) {
+    return true;
+  }
+
+  return mentionsRelation && (message.includes('does not exist') || message.includes('not found'));
 }

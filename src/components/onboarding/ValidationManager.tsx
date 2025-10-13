@@ -53,16 +53,25 @@ export class ValidationManager {
   ): boolean {
     if (isCustomTemplate) {
       switch (step) {
-        case 1:
+        case 1: {
           const passwordValidation = validatePassword(userInfo.password, {
             firstName: userInfo.firstName,
             lastName: userInfo.lastName,
             email: userInfo.email,
-            companyName: companyInfo.name
+            companyName: companyInfo.name,
           });
-          return Boolean(userInfo.firstName && userInfo.lastName && userInfo.email && 
-                 userInfo.password && companyInfo.name && companyInfo.industry && companyInfo.size) &&
-                 passwordValidation.isValid;
+          return (
+            Boolean(
+              userInfo.firstName &&
+                userInfo.lastName &&
+                userInfo.email &&
+                userInfo.password &&
+                companyInfo.name &&
+                companyInfo.industry &&
+                companyInfo.size,
+            ) && passwordValidation.isValid
+          );
+        }
         case 2:
           return selectedTemplate !== null;
         case 3:
@@ -78,16 +87,25 @@ export class ValidationManager {
       }
     } else {
       switch (step) {
-        case 1:
+        case 1: {
           const passwordValidation = validatePassword(userInfo.password, {
             firstName: userInfo.firstName,
             lastName: userInfo.lastName,
             email: userInfo.email,
-            companyName: companyInfo.name
+            companyName: companyInfo.name,
           });
-          return Boolean(userInfo.firstName && userInfo.lastName && userInfo.email && 
-                 userInfo.password && companyInfo.name && companyInfo.industry && companyInfo.size) &&
-                 passwordValidation.isValid;
+          return (
+            Boolean(
+              userInfo.firstName &&
+                userInfo.lastName &&
+                userInfo.email &&
+                userInfo.password &&
+                companyInfo.name &&
+                companyInfo.industry &&
+                companyInfo.size,
+            ) && passwordValidation.isValid
+          );
+        }
         case 2:
           return selectedTemplate !== null;
         case 3:

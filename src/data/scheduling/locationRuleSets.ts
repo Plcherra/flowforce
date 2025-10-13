@@ -9,7 +9,7 @@ export type CoverageSlotTemplate = {
   headcount: number;
   isCloser?: boolean;
   tags?: string[];
-};
+}
 
 export interface ComplianceRules {
   maxHoursPerWeek: number;
@@ -21,7 +21,7 @@ export interface ComplianceRules {
     coverageRatio: number;
     weekendCoverage: number;
   };
-};
+}
 
 export interface CopilotEmployeeSeed {
   id: string;
@@ -39,7 +39,7 @@ export interface CopilotEmployeeSeed {
   maxHoursWeek?: number;
   preferredDaysOff?: number[];
   isTrainee?: boolean;
-};
+}
 
 export interface LocationRuleSet {
   id: string;

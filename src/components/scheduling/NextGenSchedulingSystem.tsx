@@ -125,6 +125,23 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     };
   }, [assignments, locationFilter, shifts]);
 
+  const coveragePercentages = useMemo(() => {
+    const total = hoursSummary.shiftCount || 1;
+    const filledPct = (hoursSummary.filledCount / total) * 100;
+    const partialPct = (hoursSummary.partialCount / total) * 100;
+    const openPct = (hoursSummary.unfilledCount / total) * 100;
+    return {
+      filledPct,
+      partialPct,
+      openPct,
+    };
+  }, [
+    hoursSummary.filledCount,
+    hoursSummary.partialCount,
+    hoursSummary.shiftCount,
+    hoursSummary.unfilledCount,
+  ]);
+
   const dailyHourEntries = useMemo(() => {
     return Object.entries(hoursSummary.dailyHours)
       .map(([day, hours]) => ({ day, hours }))
@@ -382,14 +399,3 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     </div>
   );
 }
-  const coveragePercentages = useMemo(() => {
-    const total = hoursSummary.shiftCount || 1;
-    const filledPct = (hoursSummary.filledCount / total) * 100;
-    const partialPct = (hoursSummary.partialCount / total) * 100;
-    const openPct = (hoursSummary.unfilledCount / total) * 100;
-    return {
-      filledPct,
-      partialPct,
-      openPct,
-    };
-  }, [hoursSummary.filledCount, hoursSummary.partialCount, hoursSummary.shiftCount, hoursSummary.unfilledCount]);
