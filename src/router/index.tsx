@@ -46,6 +46,7 @@ const Resources = lazy(() => import('../pages/Resources.tsx'));
 const Cookbook = lazy(() => import('../pages/Cookbook.tsx'));
 const AIInsights = lazy(() => import('../pages/AIInsights.tsx'));
 const Settings = lazy(() => import('../pages/Settings.tsx'));
+const Profile = lazy(() => import('../pages/Profile.tsx'));
 const Admin = lazy(() => import('../pages/Admin.tsx'));
 const SectionsPermissions = lazy(() => import('../pages/SectionsPermissions.tsx'));
 const AddSection = lazy(() => import('../pages/AddSection.tsx'));
@@ -236,6 +237,10 @@ export const router = createBrowserRouter([
             element: <Settings />,
           },
           {
+            path: "profile",
+            element: <Profile />,
+          },
+          {
             path: "admin",
             element: <Admin />,
           },
@@ -361,6 +366,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: <Navigate to="/app/settings" replace />,
+      },
+      {
+        path: "profile",
+        element: <Navigate to="/app/profile" replace />,
       },
       {
         path: "admin",

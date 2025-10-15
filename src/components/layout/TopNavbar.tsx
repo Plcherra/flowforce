@@ -50,7 +50,7 @@ export function TopNavbar() {
 
           {/* Settings (for admins) */}
           {can('systemSettings') && (
-            <Button variant="ghost" size="sm" onClick={() => handleNavigation('/settings')}>
+            <Button variant="ghost" size="sm" onClick={() => handleNavigation('/app/settings')}>
               <Settings className="h-5 w-5" />
             </Button>
           )}
@@ -106,11 +106,11 @@ export function TopNavbar() {
                 </div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleNavigation('/profile')}>
+              <DropdownMenuItem onClick={() => handleNavigation('/app/profile')}>
                 <User className="h-4 w-4 mr-2" />
                 Profile Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigation('/settings')}>
+              <DropdownMenuItem onClick={() => handleNavigation('/app/settings')}>
                 <Settings className="h-4 w-4 mr-2" />
                 Account Settings
               </DropdownMenuItem>

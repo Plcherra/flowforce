@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Shield, AlertTriangle } from 'lucide-react';
 import { useAccountDeletion } from '@/hooks/useAccountDeletion';
 import AccountDeletionDialog from './AccountDeletionDialog';
+import PasswordChangeForm from './PasswordChangeForm';
 
 interface AccountSecurityProps {
   userId: string;
@@ -30,7 +31,9 @@ export default function AccountSecurity({ userId, onSignOut }: AccountSecurityPr
           Manage your account security settings and permanent data deletion
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        <PasswordChangeForm />
+
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
