@@ -21,6 +21,11 @@ export interface AssignmentWithUser extends ScheduleAssignmentRow {
 
 export interface ShiftWithAssignments extends ScheduleRow {
   assignments: AssignmentWithUser[];
+  job_position?: {
+    id?: string;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 export interface TimeOffWithUser extends TimeOffRequestRow {

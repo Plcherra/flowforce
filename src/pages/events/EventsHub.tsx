@@ -9,13 +9,16 @@ import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
 import { ShiftDetailsPanel } from '@/components/scheduling/ShiftDetailsPanel';
 import { SchedulingProvider } from '@/contexts/SchedulingContext';
 import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
+import { CreateEventDialog } from '@/components/events/CreateEventDialog';
 import { useEvents } from '@/hooks/useEvents';
 
 export default function EventsHubPage() {
   const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
-  const { events, createEvent } = useEvents();
+  const { events } = useEvents();
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
+  const [sessionDialogType, setSessionDialogType] = useState<'meeting' | 'event'>('meeting');
   const [selectedShiftId, setSelectedShiftId] = useState<string | null>(null);
 
   const upcoming = useMemo(() => {
@@ -30,20 +33,8 @@ export default function EventsHubPage() {
       .slice(0, 8);
   }, [events, search]);
 
-  const quickCreate = async (kind: 'meeting' | 'event') => {
-    const start = new Date();
-    const end = new Date(start.getTime() + 30 * 60 * 1000);
-    await createEvent({
-      title: kind === 'meeting' ? 'New Meeting' : 'New Event',
-      description: kind === 'meeting' ? 'Quick-created meeting' : 'Quick-created event',
-      start: start.toISOString(),
-      end: end.toISOString(),
-      type: kind,
-    });
-  };
-
   return (
-    <div>
+    <SchedulingProvider>
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="bg-card border-b border-border sticky top-0 z-10">
@@ -70,11 +61,24 @@ export default function EventsHubPage() {
                   />
                 </div>
                 <div className="hidden sm:flex gap-2">
-                  <Button variant="outline" size={isMobile ? 'sm' : 'default'} onClick={() => quickCreate('meeting')}>
+                  <Button
+                    variant="outline"
+                    size={isMobile ? 'sm' : 'default'}
+                    onClick={() => {
+                      setSessionDialogType('meeting');
+                      setSessionDialogOpen(true);
+                    }}
+                  >
                     <Video className="h-4 w-4 mr-2" />
                     {isMobile ? '' : 'New Meeting'}
                   </Button>
-                  <Button size={isMobile ? 'sm' : 'default'} onClick={() => quickCreate('event')}>
+                  <Button
+                    size={isMobile ? 'sm' : 'default'}
+                    onClick={() => {
+                      setSessionDialogType('event');
+                      setSessionDialogOpen(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     {isMobile ? '' : 'New Event'}
                   </Button>
@@ -100,13 +104,11 @@ export default function EventsHubPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <SchedulingProvider>
-                    <SchedulingCalendar
-                      hideShiftActions
-                      externalDetails
-                      onShiftSelect={setSelectedShiftId}
-                    />
-                  </SchedulingProvider>
+                  <SchedulingCalendar
+                    hideShiftActions
+                    externalDetails
+                    onShiftSelect={setSelectedShiftId}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -133,6 +135,12 @@ export default function EventsHubPage() {
                         {e.description && (
                           <div className="mt-1 text-xs text-muted-foreground line-clamp-2">{e.description}</div>
                         )}
+                        {e.attendees && e.attendees.length > 0 && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            Attendees: {e.attendees.slice(0, 3).map((attendee) => attendee.name).join(', ')}
+                            {e.attendees.length > 3 ? ` (+${e.attendees.length - 3})` : ''}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -145,12 +153,10 @@ export default function EventsHubPage() {
                     <h3 className="text-sm font-medium">Shift Details</h3>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <SchedulingProvider>
-                      <ShiftDetailsPanel
-                        shiftId={selectedShiftId}
-                        onClose={() => setSelectedShiftId(null)}
-                      />
-                    </SchedulingProvider>
+                    <ShiftDetailsPanel
+                      shiftId={selectedShiftId}
+                      onClose={() => setSelectedShiftId(null)}
+                    />
                   </CardContent>
                 </Card>
               )}
@@ -158,9 +164,12 @@ export default function EventsHubPage() {
           </div>
         </div>
       </div>
-      <SchedulingProvider>
-        <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
-      </SchedulingProvider>
-    </div>
+      <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
+      <CreateEventDialog
+        open={sessionDialogOpen}
+        onOpenChange={setSessionDialogOpen}
+        defaultType={sessionDialogType}
+      />
+    </SchedulingProvider>
   );
 }

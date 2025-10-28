@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -21,6 +21,8 @@ import { ShiftSwap, TimeOffRequest } from '@/types/scheduling-unified';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { PersonalAvailabilityPanel } from './availability/PersonalAvailabilityPanel';
+import { TeamAvailabilityPanel } from './availability/TeamAvailabilityPanel';
 
 export function StaffShiftManagement() {
   const { toast } = useToast();
@@ -29,11 +31,7 @@ export function StaffShiftManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       // Load shift swaps
       const { data: swaps } = await supabase
@@ -86,7 +84,7 @@ export function StaffShiftManagement() {
 
       setShiftSwaps(transformedSwaps);
       setTimeOffRequests(transformedTimeOff);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error loading data",
         description: "Please try again",
@@ -95,7 +93,11 @@ export function StaffShiftManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const handleSwapAction = async (swapId: string, action: 'approve' | 'reject') => {
     try {
@@ -114,7 +116,7 @@ export function StaffShiftManagement() {
         title: `Shift swap ${action}d`,
         description: "Staff have been notified of the decision",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error processing request",
         description: "Please try again",
@@ -140,7 +142,7 @@ export function StaffShiftManagement() {
         title: `Time off request ${action}d`,
         description: "Employee has been notified",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error processing request",
         description: "Please try again",
@@ -399,21 +401,9 @@ export function StaffShiftManagement() {
           )}
         </TabsContent>
 
-        <TabsContent value="availability">
-          <Card>
-            <CardHeader>
-              <CardTitle>Staff Availability Management</CardTitle>
-              <CardDescription>
-                Set and manage staff availability patterns and preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Availability management interface coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="availability" className="space-y-6">
+          <PersonalAvailabilityPanel />
+          <TeamAvailabilityPanel />
         </TabsContent>
       </Tabs>
     </div>

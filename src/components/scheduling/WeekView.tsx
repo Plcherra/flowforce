@@ -1,45 +1,81 @@
 
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Clock, Users, Plus } from 'lucide-react';
-import { Schedule, SchedulingFilters, ScheduleAssignment } from '@/types/common';
+import { Clock } from 'lucide-react';
+import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
+import type { SchedulingFilterState } from './SchedulingFilters';
 import type { AppEvent } from '@/hooks/useEvents';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
-import { getShiftColor, getHourlyUsers, calculateCoverageStats, UserProfile } from '@/utils/schedulingUtils';
+import { getShiftColor, calculateCoverageStats } from '@/utils/schedulingUtils';
 
 interface WeekViewProps {
-  schedules: Schedule[];
+  schedules: ShiftWithAssignments[];
   selectedDate: Date;
   onSelectShift: (shiftId: string) => void;
-  filters: SchedulingFilters;
+  onSelectEvent?: (eventId: string | null) => void;
+  filters: SchedulingFilterState;
   isMobile?: boolean;
   overlayEvents?: AppEvent[];
   hideShiftActions?: boolean;
+  selectedEventId?: string | null;
 }
 
-export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMobile = false, overlayEvents = [], hideShiftActions = false }: WeekViewProps) {
+export function WeekView({
+  schedules,
+  selectedDate,
+  onSelectShift,
+  onSelectEvent,
+  filters: _filters,
+  isMobile = false,
+  overlayEvents = [],
+  hideShiftActions = false,
+  selectedEventId = null,
+}: WeekViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const weekStart = startOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  const getShiftsForDay = (day: Date) => {
+  const getShiftsForDay = useCallback((day: Date) => {
     return schedules.filter(schedule => 
       isSameDay(parseISO(schedule.start_time), day)
     );
-  };
+  }, [schedules]);
 
   const getCoverageStats = useMemo(() => (day: Date) => {
     const dayShifts = getShiftsForDay(day);
     return calculateCoverageStats(dayShifts);
-  }, [schedules]);
+  }, [getShiftsForDay]);
 
   const getEventsForDay = useMemo(() => (day: Date) => {
     return overlayEvents.filter(ev => isSameDay(new Date(ev.start), day));
   }, [overlayEvents]);
+
+  const handleEventClick = (eventId: string) => {
+    if (!onSelectEvent) return;
+    if (selectedEventId === eventId) {
+      onSelectEvent(null);
+    } else {
+      onSelectEvent(eventId);
+    }
+  };
+
+  const renderAttendeeSummary = (event: AppEvent) => {
+    const attendees = event.attendees ?? [];
+    if (attendees.length === 0) return null;
+    const names = attendees.map((attendee) => attendee.name).filter(Boolean);
+    if (names.length === 0) return null;
+    const summary = names.slice(0, 2).join(', ');
+    const extra = names.length > 2 ? ` +${names.length - 2}` : '';
+    return (
+      <div className="text-[11px] text-muted-foreground">
+        {summary}
+        {extra}
+      </div>
+    );
+  };
 
   if (isMobile) {
     // Mobile: Show simplified horizontal scrollable week view
@@ -113,7 +149,7 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
                     {shift.assignments && shift.assignments.length > 0 && (
                       <div className="mt-2 flex items-center space-x-2">
                         <div className="flex -space-x-1">
-                          {shift.assignments?.slice(0, 3).map((assignment: ScheduleAssignment) => (
+                          {shift.assignments?.slice(0, 3).map((assignment: AssignmentWithUser) => (
                             <Avatar key={assignment.id} className="h-6 w-6 border-2 border-white">
                               <AvatarImage src={assignment.user?.avatar_url} />
                               <AvatarFallback className="text-xs">
@@ -187,6 +223,58 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
         })}
       </div>
 
+      <div className="grid grid-cols-8 border-b bg-muted/40">
+        <div className="p-3 border-r">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Meetings & Events
+          </div>
+          <div className="text-[11px] text-muted-foreground">Sessions linked to the schedule</div>
+        </div>
+        {weekDays.map((day) => {
+          const dayEvents = getEventsForDay(day)
+            .slice()
+            .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+          return (
+            <div key={`events-${day.toISOString()}`} className="border-r p-2">
+              {dayEvents.length === 0 ? (
+                <div className="h-20 flex items-center justify-center text-[11px] text-muted-foreground">
+                  No sessions
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {dayEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className={`rounded-md border border-border/60 bg-background p-2 text-xs shadow-sm transition hover:shadow-md cursor-pointer ${
+                        selectedEventId === event.id ? 'ring-2 ring-primary' : ''
+                      }`}
+                      style={{ borderLeftColor: event.color ?? '#6366f1', borderLeftWidth: 4 }}
+                      onClick={() => handleEventClick(event.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="font-semibold text-foreground text-[13px] truncate">
+                          {event.title || 'Untitled'}
+                        </div>
+                        {event.type && (
+                          <Badge variant="outline" className="text-[10px] capitalize">
+                            {event.type}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {format(new Date(event.start), 'HH:mm')} –{' '}
+                        {event.end ? format(new Date(event.end), 'HH:mm') : 'TBD'}
+                      </div>
+                      {renderAttendeeSummary(event)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       {/* Time slots and shifts - unified grid by rows to keep heights aligned */}
       <div className="flex-1 overflow-auto">
         {(() => {
@@ -196,7 +284,7 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
             const dayShifts = getShiftsForDay(day);
             dayShifts.forEach(shift => {
               if (shift.assignments && shift.assignments.length > 0) {
-                shift.assignments.forEach((assignment: ScheduleAssignment) => {
+                shift.assignments.forEach((assignment: AssignmentWithUser) => {
                   if (assignment.user) {
                     const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
                     if (!employeeMap.has(userId)) {
@@ -246,7 +334,7 @@ export function WeekView({ schedules, selectedDate, onSelectShift, filters, isMo
                         if (employee.id === 'unassigned') {
                           return !shift.assignments || shift.assignments.length === 0;
                         }
-                        return shift.assignments?.some((assignment: ScheduleAssignment) =>
+                        return shift.assignments?.some((assignment: AssignmentWithUser) =>
                           assignment.user && (assignment.user.id === employee.id || `${assignment.user.first_name}-${assignment.user.last_name}` === employee.id)
                         );
                       });

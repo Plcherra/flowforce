@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { canViewScheduleDrafts } from '@/utils/authRoles';
+import { buildSchedulingFallbackData } from './fallbackData';
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -33,6 +34,7 @@ interface SchedulingConsolidatedResult {
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
   upsertShift: (payload: ShiftUpsertInput) => Promise<Tables<'schedules'> | null>;
   upsertVendorEvent: (payload: VendorEventUpsertInput) => Promise<VendorEventRow | null>;
+  isUsingFallbackData: boolean;
 }
 
 const DEFAULT_ERROR = 'Unable to load the latest scheduling data.';
@@ -49,6 +51,8 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
   const [vendorEvents, setVendorEvents] = useState<VendorEventRow[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
+  const fallbackNoticeShownRef = useRef<boolean>(false);
 
   const range = useMemo(() => {
     const parseDate = (value?: Date | string | null) => {
@@ -163,12 +167,28 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         vendorEventsQuery = vendorEventsQuery.lte('event_date', range.endDateOnly);
       }
 
-      const [schedulesResponse, vendorEventsResponse] = await Promise.all([schedulesQuery, vendorEventsQuery]);
+      const [schedulesResult, vendorEventsResult] = await Promise.allSettled([schedulesQuery, vendorEventsQuery]);
 
-      if (schedulesResponse.error) throw schedulesResponse.error;
-      if (vendorEventsResponse.error) throw vendorEventsResponse.error;
+      if (schedulesResult.status === 'rejected') {
+        throw schedulesResult.reason;
+      }
 
-      const scheduleRows = schedulesResponse.data ?? [];
+      if (schedulesResult.value.error) {
+        throw schedulesResult.value.error;
+      }
+
+      const scheduleRows = schedulesResult.value.data ?? [];
+      let vendorEventsRows: VendorEventRow[] = [];
+
+      if (vendorEventsResult.status === 'fulfilled') {
+        if (vendorEventsResult.value.error) {
+          console.warn('Failed to load vendor events', vendorEventsResult.value.error);
+        } else {
+          vendorEventsRows = vendorEventsResult.value.data ?? [];
+        }
+      } else {
+        console.warn('Failed to load vendor events', vendorEventsResult.reason);
+      }
 
       const assignmentsPromise =
         scheduleRows.length === 0
@@ -238,15 +258,30 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       setAssignments(assignmentRows);
       setTimeOffRequests(enrichedTimeOff);
       setUnavailability(enrichedUnavailability);
-      setVendorEvents(vendorEventsResponse.data ?? []);
+      setVendorEvents(vendorEventsRows);
+      setIsUsingFallback(false);
+      fallbackNoticeShownRef.current = false;
     } catch (err) {
       const message = err instanceof Error ? err.message : DEFAULT_ERROR;
+      console.error('Failed to load scheduling data, using fallback data.', err);
       setError(message);
-      toast({
-        title: 'Scheduling data error',
-        description: message,
-        variant: 'destructive',
-      });
+      const fallback = buildSchedulingFallbackData({ start: range.start });
+      setShifts(fallback.shifts);
+      setAssignments(fallback.assignments);
+      setTimeOffRequests(fallback.timeOff);
+      setUnavailability(fallback.unavailability);
+      setVendorEvents(fallback.vendorEvents);
+      setIsUsingFallback(true);
+
+      if (!fallbackNoticeShownRef.current) {
+        const description =
+          'Live scheduling data is unavailable. Showing demo data so you can continue exploring the schedule experience.';
+        toast({
+          title: 'Scheduling in preview mode',
+          description,
+        });
+        fallbackNoticeShownRef.current = true;
+      }
     } finally {
       setLoading(false);
     }
@@ -406,6 +441,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     unassign,
     upsertShift,
     upsertVendorEvent,
+    isUsingFallbackData: isUsingFallback,
   };
 }
 

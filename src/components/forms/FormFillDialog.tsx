@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,17 +12,17 @@ import { useForms } from '@/hooks/useForms';
 import { toast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { FormSubmissionData } from '@/types/api';
-import { 
-  LocationData, 
-  SignatureData, 
-  RatingData, 
-  RatingConfig, 
-  ScanData, 
-  ScanConfig, 
-  TaskData, 
-  FileUploadData, 
+import {
+  LocationData,
+  SignatureData,
+  RatingData,
+  RatingConfig,
+  ScanData,
+  ScanConfig,
+  TaskData,
   ImageSelectionData,
-  FormFieldType 
+  FormFieldType,
+  MediaConfig,
 } from '@/types/forms';
 import { LocationField } from './fields/LocationField';
 import { ImageUploadField } from './fields/ImageUploadField';
@@ -40,6 +40,19 @@ import { TaskField } from './fields/TaskField';
 import { ImageSelectionField } from './fields/ImageSelectionField';
 
 type FormFieldDataLocal = Tables<'form_fields'>;
+
+type ConditionType = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'any_of' | 'none_of';
+
+interface ConditionalLogicConfig {
+  enabled?: boolean;
+  field_id?: string;
+  condition_type?: ConditionType;
+  condition_values?: unknown[];
+}
+
+type ValidationRules = {
+  conditional_logic?: ConditionalLogicConfig;
+} | null;
 
 interface FormFillDialogProps {
   open: boolean;
@@ -60,23 +73,11 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
 
   const formValues = form.watch();
 
-  useEffect(() => {
-    if (open && formId) {
-      loadFormFields();
-    }
-  }, [open, formId]);
-
-  useEffect(() => {
-    if (fields.length > 0) {
-      updateVisibleFields();
-    }
-  }, [fields, formValues]);
-
-  const updateVisibleFields = () => {
+  const updateVisibleFields = useCallback(() => {
     const visible = new Set<string>();
     
     fields.forEach((field) => {
-      const fieldConfig = field.validation_rules as any;
+      const fieldConfig = (field.validation_rules as ValidationRules) ?? null;
       const conditionalLogic = fieldConfig?.conditional_logic;
       
       if (!conditionalLogic?.enabled) {
@@ -84,47 +85,55 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
         return;
       }
 
-      const { field_id, condition_type, condition_values = [] } = conditionalLogic;
+      const { field_id, condition_type, condition_values } = conditionalLogic;
       if (!field_id || !condition_type) {
         visible.add(field.id);
         return;
       }
 
       // Find the referenced field
-      const referencedField = fields.find(f => f.id === field_id);
+      const referencedField = fields.find((candidate) => candidate.id === field_id);
       if (!referencedField) {
         visible.add(field.id);
         return;
       }
 
-      const referencedValue = formValues[`field_${referencedField.id}`];
+      const referencedValue = formValues[referencedField.id];
+      const normalizedValues = Array.isArray(condition_values)
+        ? condition_values.map((value) => String(value))
+        : [];
+      const referencedValueAsString = referencedValue == null ? '' : String(referencedValue);
       let shouldShow = false;
 
       switch (condition_type) {
         case 'equals':
-          shouldShow = condition_values.includes(String(referencedValue));
+          shouldShow = normalizedValues.includes(referencedValueAsString);
           break;
         case 'not_equals':
-          shouldShow = !condition_values.includes(String(referencedValue));
+          shouldShow = !normalizedValues.includes(referencedValueAsString);
           break;
         case 'contains':
-          shouldShow = condition_values.some((val: string) => String(referencedValue).includes(val));
+          shouldShow = normalizedValues.some((value) => referencedValueAsString.includes(value));
           break;
         case 'not_contains':
-          shouldShow = !condition_values.some((val: string) => String(referencedValue).includes(val));
+          shouldShow = !normalizedValues.some((value) => referencedValueAsString.includes(value));
           break;
         case 'any_of':
           if (Array.isArray(referencedValue)) {
-            shouldShow = referencedValue.some((val: any) => condition_values.includes(String(val)));
+            shouldShow = referencedValue.some((value) =>
+              normalizedValues.includes(String(value)),
+            );
           } else {
-            shouldShow = condition_values.includes(String(referencedValue));
+            shouldShow = normalizedValues.includes(referencedValueAsString);
           }
           break;
         case 'none_of':
           if (Array.isArray(referencedValue)) {
-            shouldShow = !referencedValue.some((val: any) => condition_values.includes(String(val)));
+            shouldShow = !referencedValue.some((value) =>
+              normalizedValues.includes(String(value)),
+            );
           } else {
-            shouldShow = !condition_values.includes(String(referencedValue));
+            shouldShow = !normalizedValues.includes(referencedValueAsString);
           }
           break;
         default:
@@ -137,9 +146,9 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
     });
 
     setVisibleFields(visible);
-  };
+  }, [fields, formValues]);
 
-  const getDefaultValue = (field: FormFieldDataLocal) => {
+  const getDefaultValue = useCallback((field: FormFieldDataLocal) => {
     const fieldType = field.field_type as FormFieldType;
     switch (fieldType) {
       case 'checkbox':
@@ -186,23 +195,53 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
       default:
         return '';
     }
-  };
+  }, []);
 
-  const loadFormFields = async () => {
+  const loadFormFields = useCallback(async () => {
+    if (!formId) return;
     setLoading(true);
-    const { data, error } = await getFormFields(formId);
-    if (!error && data) {
-      setFields(data as FormFieldDataLocal[]);
-      
-      // Set default values with proper types
+    try {
+      const { data, error } = await getFormFields(formId);
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Unable to load form fields',
+          variant: 'destructive',
+        });
+        setFields([]);
+        form.reset({});
+        return;
+      }
+
+      const rows = (data ?? []) as FormFieldDataLocal[];
+      setFields(rows);
+
       const defaultValues: FormSubmissionData = {};
-      data.forEach(field => {
+      rows.forEach((field) => {
         defaultValues[field.id] = getDefaultValue(field);
       });
       form.reset(defaultValues);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [formId, getFormFields, form, getDefaultValue]);
+
+  useEffect(() => {
+    if (open && formId) {
+      void loadFormFields();
+    } else if (!open) {
+      setFields([]);
+      setVisibleFields(new Set());
+    }
+  }, [open, formId, loadFormFields]);
+
+  useEffect(() => {
+    if (fields.length === 0) {
+      setVisibleFields(new Set());
+      return;
+    }
+    updateVisibleFields();
+  }, [fields, updateVisibleFields]);
 
   const onSubmit = async (values: FormSubmissionData) => {
     const { error } = await submitForm(formId, values);
@@ -233,16 +272,25 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
     return [];
   };
 
-  const parseConfig = (config: any, defaultConfig: any = {}) => {
+  const parseConfig = <T extends Record<string, unknown>>(config: unknown, defaultConfig: T = {} as T): T => {
     if (!config) return defaultConfig;
-    if (typeof config === 'object') return { ...defaultConfig, ...config };
+
     if (typeof config === 'string') {
       try {
-        return { ...defaultConfig, ...JSON.parse(config) };
+        const parsed = JSON.parse(config);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return { ...defaultConfig, ...(parsed as Record<string, unknown>) } as T;
+        }
       } catch {
         return defaultConfig;
       }
+      return defaultConfig;
     }
+
+    if (typeof config === 'object' && !Array.isArray(config)) {
+      return { ...defaultConfig, ...(config as Record<string, unknown>) } as T;
+    }
+
     return defaultConfig;
   };
 
@@ -398,7 +446,7 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   {field.is_required && <span className="text-red-500 ml-1">*</span>}
                 </FormLabel>
                 {field.description && <FormDescription>{field.description}</FormDescription>}
-                <Select onValueChange={formField.onChange} defaultValue={String(formField.value || '')}>
+                <Select value={formField.value == null ? '' : String(formField.value)} onValueChange={formField.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an option" />
@@ -435,7 +483,7 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                 <FormControl>
                   <RadioGroup
                     onValueChange={formField.onChange}
-                    defaultValue={String(formField.value || '')}
+                    value={formField.value == null ? '' : String(formField.value)}
                     className="flex flex-col space-y-1"
                   >
                     {options.map((option: string, index: number) => (
@@ -614,7 +662,8 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
           />
         );
 
-      case 'image_upload':
+      case 'image_upload': {
+        const imageConfig = parseConfig<MediaConfig>(field.media_config, {});
         return (
           <FormField
             key={field.id}
@@ -627,15 +676,17 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   description={field.description}
                   value={Array.isArray(formField.value) ? formField.value : []}
                   onChange={formField.onChange}
-                  maxFiles={parseConfig(field.media_config).max_files || 5}
-                  maxSize={parseConfig(field.media_config).max_size || 10}
+                  maxFiles={imageConfig.max_files ?? 5}
+                  maxSize={imageConfig.max_size ?? 10}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
-      case 'video_upload':
+      case 'video_upload': {
+        const videoConfig = parseConfig<MediaConfig>(field.media_config, {});
         return (
           <FormField
             key={field.id}
@@ -648,15 +699,17 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   description={field.description}
                   value={Array.isArray(formField.value) ? formField.value : []}
                   onChange={formField.onChange}
-                  maxFiles={parseConfig(field.media_config).max_files || 3}
-                  maxSize={parseConfig(field.media_config).max_size || 50}
+                  maxFiles={videoConfig.max_files ?? 3}
+                  maxSize={videoConfig.max_size ?? 50}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
-      case 'audio_recording':
+      case 'audio_recording': {
+        const audioConfig = parseConfig<MediaConfig>(field.media_config, {});
         return (
           <FormField
             key={field.id}
@@ -669,15 +722,17 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   description={field.description}
                   value={Array.isArray(formField.value) ? formField.value : []}
                   onChange={formField.onChange}
-                  maxRecordings={parseConfig(field.media_config).max_files || 3}
+                  maxRecordings={audioConfig.max_files ?? 3}
                   maxDuration={300}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
-      case 'file_upload':
+      case 'file_upload': {
+        const fileConfig = parseConfig<MediaConfig>(field.media_config, {});
         return (
           <FormField
             key={field.id}
@@ -690,14 +745,15 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   description={field.description}
                   value={Array.isArray(formField.value) ? formField.value : []}
                   onChange={formField.onChange}
-                  maxFiles={parseConfig(field.media_config).max_files || 5}
-                  maxSize={parseConfig(field.media_config).max_size || 10}
-                  acceptedTypes={parseConfig(field.media_config).accepted_types}
+                  maxFiles={fileConfig.max_files ?? 5}
+                  maxSize={fileConfig.max_size ?? 10}
+                  acceptedTypes={fileConfig.accepted_types}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
       case 'signature':
         return (
@@ -719,7 +775,11 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
           />
         );
 
-      case 'rating':
+      case 'rating': {
+        const ratingConfig = parseConfig<RatingConfig>(field.rating_config, {
+          max_rating: 5,
+          rating_type: 'stars',
+        });
         return (
           <FormField
             key={field.id}
@@ -731,15 +791,19 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   label={field.label}
                   description={field.description}
                   value={formField.value as RatingData | undefined}
-                  config={parseConfig(field.rating_config, { max_rating: 5, rating_type: 'stars' }) as RatingConfig}
+                  config={ratingConfig}
                   onChange={formField.onChange}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
-      case 'scanner':
+      case 'scanner': {
+        const scannerConfig = parseConfig<ScanConfig>(field.scan_config, {
+          scan_types: ['barcode', 'qr_code'],
+        });
         return (
           <FormField
             key={field.id}
@@ -751,13 +815,14 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
                   label={field.label}
                   description={field.description}
                   value={formField.value as ScanData | undefined}
-                  config={parseConfig(field.scan_config, { scan_types: ['barcode', 'qr_code'] }) as ScanConfig}
+                  config={scannerConfig}
                   onChange={formField.onChange}
                 />
               </FormItem>
             )}
           />
         );
+      }
 
       case 'task':
         return (

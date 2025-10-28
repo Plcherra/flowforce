@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -52,6 +52,7 @@ interface SchedulingContextType {
   vendorEvents: VendorEventWithMetadata[];
   loading: boolean;
   error: string | null;
+  isFallbackData: boolean;
   refetchAll: () => Promise<void>;
   weekRange: { start: Date; end: Date };
   mutations: SchedulingMutations;
@@ -73,6 +74,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const { profile } = useProfile();
   const { user } = useAuth();
   const { toast } = useToast();
+  const fallbackActionNoticeShownRef = useRef(false);
+
+  const showReadOnlyNotice = useCallback(() => {
+    if (fallbackActionNoticeShownRef.current) return;
+    toast({
+      title: 'Read-only preview mode',
+      description: 'Connect your data source to enable scheduling changes.',
+    });
+    fallbackActionNoticeShownRef.current = true;
+  }, [toast]);
 
   const companyId = profile?.companyId ?? null;
 
@@ -91,15 +102,20 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     loading,
     error,
     refetchAll,
-    assign,
-    unassign,
+    assign: assignInternal,
+    unassign: unassignInternal,
     upsertShift,
     upsertVendorEvent,
+    isUsingFallbackData,
   } = useSchedulingConsolidated({
     companyId,
     start: weekRange.start,
     end: weekRange.end,
   });
+
+  if (!isUsingFallbackData && fallbackActionNoticeShownRef.current) {
+    fallbackActionNoticeShownRef.current = false;
+  }
 
   const ensureCompanyContext = useCallback(() => {
     if (!companyId) {
@@ -109,6 +125,11 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
 
   const createSchedule = useCallback(
     async (payload: ShiftInsertPayload) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return null;
+      }
+
       try {
         const result = await upsertShift(payload as ShiftUpsertInput);
         if (result) {
@@ -128,11 +149,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return null;
       }
     },
-    [toast, upsertShift],
+    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
   );
 
   const updateSchedule = useCallback(
     async (id: string, updates: TablesUpdate<'schedules'>) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return null;
+      }
+
       try {
         const result = await upsertShift({ id, ...updates } as ShiftUpsertInput);
         if (result) {
@@ -152,11 +178,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return null;
       }
     },
-    [toast, upsertShift],
+    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
   );
 
   const deleteSchedule = useCallback(
     async (id: string) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { error: deleteError } = await supabase.from('schedules').delete().eq('id', id);
         if (deleteError) throw deleteError;
@@ -176,11 +207,51 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [refetchAll, toast],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+  );
+
+  const assign = useCallback(
+    async (shiftId: string, userId: string, status: string = 'assigned') => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
+      return assignInternal(shiftId, userId, status);
+    },
+    [assignInternal, isUsingFallbackData, showReadOnlyNotice],
+  );
+
+  const unassign = useCallback(
+    async (shiftId: string, userId: string) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
+      return unassignInternal(shiftId, userId);
+    },
+    [isUsingFallbackData, showReadOnlyNotice, unassignInternal],
+  );
+
+  const upsertVendorEventGuarded = useCallback(
+    async (payload: VendorEventUpsertInput) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return null;
+      }
+      return upsertVendorEvent(payload);
+    },
+    [isUsingFallbackData, showReadOnlyNotice, upsertVendorEvent],
   );
 
   const createVendorEvent = useCallback(
     async (payload: VendorEventUpsertInput) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return null;
+      }
+
       try {
         ensureCompanyContext();
         const event = await upsertVendorEvent({ ...payload, company_id: companyId! });
@@ -201,11 +272,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return null;
       }
     },
-    [companyId, ensureCompanyContext, toast, upsertVendorEvent],
+    [companyId, ensureCompanyContext, isUsingFallbackData, showReadOnlyNotice, toast, upsertVendorEvent],
   );
 
   const deleteVendorEvent = useCallback(
     async (id: string) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         ensureCompanyContext();
         const { error: deleteError } = await supabase.from('vendor_event').delete().eq('id', id);
@@ -226,11 +302,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [ensureCompanyContext, refetchAll, toast],
+    [ensureCompanyContext, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const autoGenerateWeek = useCallback(
     async (params: { weekStart: string; preferences?: Record<string, unknown> }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { data, error: fnError } = await supabase.functions.invoke('ai-scheduling-assistant', {
           body: {
@@ -263,11 +344,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [companyId, refetchAll, toast],
+    [companyId, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const bulkCreateShifts = useCallback(
     async (payloads: ShiftInsertPayload[]) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       if (!payloads.length) return true;
 
       try {
@@ -287,11 +373,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [toast, upsertShift],
+    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
   );
 
   const copyWeek = useCallback(
     async (params: { sourceWeekStart: string; targetWeekStart: string }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         ensureCompanyContext();
         const sourceStart = new Date(params.sourceWeekStart);
@@ -352,11 +443,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [bulkCreateShifts, companyId, ensureCompanyContext, toast],
+    [bulkCreateShifts, companyId, ensureCompanyContext, isUsingFallbackData, showReadOnlyNotice, toast],
   );
 
   const clearWeek = useCallback(
     async (params: { weekStart: string; weekEnd: string }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { error: schedulesError } = await supabase
           .from('schedules')
@@ -388,11 +484,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [refetchAll, toast],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const publishWeek = useCallback(
     async (params: { weekStart: string; weekEnd: string; isPublished: boolean }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         ensureCompanyContext();
         const { error: updateError } = await supabase
@@ -417,11 +518,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [companyId, ensureCompanyContext, refetchAll, toast],
+    [companyId, ensureCompanyContext, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const addUnavailability = useCallback(
     async (payload: { userId: string; start: string; end: string; reason?: string | null }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { error: insertError } = await supabase.from('user_unavailability').insert({
           user_id: payload.userId,
@@ -446,7 +552,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [refetchAll, toast],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const requestTimeOff = useCallback(
@@ -457,6 +563,11 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       type: 'vacation' | 'sick' | 'personal' | 'other';
       reason?: string | null;
     }) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { error: insertError } = await supabase.from('time_off_requests').insert({
           user_id: payload.userId,
@@ -486,11 +597,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [refetchAll, toast],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const generateRecommendations = useCallback(
     async (scheduleId: string) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return [];
+      }
+
       try {
         const { data, error: fnError } = await supabase.functions.invoke('ai-scheduling-assistant', {
           body: {
@@ -518,11 +634,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return [];
       }
     },
-    [companyId, toast],
+    [companyId, isUsingFallbackData, showReadOnlyNotice, toast],
   );
 
   const approveTimeOff = useCallback(
     async (requestId: string, notes?: string) => {
+      if (isUsingFallbackData) {
+        showReadOnlyNotice();
+        return false;
+      }
+
       try {
         const { error: updateError } = await supabase
           .from('time_off_requests')
@@ -552,7 +673,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [refetchAll, toast, user?.id],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast, user?.id],
   );
 
   const mutations = useMemo<SchedulingMutations>(
@@ -573,7 +694,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       publishWeek,
       generateRecommendations,
       approveTimeOff,
-      upsertVendorEvent,
+      upsertVendorEvent: upsertVendorEventGuarded,
     }),
     [
       addUnavailability,
@@ -592,7 +713,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       requestTimeOff,
       unassign,
       updateSchedule,
-      upsertVendorEvent,
+      upsertVendorEventGuarded,
     ],
   );
 
@@ -604,6 +725,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     vendorEvents,
     loading,
     error,
+    isFallbackData: isUsingFallbackData,
     refetchAll,
     weekRange,
     mutations,

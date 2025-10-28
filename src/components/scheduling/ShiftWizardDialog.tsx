@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { usePositions } from '@/hooks/usePositions';
@@ -93,6 +94,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
     shifts,
     weekRange,
     unavailability,
+    isFallbackData,
     refetchAll,
     mutations: { createSchedule, assign },
   } = useScheduling();
@@ -251,22 +253,34 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
       }
     }}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="w-[95vw] max-w-3xl max-h-[88vh] p-0 overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-hidden p-0 sm:rounded-lg">
         <form
-          className="flex h-full flex-col"
+          className="flex h-full max-h-[90vh] flex-col"
           onSubmit={(event) => {
             event.preventDefault();
             handleSave(true);
           }}
         >
           <DialogHeader className="px-6 pt-6 pb-4">
-            <DialogTitle>Create New Shift</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Create New Shift
+              {isFallbackData && (
+                <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+                  Preview
+                </Badge>
+              )}
+            </DialogTitle>
             <DialogDescription>Set up a new shift with detailed scheduling options.</DialogDescription>
+            {isFallbackData && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Live scheduling updates are disabled while demo data is active.
+              </p>
+            )}
           </DialogHeader>
 
           <Separator />
 
-          <div className="flex-1 overflow-hidden px-6 py-4">
+          <div className="flex-1 min-h-0 px-6 py-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full flex-col">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="details">Details</TabsTrigger>
@@ -275,66 +289,68 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
                 <TabsTrigger value="notes">Notes</TabsTrigger>
               </TabsList>
 
-              <div className="mt-4 flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto pr-1">
-                  <TabsContent value="details" className="mt-0 space-y-4">
-                    <DetailsTab
-                      formData={formData}
-                      setFormData={setFormData}
-                      positions={positions}
-                      distinctLocations={distinctLocations}
-                      hours={hours}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="users" className="mt-0 space-y-4">
-                    <UsersTab
-                      employees={employees}
-                      employeesLoading={employeesLoading}
-                      getEmployeesByPosition={getEmployeesByPosition}
-                      getEmployeeFullName={getEmployeeFullName}
-                      formData={formData}
-                      setFormData={setFormData}
-                      isUserAvailableForWindow={isUserAvailableForWindow}
-                    />
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="can-claim"
-                        checked={formData.can_claim}
-                        onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, can_claim: checked }))}
+              <div className="mt-4 flex-1 min-h-0">
+                <ScrollArea className="h-full pr-4">
+                  <div className="space-y-4 pb-6">
+                    <TabsContent value="details" className="mt-0 space-y-4">
+                      <DetailsTab
+                        formData={formData}
+                        setFormData={setFormData}
+                        positions={positions}
+                        distinctLocations={distinctLocations}
+                        hours={hours}
                       />
-                      <Label htmlFor="can-claim">Enable users to claim this shift</Label>
-                    </div>
+                    </TabsContent>
 
-                    {formData.job_position_id && (
-                      <Card>
-                        <CardContent className="pt-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Users className="h-4 w-4" />
-                              <span className="text-sm text-muted-foreground">
-                                {getEmployeesByPosition(formData.job_position_id).length} users are qualified for{' '}
+                    <TabsContent value="users" className="mt-0 space-y-4">
+                      <UsersTab
+                        employees={employees}
+                        employeesLoading={employeesLoading}
+                        getEmployeesByPosition={getEmployeesByPosition}
+                        getEmployeeFullName={getEmployeeFullName}
+                        formData={formData}
+                        setFormData={setFormData}
+                        isUserAvailableForWindow={isUserAvailableForWindow}
+                      />
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="can-claim"
+                          checked={formData.can_claim}
+                          onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, can_claim: checked }))}
+                        />
+                        <Label htmlFor="can-claim">Enable users to claim this shift</Label>
+                      </div>
+
+                      {formData.job_position_id && (
+                        <Card>
+                          <CardContent className="pt-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Users className="h-4 w-4" />
+                                <span className="text-sm text-muted-foreground">
+                                  {getEmployeesByPosition(formData.job_position_id).length} users are qualified for{' '}
+                                  {positions.find((position) => position.id === formData.job_position_id)?.name}
+                                </span>
+                              </div>
+                              <Badge variant="secondary">
                                 {positions.find((position) => position.id === formData.job_position_id)?.name}
-                              </span>
+                              </Badge>
                             </div>
-                            <Badge variant="secondary">
-                              {positions.find((position) => position.id === formData.job_position_id)?.name}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </TabsContent>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </TabsContent>
 
-                  <TabsContent value="tasks" className="mt-0 space-y-4">
-                    <TasksTab tasks={formData.tasks as ShiftTask[]} onAddTask={onAddTask} onRemoveTask={onRemoveTask} />
-                  </TabsContent>
+                    <TabsContent value="tasks" className="mt-0 space-y-4">
+                      <TasksTab tasks={formData.tasks as ShiftTask[]} onAddTask={onAddTask} onRemoveTask={onRemoveTask} />
+                    </TabsContent>
 
-                  <TabsContent value="notes" className="mt-0 space-y-4">
-                    <NotesTab notes={formData.notes} onNotesChange={(notes) => setFormData((prev) => ({ ...prev, notes }))} />
-                  </TabsContent>
-                </div>
+                    <TabsContent value="notes" className="mt-0 space-y-4">
+                      <NotesTab notes={formData.notes} onNotesChange={(notes) => setFormData((prev) => ({ ...prev, notes }))} />
+                    </TabsContent>
+                  </div>
+                </ScrollArea>
               </div>
             </Tabs>
           </div>
@@ -352,15 +368,20 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
                 Cancel
               </Button>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                {isFallbackData && (
+                  <span className="text-xs text-muted-foreground sm:mr-2">
+                    Preview mode — actions disabled
+                  </span>
+                )}
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={loading}
+                  disabled={loading || isFallbackData}
                   onClick={() => handleSave(false)}
                 >
                   {loading ? 'Saving...' : 'Save Draft'}
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading || isFallbackData}>
                   {loading ? 'Publishing...' : 'Publish'}
                 </Button>
               </div>

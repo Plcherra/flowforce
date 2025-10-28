@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageFilterBar } from '@/components/MessageFilterBar';
 import { AvailabilityToggle } from '@/components/AvailabilityToggle';
@@ -306,133 +307,146 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mx-auto grid gap-4 lg:grid-cols-[300px_1fr] xl:grid-cols-[340px_1fr] max-w-6xl">
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg">Conversations</CardTitle>
-                  <p className="text-xs text-muted-foreground">Talk with teammates and groups</p>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => setShowNewConversation(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  New chat
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MessageFilterBar
-                  active={filter}
-                  onChange={setFilter}
-                  labels={{ all: 'All', unread: 'Unread', teams: 'Teams', helpdesk: 'Help Desk' }}
-                />
-                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="h-9 flex-1 min-w-[140px]" />
-              </div>
-
-              <ScrollArea className="h-[60vh] pr-1">
-                <div className="space-y-3">
-                  {filteredConversations.map((conversation) => renderConversationMeta(conversation))}
-
-                  {filteredConversations.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground text-sm">
-                      <UsersIcon className="mx-auto mb-3 h-8 w-8" />
-                      <p>{conversations.length === 0 ? 'No conversations yet' : 'No conversations match the current filters'}</p>
+    <div className="flex h-full min-h-0 flex-col px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto flex w-full flex-1 max-w-7xl">
+        <ResizablePanelGroup direction="horizontal" className="flex w-full flex-1 items-stretch">
+          <ResizablePanel defaultSize={32} minSize={22} maxSize={44} className="flex min-w-[220px]">
+            <div className="flex h-full w-full flex-col pr-3 lg:pr-4">
+              <Card className="flex flex-1 flex-col">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-lg">Conversations</CardTitle>
+                      <p className="text-xs text-muted-foreground">Talk with teammates and groups</p>
                     </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          <Card className="h-full">
-            <CardHeader className="flex flex-col gap-2 border-b">
-              {activeConversation ? (
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <CardTitle>{getConversationName(activeConversation, usersById, CURRENT_USER.id) || 'Conversation'}</CardTitle>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <UsersIcon className="h-3.5 w-3.5" />
-                      <span>
-                        {activeConversation.participantIds
-                          .filter((id) => id !== CURRENT_USER.id)
-                          .map((id) => usersById.get(id)?.name ?? 'Unknown')
-                          .join(', ')}
-                      </span>
-                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => setShowNewConversation(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      New chat
+                    </Button>
                   </div>
-                  <AvailabilityToggle />
-                </div>
-              ) : (
-                <div>
-                  <CardTitle>No conversation selected</CardTitle>
-                  <p className="text-sm text-muted-foreground">Choose a conversation or start a new one.</p>
-                </div>
-              )}
-            </CardHeader>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col gap-3 overflow-hidden">
+                  <div className="flex flex-col gap-2">
+                    <MessageFilterBar
+                      active={filter}
+                      onChange={setFilter}
+                      labels={{ all: 'All', unread: 'Unread', teams: 'Teams', helpdesk: 'Help Desk' }}
+                    />
+                    <Input
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Search"
+                      className="h-9 w-full sm:max-w-[240px]"
+                    />
+                  </div>
 
-            <CardContent className="flex flex-col h-[70vh]">
-              {activeConversation ? (
-                <>
-                  <ScrollArea className="flex-1 pr-3">
-                    <div className="space-y-4 py-4">
-                      {activeConversation.messages.length === 0 ? (
-                        <div className="text-center text-sm text-muted-foreground py-12">
-                          Be the first to say something in this chat.
+                  <ScrollArea className="flex-1 min-h-0 pr-1">
+                    <div className="space-y-3">
+                      {filteredConversations.map((conversation) => renderConversationMeta(conversation))}
+
+                      {filteredConversations.length === 0 && (
+                        <div className="text-center py-12 text-muted-foreground text-sm">
+                          <UsersIcon className="mx-auto mb-3 h-8 w-8" />
+                          <p>{conversations.length === 0 ? 'No conversations yet' : 'No conversations match the current filters'}</p>
                         </div>
-                      ) : (
-                        activeConversation.messages.map((message, index) =>
-                          renderMessageBubble(message, activeConversation.messages[index - 1])
-                        )
                       )}
                     </div>
                   </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          </ResizablePanel>
 
-                  <div className="border-t pt-4">
-                    <div className="rounded-2xl border border-border/70 bg-muted/20 p-3">
-                      <Textarea
-                        placeholder="Write a message..."
-                        value={draftMessage}
-                        onChange={(event) => setDraftMessage(event.target.value)}
-                        className="min-h-[96px] resize-none border-0 bg-transparent shadow-none focus-visible:ring-0"
-                      />
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Attach file">
-                            <Paperclip className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add image">
-                            <Image className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add emoji">
-                            <Smile className="h-4 w-4" />
-                          </Button>
+          <ResizableHandle withHandle className="mx-1 w-2 rounded-full bg-border/60 hover:bg-border focus-visible:ring-2 focus-visible:ring-primary/40" />
+
+          <ResizablePanel defaultSize={68} minSize={40} className="flex min-w-[280px]">
+            <div className="flex h-full w-full flex-col pl-3 lg:pl-4">
+              <Card className="flex flex-1 flex-col">
+                <CardHeader className="flex flex-col gap-2 border-b">
+                  {activeConversation ? (
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <CardTitle>{getConversationName(activeConversation, usersById, CURRENT_USER.id) || 'Conversation'}</CardTitle>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <UsersIcon className="h-3.5 w-3.5" />
+                          <span>
+                            {activeConversation.participantIds
+                              .filter((id) => id !== CURRENT_USER.id)
+                              .map((id) => usersById.get(id)?.name ?? 'Unknown')
+                              .join(', ')}
+                          </span>
                         </div>
-                        <Button onClick={handleSendMessage} disabled={!draftMessage.trim()}>
-                          Send
-                        </Button>
+                      </div>
+                      <AvailabilityToggle />
+                    </div>
+                  ) : (
+                    <div>
+                      <CardTitle>No conversation selected</CardTitle>
+                      <p className="text-sm text-muted-foreground">Choose a conversation or start a new one.</p>
+                    </div>
+                  )}
+                </CardHeader>
+
+                <CardContent className="flex flex-1 flex-col min-h-0">
+                  {activeConversation ? (
+                    <>
+                      <ScrollArea className="flex-1 min-h-0 pr-3">
+                        <div className="space-y-4 py-4">
+                          {activeConversation.messages.length === 0 ? (
+                            <div className="text-center text-sm text-muted-foreground py-12">
+                              Be the first to say something in this chat.
+                            </div>
+                          ) : (
+                            activeConversation.messages.map((message, index) =>
+                              renderMessageBubble(message, activeConversation.messages[index - 1])
+                            )
+                          )}
+                        </div>
+                      </ScrollArea>
+
+                      <div className="border-t pt-4">
+                        <div className="rounded-2xl border border-border/70 bg-muted/20 p-3">
+                          <Textarea
+                            placeholder="Write a message..."
+                            value={draftMessage}
+                            onChange={(event) => setDraftMessage(event.target.value)}
+                            className="min-h-[96px] resize-none border-0 bg-transparent shadow-none focus-visible:ring-0"
+                          />
+                          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Attach file">
+                                <Paperclip className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add image">
+                                <Image className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add emoji">
+                                <Smile className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <Button onClick={handleSendMessage} disabled={!draftMessage.trim()}>
+                              Send
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                      <div className="space-y-2">
+                        <MessageSquare className="mx-auto h-10 w-10" />
+                        <p>Select a conversation to view the chat history.</p>
                       </div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
-                  <div className="space-y-2">
-                    <MessageSquare className="mx-auto h-10 w-10" />
-                    <p>Select a conversation to view the chat history.</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
       <NewConversationDialog

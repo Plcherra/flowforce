@@ -5,7 +5,9 @@ import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/public-types';
 
-type FormRow = Tables<'forms'> & {
+type FormTable = Tables<'forms'>;
+
+type FormQueryRow = FormTable & {
   created_profile?: {
     first_name: string;
     last_name: string;
@@ -13,22 +15,17 @@ type FormRow = Tables<'forms'> & {
   department?: {
     name: string;
   };
-  submissions?: {
-    count: number;
+  submission_stats?: {
+    count: number | null;
+  }[];
+  latest_submission?: {
     submitted_at?: string | null;
   }[];
 };
 
 type FormField = Tables<'form_fields'>;
 
-type FormSubmission = Tables<'form_submissions'> & {
-  submitted_profile?: {
-    first_name: string;
-    last_name: string;
-  };
-};
-
-export type FormWithMeta = Omit<FormRow, 'submissions'> & {
+export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submission'> & {
   submissions_count: number;
   latest_submission_at: string | null;
 };
@@ -48,6 +45,7 @@ export function useForms() {
   }, [user]);
 
   const fetchForms = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('forms')
@@ -55,20 +53,24 @@ export function useForms() {
           *,
           created_profile:profiles!forms_created_by_fkey(first_name, last_name),
           department:departments(name),
-          submissions:form_submissions(count, submitted_at)
+          submission_stats:form_submissions(count),
+          latest_submission:form_submissions(submitted_at)
         `)
         .order('created_at', { ascending: false })
-        .order('submitted_at', { foreignTable: 'form_submissions', ascending: false })
-        .limit(1, { foreignTable: 'form_submissions' });
+        .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
+        .limit(1, { foreignTable: 'latest_submission' });
 
       if (error) throw error;
 
-      const normalized: FormWithMeta[] = (data || []).map((form) => {
-        const stats = form.submissions?.[0];
+      const rows = (data ?? []) as FormQueryRow[];
+      const normalized: FormWithMeta[] = rows.map((form) => {
+        const { submission_stats, latest_submission, ...rest } = form;
+        const stats = submission_stats?.[0];
+        const latest = latest_submission?.[0];
         return {
-          ...form,
+          ...rest,
           submissions_count: stats?.count ?? 0,
-          latest_submission_at: stats?.submitted_at ?? null,
+          latest_submission_at: latest?.submitted_at ?? null,
         };
       });
 
@@ -123,7 +125,7 @@ export function useForms() {
     }
   };
 
-  const updateForm = async (formId: string, updates: Partial<FormRow>) => {
+  const updateForm = async (formId: string, updates: Partial<FormTable>) => {
     try {
       const { error } = await supabase
         .from('forms')

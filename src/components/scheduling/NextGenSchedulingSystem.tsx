@@ -4,27 +4,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Calendar, 
-  Brain, 
-  Users, 
-  Settings, 
-  BarChart3, 
-  Zap, 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Calendar,
+  Brain,
+  Users,
+  Settings,
+  BarChart3,
+  Zap,
   Clock,
-  Smartphone,
-  CheckSquare
+  CheckSquare,
+  AlertTriangle,
 } from 'lucide-react';
-import { DragDropScheduleCalendar } from './DragDropScheduleCalendar';
-import { SchedulingCalendar } from './SchedulingCalendar';
 import { EnhancedCalendarView } from './EnhancedCalendarView';
 import { AIInsightsDashboard } from './AIInsightsDashboard';
 import { WeeklySchedulingChecklist } from './WeeklySchedulingChecklist';
 import { SchedulingWorkflow } from './SchedulingWorkflow';
 import { SchedulingNotifications } from './SchedulingNotifications';
 import { StaffShiftManagement } from './StaffShiftManagement';
-import { ComplianceMonitor } from './ComplianceMonitor';
-import { MobileStaffInterface } from './MobileStaffInterface';
+import { PersonalAvailabilityPanel } from './availability/PersonalAvailabilityPanel';
+import { TeamAvailabilityPanel } from './availability/TeamAvailabilityPanel';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AutoScheduleDialog } from './AutoScheduleDialog';
@@ -32,12 +31,22 @@ import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
 
 export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: string }) {
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('schedule');
   const [showChecklist, setShowChecklist] = useState(false);
   const [showAutoScheduler, setShowAutoScheduler] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   const { profile } = useProfile();
-  const { shifts, assignments, timeOff, vendorEvents, weekRange, error: schedulingError } = useScheduling();
+  const {
+    shifts,
+    assignments,
+    timeOff,
+    vendorEvents,
+    weekRange,
+    error: schedulingError,
+    loading,
+    refetchAll,
+    isFallbackData,
+  } = useScheduling();
 
   const isManager = useMemo(() => {
     const role = (profile?.role ?? '').toLowerCase();
@@ -178,29 +187,61 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
       description: 'Automated workflows and reminders'
     },
     {
-      id: 'mobile',
-      label: 'Mobile View',
-      icon: Smartphone,
-      description: 'Staff mobile interface'
+      id: 'availability',
+      label: 'Availability',
+      icon: Clock,
+      description: 'Personal and team availability tools'
     }
   ];
+
+  const showStatusAlert = Boolean(schedulingError) || isFallbackData;
+  const statusTitle = isFallbackData ? 'Viewing demo scheduling data' : 'Scheduling data unavailable';
+  const statusDescription = isFallbackData
+    ? 'Live scheduling data could not be reached. Preview data is displayed and scheduling actions are temporarily disabled.'
+    : schedulingError ?? 'An unexpected error occurred while loading scheduling data.';
+  const actionsDisabled = isFallbackData;
+  const retryDisabled = loading;
+
+  const handleRetry = () => {
+    void refetchAll();
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {isManager && (
         <div className="border-b border-amber-200/60 bg-amber-50/70">
-          <div className="container mx-auto px-4 py-3 text-[11px] font-mono leading-relaxed text-amber-900">
-            <div className="flex items-center justify-between gap-2 text-amber-700">
-              <span className="text-xs font-semibold uppercase tracking-wide">Scheduling Debug</span>
-              <span className="text-[10px]">Manager view only</span>
+          <div className="container mx-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-amber-900">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-amber-700">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide">Scheduling Debug</span>
+                {isFallbackData && (
+                  <span className="rounded-full bg-amber-200 px-2 py-[2px] text-[10px] font-semibold text-amber-900">
+                    Preview data
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px]">Manager view only</span>
+                <button
+                  type="button"
+                  onClick={() => setShowDebugPanel((prev) => !prev)}
+                  className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 transition hover:text-amber-900"
+                >
+                  {showDebugPanel ? 'Hide details' : 'Show details'}
+                </button>
+              </div>
             </div>
-            <pre className="mt-2 whitespace-pre-wrap break-words text-xs" data-testid="scheduling-debug-json">
-              {JSON.stringify(debugPayload, null, 2)}
-            </pre>
-            <div className="mt-2 text-xs" data-testid="scheduling-debug-error">
-              <span className="font-semibold text-amber-700">lastError:</span>{' '}
-              {lastApiError && lastApiError.trim().length > 0 ? lastApiError : 'none'}
-            </div>
+            {showDebugPanel && (
+              <>
+                <pre className="mt-2 whitespace-pre-wrap break-words text-xs" data-testid="scheduling-debug-json">
+                  {JSON.stringify(debugPayload, null, 2)}
+                </pre>
+                <div className="mt-2 text-xs" data-testid="scheduling-debug-error">
+                  <span className="font-semibold text-amber-700">lastError:</span>{' '}
+                  {lastApiError && lastApiError.trim().length > 0 ? lastApiError : 'none'}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -227,7 +268,12 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                 <Clock className="h-3 w-3" />
                 Real-time
               </Badge>
-              <Button size="sm" className="flex items-center gap-2" onClick={() => setShowAutoScheduler(true)}>
+              <Button
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => setShowAutoScheduler(true)}
+                disabled={actionsDisabled}
+              >
                 <Zap className="h-3 w-3" />
                 Auto-Schedule Week
               </Button>
@@ -241,6 +287,18 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
       </div>
 
       <div className="container mx-auto p-4">
+        {showStatusAlert && (
+          <Alert variant={isFallbackData ? 'default' : 'destructive'} className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>{statusTitle}</AlertTitle>
+            <AlertDescription>{statusDescription}</AlertDescription>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={handleRetry} disabled={retryDisabled}>
+                Retry
+              </Button>
+            </div>
+          </Alert>
+        )}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Enhanced Tab Navigation */}
           <div className="overflow-x-auto">
@@ -375,8 +433,9 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
             </div>
           </TabsContent>
 
-          <TabsContent value="mobile">
-            <MobileStaffInterface />
+          <TabsContent value="availability" className="space-y-6">
+            <PersonalAvailabilityPanel />
+            <TeamAvailabilityPanel />
           </TabsContent>
         </Tabs>
       </div>

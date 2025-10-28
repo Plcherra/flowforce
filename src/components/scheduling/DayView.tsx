@@ -3,27 +3,57 @@ import { format, isSameDay, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, Plus } from 'lucide-react';
-import { Schedule, SchedulingFilters, ScheduleAssignment } from '@/types/common';
-import { useState } from 'react';
+import { Clock, Users, Plus, CalendarDays } from 'lucide-react';
+import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
+import type { SchedulingFilterState } from './SchedulingFilters';
+import type { AppEvent } from '@/hooks/useEvents';
+import { useMemo, useState } from 'react';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor } from '@/utils/schedulingUtils';
 
 interface DayViewProps {
-  schedules: Schedule[];
+  schedules: ShiftWithAssignments[];
   selectedDate: Date;
   onSelectShift: (shiftId: string) => void;
-  filters: SchedulingFilters;
+  onSelectEvent?: (eventId: string | null) => void;
+  filters: SchedulingFilterState;
   isMobile?: boolean;
   hideShiftActions?: boolean;
+  overlayEvents?: AppEvent[];
+  selectedEventId?: string | null;
 }
 
-export function DayView({ schedules, selectedDate, onSelectShift, filters, isMobile = false, hideShiftActions = false }: DayViewProps) {
+export function DayView({
+  schedules,
+  selectedDate,
+  onSelectShift,
+  onSelectEvent,
+  filters: _filters,
+  isMobile = false,
+  hideShiftActions = false,
+  overlayEvents = [],
+  selectedEventId = null,
+}: DayViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const dayShifts = schedules.filter(schedule => 
     isSameDay(parseISO(schedule.start_time), selectedDate)
   );
+  const dayEvents = useMemo(
+    () =>
+      overlayEvents
+        .filter((event) => isSameDay(new Date(event.start), selectedDate))
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()),
+    [overlayEvents, selectedDate],
+  );
 
+  const handleEventClick = (eventId: string) => {
+    if (!onSelectEvent) return;
+    if (selectedEventId === eventId) {
+      onSelectEvent(null);
+    } else {
+      onSelectEvent(eventId);
+    }
+  };
 
   return (
     <div className={`p-${isMobile ? '4' : '6'}`}>
@@ -34,6 +64,60 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
         <p className="text-gray-600">
           {dayShifts.length} shifts scheduled
         </p>
+      </div>
+
+      <div className="mb-6 space-y-2">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold text-gray-900">Meetings & events</h3>
+        </div>
+        {dayEvents.length === 0 ? (
+          <div className="rounded-md border border-dashed border-muted-foreground/40 p-4 text-sm text-muted-foreground">
+            No sessions scheduled for this day.
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {dayEvents.map((event) => (
+              <div
+                key={event.id}
+                className={`rounded-md border border-border/70 bg-background p-3 shadow-sm transition hover:shadow-md cursor-pointer ${
+                  selectedEventId === event.id ? 'ring-2 ring-primary' : ''
+                }`}
+                style={{ borderLeftColor: event.color ?? '#6366f1', borderLeftWidth: 4 }}
+                onClick={() => handleEventClick(event.id)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-semibold text-gray-900">
+                    {event.title || 'Untitled session'}
+                  </div>
+                  {event.type && (
+                    <Badge variant="outline" className="text-xs capitalize">
+                      {event.type}
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(event.start), 'HH:mm')} – {event.end ? format(new Date(event.end), 'HH:mm') : 'TBD'}
+                  {event.location ? ` • ${event.location}` : ''}
+                </div>
+                {event.attendees && event.attendees.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {event.attendees.slice(0, 4).map((attendee) => (
+                      <Badge key={attendee.id} variant="secondary" className="text-[10px]">
+                        {attendee.name}
+                      </Badge>
+                    ))}
+                    {event.attendees.length > 4 && (
+                      <Badge variant="secondary" className="text-[10px]">
+                        +{event.attendees.length - 4}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-2'} gap-${isMobile ? '4' : '6'}`}>
@@ -55,7 +139,7 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
               const hourlyUsers = new Set<string>();
               hourShifts.forEach(shift => {
                 if (shift.assignments) {
-                  shift.assignments.forEach((assignment: ScheduleAssignment) => {
+                  shift.assignments.forEach((assignment: AssignmentWithUser) => {
                     if (assignment.user) {
                       hourlyUsers.add(`${assignment.user.first_name} ${assignment.user.last_name}`);
                     }
@@ -153,7 +237,7 @@ export function DayView({ schedules, selectedDate, onSelectShift, filters, isMob
                       </div>
                       {shift.assignments && shift.assignments.length > 0 ? (
                         <div className="ml-5 flex -space-x-1">
-                          {shift.assignments?.slice(0, 5).map((assignment: ScheduleAssignment) => (
+                          {shift.assignments?.slice(0, 5).map((assignment: AssignmentWithUser) => (
                             <Avatar key={assignment.id} className="h-6 w-6 border-2 border-white">
                               <AvatarImage src={assignment.user?.avatar_url} />
                               <AvatarFallback className="text-xs">

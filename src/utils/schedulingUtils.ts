@@ -1,8 +1,8 @@
-import { Schedule, ScheduleAssignment } from '@/types/common';
+import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
 
 // Shared utilities for scheduling components
 
-export const getShiftColor = (shift: Schedule): string => {
+export const getShiftColor = (shift: ShiftWithAssignments): string => {
   if (shift.color) return shift.color;
   if (shift.job_position?.role) {
     const roleColors: Record<string, string> = {
@@ -23,12 +23,12 @@ export interface UserProfile {
   avatar_url?: string;
 }
 
-export const extractUsersFromShifts = (shifts: Schedule[]): Map<string, UserProfile> => {
+export const extractUsersFromShifts = (shifts: ShiftWithAssignments[]): Map<string, UserProfile> => {
   const userMap = new Map<string, UserProfile>();
   
   shifts.forEach(shift => {
     if (shift.assignments) {
-      shift.assignments.forEach((assignment: ScheduleAssignment) => {
+      shift.assignments.forEach((assignment: AssignmentWithUser) => {
         if (assignment.user) {
           const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
           userMap.set(userId, {
@@ -45,7 +45,7 @@ export const extractUsersFromShifts = (shifts: Schedule[]): Map<string, UserProf
   return userMap;
 };
 
-export const getHourlyUsers = (shifts: Schedule[], hour: number): UserProfile[] => {
+export const getHourlyUsers = (shifts: ShiftWithAssignments[], hour: number): UserProfile[] => {
   const hourlyUsers = new Map<string, UserProfile>();
   
   shifts.forEach(shift => {
@@ -53,7 +53,7 @@ export const getHourlyUsers = (shifts: Schedule[], hour: number): UserProfile[] 
     const endHour = new Date(shift.end_time).getHours();
     
     if (hour >= startHour && hour < endHour && shift.assignments) {
-      shift.assignments.forEach((assignment: ScheduleAssignment) => {
+      shift.assignments.forEach((assignment: AssignmentWithUser) => {
         if (assignment.user) {
           const userId = assignment.user.id || `${assignment.user.first_name}-${assignment.user.last_name}`;
           hourlyUsers.set(userId, {
@@ -77,7 +77,7 @@ export interface CoverageStats {
   coverageRatio: number;
 }
 
-export const calculateCoverageStats = (shifts: Schedule[]): CoverageStats => {
+export const calculateCoverageStats = (shifts: ShiftWithAssignments[]): CoverageStats => {
   const totalHours = shifts.reduce((sum, shift) => {
     const start = new Date(shift.start_time);
     const end = new Date(shift.end_time);

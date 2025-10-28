@@ -3,21 +3,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { WeekView } from './WeekView';
 import { MonthView } from './MonthView';
 import { DayView } from './DayView';
-import { Schedule, SchedulingFilters } from '@/types/common';
+import type { SchedulingFilterState } from './SchedulingFilters';
+import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
 import type { AppEvent } from '@/hooks/useEvents';
 
 type ViewType = 'month' | 'week' | 'day' | 'year';
 
 interface CalendarGridProps {
   currentView: ViewType;
-  schedules: Schedule[];
+  schedules: ShiftWithAssignments[];
   selectedDate: Date;
   onSelectShift: (shiftId: string) => void;
-  filters: SchedulingFilters;
+  onSelectEvent?: (eventId: string | null) => void;
+  filters: SchedulingFilterState;
   loading: boolean;
   isMobile?: boolean;
   overlayEvents?: AppEvent[];
   hideShiftActions?: boolean;
+  selectedEventId?: string | null;
 }
 
 export function CalendarGrid({
@@ -25,21 +28,25 @@ export function CalendarGrid({
   schedules,
   selectedDate,
   onSelectShift,
+  onSelectEvent,
   filters,
   loading,
   isMobile = false,
   overlayEvents,
-  hideShiftActions = false
+  hideShiftActions = false,
+  selectedEventId = null
 }: CalendarGridProps) {
   const renderCalendarView = () => {
     const commonProps = {
       schedules,
       selectedDate,
       onSelectShift,
+      onSelectEvent,
       filters,
       isMobile,
       overlayEvents,
-      hideShiftActions
+      hideShiftActions,
+      selectedEventId
     };
 
     switch (currentView) {

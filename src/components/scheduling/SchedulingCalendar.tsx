@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarGrid } from './CalendarGrid';
 import { ScheduleHeader } from './ScheduleHeader';
 import { ShiftDetailsPanel } from './ShiftDetailsPanel';
 import { ViewSelector } from './ViewSelector';
-import { SchedulingFilters } from './SchedulingFilters';
+import { SchedulingFilters, type SchedulingFilterState } from './SchedulingFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ViewType, Schedule } from '@/types/scheduling-unified';
+import { ViewType } from '@/types/scheduling-unified';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useEvents } from '@/hooks/useEvents';
+import { EventDetailsPanel } from '@/components/events/EventDetailsPanel';
+import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
+
+const INITIAL_FILTERS: SchedulingFilterState = {
+  positions: [],
+  users: [],
+  status: 'all',
+  published: 'all',
+};
 
 interface SchedulingCalendarProps {
   onCreateShift?: () => void;
@@ -17,7 +26,7 @@ interface SchedulingCalendarProps {
 }
 
 export function SchedulingCalendar({
-  onCreateShift,
+  onCreateShift: _onCreateShift,
   hideShiftActions = false,
   externalDetails = false,
   onShiftSelect,
@@ -27,19 +36,80 @@ export function SchedulingCalendar({
   const [currentView, setCurrentView] = useState<ViewType>(isMobile ? 'day' : 'week');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    positions: [],
-    users: [],
-    status: 'all',
-    departments: []
-  });
+  const [filters, setFilters] = useState<SchedulingFilterState>(INITIAL_FILTERS);
 
-  // Transform raw schedules to match expected interface
-  const transformedSchedules = shifts as unknown as Schedule[];
+  const filteredShifts = useMemo<ShiftWithAssignments[]>(() => {
+    return shifts.filter((shift) => {
+      if (filters.published !== 'all') {
+        if (filters.published === 'published' && !shift.is_published) return false;
+        if (filters.published === 'draft' && shift.is_published) return false;
+      }
+
+      if (filters.positions.length > 0 && (!shift.position_id || !filters.positions.includes(shift.position_id))) {
+        return false;
+      }
+
+      if (filters.users.length > 0) {
+        const assignedUserIds = shift.assignments.map((assignment) => assignment.user_id).filter(Boolean);
+        if (!assignedUserIds.some((id) => filters.users.includes(id))) {
+          return false;
+        }
+      }
+
+      if (filters.status !== 'all') {
+        const assignedCount = shift.assignments.length;
+        const requiredHeadcount = shift.required_headcount ?? 0;
+        switch (filters.status) {
+          case 'assigned':
+            if (assignedCount === 0) return false;
+            break;
+          case 'unassigned':
+            if (assignedCount > 0) return false;
+            break;
+          case 'understaffed':
+            if (requiredHeadcount > 0 && assignedCount >= requiredHeadcount) return false;
+            break;
+          case 'overstaffed':
+            if (requiredHeadcount > 0 && assignedCount <= requiredHeadcount) return false;
+            break;
+          default:
+            break;
+        }
+      }
+
+      return true;
+    });
+  }, [filters, shifts]);
 
   const { events } = useEvents();
-  const overlayEvents = events.filter(e => e.type === 'vendor' || e.type === 'meeting' || e.type === 'event');
+  const overlayEvents = events.filter(
+    (event) => event.type === 'vendor' || event.type === 'meeting' || event.type === 'event',
+  );
+  const selectedEvent = useMemo(
+    () => overlayEvents.find((event) => event.id === selectedEventId) ?? null,
+    [overlayEvents, selectedEventId],
+  );
+  const relatedShifts = useMemo(() => {
+    if (!selectedEvent) return [];
+    const ids = new Set(selectedEvent.related_shift_ids ?? []);
+    if (ids.size === 0) return [];
+    return shifts.filter((shift) => ids.has(shift.id));
+  }, [selectedEvent, shifts]);
+
+  useEffect(() => {
+    if (selectedShift && !filteredShifts.some((shift) => shift.id === selectedShift)) {
+      setSelectedShift(null);
+      if (onShiftSelect) onShiftSelect(null);
+    }
+  }, [filteredShifts, onShiftSelect, selectedShift]);
+
+  useEffect(() => {
+    if (selectedEventId && !overlayEvents.some((event) => event.id === selectedEventId)) {
+      setSelectedEventId(null);
+    }
+  }, [overlayEvents, selectedEventId]);
 
   const handleDateChange = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
@@ -52,11 +122,20 @@ export function SchedulingCalendar({
   };
 
   const selectedSchedule = selectedShift ?
-    transformedSchedules.find(s => s.id === selectedShift) : null;
+    filteredShifts.find(s => s.id === selectedShift) : null;
 
   const handleSelectShift = (id: string | null) => {
+    setSelectedEventId(null);
     setSelectedShift(id);
     if (onShiftSelect) onShiftSelect(id);
+  };
+
+  const handleSelectEvent = (id: string | null) => {
+    setSelectedShift(null);
+    if (onShiftSelect) {
+      onShiftSelect(null);
+    }
+    setSelectedEventId(id);
   };
 
   return (
@@ -90,14 +169,16 @@ export function SchedulingCalendar({
         <div className="flex-1">
           <CalendarGrid
             currentView={currentView}
-            schedules={transformedSchedules}
+            schedules={filteredShifts}
             selectedDate={selectedDate}
             onSelectShift={handleSelectShift}
+            onSelectEvent={handleSelectEvent}
             filters={filters}
             loading={loading}
             isMobile={isMobile}
             overlayEvents={overlayEvents}
             hideShiftActions={hideShiftActions}
+            selectedEventId={selectedEventId}
           />
         </div>
 
@@ -109,6 +190,17 @@ export function SchedulingCalendar({
             />
           </div>
         )}
+
+        {selectedEvent && !selectedShift && !isMobile && !externalDetails && (
+          <div className="w-96">
+            <EventDetailsPanel
+              event={selectedEvent}
+              relatedShifts={relatedShifts}
+              onClose={() => handleSelectEvent(null)}
+              onViewShift={(shiftId) => handleSelectShift(shiftId)}
+            />
+          </div>
+        )}
       </div>
 
       {selectedShift && selectedSchedule && isMobile && !externalDetails && (
@@ -117,6 +209,22 @@ export function SchedulingCalendar({
             shiftId={selectedShift}
             onClose={() => handleSelectShift(null)}
           />
+        </div>
+      )}
+
+      {selectedEvent && !selectedShift && isMobile && !externalDetails && (
+        <div className="fixed inset-0 bg-background z-50 overflow-auto">
+          <div className="p-4">
+            <EventDetailsPanel
+              event={selectedEvent}
+              relatedShifts={relatedShifts}
+              onClose={() => handleSelectEvent(null)}
+              onViewShift={(shiftId) => {
+                handleSelectEvent(null);
+                handleSelectShift(shiftId);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

@@ -14,19 +14,29 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { X, Plus } from 'lucide-react';
 import { usePositions } from '@/hooks/usePositions';
 
+export type SchedulingFilterState = {
+  positions: string[];
+  users: string[];
+  status: 'all' | 'assigned' | 'unassigned' | 'understaffed' | 'overstaffed';
+  published: 'all' | 'published' | 'draft';
+};
+
 interface SchedulingFiltersProps {
-  filters: any;
-  onFiltersChange: (filters: any) => void;
+  filters: SchedulingFilterState;
+  onFiltersChange: (filters: SchedulingFilterState) => void;
 }
 
 export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFiltersProps) {
   const { positions } = usePositions();
-  const [showCustomFilter, setShowCustomFilter] = useState(false);
+  const [, setShowCustomFilter] = useState(false);
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = <Key extends keyof SchedulingFilterState>(
+    key: Key,
+    value: SchedulingFilterState[Key],
+  ) => {
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: value,
     });
   };
 
@@ -44,7 +54,7 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
       positions: [],
       users: [],
       status: 'all',
-      published: 'all'
+      published: 'all',
     });
   };
 

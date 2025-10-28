@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, type EventAttendee } from '@/hooks/useEvents';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { Schedule } from '@/types/common';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface CreateVendorVisitDialogProps {
 export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisitDialogProps) {
   const { shifts } = useScheduling();
   const { createVendorVisit, linkVisitToShifts } = useEvents();
+  const { toast } = useToast();
 
   const [title, setTitle] = useState('Vendor Visit');
   const [vendorName, setVendorName] = useState('');
@@ -59,8 +61,33 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
     setSelectedShiftIds(prev => ({ ...prev, [id]: v }));
   };
 
+  const buildAttendees = (shiftIds: string[]): EventAttendee[] => {
+    if (!shiftIds.length) return [];
+    const map = new Map<string, EventAttendee>();
+    shifts
+      .filter((shift) => shiftIds.includes(shift.id))
+      .forEach((shift) => {
+        shift.assignments?.forEach((assignment) => {
+          if (assignment.user?.id) {
+            const name = `${assignment.user.first_name ?? ''} ${assignment.user.last_name ?? ''}`.trim() || 'Team member';
+            map.set(assignment.user.id, {
+              id: assignment.user.id,
+              name,
+              avatar_url: assignment.user.avatar_url ?? null,
+              role: shift.job_position?.name ?? assignment.user.role ?? undefined,
+            });
+          }
+        });
+      });
+    return Array.from(map.values());
+  };
+
   const handleCreate = async () => {
     if (!start || !end || !title.trim() || !vendorName.trim()) return;
+    const linkedShiftIds = Object.entries(selectedShiftIds)
+      .filter(([, v]) => v)
+      .map(([id]) => id);
+
     const visit = await createVendorVisit({
       title,
       description,
@@ -68,7 +95,8 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
       end: new Date(end).toISOString(),
       location,
       vendor: { name: vendorName, service_type: serviceType },
-      related_shift_ids: Object.entries(selectedShiftIds).filter(([,v]) => v).map(([id]) => id),
+      related_shift_ids: linkedShiftIds,
+      attendees: buildAttendees(linkedShiftIds),
       checklist: [
         { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
         { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
@@ -77,6 +105,10 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
     if (visit.related_shift_ids && visit.related_shift_ids.length > 0) {
       await linkVisitToShifts(visit.id, visit.related_shift_ids);
     }
+    toast({
+      title: 'Vendor visit created',
+      description: `${vendorName} scheduled for ${new Date(start).toLocaleString()}.`,
+    });
     onOpenChange(false);
   };
 
