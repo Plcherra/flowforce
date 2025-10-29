@@ -8,10 +8,10 @@ import {
   Clock,
   Bell,
   MessageSquare,
-  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { WizardFormData } from '../CreateUpdateWizard';
+import { CompanyUpdatePreview } from '@/features/company-updates/wizard/CompanyUpdatePreview';
 
 interface SummaryStepProps {
   formData: WizardFormData;
@@ -46,14 +46,6 @@ export function SummaryStep({ formData }: SummaryStepProps) {
 
     const labels = labelMap[type] ?? { singular: type, plural: `${type}s` };
     return `${relevantTargets.length} ${relevantTargets.length === 1 ? labels.singular : labels.plural}`;
-  };
-
-  const getBackgroundPreview = () => {
-    const { backgroundStyle } = formData;
-    if (backgroundStyle.type === 'gradient') {
-      return `linear-gradient(135deg, ${backgroundStyle.primary}, ${backgroundStyle.secondary})`;
-    }
-    return backgroundStyle.primary;
   };
 
   const getScheduleSummary = () => {
@@ -107,57 +99,8 @@ export function SummaryStep({ formData }: SummaryStepProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Update Preview */}
         <div className="space-y-4">
-          <h4 className="font-semibold flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            Update Preview
-          </h4>
-          
-          <Card className="overflow-hidden">
-            <div
-              className="h-32 p-4 text-white relative"
-              style={{ background: getBackgroundPreview() }}
-            >
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="relative z-10">
-                <Badge variant="secondary" className="mb-2">
-                  {formData.type}
-                </Badge>
-                <h4 className="font-semibold text-lg line-clamp-2">
-                  {formData.title}
-                </h4>
-              </div>
-            </div>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground line-clamp-4 mb-3">
-                {formData.content}
-              </p>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>
-                  {formData.publishingSettings.authorAttribution 
-                    ? `By ${formData.publishingSettings.authorName || 'You'}`
-                    : 'Anonymous'
-                  }
-                </span>
-                <div className="flex flex-wrap gap-2 justify-end">
-                  {formData.publishingSettings.engagement.allowLikes && (
-                    <Badge variant="outline">Likes on</Badge>
-                  )}
-                  {formData.publishingSettings.engagement.allowComments && (
-                    <Badge variant="outline">Comments on</Badge>
-                  )}
-                  {formData.publishingSettings.engagement.allowSharing && (
-                    <Badge variant="outline">Sharing on</Badge>
-                  )}
-                  {formData.publishingSettings.engagement.requireConfirmation && (
-                    <Badge variant="outline">Read receipt</Badge>
-                  )}
-                  {formData.publishingSettings.engagement.showAsPopup && (
-                    <Badge variant="outline">Popup</Badge>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <h4 className="font-semibold">Update Preview</h4>
+          <CompanyUpdatePreview data={formData} />
         </div>
 
         {/* Settings Summary */}

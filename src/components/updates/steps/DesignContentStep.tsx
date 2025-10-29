@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,59 +8,83 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Palette, Type, Image, Sparkles } from 'lucide-react';
-import { WizardFormData } from '../CreateUpdateWizard';
+
+import type { WizardFormData } from '../CreateUpdateWizard';
 import { GRADIENT_PRESETS, BACKGROUND_PATTERNS } from '@/data/updateTemplates';
+import { CompanyUpdatePreview } from '@/features/company-updates/wizard/CompanyUpdatePreview';
 
 interface DesignContentStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
+  previewDevice?: 'desktop' | 'mobile';
+  onPreviewDeviceChange?: (device: 'desktop' | 'mobile') => void;
 }
 
-export function DesignContentStep({ formData, updateFormData }: DesignContentStepProps) {
+export function DesignContentStep({
+  formData,
+  updateFormData,
+  previewDevice = 'desktop',
+  onPreviewDeviceChange,
+}: DesignContentStepProps) {
   const [activeTab, setActiveTab] = useState('content');
 
   const updateBackgroundStyle = (updates: Partial<typeof formData.backgroundStyle>) => {
     updateFormData({
-      backgroundStyle: { ...formData.backgroundStyle, ...updates }
+      backgroundStyle: { ...formData.backgroundStyle, ...updates },
     });
   };
 
-  const handleGradientPreset = (preset: typeof GRADIENT_PRESETS[0]) => {
+  const handleGradientPreset = (preset: typeof GRADIENT_PRESETS[number]) => {
     updateBackgroundStyle({
       type: 'gradient',
       primary: preset.primary,
-      secondary: preset.secondary
+      secondary: preset.secondary,
     });
   };
 
-  const getBackgroundPreview = () => {
-    const { backgroundStyle } = formData;
-    if (backgroundStyle.type === 'gradient') {
-      return `linear-gradient(135deg, ${backgroundStyle.primary}, ${backgroundStyle.secondary})`;
-    }
-    return backgroundStyle.primary;
-  };
+  const deviceToggle = useMemo(
+    () => (
+      <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 text-xs shadow-sm">
+        <Button
+          type="button"
+          variant={previewDevice === 'desktop' ? 'default' : 'ghost'}
+          size="sm"
+          className="h-7 px-3"
+          onClick={() => onPreviewDeviceChange?.('desktop')}
+        >
+          Desktop
+        </Button>
+        <Button
+          type="button"
+          variant={previewDevice === 'mobile' ? 'default' : 'ghost'}
+          size="sm"
+          className="h-7 px-3"
+          onClick={() => onPreviewDeviceChange?.('mobile')}
+        >
+          Mobile
+        </Button>
+      </div>
+    ),
+    [previewDevice, onPreviewDeviceChange],
+  );
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Design & Content</h3>
-        <p className="text-muted-foreground">
-          Customize the look and write your content
-        </p>
+        <h3 className="mb-2 text-lg font-semibold">Design & Content</h3>
+        <p className="text-muted-foreground">Craft the message and see how it renders in real time.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Content Editor */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,1fr)]">
         <div className="space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="content">
-                <Type className="h-4 w-4 mr-2" />
+                <Type className="mr-2 h-4 w-4" />
                 Content
               </TabsTrigger>
               <TabsTrigger value="design">
-                <Palette className="h-4 w-4 mr-2" />
+                <Palette className="mr-2 h-4 w-4" />
                 Design
               </TabsTrigger>
             </TabsList>
@@ -75,18 +99,13 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                   placeholder="Enter your update title..."
                   className="text-lg font-semibold"
                 />
-                <p className="text-xs text-muted-foreground">
-                  {formData.title.length}/100 characters
-                </p>
+                <p className="text-xs text-muted-foreground">{formData.title.length}/100 characters</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Type</Label>
-                  <Select 
-                    value={formData.type} 
-                    onValueChange={(value: any) => updateFormData({ type: value })}
-                  >
+                  <Select value={formData.type} onValueChange={(value) => updateFormData({ type: value as any })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -101,10 +120,7 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
 
                 <div className="space-y-2">
                   <Label>Priority</Label>
-                  <Select 
-                    value={formData.priority} 
-                    onValueChange={(value: any) => updateFormData({ priority: value })}
-                  >
+                  <Select value={formData.priority} onValueChange={(value) => updateFormData({ priority: value as any })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -130,7 +146,7 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{formData.content.length}/1000 characters</span>
                   <Button variant="outline" size="sm" className="h-6">
-                    <Sparkles className="h-3 w-3 mr-1" />
+                    <Sparkles className="mr-1 h-3 w-3" />
                     AI Enhance
                   </Button>
                 </div>
@@ -151,7 +167,7 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
               <div className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium">Background Style</Label>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="mt-2 grid grid-cols-3 gap-2">
                     <Button
                       variant={formData.backgroundStyle.type === 'solid' ? 'default' : 'outline'}
                       size="sm"
@@ -179,7 +195,7 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                 {formData.backgroundStyle.type === 'gradient' && (
                   <div>
                     <Label className="text-sm font-medium">Gradient Presets</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="mt-2 grid grid-cols-2 gap-2">
                       {GRADIENT_PRESETS.map((preset) => (
                         <Button
                           key={preset.name}
@@ -189,10 +205,8 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                           className="justify-start p-2"
                         >
                           <div
-                            className="w-4 h-4 rounded mr-2"
-                            style={{ 
-                              background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})` 
-                            }}
+                            className="mr-2 h-4 w-4 rounded"
+                            style={{ background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})` }}
                           />
                           <span className="text-xs">{preset.name}</span>
                         </Button>
@@ -204,7 +218,7 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                 {formData.backgroundStyle.type === 'pattern' && (
                   <div>
                     <Label className="text-sm font-medium">Pattern</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="mt-2 grid grid-cols-2 gap-2">
                       {BACKGROUND_PATTERNS.map((pattern) => (
                         <Button
                           key={pattern.id}
@@ -222,13 +236,13 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="primary-color">Primary Color</Label>
-                    <div className="flex gap-2 mt-1">
+                    <div className="mt-1 flex gap-2">
                       <input
                         id="primary-color"
                         type="color"
                         value={formData.backgroundStyle.primary}
                         onChange={(e) => updateBackgroundStyle({ primary: e.target.value })}
-                        className="w-12 h-10 rounded border"
+                        className="h-10 w-12 rounded border"
                       />
                       <Input
                         value={formData.backgroundStyle.primary}
@@ -238,17 +252,17 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
                       />
                     </div>
                   </div>
-                  
+
                   {formData.backgroundStyle.type === 'gradient' && (
                     <div>
                       <Label htmlFor="secondary-color">Secondary Color</Label>
-                      <div className="flex gap-2 mt-1">
+                      <div className="mt-1 flex gap-2">
                         <input
                           id="secondary-color"
                           type="color"
                           value={formData.backgroundStyle.secondary || '#1e40af'}
                           onChange={(e) => updateBackgroundStyle({ secondary: e.target.value })}
-                          className="w-12 h-10 rounded border"
+                          className="h-10 w-12 rounded border"
                         />
                         <Input
                           value={formData.backgroundStyle.secondary || '#1e40af'}
@@ -263,37 +277,52 @@ export function DesignContentStep({ formData, updateFormData }: DesignContentSte
               </div>
             </TabsContent>
           </Tabs>
+
+          <Card className="border-dashed">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Image className="h-4 w-4" />
+                Media & Attachments
+              </CardTitle>
+              <Button variant="ghost" size="sm" className="h-8 px-2">
+                Manage library
+              </Button>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Upload hero images, resources or attach files to your update. Attachment support will be available in the next iteration.
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Live Preview */}
-        <div className="space-y-4">
-          <Label className="text-sm font-medium">Live Preview</Label>
-          <Card className="overflow-hidden">
-            <div
-              className="h-32 p-4 text-white relative"
-              style={{ background: getBackgroundPreview() }}
-            >
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="relative z-10">
-                <Badge variant="secondary" className="mb-2">
-                  {formData.type}
-                </Badge>
-                <h4 className="font-semibold text-lg truncate">
-                  {formData.title || 'Your Title Here'}
-                </h4>
+        <div className="space-y-4 lg:sticky lg:top-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium">Live preview</CardTitle>
+              {deviceToggle}
+            </CardHeader>
+            <CardContent>
+              <CompanyUpdatePreview data={formData} device={previewDevice} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Quick Highlights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Characters remaining</span>
+                <span>{Math.max(0, 1000 - formData.content.length)}</span>
               </div>
-            </div>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {formData.content || 'Your content will appear here...'}
-              </p>
-              <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
-                <span>Just now</span>
-                <div className="flex gap-4">
-                  <span>👍 0</span>
-                  <span>💬 0</span>
-                  <span>👁 0</span>
-                </div>
+              <div className="flex justify-between">
+                <span>Priority</span>
+                <Badge variant="outline" className="capitalize">
+                  {formData.priority}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span>Template</span>
+                <span>{formData.template ? formData.template.name : 'Custom'}</span>
               </div>
             </CardContent>
           </Card>

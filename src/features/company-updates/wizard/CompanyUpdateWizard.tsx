@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
 import { TemplateSelectionStep } from '@/components/updates/steps/TemplateSelectionStep';
 import { DesignContentStep } from '@/components/updates/steps/DesignContentStep';
 import { RecipientsStep } from '@/components/updates/steps/RecipientsStep';
@@ -32,11 +33,24 @@ const STEP_COMPONENT_RENDERERS: Record<
 interface StepComponentProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
+  previewDevice?: 'desktop' | 'mobile';
+  onPreviewDeviceChange?: (device: 'desktop' | 'mobile') => void;
 }
 
 export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyUpdateWizardProps) {
   const draft = useCompanyUpdateDraft();
   const { toast } = useToast();
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+
+  const autoSaveLabel = useMemo(() => {
+    if (draft.lastSavedAt) {
+      return `Autosaved ${formatDistanceToNow(draft.lastSavedAt, { addSuffix: true })}`;
+    }
+    if (draft.hasPersistedDraft) {
+      return 'Draft restored from previous session';
+    }
+    return 'Autosave enabled';
+  }, [draft.hasPersistedDraft, draft.lastSavedAt]);
 
   const handleDialogChange = useCallback(
     (nextOpen: boolean) => {
@@ -83,7 +97,7 @@ export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyU
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-5xl overflow-hidden border-none p-0 shadow-2xl">
         <div className="flex h-[85vh] flex-col">
-          <WizardHeader currentStepIndex={draft.currentStepIndex} />
+          <WizardHeader currentStepIndex={draft.currentStepIndex} statusLabel={autoSaveLabel} />
 
           <StepNavigation
             currentIndex={draft.currentStepIndex}
@@ -102,6 +116,12 @@ export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyU
                 {StepRenderer({
                   formData: draft.formData,
                   updateFormData: draft.updateFormData,
+                  ...(draft.currentStep.id === 'design'
+                    ? {
+                        previewDevice,
+                        onPreviewDeviceChange: setPreviewDevice,
+                      }
+                    : {}),
                 })}
               </motion.div>
             </AnimatePresence>
@@ -122,7 +142,7 @@ export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyU
   );
 }
 
-function WizardHeader({ currentStepIndex }: { currentStepIndex: number }) {
+function WizardHeader({ currentStepIndex, statusLabel }: { currentStepIndex: number; statusLabel: string }) {
   return (
     <header className="flex flex-col gap-3 border-b border-border px-6 py-4">
       <div className="flex flex-col gap-2">
@@ -131,9 +151,12 @@ function WizardHeader({ currentStepIndex }: { currentStepIndex: number }) {
           Follow the guided steps to craft an announcement, choose recipients, and publish it when you&apos;re ready.
         </DialogDescription>
       </div>
-      <Badge variant="outline" className="self-start">
-        Step {currentStepIndex + 1} of {WIZARD_STEPS.length}
-      </Badge>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <Badge variant="outline" className="border-dashed">
+          Step {currentStepIndex + 1} of {WIZARD_STEPS.length}
+        </Badge>
+        <span>{statusLabel}</span>
+      </div>
     </header>
   );
 }
