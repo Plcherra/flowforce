@@ -5297,7 +5297,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       task_workflow_instances: {
