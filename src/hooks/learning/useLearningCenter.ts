@@ -36,6 +36,7 @@ const TRAINING_ADMIN_ROLES = new Set(['manager', 'admin', 'company_admin', 'owne
 export function useLearningCenter() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,13 +102,14 @@ export function useLearningCenter() {
   );
 
   const loadData = useCallback(async () => {
-    if (!user?.id || !profile?.userId) {
+    if (!user?.id || !profile?.userId || !companyId) {
       setCatalog([]);
       setEnrollments([]);
       setMetrics([]);
       setRecommendations([]);
       setSnapshot(null);
       setProgressByEnrollment({});
+      setError(user?.id && profile?.userId && !companyId ? 'Company context missing for learning data.' : null);
       setLoading(false);
       return;
     }
@@ -120,7 +122,7 @@ export function useLearningCenter() {
       const adminEnrollmentsPromise = trainingAdmin ? fetchAllEnrollments() : Promise.resolve<LearningEnrollment[]>([]);
 
       const [catalogData, personalEnrollments, skillSnapshot, adminEnrollmentsData] = await Promise.all([
-        fetchLearningCatalog(),
+        fetchLearningCatalog(companyId),
         personalEnrollmentsPromise,
         fetchSkillSnapshot(),
         adminEnrollmentsPromise,
@@ -153,7 +155,16 @@ export function useLearningCenter() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, profile?.userId, profile?.role, trainingAdmin, collectMetrics, fetchSkillSnapshot, loadProgressEvents]);
+  }, [
+    user?.id,
+    profile?.userId,
+    profile?.role,
+    companyId,
+    trainingAdmin,
+    collectMetrics,
+    fetchSkillSnapshot,
+    loadProgressEvents,
+  ]);
 
   useEffect(() => {
     loadData();

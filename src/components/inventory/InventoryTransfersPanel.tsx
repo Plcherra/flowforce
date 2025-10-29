@@ -47,10 +47,16 @@ interface LineItemRow {
   itemId: string;
   quantity: string;
   costPerUnit: string;
-  unitId?: string;
+  unitId: string;
 }
 
 type StatusAction = 'sent' | 'received' | 'rejected';
+
+type LineItemFieldErrors = {
+  unit?: string;
+};
+
+type LineItemErrors = Record<string, LineItemFieldErrors>;
 
 const statusLabels: Record<InventoryTransferStatus, string> = {
   requested: 'Requested',
@@ -89,7 +95,7 @@ const makeLineItemRow = (): LineItemRow => ({
   itemId: '',
   quantity: '',
   costPerUnit: '',
-  unitId: undefined,
+  unitId: '',
 });
 
 const formatEmployeeName = (first?: string | null, last?: string | null) =>
@@ -133,6 +139,7 @@ export function InventoryTransfersPanel() {
   });
 
   const [lineItems, setLineItems] = useState<LineItemRow[]>([makeLineItemRow()]);
+  const [lineItemErrors, setLineItemErrors] = useState<LineItemErrors>({});
 
   const [statusDialog, setStatusDialog] = useState<{
     open: boolean;
@@ -178,22 +185,61 @@ export function InventoryTransfersPanel() {
       comments: '',
     });
     setLineItems([makeLineItemRow()]);
+    setLineItemErrors({});
   };
 
   const handleItemSelect = (index: number, itemId: string) => {
     const item = items.find((entry) => entry.id === itemId);
+    const units = item?.units ?? [];
+    const primaryUnit = units.find((entry) => entry.unit_level === 1) ?? units[0];
+    const fallbackUnitId = primaryUnit?.unit_id || item?.unit_id || '';
+    const fallbackUnitCost =
+      primaryUnit?.cost_per_unit ??
+      item?.calculated_cost_per_unit ??
+      item?.cost_per_unit ??
+      undefined;
+    const rowKey = lineItems[index]?.key;
     setLineItems((prev) =>
       prev.map((row, idx) =>
         idx === index
           ? {
               ...row,
               itemId,
-              unitId: item?.unit_id || row.unitId,
-              costPerUnit: item?.cost_per_unit != null ? String(item.cost_per_unit) : '',
+              unitId: fallbackUnitId,
+              costPerUnit:
+                fallbackUnitCost != null
+                  ? String(fallbackUnitCost)
+                  : item?.cost_per_unit != null
+                    ? String(item.cost_per_unit)
+                    : '',
             }
           : row,
       ),
     );
+    if (rowKey) {
+      setLineItemErrors((prev) => {
+        const next = { ...prev };
+        if (fallbackUnitId) {
+          if (!next[rowKey]?.unit) return prev;
+          const nextRowErrors = { ...(next[rowKey] ?? {}) };
+          delete nextRowErrors.unit;
+          if (Object.keys(nextRowErrors).length === 0) {
+            delete next[rowKey];
+          } else {
+            next[rowKey] = nextRowErrors;
+          }
+          return next;
+        }
+
+        return {
+          ...next,
+          [rowKey]: {
+            ...(next[rowKey] ?? {}),
+            unit: 'This item has no units configured. Update the item before creating a transfer.',
+          },
+        };
+      });
+    }
   };
 
   const handleQuantityChange = (index: number, value: string) => {
@@ -209,14 +255,97 @@ export function InventoryTransfersPanel() {
   };
 
   const handleRemoveLineItem = (index: number) => {
+    const rowKey = lineItems[index]?.key;
     setLineItems((prev) => {
       const next = prev.filter((_, idx) => idx !== index);
       return next.length > 0 ? next : [makeLineItemRow()];
     });
+    if (rowKey) {
+      setLineItemErrors((prev) => {
+        if (!prev[rowKey]) return prev;
+        const next = { ...prev };
+        delete next[rowKey];
+        return next;
+      });
+    }
   };
 
   const handleAddLineItem = () => {
     setLineItems((prev) => [...prev, makeLineItemRow()]);
+  };
+
+  const handleUnitChange = (index: number, rowKey: string, unitId: string) => {
+    const itemId = lineItems[index]?.itemId;
+    const item = items.find((entry) => entry.id === itemId);
+    const matchedUnit = item?.units?.find((unit) => unit.unit_id === unitId);
+    const fallbackCost =
+      matchedUnit?.cost_per_unit ??
+      item?.calculated_cost_per_unit ??
+      item?.cost_per_unit ??
+      null;
+
+    setLineItems((prev) =>
+      prev.map((row, idx) =>
+        idx === index
+          ? {
+              ...row,
+              unitId,
+              costPerUnit: fallbackCost != null ? String(fallbackCost) : row.costPerUnit,
+            }
+          : row,
+      ),
+    );
+
+    if (rowKey) {
+      setLineItemErrors((prev) => {
+        const current = prev[rowKey];
+        if (!current?.unit) return prev;
+        const next = { ...prev };
+        const nextRowErrors = { ...current };
+        delete nextRowErrors.unit;
+        if (Object.keys(nextRowErrors).length === 0) {
+          delete next[rowKey];
+        } else {
+          next[rowKey] = nextRowErrors;
+        }
+        return next;
+      });
+    }
+  };
+
+  const validateLineItems = () => {
+    const nextErrors: LineItemErrors = {};
+
+    lineItems.forEach((row) => {
+      if (!row.itemId) return;
+      const item = items.find((entry) => entry.id === row.itemId);
+      const availableUnits = new Set<string>();
+      (item?.units ?? []).forEach((unit) => {
+        availableUnits.add(unit.unit_id);
+      });
+      if (item?.unit_id) {
+        availableUnits.add(item.unit_id);
+      }
+
+      const unitId = row.unitId || item?.unit_id || '';
+
+      if (!unitId) {
+        nextErrors[row.key] = {
+          unit:
+            availableUnits.size === 0
+              ? 'This item has no units configured. Update the item before creating a transfer.'
+              : 'Select a unit for this item.',
+        };
+        return;
+      }
+
+      if (availableUnits.size > 0 && !availableUnits.has(unitId)) {
+        nextErrors[row.key] = { unit: 'Select a valid unit option.' };
+      }
+    });
+
+    setLineItemErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const buildLineItemPayload = () => {
@@ -228,9 +357,11 @@ export function InventoryTransfersPanel() {
         if (!Number.isFinite(quantity) || quantity <= 0) return null;
         const costString = row.costPerUnit || (item?.cost_per_unit != null ? String(item.cost_per_unit) : '');
         const cost = Number.parseFloat(costString);
+        const unitId = row.unitId || item?.unit_id;
+        if (!unitId) return null;
         return {
           item_id: row.itemId,
-          unit_id: row.unitId || item?.unit_id || '',
+          unit_id: unitId,
           quantity,
           cost_per_unit: Number.isFinite(cost) && cost >= 0 ? cost : undefined,
         };
@@ -240,7 +371,7 @@ export function InventoryTransfersPanel() {
         unit_id: string;
         quantity: number;
         cost_per_unit?: number;
-      } => Boolean(entry && entry.unit_id));
+      } => Boolean(entry));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -258,6 +389,15 @@ export function InventoryTransfersPanel() {
       toast({
         title: 'Invalid locations',
         description: 'From and To locations must be different.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!validateLineItems()) {
+      toast({
+        title: 'Select units',
+        description: 'Choose a unit for each transfer item before submitting.',
         variant: 'destructive',
       });
       return;
@@ -489,13 +629,23 @@ export function InventoryTransfersPanel() {
               <div className="space-y-4">
                 {lineItems.map((row, index) => {
                   const item = items.find((entry) => entry.id === row.itemId);
-                  const unitLabel = getItemUnitLabel(item);
+                  const unitOptions = item?.units ?? [];
+                  const includeBaseUnitOption =
+                    Boolean(item?.unit_id) && !unitOptions.some((unit) => unit.unit_id === item?.unit_id);
+                  const resolvedUnit =
+                    unitOptions.find((unit) => unit.unit_id === row.unitId)?.unit ||
+                    (row.unitId && row.unitId === item?.unit_id ? item?.unit : undefined);
+                  const unitLabel =
+                    resolvedUnit?.abbreviation || resolvedUnit?.name || getItemUnitLabel(item);
+                  const hasUnitChoices = unitOptions.length > 0 || Boolean(item?.unit_id);
+                  const unitError = lineItemErrors[row.key]?.unit;
+
                   return (
                     <div
                       key={row.key}
                       className="grid gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
                     >
-                      <div className="md:col-span-5 space-y-2">
+                      <div className="md:col-span-4 space-y-2">
                         <Label>Item</Label>
                         <Select
                           value={row.itemId}
@@ -517,6 +667,57 @@ export function InventoryTransfersPanel() {
                       </div>
 
                       <div className="md:col-span-3 space-y-2">
+                        <Label>Unit</Label>
+                        <Select
+                          value={row.unitId}
+                          onValueChange={(value) => handleUnitChange(index, row.key, value)}
+                          disabled={!item || !hasUnitChoices}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                !item
+                                  ? 'Select item first'
+                                  : hasUnitChoices
+                                    ? 'Select unit'
+                                    : 'No units configured'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {!item ? (
+                              <SelectItem value="" disabled>
+                                Select an item first
+                              </SelectItem>
+                            ) : hasUnitChoices ? (
+                              <>
+                                {unitOptions.map((unit) => (
+                                  <SelectItem key={unit.id} value={unit.unit_id}>
+                                    {unit.unit?.name || 'Unit'}
+                                    {unit.unit?.abbreviation ? ` (${unit.unit.abbreviation})` : ''}
+                                    {unit.unit_level > 1 ? ` · ${unit.conversion_factor}× base` : ''}
+                                  </SelectItem>
+                                ))}
+                                {includeBaseUnitOption && item?.unit_id ? (
+                                  <SelectItem value={item.unit_id}>
+                                    {item.unit?.name || 'Default unit'}
+                                    {item.unit?.abbreviation ? ` (${item.unit.abbreviation})` : ''}
+                                  </SelectItem>
+                                ) : null}
+                              </>
+                            ) : (
+                              <SelectItem value="" disabled>
+                                No units configured
+                              </SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {unitError ? (
+                          <p className="text-xs text-destructive">{unitError}</p>
+                        ) : null}
+                      </div>
+
+                      <div className="md:col-span-2 space-y-2">
                         <Label>Quantity</Label>
                         <div className="flex items-center gap-2">
                           <Input
@@ -530,7 +731,7 @@ export function InventoryTransfersPanel() {
                         </div>
                       </div>
 
-                      <div className="md:col-span-3 space-y-2">
+                      <div className="md:col-span-2 space-y-2">
                         <Label>Cost per unit</Label>
                         <Input
                           type="number"

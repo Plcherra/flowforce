@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
-import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { SchedulingProvider, useScheduling } from '@/contexts/SchedulingContext';
 
 const mocks = vi.hoisted(() => {
@@ -32,6 +32,24 @@ const mocks = vi.hoisted(() => {
 
   return { assignMock, unassignMock, refetchAllMock, supabaseMock };
 });
+
+const defaultProfile = {
+  userId: 'user-1',
+  companyId: 'company-1',
+  company_id: 'company-1',
+  role: 'manager',
+  firstName: 'Test',
+  lastName: 'User',
+  email: 'test@example.com',
+  employeeId: 'EMP-1',
+  first_name: 'Test',
+  last_name: 'User',
+  locationIds: [] as string[],
+};
+
+const profileState: { profile: typeof defaultProfile | null } = {
+  profile: { ...defaultProfile },
+};
 
 vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
   useSchedulingConsolidated: () => ({
@@ -81,19 +99,7 @@ vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
 
 vi.mock('@/hooks/useProfile', () => ({
   useProfile: () => ({
-    profile: {
-      userId: 'user-1',
-      companyId: 'company-1',
-      company_id: 'company-1',
-      role: 'manager',
-      firstName: 'Test',
-      lastName: 'User',
-      email: 'test@example.com',
-      employeeId: 'EMP-1',
-      first_name: 'Test',
-      last_name: 'User',
-      locationIds: [],
-    },
+    profile: profileState.profile,
     loading: false,
     error: null,
     refreshProfile: vi.fn(),
@@ -126,9 +132,11 @@ function TestHarness() {
 
 describe('SchedulingContext mutations passthrough', () => {
   beforeEach(() => {
+    profileState.profile = { ...defaultProfile };
     mocks.assignMock.mockClear();
     mocks.unassignMock.mockClear();
     mocks.refetchAllMock.mockClear();
+    mocks.supabaseMock.from.mockClear();
   });
 
   afterEach(() => {
@@ -153,4 +161,65 @@ describe('SchedulingContext mutations passthrough', () => {
 
     await waitFor(() => expect(mocks.unassignMock).toHaveBeenCalledWith('shift-1', 'user-100'));
   });
+
+  test('clearWeek scopes deletions to the active company', async () => {
+    const onResult = vi.fn();
+
+    render(
+      <SchedulingProvider>
+        <ClearWeekHarness onResult={onResult} />
+      </SchedulingProvider>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('clear-week'));
+    });
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
+
+    expect(mocks.supabaseMock.from).toHaveBeenNthCalledWith(1, 'schedules');
+    expect(mocks.supabaseMock.from).toHaveBeenNthCalledWith(2, 'vendor_event');
+
+    const schedulesBuilder: any = mocks.supabaseMock.from.mock.results[0]?.value;
+    const vendorBuilder: any = mocks.supabaseMock.from.mock.results[1]?.value;
+
+    expect(schedulesBuilder?.eq).toHaveBeenCalledWith('company_id', 'company-1');
+    expect(vendorBuilder?.eq).toHaveBeenCalledWith('company_id', 'company-1');
+  });
+
+  test('clearWeek short-circuits when company context is missing', async () => {
+    profileState.profile = null;
+    const onResult = vi.fn();
+
+    render(
+      <SchedulingProvider>
+        <ClearWeekHarness onResult={onResult} />
+      </SchedulingProvider>,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('clear-week'));
+    });
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(false));
+    expect(mocks.supabaseMock.from).not.toHaveBeenCalled();
+  });
 });
+
+function ClearWeekHarness({ onResult }: { onResult: (result: boolean) => void }) {
+  const { mutations } = useScheduling();
+  return (
+    <button
+      data-testid="clear-week"
+      onClick={async () => {
+        const result = await mutations.clearWeek({
+          weekStart: '2024-01-01T00:00:00.000Z',
+          weekEnd: '2024-01-08T00:00:00.000Z',
+        });
+        onResult(result);
+      }}
+    >
+      clear-week
+    </button>
+  );
+}

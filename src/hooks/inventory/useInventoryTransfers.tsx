@@ -32,9 +32,18 @@ export interface UpdateInventoryTransferStatusInput {
 }
 
 export function useInventoryTransfers() {
+  const { profile, loading } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+
   return useQuery<InventoryTransfer[]>({
-    queryKey: ['inventory-transfers'],
-    queryFn: () => InventoryService.listTransfers(),
+    queryKey: ['inventory-transfers', companyId],
+    queryFn: () => {
+      if (!companyId) {
+        throw new Error('Company context is required to list inventory transfers.');
+      }
+      return InventoryService.listTransfers(companyId);
+    },
+    enabled: Boolean(companyId) && !loading,
   });
 }
 

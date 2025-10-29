@@ -30,7 +30,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = manual, 30, 60, 300 seconds
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
   const {
     data: closedLoopState,

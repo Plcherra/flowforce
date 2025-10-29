@@ -38,17 +38,44 @@ export function useEmployees() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchEmployees = useCallback(async () => {
-    try {
-      setError(null);
+    const authUser = user;
 
-      // Get current user's company to filter employees
-      const { data: currentProfile } = await supabase
+    if (!authUser?.id) {
+      setEmployees([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const metadataCompanyId =
+        typeof authUser.user_metadata?.company_id === 'string'
+          ? (authUser.user_metadata.company_id as string)
+          : null;
+
+      // Resolve company context from the profile, falling back to user metadata if needed
+      const { data: currentProfile, error: currentProfileError } = await supabase
         .from('profiles')
         .select('company_id')
-        .eq('id', user.id)
+        .eq('id', authUser.id)
         .single();
 
-      let query = supabase
+      if (currentProfileError) {
+        console.error('Error resolving current profile for employee fetch:', currentProfileError);
+      }
+
+      const companyId = currentProfile?.company_id ?? metadataCompanyId;
+
+      if (!companyId) {
+        setError('No company context available');
+        setEmployees([]);
+        return;
+      }
+
+      const { data, error: fetchError } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -70,14 +97,9 @@ export function useEmployees() {
             role
           )
         `)
-        .eq('employment_status', 'active');
-
-      // Filter by company if user has one
-      if (currentProfile?.company_id) {
-        query = query.eq('company_id', currentProfile.company_id);
-      }
-
-      const { data, error: fetchError } = await query.order('first_name', { ascending: true });
+        .eq('employment_status', 'active')
+        .eq('company_id', companyId)
+        .order('first_name', { ascending: true });
 
       if (fetchError) throw fetchError;
 
@@ -186,7 +208,7 @@ export function useEmployees() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.user_metadata?.company_id]);
 
   useEffect(() => {
     if (user) {

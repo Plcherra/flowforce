@@ -485,6 +485,7 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
         'updated_at',
       ].join(','),
     )
+    .eq('company_id', companyId)
     .neq('status', 'cancelled')
     .order('created_at', { ascending: false })
     .limit(80);
@@ -492,11 +493,13 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
   const timeOffPromise = supabase
     .from('time_off_requests')
     .select('id,status,start_date,end_date')
+    .eq('company_id', companyId)
     .gte('start_date', rangeStartIso.split('T')[0]);
 
   const shiftSwapPromise = supabase
     .from('shift_swaps')
-    .select('id,status,created_at');
+    .select('id,status,created_at')
+    .eq('company_id', companyId);
 
   const schedulePromise = supabase
     .from('schedules')
@@ -716,4 +719,3 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
     learning,
   };
 }
-

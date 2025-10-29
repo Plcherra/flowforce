@@ -131,18 +131,12 @@ export function useSaveUserPermissions() {
         {},
       );
 
-      // Delete existing overrides for this user
-      await supabase
-        .from('user_permissions')
-        .delete()
-        .eq('user_id', userId);
-
       // Get current user ID for created_by field
       const { data: { user } } = await supabase.auth.getUser();
       const currentUserId = user?.id;
 
-      // Insert new overrides (only non-inherit values)
-      const overridesToInsert = Object.entries(permissions)
+      // Build overrides to persist (only non-inherit values)
+      const overridesToPersist = Object.entries(permissions)
         .filter(([_, value]) => value !== 'inherit')
         .map(([key, value]) => ({
           user_id: userId,
@@ -151,21 +145,36 @@ export function useSaveUserPermissions() {
           created_by: currentUserId
         }));
 
-      if (overridesToInsert.length > 0) {
-        const { error } = await supabase
+      if (overridesToPersist.length > 0) {
+        const { error: upsertError } = await supabase
           .from('user_permissions')
-          .insert(overridesToInsert);
+          .upsert(overridesToPersist, { onConflict: 'user_id,permission_key' });
 
-        if (error) throw error;
+        if (upsertError) throw upsertError;
       }
 
-      const nextOverrideValues = overridesToInsert.reduce<Record<string, PermissionValue>>(
+      const nextOverrideValues = overridesToPersist.reduce<Record<string, PermissionValue>>(
         (acc, override) => {
           acc[override.permission_key] = override.permission_value;
           return acc;
         },
         {},
       );
+
+      // Remove stale overrides that are no longer present
+      const keysToDelete = Object.keys(previousOverrideValues).filter(
+        (key) => !nextOverrideValues[key],
+      );
+
+      if (keysToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('user_permissions')
+          .delete()
+          .eq('user_id', userId)
+          .in('permission_key', keysToDelete);
+
+        if (deleteError) throw deleteError;
+      }
 
       const normalize = (valueMap: Record<string, PermissionValue>) => {
         const sortedKeys = Object.keys(valueMap).sort();

@@ -130,6 +130,7 @@ export default function Expenses() {
         status: 'pending',
         employee_id: profile?.id,
         created_by: profile?.id,
+        company_id: profile?.companyId ?? profile?.company_id ?? undefined,
       });
       setShowCreateDialog(false);
     } catch (error) {
@@ -144,6 +145,8 @@ export default function Expenses() {
         status: 'approved',
         approved_by: profile?.id,
         approved_at: new Date().toISOString(),
+        rejected_by: null,
+        rejected_at: null,
       });
     } catch (error) {
       console.error('Error approving expense:', error);
@@ -155,8 +158,10 @@ export default function Expenses() {
       await updateExpense({
         id: expenseId,
         status: 'rejected',
-        approved_by: profile?.id,
-        approved_at: new Date().toISOString(),
+        approved_by: null,
+        approved_at: null,
+        rejected_by: profile?.id ?? null,
+        rejected_at: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error rejecting expense:', error);

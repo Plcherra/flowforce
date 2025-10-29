@@ -13,6 +13,7 @@ export interface SchedulingQueryParams {
   companyId?: string | null;
   start?: Date | string | null;
   end?: Date | string | null;
+  enabled?: boolean;
 }
 
 export interface AssignmentWithUser extends ScheduleAssignmentRow {

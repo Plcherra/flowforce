@@ -88,6 +88,10 @@ const normalizeExpenseDate = (expense: Expense) => {
 };
 
 export function useAIActionsFeed() {
+  const { profile, loading: profileLoading } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const hasCompanyContext = Boolean(companyId);
+
   const {
     tasks = [],
     loading: tasksLoading,
@@ -114,9 +118,12 @@ export function useAIActionsFeed() {
     markAllAsRead,
     refetchNotifications,
   } = useTaskNotifications();
-  const { profile } = useProfile();
   const expensesQuery = useExpenses();
-  const expenses = useMemo<Expense[]>(() => (expensesQuery.data ?? []) as Expense[], [expensesQuery.data]);
+  const refetchExpenses = expensesQuery.refetch;
+  const expenses = useMemo<Expense[]>(
+    () => ((hasCompanyContext ? expensesQuery.data ?? [] : []) as Expense[]),
+    [expensesQuery.data, hasCompanyContext],
+  );
 
   const schedulingWindow = useMemo(() => {
     const start = new Date();
@@ -132,12 +139,17 @@ export function useAIActionsFeed() {
     refetchAll: refetchScheduling,
     isUsingFallbackData,
   } = useSchedulingConsolidated({
-    companyId: profile?.companyId ?? null,
+    companyId,
     start: schedulingWindow.start,
     end: schedulingWindow.end,
+    enabled: hasCompanyContext,
   });
 
   const items = useMemo<AIActionsFeedItem[]>(() => {
+    if (!hasCompanyContext) {
+      return [];
+    }
+
     const now = new Date();
     const upcomingThreshold = addDays(now, 7);
     const itemsAccumulator: AIActionsFeedItem[] = [];
@@ -556,26 +568,51 @@ export function useAIActionsFeed() {
     });
 
     return itemsAccumulator.slice(0, 8);
-  }, [tasks, goals, calculateGoalProgress, reminders, notifications, unreadCount, shifts, expenses]);
+  }, [hasCompanyContext, tasks, goals, calculateGoalProgress, reminders, notifications, unreadCount, shifts, expenses]);
 
   const refresh = useCallback(async () => {
-    await Promise.allSettled([
+    const refreshPromises: Array<Promise<unknown> | undefined> = [
       refetchTasks?.(),
       refetchGoals?.(),
       refetchReminders?.(),
       refetchNotifications?.(),
-      refetchScheduling(),
-      expensesQuery.refetch?.(),
-    ]);
-  }, [refetchTasks, refetchGoals, refetchReminders, refetchNotifications, refetchScheduling, expensesQuery]);
+    ];
+
+    if (hasCompanyContext) {
+      refreshPromises.push(refetchScheduling());
+      if (refetchExpenses) {
+        refreshPromises.push(refetchExpenses());
+      }
+    }
+
+    const settledPromises = refreshPromises.filter(
+      (promise): promise is Promise<unknown> => promise !== undefined,
+    );
+
+    if (settledPromises.length > 0) {
+      await Promise.allSettled(settledPromises);
+    }
+  }, [
+    hasCompanyContext,
+    refetchTasks,
+    refetchGoals,
+    refetchReminders,
+    refetchNotifications,
+    refetchScheduling,
+    refetchExpenses,
+  ]);
+
+  const schedulingLoadingEffective = hasCompanyContext ? schedulingLoading : false;
+  const expensesLoadingEffective = hasCompanyContext ? expensesQuery.isLoading : false;
 
   const loading =
+    profileLoading ||
     tasksLoading ||
     goalsLoading ||
     remindersLoading ||
     notificationsLoading ||
-    schedulingLoading ||
-    expensesQuery.isLoading;
+    schedulingLoadingEffective ||
+    expensesLoadingEffective;
 
   return {
     items,
@@ -589,7 +626,7 @@ export function useAIActionsFeed() {
     refetchReminders,
     refetchTasks,
     refetchGoals,
-    refetchExpenses: expensesQuery.refetch,
-    schedulingFallback: isUsingFallbackData,
+    refetchExpenses: refetchExpenses,
+    schedulingFallback: hasCompanyContext ? isUsingFallbackData : false,
   };
 }

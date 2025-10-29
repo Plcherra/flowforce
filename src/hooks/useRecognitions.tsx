@@ -192,18 +192,27 @@ export function useRecognitions() {
   }, [companyId, user?.id]);
 
   const fetchExistingRecognitions = useCallback(async () => {
-    const { data, error } = await supabase
+    if (!companyId) return [];
+
+    const baseQuery = supabase
       .from('goal_rewards')
       .select('id, goal_id, user_id, reward_details, reward_type, awarded_at, created_by, goal:goals(id, title, status, company_id)')
       .eq('reward_type', 'recognition')
       .order('awarded_at', { ascending: false });
+
+    const companyFilter = [
+      `goal.company_id.eq.${companyId}`,
+      `reward_details->metadata->>company_id.eq.${companyId}`,
+    ].join(',');
+
+    const { data, error } = await baseQuery.or(companyFilter);
 
     if (error) {
       throw error;
     }
 
     return data ?? [];
-  }, []);
+  }, [companyId]);
 
   const generateTrainingRecognitions = useCallback(
     async (existing: GoalRewardRow[]) => {
@@ -477,11 +486,18 @@ export function useRecognitions() {
     setPartialState({ loading: true, error: null });
 
     try {
-      const { data, error } = await supabase
+      const baseQuery = supabase
         .from('goal_rewards')
         .select('id, goal_id, user_id, reward_type, reward_details, awarded_at, created_by, goal:goals(id, title, status, company_id)')
         .eq('reward_type', 'recognition')
         .order('awarded_at', { ascending: false });
+
+      const filter = [
+        `goal.company_id.eq.${companyId}`,
+        `reward_details->metadata->>company_id.eq.${companyId}`,
+      ].join(',');
+
+      const { data, error } = await baseQuery.or(filter);
 
       if (error) {
         throw error;

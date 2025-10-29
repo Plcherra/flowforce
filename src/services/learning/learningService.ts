@@ -26,6 +26,7 @@ type CourseRow = {
   title: string;
   description: string | null;
   category: string;
+  company_id: string | null;
   level_requirement: number;
   xp_reward: number;
   estimated_hours: string | number | null;
@@ -41,6 +42,7 @@ type CourseRow = {
 type ModuleRow = {
   id: string;
   course_id: string;
+  company_id: string | null;
   title: string;
   description: string | null;
   content: string | null;
@@ -82,6 +84,7 @@ type MetricsRow = {
   course_id: string;
   title: string;
   category: string;
+  company_id: string | null;
   xp_reward: number | null;
   estimated_hours: string | number | null;
   active_learners: number | null;
@@ -176,14 +179,22 @@ function buildSlug(title: string) {
   return baseSlug || `course-${Date.now()}`;
 }
 
-export async function fetchLearningCatalog(): Promise<LearningCatalogRecord[]> {
+export async function fetchLearningCatalog(companyId: string): Promise<LearningCatalogRecord[]> {
+  if (!companyId) {
+    throw new Error('Company context is required to fetch the learning catalog.');
+  }
+
   const [{ data: courseData, error: courseError }, { data: moduleData, error: moduleError }, { data: metricsData }] =
     await Promise.all([
-      fromTable<CourseRow>(TABLE_COURSES).select('*').order('title', { ascending: true }),
+      fromTable<CourseRow>(TABLE_COURSES)
+        .select('*')
+        .eq('company_id', companyId)
+        .order('title', { ascending: true }),
       fromTable<ModuleRow>(TABLE_MODULES)
         .select('*')
+        .eq('company_id', companyId)
         .order('order_index', { ascending: true }),
-      fromTable<MetricsRow>(VIEW_METRICS).select('*'),
+      fromTable<MetricsRow>(VIEW_METRICS).select('*').eq('company_id', companyId),
     ]);
 
   if (courseError) throw courseError;
@@ -361,8 +372,14 @@ export async function fetchProgressEvents(enrollmentId: string): Promise<Learnin
   return (data ?? []).map(mapProgressEvent);
 }
 
-export async function fetchCourseMetrics(): Promise<LearningCourseMetrics[]> {
-  const { data, error } = await fromTable<MetricsRow>(VIEW_METRICS).select('*');
+export async function fetchCourseMetrics(companyId: string): Promise<LearningCourseMetrics[]> {
+  if (!companyId) {
+    throw new Error('Company context is required to fetch learning course metrics.');
+  }
+
+  const { data, error } = await fromTable<MetricsRow>(VIEW_METRICS)
+    .select('*')
+    .eq('company_id', companyId);
   if (error) throw error;
   return (data ?? []).map(mapMetrics);
 }
@@ -535,13 +552,14 @@ function buildCourseRecommendations(
 
 export async function getCourseRecommendations(options: {
   employeeId: string;
+  companyId: string;
   role?: string | null;
   currentXp?: number;
 }) {
   const [catalog, enrollments, metrics] = await Promise.all([
-    fetchLearningCatalog(),
+    fetchLearningCatalog(options.companyId),
     fetchEnrollments(options.employeeId),
-    fetchCourseMetrics(),
+    fetchCourseMetrics(options.companyId),
   ]);
 
   const recommendations = buildCourseRecommendations(catalog, enrollments, metrics, {

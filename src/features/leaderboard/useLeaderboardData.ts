@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import { ensureLeaderboardSynced } from './syncLeaderboard';
 import type {
@@ -28,6 +28,45 @@ const defaultAnalytics: LeaderboardAnalytics = {
   },
 };
 
+const LEADERBOARD_SELECT = `
+    employee_id,
+    department_id,
+    role,
+    period,
+    period_start,
+    xp_total,
+    xp_tasks,
+    xp_goals,
+    xp_recognitions,
+    xp_training,
+    badge_tier,
+    badge_codes,
+    achievements,
+    insights,
+    challenges,
+    updated_at,
+    last_synced_at,
+    department:departments!gamification_leaderboard_department_id_fkey(
+      id,
+      name
+    ),
+    employee:profiles(
+      id,
+      first_name,
+      last_name,
+      email,
+      avatar_url,
+      role,
+      department:departments(
+        id,
+        name
+      ),
+      position:positions(
+        name
+      )
+    )
+  `;
+
 function normaliseTier(tier: string | null | undefined): LeaderboardBadgeTier {
   if (tier === 'Platinum' || tier === 'Gold' || tier === 'Silver') return tier;
   return 'Bronze';
@@ -38,12 +77,14 @@ function toStringArray(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === 'string');
 }
 
-function mapToLeaderboardEntry(
+export function mapToLeaderboardEntry(
   row: any,
   rank: number,
-  employee: ReturnType<typeof useEmployees>['employees'][number] | undefined,
+  employee: Employee | undefined,
 ): LeaderboardEntry | null {
-  if (!employee) return null;
+  const fallbackProfile = row.employee ?? null;
+  if (!employee && !fallbackProfile) return null;
+
   const achievements = Array.isArray(row.achievements) ? row.achievements : [];
   const achievementsMap = new Map<string, any>(
     achievements
@@ -58,19 +99,34 @@ function mapToLeaderboardEntry(
       typeof challenge.employeeId === 'string' &&
       typeof challenge.focus === 'string',
   );
-  const departmentId = row.department_id ?? employee.department?.id ?? null;
-  const departmentName = employee.department?.name ?? null;
+  const fallbackDepartment = fallbackProfile?.department ?? row.department ?? null;
+  const departmentId =
+    row.department_id ??
+    employee?.department_id ??
+    employee?.department?.id ??
+    fallbackDepartment?.id ??
+    null;
+  const departmentName =
+    employee?.department?.name ?? fallbackDepartment?.name ?? null;
+
+  const positionName = employee?.position?.name ?? fallbackProfile?.position?.name ?? null;
+  const avatarUrl = employee?.avatar_url ?? fallbackProfile?.avatar_url ?? null;
+  const role = row.role ?? employee?.role ?? fallbackProfile?.role ?? 'employee';
+  const firstName = employee?.first_name ?? fallbackProfile?.first_name ?? '';
+  const lastName = employee?.last_name ?? fallbackProfile?.last_name ?? '';
+  const email = employee?.email ?? fallbackProfile?.email ?? row.employee_id;
+  const fullName = `${firstName} ${lastName}`.trim() || email;
 
   return {
     employeeId: row.employee_id,
-    fullName: `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim() || employee.email,
-    email: employee.email,
-    avatarUrl: employee.avatar_url ?? null,
-    role: row.role ?? employee.role,
+    fullName,
+    email,
+    avatarUrl,
+    role,
     period: row.period,
     periodStart: row.period_start,
     department: { id: departmentId, name: departmentName },
-    positionName: employee.position?.name ?? null,
+    positionName: positionName ?? null,
     xp: {
       tasks: row.xp_tasks ?? 0,
       goals: row.xp_goals ?? 0,
@@ -87,7 +143,7 @@ function mapToLeaderboardEntry(
     goalCount: achievementsMap.get('goal_closer')?.value ?? 0,
     recognitionCount: achievementsMap.get('recognition_star')?.value ?? 0,
     trainingCount: achievementsMap.get('skills_in_motion')?.value ?? 0,
-    reliability: employee.reliability,
+    reliability: employee?.reliability ?? fallbackProfile?.reliability,
     updatedAt: row.updated_at ?? row.last_synced_at ?? dayjs().toISOString(),
     rank: rank + 1,
   };
@@ -223,27 +279,7 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
 
       const { data, error: fetchError } = await supabase
         .from('gamification_leaderboard')
-        .select(
-          `
-            employee_id,
-            department_id,
-            role,
-            period,
-            period_start,
-            xp_total,
-            xp_tasks,
-            xp_goals,
-            xp_recognitions,
-            xp_training,
-            badge_tier,
-            badge_codes,
-            achievements,
-            insights,
-            challenges,
-            updated_at,
-            last_synced_at
-          `,
-        )
+        .select(LEADERBOARD_SELECT)
         .eq('company_id', companyId)
         .eq('period', period)
         .order('xp_total', { ascending: false });
@@ -258,7 +294,7 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
         await ensureLeaderboardSynced(companyId, employees, period);
         const retry = await supabase
           .from('gamification_leaderboard')
-          .select('*')
+          .select(LEADERBOARD_SELECT)
           .eq('company_id', companyId)
           .eq('period', period)
           .order('xp_total', { ascending: false });

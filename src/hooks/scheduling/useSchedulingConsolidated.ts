@@ -41,7 +41,7 @@ interface SchedulingConsolidatedResult {
 const DEFAULT_ERROR = 'Unable to load the latest scheduling data.';
 
 export function useSchedulingConsolidated(params: SchedulingQueryParams): SchedulingConsolidatedResult {
-  const { companyId, start, end } = params;
+  const { companyId, start, end, enabled = true } = params;
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -83,13 +83,15 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
   }, [companyId]);
 
   const refetchAll = useCallback(async () => {
-    if (!companyId) {
+    if (!enabled || !companyId) {
       setShifts([]);
       setAssignments([]);
       setTimeOffRequests([]);
       setUnavailability([]);
       setVendorEvents([]);
       setTeamMembers([]);
+      setIsUsingFallback(false);
+      fallbackNoticeShownRef.current = false;
       setError(null);
       setLoading(false);
       return;
@@ -290,7 +292,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     } finally {
       setLoading(false);
     }
-  }, [companyId, range.end, range.endDateOnly, range.start, range.startDateOnly, toast, user]);
+  }, [companyId, enabled, range.end, range.endDateOnly, range.start, range.startDateOnly, toast, user]);
 
   useEffect(() => {
     refetchAll();

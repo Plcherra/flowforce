@@ -37,6 +37,8 @@ export default function PaymentsOverview() {
         status: 'approved',
         approved_by: profile?.id,
         approved_at: new Date().toISOString(),
+        rejected_by: null,
+        rejected_at: null,
       });
     } catch (error) {
       console.error('Error approving payment:', error);
@@ -48,8 +50,10 @@ export default function PaymentsOverview() {
       await updatePayment.mutateAsync({
         id: paymentId,
         status: 'rejected',
-        approved_by: profile?.id,
-        approved_at: new Date().toISOString(),
+        approved_by: null,
+        approved_at: null,
+        rejected_by: profile?.id ?? null,
+        rejected_at: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error rejecting payment:', error);

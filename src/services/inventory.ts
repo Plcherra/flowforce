@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { notifyTransferCreated, notifyTransferStatusChange } from '@/notifications/inventoryTransfers';
 import type {
@@ -138,6 +139,37 @@ type UpdateTransferStatusPayload = {
   status_note?: string | null;
 };
 
+async function resolveActiveCompanyId(client: SupabaseClient = supabase): Promise<string | null> {
+  try {
+    const { data: authData, error: authError } = await client.auth.getUser();
+    if (authError) {
+      console.warn('[inventory] Failed to resolve authenticated user', authError);
+      return null;
+    }
+
+    const userId = authData?.user?.id;
+    if (!userId) {
+      return null;
+    }
+
+    const { data, error } = await client
+      .from('profiles')
+      .select('company_id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('[inventory] Failed to resolve company id', error);
+      return null;
+    }
+
+    return data?.company_id ?? null;
+  } catch (error) {
+    console.warn('[inventory] Unexpected error resolving company id', error);
+    return null;
+  }
+}
+
 // Centralized API service for inventory operations
 export class InventoryService {
   private static readonly transferSelect = `
@@ -171,8 +203,17 @@ export class InventoryService {
   `;
   
   // Items Management
-  static async listItems() {
-    const { data: baseItems, error } = await supabase
+  static async listItems(options: { companyId?: string; supabaseClient?: SupabaseClient } = {}) {
+    const { companyId, supabaseClient } = options;
+    const client = supabaseClient ?? supabase;
+    const activeCompanyId = companyId ?? (await resolveActiveCompanyId(client));
+
+    if (!activeCompanyId) {
+      console.warn('[inventory] listItems called without an active company context');
+      return [];
+    }
+
+    const { data: baseItems, error } = await client
       .from('inv_items')
       .select(`
         *,
@@ -183,6 +224,7 @@ export class InventoryService {
         category_details:inventory_categories!category_id(*)
       `)
       .eq('is_active', true)
+      .eq('company_id', activeCompanyId)
       .order('name');
 
     if (error) throw error;
@@ -195,7 +237,7 @@ export class InventoryService {
     const itemIds = items.map((item) => item.id);
 
     const [unitsResult, recipeResult] = await Promise.all([
-      supabase
+      client
         .from('inv_item_units')
         .select(
           `
@@ -205,7 +247,7 @@ export class InventoryService {
         )
         .in('item_id', itemIds)
         .order('unit_level', { ascending: true }),
-      supabase
+      client
         .from('inv_recipes')
         .select(
           `
@@ -1794,10 +1836,15 @@ export class InventoryService {
   }
 
   // Transfer Operations
-  static async listTransfers(): Promise<InventoryTransfer[]> {
+  static async listTransfers(companyId: string): Promise<InventoryTransfer[]> {
+    if (!companyId) {
+      throw new Error('companyId is required to list transfers');
+    }
+
     const { data, error } = await supabase
       .from('inv_transfers')
       .select(this.transferSelect)
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .order('created_at', { ascending: true, foreignTable: 'items' })
       .order('created_at', { ascending: false, foreignTable: 'audit' });

@@ -30,8 +30,10 @@ export interface Payment {
   status: string;
   due_date?: string;
   paid_date?: string;
-  approved_by?: string;
-  approved_at?: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  rejected_by?: string | null;
+  rejected_at?: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;

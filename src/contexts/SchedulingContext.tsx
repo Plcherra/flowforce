@@ -360,7 +360,25 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       if (!payloads.length) return true;
 
       try {
-        await Promise.all(payloads.map((payload) => upsertShift(payload as ShiftUpsertInput)));
+        ensureCompanyContext();
+
+        const normalizedPayloads = payloads.map((payload) => {
+          if (!payload.title || !payload.start_time || !payload.end_time) {
+            throw new Error('Shift title, start_time, and end_time are required for bulk creation.');
+          }
+
+          return {
+            ...payload,
+            company_id: companyId!,
+            created_by: user?.id ?? null,
+          };
+        });
+
+        const { error: insertError } = await supabase.from('schedules').insert(normalizedPayloads);
+        if (insertError) throw insertError;
+
+        await refetchAll();
+
         toast({
           title: 'Shifts created',
           description: `${payloads.length} shift${payloads.length === 1 ? '' : 's'} added to the schedule.`,
@@ -376,7 +394,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
+    [companyId, ensureCompanyContext, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast, user?.id],
   );
 
   const copyWeek = useCallback(
@@ -434,8 +452,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
               };
             }) ?? [];
 
-        await bulkCreateShifts(payloads);
-        return true;
+        return await bulkCreateShifts(payloads);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to copy week';
         toast({
@@ -457,9 +474,11 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       }
 
       try {
+        ensureCompanyContext();
         const { error: schedulesError } = await supabase
           .from('schedules')
           .delete()
+          .eq('company_id', companyId!)
           .gte('start_time', params.weekStart)
           .lt('start_time', params.weekEnd);
         if (schedulesError) throw schedulesError;
@@ -467,6 +486,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         const { error: vendorsError } = await supabase
           .from('vendor_event')
           .delete()
+          .eq('company_id', companyId!)
           .gte('event_date', params.weekStart)
           .lt('event_date', params.weekEnd);
         if (vendorsError) throw vendorsError;
@@ -487,7 +507,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+    [companyId, ensureCompanyContext, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const publishWeek = useCallback(

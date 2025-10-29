@@ -188,103 +188,22 @@ export function evaluateEmployeeContext(context: EmployeeContext, now = dayjs())
 }
 
 export async function evaluateEmployee(employeeId: string): Promise<CopilotDecision> {
-  const now = dayjs();
-
-  const [
-    profileResult,
-    reportsResult,
-    skillsResult,
-    performanceResult,
-    certificationResult,
-    badgeResult,
-  ] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('id, role, first_name, last_name')
-      .eq('id', employeeId)
-      .maybeSingle(),
-    supabase
-      .from('employee_report')
-      .select('id, employee_id, date, category, severity, notes, created_by, created_at, updated_at')
-      .eq('employee_id', employeeId)
-      .gte('date', now.subtract(120, 'day').format('YYYY-MM-DD')),
-    supabase
-      .from('skill_matrix')
-      .select('id, employee_id, role, level, xp, last_review, created_at, updated_at')
-      .eq('employee_id', employeeId),
-    supabase
-      .from('staff_performance')
-      .select('date, attendance_status, role, hours_worked')
-      .eq('user_id', employeeId)
-      .gte('date', now.subtract(120, 'day').format('YYYY-MM-DD')),
-    supabase
-      .from('certification_progress')
-      .select('certification_code, status, achieved_at, certification:certification_catalog(badge_code, title)')
-      .eq('employee_id', employeeId),
-    supabase
-      .from('employee_badge')
-      .select('badge_code')
-      .eq('employee_id', employeeId),
-  ]);
-
-  if (profileResult.error) throw profileResult.error;
-  if (!profileResult.data) throw new Error('Employee profile not found');
-  if (reportsResult.error) throw reportsResult.error;
-  if (skillsResult.error) throw skillsResult.error;
-  if (performanceResult.error) throw performanceResult.error;
-  if (certificationResult.error) throw certificationResult.error;
-  if (badgeResult.error) throw badgeResult.error;
-
-  const context: EmployeeContext = {
-    profile: {
-      id: profileResult.data.id,
-      role: profileResult.data.role,
-      firstName: profileResult.data.first_name,
-      lastName: profileResult.data.last_name,
+  const { data, error } = await supabase.functions.invoke<{ decision: CopilotDecision }>(
+    'copilot-evaluate-employee',
+    {
+      body: { employeeId },
     },
-    reports: (reportsResult.data ?? []).map((row) => ({
-      id: row.id,
-      employeeId: row.employee_id,
-      date: row.date,
-      category: row.category as EmployeeReport['category'],
-      severity: row.severity,
-      notes: row.notes ?? null,
-      createdBy: row.created_by,
-      createdAt: row.created_at ?? '',
-      updatedAt: row.updated_at ?? '',
-    })),
-    skills: (skillsResult.data ?? []).map((row) => ({
-      id: row.id,
-      employeeId: row.employee_id,
-      role: row.role,
-      level: row.level,
-      xp: row.xp,
-      lastReview: row.last_review ?? null,
-      createdAt: row.created_at ?? '',
-      updatedAt: row.updated_at ?? '',
-    })),
-    performance: (performanceResult.data ?? []).map((row) => ({
-      date: row.date,
-      attendanceStatus: row.attendance_status,
-      role: row.role,
-      hoursWorked: row.hours_worked ?? null,
-    })),
-    certifications: (certificationResult.data ?? []).map((row) => {
-      const typedRow = row as Tables<'certification_progress'> & {
-        certification: Pick<Tables<'certification_catalog'>, 'badge_code' | 'title'> | null;
-      };
-      return {
-        code: typedRow.certification_code,
-        status: typedRow.status as CertificationStatus,
-        achievedAt: typedRow.achieved_at ?? null,
-        badgeCode: typedRow.certification?.badge_code ?? null,
-        title: typedRow.certification?.title ?? null,
-      };
-    }),
-    awardedBadges: (badgeResult.data ?? []).map((row) => row.badge_code),
-  };
+  );
 
-  return evaluateEmployeeContext(context, now);
+  if (error) {
+    throw new Error(error.message ?? 'Failed to evaluate employee');
+  }
+
+  if (!data?.decision) {
+    throw new Error('Invalid response from evaluation service');
+  }
+
+  return data.decision;
 }
 
 export default {

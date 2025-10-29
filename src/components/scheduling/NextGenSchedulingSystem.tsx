@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,15 @@ import { AutoScheduleDialog } from './AutoScheduleDialog';
 import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useSearchParams } from 'react-router-dom';
+
+export const formatDailyHoursLabel = (day: string, parsedDate?: Date) => {
+  const date = parsedDate ?? parseISO(day);
+  if (Number.isNaN(date.getTime())) {
+    return day;
+  }
+
+  return format(date, 'EEE, MMM d');
+};
 
 export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: string }) {
   const tabs = useMemo(
@@ -216,8 +225,22 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
 
   const dailyHourEntries = useMemo(() => {
     return Object.entries(hoursSummary.dailyHours)
-      .map(([day, hours]) => ({ day, hours }))
-      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
+      .map(([day, hours]) => {
+        const parsedDate = parseISO(day);
+        const timestamp = parsedDate.getTime();
+        if (Number.isNaN(timestamp)) {
+          return null;
+        }
+
+        return {
+          day,
+          hours,
+          parsedDate,
+          label: formatDailyHoursLabel(day, parsedDate),
+        };
+      })
+      .filter((entry): entry is { day: string; hours: number; parsedDate: Date; label: string } => entry !== null)
+      .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
   }, [hoursSummary.dailyHours]);
 
   const appliedFilterLabel = locationFilter
@@ -470,11 +493,9 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                     <p className="text-sm text-muted-foreground">No shifts scheduled for this period.</p>
                   ) : (
                     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                      {dailyHourEntries.map(({ day, hours }) => (
+                      {dailyHourEntries.map(({ day, hours, label }) => (
                         <div key={day} className="rounded-lg border border-border/60 p-3">
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(`${day}T00:00:00`), 'EEE, MMM d')}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{label}</p>
                           <p className="mt-1 text-lg font-semibold">{hours.toFixed(1)} hrs</p>
                         </div>
                       ))}

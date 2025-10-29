@@ -11,6 +11,13 @@ import { useInventoryItems } from '@/hooks/useInventory';
 import { useProfile } from '@/hooks/useProfile';
 import { Plus } from 'lucide-react';
 
+export function computeInventoryTransactionTotals(quantity: number, conversionFactor: number, unitPrice?: number) {
+  const normalizedQuantity = quantity * conversionFactor;
+  const totalAmount = unitPrice !== undefined ? normalizedQuantity * unitPrice : undefined;
+
+  return { normalizedQuantity, totalAmount };
+}
+
 export default function InventoryTransactionForm() {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -54,17 +61,17 @@ export default function InventoryTransactionForm() {
       }
 
       const conversion = selectedUnit?.conversion_factor || 1;
-      const normalizedQuantity = quantity * conversion;
       const unitPrice = formData.unit_price
         ? parseFloat(formData.unit_price)
         : (suggestedUnitPrice !== undefined ? suggestedUnitPrice : undefined);
+      const { normalizedQuantity, totalAmount } = computeInventoryTransactionTotals(quantity, conversion, unitPrice);
 
       await createTransaction.mutateAsync({
         item_id: formData.item_id,
         transaction_type: formData.transaction_type,
         quantity: normalizedQuantity,
         unit_price: unitPrice,
-        total_amount: unitPrice ? quantity * unitPrice : undefined,
+        total_amount: totalAmount,
         reference_number: formData.reference_number || undefined,
         notes: formData.notes || undefined,
         performed_by: profile.id,

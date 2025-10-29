@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { endOfMonth, format, isAfter, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 
@@ -327,10 +328,23 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
     const hoursLastWeek = Number((weeklyTotals.get(lastWeekLabel) || 0).toFixed(2));
     const weeklyHourTrend = buildWeeklyTrend(weeklyTotals, 5, now);
 
-    const lastClockEntry = timeEntries.length > 0 ? timeEntries[timeEntries.length - 1] : null;
-    const clockedInToday =
-      lastClockEntry?.entry_type === 'clock_in' &&
-      format(new Date(lastClockEntry.timestamp), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+    const todayKey = format(now, 'yyyy-MM-dd');
+    const todaysEntries = timeEntries.filter(entry => {
+      const entryDateKey = format(new Date(entry.timestamp), 'yyyy-MM-dd');
+      return entryDateKey === todayKey;
+    });
+
+    let openShiftCount = 0;
+    for (const entry of todaysEntries) {
+      if (entry.entry_type === 'clock_in') {
+        openShiftCount += 1;
+      } else if (entry.entry_type === 'clock_out') {
+        openShiftCount = Math.max(openShiftCount - 1, 0);
+      }
+      // break events do not change the clock-in balance
+    }
+
+    const clockedInToday = openShiftCount > 0;
 
     const thirtyDaysAgo = subWeeks(now, 4);
     const totalEarnings30d = earnings
@@ -487,10 +501,46 @@ function defaultIntegrations(): IntegrationStatus[] {
   ];
 }
 
+function createEmptySnapshot(loading: boolean): ManagerFinancialSnapshot {
+  return {
+    payrollTotal30d: 0,
+    payrollPendingApproval: 0,
+    payrollPendingApprovalCount: 0,
+    payrollApproved: 0,
+    laborCostThisWeek: 0,
+    vendorSpending30d: 0,
+    reimbursementVolume30d: 0,
+    expenseBreakdown: [],
+    operatingExpenses30d: 0,
+    pendingExpenseTotal: 0,
+    pendingExpenseCount: 0,
+    wasteCost30d: 0,
+    inventoryPurchase30d: 0,
+    inventorySales30d: 0,
+    profitLossTrend: [],
+    profitForecastNextMonth: 0,
+    integrations: defaultIntegrations(),
+    loading,
+  };
+}
+
 export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
+  const { profile, loading: profileLoading } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['financial-management', 'manager'],
+    queryKey: ['financial-management', 'manager', companyId ?? 'no-company'],
+    enabled: Boolean(companyId),
     queryFn: async () => {
+      if (!companyId) {
+        return {
+          payments: [] as Payment[],
+          expenses: [] as Expense[],
+          transactions: [] as InventoryTransaction[],
+          waste: [] as WasteEvent[],
+        };
+      }
+
       const sixMonthsAgo = subMonths(new Date(), 6).toISOString();
 
       const [paymentsResponse, expensesResponse, transactionsResponse, wasteResponse] =
@@ -498,18 +548,22 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           supabase
             .from('payments')
             .select('*')
+            .eq('company_id', companyId)
             .gte('created_at', sixMonthsAgo),
           supabase
             .from('expenses')
             .select('*')
+            .eq('company_id', companyId)
             .gte('created_at', sixMonthsAgo),
           supabase
             .from('inventory_transactions')
             .select('*')
+            .eq('company_id', companyId)
             .gte('created_at', sixMonthsAgo),
           supabase
             .from('inv_waste')
             .select('*')
+            .eq('company_id', companyId)
             .gte('created_at', sixMonthsAgo),
         ]);
 
@@ -528,35 +582,15 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
   });
 
   const snapshot = useMemo<ManagerFinancialSnapshot>(() => {
-    if (isLoading) {
-      return {
-        payrollTotal30d: 0,
-        payrollPendingApproval: 0,
-        payrollPendingApprovalCount: 0,
-        payrollApproved: 0,
-        laborCostThisWeek: 0,
-        vendorSpending30d: 0,
-        reimbursementVolume30d: 0,
-        expenseBreakdown: [],
-        operatingExpenses30d: 0,
-        pendingExpenseTotal: 0,
-        pendingExpenseCount: 0,
-        wasteCost30d: 0,
-        inventoryPurchase30d: 0,
-        inventorySales30d: 0,
-        profitLossTrend: [],
-        profitForecastNextMonth: 0,
-        integrations: defaultIntegrations(),
-        loading: true,
-      } satisfies ManagerFinancialSnapshot;
+    if (profileLoading || isLoading) {
+      return createEmptySnapshot(true);
     }
 
-    const { payments, expenses, transactions, waste } = data ?? {
-      payments: [],
-      expenses: [],
-      transactions: [],
-      waste: [],
-    };
+    if (!companyId || !data) {
+      return createEmptySnapshot(false);
+    }
+
+    const { payments, expenses, transactions, waste } = data;
 
     const now = new Date();
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -669,11 +703,15 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
       integrations: defaultIntegrations(),
       loading: false,
     } satisfies ManagerFinancialSnapshot;
-  }, [data, isLoading]);
+  }, [companyId, data, isLoading, profileLoading]);
 
   const refresh = useCallback(async () => {
+    if (!companyId) {
+      return;
+    }
+
     await refetch();
-  }, [refetch]);
+  }, [companyId, refetch]);
 
   return {
     ...snapshot,

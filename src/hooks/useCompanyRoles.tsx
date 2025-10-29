@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,195 +26,141 @@ export interface CreateRoleData {
   permissions: Record<string, boolean>;
 }
 
-export function useCompanyRoles() {
+export interface CompanyRolesError {
+  message: string;
+  code?: string;
+  status?: number;
+}
+
+export interface UseCompanyRolesOptions {
+  onboarding?: boolean;
+}
+
+const MINIMAL_ONBOARDING_ROLES: CompanyRole[] = [
+  {
+    id: 'onboarding-basic',
+    name: 'Onboarding Staff',
+    description: 'Temporary access during onboarding setup',
+    color: '#6b7280',
+    icon: 'Users',
+    hierarchy_level: 1,
+    permissions: {
+      viewOwnProfile: true,
+      editOwnProfile: true,
+      viewOwnSchedules: true
+    },
+    is_system_role: true,
+    is_active: true
+  }
+];
+
+const UNKNOWN_ERROR_MESSAGE = 'Unable to load company roles';
+
+const normalizeError = (error: unknown): CompanyRolesError => {
+  if (error && typeof error === 'object') {
+    const err = error as { message?: string; code?: string; status?: number };
+    return {
+      message: typeof err.message === 'string' && err.message.length > 0 ? err.message : UNKNOWN_ERROR_MESSAGE,
+      code: typeof err.code === 'string' ? err.code : undefined,
+      status: typeof err.status === 'number' ? err.status : undefined
+    };
+  }
+
+  if (typeof error === 'string') {
+    return { message: error };
+  }
+
+  return { message: UNKNOWN_ERROR_MESSAGE };
+};
+
+const isMissingCompanyError = (error: CompanyRolesError) => {
+  if (error.code === 'PGRST116') {
+    return true;
+  }
+
+  const lowerMessage = error.message.toLowerCase();
+  return lowerMessage.includes('company');
+};
+
+export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
+  const { onboarding = false } = options;
   const { user } = useAuth();
   const [roles, setRoles] = useState<CompanyRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<CompanyRolesError | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchRoles();
-    } else {
-      setRoles([]);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     if (!user) return;
 
-    try {
-      // Fetching company roles...
-      
-      // Use the improved get_company_roles function
-      const { data, error } = await supabase.rpc('get_company_roles');
+    setLoading(true);
+    setError(null);
 
-      if (error) {
-        console.error('Error from get_company_roles:', error);
-        throw error;
+    try {
+      const metadataCompanyId =
+        typeof user.user_metadata?.company_id === 'string'
+          ? (user.user_metadata.company_id as string)
+          : null;
+
+      const { data: currentProfile, error: currentProfileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (currentProfileError) {
+        console.error('Error resolving current profile for company roles:', currentProfileError);
       }
-      
-      // Raw roles data received
-      
-      // Parse the permissions field properly
+
+      const companyId = currentProfile?.company_id ?? metadataCompanyId;
+
+      if (!companyId) {
+        throw new Error('No company context available for role listing');
+      }
+
+      const { data, error: rpcError } = await supabase.rpc('get_company_roles', {
+        company_uuid: companyId,
+      });
+
+      if (rpcError) {
+        throw rpcError;
+      }
+
       const parsedRoles = (data || []).map((role: any) => ({
         ...role,
-        permissions: typeof role.permissions === 'string' ? 
-          JSON.parse(role.permissions) : 
-          (role.permissions || {})
+        permissions: typeof role.permissions === 'string'
+          ? JSON.parse(role.permissions)
+          : (role.permissions || {})
       }));
-      
-      // Parsed roles processed
+
       setRoles(parsedRoles);
-    } catch (error: any) {
-      console.error('Error fetching company roles:', error);
-      
-      // If no company is set up yet, provide default roles for onboarding
-      if (error.message?.includes('company') || error.code === 'PGRST116') {
-        // No company found, providing default roles for onboarding
-        setRoles([]);
+    } catch (err: unknown) {
+      console.error('Error fetching company roles:', err);
+      const normalizedError = normalizeError(err);
+      setError(normalizedError);
+
+      if (onboarding && isMissingCompanyError(normalizedError)) {
+        setRoles([...MINIMAL_ONBOARDING_ROLES]);
       } else {
-        // Fallback to system default roles
-        // Using fallback default roles
-        setRoles([
-          { 
-            id: 'temp-1', 
-            name: 'Staff', 
-            description: 'Basic staff member', 
-            color: '#6b7280', 
-            icon: 'Users', 
-            hierarchy_level: 1, 
-            permissions: {
-              viewOwnProfile: true,
-              editOwnProfile: true,
-              viewOwnSchedules: true,
-              viewOwnTasks: true,
-              viewOwnExpenses: true,
-              'inventory.view': true,
-              'inventory.counts.view': true
-            },
-            is_system_role: true, 
-            is_active: true 
-          },
-          { 
-            id: 'temp-2', 
-            name: 'Supervisor', 
-            description: 'Team supervisor', 
-            color: '#10b981', 
-            icon: 'UserCheck', 
-            hierarchy_level: 2, 
-            permissions: {
-              viewOwnProfile: true,
-              editOwnProfile: true,
-              viewOwnSchedules: true,
-              viewOwnTasks: true,
-              viewOwnExpenses: true,
-              viewTeamProfiles: true,
-              viewTeamTasks: true,
-              editTasks: true,
-              'inventory.view': true,
-              'inventory.counts.view': true,
-              'inventory.prep.view': true,
-              'inventory.waste.view': true,
-              'inventory.adjust': true,
-              'inventory.counts.create': true,
-              'inventory.counts.edit': true,
-              'inventory.waste.create': true,
-              'inventory.prep.edit': true,
-              'inventory.export': true
-            },
-            is_system_role: true, 
-            is_active: true 
-          },
-          { 
-            id: 'temp-3', 
-            name: 'Manager', 
-            description: 'Department manager', 
-            color: '#3b82f6', 
-            icon: 'Shield', 
-            hierarchy_level: 3, 
-            permissions: {
-              viewOwnProfile: true,
-              editOwnProfile: true,
-              viewOwnSchedules: true,
-              viewOwnTasks: true,
-              viewOwnExpenses: true,
-              viewTeamProfiles: true,
-              viewTeamTasks: true,
-              editTasks: true,
-              editSchedules: true,
-              approveExpenses: true,
-              approveTimeOff: true,
-              'inventory.view': true,
-              'inventory.counts.view': true,
-              'inventory.prep.view': true,
-              'inventory.waste.view': true,
-              'inventory.purchasing.view': true,
-              'inventory.create': true,
-              'inventory.edit': true,
-              'inventory.adjust': true,
-              'inventory.counts.create': true,
-              'inventory.counts.edit': true,
-              'inventory.counts.approve': true,
-              'inventory.waste.create': true,
-              'inventory.prep.edit': true,
-              'inventory.purchasing.manage': true,
-              'inventory.import': true,
-              'inventory.export': true
-            },
-            is_system_role: true, 
-            is_active: true 
-          },
-          { 
-            id: 'temp-4', 
-            name: 'Admin', 
-            description: 'System administrator', 
-            color: '#ef4444', 
-            icon: 'Crown', 
-            hierarchy_level: 4, 
-            permissions: {
-              viewOwnProfile: true,
-              editOwnProfile: true,
-              viewOwnSchedules: true,
-              viewOwnTasks: true,
-              viewOwnExpenses: true,
-              viewTeamProfiles: true,
-              viewTeamTasks: true,
-              editTasks: true,
-              editSchedules: true,
-              approveExpenses: true,
-              approveTimeOff: true,
-              manageUsers: true,
-              systemSettings: true,
-              'inventory.view': true,
-              'inventory.counts.view': true,
-              'inventory.prep.view': true,
-              'inventory.waste.view': true,
-              'inventory.purchasing.view': true,
-              'inventory.create': true,
-              'inventory.edit': true,
-              'inventory.delete': true,
-              'inventory.adjust': true,
-              'inventory.counts.create': true,
-              'inventory.counts.edit': true,
-              'inventory.counts.approve': true,
-              'inventory.waste.create': true,
-              'inventory.prep.edit': true,
-              'inventory.purchasing.manage': true,
-              'inventory.import': true,
-              'inventory.export': true
-            },
-            is_system_role: true, 
-            is_active: true 
-          }
-        ]);
+        setRoles([]);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, onboarding]);
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles().catch((err) => {
+        console.error('Unhandled error while fetching company roles:', err);
+      });
+    } else {
+      setRoles([]);
+      setError(null);
+      setLoading(false);
+    }
+  }, [user, fetchRoles]);
 
   const createRole = useMutation({
     mutationFn: async (roleData: CreateRoleData) => {
@@ -350,6 +296,7 @@ export function useCompanyRoles() {
     roles,
     loading,
     isLoading: loading,
+    error,
     createRole,
     updateRole,
     deleteRole,

@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from './useAuth';
 
 export interface Profile {
   id: string;
@@ -14,12 +15,37 @@ export interface Profile {
 }
 
 export function useProfiles() {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ['profiles'],
+    queryKey: ['profiles', user?.id ?? 'guest'],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
+      const metadataCompanyId =
+        typeof user?.user_metadata?.company_id === 'string'
+          ? (user.user_metadata.company_id as string)
+          : null;
+
+      const { data: currentProfile, error: currentProfileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user!.id)
+        .single();
+
+      if (currentProfileError) {
+        console.error('Error resolving current profile for admin listing:', currentProfileError);
+      }
+
+      const companyId = currentProfile?.company_id ?? metadataCompanyId;
+
+      if (!companyId) {
+        throw new Error('No company context available for profile listing');
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

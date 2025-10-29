@@ -1,5 +1,6 @@
 
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -30,6 +31,8 @@ export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submi
   submissions_count: number;
   latest_submission_at: string | null;
 };
+
+const FORMS_QUERY_SCOPE = ['forms'] as const;
 
 const buildFormFieldFallback = (formId: string): FormField[] => {
   const schema = useFormSchemaStore.getState().schema;
@@ -68,60 +71,63 @@ const buildFormFieldFallback = (formId: string): FormField[] => {
 
 export function useForms() {
   const { user } = useAuth();
-  const [forms, setForms] = useState<FormWithMeta[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user) {
-      fetchForms();
-    } else {
-      setForms([]);
-      setLoading(false);
-    }
-  }, [user]);
+  const formsQueryKey = useMemo(
+    () => [...FORMS_QUERY_SCOPE, user?.id ?? 'anonymous'] as const,
+    [user?.id],
+  );
 
-  const fetchForms = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('forms')
-        .select(`
-          *,
-          created_profile:profiles!forms_created_by_fkey(first_name, last_name),
-          department:departments(name),
-          submission_stats:form_submissions(count),
-          latest_submission:form_submissions(submitted_at)
-        `)
-        .order('created_at', { ascending: false })
-        .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
-        .limit(1, { foreignTable: 'latest_submission' });
+  const fetchForms = useCallback(async (): Promise<FormWithMeta[]> => {
+    const { data, error } = await supabase
+      .from('forms')
+      .select(`
+        *,
+        created_profile:profiles!forms_created_by_fkey(first_name, last_name),
+        department:departments(name),
+        submission_stats:form_submissions(count),
+        latest_submission:form_submissions(submitted_at)
+      `)
+      .order('created_at', { ascending: false })
+      .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
+      .limit(1, { foreignTable: 'latest_submission' });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      const rows = (data ?? []) as FormQueryRow[];
-      const normalized: FormWithMeta[] = rows.map((form) => {
-        const { submission_stats, latest_submission, ...rest } = form;
-        const stats = submission_stats?.[0];
-        const latest = latest_submission?.[0];
-        return {
-          ...rest,
-          submissions_count: stats?.count ?? 0,
-          latest_submission_at: latest?.submitted_at ?? null,
-        };
-      });
+    const rows = (data ?? []) as FormQueryRow[];
+    return rows.map((form) => {
+      const { submission_stats, latest_submission, ...rest } = form;
+      const stats = submission_stats?.[0];
+      const latest = latest_submission?.[0];
+      return {
+        ...rest,
+        submissions_count: stats?.count ?? 0,
+        latest_submission_at: latest?.submitted_at ?? null,
+      };
+    });
+  }, []);
 
-      setForms(normalized);
-    } catch (error) {
+  const formsQuery = useQuery<FormWithMeta[]>({
+    queryKey: formsQueryKey,
+    queryFn: fetchForms,
+    enabled: Boolean(user),
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    suspense: false,
+    throwOnError: false,
+    retry: 1,
+    onError: (error) => {
       console.error('Error fetching forms:', error);
       toast({
-        title: "Error",
-        description: "Failed to load forms",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load forms',
+        variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
+
+  const forms = formsQuery.data ?? [];
+  const loading = user ? formsQuery.isLoading || formsQuery.isFetching : false;
 
   const createForm = async (formData: {
     title: string;
@@ -148,7 +154,7 @@ export function useForms() {
         description: "Form created successfully",
       });
 
-      await fetchForms();
+      await queryClient.invalidateQueries({ queryKey: formsQueryKey });
       return { data, error: null };
     } catch (error) {
       console.error('Error creating form:', error);
@@ -175,7 +181,7 @@ export function useForms() {
         description: "Form updated successfully",
       });
 
-      await fetchForms();
+      await queryClient.invalidateQueries({ queryKey: formsQueryKey });
       return { error: null };
     } catch (error) {
       console.error('Error updating form:', error);
@@ -202,7 +208,7 @@ export function useForms() {
         description: "Form deleted successfully",
       });
 
-      await fetchForms();
+      await queryClient.invalidateQueries({ queryKey: formsQueryKey });
       return { error: null };
     } catch (error) {
       console.error('Error deleting form:', error);
@@ -343,6 +349,8 @@ export function useForms() {
     saveFormFields,
     getFormSubmissions,
     submitForm,
-    refetchForms: fetchForms,
+    refetchForms: async () => {
+      await queryClient.invalidateQueries({ queryKey: formsQueryKey });
+    },
   };
 }

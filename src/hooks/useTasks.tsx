@@ -11,10 +11,12 @@ export type TaskWithRelations = TaskRow & {
   assigned_profile?: {
     first_name: string;
     last_name: string;
+    company_id?: string | null;
   } | null;
   created_profile?: {
     first_name: string;
     last_name: string;
+    company_id?: string | null;
   } | null;
   department?: {
     name: string;
@@ -55,24 +57,54 @@ export function useTasks() {
   }, [user]);
 
   const fetchTasks = async () => {
-    if (!user) return;
+    if (!user) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
 
     try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const companyId = profileData?.company_id ?? null;
+
+      if (!companyId) {
+        setTasks([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .select(`
           *,
-          assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name),
-          created_profile:profiles!tasks_created_by_fkey(first_name, last_name),
+          assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
+          created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
           department:departments(name),
           goal:goals(id, title, status, progress, target_completion_date)
         `)
+        .eq('profiles!tasks_created_by_fkey.company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTasks((data as TaskWithRelations[]) || []);
+
+      const scopedTasks = ((data ?? []) as TaskWithRelations[]).filter((task) => {
+        const assignedCompanyId = task.assigned_profile?.company_id ?? null;
+        const createdCompanyId = task.created_profile?.company_id ?? null;
+        return assignedCompanyId === companyId || createdCompanyId === companyId;
+      });
+
+      setTasks(scopedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      setTasks([]);
     } finally {
       setLoading(false);
     }

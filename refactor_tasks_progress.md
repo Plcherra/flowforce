@@ -11,4 +11,5 @@
 | R13 | Completed | Normalized transaction totals in the form and added converted-unit coverage. |
 | R15 | Completed | Typed the transactions hook and scoped queries to the active company. |
 | R18 | Completed | Stored rejection metadata for expenses/payments and cleared approval fields on rejection. |
+| R22 | Completed | Gated the AI actions feed behind company context and added regression tests. |
 | R30 | Completed | Removed the stray trailing comma in Supabase notification relationships to restore type parsing. |
