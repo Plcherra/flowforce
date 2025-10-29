@@ -1,45 +1,154 @@
-
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, User, Flag, Clock, MessageSquare, Send } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ArrowRight,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Flag,
+  MessageSquare,
+  Send,
+  Target,
+} from 'lucide-react';
 import { format } from 'date-fns';
-import { useTasks } from '@/hooks/useTasks';
+import {
+  useTasks,
+  TASK_STATUS_TRANSITIONS,
+  type TaskWithRelations,
+} from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
-import { Task } from '@/types/common';
+import { TaskTimeline } from './TaskTimeline';
+import {
+  getTaskStatusBadgeClass,
+  getTaskStatusLabel,
+  TASK_STATUS_FLOW,
+  type TaskStatus,
+} from '@/constants/taskStatus';
+import type { Tables } from '@/integrations/supabase/public-types';
+import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
+
+type ButtonVariant = 'default' | 'secondary' | 'outline';
+type TaskCommentRow = Tables<'task_comments'>;
+type TaskCommentWithUser = TaskCommentRow & {
+  user?: {
+    first_name: string;
+    last_name: string;
+  } | null;
+};
 
 interface TaskDetailsDialogProps {
-  task: Task;
+  task: TaskWithRelations | null;
   open: boolean;
   onClose: () => void;
+  onTaskUpdate?: (task: TaskWithRelations) => void;
 }
 
-export function TaskDetailsDialog({ task, open, onClose }: TaskDetailsDialogProps) {
-  const { addComment, getTaskComments } = useTasks();
+const getPriorityColor = (priority?: string | null) => {
+  switch (priority) {
+    case 'urgent':
+      return 'bg-red-500';
+    case 'high':
+      return 'bg-orange-500';
+    case 'medium':
+      return 'bg-yellow-500';
+    case 'low':
+      return 'bg-green-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
+const getActionLabel = (current: TaskStatus, target: TaskStatus) => {
+  if (current === 'todo' && target === 'in_progress') return 'Start Task';
+  if (current === 'in_progress' && target === 'completed') return 'Mark Done';
+  if (current === 'in_progress' && target === 'todo') return 'Move to To Do';
+  if (current === 'completed' && target === 'todo') return 'Reopen Task';
+  return `Move to ${getTaskStatusLabel(target)}`;
+};
+
+const getActionVariant = (current: TaskStatus, target: TaskStatus): ButtonVariant => {
+  if (target === 'todo') {
+    return current === 'completed' ? 'outline' : 'secondary';
+  }
+  return 'default';
+};
+
+export function TaskDetailsDialog({
+  task,
+  open,
+  onClose,
+  onTaskUpdate,
+}: TaskDetailsDialogProps) {
+  const { addComment, getTaskComments, transitionTaskStatus, updateTask } = useTasks();
   const { toast } = useToast();
-  const [comments, setComments] = useState([]);
+  const {
+    assignees,
+    goals,
+    loading: optionsLoading,
+  } = useTaskFormOptions(open);
+
+  const [currentTask, setCurrentTask] = useState<TaskWithRelations | null>(task);
+  const [comments, setComments] = useState<TaskCommentWithUser[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   const [addingComment, setAddingComment] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState<TaskStatus | null>(null);
+  const [assignmentValue, setAssignmentValue] = useState('none');
+  const [goalValue, setGoalValue] = useState('none');
+  const [updatingAssignment, setUpdatingAssignment] = useState(false);
+  const [updatingGoal, setUpdatingGoal] = useState(false);
 
   useEffect(() => {
-    if (open && task) {
-      fetchComments();
-    }
-  }, [open, task]);
+    setCurrentTask(task);
+  }, [task]);
 
-  const fetchComments = async () => {
+  useEffect(() => {
+    if (!currentTask) {
+      setAssignmentValue('none');
+      setGoalValue('none');
+      return;
+    }
+
+    setAssignmentValue(currentTask.assigned_to ?? 'none');
+    setGoalValue(currentTask.goal_id ?? 'none');
+  }, [currentTask?.id, currentTask?.assigned_to, currentTask?.goal_id]);
+
+  useEffect(() => {
+    if (open && task?.id) {
+      fetchComments(task.id);
+    } else if (!open) {
+      setComments([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, task?.id]);
+
+  const fetchComments = async (taskId: string) => {
     setLoadingComments(true);
     try {
-      const { data, error } = await getTaskComments(task.id);
+      const { data, error } = await getTaskComments(taskId);
       if (error) {
         console.error('Error fetching comments:', error);
       } else {
-        setComments(data);
+        setComments((data as TaskCommentWithUser[]) ?? []);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -48,12 +157,132 @@ export function TaskDetailsDialog({ task, open, onClose }: TaskDetailsDialogProp
     }
   };
 
+  const handleAssigneeChange = async (value: string) => {
+    if (!currentTask) return;
+
+    const nextAssignedTo = value === 'none' ? null : value;
+    const previousAssignedTo = currentTask.assigned_to ?? null;
+
+    if (nextAssignedTo === previousAssignedTo) {
+      setAssignmentValue(value);
+      return;
+    }
+
+    setAssignmentValue(value);
+    setUpdatingAssignment(true);
+
+    try {
+      const { data, error } = await updateTask(currentTask.id, {
+        assigned_to: nextAssignedTo,
+      });
+
+      if (error || !data) {
+        throw error ?? new Error('Unable to update assignee');
+      }
+
+      const selectedAssignee = assignees.find((option) => option.id === nextAssignedTo);
+
+      const updatedTask: TaskWithRelations = {
+        ...currentTask,
+        ...data,
+        assigned_profile: selectedAssignee
+          ? {
+              first_name: selectedAssignee.first_name,
+              last_name: selectedAssignee.last_name,
+            }
+          : null,
+      };
+
+      setCurrentTask(updatedTask);
+      onTaskUpdate?.(updatedTask);
+
+      toast({
+        title: 'Assignment updated',
+        description: selectedAssignee
+          ? `Task assigned to ${selectedAssignee.first_name} ${selectedAssignee.last_name}.`
+          : 'Task is now unassigned.',
+      });
+    } catch (error) {
+      console.error('Error updating task assignment:', error);
+      setAssignmentValue(previousAssignedTo ?? 'none');
+      toast({
+        title: 'Assignment update failed',
+        description: 'Could not update the task assignment. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingAssignment(false);
+    }
+  };
+
+  const handleGoalChange = async (value: string) => {
+    if (!currentTask) return;
+
+    const nextGoalId = value === 'none' ? null : value;
+    const previousGoalId = currentTask.goal_id ?? null;
+
+    if (nextGoalId === previousGoalId) {
+      setGoalValue(value);
+      return;
+    }
+
+    setGoalValue(value);
+    setUpdatingGoal(true);
+
+    try {
+      const { data, error } = await updateTask(currentTask.id, {
+        goal_id: nextGoalId,
+      });
+
+      if (error || !data) {
+        throw error ?? new Error('Unable to update goal');
+      }
+
+      const selectedGoal = goals.find((goalOption) => goalOption.id === nextGoalId);
+
+      const updatedTask: TaskWithRelations = {
+        ...currentTask,
+        ...data,
+        goal:
+          nextGoalId && selectedGoal
+            ? {
+                id: selectedGoal.id,
+                title: selectedGoal.title,
+                status: selectedGoal.status,
+                progress: selectedGoal.progress,
+                target_completion_date: selectedGoal.target_completion_date,
+              }
+            : null,
+      };
+
+      setCurrentTask(updatedTask);
+      onTaskUpdate?.(updatedTask);
+
+      toast({
+        title: 'Goal link updated',
+        description: selectedGoal
+          ? `Task linked to goal “${selectedGoal.title}”.`
+          : 'Task is no longer linked to a goal.',
+      });
+    } catch (error) {
+      console.error('Error updating task goal link:', error);
+      setGoalValue(previousGoalId ?? 'none');
+      toast({
+        title: 'Goal update failed',
+        description: 'Could not update the goal link. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingGoal(false);
+    }
+  };
+
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    if (!currentTask || !newComment.trim()) return;
 
     setAddingComment(true);
     try {
-      const { error } = await addComment(task.id, newComment);
+      const { error } = await addComment(currentTask.id, newComment);
       if (error) {
         toast({
           title: 'Error',
@@ -62,10 +291,10 @@ export function TaskDetailsDialog({ task, open, onClose }: TaskDetailsDialogProp
         });
       } else {
         setNewComment('');
-        await fetchComments(); // Refresh comments
+        await fetchComments(currentTask.id);
         toast({
-          title: 'Success',
-          description: 'Comment added successfully.',
+          title: 'Comment added',
+          description: 'Your comment was posted successfully.',
         });
       }
     } catch (error) {
@@ -80,91 +309,271 @@ export function TaskDetailsDialog({ task, open, onClose }: TaskDetailsDialogProp
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+  const handleStatusChange = async (targetStatus: TaskStatus) => {
+    if (!currentTask) return;
+    setPendingTarget(targetStatus);
+
+    try {
+      const { data, error } = await transitionTaskStatus(currentTask, targetStatus);
+      if (error || !data) {
+        const errorMessage =
+          (error as Error)?.message ?? 'Unable to update task status. Please try again.';
+        toast({
+          title: 'Status update failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const updatedTask: TaskWithRelations = {
+        ...currentTask,
+        ...data,
+      };
+
+      setCurrentTask(updatedTask);
+      onTaskUpdate?.(updatedTask);
+
+      const previous = currentTask.status;
+      let successMessage = `Task status updated to ${getTaskStatusLabel(targetStatus)}.`;
+
+      if (targetStatus === 'in_progress') {
+        successMessage = 'Task is now in progress.';
+      } else if (targetStatus === 'completed') {
+        successMessage = 'Task marked as done.';
+      } else if (targetStatus === 'todo') {
+        successMessage =
+          previous === 'completed'
+            ? 'Task reopened and moved back to To Do.'
+            : 'Task moved back to To Do.';
+      }
+
+      toast({
+        title: 'Status updated',
+        description: successMessage,
+      });
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        title: 'Status update failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setPendingTarget(null);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'review': return 'bg-purple-100 text-purple-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const statusActions = useMemo(() => {
+    if (!currentTask) return [];
+    const transitions = TASK_STATUS_TRANSITIONS[currentTask.status] ?? [];
+    return transitions.map((target) => ({
+      target,
+      label: getActionLabel(currentTask.status, target),
+      variant: getActionVariant(currentTask.status, target),
+    }));
+  }, [currentTask]);
 
-  if (!task) return null;
+  const activeFlowIndex = currentTask
+    ? TASK_STATUS_FLOW.indexOf(currentTask.status as TaskStatus)
+    : -1;
+
+  if (!currentTask) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[720px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <DialogTitle className="text-xl">{task.title}</DialogTitle>
-              {task.description && (
-                <DialogDescription className="text-base">
-                  {task.description}
+              <DialogTitle className="text-xl font-semibold">{currentTask.title}</DialogTitle>
+              {currentTask.description && (
+                <DialogDescription className="text-base leading-relaxed">
+                  {currentTask.description}
                 </DialogDescription>
               )}
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`} />
-              <Badge className={getStatusColor(task.status)}>
-                {task.status.replace('_', ' ')}
+              <div className={`h-3 w-3 rounded-full ${getPriorityColor(currentTask.priority)}`} />
+              <Badge className={getTaskStatusBadgeClass(currentTask.status)}>
+                {getTaskStatusLabel(currentTask.status)}
               </Badge>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Task Details */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="space-y-3">
-              {task.assigned_profile && (
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Assigned to:</span>
-                  <span>{task.assigned_profile.first_name} {task.assigned_profile.last_name}</span>
-                </div>
+          <div className="rounded-md border bg-muted/40 p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Workflow
+              </p>
+              <Badge variant="secondary">{getTaskStatusLabel(currentTask.status)}</Badge>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {TASK_STATUS_FLOW.map((status, index) => {
+                const isActive = activeFlowIndex === index;
+                const isCompleted = activeFlowIndex > index;
+                return (
+                  <React.Fragment key={status}>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-3 w-3 rounded-full ${
+                          isActive
+                            ? 'bg-primary'
+                            : isCompleted
+                              ? 'bg-emerald-500'
+                              : 'bg-muted-foreground/40'
+                        }`}
+                      />
+                      <span
+                        className={`${
+                          isActive ? 'font-semibold text-foreground' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {getTaskStatusLabel(status)}
+                      </span>
+                    </div>
+                    {index < TASK_STATUS_FLOW.length - 1 && (
+                      <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+              {activeFlowIndex === -1 && (
+                <span className="text-sm text-muted-foreground">
+                  {getTaskStatusLabel(currentTask.status)} (outside primary flow)
+                </span>
               )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {statusActions.length > 0 ? (
+                statusActions.map((action) => (
+                  <Button
+                    key={`${currentTask.id}-${action.target}`}
+                    variant={action.variant}
+                    size="sm"
+                    onClick={() => handleStatusChange(action.target)}
+                    disabled={!!pendingTarget}
+                  >
+                    {pendingTarget === action.target ? 'Updating…' : action.label}
+                  </Button>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No available transitions from this status.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">Assignee</Label>
+                <Select
+                  value={assignmentValue}
+                  onValueChange={handleAssigneeChange}
+                  disabled={optionsLoading || updatingAssignment}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {assignees.map((assignee) => (
+                      <SelectItem key={assignee.id} value={assignee.id}>
+                        {assignee.first_name} {assignee.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {updatingAssignment && (
+                  <p className="text-xs text-muted-foreground">Updating assignment…</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">Linked Goal</Label>
+                <Select
+                  value={goalValue}
+                  onValueChange={handleGoalChange}
+                  disabled={optionsLoading || updatingGoal}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No goal</SelectItem>
+                    {goals.map((goalOption) => (
+                      <SelectItem key={goalOption.id} value={goalOption.id}>
+                        {goalOption.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {updatingGoal && (
+                  <p className="text-xs text-muted-foreground">Updating goal link…</p>
+                )}
+                {goalValue !== 'none' && currentTask.goal && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Target className="h-3.5 w-3.5" />
+                      {currentTask.goal.title}
+                    </span>
+                    <span>{currentTask.goal.progress}%</span>
+                  </div>
+                )}
+                {goalValue === 'none' && (
+                  <p className="text-xs text-muted-foreground">Not linked to a goal.</p>
+                )}
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Flag className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Priority:</span>
-                <span className="capitalize">{task.priority}</span>
+                <span className="capitalize">{currentTask.priority}</span>
               </div>
-              {task.estimated_hours && (
+              {currentTask.estimated_hours !== null && currentTask.estimated_hours !== undefined && (
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Estimated:</span>
-                  <span>{task.estimated_hours}h</span>
+                  <span>{currentTask.estimated_hours}h</span>
+                </div>
+              )}
+              {currentTask.actual_hours !== null && currentTask.actual_hours !== undefined && (
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Actual:</span>
+                  <span>{currentTask.actual_hours}h</span>
                 </div>
               )}
             </div>
+
             <div className="space-y-3">
-              {task.due_date && (
+              {currentTask.due_date && (
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Due:</span>
-                  <span>{format(new Date(task.due_date), 'MMM dd, yyyy')}</span>
+                  <span>{format(new Date(currentTask.due_date), 'MMM dd, yyyy')}</span>
                 </div>
               )}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Created:</span>
-                <span>{format(new Date(task.created_at), 'MMM dd, yyyy')}</span>
+                <span>{format(new Date(currentTask.created_at), 'MMM dd, yyyy')}</span>
               </div>
-              {task.department && (
+              {currentTask.completed_at && (
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Completed:</span>
+                  <span>{format(new Date(currentTask.completed_at), 'MMM dd, yyyy')}</span>
+                </div>
+              )}
+              {currentTask.department && (
                 <div className="flex items-center space-x-2">
                   <span className="text-muted-foreground">Department:</span>
-                  <span>{task.department.name}</span>
+                  <span>{currentTask.department.name}</span>
                 </div>
               )}
             </div>
@@ -172,42 +581,43 @@ export function TaskDetailsDialog({ task, open, onClose }: TaskDetailsDialogProp
 
           <Separator />
 
-          {/* Comments Section */}
+          <TaskTimeline taskId={currentTask.id} open={open} />
+
+          <Separator />
+
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <MessageSquare className="h-5 w-5" />
               <h3 className="text-lg font-semibold">Comments</h3>
             </div>
 
-            {/* Add Comment */}
             <div className="space-y-2">
               <Textarea
                 placeholder="Add a comment..."
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
+                onChange={(event) => setNewComment(event.target.value)}
                 rows={3}
               />
               <div className="flex justify-end">
-                <Button 
+                <Button
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || addingComment}
                   size="sm"
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  {addingComment ? 'Adding...' : 'Add Comment'}
+                  {addingComment ? 'Adding…' : 'Add Comment'}
                 </Button>
               </div>
             </div>
 
-            {/* Comments List */}
             <div className="space-y-3">
               {loadingComments ? (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                <div className="py-4 text-center">
+                  <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-primary" />
                 </div>
               ) : comments.length === 0 ? (
-                <div className="text-center py-6 text-muted-foreground">
-                  No comments yet. Be the first to add one!
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  No comments yet. Be the first to add one.
                 </div>
               ) : (
                 comments.map((comment) => (

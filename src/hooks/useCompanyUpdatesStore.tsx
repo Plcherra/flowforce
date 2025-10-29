@@ -81,7 +81,15 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
 
   likeUpdate: (id) => set((state) => {
     const updates = state.updates.map((update) =>
-      update.id === id ? { ...update, likes: update.likes + 1 } : update
+      update.id === id
+        ? {
+            ...update,
+            likes:
+              update.publishingSettings?.engagement?.allowLikes === false
+                ? update.likes
+                : update.likes + 1,
+          }
+        : update
     );
     persistUpdates(updates);
     return { updates };
@@ -97,7 +105,15 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
 
   incrementComments: (id) => set((state) => {
     const updates = state.updates.map((update) =>
-      update.id === id ? { ...update, comments: update.comments + 1 } : update
+      update.id === id
+        ? {
+            ...update,
+            comments:
+              update.publishingSettings?.engagement?.allowComments === false
+                ? update.comments
+                : update.comments + 1,
+          }
+        : update
     );
     persistUpdates(updates);
     return { updates };

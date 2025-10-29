@@ -10,6 +10,7 @@ import {
   type UnavailabilityWithUser,
   type VendorEventUpsertInput,
   type VendorEventWithMetadata,
+  type ProfileSummary,
 } from '@/hooks/scheduling/useSchedulingConsolidated';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,6 +51,7 @@ interface SchedulingContextType {
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
   vendorEvents: VendorEventWithMetadata[];
+  teamMembers: ProfileSummary[];
   loading: boolean;
   error: string | null;
   isFallbackData: boolean;
@@ -99,6 +101,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     timeOffRequests,
     unavailability,
     vendorEvents,
+    teamMembers,
     loading,
     error,
     refetchAll,
@@ -723,6 +726,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     timeOff: timeOffRequests,
     unavailability,
     vendorEvents,
+    teamMembers,
     loading,
     error,
     isFallbackData: isUsingFallbackData,

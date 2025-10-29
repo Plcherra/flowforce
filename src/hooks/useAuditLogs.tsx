@@ -1,7 +1,7 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
+import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 
 export interface AuditLog {
   id: string;
@@ -27,11 +27,15 @@ export interface AuditLog {
 
 export function useAuditLogs() {
   const { can } = useCan();
+  const auditLogsEnabled = useFeatureFlag('admin.auditLogs');
 
-  return useQuery({
-    queryKey: ['audit-logs'],
+  const query = useQuery<AuditLog[]>({
+    queryKey: ['audit-logs', auditLogsEnabled],
     queryFn: async () => {
-      // Direct table query with type assertion to bypass TypeScript issues
+      if (!auditLogsEnabled) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('audit_logs' as any)
         .select('*')
@@ -39,14 +43,18 @@ export function useAuditLogs() {
         .limit(100);
 
       if (error) {
+        // Gracefully handle missing table when feature flag is disabled or migration not run
+        if ((error as any).code === '42P01') {
+          console.warn('[useAuditLogs] audit_logs table not found. Returning empty list.');
+          return [];
+        }
+
         throw error;
       }
       
-      // If we have data, try to enrich it with user profiles
       if (data && data.length > 0) {
         const enrichedData = await Promise.all(
           data.map(async (log: any) => {
-            // Get user profile for the affected user
             let userProfile = null;
             if (log.user_id) {
               const { data: profile } = await supabase
@@ -57,7 +65,6 @@ export function useAuditLogs() {
               userProfile = profile;
             }
 
-            // Get profile for the user who performed the action
             let performedByProfile = null;
             if (log.performed_by) {
               const { data: profile } = await supabase
@@ -79,9 +86,16 @@ export function useAuditLogs() {
         return enrichedData;
       }
 
-      // Safe type conversion: first to unknown, then to our expected type
       return (data as unknown as AuditLog[]) || [];
     },
-    enabled: can('manageUsers'),
+    enabled: can('manageUsers') && auditLogsEnabled,
   });
+
+  const normalizedData = auditLogsEnabled ? query.data ?? [] : [];
+
+  return {
+    ...query,
+    data: normalizedData,
+    isAuditEnabled: auditLogsEnabled,
+  };
 }

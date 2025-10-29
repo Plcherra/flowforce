@@ -1,222 +1,2035 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ShoppingCart,
+  Plus,
+  Truck,
+  Package,
+  CheckCircle,
+  Clock,
+  History as HistoryIcon,
+  FileText,
+  Link2,
+  RefreshCw,
+  BadgeCheck,
+  AlertTriangle,
+  ExternalLink,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Plus, Truck, Package, CheckCircle, Clock } from 'lucide-react';
-import { usePurchaseOrders } from '@/hooks/inventory/usePurchaseOrders';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
+import {
+  useInventoryItems,
+  useInventorySuppliers,
+  usePurchaseOrders,
+  useCreatePurchaseOrder,
+  useReceivePurchaseOrder,
+  useUpdatePurchaseOrder,
+  useRecordVendorInvoice,
+  useVendorInvoices,
+  useSupplierIntegrationLink,
+} from '@/hooks/useInventory';
+import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
+import type {
+  InventoryItem,
+  PurchaseOrder,
+  SupplierIntegrationDetails,
+} from '@/hooks/inventory/types';
 
-// Placeholder for development
-const placeholderPOs = [];
-const placeholderItems = [];
+type DraftLineItem = {
+  id: string;
+  itemId?: string;
+  itemName: string;
+  category?: string | null;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+};
+
+type IntegrationFormState = {
+  provider: SupplierIntegrationDetails['provider'];
+  account_id: string;
+  api_key: string;
+  notes: string;
+};
+
+type InvoiceFormState = {
+  po_id: string;
+  invoiceNumber: string;
+  amount: string;
+  dueDate: string;
+  notes: string;
+  paymentMethod: string;
+};
+
+type VendorInvoiceRecord = {
+  id: string;
+  reference_number?: string | null;
+  amount?: number | null;
+  status?: string | null;
+  due_date?: string | null;
+  created_at?: string | null;
+  payment_method?: string | null;
+  notes?: string | null;
+  description?: string | null;
+};
+
+const providerOptions: Array<{
+  value: SupplierIntegrationDetails['provider'];
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'marketman',
+    label: 'MarketMan',
+    description: 'Sync catalogs, recipes, and pricing automatically.',
+  },
+  {
+    value: 'us_foods',
+    label: 'US Foods',
+    description: 'Transmit orders directly to your US Foods representative.',
+  },
+  {
+    value: 'baldor',
+    label: 'Baldor',
+    description: 'Automate produce replenishment and delivery confirmations.',
+  },
+  {
+    value: 'sysco',
+    label: 'Sysco',
+    description: 'Pull live pricing and availability from Sysco.',
+  },
+  {
+    value: 'other',
+    label: 'Other Provider',
+    description: 'Configure a custom API, EDI, or FTP integration.',
+  },
+];
+
+const statusLabels: Record<string, string> = {
+  draft: 'Draft',
+  pending: 'Pending Approval',
+  ordered: 'Ordered',
+  partial: 'Partially Received',
+  received: 'Received',
+  cancelled: 'Cancelled',
+};
+
+const generateLineId = () => Math.random().toString(36).slice(2, 10);
+
+const createDraftLineItem = (): DraftLineItem => ({
+  id: generateLineId(),
+  itemId: undefined,
+  itemName: '',
+  category: null,
+  quantity: 1,
+  unitPrice: 0,
+  total: 0,
+});
+
+const formatCurrency = (value?: number | null, currency = 'USD') => {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return '—';
+  }
+
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `$${value.toFixed(2)}`;
+  }
+};
+
+const formatDate = (value?: string | null) =>
+  value ? new Date(value).toLocaleDateString() : '—';
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'received': return 'default';
-    case 'ordered': return 'secondary';
-    case 'pending': return 'outline';
-    case 'partial': return 'secondary';
-    default: return 'outline';
+    case 'received':
+      return 'default';
+    case 'ordered':
+    case 'pending':
+    case 'partial':
+      return 'secondary';
+    case 'cancelled':
+      return 'destructive';
+    case 'draft':
+    default:
+      return 'outline';
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'received': return CheckCircle;
-    case 'ordered': return Truck;
-    case 'pending': return Clock;
-    case 'partial': return Package;
-    default: return Clock;
+    case 'received':
+      return CheckCircle;
+    case 'ordered':
+      return Truck;
+    case 'partial':
+      return RefreshCw;
+    case 'cancelled':
+      return AlertTriangle;
+    case 'pending':
+    case 'draft':
+    default:
+      return Clock;
   }
 };
 
+const paymentStatusVariant = (status: string) => {
+  switch (status) {
+    case 'approved':
+    case 'paid':
+      return 'default';
+    case 'pending':
+      return 'secondary';
+    case 'rejected':
+    case 'cancelled':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+};
+
+const extractInvoiceNumber = (notes?: string | null, description?: string | null) => {
+  if (notes) {
+    const match = notes.match(/Invoice\s?#([^•]+)/i);
+    if (match) return match[1].trim();
+  }
+  if (description) {
+    const match = description.match(/Invoice\s+([^\s]+)\s+for/i);
+    if (match) return match[1].trim();
+  }
+  return undefined;
+};
+
 export default function InventoryPurchasingPage() {
-  const [selectedPO, setSelectedPO] = useState<string | null>(null);
-  const { data: purchaseOrders = [], isLoading } = usePurchaseOrders();
-  
-  // Use real data when available
-  const orders = purchaseOrders.length > 0 ? purchaseOrders : placeholderPOs;
+  const { data: purchaseOrders = [], isLoading: ordersLoading } = usePurchaseOrders();
+  const { data: inventoryItems = [], isLoading: itemsLoading } = useInventoryItems();
+  const { data: suppliers = [], isLoading: suppliersLoading } = useInventorySuppliers();
+  const { data: vendorInvoiceData = [], isLoading: invoicesLoading } = useVendorInvoices();
+
+  const createOrder = useCreatePurchaseOrder();
+  const receiveOrder = useReceivePurchaseOrder();
+  const updateOrder = useUpdatePurchaseOrder();
+  const recordInvoice = useRecordVendorInvoice();
+  const linkIntegration = useSupplierIntegrationLink();
+
+  const { toast } = useToast();
+  const { profile } = useProfile();
+  const vendorInvoices = useMemo<VendorInvoiceRecord[]>(
+    () => (vendorInvoiceData as VendorInvoiceRecord[]) ?? [],
+    [vendorInvoiceData]
+  );
+
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
+  const [orderDate, setOrderDate] = useState<string>(() =>
+    new Date().toISOString().split('T')[0]
+  );
+  const [expectedDate, setExpectedDate] = useState<string>('');
+  const [orderNotes, setOrderNotes] = useState<string>('');
+  const [autoApprove, setAutoApprove] = useState<boolean>(false);
+  const [lineItems, setLineItems] = useState<DraftLineItem[]>([createDraftLineItem()]);
+
+  const [receivingSelection, setReceivingSelection] = useState<string | null>(null);
+  const [receivingLines, setReceivingLines] = useState<Record<string, number>>({});
+  const [receivingNotes, setReceivingNotes] = useState<string>('');
+  const [closeReceiving, setCloseReceiving] = useState<boolean>(false);
+
+  const [historyFilter, setHistoryFilter] = useState({
+    status: 'all',
+    supplier: 'all',
+    search: '',
+    from: '',
+    to: '',
+  });
+  const [historyDetailId, setHistoryDetailId] = useState<string | null>(null);
+
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceForm, setInvoiceForm] = useState<InvoiceFormState>({
+    po_id: '',
+    invoiceNumber: '',
+    amount: '',
+    dueDate: '',
+    notes: '',
+    paymentMethod: 'bank_transfer',
+  });
+
+  const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false);
+  const [integrationSupplierId, setIntegrationSupplierId] = useState<string | null>(null);
+  const [integrationForm, setIntegrationForm] = useState<IntegrationFormState>({
+    provider: 'marketman',
+    account_id: '',
+    api_key: '',
+    notes: '',
+  });
+
+  const selectedSupplier = useMemo(
+    () => suppliers?.find((supplierItem) => supplierItem.id === selectedSupplierId) ?? null,
+    [suppliers, selectedSupplierId]
+  );
+
+  const selectedSupplierIntegration = useMemo(() => {
+    if (!selectedSupplier) return null;
+    if (selectedSupplier.integration) return selectedSupplier.integration;
+    const address = selectedSupplier.address;
+    if (address && typeof address === 'object' && !Array.isArray(address) && 'integration' in address) {
+      return (address as Record<string, unknown>).integration as SupplierIntegrationDetails;
+    }
+    return null;
+  }, [selectedSupplier]);
+
+  const pendingOrders = useMemo(
+    () => purchaseOrders.filter((po) => ['pending', 'draft'].includes(po.status)),
+    [purchaseOrders]
+  );
+
+  const receivingCandidates = useMemo(
+    () => purchaseOrders.filter((po) => ['pending', 'ordered', 'partial'].includes(po.status)),
+    [purchaseOrders]
+  );
+
+  const outstandingByPo = useMemo(() => {
+    const map = new Map<string, number>();
+
+    purchaseOrders.forEach((po) => {
+      const invoicesForPo = vendorInvoices.filter(
+        (invoice) => invoice.reference_number === po.po_number
+      );
+      const paidTotal = invoicesForPo.reduce(
+        (sum, invoice) => sum + (Number(invoice.amount) || 0),
+        0
+      );
+      const outstanding = Math.max((po.total_amount ?? 0) - paidTotal, 0);
+      map.set(po.id, outstanding);
+    });
+
+    return map;
+  }, [purchaseOrders, vendorInvoices]);
+
+  const orderTotal = useMemo(
+    () => lineItems.reduce((sum, item) => sum + (Number.isFinite(item.total) ? item.total : 0), 0),
+    [lineItems]
+  );
+
+  const filteredHistoryOrders = useMemo(() => {
+    const statusFilter = historyFilter.status;
+    const supplierFilter = historyFilter.supplier;
+    const searchTerm = historyFilter.search.trim().toLowerCase();
+    const fromDate = historyFilter.from ? new Date(historyFilter.from) : null;
+    const toDate = historyFilter.to ? new Date(historyFilter.to) : null;
+
+    return purchaseOrders.filter((po) => {
+      if (statusFilter !== 'all' && po.status !== statusFilter) return false;
+      if (supplierFilter !== 'all' && po.supplier_name !== supplierFilter) return false;
+
+      if (searchTerm) {
+        const matchesSearch =
+          po.po_number.toLowerCase().includes(searchTerm) ||
+          po.supplier_name.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return false;
+      }
+
+      if (fromDate) {
+        const order = new Date(po.order_date);
+        if (order < fromDate) return false;
+      }
+
+      if (toDate) {
+        const order = new Date(po.order_date);
+        if (order > toDate) return false;
+      }
+
+      return true;
+    });
+  }, [purchaseOrders, historyFilter]);
+
+  const totalOutstandingValue = useMemo(
+    () => Array.from(outstandingByPo.values()).reduce((sum, value) => sum + value, 0),
+    [outstandingByPo]
+  );
+
+  const openOrderCount = useMemo(
+    () =>
+      purchaseOrders.filter(
+        (po) => po.status !== 'received' && po.status !== 'cancelled'
+      ).length,
+    [purchaseOrders]
+  );
+
+  const pendingApprovalCount = pendingOrders.length;
+  const supplierCount = suppliers?.length ?? 0;
+
+  useEffect(() => {
+    if (!purchaseOrders.length) return;
+
+    setInvoiceForm((prev) => {
+      if (prev.po_id && purchaseOrders.some((po) => po.id === prev.po_id)) {
+        return prev;
+      }
+      const defaultPo = purchaseOrders[0];
+      return {
+        ...prev,
+        po_id: defaultPo.id,
+        amount: (defaultPo.total_amount ?? 0).toFixed(2),
+      };
+    });
+  }, [purchaseOrders]);
+
+  useEffect(() => {
+    if (!receivingCandidates.length) return;
+
+    setReceivingSelection((prev) => {
+      if (prev && receivingCandidates.some((po) => po.id === prev)) {
+        return prev;
+      }
+      return receivingCandidates[0].id;
+    });
+  }, [receivingCandidates]);
+
+  const selectedReceivingPo = useMemo<PurchaseOrder | null>(
+    () =>
+      receivingCandidates.find((po) => po.id === receivingSelection) ??
+      receivingCandidates.find((po) => po.id === invoiceForm.po_id) ??
+      null,
+    [receivingCandidates, receivingSelection, invoiceForm.po_id]
+  );
+
+  useEffect(() => {
+    if (!selectedReceivingPo) {
+      setReceivingLines({});
+      return;
+    }
+
+    const defaults: Record<string, number> = {};
+    selectedReceivingPo.purchase_order_items?.forEach((line) => {
+      const received = line.received_quantity ?? 0;
+      const remaining = Math.max(line.quantity - received, 0);
+      defaults[line.id] = remaining;
+    });
+    setReceivingLines(defaults);
+    setCloseReceiving(
+      selectedReceivingPo.purchase_order_items?.every(
+        (line) => (line.received_quantity ?? 0) >= line.quantity
+      ) ?? false
+    );
+  }, [selectedReceivingPo]);
+
+  const selectedInvoicePo = useMemo<PurchaseOrder | null>(
+    () => purchaseOrders.find((po) => po.id === invoiceForm.po_id) ?? null,
+    [purchaseOrders, invoiceForm.po_id]
+  );
+
+  const invoicesForSelectedPo = useMemo(
+    () =>
+      selectedInvoicePo
+        ? vendorInvoices.filter((invoice) => invoice.reference_number === selectedInvoicePo.po_number)
+        : [],
+    [selectedInvoicePo, vendorInvoices]
+  );
+
+  const outstandingForSelectedPo =
+    selectedInvoicePo && outstandingByPo.has(selectedInvoicePo.id)
+      ? outstandingByPo.get(selectedInvoicePo.id) ?? 0
+      : 0;
+
+  const handleLineItemSelect = (lineId: string, itemId: string) => {
+    const inventoryItem = inventoryItems.find((item) => item.id === itemId);
+    setLineItems((prev) =>
+      prev.map((line) => {
+        if (line.id !== lineId) return line;
+        const unitPrice = inventoryItem?.cost_per_unit ?? line.unitPrice ?? 0;
+        const quantity = line.quantity > 0 ? line.quantity : 1;
+        return {
+          ...line,
+          itemId,
+          itemName: inventoryItem?.name ?? line.itemName,
+          category: inventoryItem?.category ?? inventoryItem?.category_details?.name ?? null,
+          unitPrice,
+          quantity,
+          total: Number((unitPrice * quantity).toFixed(2)),
+        };
+      })
+    );
+  };
+
+  const handleLineItemQuantity = (lineId: string, value: string) => {
+    const quantity = Math.max(Number(value) || 0, 0);
+    setLineItems((prev) =>
+      prev.map((line) =>
+        line.id === lineId
+          ? {
+              ...line,
+              quantity,
+              total: Number((quantity * line.unitPrice).toFixed(2)),
+            }
+          : line
+      )
+    );
+  };
+
+  const handleLineItemPrice = (lineId: string, value: string) => {
+    const unitPrice = Math.max(Number(value) || 0, 0);
+    setLineItems((prev) =>
+      prev.map((line) =>
+        line.id === lineId
+          ? {
+              ...line,
+              unitPrice,
+              total: Number((unitPrice * line.quantity).toFixed(2)),
+            }
+          : line
+      )
+    );
+  };
+
+  const handleLineItemName = (lineId: string, value: string) => {
+    setLineItems((prev) =>
+      prev.map((line) => (line.id === lineId ? { ...line, itemName: value } : line))
+    );
+  };
+
+  const handleRemoveLineItem = (lineId: string) => {
+    setLineItems((prev) => (prev.length > 1 ? prev.filter((line) => line.id !== lineId) : prev));
+  };
+
+  const handleCreateOrder = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedSupplier) {
+      toast({
+        title: 'Supplier required',
+        description: 'Select a supplier before creating a purchase order.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const validLines = lineItems
+      .map((line) => ({
+        ...line,
+        itemName: line.itemName.trim(),
+      }))
+      .filter((line) => line.itemName && line.quantity > 0);
+
+    if (validLines.length === 0) {
+      toast({
+        title: 'No line items',
+        description: 'Add at least one item with quantity greater than zero.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    createOrder.mutate(
+      {
+        supplier: {
+          id: selectedSupplier.id,
+          name: selectedSupplier.name,
+          contact_name: selectedSupplier.contact_name,
+          email: selectedSupplier.email,
+          phone: selectedSupplier.phone,
+          address: selectedSupplier.address as Record<string, unknown> | string | null,
+          payment_terms: selectedSupplier.payment_terms,
+          integration: selectedSupplierIntegration ?? undefined,
+        },
+        items: validLines.map((line) => ({
+          item_id: line.itemId ?? undefined,
+          item_name: line.itemName,
+          quantity: line.quantity,
+          unit_price: line.unitPrice,
+        })),
+        orderDate,
+        expectedDeliveryDate: expectedDate || undefined,
+        notes: orderNotes || undefined,
+        status: autoApprove ? 'ordered' : 'pending',
+        autoApprove,
+      },
+      {
+        onSuccess: () => {
+          setLineItems([createDraftLineItem()]);
+          setOrderNotes('');
+          setExpectedDate('');
+          setAutoApprove(false);
+        },
+      }
+    );
+  };
+
+  const handleApproveOrder = (po: PurchaseOrder) => {
+    updateOrder.mutate({
+      id: po.id,
+      updates: {
+        status: 'ordered',
+        approved_by: profile?.id ?? undefined,
+      },
+    });
+  };
+
+  const handleMarkCancelled = (po: PurchaseOrder) => {
+    updateOrder.mutate({
+      id: po.id,
+      updates: {
+        status: 'cancelled',
+        notes: po.notes ?? undefined,
+      },
+    });
+  };
+
+  const handleReceive = () => {
+    if (!selectedReceivingPo) return;
+
+    const payloadItems =
+      selectedReceivingPo.purchase_order_items
+        ?.map((line) => {
+          const requested = Number(receivingLines[line.id] ?? 0);
+          const alreadyReceived = line.received_quantity ?? 0;
+          const remaining = Math.max(line.quantity - alreadyReceived, 0);
+          const receiveNow = Math.min(Math.max(requested, 0), remaining);
+
+          if (receiveNow <= 0) return null;
+          return {
+            id: line.id,
+            received_quantity: receiveNow,
+            unit_price: line.unit_price,
+          };
+        })
+        .filter(Boolean) ?? [];
+
+    if (!payloadItems.length) {
+      toast({
+        title: 'Nothing to receive',
+        description: 'Enter at least one quantity above zero to record receiving.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    receiveOrder.mutate({
+      id: selectedReceivingPo.id,
+      payload: {
+        items: payloadItems,
+        notes: receivingNotes || undefined,
+        closeOrder: closeReceiving,
+        actual_delivery_date: new Date().toISOString().split('T')[0],
+      },
+    });
+  };
+
+  const handleSubmitInvoice = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedInvoicePo) return;
+
+    const amount = Number(invoiceForm.amount);
+    if (!amount || amount <= 0) {
+      toast({
+        title: 'Amount required',
+        description: 'Enter an amount greater than zero for the invoice.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    recordInvoice.mutate(
+      {
+        poId: selectedInvoicePo.id,
+        supplierName: selectedInvoicePo.supplier_name,
+        amount,
+        dueDate: invoiceForm.dueDate || undefined,
+        invoiceNumber: invoiceForm.invoiceNumber || undefined,
+        notes: invoiceForm.notes || undefined,
+        paymentMethod: invoiceForm.paymentMethod || undefined,
+      },
+      {
+        onSuccess: () => {
+          setInvoiceDialogOpen(false);
+          setInvoiceForm((prev) => ({
+            ...prev,
+            invoiceNumber: '',
+            notes: '',
+            amount: outstandingForSelectedPo
+              ? outstandingForSelectedPo.toFixed(2)
+              : (selectedInvoicePo.total_amount ?? 0).toFixed(2),
+          }));
+        },
+      }
+    );
+  };
+
+  const handleLinkIntegration = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!integrationSupplierId) return;
+
+    linkIntegration.mutate(
+      {
+        supplierId: integrationSupplierId,
+        integration: {
+          provider: integrationForm.provider,
+          account_id: integrationForm.account_id || undefined,
+          api_key: integrationForm.api_key || undefined,
+          status: 'connected',
+          sync_notes: integrationForm.notes || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIntegrationDialogOpen(false);
+          setIntegrationForm({
+            provider: 'marketman',
+            account_id: '',
+            api_key: '',
+            notes: '',
+          });
+        },
+      }
+    );
+  };
+
+  const historyDetailPo =
+    historyDetailId && purchaseOrders.find((po) => po.id === historyDetailId);
 
   return (
     <InventoryLayout>
       <IfCan permission="inventory.purchasing.view">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                <ShoppingCart className="h-8 w-8" />
-                Purchasing
-              </h1>
-              <p className="text-muted-foreground">
-                Purchase orders, receiving, and supplier management
-              </p>
+        <TooltipProvider delayDuration={150}>
+          <div className="space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-1.5">
+                <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+                  <ShoppingCart className="h-8 w-8" />
+                  Inventory Purchasing
+                </h1>
+                <p className="text-muted-foreground">
+                  Place purchase orders, reconcile deliveries, and track vendor invoices in one
+                  workspace.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setReceivingSelection(receivingCandidates[0]?.id ?? null)}
+                  disabled={!receivingCandidates.length}
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Quick Receive
+                </Button>
+                <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Purchase Order
+                </Button>
+              </div>
             </div>
-            
-            <div className="flex gap-2">
-              <Button variant="outline">Quick Receive</Button>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New PO
-              </Button>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Open Purchase Orders</CardDescription>
+                  <CardTitle className="text-3xl font-bold">{openOrderCount}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 text-sm text-muted-foreground">
+                  Awaiting completion or receiving.
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Pending Approvals</CardDescription>
+                  <CardTitle className="text-3xl font-bold">{pendingApprovalCount}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 text-sm text-muted-foreground">
+                  Purchase orders waiting for manager approval.
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Outstanding Spend</CardDescription>
+                  <CardTitle className="text-3xl font-bold">
+                    {formatCurrency(totalOutstandingValue)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 text-sm text-muted-foreground">
+                  Un-invoiced or unpaid purchase order balance.
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Integrated Suppliers</CardDescription>
+                  <CardTitle className="text-3xl font-bold">
+                    {suppliers?.filter((supplier) => supplier.integration)?.length ?? 0} /{' '}
+                    {supplierCount}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0 text-sm text-muted-foreground">
+                  Vendors with live API or EDI connections.
+                </CardContent>
+              </Card>
             </div>
-          </div>
 
-          <Tabs defaultValue="orders" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="orders">Purchase Orders</TabsTrigger>
-              <TabsTrigger value="receiving">Receiving</TabsTrigger>
-              <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-            </TabsList>
+            <Tabs defaultValue="place" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2 gap-2 md:grid-cols-4">
+                <TabsTrigger value="place" className="flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4" />
+                  Place Orders
+                </TabsTrigger>
+                <TabsTrigger value="receive" className="flex items-center gap-2">
+                  <Truck className="h-4 w-4" />
+                  Receive Orders
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <HistoryIcon className="h-4 w-4" />
+                  Order History
+                </TabsTrigger>
+                <TabsTrigger value="invoices" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Invoices
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="orders" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* PO List */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Recent Orders</h2>
-                  {isLoading ? (
-                    <Card>
-                      <CardContent className="p-8 text-center">
-                        <div className="animate-pulse space-y-4">
-                          <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-                          <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ) : orders.length === 0 ? (
-                    <Card>
-                      <CardContent className="p-8 text-center">
-                        <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="font-semibold mb-2">No Purchase Orders</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Create your first purchase order to get started
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    orders.map((po) => {
-                      const StatusIcon = getStatusIcon(po.status);
-                      
-                      return (
-                        <Card 
-                          key={po.id}
-                          className={`cursor-pointer transition-all ${selectedPO === po.id ? 'ring-2 ring-primary' : ''}`}
-                          onClick={() => setSelectedPO(po.id)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between mb-2">
+              <TabsContent value="place" className="space-y-6">
+                <form onSubmit={handleCreateOrder}>
+                  <Card className="overflow-hidden">
+                    <CardHeader className="border-b bg-muted/30">
+                      <CardTitle className="flex items-center gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        Create Purchase Order
+                      </CardTitle>
+                      <CardDescription>
+                        Build a new purchase order using live catalog pricing from Items &amp; Setup.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6 pt-6">
+                      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                        <div className="space-y-6">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2 sm:col-span-2">
+                              <Label htmlFor="supplier">Supplier</Label>
+                              <Select
+                                value={selectedSupplierId}
+                                onValueChange={setSelectedSupplierId}
+                                disabled={suppliersLoading}
+                              >
+                                <SelectTrigger id="supplier">
+                                  <SelectValue placeholder="Select supplier" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {suppliers.map((supplier) => (
+                                    <SelectItem key={supplier.id} value={supplier.id}>
+                                      {supplier.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="order-date">Order Date</Label>
+                              <Input
+                                id="order-date"
+                                type="date"
+                                value={orderDate}
+                                onChange={(event) => setOrderDate(event.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="expected-date">Expected Delivery</Label>
+                              <Input
+                                id="expected-date"
+                                type="date"
+                                value={expectedDate}
+                                onChange={(event) => setExpectedDate(event.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2 sm:col-span-2">
+                              <Label htmlFor="notes">Internal Notes</Label>
+                              <Textarea
+                                id="notes"
+                                value={orderNotes}
+                                rows={3}
+                                onChange={(event) => setOrderNotes(event.target.value)}
+                                placeholder="Share ordering instructions, substitutions, or approval context."
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-3 rounded-lg border">
+                            <div className="flex items-center justify-between px-4 py-3">
                               <div>
-                                <h3 className="font-semibold">{po.po_number}</h3>
+                                <p className="font-medium">Line Items</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {po.supplier_name}
+                                  Search items from Items &amp; Setup to inherit category and pricing.
                                 </p>
                               </div>
-                              <Badge variant={getStatusColor(po.status)} className="flex items-center gap-1">
-                                <StatusIcon className="h-3 w-3" />
-                                {po.status}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setLineItems((prev) => [...prev, createDraftLineItem()])}
+                              >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Item
+                              </Button>
+                            </div>
+                            <ScrollArea className="h-auto max-h-[420px]">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Item</TableHead>
+                                    <TableHead className="w-[110px]">Quantity</TableHead>
+                                    <TableHead className="w-[140px]">Unit Cost</TableHead>
+                                    <TableHead className="w-[120px] text-right">Line Total</TableHead>
+                                    <TableHead className="w-[44px]" />
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {lineItems.map((line) => (
+                                    <TableRow key={line.id}>
+                                      <TableCell>
+                                        <div className="space-y-2">
+                                          <Select
+                                            value={line.itemId ?? ''}
+                                            onValueChange={(value) => handleLineItemSelect(line.id, value)}
+                                            disabled={itemsLoading}
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Search items" />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-80">
+                                              {inventoryItems.map((item: InventoryItem) => (
+                                                <SelectItem key={item.id} value={item.id}>
+                                                  <div className="flex flex-col text-left">
+                                                    <span>{item.name}</span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                      {item.category || 'Uncategorized'} ·{' '}
+                                                      {item.cost_per_unit
+                                                        ? formatCurrency(item.cost_per_unit)
+                                                        : 'No cost set'}
+                                                    </span>
+                                                  </div>
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <Input
+                                            value={line.itemName}
+                                            onChange={(event) => handleLineItemName(line.id, event.target.value)}
+                                            placeholder="Custom item name"
+                                          />
+                                        </div>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Input
+                                          type="number"
+                                          min="0"
+                                          value={line.quantity}
+                                          onChange={(event) =>
+                                            handleLineItemQuantity(line.id, event.target.value)
+                                          }
+                                        />
+                                      </TableCell>
+                                      <TableCell>
+                                        <Input
+                                          type="number"
+                                          min="0"
+                                          step="0.01"
+                                          value={line.unitPrice}
+                                          onChange={(event) =>
+                                            handleLineItemPrice(line.id, event.target.value)
+                                          }
+                                        />
+                                      </TableCell>
+                                      <TableCell className="text-right font-medium">
+                                        {formatCurrency(
+                                          line.total,
+                                          selectedSupplierIntegration?.provider === 'us_foods'
+                                            ? 'USD'
+                                            : 'USD'
+                                        )}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => handleRemoveLineItem(line.id)}
+                                          disabled={lineItems.length === 1}
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </ScrollArea>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="flex items-center gap-2 text-base">
+                                <BadgeCheck className="h-4 w-4" />
+                                Supplier Snapshot
+                              </CardTitle>
+                              <CardDescription>
+                                Contact and integration details from Items &amp; Setup.
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm">
+                              {selectedSupplier ? (
+                                <>
+                                  <div className="space-y-1">
+                                    <p className="font-medium">{selectedSupplier.name}</p>
+                                    <p className="text-muted-foreground">
+                                      {selectedSupplier.contact_name || 'No contact on file'}
+                                    </p>
+                                  </div>
+                                  <div className="space-y-1 text-muted-foreground">
+                                    <p>{selectedSupplier.email || 'No email provided'}</p>
+                                    <p>{selectedSupplier.phone || 'No phone provided'}</p>
+                                  </div>
+                                  <Separator />
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm font-medium">Integration Status</span>
+                                      {selectedSupplierIntegration ? (
+                                        <Badge variant="default" className="gap-1">
+                                          <Link2 className="h-3 w-3" />
+                                          Connected ({selectedSupplierIntegration.provider})
+                                        </Badge>
+                                      ) : (
+                                        <Badge variant="outline" className="gap-1">
+                                          <Link2 className="h-3 w-3" />
+                                          Not linked
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setIntegrationSupplierId(selectedSupplier.id);
+                                        setIntegrationForm((prev) => ({
+                                          ...prev,
+                                          provider:
+                                            selectedSupplierIntegration?.provider ?? prev.provider,
+                                          account_id:
+                                            selectedSupplierIntegration?.account_id ?? '',
+                                          api_key: '',
+                                          notes: selectedSupplierIntegration?.sync_notes ?? '',
+                                        }));
+                                        setIntegrationDialogOpen(true);
+                                      }}
+                                    >
+                                      <Link2 className="mr-2 h-4 w-4" />
+                                      Link Integration
+                                    </Button>
+                                  </div>
+                                </>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">
+                                  Select a supplier to view contact and integration details.
+                                </p>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="flex items-center gap-2 text-base">
+                                <TrendingUp className="h-4 w-4" />
+                                Order Summary
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3 text-sm">
+                              <div className="flex items-center justify-between">
+                                <span>Line Items</span>
+                                <span className="font-medium">{lineItems.length}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span>Estimated Total</span>
+                                <span className="font-medium">
+                                  {formatCurrency(
+                                    orderTotal,
+                                    selectedSupplierIntegration?.provider === 'us_foods'
+                                      ? 'USD'
+                                      : 'USD'
+                                  )}
+                                </span>
+                              </div>
+                              {selectedSupplier && (
+                                <div className="flex items-center justify-between text-muted-foreground">
+                                  <span>Open Balance with Supplier</span>
+                                  <span>
+                                    {formatCurrency(
+                                      purchaseOrders
+                                        .filter((po) => po.supplier_name === selectedSupplier.name)
+                                        .reduce(
+                                          (sum, po) => sum + (outstandingByPo.get(po.id) ?? 0),
+                                          0
+                                        )
+                                    )}
+                                  </span>
+                                </div>
+                              )}
+                              <Separator />
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">Auto-approve order</span>
+                                <Switch
+                                  checked={autoApprove}
+                                  onCheckedChange={setAutoApprove}
+                                  aria-label="Auto approve purchase order"
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Enable to move this purchase order directly to <strong>Ordered</strong>{' '}
+                                without manager approval.
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex items-center justify-between border-t bg-muted/20 py-4">
+                      <div className="text-sm text-muted-foreground">
+                        Need recurring orders? Create templates from the Order History tab.
+                      </div>
+                      <Button type="submit" disabled={createOrder.isPending}>
+                        {createOrder.isPending ? 'Saving...' : 'Create Purchase Order'}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </form>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <HistoryIcon className="h-4 w-4" />
+                      Pending Approvals
+                    </CardTitle>
+                    <CardDescription>
+                      Approve and release draft purchase orders to vendors.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {ordersLoading ? (
+                      <div className="space-y-2">
+                        {[...Array(3)].map((_, index) => (
+                          <div key={index} className="h-14 w-full animate-pulse rounded bg-muted/60" />
+                        ))}
+                      </div>
+                    ) : pendingOrders.length === 0 ? (
+                      <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                        No purchase orders are waiting for approval.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {pendingOrders.map((po) => {
+                          const StatusIcon = getStatusIcon(po.status);
+                          return (
+                            <div
+                              key={po.id}
+                              className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium">{po.po_number}</p>
+                                  <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                    <StatusIcon className="h-3 w-3" />
+                                    {statusLabels[po.status] ?? po.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  {po.supplier_name} · Ordered {formatDate(po.order_date)} ·{' '}
+                                  {formatCurrency(po.total_amount)}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setHistoryDetailId(po.id)}
+                                >
+                                  <ExternalLink className="mr-2 h-4 w-4" />
+                                  Review
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => handleApproveOrder(po)}
+                                  disabled={updateOrder.isPending}
+                                >
+                                  Approve &amp; Send
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleMarkCancelled(po)}
+                                  disabled={updateOrder.isPending}
+                                  aria-label="Cancel purchase order"
+                                >
+                                  <AlertTriangle className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="receive" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Truck className="h-4 w-4" />
+                      Receiving Station
+                    </CardTitle>
+                    <CardDescription>
+                      Log deliveries, capture cost adjustments, and update on-hand inventory.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+                    <div className="space-y-3">
+                      <div className="rounded-lg border">
+                        <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-3">
+                          <div>
+                            <p className="font-medium">Receiving Queue</p>
+                            <p className="text-xs text-muted-foreground">
+                              {receivingCandidates.length} purchase orders awaiting receiving.
+                            </p>
+                          </div>
+                        </div>
+                        <ScrollArea className="h-[360px]">
+                          <div className="space-y-1 p-2">
+                            {receivingCandidates.length === 0 ? (
+                              <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+                                No open purchase orders with quantity remaining.
+                              </div>
+                            ) : (
+                              receivingCandidates.map((po) => {
+                                const StatusIcon = getStatusIcon(po.status);
+                                const outstanding = outstandingByPo.get(po.id) ?? 0;
+                                const isSelected = receivingSelection === po.id;
+                                return (
+                                  <button
+                                    key={po.id}
+                                    type="button"
+                                    onClick={() => setReceivingSelection(po.id)}
+                                    className={cn(
+                                      'w-full rounded-lg border p-4 text-left transition hover:border-primary',
+                                      isSelected && 'border-primary shadow-sm'
+                                    )}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div>
+                                        <p className="font-medium">{po.po_number}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {po.supplier_name} · Expected {formatDate(po.expected_delivery_date)}
+                                        </p>
+                                      </div>
+                                      <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                        <StatusIcon className="h-3 w-3" />
+                                        {statusLabels[po.status] ?? po.status}
+                                      </Badge>
+                                    </div>
+                                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                                      <span>
+                                        {po.purchase_order_items
+                                          ?.map((item) => item.quantity)
+                                          .reduce((sum, qty) => sum + (qty || 0), 0) ?? 0}{' '}
+                                        units ordered
+                                      </span>
+                                      <span>Outstanding {formatCurrency(outstanding)}</span>
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {selectedReceivingPo ? (
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-lg font-semibold">{selectedReceivingPo.po_number}</h3>
+                              <Badge variant={getStatusColor(selectedReceivingPo.status)} className="gap-1">
+                                {(() => {
+                                  const StatusIcon = getStatusIcon(selectedReceivingPo.status);
+                                  return <StatusIcon className="h-3 w-3" />;
+                                })()}
+                                {statusLabels[selectedReceivingPo.status] ?? selectedReceivingPo.status}
                               </Badge>
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">Order Date:</span>
-                                <div className="font-medium">{new Date(po.order_date).toLocaleDateString()}</div>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Expected:</span>
-                                <div className="font-medium">
-                                  {po.expected_delivery_date ? new Date(po.expected_delivery_date).toLocaleDateString() : 'TBD'}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="mt-2 pt-2 border-t">
-                              <div className="text-lg font-semibold">
-                                {po.total_amount ? `$${po.total_amount.toFixed(2)}` : 'TBD'}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
-                  )}
-                </div>
+                            <p className="text-sm text-muted-foreground">
+                              {selectedReceivingPo.supplier_name} · Ordered {formatDate(selectedReceivingPo.order_date)}
+                            </p>
+                          </div>
 
-                {/* PO Details */}
-                <div>
-                  {selectedPO ? (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Order Items</CardTitle>
-                        <CardDescription>
-                          {selectedPO} - {orders.find(po => po.id === selectedPO)?.supplier_name}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-center py-8">
-                          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">Order items will be displayed here</p>
-                          <p className="text-sm text-muted-foreground mt-2">Once purchase order items are configured</p>
+                          <div className="rounded-lg border">
+                            <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">
+                              Receive Line Items
+                            </div>
+                            <ScrollArea className="h-[280px]">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Item</TableHead>
+                                    <TableHead className="w-[80px] text-right">Ordered</TableHead>
+                                    <TableHead className="w-[80px] text-right">Received</TableHead>
+                                    <TableHead className="w-[80px] text-right">Remaining</TableHead>
+                                    <TableHead className="w-[120px] text-right">Receive Now</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {selectedReceivingPo.purchase_order_items?.map((line) => {
+                                    const alreadyReceived = line.received_quantity ?? 0;
+                                    const remaining = Math.max(line.quantity - alreadyReceived, 0);
+                                    return (
+                                      <TableRow key={line.id}>
+                                        <TableCell>
+                                          <div>
+                                            <p className="font-medium">{line.item_name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                              {formatCurrency(line.unit_price)} per unit
+                                            </p>
+                                          </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">{line.quantity}</TableCell>
+                                        <TableCell className="text-right">{alreadyReceived}</TableCell>
+                                        <TableCell className="text-right">
+                                          {remaining}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <Input
+                                            type="number"
+                                            min="0"
+                                            max={remaining}
+                                            value={receivingLines[line.id] ?? 0}
+                                            onChange={(event) => {
+                                              const value = Math.min(
+                                                Math.max(Number(event.target.value) || 0, 0),
+                                                remaining
+                                              );
+                                              setReceivingLines((prev) => ({
+                                                ...prev,
+                                                [line.id]: value,
+                                              }));
+                                            }}
+                                          />
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                                </TableBody>
+                              </Table>
+                            </ScrollArea>
+                          </div>
+
+                          <div className="space-y-3 rounded-lg border p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-sm font-medium">Close purchase order after receiving</p>
+                                <p className="text-xs text-muted-foreground">
+                                  Automatically marks the order as received and timestamps the delivery.
+                                </p>
+                              </div>
+                              <Switch
+                                checked={closeReceiving}
+                                onCheckedChange={setCloseReceiving}
+                                aria-label="Close purchase order after receiving"
+                              />
+                            </div>
+                            <div className="space-y-1 text-sm">
+                              <Label htmlFor="receiving-notes">Receiving Notes</Label>
+                              <Textarea
+                                id="receiving-notes"
+                                value={receivingNotes}
+                                onChange={(event) => setReceivingNotes(event.target.value)}
+                                placeholder="Log any discrepancies, substitutions, or credits."
+                                rows={3}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between text-sm text-muted-foreground">
+                              <span>Outstanding balance</span>
+                              <span>{formatCurrency(outstandingByPo.get(selectedReceivingPo.id) ?? 0)}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              className="w-full"
+                              onClick={handleReceive}
+                              disabled={receiveOrder.isPending}
+                            >
+                              {receiveOrder.isPending ? 'Recording...' : 'Record Receiving'}
+                            </Button>
+                          </div>
                         </div>
-                        
-                        <div className="flex gap-2 mt-6">
-                          <Button variant="outline" className="flex-1">Edit Order</Button>
-                          <Button className="flex-1">Start Receiving</Button>
+                      ) : (
+                        <div className="flex h-full items-center justify-center rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
+                          Select a purchase order from the queue to record receiving activity.
                         </div>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card>
-                      <CardContent className="p-8 text-center">
-                        <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="font-semibold mb-2">Select a Purchase Order</h3>
-                        <p className="text-muted-foreground">
-                          Choose an order from the list to view details and manage receiving
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="history" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <HistoryIcon className="h-4 w-4" />
+                      Purchase Order History
+                    </CardTitle>
+                    <CardDescription>
+                      Audit trail for every purchase order, including approvals, receiving, and invoices.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      <div>
+                        <Label className="text-xs uppercase text-muted-foreground">Status</Label>
+                        <Select
+                          value={historyFilter.status}
+                          onValueChange={(value) =>
+                            setHistoryFilter((prev) => ({ ...prev, status: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="All statuses" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All statuses</SelectItem>
+                            {Object.entries(statusLabels).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs uppercase text-muted-foreground">Supplier</Label>
+                        <Select
+                          value={historyFilter.supplier}
+                          onValueChange={(value) =>
+                            setHistoryFilter((prev) => ({ ...prev, supplier: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="All suppliers" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All suppliers</SelectItem>
+                            {Array.from(new Set(purchaseOrders.map((po) => po.supplier_name))).map(
+                              (supplier) => (
+                                <SelectItem key={supplier} value={supplier}>
+                                  {supplier}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs uppercase text-muted-foreground">
+                          Order date from
+                        </Label>
+                        <Input
+                          type="date"
+                          value={historyFilter.from}
+                          onChange={(event) =>
+                            setHistoryFilter((prev) => ({ ...prev, from: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs uppercase text-muted-foreground">Order date to</Label>
+                        <Input
+                          type="date"
+                          value={historyFilter.to}
+                          onChange={(event) =>
+                            setHistoryFilter((prev) => ({ ...prev, to: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label className="text-xs uppercase text-muted-foreground">Search</Label>
+                        <Input
+                          placeholder="Search by PO number or supplier"
+                          value={historyFilter.search}
+                          onChange={(event) =>
+                            setHistoryFilter((prev) => ({ ...prev, search: event.target.value }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border">
+                      <ScrollArea className="h-[420px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>PO</TableHead>
+                              <TableHead>Supplier</TableHead>
+                              <TableHead>Ordered</TableHead>
+                              <TableHead>Expected</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredHistoryOrders.length === 0 ? (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={7}
+                                  className="h-24 text-center text-sm text-muted-foreground"
+                                >
+                                  No purchase orders match your filters.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              filteredHistoryOrders.map((po) => {
+                                const StatusIcon = getStatusIcon(po.status);
+                                return (
+                                  <TableRow key={po.id} className="hover:bg-muted/40">
+                                    <TableCell className="font-medium">{po.po_number}</TableCell>
+                                    <TableCell>{po.supplier_name}</TableCell>
+                                    <TableCell>{formatDate(po.order_date)}</TableCell>
+                                    <TableCell>{formatDate(po.expected_delivery_date)}</TableCell>
+                                    <TableCell className="text-right">
+                                      {formatCurrency(po.total_amount)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                        <StatusIcon className="h-3 w-3" />
+                                        {statusLabels[po.status] ?? po.status}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setHistoryDetailId(po.id)}
+                                      >
+                                        View
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })
+                            )}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="invoices" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Vendor Invoices
+                    </CardTitle>
+                    <CardDescription>
+                      Track invoices, payment status, and outstanding balances for each purchase order.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+                      <div className="space-y-3 rounded-lg border p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <Label className="text-xs uppercase text-muted-foreground">
+                              Purchase Order
+                            </Label>
+                            <Select
+                              value={invoiceForm.po_id}
+                              onValueChange={(value) => {
+                                const targetPo = purchaseOrders.find((po) => po.id === value);
+                                setInvoiceForm((prev) => ({
+                                  ...prev,
+                                  po_id: value,
+                                  amount: targetPo
+                                    ? (outstandingByPo.get(targetPo.id) ?? targetPo.total_amount ?? 0).toFixed(2)
+                                    : prev.amount,
+                                }));
+                              }}
+                              disabled={ordersLoading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select purchase order" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-72">
+                                {purchaseOrders.map((po) => (
+                                  <SelectItem key={po.id} value={po.id}>
+                                    {po.po_number} · {po.supplier_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => setInvoiceDialogOpen(true)}
+                            disabled={!selectedInvoicePo}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Log Invoice
+                          </Button>
+                        </div>
+                        {selectedInvoicePo && (
+                          <div className="rounded-md border bg-muted/40 p-3 text-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{selectedInvoicePo.po_number}</span>
+                              <Badge variant={getStatusColor(selectedInvoicePo.status)} className="gap-1">
+                                {statusLabels[selectedInvoicePo.status] ?? selectedInvoicePo.status}
+                              </Badge>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                              <span>Ordered</span>
+                              <span className="text-right">{formatDate(selectedInvoicePo.order_date)}</span>
+                              <span>Expected Delivery</span>
+                              <span className="text-right">{formatDate(selectedInvoicePo.expected_delivery_date)}</span>
+                              <span>Total Value</span>
+                              <span className="text-right">{formatCurrency(selectedInvoicePo.total_amount)}</span>
+                              <span>Outstanding</span>
+                              <span className="text-right">{formatCurrency(outstandingForSelectedPo)}</span>
+                              <span>Invoices Logged</span>
+                              <span className="text-right">{invoicesForSelectedPo.length}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 rounded-lg border p-4 text-sm">
+                        <p className="font-medium">Invoice Metrics</p>
+                        <div className="flex items-center justify-between">
+                          <span>Total invoices logged</span>
+                          <span>{vendorInvoices.length}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Open invoices</span>
+                          <span>
+                            {
+                              vendorInvoices.filter(
+                                (invoice) => invoice.status === 'pending' || invoice.status === 'approved'
+                              ).length
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Paid invoices</span>
+                          <span>
+                            {vendorInvoices.filter((invoice) => invoice.status === 'paid').length}
+                          </span>
+                        </div>
+                        <Separator />
+                        <div className="flex items-center justify-between font-medium">
+                          <span>Total outstanding</span>
+                          <span>{formatCurrency(totalOutstandingValue)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border">
+                      <ScrollArea className="h-[320px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Invoice</TableHead>
+                              <TableHead>PO</TableHead>
+                              <TableHead>Amount</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Due</TableHead>
+                              <TableHead className="text-right">Logged</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {invoicesLoading ? (
+                              <TableRow>
+                                <TableCell colSpan={6}>
+                                  <div className="space-y-2 p-4">
+                                    {[...Array(3)].map((_, index) => (
+                                      <div key={index} className="h-10 animate-pulse rounded bg-muted/60" />
+                                    ))}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : (vendorInvoices?.length ?? 0) === 0 ? (
+                              <TableRow>
+                                <TableCell
+                                  colSpan={6}
+                                  className="h-24 text-center text-sm text-muted-foreground"
+                                >
+                                  No invoices recorded yet.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              vendorInvoices.map((invoice: VendorInvoiceRecord) => {
+                                const relatedPo = purchaseOrders.find(
+                                  (po) => po.po_number === invoice.reference_number
+                                );
+                                const invoiceNumber = extractInvoiceNumber(invoice.notes, invoice.description);
+                                return (
+                                  <TableRow key={invoice.id}>
+                                    <TableCell>
+                                      <div>
+                                        <p className="font-medium">
+                                          {invoiceNumber ?? invoice.reference_number ?? 'Invoice'}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {invoice.payment_method ?? 'Payment method not set'}
+                                        </p>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{relatedPo?.po_number ?? invoice.reference_number}</TableCell>
+                                    <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+                                    <TableCell>
+                                      <Badge variant={paymentStatusVariant(invoice.status)} className="capitalize">
+                                        {invoice.status ?? 'pending'}
+                                      </Badge>
+                                    </TableCell>
+                                    <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                                    <TableCell className="text-right text-xs text-muted-foreground">
+                                      {formatDate(invoice.created_at)}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })
+                            )}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <Dialog
+            open={Boolean(historyDetailPo)}
+            onOpenChange={(open) => {
+              if (!open) setHistoryDetailId(null);
+            }}
+          >
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Purchase Order Details</DialogTitle>
+                <DialogDescription>
+                  {historyDetailPo?.po_number} · {historyDetailPo?.supplier_name}
+                </DialogDescription>
+              </DialogHeader>
+              {historyDetailPo && (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-lg border bg-muted/30 p-3 text-sm">
+                      <p className="font-medium">Summary</p>
+                      <div className="mt-2 space-y-1 text-muted-foreground">
+                        <p>Order date: {formatDate(historyDetailPo.order_date)}</p>
+                        <p>Expected delivery: {formatDate(historyDetailPo.expected_delivery_date)}</p>
+                        <p>Actual delivery: {formatDate(historyDetailPo.actual_delivery_date)}</p>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border bg-muted/30 p-3 text-sm">
+                      <p className="font-medium">Financials</p>
+                      <div className="mt-2 space-y-1 text-muted-foreground">
+                        <p>Total: {formatCurrency(historyDetailPo.total_amount)}</p>
+                        <p>
+                          Outstanding:{' '}
+                          {formatCurrency(outstandingByPo.get(historyDetailPo.id) ?? 0)}
                         </p>
-                      </CardContent>
-                    </Card>
-                  )}
+                        <p>Status: {statusLabels[historyDetailPo.status] ?? historyDetailPo.status}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 rounded-lg border">
+                    <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">
+                      Line Items
+                    </div>
+                    <ScrollArea className="h-64">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Item</TableHead>
+                            <TableHead className="w-[90px] text-right">Quantity</TableHead>
+                            <TableHead className="w-[90px] text-right">Unit Cost</TableHead>
+                            <TableHead className="w-[100px] text-right">Received</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {historyDetailPo.purchase_order_items?.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium">{item.item_name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Line value {formatCurrency(item.unit_price * item.quantity)}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">{item.quantity}</TableCell>
+                              <TableCell className="text-right">
+                                {formatCurrency(item.unit_price)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {item.received_quantity ?? 0}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
+              )}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setHistoryDetailId(null)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-            <TabsContent value="receiving" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Receiving Station
-                  </CardTitle>
-                  <CardDescription>
-                    Process incoming deliveries and update inventory
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Receiving interface will be implemented here.</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
+          <Dialog open={invoiceDialogOpen} onOpenChange={setInvoiceDialogOpen}>
+            <DialogContent>
+              <form onSubmit={handleSubmitInvoice} className="space-y-4">
+                <DialogHeader>
+                  <DialogTitle>Log Vendor Invoice</DialogTitle>
+                  <DialogDescription>
+                    Capture invoice details to reconcile against the purchase order.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice-number">Invoice Number</Label>
+                      <Input
+                        id="invoice-number"
+                        value={invoiceForm.invoiceNumber}
+                        onChange={(event) =>
+                          setInvoiceForm((prev) => ({ ...prev, invoiceNumber: event.target.value }))
+                        }
+                        placeholder="Invoice #"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice-amount">Amount</Label>
+                      <Input
+                        id="invoice-amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={invoiceForm.amount}
+                        onChange={(event) =>
+                          setInvoiceForm((prev) => ({ ...prev, amount: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice-due">Due Date</Label>
+                      <Input
+                        id="invoice-due"
+                        type="date"
+                        value={invoiceForm.dueDate}
+                        onChange={(event) =>
+                          setInvoiceForm((prev) => ({ ...prev, dueDate: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="payment-method">Payment Method</Label>
+                      <Select
+                        value={invoiceForm.paymentMethod}
+                        onValueChange={(value) =>
+                          setInvoiceForm((prev) => ({ ...prev, paymentMethod: value }))
+                        }
+                      >
+                        <SelectTrigger id="payment-method">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bank_transfer">Bank transfer / ACH</SelectItem>
+                          <SelectItem value="check">Check</SelectItem>
+                          <SelectItem value="credit_card">Credit card</SelectItem>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoice-notes">Notes</Label>
+                    <Textarea
+                      id="invoice-notes"
+                      rows={3}
+                      value={invoiceForm.notes}
+                      onChange={(event) =>
+                        setInvoiceForm((prev) => ({ ...prev, notes: event.target.value }))
+                      }
+                      placeholder="Add memo or reconciliation details."
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setInvoiceDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={recordInvoice.isPending}>
+                    {recordInvoice.isPending ? 'Saving...' : 'Save Invoice'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
 
-            <TabsContent value="suppliers" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5" />
-                    Supplier Management
-                  </CardTitle>
-                  <CardDescription>
-                    Manage supplier information and performance
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Supplier management interface will be implemented here.</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+          <Dialog open={integrationDialogOpen} onOpenChange={setIntegrationDialogOpen}>
+            <DialogContent>
+              <form onSubmit={handleLinkIntegration} className="space-y-4">
+                <DialogHeader>
+                  <DialogTitle>Link Supplier Integration</DialogTitle>
+                  <DialogDescription>
+                    Connect supplier APIs to sync catalogs, pricing, and order statuses automatically.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="integration-provider">Provider</Label>
+                    <Select
+                      value={integrationForm.provider}
+                      onValueChange={(value) =>
+                        setIntegrationForm((prev) => ({
+                          ...prev,
+                          provider: value as SupplierIntegrationDetails['provider'],
+                        }))
+                      }
+                    >
+                      <SelectTrigger id="integration-provider">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {providerOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex flex-col text-start">
+                              <span>{option.label}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {option.description}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="integration-account">Account Identifier</Label>
+                    <Input
+                      id="integration-account"
+                      value={integrationForm.account_id}
+                      onChange={(event) =>
+                        setIntegrationForm((prev) => ({ ...prev, account_id: event.target.value }))
+                      }
+                      placeholder="e.g. MarketMan store ID or vendor account number"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="integration-key">API Key / Secret</Label>
+                    <Input
+                      id="integration-key"
+                      value={integrationForm.api_key}
+                      onChange={(event) =>
+                        setIntegrationForm((prev) => ({ ...prev, api_key: event.target.value }))
+                      }
+                      placeholder="Secure credential (stored encrypted)"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="integration-notes">Integration Notes</Label>
+                    <Textarea
+                      id="integration-notes"
+                      rows={3}
+                      value={integrationForm.notes}
+                      onChange={(event) =>
+                        setIntegrationForm((prev) => ({ ...prev, notes: event.target.value }))
+                      }
+                      placeholder="Connection details, sync cadence, or contacts."
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIntegrationDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={linkIntegration.isPending}>
+                    {linkIntegration.isPending ? 'Linking...' : 'Save Integration'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </TooltipProvider>
       </IfCan>
     </InventoryLayout>
   );

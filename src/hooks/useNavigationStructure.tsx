@@ -67,10 +67,8 @@ export function useNavigationStructure() {
       )
       // Remove unwanted sections
       .filter(cs => {
-        const path = (cs.path || '').toLowerCase();
         const name = (cs.name || '').toLowerCase();
-        return !path.includes('/help-desk') && 
-               !name.includes('simple inventory') &&
+        return !name.includes('simple inventory') &&
                !name.includes('events') && 
                !name.includes('calendar');
       })
@@ -146,6 +144,12 @@ export function useNavigationStructure() {
             const canonical = canonicalizePath(resolvedPath);
             const canonicalTail = canonical.split('/').pop() || '';
             const normalizedName = (customSection.name || '').trim().toLowerCase();
+            const templateKey = (customSection.template_id || '').toString().toLowerCase();
+
+            const isHelpDeskSection =
+              templateKey === 'help-desk' ||
+              canonical.includes('help-desk') ||
+              normalizedName.includes('help desk');
 
             if (!canonical || canonicalPaths.has(canonical) || staticNames.has(normalizedName)) {
               return null;
@@ -153,6 +157,24 @@ export function useNavigationStructure() {
 
             if (canonicalTail === 'company-updates' || normalizedName === 'company updates') {
               return null;
+            }
+
+            if (isHelpDeskSection) {
+              const helpDeskHref = '/messages/helpdesk';
+              const helpDeskCanonical = canonicalizePath(helpDeskHref);
+
+              if (canonicalPaths.has(helpDeskCanonical)) {
+                return null;
+              }
+
+              canonicalPaths.add(helpDeskCanonical);
+
+              return {
+                id: `custom-${customSection.id}`,
+                name: customSection.name || 'Help Desk',
+                href: helpDeskHref,
+                icon: customSection.icon || 'Headphones',
+              };
             }
 
             let href = resolvedPath;

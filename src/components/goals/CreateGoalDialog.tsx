@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils';
 import { useGoals } from '@/hooks/useGoals';
 import { useTasks } from '@/hooks/useTasks';
 import { TaskForm, type Task } from './TaskForm';
+import { useAuth } from '@/hooks/useAuth';
+import { useEmployees } from '@/hooks/useEmployees';
 
 interface CreateGoalDialogProps {
   open: boolean;
@@ -25,17 +27,26 @@ interface CreateGoalDialogProps {
 export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) {
   const { createGoal, linkTaskToGoal } = useGoals();
   const { createTask } = useTasks();
+  const { user } = useAuth();
+  const { employees, loading: employeesLoading } = useEmployees();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [targetDate, setTargetDate] = useState<Date>();
   const [rewardType, setRewardType] = useState<'recognition' | 'bonus' | 'badge' | 'time_off' | 'custom'>('recognition');
   const [rewardDetails, setRewardDetails] = useState('');
+  const [ownerId, setOwnerId] = useState('');
   const [tasks, setTasks] = useState<Task[]>([
     { title: '', description: '', priority: 'medium' },
     { title: '', description: '', priority: 'medium' }
   ]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && user) {
+      setOwnerId((current) => current || user.id);
+    }
+  }, [open, user]);
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
@@ -69,6 +80,7 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
 
   const isFormValid = () => {
     return title.trim() && 
+           ownerId &&
            tasks.length >= 2 && 
            tasks.every(task => task.title.trim());
   };
@@ -79,13 +91,20 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
 
     setLoading(true);
     try {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const ownerToUse = ownerId || user.id;
+
       const newGoal = await createGoal({
+        ownerId: ownerToUse,
         title: title.trim(),
         description: description.trim() || null,
         priority,
         target_completion_date: targetDate ? targetDate.toISOString().split('T')[0] : null,
         reward_type: rewardType,
-        reward_details: rewardDetails ? { description: rewardDetails } : {},
+        reward_details: rewardDetails ? { description: rewardDetails } : null,
         status: 'draft',
         progress: 0,
         completed_at: null
@@ -100,13 +119,13 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
             priority: task.priority,
             status: 'todo',
             due_date: targetDate ? targetDate.toISOString() : null,
-            assigned_to: null,
-            created_by: '',
+            assigned_to: ownerToUse,
+            created_by: user.id,
             department_id: null,
             estimated_hours: null,
             actual_hours: null,
-            tags: null,
-            attachments: {},
+            tags: [],
+            attachments: [],
             parent_task_id: null,
             workflow_id: null
           });
@@ -124,6 +143,7 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
       setTargetDate(undefined);
       setRewardType('recognition');
       setRewardDetails('');
+      setOwnerId(user?.id ?? '');
       setTasks([
         { title: '', description: '', priority: 'medium' },
         { title: '', description: '', priority: 'medium' }
@@ -151,12 +171,12 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Goal Information Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-3">
-              <Target className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Goal Details</h3>
-            </div>
-            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Goal Details</h3>
+              </div>
+              
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">Goal Title *</Label>
               <Input
@@ -181,7 +201,7 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium flex items-center space-x-1">
                   {getPriorityIcon(priority)}
@@ -216,6 +236,26 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
                   {getPriorityIcon(priority)}
                   <span className="ml-1 capitalize">{priority} Priority</span>
                 </Badge>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Goal Owner *</Label>
+                <Select 
+                  value={ownerId} 
+                  onValueChange={setOwnerId}
+                  disabled={loading || employeesLoading}
+                >
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Select owner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.first_name} {employee.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -266,7 +306,10 @@ export function CreateGoalDialog({ open, onOpenChange }: CreateGoalDialogProps) 
                   {getRewardIcon(rewardType)}
                   <span>Reward Type</span>
                 </Label>
-                <Select value={rewardType} onValueChange={(value: any) => setRewardType(value)}>
+                <Select
+                  value={rewardType}
+                  onValueChange={(value: typeof rewardType) => setRewardType(value)}
+                >
                   <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>

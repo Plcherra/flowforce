@@ -1,6 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
 import { useCompanyUpdatesStore } from './useCompanyUpdatesStore';
+
+type CreateCompanyUpdateInput = {
+  title: string;
+  content: string;
+  richContent?: string;
+  type: CompanyUpdate['type'];
+  priority: CompanyUpdate['priority'];
+  backgroundStyle?: CompanyUpdate['backgroundStyle'];
+  isPinned?: boolean;
+  publishingSettings?: CompanyUpdate['publishingSettings'];
+  recipients?: CompanyUpdate['recipients'];
+};
 
 export function useCompanyUpdates() {
   const { 
@@ -59,18 +71,71 @@ export function useCompanyUpdates() {
     updateStatus(updateId, 'archived');
   };
 
-  const createUpdate = (updateData: Omit<CompanyUpdate, 'id' | 'createdAt' | 'updatedAt' | 'publishDate' | 'status' | 'likes' | 'comments' | 'views' | 'assignedEmployees' | 'createdBy' | 'author'>) => {
+  const createUpdate = (updateData: CreateCompanyUpdateInput) => {
+    const engagementDefaults = {
+      allowLikes: true,
+      allowComments: true,
+      allowSharing: false,
+      requireConfirmation: false,
+      showAsPopup: false,
+    };
+
+    const notificationDefaults = {
+      email: true,
+      push: true,
+      inApp: true,
+      reminders: false,
+    };
+
+    const publishingSettings = {
+      publishNow: true,
+      notifications: {
+        ...notificationDefaults,
+        ...updateData.publishingSettings?.notifications,
+      },
+      engagement: {
+        ...engagementDefaults,
+        ...updateData.publishingSettings?.engagement,
+      },
+      authorAttribution: updateData.publishingSettings?.authorAttribution ?? true,
+      authorName: updateData.publishingSettings?.authorName,
+      scheduledDate: updateData.publishingSettings?.scheduledDate,
+      scheduledTime: updateData.publishingSettings?.scheduledTime,
+      timezone: updateData.publishingSettings?.timezone,
+      publishNow: updateData.publishingSettings?.publishNow ?? true,
+    };
+
+    const recipients = updateData.recipients
+      ? {
+          ...updateData.recipients,
+          targets: [...updateData.recipients.targets],
+        }
+      : undefined;
+
+    const assignedEmployees =
+      recipients?.targets
+        ?.filter((target) => target.startsWith('individuals:'))
+        .map((target) => target.split(':')[1])
+        .filter(Boolean) ?? [];
+
+    const authorName = publishingSettings.authorAttribution
+      ? publishingSettings.authorName || 'Current User'
+      : 'Company Updates';
+
     const fullUpdateData = {
       ...updateData,
+      isPinned: updateData.isPinned ?? false,
       status: 'published' as const,
       likes: 0,
       comments: 0,
       views: 0,
-      assignedEmployees: [],
+      publishingSettings,
+      recipients,
+      assignedEmployees,
       createdBy: 'current-user',
       author: {
         id: 'current-user',
-        name: 'Current User',
+        name: authorName,
         avatar: '',
         role: 'Admin'
       }

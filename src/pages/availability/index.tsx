@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/ui/loading-states';
 import { SchedulingProvider, useScheduling } from '@/contexts/SchedulingContext';
 import { useProfile } from '@/hooks/useProfile';
 import { AvailabilityRequestForm, type AvailabilityGrid } from '@/components/availability/AvailabilityRequestForm';
+import { TimeOffRequestPanel } from '@/components/availability/TimeOffRequestPanel';
 import { DEFAULT_ORG_ID, startOfIsoWeek } from '@/availability/lockEngine';
 import {
   cloneGrid,
@@ -146,44 +147,51 @@ function EmployeeAvailabilityContent() {
     );
   }
 
+  const availabilityCard = (
+    <Card className="border bg-background shadow-sm">
+      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <CalendarCheck className="h-5 w-5 text-primary" />
+            My Availability
+          </CardTitle>
+          <CardDescription>
+            Select when you&apos;re free to work. Submit a request if this week is locked by your manager.
+          </CardDescription>
+        </div>
+        <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs text-primary">
+          Week of {dayjs(weekStart).format('MMM D, YYYY')}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Alert className={cn('border-primary/30', (availabilityQuery.data?.length ?? 0) === 0 && 'border-dashed')}>
+          <CalendarCheck className="h-5 w-5 text-primary" />
+          <AlertTitle>
+            {(availabilityQuery.data?.length ?? 0) === 0 ? 'No availability saved yet' : 'Update as needed'}
+          </AlertTitle>
+          <AlertDescription>
+            Choose the hours you prefer to work each day. Locked weeks still let you submit a change request
+            for manager approval.
+          </AlertDescription>
+        </Alert>
+
+        <AvailabilityRequestForm
+          orgId={orgId}
+          employeeId={employeeId}
+          weekStart={weekStart}
+          initialAvailability={initialGrid}
+          onSaveDirect={handleDirectSave}
+        />
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6 px-6 py-8">
-      <Card className="border bg-background shadow-sm">
-        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CalendarCheck className="h-5 w-5 text-primary" />
-              My Availability
-            </CardTitle>
-            <CardDescription>
-              Select when you&apos;re free to work. Submit a request if this week is locked by your manager.
-            </CardDescription>
-          </div>
-          <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs text-primary">
-            Week of {dayjs(weekStart).format('MMM D, YYYY')}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert className={cn('border-primary/30', (availabilityQuery.data?.length ?? 0) === 0 && 'border-dashed')}>
-            <CalendarCheck className="h-5 w-5 text-primary" />
-            <AlertTitle>
-              {(availabilityQuery.data?.length ?? 0) === 0 ? 'No availability saved yet' : 'Update as needed'}
-            </AlertTitle>
-            <AlertDescription>
-              Choose the hours you prefer to work each day. Locked weeks still let you submit a change request
-              for manager approval.
-            </AlertDescription>
-          </Alert>
-
-          <AvailabilityRequestForm
-            orgId={orgId}
-            employeeId={employeeId}
-            weekStart={weekStart}
-            initialAvailability={initialGrid}
-            onSaveDirect={handleDirectSave}
-          />
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+        {availabilityCard}
+        <TimeOffRequestPanel employeeId={employeeId} availabilityGrid={initialGrid} />
+      </div>
     </div>
   );
 }

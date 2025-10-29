@@ -1,4 +1,5 @@
 // Common types to replace 'any' usage across the application
+import type { Tables } from '@/integrations/supabase/public-types';
 
 export interface FormSubmission {
   id: string;
@@ -226,27 +227,28 @@ export interface Payment {
 }
 
 // Task types
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  assigned_to?: string;
-  created_by: string;
-  due_date?: string;
-  completed_at?: string;
-  created_at: string;
-  updated_at: string;
+type TaskRow = Tables<'tasks'>;
+
+export type Task = TaskRow & {
   assigned_profile?: {
     first_name: string;
     last_name: string;
-  };
-  estimated_hours?: number;
+  } | null;
+  created_profile?: {
+    first_name: string;
+    last_name: string;
+  } | null;
   department?: {
     name: string;
-  };
-}
+  } | null;
+  goal?: {
+    id: string;
+    title: string;
+    status: string;
+    progress: number;
+    target_completion_date: string | null;
+  } | null;
+};
 
 // Navigation types
 export interface NavigationItem {

@@ -4,13 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sparkles, RefreshCw, Brain, TrendingUp, Settings, AlertTriangle, TrendingDown } from 'lucide-react';
+import { Sparkles, RefreshCw, Brain, TrendingUp, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import { OodaLoopPanel } from '@/components/ooda/OodaLoopPanel';
+import AIActionsFeed from '@/components/ai/AIActionsFeed';
+import { ClosedLoopSummary } from '@/components/ai/ClosedLoopSummary';
+import { useClosedLoopState } from '@/hooks/useClosedLoopState';
+import { cn } from '@/lib/utils';
 
 interface AIInsightsPanelProps {
   type: 'dashboard' | 'scheduler' | 'expenses' | 'reports';
@@ -22,13 +25,26 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   const { can } = useCan();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const oodaEnabled = useFeatureFlag('intelligence.oodaLoop');
+  const actionsFeedEnabled = useFeatureFlag('intelligence.oodaLoop');
   const [insights, setInsights] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = manual, 30, 60, 300 seconds
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const {
+    data: closedLoopState,
+    isLoading: closedLoopLoading,
+    isError: closedLoopErrorFlag,
+    error: closedLoopError,
+    refetch: refetchClosedLoop,
+  } = useClosedLoopState({ rangeDays: type === 'dashboard' ? 14 : 7, aiType: type });
+  const closedLoopLoadingState = closedLoopLoading && !closedLoopState;
+  const closedLoopErrorInstance = closedLoopErrorFlag ? closedLoopError : null;
+
+  const handleClosedLoopRefresh = useCallback(() => {
+    void refetchClosedLoop();
+  }, [refetchClosedLoop]);
 
   const fetchInsights = useCallback(async () => {
     if (!mountedRef.current || !can('viewAIInsights')) return;
@@ -83,7 +99,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   // Initial fetch
   useEffect(() => {
     fetchInsights();
-  }, []);
+  }, [fetchInsights]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -136,14 +152,6 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     });
   };
 
-  const getRefreshLabel = (interval: number) => {
-    if (interval === 0) return 'Manual';
-    if (interval === 30) return '30 seconds';
-    if (interval === 60) return '1 minute';
-    if (interval === 300) return '5 minutes';
-    return 'Manual';
-  };
-
   const getTypeLabel = () => {
     switch (type) {
       case 'dashboard': return 'Operations Overview';
@@ -167,15 +175,10 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     return null;
   }
 
-  const showOoda = oodaEnabled && (type === 'reports' || type === 'dashboard');
-
-  const cardClassName = ['h-fit'];
-  if (!showOoda && className) {
-    cardClassName.push(className);
-  }
+  const showActionsFeed = actionsFeedEnabled && (type === 'reports' || type === 'dashboard');
 
   const insightsCard = (
-    <Card className={cardClassName.join(' ')}>
+    <Card className="h-fit">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col space-y-2">
@@ -331,14 +334,32 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     </Card>
   );
 
-  if (!showOoda) {
-    return <div className={className}>{insightsCard}</div>;
+  const containerClass = cn('space-y-4', className);
+
+  if (!showActionsFeed) {
+    return (
+      <div className={containerClass}>
+        {insightsCard}
+        <ClosedLoopSummary
+          loading={closedLoopLoadingState}
+          error={closedLoopErrorInstance}
+          state={closedLoopState}
+          onRefresh={handleClosedLoopRefresh}
+        />
+      </div>
+    );
   }
 
   return (
-    <div className={`space-y-4 ${className ?? ''}`}>
+    <div className={containerClass}>
       {insightsCard}
-      <OodaLoopPanel />
+      <ClosedLoopSummary
+        loading={closedLoopLoadingState}
+        error={closedLoopErrorInstance}
+        state={closedLoopState}
+        onRefresh={handleClosedLoopRefresh}
+      />
+      <AIActionsFeed />
     </div>
   );
 }

@@ -68,10 +68,10 @@ export const navigationSections: NavigationSection[] = [
       { name: 'Tasks', href: '/tasks', icon: CheckSquare, translationKey: 'tasks' },
       { name: 'Forms', href: '/forms', icon: FileText, translationKey: 'forms' },
       { name: 'Scheduling', href: '/enhanced-scheduling', icon: CalendarRange, translationKey: 'scheduling' },
-      { name: 'My Availability', href: '/availability', icon: CalendarCheck, translationKey: 'myAvailability' },
+      { name: 'My Availability', href: '/enhanced-scheduling?tab=availability', icon: CalendarCheck, translationKey: 'myAvailability' },
       {
         name: 'Manage Availability',
-        href: '/availability/manage',
+        href: '/enhanced-scheduling?tab=availability&availability=team',
         icon: ClipboardCheck,
         translationKey: 'manageAvailability',
         roles: ['manager', 'admin', 'company_admin', 'owner'],
@@ -124,8 +124,8 @@ export const navigationSections: NavigationSection[] = [
     items: [
       { name: 'User Management', href: '/admin', icon: UserCheck, translationKey: 'userManagement', roles: ['admin', 'company_admin', 'owner'] },
       { name: 'Employees', href: '/employees', icon: Users, translationKey: 'employees', roles: ['manager', 'admin', 'company_admin', 'owner'] },
-      { name: 'Invite Employee', href: '/invite-employee', icon: UserPlus, translationKey: 'inviteEmployee', roles: ['admin', 'company_admin', 'owner'] },
-      { name: 'Position Management', href: '/position-management', icon: User, translationKey: 'positionManagement', roles: ['manager', 'admin', 'company_admin', 'owner'] },
+      { name: 'Invite Employee', href: '/employees?invite=1', icon: UserPlus, translationKey: 'inviteEmployee', roles: ['admin', 'company_admin', 'owner'] },
+      { name: 'Team Management', href: '/position-management', icon: User, translationKey: 'positionManagement', roles: ['manager', 'admin', 'company_admin', 'owner'] },
       { name: 'Sections & Permissions', href: '/sections-permissions', icon: Layers, translationKey: 'sectionsPermissions', roles: ['company_admin', 'owner'] },
       { name: 'System Settings', href: '/settings', icon: Settings, translationKey: 'systemSettings', roles: ['admin', 'company_admin', 'owner'] },
     ],

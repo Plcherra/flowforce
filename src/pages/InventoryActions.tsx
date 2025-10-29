@@ -1,9 +1,8 @@
-import { useState } from 'react';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCan } from '@/hooks/useCan';
 import InventoryTransactionForm from '@/components/inventory/InventoryTransactionForm';
+import { InventoryTransfersPanel } from '@/components/inventory/InventoryTransfersPanel';
 import { Calculator, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
 
 export default function InventoryActions() {
@@ -104,20 +103,7 @@ export default function InventoryActions() {
           </TabsContent>
 
           <TabsContent value="transfers" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ArrowRightLeft className="h-5 w-5" />
-                  Internal Transfers
-                </CardTitle>
-                <CardDescription>
-                  Transfer inventory between locations and storage areas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Internal transfer functionality will be implemented here.</p>
-              </CardContent>
-            </Card>
+            <InventoryTransfersPanel />
           </TabsContent>
         </Tabs>
       </div>

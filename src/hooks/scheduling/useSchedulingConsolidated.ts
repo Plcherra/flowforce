@@ -27,6 +27,7 @@ interface SchedulingConsolidatedResult {
   timeOffRequests: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
   vendorEvents: VendorEventRow[];
+  teamMembers: ProfileSummary[];
   loading: boolean;
   error: string | null;
   refetchAll: () => Promise<void>;
@@ -49,6 +50,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
   const [timeOffRequests, setTimeOffRequests] = useState<TimeOffWithUser[]>([]);
   const [unavailability, setUnavailability] = useState<UnavailabilityWithUser[]>([]);
   const [vendorEvents, setVendorEvents] = useState<VendorEventRow[]>([]);
+  const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
@@ -87,6 +89,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       setTimeOffRequests([]);
       setUnavailability([]);
       setVendorEvents([]);
+      setTeamMembers([]);
       setError(null);
       setLoading(false);
       return;
@@ -107,6 +110,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       (profileRows ?? []).forEach((profile) => {
         profileMap.set(profile.id, profile);
       });
+      setTeamMembers(profileRows ?? []);
       const memberIds = (profileRows ?? []).map((profile) => profile.id);
 
       let schedulesQuery = supabase
@@ -271,6 +275,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       setTimeOffRequests(fallback.timeOff);
       setUnavailability(fallback.unavailability);
       setVendorEvents(fallback.vendorEvents);
+      setTeamMembers(fallback.profiles);
       setIsUsingFallback(true);
 
       if (!fallbackNoticeShownRef.current) {
@@ -434,6 +439,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     timeOffRequests,
     unavailability,
     vendorEvents,
+    teamMembers,
     loading,
     error,
     refetchAll,

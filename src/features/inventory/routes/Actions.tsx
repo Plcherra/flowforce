@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Calculator, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
+import { Factory, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useInventoryItems, useInventoryLocations, useCreateWaste } from '@/hooks/useInventory';
+import { InventoryTransfersPanel } from '@/components/inventory/InventoryTransfersPanel';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
+import { ProductionEventForm } from '@/components/inventory/ProductionEventForm';
+import { ProductionEventList } from '@/components/inventory/ProductionEventList';
 
 const wasteTypes = [
   { value: 'spoilage', label: 'Spoilage' },
@@ -24,7 +27,7 @@ const wasteTypes = [
 
 export default function InventoryActionsPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('waste');
+  const [activeTab, setActiveTab] = useState('production');
   
   // Fetch real data
   const { data: items = [], isLoading: itemsLoading } = useInventoryItems();
@@ -87,14 +90,6 @@ export default function InventoryActionsPage() {
     });
   };
 
-  const handleTransferSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: 'Transfer Completed',
-      description: 'Inventory has been transferred between locations',
-    });
-  };
-
   return (
     <InventoryLayout>
       <IfCan permission="inventory.view">
@@ -103,12 +98,16 @@ export default function InventoryActionsPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Inventory Actions</h1>
             <p className="text-muted-foreground">
-              Record waste, adjustments, and transfers
+              Record production, waste, adjustments, and transfers
             </p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="production" className="flex items-center gap-2">
+                <Factory className="h-4 w-4" />
+                Production
+              </TabsTrigger>
               <TabsTrigger value="waste" className="flex items-center gap-2">
                 <Trash2 className="h-4 w-4" />
                 Log Waste
@@ -122,6 +121,34 @@ export default function InventoryActionsPage() {
                 Transfers
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="production" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Factory className="h-5 w-5" />
+                    Record Production Event
+                  </CardTitle>
+                  <CardDescription>
+                    Track material usage, yield, and costs for prep, batch, cooked, or baked production runs.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ProductionEventForm />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Production Events</CardTitle>
+                  <CardDescription>
+                    Cost summaries and material usage for the most recent production runs.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ProductionEventList />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="waste">
               <Card>
@@ -344,99 +371,7 @@ export default function InventoryActionsPage() {
             </TabsContent>
 
             <TabsContent value="transfers">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ArrowRightLeft className="h-5 w-5" />
-                    Internal Transfers
-                  </CardTitle>
-                  <CardDescription>
-                    Transfer inventory between storage locations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleTransferSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="transfer-item">Item</Label>
-                      <Select required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select item" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {items.map(item => (
-                            <SelectItem key={item.id} value={item.id}>
-                              {item.name} ({item.unit?.name || 'units'})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="transfer-from">From Location</Label>
-                        <Select required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {locations.map(location => (
-                              <SelectItem key={location.id} value={location.id}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="transfer-to">To Location</Label>
-                        <Select required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select destination" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {locations.map(location => (
-                              <SelectItem key={location.id} value={location.id}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="transfer-quantity">Quantity</Label>
-                      <Input 
-                        id="transfer-quantity"
-                        type="number" 
-                        step="0.1"
-                        placeholder="0.0"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="transfer-notes">Notes (Optional)</Label>
-                      <Textarea 
-                        id="transfer-notes"
-                        placeholder="Add any notes about this transfer..."
-                        rows={2}
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" className="flex-1">
-                        Clear Form
-                      </Button>
-                      <Button type="submit" className="flex-1">
-                        Complete Transfer
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
+              <InventoryTransfersPanel />
             </TabsContent>
           </Tabs>
         </div>

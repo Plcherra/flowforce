@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { useFormSchemaStore } from '@/stores/useFormSchemaStore';
 
 type FormTable = Tables<'forms'>;
 
@@ -28,6 +29,41 @@ type FormField = Tables<'form_fields'>;
 export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submission'> & {
   submissions_count: number;
   latest_submission_at: string | null;
+};
+
+const buildFormFieldFallback = (formId: string): FormField[] => {
+  const schema = useFormSchemaStore.getState().schema;
+  if (!schema || schema.id !== formId) {
+    return [];
+  }
+
+  const timestamp = new Date().toISOString();
+  let order = 1;
+
+  return schema.sections.flatMap((section) =>
+    section.fields.map((field) => ({
+      id: field.id,
+      form_id: formId,
+      field_order: order++,
+      field_type: field.type as FormField['field_type'],
+      label: field.label,
+      placeholder: field.placeholder ?? null,
+      description: null,
+      is_required: field.required ?? false,
+      options: field.options && field.options.length > 0 ? field.options : null,
+      validation_rules: field.validation ?? null,
+      min_value: field.min_value ?? null,
+      max_value: field.max_value ?? null,
+      step_value: field.step_value ?? null,
+      formula_expression: field.formula_expression ?? null,
+      dependent_fields: field.dependent_fields ?? null,
+      rating_config: field.rating_config ?? null,
+      scan_config: field.scan_config ?? null,
+      media_config: field.media_config ?? null,
+      created_at: timestamp,
+      updated_at: timestamp,
+    })),
+  );
 };
 
 export function useForms() {
@@ -188,9 +224,24 @@ export function useForms() {
         .order('field_order', { ascending: true });
 
       if (error) throw error;
-      return { data: data || [], error: null };
+
+      const rows = data ?? [];
+      if (!rows.length) {
+        const fallback = buildFormFieldFallback(formId);
+        if (fallback.length) {
+          console.warn('Supabase returned no form fields; using local schema fallback.');
+          return { data: fallback, error: null };
+        }
+      }
+
+      return { data: rows, error: null };
     } catch (error) {
       console.error('Error fetching form fields:', error);
+      const fallback = buildFormFieldFallback(formId);
+      if (fallback.length) {
+        console.warn('Using locally cached form schema due to Supabase error.');
+        return { data: fallback, error: null };
+      }
       return { data: [], error };
     }
   };

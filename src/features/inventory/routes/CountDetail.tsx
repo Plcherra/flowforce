@@ -4,16 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calculator, CheckCircle, Clock, AlertCircle, Save, FileCheck, Plus, Trash } from 'lucide-react';
+import { ArrowLeft, Calculator, CheckCircle, Clock, AlertCircle, Save, FileCheck, Plus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useInventoryCounts, useInventoryCountLines } from '@/hooks/inventory/useInventoryCounts';
 import { MarketManCountingInterface } from '@/components/inventory/MarketManCountingInterface';
+import { ItemSelector } from '@/components/inventory/ItemSelector';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
+import { InventoryService } from '@/services/inventory';
 
 const getStatusColor = (status: string) => {
   switch (status) {
+    case 'approved':
+      return 'default';
     case 'completed': return 'default';
+    case 'awaiting_review': return 'secondary';
     case 'in_progress': return 'secondary';
     case 'planned': return 'outline';
     default: return 'outline';
@@ -22,11 +28,51 @@ const getStatusColor = (status: string) => {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
+    case 'approved': return CheckCircle;
     case 'completed': return CheckCircle;
     case 'in_progress': return Clock;
+    case 'awaiting_review': return Clock;
     case 'planned': return AlertCircle;
     default: return AlertCircle;
   }
+};
+
+const formatCountType = (type?: string | null) => {
+  if (!type) return 'Inventory Count';
+  return type
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
+const getPeriodLabel = (period?: string | null) => {
+  switch (period) {
+    case 'day_start':
+      return 'Day Start';
+    case 'day_end':
+      return 'Day End';
+    default:
+      return 'Custom';
+  }
+};
+
+const REVIEW_STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
+  pending: { label: 'Pending Review', variant: 'outline' },
+  under_review: { label: 'Under Review', variant: 'secondary' },
+  approved: { label: 'Approved', variant: 'default' },
+  rejected: { label: 'Needs Revision', variant: 'destructive' },
+};
+
+const EVENT_ICON_MAP: Record<string, LucideIcon> = {
+  created: AlertCircle,
+  started: Clock,
+  item_counted: CheckCircle,
+  note_added: AlertCircle,
+  submitted: FileCheck,
+  approved: CheckCircle,
+  rejected: AlertCircle,
+  reopened: AlertCircle,
 };
 
 interface CountDetailPageProps {
@@ -38,10 +84,27 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
   const countId = propCountId || paramCountId;
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { counts, updateCount } = useInventoryCounts();
-  const { countLines, addItemToCount, updateCountLine, removeItemFromCount } = useInventoryCountLines(countId);
+  const {
+    counts,
+    updateCount,
+    completeCount,
+    submitCountForReview,
+    approveCount: approveInventoryCount,
+    rejectCount: rejectInventoryCount,
+    refetch: refetchCounts,
+  } = useInventoryCounts();
+  const {
+    countLines,
+    addItemToCount,
+    addItemsToCount,
+    updateCountLine,
+    removeItemFromCount,
+    refetch: refetchCountLines,
+  } = useInventoryCountLines(countId);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [showItemSelector, setShowItemSelector] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
 
   const count = counts.find(c => c.id === countId);
 
@@ -56,8 +119,25 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
     setQuantities(initialQuantities);
   }, [countLines]);
 
+  useEffect(() => {
+    loadEvents();
+  }, [countId]);
+
   const handleQuantityChange = (lineId: string, value: number) => {
     setQuantities(prev => ({ ...prev, [lineId]: value }));
+  };
+
+  const loadEvents = async () => {
+    if (!countId) return;
+    setLoadingEvents(true);
+    try {
+      const data = await InventoryService.listCountEvents(countId);
+      setEvents(data);
+    } catch (error) {
+      console.error('Error loading count events:', error);
+    } finally {
+      setLoadingEvents(false);
+    }
   };
 
   const handleSaveProgress = async () => {
@@ -73,6 +153,9 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
       if (count?.status === 'planned') {
         await updateCount(countId!, { status: 'in_progress' });
       }
+      await refetchCountLines();
+      await refetchCounts();
+      await loadEvents();
       
       toast({
         title: "Progress Saved",
@@ -98,16 +181,14 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
       });
       
       await Promise.all(updates);
-      
-      // Mark count as completed
-      await updateCount(countId!, { 
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      });
+      await completeCount(countId!);
+      await refetchCountLines();
+      await refetchCounts();
+      await loadEvents();
       
       toast({
-        title: "Count Completed",
-        description: "Inventory count has been completed and variance calculated",
+        title: "Count Submitted",
+        description: "Inventory count has been submitted for supervisor review",
       });
       
       // Navigate back to counts list
@@ -124,10 +205,9 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
 
   const handleItemsSelected = async (items: Array<{ id: string; name: string; expectedQuantity: number }>) => {
     try {
-      const promises = items.map(item => 
-        addItemToCount(item.id, item.expectedQuantity)
-      );
-      await Promise.all(promises);
+      await addItemsToCount(items.map(item => ({ id: item.id, expectedQuantity: item.expectedQuantity })));
+      await refetchCountLines();
+      await loadEvents();
     } catch (error) {
       // Error handled in hook
     }
@@ -140,8 +220,56 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
       const newQuantities = { ...quantities };
       delete newQuantities[lineId];
       setQuantities(newQuantities);
+      await refetchCountLines();
+      await loadEvents();
     } catch (error) {
       // Error handled in hook
+    }
+  };
+
+  const handleApproveCount = async () => {
+    if (!countId) return;
+    try {
+      const notes = window.prompt('Approval notes (optional):') || undefined;
+      await approveInventoryCount(countId, notes);
+      await refetchCounts();
+      await loadEvents();
+      toast({
+        title: 'Count Approved',
+        description: 'Inventory count has been approved and finalized.',
+      });
+    } catch (error) {
+      console.error('Error approving count:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve count',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectCount = async () => {
+    if (!countId) return;
+    const notes = window.prompt('Please provide revision notes for this count:');
+    if (notes === null) {
+      return;
+    }
+
+    try {
+      await rejectInventoryCount(countId, notes || undefined);
+      await refetchCounts();
+      await loadEvents();
+      toast({
+        title: 'Revision Requested',
+        description: 'The count has been sent back for additional work.',
+      });
+    } catch (error) {
+      console.error('Error rejecting count:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send count back for revisions',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -165,37 +293,94 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
     quantities[line.id] !== undefined || line.counted_quantity !== null
   ).length;
   const completion = totalLines > 0 ? Math.round((completedLines / totalLines) * 100) : 0;
+  const reviewBadge = REVIEW_STATUS_CONFIG[count.review_status] ?? REVIEW_STATUS_CONFIG.pending;
 
   return (
     <InventoryLayout>
       <IfCan permission="inventory.counts.view">
         <div className="space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => navigate('/inventory/counts')}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div>
-                <p className="text-muted-foreground">
-                  {completion}% Complete
-                </p>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <Button variant="outline" onClick={() => navigate('/inventory/counts')}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calculator className="h-5 w-5 text-muted-foreground" />
+                    <h1 className="text-2xl font-semibold">
+                      {formatCountType(count.count_type)} • {getPeriodLabel(count.count_period)}
+                    </h1>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span>{new Date(count.count_date).toLocaleDateString()}</span>
+                    <Badge variant={getStatusColor(count.status)} className="flex items-center gap-1 capitalize">
+                      <StatusIcon className="h-3 w-3" />
+                      {count.status.replace(/_/g, ' ')}
+                    </Badge>
+                    <Badge variant={reviewBadge.variant} className="capitalize">
+                      {reviewBadge.label}
+                    </Badge>
+                    <span>{completion}% Complete</span>
+                    {count.submitted_at && (
+                      <span>Submitted {new Date(count.submitted_at).toLocaleString()}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <IfCan permission="inventory.counts.edit">
+                  <Button
+                    variant="outline"
+                    onClick={handleSaveProgress}
+                    disabled={count.status === 'awaiting_review' || count.status === 'approved'}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Progress
+                  </Button>
+                  <Button
+                    onClick={handleCompleteCount}
+                    disabled={
+                      countLines.length === 0 ||
+                      count.status === 'awaiting_review' ||
+                      count.status === 'approved'
+                    }
+                  >
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    Submit for Review
+                  </Button>
+                </IfCan>
+                <IfCan permission="inventory.counts.approve">
+                  {count.status === 'awaiting_review' && (
+                    <>
+                      <Button variant="outline" onClick={handleRejectCount}>
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        Request Changes
+                      </Button>
+                      <Button onClick={handleApproveCount}>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Approve
+                      </Button>
+                    </>
+                  )}
+                </IfCan>
               </div>
             </div>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSaveProgress}>
-                <Save className="h-4 w-4 mr-2" />
-                Save Progress
-              </Button>
-              <Button 
-                onClick={handleCompleteCount}
-                disabled={countLines.length === 0}
-              >
-                <FileCheck className="h-4 w-4 mr-2" />
-                Complete Count
-              </Button>
-            </div>
+
+            {count.locations && count.locations.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {count.locations.map((location) => (
+                  <Badge key={location.id} variant="secondary">
+                    {location.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {count.description && (
+              <p className="text-sm text-muted-foreground">{count.description}</p>
+            )}
           </div>
 
           <Tabs defaultValue="counting" className="space-y-6">
@@ -206,11 +391,31 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
             </TabsList>
 
             <TabsContent value="counting">
+              <div className="flex justify-end mb-4">
+                <IfCan permission="inventory.counts.edit">
+                  <Button size="sm" variant="outline" onClick={() => setShowItemSelector(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Items
+                  </Button>
+                </IfCan>
+              </div>
               <MarketManCountingInterface 
-                countId={countId!} 
-                onCountUpdate={() => {
-                  // Handle count update completion
-                }}
+                countId={countId!}
+                lines={countLines}
+                quantities={quantities}
+                onQuantityChange={handleQuantityChange}
+                onRemoveLine={
+                  count.status === 'awaiting_review' || count.status === 'approved'
+                    ? undefined
+                    : (lineId) => handleRemoveItem(lineId)
+                }
+                readOnly={count.status === 'awaiting_review' || count.status === 'approved'}
+              />
+              <ItemSelector
+                open={showItemSelector}
+                onOpenChange={setShowItemSelector}
+                onItemsSelected={handleItemsSelected}
+                excludeIds={countLines.map(line => line.item_id)}
               />
             </TabsContent>
 
@@ -221,28 +426,45 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
                   <CardDescription>Activity log for this count</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                      <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">Count Created</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(count.created_at).toLocaleString()}
-                        </p>
-                      </div>
+                  {loadingEvents ? (
+                    <p className="text-sm text-muted-foreground">Loading activity…</p>
+                  ) : events.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No activity recorded yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {events.map((event) => {
+                        const Icon = EVENT_ICON_MAP[event.event_type] || AlertCircle;
+                        const actorName = event.actor
+                          ? `${event.actor.first_name ?? ''} ${event.actor.last_name ?? ''}`.trim() || 'System'
+                          : 'System';
+
+                        const payload = event.payload || {};
+
+                        return (
+                          <div key={event.id} className="flex items-start gap-3 rounded-lg border p-3">
+                            <Icon className="mt-1 h-4 w-4 text-muted-foreground" />
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2 text-sm font-medium capitalize">
+                                <span>{event.event_type.replace(/_/g, ' ')}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(event.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground">By {actorName}</p>
+                              {payload.notes && (
+                                <p className="text-sm">{payload.notes}</p>
+                              )}
+                              {payload.item_id && (
+                                <p className="text-xs text-muted-foreground">
+                                  Item ID: {payload.item_id}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    {count.status !== 'planned' && (
-                      <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">Count Started</p>
-                          <p className="text-xs text-muted-foreground">
-                            In progress
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -254,30 +476,57 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
                   <CardDescription>Information about this inventory count</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid gap-4 text-sm sm:grid-cols-2">
                     <div>
-                      <span className="font-medium">Count Type:</span>
-                      <p className="capitalize">{count.count_type}</p>
+                      <span className="font-medium">Count Type</span>
+                      <p>{formatCountType(count.count_type)}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Count Date:</span>
+                      <span className="font-medium">Day Part</span>
+                      <p>{getPeriodLabel(count.count_period)}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Count Date</span>
                       <p>{new Date(count.count_date).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Status:</span>
-                      <p className="capitalize">{count.status.replace('_', ' ')}</p>
+                      <span className="font-medium">Status</span>
+                      <p className="capitalize">{count.status.replace(/_/g, ' ')}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Created:</span>
-                      <p>{new Date(count.created_at).toLocaleDateString()}</p>
+                      <span className="font-medium">Review Status</span>
+                      <p className="capitalize">{count.review_status.replace(/_/g, ' ')}</p>
                     </div>
-                    {count.notes && (
-                      <div className="col-span-2">
-                        <span className="font-medium">Notes:</span>
-                        <p className="mt-1">{count.notes}</p>
-                      </div>
-                    )}
+                    <div>
+                      <span className="font-medium">Created</span>
+                      <p>{new Date(count.created_at).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Submitted</span>
+                      <p>{count.submitted_at ? new Date(count.submitted_at).toLocaleString() : 'Not submitted'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Completed</span>
+                      <p>{count.completed_at ? new Date(count.completed_at).toLocaleString() : 'Not completed'}</p>
+                    </div>
                   </div>
+
+                  {(count.description || count.notes) && (
+                    <div className="mt-4 space-y-3">
+                      {count.description && (
+                        <div>
+                          <span className="font-medium">Description</span>
+                          <p className="text-sm text-muted-foreground">{count.description}</p>
+                        </div>
+                      )}
+                      {count.notes && (
+                        <div>
+                          <span className="font-medium">Notes</span>
+                          <p className="text-sm text-muted-foreground">{count.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

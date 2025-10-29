@@ -1,230 +1,265 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { useInventoryItems, useInventoryCategories, useInventoryLocations, useInventoryCountLines, useInventoryCounts } from '@/hooks/useInventory';
-import { useCountingTimer } from '@/hooks/inventory/useCountingTimer';
-import { useCountingStats, CountData } from '@/hooks/inventory/useCountingStats';
-import { CountingTimers } from './counting/CountingTimers';
-import { CountingFilters } from './counting/CountingFilters';
-import { CountingTable } from './counting/CountingTable';
-import { CountingStats } from './counting/CountingStats';
+import { useFeatureFlag } from '@/hooks/useFeatureFlags';
+import { InventoryService } from '@/services/inventory';
+import type { InventoryCountLine } from '@/hooks/inventory/types';
+import { Barcode, Trash } from 'lucide-react';
 
 interface MarketManCountingInterfaceProps {
   countId: string;
-  onCountUpdate?: () => void;
+  lines: InventoryCountLine[];
+  quantities: Record<string, number>;
+  onQuantityChange: (lineId: string, value: number) => void;
+  onRemoveLine?: (lineId: string) => Promise<void> | void;
+  readOnly?: boolean;
 }
 
-export function MarketManCountingInterface({ countId, onCountUpdate }: MarketManCountingInterfaceProps) {
+export function MarketManCountingInterface({
+  countId,
+  lines,
+  quantities,
+  onQuantityChange,
+  onRemoveLine,
+  readOnly = false,
+}: MarketManCountingInterfaceProps) {
   const { toast } = useToast();
-  
-  // State management
+  const barcodeEnabled = useFeatureFlag('inventory.barcodeScanning');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [showUncountedOnly, setShowUncountedOnly] = useState(false);
-  const [counts, setCounts] = useState<Record<string, CountData>>({});
-  const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isCountCompleted, setIsCountCompleted] = useState(false);
-  const [countingStats, setCountingStats] = useState<any>(null);
-  const [editStats, setEditStats] = useState<any>(null);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [showUnsavedOnly, setShowUnsavedOnly] = useState(false);
 
-  // Custom hooks
-  const { data: allItems = [], isLoading: itemsLoading } = useInventoryItems();
-  const { data: categories = [] } = useInventoryCategories();
-  const { data: locations = [] } = useInventoryLocations();
-  const { countLines } = useInventoryCountLines(countId);
-  const { completeCount } = useInventoryCounts();
-  
-  const timer = useCountingTimer();
-  const statsCalculator = useCountingStats(counts, allItems);
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(
+        lines
+          .map((line) => line.item?.category)
+          .filter((category): category is string => Boolean(category))
+      )
+    );
+  }, [lines]);
 
-  // Initialize counts from count lines
-  useEffect(() => {
-    if (countLines && countLines.length > 0) {
-      const initialCounts: Record<string, CountData> = {};
-      const savedSet = new Set<string>();
-      
-      countLines.forEach(line => {
-        if (line.counted_quantity !== null && line.counted_quantity !== undefined) {
-          initialCounts[line.item_id] = {
-            item_id: line.item_id,
-            unit_counts: { [line.item_id]: line.counted_quantity }
-          };
-          if (line.counted_at) {
-            savedSet.add(line.item_id);
-          }
-        }
-      });
-      
-      setCounts(initialCounts);
-      setSavedItems(savedSet);
-    }
-  }, [countLines]);
+  const filteredLines = useMemo(() => {
+    return lines.filter((line) => {
+      const itemName = line.item?.name?.toLowerCase() || '';
+      const sku = line.item?.sku?.toLowerCase() || '';
+      const unitLabel = line.unit?.abbreviation?.toLowerCase() || line.unit?.name?.toLowerCase() || '';
+      const term = searchTerm.toLowerCase();
 
-  // Filtered items
-  const filteredItems = allItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.sku?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || item.category === selectedCategory;
-    const matchesLocation = !selectedLocation || item.location?.name === selectedLocation;
-    const matchesUncounted = !showUncountedOnly || !savedItems.has(item.id);
-    
-    return matchesSearch && matchesCategory && matchesLocation && matchesUncounted;
-  });
+      const matchesSearch = !term || itemName.includes(term) || sku.includes(term) || unitLabel.includes(term);
+      const matchesCategory = categoryFilter === 'all' || line.item?.category === categoryFilter;
 
-  // Event handlers
-  const updateCount = (itemId: string, unitId: string, quantity: number) => {
-    if (isCountCompleted) return;
-    
-    setCounts(prev => ({
-      ...prev,
-      [itemId]: {
-        item_id: itemId,
-        unit_counts: {
-          ...prev[itemId]?.unit_counts,
-          [unitId]: quantity
-        }
+      const currentQuantity = quantities[line.id];
+      const originalQuantity = line.counted_quantity ?? 0;
+      const isDirty = currentQuantity !== undefined ? currentQuantity !== originalQuantity : false;
+      const isSaved = Boolean(line.counted_at);
+      const matchesUnsaved = !showUnsavedOnly || isDirty || !isSaved;
+
+      return matchesSearch && matchesCategory && matchesUnsaved;
+    });
+  }, [lines, searchTerm, categoryFilter, showUnsavedOnly, quantities]);
+
+  const unsavedCount = useMemo(() => {
+    return lines.reduce((total, line) => {
+      if (!(line.id in quantities)) {
+        return total;
       }
-    }));
+      const current = quantities[line.id];
+      const original = line.counted_quantity ?? 0;
+      return current !== original ? total + 1 : total;
+    }, 0);
+  }, [lines, quantities]);
+
+  const handleQuantityInput = (lineId: string, value: string) => {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      onQuantityChange(lineId, 0);
+      return;
+    }
+    onQuantityChange(lineId, parsed);
   };
 
-  const saveItem = async (itemId: string) => {
+  const handleBarcodeLog = async (line: InventoryCountLine) => {
+    const scannedCode = window.prompt('Scan or enter the barcode to log for this item:');
+    if (!scannedCode) {
+      return;
+    }
+
     try {
-      setSavedItems(prev => new Set([...prev, itemId]));
+      await InventoryService.recordCountScan(countId, scannedCode, {
+        itemId: line.item_id,
+        scanType: 'barcode',
+      });
       toast({
-        title: "Item Saved",
-        description: "Count data has been saved successfully.",
+        title: 'Scan Logged',
+        description: 'Barcode has been recorded for this count.',
       });
     } catch (error) {
-      console.error('Error saving item:', error);
+      console.error('Error logging barcode scan:', error);
       toast({
-        title: "Save Failed",
-        description: "Failed to save count data. Please try again.",
-        variant: "destructive",
+        title: 'Scan Failed',
+        description: 'Unable to record the barcode scan.',
+        variant: 'destructive',
       });
     }
   };
 
-  const handleCompleteCount = async () => {
-    try {
-      timer.stopCountingTimer();
-      const stats = timer.generateTimerStats(savedItems.size);
-      setCountingStats(stats);
-      setIsCountCompleted(true);
-      
-      await completeCount(countId);
-      onCountUpdate?.();
-      
-      toast({
-        title: "Count Completed",
-        description: `Successfully completed count with ${savedItems.size} items.`,
-      });
-    } catch (error) {
-      console.error('Error completing count:', error);
-      toast({
-        title: "Completion Failed",
-        description: "Failed to complete count. Please try again.",
-        variant: "destructive",
-      });
+  const renderStatusBadge = (line: InventoryCountLine, isDirty: boolean) => {
+    if (isDirty) {
+      return <Badge variant="secondary">Pending Save</Badge>;
     }
-  };
 
-  const handleEditMode = () => {
-    if (isEditMode) {
-      timer.stopEditTimer();
-      const stats = timer.generateEditStats(savedItems.size);
-      setEditStats(stats);
-    } else {
-      timer.startEditTimer();
+    if (line.counted_at) {
+      return <Badge variant="default">Saved</Badge>;
     }
-    setIsEditMode(!isEditMode);
-  };
 
-  if (itemsLoading) {
-    return <div>Loading inventory items...</div>;
-  }
+    return <Badge variant="outline">Not Counted</Badge>;
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Timers */}
-      <CountingTimers
-        countingTime={timer.countingTime}
-        editTime={timer.editTime}
-        isTimerRunning={timer.isTimerRunning}
-        isEditTimerRunning={timer.isEditTimerRunning}
-        isEditMode={isEditMode}
-        formatTime={timer.formatTime}
-        onStartTimer={timer.startCountingTimer}
-        onStopTimer={timer.stopCountingTimer}
-        onStartEditTimer={timer.startEditTimer}
-        onStopEditTimer={timer.stopEditTimer}
-      />
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Input
+          placeholder="Search items or units..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
 
-      {/* Filters */}
-      <CountingFilters
-        searchTerm={searchTerm}
-        selectedCategory={selectedCategory}
-        selectedLocation={selectedLocation}
-        showUncountedOnly={showUncountedOnly}
-        categories={categories}
-        locations={locations}
-        onSearchChange={setSearchTerm}
-        onCategoryChange={setSelectedCategory}
-        onLocationChange={setSelectedLocation}
-        onUncountedOnlyChange={setShowUncountedOnly}
-      />
+        <select
+          value={categoryFilter}
+          onChange={(event) => setCategoryFilter(event.target.value)}
+          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+        >
+          <option value="all">All categories</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
 
-      {/* Counting Table */}
-      <CountingTable
-        items={filteredItems}
-        counts={counts}
-        savedItems={savedItems}
-        isCountCompleted={isCountCompleted}
-        onUpdateCount={updateCount}
-        onSaveItem={saveItem}
-        calculateItemTotalPrice={statsCalculator.calculateItemTotalPrice}
-        calculateVariance={statsCalculator.calculateVariance}
-        getVarianceStatus={statsCalculator.getVarianceStatus}
-      />
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox
+            checked={showUnsavedOnly}
+            onCheckedChange={(checked) => setShowUnsavedOnly(Boolean(checked))}
+          />
+          Show unsaved only
+        </label>
+      </div>
 
-      {/* Statistics */}
-      <CountingStats
-        itemsCompleted={savedItems.size}
-        itemsCounted={statsCalculator.stats.itemsCounted}
-        itemsRemaining={filteredItems.length - savedItems.size}
-        totalAmount={statsCalculator.stats.totalValue}
-        significantVariances={statsCalculator.stats.significantVariances}
-        countingStats={countingStats}
-        editStats={editStats}
-        formatTime={timer.formatTime}
-      />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-64">Item</TableHead>
+              <TableHead>Unit</TableHead>
+              <TableHead className="text-right">Expected</TableHead>
+              <TableHead className="text-right">Counted</TableHead>
+              <TableHead className="text-right">Variance</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredLines.map((line) => {
+              const currentQuantity = quantities[line.id] ?? line.counted_quantity ?? 0;
+              const expectedQuantity = line.expected_quantity ?? 0;
+              const variance = currentQuantity - expectedQuantity;
+              const isDirty = quantities[line.id] !== undefined && currentQuantity !== (line.counted_quantity ?? 0);
 
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-4">
-        {/* Complete Count Button */}
-        {!isCountCompleted && !isEditMode && savedItems.size > 0 && (
-          <Button
-            onClick={handleCompleteCount}
-            size="lg"
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <CheckCircle2 className="h-4 w-4 mr-2" />
-            Complete Count
-          </Button>
-        )}
+              return (
+                <TableRow key={line.id}>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <div className="font-medium">{line.item?.name ?? 'Unknown item'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {line.item?.sku && <span>SKU: {line.item.sku}</span>}
+                        {line.item?.category && <span className="ml-2">Category: {line.item.category}</span>}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {line.unit?.abbreviation || line.unit?.name || 'Unit'}
+                    </div>
+                    {line.conversion_factor && line.conversion_factor !== 1 && (
+                      <div className="text-xs text-muted-foreground">
+                        × {line.conversion_factor} base units
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm">
+                    {expectedQuantity}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={currentQuantity}
+                      disabled={readOnly}
+                      onChange={(event) => handleQuantityInput(line.id, event.target.value)}
+                      className="text-right"
+                    />
+                  </TableCell>
+                  <TableCell className={`text-right font-mono text-sm ${variance > 0 ? 'text-emerald-600' : variance < 0 ? 'text-destructive' : ''}`}>
+                    {variance.toFixed(2)}
+                  </TableCell>
+                  <TableCell>{renderStatusBadge(line, isDirty)}</TableCell>
+                  <TableCell className="flex justify-end gap-2">
+                    {barcodeEnabled && !readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleBarcodeLog(line)}
+                        title="Log barcode scan"
+                      >
+                        <Barcode className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {onRemoveLine && !readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (onRemoveLine) {
+                            await onRemoveLine(line.id);
+                          }
+                        }}
+                        title="Remove from count"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {filteredLines.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
+                  No count lines match your filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Edit Mode Toggle */}
-        {isCountCompleted && (
-          <Button
-            onClick={handleEditMode}
-            variant="outline"
-            size="lg"
-          >
-            {isEditMode ? 'Exit Edit Mode' : 'Enter Edit Mode'}
-          </Button>
-        )}
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+        <span>
+          Total items: <strong>{lines.length}</strong>
+        </span>
+        <span>
+          Counted items: <strong>{lines.filter((line) => (quantities[line.id] ?? line.counted_quantity ?? 0) > 0).length}</strong>
+        </span>
+        <span>
+          Unsaved changes: <strong>{unsavedCount}</strong>
+        </span>
       </div>
     </div>
   );

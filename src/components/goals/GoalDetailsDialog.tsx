@@ -3,20 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { CalendarIcon, Target, Award, Plus, CheckCircle, Circle, Edit } from 'lucide-react';
+import { CalendarIcon, Award, Plus, CheckCircle, Circle, Edit } from 'lucide-react';
 import { format } from 'date-fns';
-import { useGoals } from '@/hooks/useGoals';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useGoals, type Goal } from '@/hooks/useGoals';
 import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
-
-type Goal = Tables<'goals'>;
 
 interface GoalDetailsDialogProps {
   goal: Goal | null;
@@ -30,53 +27,43 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
   const { createTask } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [linkedTasks, setLinkedTasks] = useState<any[]>([]);
+  type GoalTask = NonNullable<Goal['goal_tasks']>[number];
+  type GoalParticipant = NonNullable<Goal['participants']>[number];
+
+  const [linkedTasks, setLinkedTasks] = useState<GoalTask[]>([]);
   const [taskDescription, setTaskDescription] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (goal && open) {
-      fetchLinkedTasks();
+    if (!goal) {
+      setLinkedTasks([]);
+      return;
     }
-  }, [goal, open]);
-
-  const fetchLinkedTasks = async () => {
-    if (!goal) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('goal_tasks')
-        .select(`
-          *,
-          task:tasks(*)
-        `)
-        .eq('goal_id', goal.id);
-
-      if (error) throw error;
-      setLinkedTasks(data || []);
-    } catch (error) {
-      console.error('Error fetching linked tasks:', error);
-    }
-  };
+    setLinkedTasks(goal.goal_tasks ?? []);
+  }, [goal]);
 
   const createTasksFromDescription = async () => {
     if (!goal || !taskDescription.trim()) return;
 
     setLoading(true);
     try {
-      // Parse numbered task lists
+      const ownerParticipant: GoalParticipant | undefined = goal.participants?.find(
+        participant => participant.role === 'owner'
+      );
+      const ownerId = ownerParticipant?.user_id ?? user?.id ?? null;
+
       const lines = taskDescription.split('\n').filter(line => line.trim());
       const taskLines = lines.filter(line => /^\d+\.\s/.test(line.trim()));
+      let updatedTasks = [...linkedTasks];
       
       if (taskLines.length === 0) {
-        // Create single task
         const { data: taskData } = await createTask({
           title: taskDescription.trim(),
           description: `Created from goal: ${goal.title}`,
           status: 'todo',
           priority: 'medium',
           created_by: user!.id,
-          assigned_to: null,
+          assigned_to: ownerId,
           due_date: goal.target_completion_date,
           estimated_hours: null,
           department_id: null,
@@ -84,14 +71,20 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
           workflow_id: null,
           actual_hours: null,
           parent_task_id: null,
-          tags: []
+          tags: [],
+          goal_id: goal.id
         });
 
         if (taskData) {
-          await linkTaskToGoal(goal.id, taskData.id);
+          const { data: linkedTask } = await linkTaskToGoal(goal.id, taskData.id);
+          if (linkedTask) {
+            updatedTasks = [
+              ...updatedTasks.filter((item) => item.task_id !== linkedTask.task_id),
+              linkedTask as GoalTask,
+            ];
+          }
         }
       } else {
-        // Create multiple tasks
         for (const line of taskLines) {
           const taskTitle = line.replace(/^\d+\.\s*/, '').trim();
           if (taskTitle) {
@@ -101,7 +94,7 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
               status: 'todo',
               priority: 'medium',
               created_by: user!.id,
-              assigned_to: null,
+              assigned_to: ownerId,
               due_date: goal.target_completion_date,
               estimated_hours: null,
               department_id: null,
@@ -109,19 +102,26 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
               workflow_id: null,
               actual_hours: null,
               parent_task_id: null,
-              tags: []
+              tags: [],
+              goal_id: goal.id
             });
 
             if (taskData) {
-              await linkTaskToGoal(goal.id, taskData.id);
+              const { data: linkedTask } = await linkTaskToGoal(goal.id, taskData.id);
+              if (linkedTask) {
+                updatedTasks = [
+                  ...updatedTasks.filter((item) => item.task_id !== linkedTask.task_id),
+                  linkedTask as GoalTask,
+                ];
+              }
             }
           }
         }
       }
 
       setTaskDescription('');
-      await fetchLinkedTasks();
-      await updateGoalProgress();
+      setLinkedTasks(updatedTasks);
+      await updateGoalProgress(updatedTasks);
       
       toast({
         title: "Success",
@@ -139,17 +139,17 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
     }
   };
 
-  const updateGoalProgress = async () => {
+  const updateGoalProgress = async (tasks: GoalTask[] = linkedTasks) => {
     if (!goal) return;
 
     try {
-      const completedTasks = linkedTasks.filter(lt => lt.task?.status === 'completed').length;
-      const totalTasks = linkedTasks.length;
-      const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      const progress = calculateGoalProgress({
+        ...goal,
+        goal_tasks: tasks
+      });
+
+      const updates: Partial<Goal> = { progress };
       
-      const updates: any = { progress };
-      
-      // Auto-complete goal if all tasks are done
       if (progress === 100 && goal.status !== 'completed') {
         updates.status = 'completed';
         updates.completed_at = new Date().toISOString();
@@ -180,6 +180,17 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
   };
 
   if (!goal) return null;
+
+  const ownerParticipant = goal.participants?.find(participant => participant.role === 'owner');
+  const ownerProfile = ownerParticipant?.profile;
+  const ownerName = ownerProfile
+    ? `${ownerProfile.first_name} ${ownerProfile.last_name}`
+    : ownerParticipant
+      ? 'Owner assigned'
+      : 'Owner not assigned';
+  const ownerInitials = ownerProfile
+    ? `${ownerProfile.first_name.charAt(0)}${ownerProfile.last_name.charAt(0)}`
+    : 'NA';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -231,6 +242,23 @@ export function GoalDetailsDialog({ goal, open, onOpenChange, onEdit }: GoalDeta
                   <span>Reward: {goal.reward_type.replace('_', ' ')}</span>
                 </div>
               )}
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center space-x-3">
+              <Avatar className="h-10 w-10 border border-background">
+                {ownerProfile?.avatar_url ? (
+                  <AvatarImage src={ownerProfile.avatar_url} alt={ownerName} />
+                ) : (
+                  <AvatarFallback>{ownerInitials}</AvatarFallback>
+                )}
+              </Avatar>
+              <div>
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Goal Owner</div>
+                <div className="text-sm font-semibold text-foreground">{ownerName}</div>
+                {ownerParticipant && (
+                  <div className="text-xs text-muted-foreground">Role: {ownerParticipant.role}</div>
+                )}
+              </div>
             </div>
 
             {/* Progress */}

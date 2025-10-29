@@ -9,6 +9,8 @@ import { Package, Plus, Search, Filter, Edit, Trash2, History } from 'lucide-rea
 import { useInventoryItems, useDeleteInventoryItem } from '@/hooks/useInventory';
 import { useInventoryCategories } from '@/hooks/inventory/useInventoryCategories';
 import InventoryItemForm from '@/components/inventory/InventoryItemForm';
+import { InventoryRecipeDialog } from '@/components/inventory/InventoryRecipeDialog';
+import { getUnitHierarchyDisplay } from '@/hooks/inventory/useItemUnits';
 import type { InventoryItem } from '@/hooks/inventory/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,16 +20,27 @@ export default function ItemsSetup() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | undefined>();
+  const [recipeItem, setRecipeItem] = useState<InventoryItem | undefined>();
+  const [isRecipeDialogOpen, setRecipeDialogOpen] = useState(false);
   
   const { data: items = [], isLoading } = useInventoryItems();
   const { data: categories = [] } = useInventoryCategories();
   const deleteItem = useDeleteInventoryItem();
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.sku?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesSearch = !normalizedSearch ||
+      item.name.toLowerCase().includes(normalizedSearch) ||
+      item.description?.toLowerCase().includes(normalizedSearch) ||
+      item.sku?.toLowerCase().includes(normalizedSearch) ||
+      item.barcode?.toLowerCase().includes(normalizedSearch) ||
+      item.preferred_supplier?.name?.toLowerCase().includes(normalizedSearch);
+
+    const matchesCategory = selectedCategory === 'all' ||
+      item.category_id === selectedCategory ||
+      item.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
@@ -51,7 +64,12 @@ export default function ItemsSetup() {
     }
   };
 
-  const handleViewHistory = (item: InventoryItem) => {
+  const handleManageRecipe = (item: InventoryItem) => {
+    setRecipeItem(item);
+    setRecipeDialogOpen(true);
+  };
+
+  const handleViewHistory = (_item: InventoryItem) => {
     // Feature not yet implemented - could open history dialog
     toast({
       title: "Coming Soon",
@@ -75,6 +93,11 @@ export default function ItemsSetup() {
       default: return <Badge variant="outline">Unknown</Badge>;
     }
   };
+
+  const formatCurrency = (value?: number | null) =>
+    typeof value === 'number' && Number.isFinite(value)
+      ? `$${value.toFixed(2)}`
+      : 'N/A';
 
   return (
     <div>
@@ -129,7 +152,7 @@ export default function ItemsSetup() {
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.name}>
+                    <SelectItem key={category.id} value={category.id}>
                       {category.name}
                     </SelectItem>
                   ))}
@@ -156,15 +179,15 @@ export default function ItemsSetup() {
                 <CardContent className="p-8 text-center">
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">
-                    {searchTerm || selectedCategory ? 'No Items Found' : 'No Items Yet'}
+                    {searchTerm || selectedCategory !== 'all' ? 'No Items Found' : 'No Items Yet'}
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm || selectedCategory 
+                    {searchTerm || selectedCategory !== 'all' 
                       ? 'Try adjusting your search or filters'
                       : 'Create your first inventory item to get started'
                     }
                   </p>
-                  {!searchTerm && !selectedCategory && (
+                  {!searchTerm && selectedCategory === 'all' && (
                     <Button onClick={handleNewItem}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add First Item
@@ -176,6 +199,17 @@ export default function ItemsSetup() {
               <div className="space-y-4">
                 {filteredItems.map((item) => {
                   const stockStatus = getStockStatus(item);
+                  const baseCost = item.cost_per_unit ?? null;
+                  const recipeCost = item.recipe_cost_per_unit ?? item.calculated_cost_per_unit ?? null;
+                  const supplierName = item.preferred_supplier?.name || 'No supplier linked';
+                  const unitHierarchy = item.units && item.units.length > 0
+                    ? getUnitHierarchyDisplay(item.units)
+                    : null;
+                  const primaryUnit = item.unit?.name
+                    ? `${item.unit?.name}${item.unit?.abbreviation ? ` (${item.unit?.abbreviation})` : ''}`
+                    : 'N/A';
+                  const categoryName = item.category_details?.name || item.category || 'Uncategorized';
+                  const recipeLineCount = item.recipes?.[0]?.lines?.length || 0;
                   
                   return (
                     <Card key={item.id}>
@@ -194,44 +228,65 @@ export default function ItemsSetup() {
                               </div>
                             </div>
                             
-                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
                               <div>
-                                <span className="font-medium">SKU:</span>
-                                <p className="text-muted-foreground">{item.sku || 'N/A'}</p>
+                                <span className="font-medium">SKU / Barcode:</span>
+                                <p className="text-muted-foreground">
+                                  {item.sku || 'N/A'}
+                                  {item.barcode ? ` • ${item.barcode}` : ''}
+                                </p>
                               </div>
                               <div>
                                 <span className="font-medium">Category:</span>
-                                <p className="text-muted-foreground">{item.category || 'Uncategorized'}</p>
+                                <p className="text-muted-foreground">{categoryName}</p>
                               </div>
                               <div>
-                                <span className="font-medium">Stock:</span>
+                                <span className="font-medium">Supplier:</span>
+                                <p className="text-muted-foreground">{supplierName}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium">Stock Targets:</span>
                                 <p className={`font-medium ${
                                   stockStatus === 'low' ? 'text-destructive' : 
                                   stockStatus === 'high' ? 'text-amber-600' : ''
                                 }`}>
-                                  {item.min_stock_level || 0} units
+                                  Min {item.min_stock_level || 0} / Max {item.max_stock_level || '∞'}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">Min/Max:</span>
-                                <p className="text-muted-foreground">
-                                  {item.min_stock_level || 0}/{item.max_stock_level || '∞'}
-                                </p>
+                                <span className="font-medium">Cost:</span>
+                                <p className="text-muted-foreground">Base {formatCurrency(baseCost)}</p>
+                                {recipeCost && baseCost !== recipeCost && (
+                                  <p className="text-muted-foreground">Recipe {formatCurrency(recipeCost)}</p>
+                                )}
                               </div>
                               <div>
-                                <span className="font-medium">Cost Per Unit:</span>
-                                <p className="text-muted-foreground">
-                                  {item.cost_per_unit ? `$${item.cost_per_unit}` : 'N/A'}
-                                </p>
-                              </div>
-                              <div>
-                                <span className="font-medium">Location:</span>
+                                <span className="font-medium">Location / Unit:</span>
                                 <p className="text-muted-foreground">{item.location?.name || 'No location set'}</p>
+                                <p className="text-muted-foreground">Unit: {primaryUnit}</p>
                               </div>
                             </div>
+
+                            {unitHierarchy && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Unit hierarchy: {unitHierarchy}
+                              </p>
+                            )}
+                            {recipeLineCount > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                Recipe ingredients: {recipeLineCount}
+                              </p>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-2 ml-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleManageRecipe(item)}
+                            >
+                              Recipe
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -341,6 +396,18 @@ export default function ItemsSetup() {
           open={showItemForm}
           onOpenChange={setShowItemForm}
         />
+        {recipeItem && (
+          <InventoryRecipeDialog
+            item={recipeItem}
+            open={isRecipeDialogOpen}
+            onOpenChange={(open) => {
+              setRecipeDialogOpen(open);
+              if (!open) {
+                setRecipeItem(undefined);
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );

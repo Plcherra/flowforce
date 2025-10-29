@@ -47,7 +47,10 @@ export function OperationsHealthCard({ className, stats, loading }: OperationsHe
       icon: Clock,
       label: t('dashboard.operationsSummary.pendingTimeOff'),
       value: stats.pendingTimeOff,
-      hint: t('dashboard.operationsSummary.requestsHint'),
+      hint: t('dashboard.operationsSummary.requestsHintDetailed', {
+        approved: stats.approvedTimeOffUpcoming,
+        balance: stats.timeOffBalanceRemaining,
+      }),
       iconClass: 'text-secondary'
     },
     {

@@ -1,3 +1,5 @@
+import type { PublishingSettings, UpdateRecipient } from '@/types/updateTemplates';
+
 export interface CompanyUpdate {
   id: string;
   title: string;
@@ -28,6 +30,8 @@ export interface CompanyUpdate {
   createdAt: string;
   updatedAt: string;
   richContent?: string;
+  publishingSettings?: PublishingSettings;
+  recipients?: UpdateRecipient;
 }
 
 export interface UpdateComment {

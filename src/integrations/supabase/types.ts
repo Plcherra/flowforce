@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          performed_by: string | null
+          record_id: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+          record_id?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+          record_id?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       announcement_reads: {
         Row: {
           announcement_id: string
@@ -1582,6 +1618,337 @@ export type Database = {
           },
         ]
       }
+      gamification_leaderboard: {
+        Row: {
+          achievements: Json
+          badge_codes: string[]
+          badge_tier: string
+          challenges: Json
+          company_id: string
+          created_at: string
+          department_id: string | null
+          employee_id: string
+          id: string
+          insights: Json
+          last_challenge_triggered: string | null
+          last_synced_at: string
+          period: string
+          period_end: string | null
+          period_start: string | null
+          role: string
+          updated_at: string
+          xp_goals: number
+          xp_recognitions: number
+          xp_tasks: number
+          xp_total: number
+          xp_training: number
+        }
+        Insert: {
+          achievements?: Json
+          badge_codes?: string[]
+          badge_tier?: string
+          challenges?: Json
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          employee_id: string
+          id?: string
+          insights?: Json
+          last_challenge_triggered?: string | null
+          last_synced_at?: string
+          period: string
+          period_end?: string | null
+          period_start?: string | null
+          role: string
+          updated_at?: string
+          xp_goals?: number
+          xp_recognitions?: number
+          xp_tasks?: number
+          xp_total?: number
+          xp_training?: number
+        }
+        Update: {
+          achievements?: Json
+          badge_codes?: string[]
+          badge_tier?: string
+          challenges?: Json
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          employee_id?: string
+          id?: string
+          insights?: Json
+          last_challenge_triggered?: string | null
+          last_synced_at?: string
+          period?: string
+          period_end?: string | null
+          period_start?: string | null
+          role?: string
+          updated_at?: string
+          xp_goals?: number
+          xp_recognitions?: number
+          xp_tasks?: number
+          xp_total?: number
+          xp_training?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_leaderboard_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gamification_leaderboard_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gamification_leaderboard_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_courses: {
+        Row: {
+          category: string
+          certification_code: string | null
+          created_at: string
+          created_by: string | null
+          delivery_mode: string
+          description: string | null
+          estimated_hours: number
+          featured: boolean
+          id: string
+          level_requirement: number
+          slug: string
+          target_roles: string[]
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          category: string
+          certification_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: string
+          description?: string | null
+          estimated_hours?: number
+          featured?: boolean
+          id?: string
+          level_requirement?: number
+          slug: string
+          target_roles?: string[]
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          certification_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: string
+          description?: string | null
+          estimated_hours?: number
+          featured?: boolean
+          id?: string
+          level_requirement?: number
+          slug?: string
+          target_roles?: string[]
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_courses_certification_fk"
+            columns: ["certification_code"]
+            isOneToOne: false
+            referencedRelation: "badge_catalog"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "learning_courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_enrollments: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          current_module: number
+          employee_id: string
+          hours_completed: number
+          id: string
+          last_activity_at: string
+          level: number
+          progress_percent: number
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          current_module?: number
+          employee_id: string
+          hours_completed?: number
+          id?: string
+          last_activity_at?: string
+          level?: number
+          progress_percent?: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          current_module?: number
+          employee_id?: string
+          hours_completed?: number
+          id?: string
+          last_activity_at?: string
+          level?: number
+          progress_percent?: number
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_modules: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          description: string | null
+          estimated_minutes: number
+          id: string
+          order_index: number
+          title: string
+          xp_award: number
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          order_index?: number
+          title: string
+          xp_award?: number
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number
+          id?: string
+          order_index?: number
+          title?: string
+          xp_award?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_progress_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          delta_hours: number
+          delta_progress: number
+          enrollment_id: string
+          event_type: string
+          id: string
+          module_id: string | null
+          note: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          delta_hours?: number
+          delta_progress?: number
+          enrollment_id: string
+          event_type: string
+          id?: string
+          module_id?: string | null
+          note?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          delta_hours?: number
+          delta_progress?: number
+          enrollment_id?: string
+          event_type?: string
+          id?: string
+          module_id?: string | null
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_progress_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_progress_events_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "learning_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_progress_events_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learning_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_tasks: {
         Row: {
           created_at: string
@@ -1851,6 +2218,209 @@ export type Database = {
       }
       inv_counts: {
         Row: {
+          completed_at: string | null
+          count_date: string
+          count_period: string | null
+          count_type: string
+          counted_by: string
+          created_at: string
+          description: string | null
+          id: string
+          location_id: string | null
+          notes: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          count_date?: string
+          count_period?: string | null
+          count_type: string
+          counted_by: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          count_date?: string
+          count_period?: string | null
+          count_type?: string
+          counted_by?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_counts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "inv_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_counts_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_count_events: {
+        Row: {
+          actor_id: string | null
+          count_id: string
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          count_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          actor_id?: string | null
+          count_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_count_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_count_events_count_id_fkey"
+            columns: ["count_id"]
+            isOneToOne: false
+            referencedRelation: "inv_counts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_count_locations: {
+        Row: {
+          count_id: string
+          created_at: string
+          id: string
+          location_id: string
+        }
+        Insert: {
+          count_id: string
+          created_at?: string
+          id?: string
+          location_id: string
+        }
+        Update: {
+          count_id?: string
+          created_at?: string
+          id?: string
+          location_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_count_locations_count_id_fkey"
+            columns: ["count_id"]
+            isOneToOne: false
+            referencedRelation: "inv_counts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_count_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "inv_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_count_scans: {
+        Row: {
+          count_id: string
+          id: string
+          item_id: string | null
+          metadata: Json
+          scan_type: string
+          scanned_at: string
+          scanned_by: string | null
+          scanned_code: string
+        }
+        Insert: {
+          count_id: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json
+          scan_type?: string
+          scanned_at?: string
+          scanned_by?: string | null
+          scanned_code: string
+        }
+        Update: {
+          count_id?: string
+          id?: string
+          item_id?: string | null
+          metadata?: Json
+          scan_type?: string
+          scanned_at?: string
+          scanned_by?: string | null
+          scanned_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_count_scans_count_id_fkey"
+            columns: ["count_id"]
+            isOneToOne: false
+            referencedRelation: "inv_counts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_count_scans_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_count_scans_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
           completed_at: string | null
           count_date: string
           count_type: string
@@ -2245,6 +2815,240 @@ export type Database = {
           },
         ]
       }
+      inv_production_approvals: {
+        Row: {
+          action: string
+          action_at: string
+          action_by: string
+          id: string
+          notes: string | null
+          production_id: string
+        }
+        Insert: {
+          action: string
+          action_at?: string
+          action_by: string
+          id?: string
+          notes?: string | null
+          production_id: string
+        }
+        Update: {
+          action?: string
+          action_at?: string
+          action_by?: string
+          id?: string
+          notes?: string | null
+          production_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_production_approvals_action_by_fkey"
+            columns: ["action_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_approvals_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "inv_production_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_production_events: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approval_status: string
+          batch_reference: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          item_id: string
+          labor_cost: number
+          material_cost: number
+          notes: string | null
+          overhead_cost: number
+          produced_at: string
+          produced_quantity: number
+          produced_unit_id: string
+          production_type: string
+          total_output_cost: number
+          unit_output_cost: number | null
+          updated_at: string
+          yield_quantity: number | null
+          yield_unit_id: string | null
+          waste_quantity: number | null
+          waste_unit_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approval_status?: string
+          batch_reference?: string | null
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          item_id: string
+          labor_cost?: number
+          material_cost?: number
+          notes?: string | null
+          overhead_cost?: number
+          produced_at?: string
+          produced_quantity: number
+          produced_unit_id: string
+          production_type: string
+          total_output_cost?: number
+          unit_output_cost?: number | null
+          updated_at?: string
+          yield_quantity?: number | null
+          yield_unit_id?: string | null
+          waste_quantity?: number | null
+          waste_unit_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          approval_status?: string
+          batch_reference?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          item_id?: string
+          labor_cost?: number
+          material_cost?: number
+          notes?: string | null
+          overhead_cost?: number
+          produced_at?: string
+          produced_quantity?: number
+          produced_unit_id?: string
+          production_type?: string
+          total_output_cost?: number
+          unit_output_cost?: number | null
+          updated_at?: string
+          yield_quantity?: number | null
+          yield_unit_id?: string | null
+          waste_quantity?: number | null
+          waste_unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_production_events_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_produced_unit_id_fkey"
+            columns: ["produced_unit_id"]
+            isOneToOne: false
+            referencedRelation: "inv_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_waste_unit_id_fkey"
+            columns: ["waste_unit_id"]
+            isOneToOne: false
+            referencedRelation: "inv_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_events_yield_unit_id_fkey"
+            columns: ["yield_unit_id"]
+            isOneToOne: false
+            referencedRelation: "inv_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_production_materials: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_item_id: string
+          production_id: string
+          quantity_used: number
+          total_cost: number | null
+          unit_cost: number | null
+          unit_id: string
+          updated_at: string
+          waste_quantity: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_item_id: string
+          production_id: string
+          quantity_used: number
+          total_cost?: number | null
+          unit_cost?: number | null
+          unit_id: string
+          updated_at?: string
+          waste_quantity?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_item_id?: string
+          production_id?: string
+          quantity_used?: number
+          total_cost?: number | null
+          unit_cost?: number | null
+          unit_id?: string
+          updated_at?: string
+          waste_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_production_materials_ingredient_item_id_fkey"
+            columns: ["ingredient_item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_materials_production_id_fkey"
+            columns: ["production_id"]
+            isOneToOne: false
+            referencedRelation: "inv_production_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_production_materials_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "inv_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inv_purchase_lines: {
         Row: {
           expiration_date: string | null
@@ -2536,6 +3340,224 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      inv_transfer_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          new_status: string | null
+          new_values: Json | null
+          note: string | null
+          old_status: string | null
+          old_values: Json | null
+          transfer_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          new_values?: Json | null
+          note?: string | null
+          old_status?: string | null
+          old_values?: Json | null
+          transfer_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          new_values?: Json | null
+          note?: string | null
+          old_status?: string | null
+          old_values?: Json | null
+          transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_transfer_audit_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfer_audit_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "inv_transfers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_transfer_items: {
+        Row: {
+          cost_per_unit: number | null
+          created_at: string
+          id: string
+          item_id: string
+          quantity: number
+          total_cost: number | null
+          transfer_id: string
+          unit_id: string
+        }
+        Insert: {
+          cost_per_unit?: number | null
+          created_at?: string
+          id?: string
+          item_id: string
+          quantity: number
+          total_cost?: number | null
+          transfer_id: string
+          unit_id: string
+        }
+        Update: {
+          cost_per_unit?: number | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          quantity?: number
+          total_cost?: number | null
+          transfer_id?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_transfer_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfer_items_transfer_id_fkey"
+            columns: ["transfer_id"]
+            isOneToOne: false
+            referencedRelation: "inv_transfers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfer_items_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "inv_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_transfers: {
+        Row: {
+          comments: string | null
+          company_id: string
+          created_at: string
+          delivery_date: string | null
+          fulfiller_id: string
+          from_location_id: string
+          id: string
+          received_at: string | null
+          recipient_id: string
+          rejected_at: string | null
+          requested_at: string
+          requested_by: string
+          sent_at: string | null
+          status: string
+          status_note: string | null
+          to_location_id: string
+          total_cost: number
+          total_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          delivery_date?: string | null
+          fulfiller_id: string
+          from_location_id: string
+          id?: string
+          received_at?: string | null
+          recipient_id: string
+          rejected_at?: string | null
+          requested_at?: string
+          requested_by?: string
+          sent_at?: string | null
+          status?: string
+          status_note?: string | null
+          to_location_id: string
+          total_cost?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          delivery_date?: string | null
+          fulfiller_id?: string
+          from_location_id?: string
+          id?: string
+          received_at?: string | null
+          recipient_id?: string
+          rejected_at?: string | null
+          requested_at?: string
+          requested_by?: string
+          sent_at?: string | null
+          status?: string
+          status_note?: string | null
+          to_location_id?: string
+          total_cost?: number
+          total_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_transfers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfers_fulfiller_id_fkey"
+            columns: ["fulfiller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfers_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "inv_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfers_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfers_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_transfers_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "inv_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inv_units: {
         Row: {
@@ -4104,6 +5126,56 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          admin_config: Json
+          appearance: Json
+          company_id: string
+          created_at: string
+          general: Json
+          id: string
+          integrations: Json
+          localization: Json
+          notifications: Json
+          security: Json
+          updated_at: string
+        }
+        Insert: {
+          admin_config?: Json
+          appearance?: Json
+          company_id: string
+          created_at?: string
+          general?: Json
+          id?: string
+          integrations?: Json
+          localization?: Json
+          notifications?: Json
+          security?: Json
+          updated_at?: string
+        }
+        Update: {
+          admin_config?: Json
+          appearance?: Json
+          company_id?: string
+          created_at?: string
+          general?: Json
+          id?: string
+          integrations?: Json
+          localization?: Json
+          notifications?: Json
+          security?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_activities: {
         Row: {
           action_type: string
@@ -4295,6 +5367,7 @@ export type Database = {
           created_at: string
           created_by: string
           department_id: string | null
+          goal_id: string | null
           description: string | null
           due_date: string | null
           estimated_hours: number | null
@@ -4319,6 +5392,7 @@ export type Database = {
           created_at?: string
           created_by: string
           department_id?: string | null
+          goal_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number | null
@@ -4343,6 +5417,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           department_id?: string | null
+          goal_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number | null
@@ -4386,6 +5461,13 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
             referencedColumns: ["id"]
           },
           {
@@ -4946,6 +6028,7 @@ export type Database = {
     Enums: {
       availability_lock_mode: "auto" | "open" | "lock"
       availability_request_status: "pending" | "approved" | "denied"
+      certification_status: "available" | "in_progress" | "earned" | "expired"
       employee_report_category: "performance" | "attendance" | "behavior" | "customer"
       promotion_status: "pending" | "approved" | "rejected"
       approval_status: "pending" | "approved" | "rejected"
@@ -5015,6 +6098,7 @@ export type Database = {
         | "task"
         | "image_selection"
       form_status: "draft" | "published" | "archived"
+      learning_course_status: "not_started" | "in_progress" | "completed"
       ooda_period: "daily" | "weekly" | "monthly" | "quarterly"
       ooda_status: "open" | "closed"
       schedule_status:
@@ -5177,6 +6261,7 @@ export const Constants = {
       ],
       document_processing_state: ["pending", "processing", "ready", "error"],
       employment_status: ["active", "inactive", "terminated", "on_leave"],
+      certification_status: ["available", "in_progress", "earned", "expired"],
       event_severity: ["low", "medium", "high"],
       event_type: [
         "incident",
@@ -5235,6 +6320,7 @@ export const Constants = {
         "image_selection",
       ],
       form_status: ["draft", "published", "archived"],
+      learning_course_status: ["not_started", "in_progress", "completed"],
       ooda_period: ["daily", "weekly", "monthly", "quarterly"],
       ooda_status: ["open", "closed"],
       schedule_status: [
@@ -5297,6 +6383,122 @@ export const Constants = {
           updated_at?: string
         }
         Relationships: []
+      }
+      certification_catalog: {
+        Row: {
+          badge_code: string | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          issuer: string | null
+          requirement_config: Json
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          badge_code?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          issuer?: string | null
+          requirement_config?: Json
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          badge_code?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          issuer?: string | null
+          requirement_config?: Json
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certification_catalog_badge_code_fkey"
+            columns: ["badge_code"]
+            isOneToOne: false
+            referencedRelation: "badge_catalog"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      certification_progress: {
+        Row: {
+          achieved_at: string | null
+          certification_code: string
+          courses_completed: number
+          created_at: string
+          employee_id: string
+          expires_at: string | null
+          goals_completed: number
+          id: string
+          last_evaluated_at: string
+          progress_percent: number
+          requirement_breakdown: Json | null
+          status: Database["public"]["Enums"]["certification_status"]
+          tasks_completed: number
+          updated_at: string
+          xp_earned: number
+        }
+        Insert: {
+          achieved_at?: string | null
+          certification_code: string
+          courses_completed?: number
+          created_at?: string
+          employee_id: string
+          expires_at?: string | null
+          goals_completed?: number
+          id?: string
+          last_evaluated_at?: string
+          progress_percent?: number
+          requirement_breakdown?: Json | null
+          status?: Database["public"]["Enums"]["certification_status"]
+          tasks_completed?: number
+          updated_at?: string
+          xp_earned?: number
+        }
+        Update: {
+          achieved_at?: string | null
+          certification_code?: string
+          courses_completed?: number
+          created_at?: string
+          employee_id?: string
+          expires_at?: string | null
+          goals_completed?: number
+          id?: string
+          last_evaluated_at?: string
+          progress_percent?: number
+          requirement_breakdown?: Json | null
+          status?: Database["public"]["Enums"]["certification_status"]
+          tasks_completed?: number
+          updated_at?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certification_progress_certification_code_fkey"
+            columns: ["certification_code"]
+            isOneToOne: false
+            referencedRelation: "certification_catalog"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "certification_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_badge: {
         Row: {
@@ -5400,6 +6602,102 @@ export const Constants = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      learning_course_progress: {
+        Row: {
+          completed_at: string | null
+          course_code: string
+          created_at: string
+          employee_id: string
+          id: string
+          last_interaction_at: string | null
+          progress_percent: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["learning_course_status"]
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_code: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          last_interaction_at?: string | null
+          progress_percent?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["learning_course_status"]
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_code?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          last_interaction_at?: string | null
+          progress_percent?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["learning_course_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_course_progress_course_code_fkey"
+            columns: ["course_code"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "learning_course_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_courses: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          level: string | null
+          metadata: Json | null
+          title: string
+          updated_at: string
+          xp_value: number
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          level?: string | null
+          metadata?: Json | null
+          title: string
+          updated_at?: string
+          xp_value?: number
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          level?: string | null
+          metadata?: Json | null
+          title?: string
+          updated_at?: string
+          xp_value?: number
+        }
+        Relationships: []
       }
       promotion_proposal: {
         Row: {

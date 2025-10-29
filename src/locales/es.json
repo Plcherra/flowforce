@@ -35,10 +35,11 @@
     "delete": "Eliminar",
     "back": "Atrás",
     "continue": "Continuar",
+    "refresh": "Actualizar",
     "viewCertificate": "Ver Certificado",
     "startCertification": "Iniciar Certificación",
     "inventoryCountExecution": "Ejecución de Conteo de Inventario",
-    "positionManagement": "Gestión de Puestos",
+    "positionManagement": "Gestión de Equipos",
     "companyUpdates": "Actualizaciones de la Empresa"
   },
   "navigation": {
@@ -268,6 +269,20 @@
       "evening": "Buenas noches"
     },
     "welcome": "Bienvenido a tu panel de FlowForce",
+    "stats": {
+      "totalEmployees": "Empleados totales",
+      "activeEmployees": "activos",
+      "departments": "Departamentos",
+      "activeDepartments": "Departamentos activos",
+      "todaysShifts": "Turnos de hoy",
+      "scheduledToday": "Programados hoy",
+      "pendingRequests": "Solicitudes pendientes",
+      "timeOffRequests": "Solicitudes de ausencia",
+      "timeOffRequestsDetail": "{{approved}} aprobadas próximas • {{used}} días usados este año",
+      "timeOffBalance": "Saldo de ausencias",
+      "timeOffBalanceHint": "{{used}} días utilizados este año",
+      "currentTime": "Hora actual"
+    },
     "operationsSummary": {
       "title": "Instantánea Operativa",
       "description": "Mantente al día con un resumen rápido de la actividad de hoy.",
@@ -275,6 +290,7 @@
       "shiftsHint": "Programados en todas las sedes",
       "pendingTimeOff": "Solicitudes de ausencia",
       "requestsHint": "En espera de revisión",
+      "requestsHintDetailed": "{{approved}} aprobadas próximas • {{balance}} días restantes",
       "activeEmployees": "Empleados activos",
       "activeEmployeesHint": "De {{total}} en total",
       "departmentCount": "Departamentos",

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import type { PermissionKey } from './useUserPermissions';
+import { isPermissionKey as isRegisteredPermissionKey } from '@/lib/permissions/registry';
 
 interface AuditLogEntry {
   user_id: string;
@@ -95,19 +95,7 @@ export function usePermissionAudit() {
  * Ensures only valid permission keys are used at compile time
  */
 export function isValidPermissionKey(key: string): key is PermissionKey {
-  // This would ideally import from a const assertion, but for safety:
-  const validKeys = [
-    'viewOwnProfile', 'viewTeamProfiles', 'editOwnProfile', 'editTeamProfiles',
-    'viewOwnSchedules', 'viewTeamSchedules', 'viewOwnTasks', 'viewTeamTasks',
-    'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust',
-    'inventory.import', 'inventory.export', 'inventory.counts.view',
-    'inventory.counts.create', 'inventory.counts.edit', 'inventory.prep.view',
-    'inventory.prep.edit', 'inventory.waste.view', 'inventory.waste.create',
-    'inventory.purchasing.view', 'inventory.purchasing.manage'
-    // Add other keys as needed
-  ] as const;
-  
-  return validKeys.includes(key as any);
+  return isRegisteredPermissionKey(key);
 }
 
 /**

@@ -1,90 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  PERMISSION_DEFINITIONS,
+  PERMISSION_KEYS,
+  type PermissionDefinition,
+  type PermissionKey,
+  type PermissionValue,
+} from '@/lib/permissions/registry';
+import { createPermissionResolver } from '@/lib/permissions/resolver';
+import { logAuditEvent } from '@/services/audit/auditService';
 
-// All available permission keys from the system - expanded with granular inventory permissions
-export const PERMISSION_KEYS = [
-  // Profile permissions
-  'viewOwnProfile',
-  'viewTeamProfiles',
-  'editOwnProfile', 
-  'editTeamProfiles',
-  
-  // Schedule permissions
-  'schedule.view',
-  'schedule.edit',
-  'schedule.create',
-  'schedule.delete',
-  'viewOwnSchedules',
-  'viewTeamSchedules',
-  'editSchedules',
-  
-  // Task permissions
-  'viewOwnTasks',
-  'viewTeamTasks',
-  'editTasks',
-  
-  // Expense permissions
-  'viewOwnExpenses',
-  'viewTeamExpenses',
-  'approveExpenses',
-  'approveTimeOff',
-  
-  // User management permissions
-  'manageUsers',
-  'systemSettings',
-  
-  // Form permissions
-  'createForms',
-  'manageForms',
-  'approveFormSubmissions',
-  
-  // General permissions
-  'managePositions',
-  'viewAIInsights',
-  'managePayments',
-  
-  // Directory permissions
-  'directory.view',
-  'directory.manage',
-  
-  // Inventory permissions - granular
-  'inventory.view',
-  'inventory.create',
-  'inventory.edit',
-  'inventory.delete',
-  'inventory.adjust',
-  'inventory.import',
-  'inventory.export',
-  'inventory.purchasing.view',
-  'inventory.purchasing.manage',
-  'inventory.counts.view',
-  'inventory.counts.create',
-  'inventory.counts.edit',
-  'inventory.waste.view',
-  'inventory.waste.create',
-  'inventory.prep.view',
-  'inventory.prep.edit',
-  
-  // Reports permissions
-  'reports.view',
-  'reports.export',
-  
-  // Billing permissions
-  'billing.view',
-  'billing.manage',
-  
-  // Admin Console permissions
-  'admin.roles',
-  'admin.permissions',
-  'admin.settings',
-  
-  // Legacy permissions (maintain compatibility)
-  'manageInventory'
-] as const;
-
-export type PermissionKey = typeof PERMISSION_KEYS[number];
-export type PermissionValue = 'inherit' | 'allow' | 'deny';
+export { PERMISSION_DEFINITIONS, PERMISSION_KEYS } from '@/lib/permissions/registry';
+export type { PermissionDefinition, PermissionKey, PermissionValue } from '@/lib/permissions/registry';
 
 export interface UserPermissionOverride {
   id: string;
@@ -100,7 +28,8 @@ export interface EffectivePermission {
   key: PermissionKey;
   value: PermissionValue;
   effective: boolean;
-  source: 'role' | 'override';
+  source: 'role' | 'allow_override' | 'deny_override';
+  definition?: PermissionDefinition;
 }
 
 // Hook to fetch user permission overrides
@@ -124,47 +53,47 @@ export function useUserPermissionOverrides(userId: string | null) {
 
 // Hook to get effective permissions for a user (role permissions + overrides)
 export function useUserEffectivePermissions(userId: string | null, roleId: string | null) {
-  const { data: overrides } = useUserPermissionOverrides(userId);
-  
   return useQuery({
     queryKey: ['user-effective-permissions', userId, roleId],
     queryFn: async () => {
-      if (!userId || !roleId) return [];
+      if (!userId || !roleId) {
+        return [];
+      }
 
-      // Get role permissions
-      const { data: role, error: roleError } = await supabase
-        .from('company_roles')
-        .select('permissions')
-        .eq('id', roleId)
-        .single();
+      const [{ data: role, error: roleError }, { data: overrideData, error: overrideError }] = await Promise.all([
+        supabase
+          .from('company_roles')
+          .select('permissions')
+          .eq('id', roleId)
+          .single(),
+        supabase
+          .from('user_permissions')
+          .select('*')
+          .eq('user_id', userId),
+      ]);
 
       if (roleError) throw roleError;
+      if (overrideError) throw overrideError;
 
-      const rolePermissions = role?.permissions || {};
-      const overrideMap = new Map(
-        (overrides || []).map(o => [o.permission_key, o.permission_value])
-      );
+      const overrides = (overrideData || []) as UserPermissionOverride[];
+      const rawPermissions = role?.permissions ?? {};
+      const rolePermissions = typeof rawPermissions === 'string' ? JSON.parse(rawPermissions) : rawPermissions;
 
-      // Calculate effective permissions for all permission keys
-      const effectivePermissions: EffectivePermission[] = PERMISSION_KEYS.map(key => {
-        const override = overrideMap.get(key);
-        
-        if (override && override !== 'inherit') {
-          return {
-            key,
-            value: override,
-            effective: override === 'allow',
-            source: 'override'
-          };
-        }
+      const resolver = createPermissionResolver({
+        rolePermissions: rolePermissions || {},
+        userOverrides: overrides,
+        userId,
+        roleId,
+      });
 
-        // Use role permission or default to false
-        const roleValue = rolePermissions[key] || false;
+      const effectivePermissions: EffectivePermission[] = PERMISSION_KEYS.map((key) => {
+        const override = overrides.find((item) => item.permission_key === key);
         return {
           key,
-          value: 'inherit',
-          effective: Boolean(roleValue),
-          source: 'role'
+          value: override?.permission_value ?? ('inherit' as PermissionValue),
+          effective: resolver.resolve(key),
+          source: resolver.getPermissionSource(key),
+          definition: PERMISSION_DEFINITIONS.find((definition) => definition.key === key),
         };
       });
 
@@ -187,6 +116,21 @@ export function useSaveUserPermissions() {
       userId: string; 
       permissions: Record<PermissionKey, PermissionValue> 
     }) => {
+      const { data: existingData, error: existingError } = await supabase
+        .from('user_permissions')
+        .select('permission_key, permission_value')
+        .eq('user_id', userId);
+
+      if (existingError) throw existingError;
+
+      const previousOverrideValues = ((existingData ?? []) as Pick<UserPermissionOverride, 'permission_key' | 'permission_value'>[]).reduce<Record<string, PermissionValue>>(
+        (acc, override) => {
+          acc[override.permission_key] = override.permission_value;
+          return acc;
+        },
+        {},
+      );
+
       // Delete existing overrides for this user
       await supabase
         .from('user_permissions')
@@ -213,6 +157,36 @@ export function useSaveUserPermissions() {
           .insert(overridesToInsert);
 
         if (error) throw error;
+      }
+
+      const nextOverrideValues = overridesToInsert.reduce<Record<string, PermissionValue>>(
+        (acc, override) => {
+          acc[override.permission_key] = override.permission_value;
+          return acc;
+        },
+        {},
+      );
+
+      const normalize = (valueMap: Record<string, PermissionValue>) => {
+        const sortedKeys = Object.keys(valueMap).sort();
+        return sortedKeys.reduce<Record<string, PermissionValue>>((acc, key) => {
+          acc[key] = valueMap[key];
+          return acc;
+        }, {});
+      };
+
+      const previousNormalized = normalize(previousOverrideValues);
+      const nextNormalized = normalize(nextOverrideValues);
+
+      if (JSON.stringify(previousNormalized) !== JSON.stringify(nextNormalized)) {
+        await logAuditEvent({
+          targetUserId: userId,
+          action: 'permission.overrides_updated',
+          tableName: 'user_permissions',
+          recordId: userId,
+          oldValues: Object.keys(previousNormalized).length ? previousNormalized : null,
+          newValues: Object.keys(nextNormalized).length ? nextNormalized : null,
+        });
       }
     },
     onSuccess: (_, variables) => {

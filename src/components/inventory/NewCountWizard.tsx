@@ -22,15 +22,71 @@ interface NewCountWizardProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type CountPeriod = 'day_start' | 'day_end' | 'custom';
+
+interface CountTypeOption {
+  label: string;
+  value: string;
+  period?: CountPeriod;
+  removable?: boolean;
+}
+
+const COUNT_TYPES_STORAGE_KEY = 'inventory-count-types-v2';
+
+const DEFAULT_COUNT_TYPES: CountTypeOption[] = [
+  { label: 'Day Start', value: 'day_start', period: 'day_start', removable: false },
+  { label: 'Day End', value: 'day_end', period: 'day_end', removable: false },
+  { label: 'Full Count', value: 'full', period: 'custom', removable: true },
+  { label: 'Cycle Count', value: 'cycle', period: 'custom', removable: true },
+  { label: 'Spot Check', value: 'spot', period: 'custom', removable: true },
+];
+
+const slugifyCountType = (label: string) => {
+  const base = label
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return base || 'custom_count';
+};
+
+const normalizeCountTypes = (types: CountTypeOption[]): CountTypeOption[] => {
+  const map = new Map<string, CountTypeOption>();
+
+  DEFAULT_COUNT_TYPES.forEach((option) => {
+    map.set(option.value, option);
+  });
+
+  types.forEach((option) => {
+    const value = option.value || slugifyCountType(option.label);
+    const existing = map.get(value);
+    if (existing && existing.removable === false) {
+      return;
+    }
+
+    map.set(value, {
+      label: option.label,
+      value,
+      period: option.period ?? 'custom',
+      removable: option.removable ?? true,
+    });
+  });
+
+  return Array.from(map.values());
+};
+
 
 export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState('type');
   const [countData, setCountData] = useState({
-    type: '',
+    type: 'day_start',
+    typeLabel: 'Day Start',
+    period: 'day_start' as CountPeriod,
     locations: [] as string[],
     categories: [] as string[],
     notes: '',
+    description: '',
     assignees: [] as string[],
     scheduledDate: undefined as Date | undefined,
     scheduledTime: '09:00'
@@ -42,7 +98,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   const [creating, setCreating] = useState(false);
   
   // Load count types from localStorage or use defaults
-  const [countTypes, setCountTypes] = useState<string[]>([]);
+  const [countTypes, setCountTypes] = useState<CountTypeOption[]>([]);
   const [newCountType, setNewCountType] = useState('');
 
   // Real-time clock for "now mode"
@@ -70,16 +126,67 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
 
   // Initialize count types from localStorage on mount
   useEffect(() => {
-    const savedTypes = localStorage.getItem('inventory-count-types');
-    if (savedTypes) {
-      setCountTypes(JSON.parse(savedTypes));
-    } else {
-      // Set default types only if none are saved
-      const defaultTypes = ['Full Count', 'Cycle Count', 'Spot Check'];
-      setCountTypes(defaultTypes);
-      localStorage.setItem('inventory-count-types', JSON.stringify(defaultTypes));
+    try {
+      const savedTypesRaw = localStorage.getItem(COUNT_TYPES_STORAGE_KEY);
+      if (savedTypesRaw) {
+        const parsed = JSON.parse(savedTypesRaw);
+        if (Array.isArray(parsed)) {
+          const normalized = parsed.map((entry: any) => {
+            if (typeof entry === 'string') {
+              return {
+                label: entry,
+                value: slugifyCountType(entry),
+                period: 'custom' as CountPeriod,
+                removable: true,
+              } satisfies CountTypeOption;
+            }
+
+            return {
+              label: entry.label ?? entry.value ?? 'Custom Count',
+              value: entry.value ? String(entry.value) : slugifyCountType(entry.label ?? 'custom'),
+              period: (entry.period as CountPeriod) ?? 'custom',
+              removable: entry.removable ?? true,
+            } satisfies CountTypeOption;
+          });
+
+          setCountTypes(normalizeCountTypes(normalized));
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load stored count types', error);
     }
+
+    setCountTypes(DEFAULT_COUNT_TYPES);
   }, []);
+
+  // Keep count types persisted locally
+  useEffect(() => {
+    if (countTypes.length === 0) return;
+
+    const serializable = countTypes.map((option) => ({
+      label: option.label,
+      value: option.value,
+      period: option.period,
+      removable: option.removable,
+    }));
+
+    localStorage.setItem(COUNT_TYPES_STORAGE_KEY, JSON.stringify(serializable));
+  }, [countTypes]);
+
+  useEffect(() => {
+    if (countTypes.length === 0) return;
+
+    if (!countTypes.some((option) => option.value === countData.type)) {
+      const fallback = countTypes[0];
+      setCountData((prev) => ({
+        ...prev,
+        type: fallback.value,
+        typeLabel: fallback.label,
+        period: fallback.period ?? 'custom',
+      }));
+    }
+  }, [countTypes]);
 
   // Save count types to localStorage whenever they change
   useEffect(() => {
@@ -122,25 +229,65 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
     }));
   };
 
-  const addCountType = () => {
-    if (newCountType && !countTypes.includes(newCountType)) {
-      setCountTypes(prev => [...prev, newCountType]);
-      setCountData(prev => ({ ...prev, type: newCountType }));
-      setNewCountType('');
-    }
+  const handleTypeSelect = (option: CountTypeOption) => {
+    setCountData((prev) => ({
+      ...prev,
+      type: option.value,
+      typeLabel: option.label,
+      period: option.period ?? 'custom',
+    }));
   };
 
-  const removeCountType = (typeToRemove: string) => {
-    const updatedTypes = countTypes.filter(t => t !== typeToRemove);
-    setCountTypes(updatedTypes);
-    
-    // Clear selection if deleted type was selected
-    if (countData.type === typeToRemove) {
-      setCountData(prev => ({ ...prev, type: '' }));
+  const addCountType = () => {
+    const label = newCountType.trim();
+    if (!label) return;
+
+    const value = slugifyCountType(label);
+
+    setCountTypes((prev) => {
+      if (prev.some((option) => option.value === value)) {
+        return prev;
+      }
+      return normalizeCountTypes([
+        ...prev,
+        {
+          label,
+          value,
+          period: 'custom',
+          removable: true,
+        },
+      ]);
+    });
+
+    setCountData((prev) => ({
+      ...prev,
+      type: value,
+      typeLabel: label,
+      period: 'custom',
+    }));
+
+    setNewCountType('');
+  };
+
+  const removeCountType = (value: string) => {
+    setCountTypes((prev) => {
+      const option = prev.find((opt) => opt.value === value);
+      if (!option || option.removable === false) {
+        return prev;
+      }
+      const filtered = prev.filter((opt) => opt.value !== value);
+      return normalizeCountTypes(filtered);
+    });
+
+    if (countData.type === value) {
+      const fallback = DEFAULT_COUNT_TYPES[0];
+      setCountData((prev) => ({
+        ...prev,
+        type: fallback.value,
+        typeLabel: fallback.label,
+        period: fallback.period ?? 'custom',
+      }));
     }
-    
-    // Update localStorage immediately
-    localStorage.setItem('inventory-count-types', JSON.stringify(updatedTypes));
   };
 
   const canProceed = () => {
@@ -200,38 +347,86 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                   </div>
                   
                   <div className="grid grid-cols-1 gap-2">
-                    {countTypes.map((type) => (
-                      <div
-                        key={type}
-                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all hover:bg-accent/50 ${
-                          countData.type === type 
-                            ? 'ring-2 ring-primary bg-primary/5 border-primary' 
-                            : 'border-border hover:border-primary/50'
-                        }`}
-                        onClick={() => setCountData(prev => ({ ...prev, type }))}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{type}</span>
-                          {countData.type === type && (
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                    {countTypes.map((option) => {
+                      const isSelected = countData.type === option.value;
+                      const periodHint =
+                        option.period === 'day_start'
+                          ? 'Opening inventory before service'
+                          : option.period === 'day_end'
+                          ? 'Closing inventory after service'
+                          : 'Custom frequency';
+
+                      return (
+                        <div
+                          key={option.value}
+                          className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all hover:bg-accent/50 ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-primary/5 border-primary'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                          onClick={() => handleTypeSelect(option)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <div className="font-medium">{option.label}</div>
+                              <p className="text-xs text-muted-foreground">{periodHint}</p>
+                            </div>
+                            {isSelected && (
+                              <CheckCircle2 className="h-4 w-4 text-primary" />
+                            )}
+                          </div>
+                          {option.removable !== false && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeCountType(option.value);
+                              }}
+                              className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                            >
+                              -
+                            </Button>
                           )}
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeCountType(type);
-                          }}
-                          className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          -
-                        </Button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Day Part Focus</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={countData.period === 'day_start' ? 'default' : 'outline'}
+                    onClick={() => setCountData(prev => ({ ...prev, period: 'day_start' }))}
+                    size="sm"
+                  >
+                    Day Start
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={countData.period === 'day_end' ? 'default' : 'outline'}
+                    onClick={() => setCountData(prev => ({ ...prev, period: 'day_end' }))}
+                    size="sm"
+                  >
+                    Day End
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={countData.period === 'custom' ? 'default' : 'outline'}
+                    onClick={() => setCountData(prev => ({ ...prev, period: 'custom' }))}
+                    size="sm"
+                  >
+                    Custom
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Choose the day-part focus that best matches how the count will be reviewed.
+                </p>
               </div>
             </div>
           </TabsContent>
@@ -278,6 +473,16 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Short description that appears in supervisor review"
+                  value={countData.description}
+                  onChange={(e) => setCountData(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
 
               <div>
@@ -384,11 +589,28 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium">Type:</span>
-                      <p>{countData.type}</p>
+                      <p>{countData.typeLabel || countData.type}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Day Part:</span>
+                      <p>
+                        {countData.period === 'day_start'
+                          ? 'Day Start (before service)'
+                          : countData.period === 'day_end'
+                          ? 'Day End (after service)'
+                          : 'Custom'}
+                      </p>
                     </div>
                     <div>
                       <span className="font-medium">Locations:</span>
-                      <p>{countData.locations.map(id => locations?.find(l => l.id === id)?.name).join(', ')}</p>
+                      <p>
+                        {countData.locations.length
+                          ? countData.locations
+                              .map(id => locations?.find(l => l.id === id)?.name)
+                              .filter(Boolean)
+                              .join(', ')
+                          : 'All locations'}
+                      </p>
                     </div>
                      <div>
                        <span className="font-medium">Start Time:</span>
@@ -398,6 +620,13 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                        }</p>
                      </div>
                   </div>
+
+                  {countData.description && (
+                    <div>
+                      <span className="font-medium">Description:</span>
+                      <p className="text-sm">{countData.description}</p>
+                    </div>
+                  )}
                   
                   {countData.categories.length > 0 && (
                     <div>
@@ -449,18 +678,30 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                                : new Date();
                            }
                            
-                           const countDataWithDate = {
-                             ...countData,
-                             scheduleDate: scheduledDateTime.toISOString()
+                           const selectedCategoryNames = countData.categories
+                             .map((categoryId) => categories?.find((category) => category.id === categoryId)?.name)
+                             .filter((name): name is string => Boolean(name));
+
+                           const countPayload = {
+                             type: countData.type,
+                             period: countData.period,
+                             locations: countData.locations,
+                             categories: selectedCategoryNames,
+                             scheduleDate: scheduledDateTime.toISOString(),
+                             notes: countData.notes,
+                             description: countData.description,
                            };
-                           const createdCount = await createCount(countDataWithDate);
+                           const createdCount = await createCount(countPayload);
                           onOpenChange(false);
                            // Reset form
                            setCountData({
-                             type: '',
+                             type: 'day_start',
+                             typeLabel: 'Day Start',
+                             period: 'day_start',
                              locations: [],
                              categories: [],
                              notes: '',
+                             description: '',
                              assignees: [],
                              scheduledDate: undefined,
                              scheduledTime: '09:00'

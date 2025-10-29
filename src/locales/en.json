@@ -31,7 +31,7 @@
     "certifications": "Certifications",
     "aiInsights": "AI Insights",
     "inventoryCountExecution": "Inventory Count Execution",
-    "positionManagement": "Position Management",
+    "positionManagement": "Team Management",
     "settings": "Settings",
     "signOut": "Sign Out",
     "signIn": "Sign In",
@@ -42,6 +42,7 @@
     "delete": "Delete",
     "back": "Back",
     "continue": "Continue",
+    "refresh": "Refresh",
     "custom": "Custom",
     "customBranding": "Custom branding and colors",
     "flexibleSections": "Flexible section configuration",
@@ -287,6 +288,9 @@
       "scheduledToday": "Scheduled today",
       "pendingRequests": "Pending Requests",
       "timeOffRequests": "Time off requests",
+      "timeOffRequestsDetail": "{{approved}} approved upcoming • {{used}} days used YTD",
+      "timeOffBalance": "Time Off Balance",
+      "timeOffBalanceHint": "{{used}} days used so far this year",
       "currentTime": "Current Time"
     },
     "profile": {
@@ -308,6 +312,7 @@
       "shiftsHint": "Scheduled across all locations",
       "pendingTimeOff": "Pending time off",
       "requestsHint": "Awaiting review",
+      "requestsHintDetailed": "{{approved}} upcoming approved • {{balance}} days remaining",
       "activeEmployees": "Active employees",
       "activeEmployeesHint": "Out of {{total}} total",
       "departmentCount": "Departments",
@@ -330,9 +335,23 @@
     "earned": "Earned",
     "inProgress": "In Progress",
     "available": "Available",
+    "expired": "Expired",
     "issuedBy": "Issued by",
     "earnedDate": "Earned",
     "complete": "complete",
+    "pendingBadge": "Badge pending Copilot review",
+    "badgeAwarded": "Badge awarded",
+    "requirements": "Requirements",
+    "lastEvaluated": "Last evaluated",
+    "requiredCourses": "Required courses ({{count}}): {{codes}}",
+    "metrics": {
+      "completedTasks": "Completed tasks",
+      "completedGoals": "Completed goals",
+      "xpEarned": "Total XP",
+      "coursesCompleted": "Courses completed"
+    },
+    "emptyState": "No certifications available yet",
+    "emptyDescription": "Once requirements are published you will see eligible certifications and progress here.",
     "customerServiceSpecialist": {
       "name": "Customer Service Specialist",
       "description": "Certified in advanced customer service techniques"

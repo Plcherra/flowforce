@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { InventoryService } from '@/services/inventory';
-import { InventoryItem } from './types';
+import { InventoryItem, InventoryItemInsert, InventoryItemUpdate } from './types';
 
 export function useInventoryItems() {
   const { toast } = useToast();
@@ -20,7 +20,7 @@ export function useCreateInventoryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (itemData: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>) => 
+    mutationFn: (itemData: InventoryItemInsert) => 
       InventoryService.createItem(itemData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
@@ -45,7 +45,7 @@ export function useUpdateInventoryItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<InventoryItem> }) => 
+    mutationFn: ({ id, updates }: { id: string; updates: InventoryItemUpdate }) => 
       InventoryService.updateItem(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });

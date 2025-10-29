@@ -9,9 +9,18 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, Users, FileText, Calendar, Download, Activity } from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
 import { FormSubmission } from '@/types/common';
+import type { AssistantContext } from '@/types/ai';
 
 interface FormAnalyticsProps {
   formId?: string;
+  onContextChange?: (context: AssistantContext | null) => void;
+  onFormSelect?: (formId: string) => void;
+  onSummaryChange?: (summary: {
+    formId: string;
+    submissionCount: number;
+    completionRate: number;
+    fieldData: AnalyticsData['fieldAnalysis'];
+  }) => void;
 }
 
 interface AnalyticsData {
@@ -26,7 +35,7 @@ interface AnalyticsData {
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe'];
 
-export default function FormAnalytics({ formId }: FormAnalyticsProps) {
+export default function FormAnalytics({ formId, onContextChange, onFormSelect, onSummaryChange }: FormAnalyticsProps) {
   const { forms, getFormSubmissions, getFormFields } = useForms();
   const [selectedForm, setSelectedForm] = useState(formId || '');
   const [timeRange, setTimeRange] = useState('7d');
@@ -34,10 +43,29 @@ export default function FormAnalytics({ formId }: FormAnalyticsProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (selectedForm) {
-      loadAnalytics();
+    if (formId) {
+      setSelectedForm(formId);
+      return;
     }
-  }, [selectedForm, timeRange]);
+    if (!selectedForm && forms.length) {
+      setSelectedForm(forms[0].id);
+    }
+  }, [formId, forms, selectedForm]);
+
+  useEffect(() => {
+    if (selectedForm) {
+      onFormSelect?.(selectedForm);
+    }
+  }, [selectedForm, onFormSelect]);
+
+  useEffect(() => {
+    if (selectedForm) {
+      setAnalyticsData(null);
+      loadAnalytics();
+    } else if (onContextChange) {
+      onContextChange(null);
+    }
+  }, [selectedForm, timeRange, onContextChange]);
 
   const loadAnalytics = async () => {
     if (!selectedForm) return;
@@ -67,6 +95,22 @@ export default function FormAnalytics({ formId }: FormAnalyticsProps) {
           }
         });
 
+        const requiredFields = fields.filter((field) => field.is_required);
+
+        const completedSubmissions = submissions.filter((submission: any) => {
+          if (!requiredFields.length) return true;
+          const data = (submission.submission_data || {}) as Record<string, unknown>;
+          return requiredFields.every((field) => {
+            const value = data[field.id];
+            if (Array.isArray(value)) return value.length > 0;
+            return (value ?? '') !== '';
+          });
+        });
+
+        const completionRate = submissions.length > 0
+          ? Math.round((completedSubmissions.length / submissions.length) * 100)
+          : 0;
+
         const topFields = fields.slice(0, 5).map(f => ({
           field: f.label,
           interactions: fieldCounts[f.id] || 0,
@@ -75,7 +119,7 @@ export default function FormAnalytics({ formId }: FormAnalyticsProps) {
         const fieldAnalysis = fields.map(f => {
           const count = fieldCounts[f.id] || 0;
           const completion = submissions.length > 0 ? Math.round((count / submissions.length) * 100) : 0;
-          return { field: f.label, completion, dropoff: 0 };
+          return { field: f.label, completion, dropoff: Math.max(0, 100 - completion) };
         });
 
         const breakdownCounts = { desktop: 0, mobile: 0, tablet: 0 };
@@ -94,7 +138,7 @@ export default function FormAnalytics({ formId }: FormAnalyticsProps) {
 
         const data: AnalyticsData = {
           totalSubmissions: submissions.length,
-          completionRate: submissions.length > 0 ? 100 : 0,
+          completionRate,
           averageTime: 0,
           topFields,
           dailySubmissions: generateDailyData(submissions, timeRange),
@@ -153,6 +197,125 @@ export default function FormAnalytics({ formId }: FormAnalyticsProps) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  useEffect(() => {
+    if (!onContextChange) return;
+
+    if (!analyticsData || !selectedForm) {
+      onContextChange(null);
+      if (selectedForm) {
+        onSummaryChange?.({
+          formId: selectedForm,
+          submissionCount: 0,
+          completionRate: 0,
+          fieldData: [],
+        });
+      }
+      return;
+    }
+
+    const formMeta = forms.find((form) => form.id === selectedForm);
+    if (!formMeta) {
+      onContextChange(null);
+      onSummaryChange?.({
+        formId: selectedForm,
+        submissionCount: 0,
+        completionRate: 0,
+        fieldData: [],
+      });
+      return;
+    }
+
+    const lowCompletionFields = analyticsData.fieldAnalysis.filter((field) => field.completion < 70);
+    const averageFieldCompletion = analyticsData.fieldAnalysis.length
+      ? Math.round(
+          analyticsData.fieldAnalysis.reduce((sum, field) => sum + field.completion, 0) /
+            analyticsData.fieldAnalysis.length
+        )
+      : analyticsData.completionRate;
+
+    const accuracyScore = Math.min(100, Math.round((analyticsData.completionRate + averageFieldCompletion) / 2));
+
+    const engagementDivisor = timeRange === '7d' ? 12 : timeRange === '30d' ? 45 : 90;
+    const engagementScore = Math.min(
+      100,
+      Math.round((analyticsData.totalSubmissions / Math.max(1, engagementDivisor)) * 100)
+    );
+
+    const contextPayload: AssistantContext = {
+      type: 'form',
+      title: formMeta.title ?? 'Form analytics',
+      subtitle: `Window: ${timeRange}`,
+      metrics: [
+        { label: 'Completion rate', value: `${analyticsData.completionRate}%` },
+        {
+          label: 'Engagement',
+          value: `${engagementScore}%`,
+          helperText: `${analyticsData.totalSubmissions} submissions`,
+        },
+        {
+          label: 'Accuracy',
+          value: `${accuracyScore}%`,
+          helperText: 'Based on field completion',
+        },
+        {
+          label: 'Follow-ups',
+          value: `${lowCompletionFields.length}`,
+          helperText: 'Fields below 70% completion',
+        },
+      ],
+      insights: [
+        analyticsData.completionRate < 60
+          ? {
+              title: 'Completion warning',
+              detail:
+                'Completion rate dipped below 60%. Consider trimming required fields or delivering targeted reminders.',
+            }
+          : {
+              title: 'Healthy flow',
+              detail: 'Form completion is outperforming benchmarks. Maintain the current configuration.',
+            },
+        ...(lowCompletionFields.length
+          ? [
+              {
+                title: 'Field friction',
+                detail: `${lowCompletionFields.length} fields show material drop-off and may need adjustments.`,
+              },
+            ]
+          : []),
+      ],
+      recommendedActions: [
+        ...(lowCompletionFields.length
+          ? [
+              {
+                label: 'Launch field optimization playbook',
+                action: 'Trigger the form optimization playbook for low performing fields',
+                intent: 'copilot' as const,
+              },
+            ]
+          : []),
+        {
+          label: 'Send reminder sequence',
+          action: 'Draft a reminder email sequence to boost submissions',
+          intent: 'analysis' as const,
+        },
+        {
+          label: 'Ask for AI improvement tips',
+          action: 'Share improvement tips I should prioritize',
+          intent: 'optimization' as const,
+        },
+      ],
+    };
+
+    onSummaryChange?.({
+      formId: selectedForm,
+      submissionCount: analyticsData.totalSubmissions,
+      completionRate: analyticsData.completionRate,
+      fieldData: analyticsData.fieldAnalysis,
+    });
+
+    onContextChange(contextPayload);
+  }, [analyticsData, selectedForm, forms, timeRange, onContextChange, onSummaryChange]);
 
   if (!forms.length) {
     return (

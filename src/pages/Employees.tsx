@@ -1,5 +1,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,10 +18,12 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizontal, Truck } from 'lucide-react';
+import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
 import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
 import { UserProfileDrawer } from '@/components/users/UserProfileDrawer';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { InviteEmployeesModal } from '@/components/users/InviteEmployeesModal';
 
 type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;
@@ -39,6 +42,7 @@ export default function Employees() {
   const [showAddVendorDialog, setShowAddVendorDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [vendorForm, setVendorForm] = useState({
     name: '',
     contact_name: '',
@@ -47,6 +51,8 @@ export default function Employees() {
     address: '',
     notes: ''
   });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   // Vendor hooks
   const { data: vendors, isLoading: vendorsLoading } = useInventorySuppliers();
@@ -56,6 +62,25 @@ export default function Employees() {
     fetchEmployees();
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    const inviteParam = searchParams.get('invite');
+    if (!inviteModalOpen && inviteParam && ['1', 'true', 'open'].includes(inviteParam.toLowerCase())) {
+      setInviteModalOpen(true);
+    }
+  }, [searchParams, inviteModalOpen]);
+
+  const handleInviteModalChange = (open: boolean) => {
+    setInviteModalOpen(open);
+    if (!open) {
+      const inviteParam = searchParams.get('invite');
+      if (inviteParam) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('invite');
+        setSearchParams(next, { replace: true });
+      }
+    }
+  };
 
   const handleCreateVendor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +101,8 @@ export default function Employees() {
   };
 
   const fetchEmployees = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -84,8 +111,10 @@ export default function Employees() {
 
       if (error) throw error;
       setEmployees(data || []);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
+    } catch (unknownErr) {
+      console.error('Error fetching employees:', unknownErr);
+      console.info('Team directory fallback: showing empty state while Supabase data is unavailable.');
+      setError('We couldn’t load your team directory data. Check your Supabase tables and try refreshing the page.');
       setEmployees([]);
     } finally {
       setLoading(false);
@@ -100,8 +129,9 @@ export default function Employees() {
 
       if (error) throw error;
       setDepartments(data || []);
-    } catch (error) {
-      console.error('Error fetching departments:', error);
+    } catch (unknownErr) {
+      console.error('Error fetching departments:', unknownErr);
+      setError((prev) => prev ?? 'Department filters are unavailable right now. Once Supabase is back online, refresh to restore filters.');
       setDepartments([]);
     }
   };
@@ -251,14 +281,33 @@ export default function Employees() {
                   </DialogContent>
                 </Dialog>
               ) : (
-                <Button size={isMobile ? 'sm' : 'default'}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  {isMobile ? 'Add' : 'Add Employee'}
-                </Button>
+                <InviteEmployeesModal
+                  trigger={
+                    <Button size={isMobile ? 'sm' : 'default'}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      {isMobile ? 'Add' : 'Add User'}
+                    </Button>
+                  }
+                  onInvitesCreated={fetchEmployees}
+                  open={inviteModalOpen}
+                  onOpenChange={handleInviteModalChange}
+                />
               )}
             </>
           )}
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="border-destructive/40 bg-destructive/5">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
+              <div className="space-y-1">
+                <AlertTitle>Live data unavailable</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </div>
+            </div>
+          </Alert>
+        )}
 
         {/* Toolbar */}
         <Card>

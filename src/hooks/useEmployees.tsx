@@ -11,6 +11,12 @@ export interface Employee {
   avatar_url?: string;
   role: string;
   employment_status: string;
+  department_id?: string | null;
+  department?: {
+    id: string;
+    name: string;
+    color?: string | null;
+  } | null;
   position?: {
     id: string;
     name: string;
@@ -52,6 +58,12 @@ export function useEmployees() {
           avatar_url,
           role,
           employment_status,
+          department_id,
+          department:departments(
+            id,
+            name,
+            color
+          ),
           position:positions(
             id,
             name,
@@ -161,6 +173,8 @@ export function useEmployees() {
           positiveReportCount: positives,
           lateCount: attendanceCounts.lates,
           noShowCount: attendanceCounts.noShows,
+          department: employee.department ?? null,
+          department_id: employee.department_id ?? null,
         };
       });
 

@@ -37,10 +37,11 @@
     "delete": "Elimina",
     "back": "Indietro",
     "continue": "Continua",
+    "refresh": "Aggiorna",
     "viewCertificate": "Visualizza Certificato",
     "startCertification": "Inizia Certificazione",
     "inventoryCountExecution": "Esecuzione Conteggio Inventario",
-    "positionManagement": "Gestione Posizioni"
+    "positionManagement": "Gestione del Team"
   },
   "dashboard": {
     "greeting": {
@@ -49,6 +50,20 @@
       "evening": "Buonasera"
     },
     "welcome": "Benvenuto nel tuo dashboard FlowForce",
+    "stats": {
+      "totalEmployees": "Totale dipendenti",
+      "activeEmployees": "attivi",
+      "departments": "Dipartimenti",
+      "activeDepartments": "Dipartimenti attivi",
+      "todaysShifts": "Turni di oggi",
+      "scheduledToday": "Programmati oggi",
+      "pendingRequests": "Richieste in attesa",
+      "timeOffRequests": "Richieste di permesso",
+      "timeOffRequestsDetail": "{{approved}} approvate in arrivo • {{used}} giorni utilizzati quest'anno",
+      "timeOffBalance": "Saldo permessi",
+      "timeOffBalanceHint": "{{used}} giorni utilizzati quest'anno",
+      "currentTime": "Ora attuale"
+    },
     "operationsSummary": {
       "title": "Panoramica Operativa",
       "description": "Tieni tutto sotto controllo con una rapida vista dell'attività odierna.",
@@ -56,6 +71,7 @@
       "shiftsHint": "Programmato su tutte le sedi",
       "pendingTimeOff": "Permessi in attesa",
       "requestsHint": "In attesa di revisione",
+      "requestsHintDetailed": "{{approved}} approvate in arrivo • {{balance}} giorni rimanenti",
       "activeEmployees": "Dipendenti attivi",
       "activeEmployeesHint": "Su {{total}} totali",
       "departmentCount": "Dipartimenti",

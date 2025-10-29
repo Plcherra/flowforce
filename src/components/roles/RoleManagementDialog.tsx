@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type CompanyRole, type CreateRoleData } from '@/hooks/useCompanyRoles';
 import { Shield, Users, Crown, UserCheck, Star, Settings, Eye, Users as UsersIcon } from 'lucide-react';
+import {
+  PERMISSIONS_BY_CATEGORY,
+  type PermissionDefinition,
+  type PermissionKey
+} from '@/lib/permissions/registry';
 
 const AVAILABLE_ICONS = [
   { value: 'Users', label: 'Users', icon: Users },
@@ -20,32 +25,6 @@ const AVAILABLE_ICONS = [
   { value: 'Star', label: 'Star', icon: Star },
   { value: 'Settings', label: 'Settings', icon: Settings },
   { value: 'Eye', label: 'Eye', icon: Eye },
-];
-
-const AVAILABLE_PERMISSIONS = [
-  { key: 'viewOwnProfile', label: 'View Own Profile', category: 'Profile' },
-  { key: 'viewTeamProfiles', label: 'View Team Profiles', category: 'Profile' },
-  { key: 'editOwnProfile', label: 'Edit Own Profile', category: 'Profile' },
-  { key: 'editTeamProfiles', label: 'Edit Team Profiles', category: 'Profile' },
-  { key: 'viewOwnSchedules', label: 'View Own Schedules', category: 'Scheduling' },
-  { key: 'viewTeamSchedules', label: 'View Team Schedules', category: 'Scheduling' },
-  { key: 'editSchedules', label: 'Edit Schedules', category: 'Scheduling' },
-  { key: 'viewOwnTasks', label: 'View Own Tasks', category: 'Tasks' },
-  { key: 'viewTeamTasks', label: 'View Team Tasks', category: 'Tasks' },
-  { key: 'editTasks', label: 'Edit Tasks', category: 'Tasks' },
-  { key: 'viewOwnExpenses', label: 'View Own Expenses', category: 'Expenses' },
-  { key: 'viewTeamExpenses', label: 'View Team Expenses', category: 'Expenses' },
-  { key: 'approveExpenses', label: 'Approve Expenses', category: 'Expenses' },
-  { key: 'approveTimeOff', label: 'Approve Time Off', category: 'Time Off' },
-  { key: 'manageUsers', label: 'Manage Users', category: 'Administration' },
-  { key: 'systemSettings', label: 'System Settings', category: 'Administration' },
-  { key: 'createForms', label: 'Create Forms', category: 'Forms' },
-  { key: 'manageForms', label: 'Manage Forms', category: 'Forms' },
-  { key: 'approveFormSubmissions', label: 'Approve Form Submissions', category: 'Forms' },
-  { key: 'managePositions', label: 'Manage Positions', category: 'HR' },
-  { key: 'viewAIInsights', label: 'View AI Insights', category: 'Analytics' },
-  { key: 'manageInventory', label: 'Manage Inventory', category: 'Inventory' },
-  { key: 'managePayments', label: 'Manage Payments', category: 'Payments' },
 ];
 
 interface RoleManagementDialogProps {
@@ -77,7 +56,7 @@ export default function RoleManagementDialog({
     onSave(formData);
   };
 
-  const handlePermissionChange = (permissionKey: string, enabled: boolean) => {
+  const handlePermissionChange = (permissionKey: PermissionKey, enabled: boolean) => {
     setFormData(prev => ({
       ...prev,
       permissions: {
@@ -92,13 +71,14 @@ export default function RoleManagementDialog({
     return iconConfig?.icon || Users;
   };
 
-  const groupedPermissions = AVAILABLE_PERMISSIONS.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = [];
-    }
-    acc[permission.category].push(permission);
-    return acc;
-  }, {} as Record<string, typeof AVAILABLE_PERMISSIONS>);
+  const permissionGroups = useMemo(
+    () =>
+      Object.entries(PERMISSIONS_BY_CATEGORY).map(([category, permissions]) => ({
+        category,
+        permissions: [...permissions],
+      })),
+    []
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -213,21 +193,26 @@ export default function RoleManagementDialog({
 
             <TabsContent value="permissions" className="space-y-4">
               <div className="space-y-6">
-                {Object.entries(groupedPermissions).map(([category, permissions]) => (
+                {permissionGroups.map(({ category, permissions }) => (
                   <div key={category} className="space-y-3">
                     <h4 className="font-medium text-gray-900">{category}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {permissions.map((permission) => (
-                        <div key={permission.key} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
+                      {permissions.map((permission: PermissionDefinition) => (
+                        <div key={permission.key} className="flex items-start justify-between gap-3 rounded-lg border p-3">
+                          <div className="space-y-1">
                             <Label htmlFor={permission.key} className="text-sm font-medium">
                               {permission.label}
                             </Label>
+                            {permission.description && (
+                              <p className="text-xs text-muted-foreground">
+                                {permission.description}
+                              </p>
+                            )}
                           </div>
                           <Switch
                             id={permission.key}
-                            checked={formData.permissions[permission.key] || false}
-                            onCheckedChange={(checked) => handlePermissionChange(permission.key, checked)}
+                            checked={Boolean(formData.permissions?.[permission.key])}
+                            onCheckedChange={(checked) => handlePermissionChange(permission.key, Boolean(checked))}
                           />
                         </div>
                       ))}

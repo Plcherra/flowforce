@@ -54,6 +54,43 @@ export interface SectionTemplate {
   updated_at: string;
 }
 
+const parseJsonArray = (value: any) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Failed to parse JSON array', error);
+      return [];
+    }
+  }
+  return [];
+};
+
+const slugify = (value: string) => {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    || 'page';
+};
+
+const normalizeSectionPage = (page: any): CustomSectionPage => ({
+  ...page,
+  content: parseJsonArray(page?.content),
+  permissions: parseJsonArray(page?.permissions),
+});
+
+const normalizeSectionRecord = (section: any): CustomSection => ({
+  ...section,
+  permissions: parseJsonArray(section?.permissions),
+  pages: Array.isArray(section?.pages)
+    ? section.pages.map(normalizeSectionPage)
+    : [],
+});
+
 export function useCustomSections() {
   const [sections, setSections] = useState<CustomSection[]>([]);
   const [templates, setTemplates] = useState<SectionTemplate[]>([]);
@@ -71,15 +108,7 @@ export function useCustomSections() {
         .order('sort_order');
 
       if (error) throw error;
-      setSections((data || []).map(section => ({
-        ...section,
-        permissions: Array.isArray(section.permissions) ? section.permissions : JSON.parse(section.permissions as string || '[]'),
-        pages: (section.pages || []).map((page: any) => ({
-          ...page,
-          content: Array.isArray(page.content) ? page.content : JSON.parse(page.content as string || '[]'),
-          permissions: Array.isArray(page.permissions) ? page.permissions : JSON.parse(page.permissions as string || '[]')
-        }))
-      })));
+      setSections((data || []).map(normalizeSectionRecord));
     } catch (error) {
       console.error('Error fetching custom sections:', error);
       toast({
@@ -101,8 +130,8 @@ export function useCustomSections() {
       setTemplates((data || []).map(template => ({
         ...template,
         config: typeof template.config === 'object' ? template.config : JSON.parse(template.config as string || '{}'),
-        default_pages: Array.isArray(template.default_pages) ? template.default_pages : JSON.parse(template.default_pages as string || '[]'),
-        default_permissions: Array.isArray(template.default_permissions) ? template.default_permissions : JSON.parse(template.default_permissions as string || '[]')
+        default_pages: parseJsonArray(template.default_pages),
+        default_permissions: parseJsonArray(template.default_permissions)
       })));
     } catch (error) {
       console.error('Error fetching section templates:', error);
@@ -159,8 +188,8 @@ export function useCustomSections() {
                 description: p.description || null,
                 icon: p.icon || 'FileText',
                 route: p.route,
-                content: p.content || [],
-                permissions: p.permissions || [],
+                content: parseJsonArray(p.content),
+                permissions: parseJsonArray(p.permissions),
               })),
               default_permissions: local.config?.permissions || [],
             };
@@ -168,12 +197,33 @@ export function useCustomSections() {
         }
       }
 
+      const resolvedPathInput = sectionData.path ?? template?.config?.path ?? '';
+      const sanitizedPath = resolvedPathInput.trim() || `/${slugify(sectionData.name || 'section')}`;
+      const path = sanitizedPath.startsWith('/') ? sanitizedPath : `/${sanitizedPath}`;
+      const sectionSlug = path.replace(/^\//, '');
+
+      const { data: existing } = await supabase
+        .from('custom_sections')
+        .select('*, pages:custom_section_pages(*)')
+        .eq('company_id', companyData.company_id)
+        .eq('path', path)
+        .maybeSingle();
+
+      if (existing) {
+        const normalized = normalizeSectionRecord(existing);
+        toast({
+          title: 'Section already exists',
+          description: `${normalized.name} is already configured for this workspace`,
+        });
+        return normalized;
+      }
+
       const newSection = {
         name: sectionData.name!,
         description: sectionData.description,
         icon: sectionData.icon!,
         category: sectionData.category!,
-        path: sectionData.path!,
+        path,
         company_id: companyData.company_id,
         created_by: userData.user!.id,
         template_id: templateId,
@@ -193,16 +243,31 @@ export function useCustomSections() {
       if (error) throw error;
 
       // Create default pages if template exists (DB or local fallback)
+      let initialPages: any[] = [];
+
       if (template && template.default_pages && template.default_pages.length > 0) {
-        const pages = template.default_pages.map((page: any, index: number) => ({
-          ...page,
-          section_id: section.id,
-          sort_order: index
-        }));
+        initialPages = template.default_pages.map((page: any, index: number) => {
+          const rawTitle = page.title || page.name || `Page ${index + 1}`;
+          const derivedSlug = slugify((page.route || '').split('/').filter(Boolean).pop() || rawTitle);
+          const route = `/${sectionSlug}/${derivedSlug}`;
+          const pagePermissions = parseJsonArray(page.permissions);
+
+          return {
+            section_id: section.id,
+            name: page.name || derivedSlug,
+            title: rawTitle,
+            description: page.description || null,
+            icon: page.icon || 'FileText',
+            route,
+            content: parseJsonArray(page.content),
+            permissions: pagePermissions.length > 0 ? pagePermissions : ['viewOwnProfile'],
+            sort_order: index,
+          };
+        });
 
         await supabase
           .from('custom_section_pages')
-          .insert(pages);
+          .insert(initialPages);
       }
 
       await fetchSections();
@@ -211,7 +276,7 @@ export function useCustomSections() {
         description: "Section created successfully"
       });
 
-      return section;
+      return normalizeSectionRecord({ ...section, pages: initialPages });
     } catch (error) {
       console.error('Error creating section:', error);
       toast({

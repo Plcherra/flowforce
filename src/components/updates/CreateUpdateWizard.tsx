@@ -10,7 +10,6 @@ import {
   CheckCircle,
   FileText,
   Loader2,
-  X,
 } from 'lucide-react';
 
 import { TemplateSelectionStep } from './steps/TemplateSelectionStep';
@@ -238,24 +237,16 @@ export default function CreateUpdateWizard({ open, onOpenChange, onComplete }: C
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-5xl overflow-hidden border-none p-0 shadow-2xl">
         <div className="flex h-[85vh] flex-col">
-          <header className="flex items-start justify-between border-b border-border px-6 py-4">
-            <div>
+          <header className="flex flex-col gap-3 border-b border-border px-6 py-4">
+            <div className="flex flex-col gap-2">
               <DialogTitle className="text-xl font-semibold">Create company update</DialogTitle>
               <DialogDescription className="mt-1 text-sm text-muted-foreground">
                 Follow the guided steps to craft an announcement, choose recipients, and publish it when you&apos;re ready.
               </DialogDescription>
-              <Badge variant="outline" className="mt-3">
-                Step {currentStep + 1} of {STEPS.length}
-              </Badge>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDialogChange(false)}
-              disabled={isSubmitting}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <Badge variant="outline" className="self-start">
+              Step {currentStep + 1} of {STEPS.length}
+            </Badge>
           </header>
 
           <div className="border-b border-border/60 px-6 py-3">

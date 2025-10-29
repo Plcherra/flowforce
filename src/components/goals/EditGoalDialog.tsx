@@ -10,10 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useGoals } from '@/hooks/useGoals';
-import type { Tables } from '@/integrations/supabase/public-types';
-
-type Goal = Tables<'goals'>;
+import { useGoals, type Goal } from '@/hooks/useGoals';
 
 interface EditGoalDialogProps {
   goal: Goal | null;
@@ -32,6 +29,12 @@ export function EditGoalDialog({ goal, open, onOpenChange }: EditGoalDialogProps
   const [rewardDetails, setRewardDetails] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const parseRewardDescription = (details: Goal['reward_details']) => {
+    if (!details || typeof details !== 'object') return '';
+    const description = (details as Record<string, unknown>).description;
+    return typeof description === 'string' ? description : '';
+  };
+
   useEffect(() => {
     if (goal) {
       setTitle(goal.title);
@@ -40,7 +43,7 @@ export function EditGoalDialog({ goal, open, onOpenChange }: EditGoalDialogProps
       setStatus(goal.status as 'draft' | 'active' | 'completed' | 'cancelled');
       setTargetDate(goal.target_completion_date ? new Date(goal.target_completion_date) : undefined);
       setRewardType((goal.reward_type as 'recognition' | 'bonus' | 'badge' | 'time_off' | 'custom') || 'recognition');
-      setRewardDetails((goal.reward_details as any)?.description || '');
+      setRewardDetails(parseRewardDescription(goal.reward_details));
     }
   }, [goal]);
 
@@ -57,7 +60,7 @@ export function EditGoalDialog({ goal, open, onOpenChange }: EditGoalDialogProps
         status,
         target_completion_date: targetDate ? targetDate.toISOString().split('T')[0] : null,
         reward_type: rewardType,
-        reward_details: rewardDetails ? { description: rewardDetails } : {},
+        reward_details: rewardDetails ? { description: rewardDetails } : null,
         ...(status === 'completed' && !goal.completed_at ? { completed_at: new Date().toISOString() } : {}),
         ...(status !== 'completed' && goal.completed_at ? { completed_at: null } : {})
       };
@@ -165,7 +168,10 @@ export function EditGoalDialog({ goal, open, onOpenChange }: EditGoalDialogProps
 
           <div className="space-y-2">
             <Label>Reward Type</Label>
-            <Select value={rewardType} onValueChange={(value: any) => setRewardType(value)}>
+            <Select
+              value={rewardType}
+              onValueChange={(value: typeof rewardType) => setRewardType(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

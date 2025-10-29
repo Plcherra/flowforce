@@ -36,6 +36,10 @@ interface UseEmployeeEngagementResult {
   refresh: () => Promise<void>;
 }
 
+interface UseEmployeeEngagementOptions {
+  enabled?: boolean;
+}
+
 const XP_BASE = 200;
 const XP_GROWTH = 150;
 
@@ -98,19 +102,25 @@ function buildMilestoneTip(role: string, snapshot: EngagementSnapshot) {
   return `Copilot tip: Complete ${effortCount} ${pluralise(effortUnit, effortCount)} to unlock L${snapshot.nextLevel}.`;
 }
 
-export function useEmployeeEngagement(employeeId: string | null | undefined, role: string | null | undefined): UseEmployeeEngagementResult {
+export function useEmployeeEngagement(
+  employeeId: string | null | undefined,
+  role: string | null | undefined,
+  options: UseEmployeeEngagementOptions = {},
+): UseEmployeeEngagementResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<EngagementSnapshot>(defaultSnapshot);
   const [badges, setBadges] = useState<EngagementBadge[]>([]);
 
   const normalizedRole = useMemo(() => role?.toLowerCase() ?? 'staff', [role]);
+  const { enabled = true } = options;
 
   const refresh = useCallback(async () => {
-    if (!employeeId) {
+    if (!employeeId || !enabled) {
       setSnapshot(defaultSnapshot);
       setBadges([]);
       setError(null);
+      setLoading(false);
       return;
     }
 
@@ -174,14 +184,14 @@ export function useEmployeeEngagement(employeeId: string | null | undefined, rol
     } finally {
       setLoading(false);
     }
-  }, [employeeId, normalizedRole]);
+  }, [employeeId, enabled, normalizedRole]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
   useEffect(() => {
-    if (!employeeId) {
+    if (!employeeId || !enabled) {
       return;
     }
 
@@ -216,9 +226,14 @@ export function useEmployeeEngagement(employeeId: string | null | undefined, rol
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [employeeId, refresh]);
+  }, [employeeId, enabled, refresh]);
 
-  const milestoneTip = useMemo(() => buildMilestoneTip(normalizedRole, snapshot), [normalizedRole, snapshot]);
+  const milestoneTip = useMemo(() => {
+    if (!enabled) {
+      return 'Copilot tip: Engagement metrics will activate once the feature is enabled.';
+    }
+    return buildMilestoneTip(normalizedRole, snapshot);
+  }, [enabled, normalizedRole, snapshot]);
 
   return {
     loading,

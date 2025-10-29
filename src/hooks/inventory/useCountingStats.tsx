@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { InventoryItem } from './types';
+import { InventoryItem, InventoryItemUnit } from './types';
 
 export interface CountData {
   item_id: string;
@@ -11,26 +11,64 @@ export function useCountingStats(
   allItems: InventoryItem[]
 ) {
   const calculateItemTotalPrice = (item: InventoryItem, count: CountData): number => {
-    let totalPrice = 0;
-    
-    if (count.unit_counts) {
-      Object.entries(count.unit_counts).forEach(([unitId, quantity]) => {
-        if (quantity > 0) {
-          const itemUnit = item.unit;
-          if (itemUnit && item.cost_per_unit) {
-            totalPrice += quantity * item.cost_per_unit;
-          }
-        }
-      });
-    }
-    
-    return totalPrice;
+    if (!count.unit_counts) return 0;
+
+    const units: InventoryItemUnit[] = item.units && item.units.length > 0
+      ? item.units
+      : [
+          {
+            id: `${item.id}-base`,
+            item_id: item.id,
+            unit_id: item.unit_id,
+            unit_level: 1,
+            conversion_factor: 1,
+            is_primary: true,
+            is_countable: true,
+            cost_per_unit: item.cost_per_unit ?? null,
+            unit: item.unit,
+          } as InventoryItemUnit,
+        ];
+
+    const baseCost = item.calculated_cost_per_unit ?? item.cost_per_unit ?? 0;
+
+    return Object.entries(count.unit_counts).reduce((total, [unitId, quantity]) => {
+      if (!quantity || quantity <= 0) return total;
+
+      const unit = units.find((u) => (u.id || u.unit_id) === unitId);
+      const unitCost = unit?.cost_per_unit ?? (baseCost * (unit?.conversion_factor || 1));
+
+      return total + quantity * (unitCost || 0);
+    }, 0);
   };
 
   const calculateVariance = (item: InventoryItem, count: CountData): number => {
-    const totalCounted = Object.values(count.unit_counts || {}).reduce((sum, qty) => sum + (qty || 0), 0);
+    if (!count.unit_counts) return 0;
+
+    const units: InventoryItemUnit[] = item.units && item.units.length > 0
+      ? item.units
+      : [
+          {
+            id: `${item.id}-base`,
+            item_id: item.id,
+            unit_id: item.unit_id,
+            unit_level: 1,
+            conversion_factor: 1,
+            is_primary: true,
+            is_countable: true,
+            cost_per_unit: item.cost_per_unit ?? null,
+            unit: item.unit,
+          } as InventoryItemUnit,
+        ];
+
+    const totalCountedInBase = Object.entries(count.unit_counts).reduce((sum, [unitId, qty]) => {
+      if (!qty || qty <= 0) return sum;
+      const unit = units.find((u) => (u.id || u.unit_id) === unitId);
+      const factor = unit?.conversion_factor || 1;
+      return sum + qty * factor;
+    }, 0);
+
     const expected = item.min_stock_level || 0;
-    return totalCounted - expected;
+    return totalCountedInBase - expected;
   };
 
   const getVarianceStatus = (variance: number) => {

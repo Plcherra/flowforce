@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, FileText, Upload, X, Clock, Users, Star } from 'lucide-react';
+import { Edit, FileText, Upload, X, Users, Loader2 } from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
 import FormBuilderDialog from './FormBuilderDialog';
 import { useAuth } from '@/hooks/useAuth';
@@ -99,6 +99,7 @@ export default function CreateFormDialog({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [createdFormId, setCreatedFormId] = useState<string | null>(null);
   const [formTitleOverride, setFormTitleOverride] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const resetDialog = () => {
     setCurrentStep('select-method');
@@ -106,6 +107,7 @@ export default function CreateFormDialog({
     setUploadedFile(null);
     setCreatedFormId(null);
     setFormTitleOverride(null);
+    setCreating(false);
   };
 
   const handleClose = (open: boolean) => {
@@ -120,6 +122,7 @@ export default function CreateFormDialog({
     description: string = '',
     options?: { fromFile?: boolean },
   ) => {
+    setCreating(true);
     try {
       if (options?.fromFile) {
         if (!uploadedFile) {
@@ -165,11 +168,13 @@ export default function CreateFormDialog({
         description: error instanceof Error ? error.message : 'Unexpected error occurred.',
         variant: 'destructive',
       });
+    } finally {
+      setCreating(false);
     }
   }, [createForm, onFormCreated, toast, uploadedFile, user]);
 
   useEffect(() => {
-    if (!open || !preferredMethod) return;
+    if (!open || !preferredMethod || creating) return;
 
     if (preferredMethod === 'blank') {
       void (async () => {
@@ -185,7 +190,7 @@ export default function CreateFormDialog({
       setCurrentStep('file-upload');
     }
     onPreferredMethodHandled?.();
-  }, [open, preferredMethod, createFormAndStartBuilder, onPreferredMethodHandled]);
+  }, [open, preferredMethod, creating, createFormAndStartBuilder, onPreferredMethodHandled]);
 
   const handleFormBuilderClose = (open: boolean) => {
     if (!open && createdFormId) {
@@ -196,24 +201,33 @@ export default function CreateFormDialog({
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (creating) return;
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
     }
   };
 
-  const renderMethodSelection = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">How would you like to create your form?</h3>
-        <p className="text-muted-foreground">Choose the method that works best for you</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/20"
-          onClick={() => createFormAndStartBuilder()}
-        >
+  const renderMethodSelection = () => {
+    const cardBaseClasses =
+      'relative cursor-pointer border-2 transition-shadow hover:shadow-md hover:border-primary/20';
+    const disabledClasses = creating ? 'pointer-events-none opacity-60 cursor-not-allowed' : '';
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="mb-2 text-lg font-semibold">How would you like to create your form?</h3>
+          <p className="text-muted-foreground">Choose the method that works best for you</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card
+            className={`${cardBaseClasses} ${disabledClasses}`}
+            onClick={() => {
+              if (creating) return;
+              void createFormAndStartBuilder();
+            }}
+          >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <Edit className="h-6 w-6 text-primary" />
@@ -223,10 +237,13 @@ export default function CreateFormDialog({
           </CardContent>
         </Card>
 
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/20"
-          onClick={() => setCurrentStep('template-selection')}
-        >
+          <Card
+            className={`${cardBaseClasses} ${disabledClasses}`}
+            onClick={() => {
+              if (creating) return;
+              setCurrentStep('template-selection');
+            }}
+          >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <FileText className="h-6 w-6 text-primary" />
@@ -236,10 +253,13 @@ export default function CreateFormDialog({
           </CardContent>
         </Card>
 
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/20"
-          onClick={() => setCurrentStep('file-upload')}
-        >
+          <Card
+            className={`${cardBaseClasses} ${disabledClasses}`}
+            onClick={() => {
+              if (creating) return;
+              setCurrentStep('file-upload');
+            }}
+          >
           <CardContent className="p-6 text-center">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <Upload className="h-6 w-6 text-primary" />
@@ -250,13 +270,14 @@ export default function CreateFormDialog({
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderTemplateSelection = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')}>
+        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')} disabled={creating}>
           ← Back
         </Button>
         <div>
@@ -264,47 +285,55 @@ export default function CreateFormDialog({
           <p className="text-muted-foreground">Select a pre-built form to get started quickly</p>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-        {formTemplates.map((template) => (
-          <Card 
-            key={template.id}
-            className={`cursor-pointer hover:shadow-md transition-shadow border-2 ${
-              selectedTemplate?.id === template.id ? 'border-primary' : 'hover:border-primary/20'
-            }`}
-            onClick={() => {
-              setSelectedTemplate(template);
-            }}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
-                    <Users className="h-4 w-4 text-primary" />
+
+      <div className="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
+        {formTemplates.map((template) => {
+          const isSelected = selectedTemplate?.id === template.id;
+          return (
+            <Card
+              key={template.id}
+              className={`cursor-pointer border-2 transition-shadow hover:shadow-md ${
+                isSelected ? 'border-primary' : 'hover:border-primary/20'
+              } ${creating ? 'pointer-events-none opacity-60' : ''}`}
+              onClick={() => {
+                if (creating) return;
+                setSelectedTemplate(template);
+              }}
+            >
+              <CardContent className="p-4">
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold">{template.name}</h4>
+                      <Badge variant="outline" className="text-xs">{template.category}</Badge>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-sm">{template.name}</h4>
-                    <Badge variant="outline" className="text-xs">{template.category}</Badge>
-                  </div>
+                  {template.popular && <Badge variant="secondary" className="text-xs">Popular</Badge>}
                 </div>
-                {template.popular && <Badge variant="secondary" className="text-xs">Popular</Badge>}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{template.description}</p>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <FileText className="h-3 w-3" />
-                  {template.fields} fields
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <p className="mb-2 text-sm text-muted-foreground">{template.description}</p>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <FileText className="h-3 w-3" />
+                    {template.fields} fields
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-      
+
       {selectedTemplate && (
         <div className="flex justify-end">
-          <Button onClick={() => createFormAndStartBuilder(selectedTemplate.name, selectedTemplate.description)}>
-            Use "{selectedTemplate.name}" Template
+          <Button
+            onClick={() => createFormAndStartBuilder(selectedTemplate.name, selectedTemplate.description)}
+            disabled={creating}
+          >
+            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+            Use &quot;{selectedTemplate.name}&quot; Template
           </Button>
         </div>
       )}
@@ -314,12 +343,12 @@ export default function CreateFormDialog({
   const renderFileUpload = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')}>
+        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')} disabled={creating}>
           ← Back
         </Button>
         <div>
           <h3 className="text-lg font-semibold">Upload a file</h3>
-          <p className="text-muted-foreground">Upload a document and we'll generate a form based on it</p>
+          <p className="text-muted-foreground">Upload a document and we&apos;ll generate a form based on it</p>
         </div>
       </div>
       
@@ -330,12 +359,15 @@ export default function CreateFormDialog({
           accept=".pdf,.doc,.docx,.txt"
           onChange={handleFileUpload}
           className="hidden"
+          disabled={creating}
         />
-        <label htmlFor="file-upload" className="cursor-pointer">
+        <label htmlFor="file-upload" className={`cursor-pointer ${creating ? 'pointer-events-none opacity-60' : ''}`}>
           <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h4 className="font-semibold mb-2">Choose a file to upload</h4>
           <p className="text-muted-foreground mb-4">Support for PDF, DOC, DOCX, and TXT files</p>
-          <Button type="button" variant="outline">Browse Files</Button>
+          <Button type="button" variant="outline" disabled={creating}>
+            Browse Files
+          </Button>
         </label>
       </div>
       
@@ -349,6 +381,7 @@ export default function CreateFormDialog({
             onClick={() => {
               setUploadedFile(null);
             }}
+            disabled={creating}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -361,7 +394,9 @@ export default function CreateFormDialog({
             onClick={() =>
               createFormAndStartBuilder(uploadedFile.name.replace(/\.[^/.]+$/, ''), '', { fromFile: true })
             }
+            disabled={creating}
           >
+            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
             Continue with File
           </Button>
         </div>
@@ -383,7 +418,7 @@ export default function CreateFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="relative max-h-[80vh] overflow-y-auto sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Create New Form</DialogTitle>
           <DialogDescription>
@@ -394,6 +429,15 @@ export default function CreateFormDialog({
         {currentStep === 'select-method' && renderMethodSelection()}
         {currentStep === 'template-selection' && renderTemplateSelection()}
         {currentStep === 'file-upload' && renderFileUpload()}
+
+        {creating && (
+          <div className="pointer-events-auto absolute inset-0 z-10 flex items-center justify-center bg-background/75">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Preparing your form…
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

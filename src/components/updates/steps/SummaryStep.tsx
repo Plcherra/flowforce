@@ -20,12 +20,32 @@ interface SummaryStepProps {
 export function SummaryStep({ formData }: SummaryStepProps) {
   const getRecipientSummary = () => {
     if (formData.recipients.type === 'all') {
-      return 'All employees (130)';
+      return 'All employees';
     }
-    
-    // Mock calculation - replace with actual logic
-    const count = formData.recipients.targets.length * 10; // Mock multiplier
-    return `${count} selected employees`;
+
+    const relevantTargets = formData.recipients.targets.filter((target) =>
+      target.startsWith(`${formData.recipients.type}:`)
+    );
+
+    if (relevantTargets.length === 0) {
+      return 'No recipients selected';
+    }
+
+    const type = formData.recipients.type;
+    if (type === 'individuals') {
+      return `${relevantTargets.length} ${relevantTargets.length === 1 ? 'person' : 'people'}`;
+    }
+
+    const labelMap: Record<typeof type, { singular: string; plural: string }> = {
+      departments: { singular: 'department', plural: 'departments' },
+      roles: { singular: 'role', plural: 'roles' },
+      groups: { singular: 'group', plural: 'groups' },
+      all: { singular: 'employee', plural: 'employees' },
+      individuals: { singular: 'person', plural: 'people' }
+    };
+
+    const labels = labelMap[type] ?? { singular: type, plural: `${type}s` };
+    return `${relevantTargets.length} ${relevantTargets.length === 1 ? labels.singular : labels.plural}`;
   };
 
   const getBackgroundPreview = () => {
@@ -118,10 +138,22 @@ export function SummaryStep({ formData }: SummaryStepProps) {
                     : 'Anonymous'
                   }
                 </span>
-                <div className="flex gap-4">
-                  {formData.publishingSettings.engagement.allowLikes && <span>👍 0</span>}
-                  {formData.publishingSettings.engagement.allowComments && <span>💬 0</span>}
-                  <span>👁 0</span>
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {formData.publishingSettings.engagement.allowLikes && (
+                    <Badge variant="outline">Likes on</Badge>
+                  )}
+                  {formData.publishingSettings.engagement.allowComments && (
+                    <Badge variant="outline">Comments on</Badge>
+                  )}
+                  {formData.publishingSettings.engagement.allowSharing && (
+                    <Badge variant="outline">Sharing on</Badge>
+                  )}
+                  {formData.publishingSettings.engagement.requireConfirmation && (
+                    <Badge variant="outline">Read receipt</Badge>
+                  )}
+                  {formData.publishingSettings.engagement.showAsPopup && (
+                    <Badge variant="outline">Popup</Badge>
+                  )}
                 </div>
               </div>
             </CardContent>

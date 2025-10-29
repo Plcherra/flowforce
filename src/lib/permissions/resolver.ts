@@ -1,4 +1,4 @@
-import type { PERMISSION_KEYS, PermissionKey, PermissionValue } from '@/hooks/useUserPermissions';
+import { PERMISSION_KEYS, type PermissionKey, type PermissionValue } from '@/lib/permissions/registry';
 
 export interface RolePermissions {
   [key: string]: boolean;
@@ -74,33 +74,7 @@ export class PermissionResolver {
    * @returns Record<PermissionKey, boolean> - Map of all permissions
    */
   resolveAll(): Record<string, boolean> {
-    const allKeys = [
-      'viewOwnProfile',
-      'viewTeamProfiles',
-      'editOwnProfile',
-      'editTeamProfiles',
-      'viewOwnSchedules',
-      'viewTeamSchedules',
-      'editSchedules',
-      'viewOwnTasks',
-      'viewTeamTasks',
-      'editTasks',
-      'viewOwnExpenses',
-      'viewTeamExpenses',
-      'approveExpenses',
-      'approveTimeOff',
-      'manageUsers',
-      'systemSettings',
-      'createForms',
-      'manageForms',
-      'approveFormSubmissions',
-      'managePositions',
-      'viewAIInsights',
-      'manageInventory',
-      'managePayments'
-    ] as PermissionKey[];
-
-    return this.resolveMany(allKeys);
+    return this.resolveMany([...PERMISSION_KEYS]);
   }
 
   /**

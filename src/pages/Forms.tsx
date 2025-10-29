@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCan } from '@/hooks/useCan';
 import { useForms } from '@/hooks/useForms';
 import type { FormWithMeta } from '@/hooks/useForms';
+import ErrorBoundary from '@/components/ui/error-boundary';
 
 const matchesQuery = (form: FormWithMeta, query: string) => {
   if (!query) return true;
@@ -125,40 +126,80 @@ export default function Forms() {
           <TabsContent key={value} value={value} className="space-y-6 pt-4">
             {statusFilter === value &&
               sections.map((section) => (
-                <FormsSection
+                <ErrorBoundary
                   key={section.key}
-                  title={section.title}
-                  forms={section.forms}
-                  loading={loading}
-                  emptyMessage={section.emptyMessage}
-                  onFill={handleOpenFill}
-                  onEdit={handleOpenBuilder}
-                />
+                  fallback={
+                    <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                      Unable to render the {section.title.toLowerCase()} section.
+                    </div>
+                  }
+                >
+                  <FormsSection
+                    title={section.title}
+                    forms={section.forms}
+                    loading={loading}
+                    emptyMessage={section.emptyMessage}
+                    onFill={handleOpenFill}
+                    onEdit={handleOpenBuilder}
+                  />
+                </ErrorBoundary>
               ))}
           </TabsContent>
         ))}
       </Tabs>
 
-      <CreateFormDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onFormCreated={(formId) => {
-          setSelectedFormId(formId);
-          setBuilderDialogOpen(true);
-        }}
-      />
+      <ErrorBoundary
+        fallback={
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+            Unable to open the form creation dialog.
+          </div>
+        }
+      >
+        <CreateFormDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onFormCreated={(formId) => {
+            setSelectedFormId(formId);
+            setBuilderDialogOpen(true);
+          }}
+        />
+      </ErrorBoundary>
 
-      <FormFieldTest open={testDialogOpen} onOpenChange={setTestDialogOpen} />
+      <ErrorBoundary
+        fallback={
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+            Unable to load the test fields dialog.
+          </div>
+        }
+      >
+        <FormFieldTest open={testDialogOpen} onOpenChange={setTestDialogOpen} />
+      </ErrorBoundary>
 
       {selectedFormId && (
         <>
-          <FormBuilderDialog open={builderDialogOpen} onOpenChange={setBuilderDialogOpen} formId={selectedFormId} />
-          <FormFillDialog
-            open={fillDialogOpen}
-            onOpenChange={setFillDialogOpen}
-            formId={selectedFormId}
-            onSubmitted={() => setFillDialogOpen(false)}
-          />
+          <ErrorBoundary
+            fallback={
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                Unable to open the form builder. Please refresh and try again.
+              </div>
+            }
+          >
+            <FormBuilderDialog open={builderDialogOpen} onOpenChange={setBuilderDialogOpen} formId={selectedFormId} />
+          </ErrorBoundary>
+          <ErrorBoundary
+            fallback={
+              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                Unable to load the form fill experience.
+              </div>
+            }
+          >
+            <FormFillDialog
+              open={fillDialogOpen}
+              onOpenChange={setFillDialogOpen}
+              formId={selectedFormId}
+              onSubmitted={() => setFillDialogOpen(false)}
+            />
+          </ErrorBoundary>
         </>
       )}
     </div>

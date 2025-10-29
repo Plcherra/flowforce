@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Users, Search, Building, UserCheck, Globe } from 'lucide-react';
 import { WizardFormData } from '../CreateUpdateWizard';
+import { useProfile } from '@/hooks/useProfile';
 
 interface RecipientsStepProps {
   formData: WizardFormData;
@@ -30,11 +30,41 @@ const ROLES = [
   { id: 'contractor', name: 'Contractor', count: 0 }
 ];
 
-const USERS: any[] = [];
+type RecipientUser = {
+  id: string;
+  name: string;
+  role?: string | null;
+  department?: string | null;
+};
+
+const STATIC_USERS: RecipientUser[] = [];
 
 export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const { profile } = useProfile();
+
+  const availableUsers = useMemo<RecipientUser[]>(() => {
+    const users = [...STATIC_USERS];
+
+    if (profile) {
+      const id = profile.userId ?? profile.id ?? 'current-user';
+      const firstName = profile.firstName ?? profile.first_name ?? '';
+      const lastName = profile.lastName ?? profile.last_name ?? '';
+      const displayName = [firstName, lastName].filter(Boolean).join(' ').trim() || profile.email || 'You';
+      const alreadyIncluded = users.some((user) => user.id === id);
+
+      if (!alreadyIncluded) {
+        users.push({
+          id,
+          name: displayName,
+          role: profile.role ?? 'Member',
+          department: null
+        });
+      }
+    }
+
+    return users;
+  }, [profile]);
 
   const updateRecipients = (updates: Partial<typeof formData.recipients>) => {
     updateFormData({
@@ -66,27 +96,35 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
 
   const getRecipientCount = () => {
     if (formData.recipients.type === 'all') {
-      return 'All employees (Connect to see actual count)';
+      return 'All employees';
     }
-    
-    let count = 0;
-    formData.recipients.targets.forEach(target => {
-      const [category, id] = target.split(':');
-      if (category === 'departments') {
-        const dept = DEPARTMENTS.find(d => d.id === id);
-        count += dept?.count || 0;
-      } else if (category === 'roles') {
-        const role = ROLES.find(r => r.id === id);
-        count += role?.count || 0;
-      } else if (category === 'individuals') {
-        count += 1;
-      }
-    });
-    
-    return count > 0 ? `${count} employees` : 'No recipients selected';
+
+    const selectionByCategory = formData.recipients.targets.reduce<Record<string, number>>((acc, target) => {
+      const [category] = target.split(':');
+      acc[category] = (acc[category] ?? 0) + 1;
+      return acc;
+    }, {});
+
+    if (formData.recipients.type === 'individuals') {
+      const individualCount = selectionByCategory.individuals ?? 0;
+      return individualCount > 0 ? `${individualCount} ${individualCount === 1 ? 'person' : 'people'}` : 'No recipients selected';
+    }
+
+    const appliedCategory = formData.recipients.type;
+    const labels: Record<typeof appliedCategory, { singular: string; plural: string }> = {
+      departments: { singular: 'department', plural: 'departments' },
+      roles: { singular: 'role', plural: 'roles' },
+      individuals: { singular: 'person', plural: 'people' },
+      groups: { singular: 'group', plural: 'groups' },
+      all: { singular: 'employee', plural: 'employees' }
+    };
+    const selectedCount = selectionByCategory[appliedCategory] ?? 0;
+    return selectedCount > 0
+      ? `${selectedCount} ${selectedCount === 1 ? labels[appliedCategory].singular : labels[appliedCategory].plural}`
+      : 'No recipients selected';
   };
 
-  const filteredUsers = USERS.filter((user: any) =>
+  const filteredUsers = availableUsers.filter((user: RecipientUser) =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -188,7 +226,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                         />
                         <span className="font-medium">{dept.name}</span>
                       </div>
-                      <Badge variant="outline">{dept.count} people</Badge>
+                      <span className="text-xs text-muted-foreground">Connect a directory to view counts</span>
                     </div>
                   ))}
                 </CardContent>
@@ -211,7 +249,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                         />
                         <span className="font-medium">{role.name}</span>
                       </div>
-                      <Badge variant="outline">{role.count} people</Badge>
+                      <span className="text-xs text-muted-foreground">Connect a directory to view counts</span>
                     </div>
                   ))}
                 </CardContent>
@@ -250,7 +288,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                         <div>
                           <div className="font-medium">{user.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {user.role} • {user.department}
+                            {[user.role, user.department].filter(Boolean).join(' • ') || 'Profile details pending'}
                           </div>
                         </div>
                       </div>
@@ -288,7 +326,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                           } else if (category === 'roles') {
                             name = ROLES.find(r => r.id === id)?.name || id;
                            } else if (category === 'individuals') {
-                             name = USERS.find((u: any) => u.id === id)?.name || id;
+                             name = availableUsers.find((u: RecipientUser) => u.id === id)?.name || id;
                           }
                           return (
                             <Badge key={target} variant="secondary">

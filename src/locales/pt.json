@@ -37,10 +37,11 @@
     "delete": "Excluir",
     "back": "Voltar",
     "continue": "Continuar",
+    "refresh": "Atualizar",
     "viewCertificate": "Ver Certificado",
     "startCertification": "Iniciar Certificação",
     "inventoryCountExecution": "Execução de Contagem de Inventário",
-    "positionManagement": "Gestão de Cargos"
+    "positionManagement": "Gestão de Equipes"
   },
   "navigation": {
     "communication": "Comunicação",
@@ -269,6 +270,20 @@
       "evening": "Boa noite"
     },
     "welcome": "Bem-vindo ao seu painel FlowForce",
+    "stats": {
+      "totalEmployees": "Total de colaboradores",
+      "activeEmployees": "ativos",
+      "departments": "Departamentos",
+      "activeDepartments": "Departamentos ativos",
+      "todaysShifts": "Turnos de hoje",
+      "scheduledToday": "Agendados para hoje",
+      "pendingRequests": "Solicitações pendentes",
+      "timeOffRequests": "Solicitações de folga",
+      "timeOffRequestsDetail": "{{approved}} aprovadas próximas • {{used}} dias usados este ano",
+      "timeOffBalance": "Saldo de folgas",
+      "timeOffBalanceHint": "{{used}} dias utilizados neste ano",
+      "currentTime": "Hora atual"
+    },
     "operationsSummary": {
       "title": "Visão Geral Operacional",
       "description": "Acompanhe rapidamente tudo o que está acontecendo hoje.",
@@ -276,6 +291,7 @@
       "shiftsHint": "Agendados em todas as unidades",
       "pendingTimeOff": "Folgas pendentes",
       "requestsHint": "Aguardando aprovação",
+      "requestsHintDetailed": "{{approved}} aprovadas próximas • {{balance}} dias restantes",
       "activeEmployees": "Funcionários ativos",
       "activeEmployeesHint": "De {{total}} no total",
       "departmentCount": "Departamentos",

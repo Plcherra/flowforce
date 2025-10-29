@@ -1,19 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Target, TrendingUp, Users, Award } from 'lucide-react';
-import { useGoals } from '@/hooks/useGoals';
+import { useGoals, type Goal } from '@/hooks/useGoals';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateGoalDialog } from '@/components/goals/CreateGoalDialog';
 import { EditGoalDialog } from '@/components/goals/EditGoalDialog';
 import { GoalDetailsDialog } from '@/components/goals/GoalDetailsDialog';
 import { GoalCard } from '@/components/goals/GoalCard';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-
-type Goal = Tables<'goals'>;
+import { Badge } from '@/components/ui/badge';
 
 export default function Goals() {
   const isMobile = useIsMobile();
@@ -21,12 +19,32 @@ export default function Goals() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'completed' | 'draft'>('all');
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  type GoalFilter = 'all' | 'active' | 'completed' | 'draft';
+  const [activeTab, setActiveTab] = useState<GoalFilter>('all');
   const [query, setQuery] = useState('');
 
+  const handleFilterChange = (value: string) => {
+    if (value === 'all' || value === 'active' || value === 'completed' || value === 'draft') {
+      setActiveTab(value);
+    }
+  };
+
+  const selectedGoal = useMemo(() => {
+    if (!selectedGoalId) return null;
+    return goals.find(goal => goal.id === selectedGoalId) ?? null;
+  }, [goals, selectedGoalId]);
+
+  useEffect(() => {
+    if (selectedGoalId && !selectedGoal) {
+      setShowDetailsDialog(false);
+      setShowEditDialog(false);
+      setSelectedGoalId(null);
+    }
+  }, [selectedGoalId, selectedGoal]);
+
   const handleEdit = (goal: Goal) => {
-    setSelectedGoal(goal);
+    setSelectedGoalId(goal.id);
     setShowEditDialog(true);
   };
 
@@ -37,15 +55,12 @@ export default function Goals() {
   };
 
   const handleAddTask = (goalId: string) => {
-    const goal = goals.find(g => g.id === goalId);
-    if (goal) {
-      setSelectedGoal(goal);
-      setShowDetailsDialog(true);
-    }
+    setSelectedGoalId(goalId);
+    setShowDetailsDialog(true);
   };
 
   const handleViewDetails = (goal: Goal) => {
-    setSelectedGoal(goal);
+    setSelectedGoalId(goal.id);
     setShowDetailsDialog(true);
   };
 
@@ -68,6 +83,41 @@ export default function Goals() {
     averageProgress: goals.length > 0 ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length) : 0
   };
 
+  const statusColumns = [
+    {
+      key: 'active' as const,
+      title: 'Active Goals',
+      description: 'Goals currently in progress and moving forward.',
+      goals: activeGoals,
+      emptyMessage: 'No active goals at the moment. Create one to get started.'
+    },
+    {
+      key: 'draft' as const,
+      title: 'Draft Goals',
+      description: 'Goals still being refined before kickoff.',
+      goals: draftGoals,
+      emptyMessage: 'Draft your next big initiative to keep plans flowing.'
+    },
+    {
+      key: 'completed' as const,
+      title: 'Completed Goals',
+      description: 'Wins the team has already achieved.',
+      goals: completedGoals,
+      emptyMessage: 'No completed goals yet—celebrations await!'
+    }
+  ];
+
+  const visibleColumns = activeTab === 'all'
+    ? statusColumns
+    : statusColumns.filter(column => column.key === activeTab);
+
+  const columnClass =
+    visibleColumns.length === 1
+      ? 'grid-cols-1'
+      : visibleColumns.length === 2
+        ? 'grid-cols-1 lg:grid-cols-2'
+        : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -83,7 +133,7 @@ export default function Goals() {
         <div>
           <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900 dark:text-white`}>Goals & Objectives</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Track your team's progress and celebrate achievements
+            Track team progress and celebrate achievements
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} size={isMobile ? "sm" : "default"}>
@@ -138,7 +188,7 @@ export default function Goals() {
       {/* Filters */}
       <div className={`${isMobile ? 'px-4' : ''}`}>
         <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+          <Tabs value={activeTab} onValueChange={handleFilterChange}>
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
@@ -174,36 +224,37 @@ export default function Goals() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs value={activeTab}>
-            <TabsContent value="all">
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                {normalized.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
-                ))}
+          <div className={`grid gap-6 ${columnClass}`}>
+            {visibleColumns.map((column) => (
+              <div key={column.key} className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">{column.title}</h2>
+                    <p className="text-sm text-muted-foreground">{column.description}</p>
+                  </div>
+                  <Badge variant="secondary">{column.goals.length}</Badge>
+                </div>
+                <div className="space-y-4">
+                  {column.goals.length > 0 ? (
+                    column.goals.map((goal) => (
+                      <GoalCard
+                        key={goal.id}
+                        goal={goal}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onAddTask={handleAddTask}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-muted-foreground/30 p-6 text-sm text-muted-foreground">
+                      {column.emptyMessage}
+                    </div>
+                  )}
+                </div>
               </div>
-            </TabsContent>
-            <TabsContent value="active">
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                {activeGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="completed">
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                {completedGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="draft">
-              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
-                {draftGoals.map((goal) => (
-                  <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onAddTask={handleAddTask} onViewDetails={handleViewDetails} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+            ))}
+          </div>
         )}
       </div>
 

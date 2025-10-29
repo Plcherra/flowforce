@@ -67,6 +67,7 @@ vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
     timeOffRequests: [],
     unavailability: [],
     vendorEvents: [],
+    teamMembers: [],
     loading: false,
     error: null,
     refetchAll: mocks.refetchAllMock,
@@ -74,6 +75,7 @@ vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
     unassign: mocks.unassignMock,
     upsertShift: vi.fn(),
     upsertVendorEvent: vi.fn(),
+    isUsingFallbackData: false,
   }),
 }));
 
@@ -143,7 +145,9 @@ describe('SchedulingContext mutations passthrough', () => {
     expect(screen.getByTestId('shift-count').textContent).toBe('1');
 
     fireEvent.click(screen.getByTestId('assign'));
-    await waitFor(() => expect(mocks.assignMock).toHaveBeenCalledWith('shift-1', 'user-100'));
+    await waitFor(() =>
+      expect(mocks.assignMock).toHaveBeenCalledWith('shift-1', 'user-100', 'assigned'),
+    );
 
     fireEvent.click(screen.getByTestId('unassign'));
 

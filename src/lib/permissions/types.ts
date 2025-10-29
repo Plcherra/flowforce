@@ -1,4 +1,4 @@
-import { PERMISSION_KEYS, type PermissionKey } from '@/hooks/useUserPermissions';
+import { PERMISSION_KEYS, type PermissionKey } from '@/lib/permissions/registry';
 
 /**
  * Type-safe permission utilities for compile-time validation

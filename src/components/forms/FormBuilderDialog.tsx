@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import FormLivePreview from '@/components/forms/editor/FormLivePreview';
 import type { FormField } from '@/types/forms';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { Loader2 } from 'lucide-react';
 
 interface FormBuilderDialogProps {
   open: boolean;
@@ -48,6 +49,7 @@ export default function FormBuilderDialog({
   const [formTitle, setFormTitle] = useState(initialTitle);
   const [formDescription, setFormDescription] = useState(initialDescription);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -142,44 +144,49 @@ export default function FormBuilderDialog({
       return;
     }
 
-    const updateResult = await supabase
-      .from('forms')
-      .update({ title: formTitle, description: formDescription || null })
-      .eq('id', formId);
+    setIsSaving(true);
+    try {
+      const updateResult = await supabase
+        .from('forms')
+        .update({ title: formTitle, description: formDescription || null })
+        .eq('id', formId);
 
-    if (updateResult.error) {
-      toast({ title: 'Save failed', description: 'Unable to update form details.', variant: 'destructive' });
-      return;
+      if (updateResult.error) {
+        toast({ title: 'Save failed', description: 'Unable to update form details.', variant: 'destructive' });
+        return;
+      }
+
+      type SaveField = Omit<Tables<'form_fields'>, 'id' | 'form_id' | 'created_at' | 'updated_at'>;
+      const payload: SaveField[] = fields.map((field, index) => ({
+        field_order: index + 1,
+        field_type: field.type,
+        label: field.label,
+        placeholder: field.placeholder ?? null,
+        description: null,
+        is_required: field.required ?? false,
+        options: field.options && field.options.length > 0 ? field.options : null,
+        validation_rules: field.validation ?? null,
+        min_value: field.min_value ?? null,
+        max_value: field.max_value ?? null,
+        step_value: field.step_value ?? null,
+        formula_expression: field.formula_expression ?? null,
+        dependent_fields: field.dependent_fields ?? null,
+        rating_config: field.rating_config ?? null,
+        scan_config: field.scan_config ?? null,
+        media_config: field.media_config ?? null,
+      }));
+
+      const { error } = await saveFormFields(formId, payload);
+      if (error) {
+        toast({ title: 'Save failed', description: 'Unable to save form changes.', variant: 'destructive' });
+        return;
+      }
+
+      toast({ title: 'Form saved', description: 'All changes have been stored.' });
+      onOpenChange(false);
+    } finally {
+      setIsSaving(false);
     }
-
-    type SaveField = Omit<Tables<'form_fields'>, 'id' | 'form_id' | 'created_at' | 'updated_at'>;
-    const payload: SaveField[] = fields.map((field, index) => ({
-      field_order: index + 1,
-      field_type: field.type,
-      label: field.label,
-      placeholder: field.placeholder ?? null,
-      description: null,
-      is_required: field.required ?? false,
-      options: field.options && field.options.length > 0 ? field.options : null,
-      validation_rules: field.validation ?? null,
-      min_value: field.min_value ?? null,
-      max_value: field.max_value ?? null,
-      step_value: field.step_value ?? null,
-      formula_expression: field.formula_expression ?? null,
-      dependent_fields: field.dependent_fields ?? null,
-      rating_config: field.rating_config ?? null,
-      scan_config: field.scan_config ?? null,
-      media_config: field.media_config ?? null,
-    }));
-
-    const { error } = await saveFormFields(formId, payload);
-    if (error) {
-      toast({ title: 'Save failed', description: 'Unable to save form changes.', variant: 'destructive' });
-      return;
-    }
-
-    toast({ title: 'Form saved', description: 'All changes have been stored.' });
-    onOpenChange(false);
   };
 
   const sectionCount = schema?.sections.length ?? 0;
@@ -187,8 +194,8 @@ export default function FormBuilderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1200px] gap-0 overflow-hidden p-0">
-        <DialogHeader className="space-y-1 border-b px-6 py-4">
+      <DialogContent className="flex h-[85vh] max-h-[calc(100vh-3rem)] w-full max-w-[1200px] flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="flex-shrink-0 space-y-1 border-b px-6 py-4">
           <DialogTitle className="text-2xl font-semibold">Form editor</DialogTitle>
           <DialogDescription>Compose fields, configure options, and preview the live form experience.</DialogDescription>
           <div className="flex flex-wrap items-center gap-4 pt-3 text-xs text-muted-foreground">
@@ -202,6 +209,7 @@ export default function FormBuilderDialog({
                 value={formTitle}
                 onChange={(event) => setFormTitle(event.target.value)}
                 placeholder="Enter form title"
+                aria-label="Form title"
               />
             </div>
             <div className="space-y-1.5">
@@ -211,26 +219,37 @@ export default function FormBuilderDialog({
                 onChange={(event) => setFormDescription(event.target.value)}
                 placeholder="Describe the purpose of this form"
                 rows={2}
+                aria-label="Form description"
               />
             </div>
           </div>
         </DialogHeader>
 
-        <ResizablePanelGroup direction="horizontal" className="h-[70vh]">
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="min-w-[220px]">
-            <FormFieldLibrary onAddField={handleAddTemplate} />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={40}>
-            <FormEditorPanel />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={30} minSize={25}>
-            <FormLivePreview />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <div className="relative flex flex-1 flex-col">
+          <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="min-h-0 min-w-[220px]">
+              <FormFieldLibrary onAddField={handleAddTemplate} />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={50} minSize={40} className="min-h-0">
+              <FormEditorPanel />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={30} minSize={25} className="min-h-0">
+              <FormLivePreview />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+          {loading && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/70">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Loading form fields…
+              </div>
+            </div>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between border-t bg-muted/40 px-6 py-4">
+        <div className="flex flex-shrink-0 items-center justify-between border-t bg-muted/40 px-6 py-4">
           <div className="flex flex-col text-xs text-muted-foreground">
             <span>{formTitle}</span>
             <span>{loading ? 'Loading form content…' : 'Live preview updates automatically.'}</span>
@@ -239,7 +258,8 @@ export default function FormBuilderDialog({
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
+            <Button onClick={handleSave} disabled={loading || isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               Save changes
             </Button>
           </div>

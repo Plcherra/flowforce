@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -25,6 +32,7 @@ import {
 } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { QUICK_TEMPLATES } from '@/data/sectionTemplates';
+import { listSectionComponents, getSectionComponent } from '@/components/sections/componentRegistry';
 
 interface SectionConfigurationWizardProps {
   section: any;
@@ -56,11 +64,34 @@ export function SectionConfigurationWizard({
   onSave 
 }: SectionConfigurationWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const componentOptions = useMemo(() => listSectionComponents(), []);
+  const withComponentMetadata = useCallback((pages: any[] = []) => {
+    return pages.map((page: any) => {
+      const contentArray = Array.isArray(page?.content) ? page.content : [];
+      const primary = contentArray[0] || {};
+      const resolvedComponent = page.componentId || primary.component || primary.type || componentOptions[0]?.id || '';
+      const normalizedContent = resolvedComponent
+        ? [{
+            ...primary,
+            type: resolvedComponent,
+            component: resolvedComponent,
+            title: primary.title || page.title || primary.title,
+          }]
+        : contentArray;
+
+      return {
+        ...page,
+        componentId: resolvedComponent,
+        content: normalizedContent,
+      };
+    });
+  }, [componentOptions]);
+
   const [formData, setFormData] = useState({
     name: section?.name || '',
     description: section?.description || '',
     icon: section?.icon || 'FileText',
-    pages: (section?.pages && section.pages.length > 0 ? section.pages : []),
+    pages: withComponentMetadata(section?.pages && section.pages.length > 0 ? section.pages : []),
     permissions: section?.permissions || ['viewOwnProfile'],
     isActive: true
   });
@@ -77,20 +108,22 @@ export function SectionConfigurationWizard({
   const hasPrefilled = useMemo(() => formData.pages && formData.pages.length > 0, [formData.pages]);
   React.useEffect(() => {
     if (!hasPrefilled && suggestedPages.length > 0) {
+      const nextPages = withComponentMetadata(suggestedPages.map((p: any) => ({
+        name: p.name,
+        title: p.title,
+        description: p.description || '',
+        icon: p.icon || 'FileText',
+        route: p.route,
+        content: Array.isArray(p.content) ? p.content : [],
+        permissions: Array.isArray(p.permissions) ? p.permissions : ['viewOwnProfile'],
+      })));
+
       setFormData(prev => ({
         ...prev,
-        pages: suggestedPages.map((p: any) => ({
-          name: p.name,
-          title: p.title,
-          description: p.description || '',
-          icon: p.icon || 'FileText',
-          route: p.route,
-          content: p.content || [],
-          permissions: p.permissions || ['viewOwnProfile']
-        }))
+        pages: nextPages,
       }));
     }
-  }, [hasPrefilled, suggestedPages]);
+  }, [hasPrefilled, suggestedPages, withComponentMetadata]);
 
   const handleNext = () => {
     if (currentStep < WIZARD_STEPS.length - 1) {
@@ -110,18 +143,25 @@ export function SectionConfigurationWizard({
   };
 
   const addPage = () => {
-    setFormData(prev => ({
-      ...prev,
-      pages: [...prev.pages, {
-        name: 'new-page',
-        title: 'New Page',
-        description: '',
-        icon: 'FileText',
-        route: '/new-page',
-        content: [],
-        permissions: ['viewOwnProfile']
-      }]
-    }));
+    setFormData(prev => {
+      const nextPages = withComponentMetadata([
+        ...prev.pages,
+        {
+          name: `new-page-${prev.pages.length + 1}`,
+          title: 'New Page',
+          description: '',
+          icon: 'FileText',
+          route: `/new-page-${prev.pages.length + 1}`,
+          content: [],
+          permissions: ['viewOwnProfile'],
+        },
+      ]);
+
+      return {
+        ...prev,
+        pages: nextPages,
+      };
+    });
   };
 
   const removePage = (index: number) => {
@@ -134,9 +174,41 @@ export function SectionConfigurationWizard({
   const updatePage = (index: number, updates: any) => {
     setFormData(prev => ({
       ...prev,
-      pages: prev.pages.map((page, i) => 
-        i === index ? { ...page, ...updates } : page
-      )
+      pages: prev.pages.map((page, i) => {
+        if (i !== index) return page;
+
+        const nextPage: any = { ...page, ...updates };
+        if (updates.title && Array.isArray(page.content) && page.content.length > 0) {
+          nextPage.content = page.content.map((entry: any, entryIndex: number) =>
+            entryIndex === 0 ? { ...entry, title: updates.title } : entry
+          );
+        }
+        return nextPage;
+      })
+    }));
+  };
+
+  const setPageComponent = (index: number, componentId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      pages: prev.pages.map((page, i) => {
+        if (i !== index) return page;
+
+        const baseContent = Array.isArray(page.content) && page.content.length > 0
+          ? page.content[0]
+          : {};
+
+        return {
+          ...page,
+          componentId,
+          content: [{
+            ...baseContent,
+            type: componentId,
+            component: componentId,
+            title: baseContent?.title || page.title,
+          }],
+        };
+      })
     }));
   };
 
@@ -207,7 +279,11 @@ export function SectionConfigurationWizard({
                 <h4 className="font-medium">Suggested Pages</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {suggestedPages.map((p: any, index: number) => {
-                    const included = formData.pages.some((pg: any) => pg.route === p.route);
+                    const suggestionSlug = (p.route || '').split('/').filter(Boolean).pop();
+                    const included = formData.pages.some((pg: any) => {
+                      const pageSlug = (pg.route || '').split('/').filter(Boolean).pop();
+                      return pageSlug === suggestionSlug || (pg.name && pg.name === p.name);
+                    });
                     return (
                       <Card key={index} className={included ? 'border-primary/50' : ''}>
                         <CardHeader className="pb-2">
@@ -225,7 +301,10 @@ export function SectionConfigurationWizard({
                                 variant="secondary"
                                 onClick={() => setFormData(prev => ({
                                   ...prev,
-                                  pages: prev.pages.filter((pg: any) => pg.route !== p.route)
+                                  pages: prev.pages.filter((pg: any) => {
+                                    const pageSlug = (pg.route || '').split('/').filter(Boolean).pop();
+                                    return pageSlug !== suggestionSlug && pg.name !== p.name;
+                                  })
                                 }))}
                               >
                                 Remove
@@ -235,15 +314,18 @@ export function SectionConfigurationWizard({
                                 size="sm"
                                 onClick={() => setFormData(prev => ({
                                   ...prev,
-                                  pages: [...prev.pages, {
-                                    name: p.name,
-                                    title: p.title,
-                                    description: p.description || '',
-                                    icon: p.icon || 'FileText',
-                                    route: p.route,
-                                    content: p.content || [],
-                                    permissions: p.permissions || ['viewOwnProfile']
-                                  }]
+                                  pages: withComponentMetadata([
+                                    ...prev.pages,
+                                    {
+                                      name: p.name,
+                                      title: p.title,
+                                      description: p.description || '',
+                                      icon: p.icon || 'FileText',
+                                      route: p.route,
+                                      content: Array.isArray(p.content) ? p.content : [],
+                                      permissions: Array.isArray(p.permissions) ? p.permissions : ['viewOwnProfile'],
+                                    },
+                                  ])
                                 }))}
                               >
                                 Add
@@ -259,35 +341,61 @@ export function SectionConfigurationWizard({
             )}
 
             <div className="space-y-4 mt-4">
-              {formData.pages.map((page, index) => (
-                <Card key={index}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <Input
-                        value={page.title}
-                        onChange={(e) => updatePage(index, { title: e.target.value })}
-                        className="font-medium border-0 p-0 h-auto focus-visible:ring-0"
-                        placeholder="Page title"
+              {formData.pages.map((page, index) => {
+                const selectedComponent = getSectionComponent(page.componentId);
+                return (
+                  <Card key={index}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <Input
+                          value={page.title}
+                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          className="font-medium border-0 p-0 h-auto focus-visible:ring-0"
+                          placeholder="Page title"
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removePage(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Textarea
+                        value={page.description}
+                        onChange={(e) => updatePage(index, { description: e.target.value })}
+                        placeholder="Page description"
+                        rows={2}
                       />
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => removePage(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      value={page.description}
-                      onChange={(e) => updatePage(index, { description: e.target.value })}
-                      placeholder="Page description"
-                      rows={2}
-                    />
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="space-y-2">
+                        <Label>Primary Component</Label>
+                        <Select
+                          value={page.componentId}
+                          onValueChange={(value) => setPageComponent(index, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose component" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {componentOptions.map((option) => (
+                              <SelectItem key={option.id} value={option.id}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {selectedComponent && (
+                          <CardDescription className="text-xs text-muted-foreground">
+                            {selectedComponent.description}
+                          </CardDescription>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
               
               <Button 
                 variant="outline" 
@@ -359,11 +467,19 @@ export function SectionConfigurationWizard({
                 <div>
                   <h4 className="font-medium mb-2">Pages ({formData.pages.length})</h4>
                   <div className="space-y-1">
-                    {formData.pages.map((page, index) => (
-                      <div key={index} className="text-sm text-muted-foreground">
-                        • {page.title}
-                      </div>
-                    ))}
+                    {formData.pages.map((page, index) => {
+                      const componentMeta = getSectionComponent(page.componentId);
+                      return (
+                        <div key={index} className="text-sm text-muted-foreground">
+                          • {page.title}
+                          {componentMeta && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              ({componentMeta.label})
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 

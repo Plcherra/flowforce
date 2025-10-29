@@ -14,6 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 import { CreateSectionDialog } from '@/components/sections/CreateSectionDialog';
 import { SectionConfigurationWizard } from '@/components/sections/SectionConfigurationWizard';
 
+const slugify = (value: string) => value
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .replace(/-{2,}/g, '-')
+  || 'page';
+
 export default function AddSection() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,24 +78,80 @@ export default function AddSection() {
         })
         .eq('id', newSection.id);
 
-      // 2) Ensure pages exist based on wizard selection
+      // 2) Sync pages based on wizard selection
       const { data: existingPages } = await supabase
         .from('custom_section_pages')
-        .select('id, route')
+        .select('id, route, name')
         .eq('section_id', newSection.id);
 
-      const existingRoutes = new Set((existingPages || []).map((p: any) => p.route));
-      const pagesToInsert = (updates.pages || []).filter((p: any) => !existingRoutes.has(p.route)).map((p: any, idx: number) => ({
-        section_id: newSection.id,
-        name: p.name || p.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        title: p.title || 'Page',
-        description: p.description || null,
-        icon: p.icon || 'FileText',
-        route: p.route || `${newSection.path}/${(p.title || 'page').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-        content: Array.isArray(p.content) ? p.content : [],
-        permissions: Array.isArray(p.permissions) ? p.permissions : ['viewOwnProfile'],
-        sort_order: idx,
-      }));
+      const sectionSlug = String(newSection.path || '').replace(/^\/+/, '') || slugify(newSection.name || newSection.id);
+
+      const existingBySlug = new Map(
+        (existingPages || []).map((page: any) => {
+          const slug = String(page.route || '').split('/').filter(Boolean).pop();
+          return [slug, page];
+        })
+      );
+
+      const finalPages = (updates.pages || []).map((p: any, index: number) => {
+        const baseSlug = slugify(
+          (p.route || '').split('/').filter(Boolean).pop() ||
+          p.name ||
+          p.title ||
+          `page-${index + 1}`,
+        );
+        const route = `/${sectionSlug}/${baseSlug}`;
+        const primaryContent = Array.isArray(p.content) && p.content.length > 0 ? p.content[0] : {};
+        const componentId = p.componentId || primaryContent?.component || primaryContent?.type || 'feed';
+
+        return {
+          slug: baseSlug,
+          payload: {
+            section_id: newSection.id,
+            name: p.name || baseSlug,
+            title: p.title || p.name || 'Page',
+            description: p.description || null,
+            icon: p.icon || 'FileText',
+            route,
+            content: [{
+              ...primaryContent,
+              type: componentId,
+              component: componentId,
+              title: primaryContent?.title || p.title || p.name || 'Page',
+            }],
+            permissions: Array.isArray(p.permissions) && p.permissions.length > 0 ? p.permissions : ['viewOwnProfile'],
+            sort_order: index,
+          },
+        };
+      });
+
+      const seenSlugs = new Set<string>();
+      const pagesToInsert: any[] = [];
+      const pagesToUpdate: { id: string; values: any }[] = [];
+
+      finalPages.forEach(({ slug, payload }) => {
+        seenSlugs.add(slug);
+        const existing = existingBySlug.get(slug);
+        if (existing) {
+          pagesToUpdate.push({ id: existing.id, values: payload });
+        } else {
+          pagesToInsert.push(payload);
+        }
+      });
+
+      const pagesToDelete = (existingPages || [])
+        .filter((page: any) => {
+          const slug = String(page.route || '').split('/').filter(Boolean).pop();
+          return slug && !seenSlugs.has(slug);
+        })
+        .map((page: any) => page.id);
+
+      for (const { id, values } of pagesToUpdate) {
+        await supabase
+          .from('custom_section_pages')
+          .update(values)
+          .eq('id', id);
+      }
 
       if (pagesToInsert.length > 0) {
         await supabase
@@ -96,11 +159,17 @@ export default function AddSection() {
           .insert(pagesToInsert);
       }
 
+      if (pagesToDelete.length > 0) {
+        await supabase
+          .from('custom_section_pages')
+          .delete()
+          .in('id', pagesToDelete);
+      }
+
       toast({ title: 'Section Configured', description: `${updates.name || newSection.name} is now ready` });
 
       // 3) Navigate to new section
-      const slug = String(newSection.path || '').replace(/^\//, '');
-      navigate(`/section/${slug}`);
+      navigate(`/app/section/${sectionSlug}`);
     } catch (error) {
       console.error('Error configuring section:', error);
     }

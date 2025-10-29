@@ -1,10 +1,10 @@
-import { Save, CheckCircle2, AlertTriangle, Package, MapPin } from 'lucide-react';
+import { Save, CheckCircle2, Package, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { InventoryItem } from '@/hooks/inventory/types';
+import { InventoryItem, InventoryItemUnit } from '@/hooks/inventory/types';
 import { CountData } from '@/hooks/inventory/useCountingStats';
 
 interface CountingTableProps {
@@ -27,8 +27,8 @@ export function CountingTable({
   onUpdateCount,
   onSaveItem,
   calculateItemTotalPrice,
-  calculateVariance,
-  getVarianceStatus
+  calculateVariance: _calculateVariance,
+  getVarianceStatus: _getVarianceStatus,
 }: CountingTableProps) {
   if (items.length === 0) {
     return (
@@ -62,9 +62,22 @@ export function CountingTable({
               {items.map((item) => {
                 const itemCounts = counts[item.id] || { item_id: item.id, unit_counts: {} };
                 const isSaved = savedItems.has(item.id);
-                
-                // Get sorted units for this item
-                const sortedUnits = item.unit ? [{ id: item.unit_id, unit: item.unit }] : [];
+
+                const sortedUnits: InventoryItemUnit[] = item.units && item.units.length > 0
+                  ? [...item.units].sort((a, b) => a.unit_level - b.unit_level)
+                  : [
+                      {
+                        id: `${item.id}-base`,
+                        item_id: item.id,
+                        unit_id: item.unit_id,
+                        unit_level: 1,
+                        conversion_factor: 1,
+                        cost_per_unit: item.cost_per_unit ?? null,
+                        is_primary: true,
+                        is_countable: true,
+                        unit: item.unit,
+                      } as InventoryItemUnit,
+                    ];
 
                 return (
                   <TableRow key={item.id} className={isSaved ? "bg-green-50" : ""}>
@@ -132,8 +145,10 @@ export function CountingTable({
                         {(() => {
                           // Calculate total quantity across all units for this item
                           const totalQuantityInBaseUnits = sortedUnits.reduce((total, unit) => {
-                            const unitValue = itemCounts.unit_counts[unit.id] || 0;
-                            return total + (unitValue * (unit.unit?.conversion_factor || 1));
+                            const unitKey = unit.id || unit.unit_id;
+                            const unitValue = itemCounts.unit_counts[unitKey] || 0;
+                            const factor = unit.conversion_factor || 1;
+                            return total + (unitValue * factor);
                           }, 0);
                           
                           // Determine color based on total quantity vs min/max range (only for non-saved items)
@@ -149,22 +164,29 @@ export function CountingTable({
                             }
                           }
                           
-                          return sortedUnits.map(unit => (
-                            <div key={unit.id} className="flex flex-col items-center space-y-1">
+                          return sortedUnits.map(unit => {
+                            const unitKey = unit.id || unit.unit_id;
+                            const factor = unit.conversion_factor || 1;
+                            const unitLabel = unit.unit?.abbreviation || unit.unit?.name || 'unit';
+
+                            return (
+                              <div key={unitKey} className="flex flex-col items-center space-y-1">
                               <Input
                                 type="number"
                                 step="0.01"
                                 placeholder="0"
-                                value={itemCounts.unit_counts[unit.id] || ''}
-                                onChange={(e) => onUpdateCount(item.id, unit.id, parseFloat(e.target.value) || 0)}
+                                value={itemCounts.unit_counts[unitKey] ?? ''}
+                                onChange={(e) => onUpdateCount(item.id, unitKey, parseFloat(e.target.value) || 0)}
                                 className={`w-16 text-center font-mono text-xs ${colorClass}`}
                                 disabled={isSaved || isCountCompleted}
                               />
                               <span className="text-xs font-medium text-muted-foreground">
-                                {unit.unit?.abbreviation || unit.unit?.name || 'unit'}
+                                {unitLabel}
+                                {unit.unit_level > 1 ? ` · ${factor}×` : ''}
                               </span>
                             </div>
-                          ));
+                            );
+                          });
                         })()}
                       </div>
                     </TableCell>

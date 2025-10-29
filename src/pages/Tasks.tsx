@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Calendar, User, Flag, MessageSquare, Search } from 'lucide-react';
-import { useTasks } from '@/hooks/useTasks';
+import { Plus, Calendar, User, Flag, MessageSquare, Search, Target } from 'lucide-react';
+import { useTasks, type TaskWithRelations } from '@/hooks/useTasks';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
 import { TaskDetailsDialog } from '@/components/tasks/TaskDetailsDialog';
@@ -14,17 +14,18 @@ import { TaskNotifications } from '@/components/tasks/TaskNotifications';
 import { TaskActivityFeed } from '@/components/tasks/TaskActivityFeed';
 import { RemindersPanel } from '@/components/reminders/RemindersPanel';
 import { format, differenceInDays } from 'date-fns';
+import { getTaskStatusBadgeClass, getTaskStatusLabel } from '@/constants/taskStatus';
 
 const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'completed', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
 type TaskStatusFilter = KnownTaskStatus | 'all' | 'other';
 
 const STATUS_LABELS: Record<KnownTaskStatus, string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  review: 'In Review',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
+  todo: getTaskStatusLabel('todo'),
+  in_progress: getTaskStatusLabel('in_progress'),
+  review: getTaskStatusLabel('review'),
+  completed: getTaskStatusLabel('completed'),
+  cancelled: getTaskStatusLabel('cancelled'),
 };
 
 const KNOWN_PRIORITIES = ['urgent', 'high', 'medium', 'low'] as const;
@@ -56,10 +57,25 @@ export default function Tasks() {
   const isMobile = useIsMobile();
   const { tasks, loading } = useTasks();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null);
   const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriorityFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if (!selectedTask) return;
+
+    const updated = tasks.find((item) => item.id === selectedTask.id);
+
+    if (!updated) {
+      setSelectedTask(null);
+      return;
+    }
+
+    if (updated !== selectedTask) {
+      setSelectedTask(updated);
+    }
+  }, [tasks, selectedTask]);
 
   const now = new Date();
 
@@ -73,17 +89,7 @@ export default function Tasks() {
     }
   };
 
-  const getStatusColor = (status: string | null | undefined) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'review': return 'bg-purple-100 text-purple-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const dueBadgeFor = (task: any) => {
+  const dueBadgeFor = (task: TaskWithRelations) => {
     if (!task?.due_date) return null;
 
     const dueDate = new Date(task.due_date);
@@ -222,7 +228,9 @@ export default function Tasks() {
             : normalizedPriority === priorityFilter;
 
       const matchesSearch = search
-        ? `${task.title ?? ''} ${task.description ?? ''}`.toLowerCase().includes(search)
+        ? `${task.title ?? ''} ${task.description ?? ''} ${task.goal?.title ?? ''} ${task.assigned_profile ? `${task.assigned_profile.first_name} ${task.assigned_profile.last_name}` : ''}`
+            .toLowerCase()
+            .includes(search)
         : true;
 
       return matchesStatus && matchesPriority && matchesSearch;
@@ -419,8 +427,8 @@ export default function Tasks() {
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2">
                           <div className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(task.priority)}`} />
-                          <Badge className={getStatusColor(task.status)}>
-                            {String(task.status ?? 'unknown').replace(/_/g, ' ')}
+                          <Badge className={getTaskStatusBadgeClass(task.status)}>
+                            {getTaskStatusLabel(task.status)}
                           </Badge>
                         </div>
                         {dueBadge && (
@@ -452,6 +460,15 @@ export default function Tasks() {
                           <Flag className="h-4 w-4" />
                           <span className="capitalize">{task.priority ?? 'not set'}</span>
                         </div>
+                        {task.goal && (
+                          <div className="flex items-center gap-1">
+                            <Target className="h-4 w-4" />
+                            <span className="max-w-[160px] truncate">{task.goal.title}</span>
+                            <Badge variant="outline" className="ml-1 px-1.5 text-[10px]">
+                              {task.goal.progress ?? 0}%
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       <div className="text-xs">
                         Created {format(new Date(task.created_at), 'MMM dd, yyyy')}
@@ -490,6 +507,7 @@ export default function Tasks() {
           task={selectedTask}
           open={!!selectedTask}
           onClose={() => setSelectedTask(null)}
+          onTaskUpdate={(updatedTask) => setSelectedTask(updatedTask)}
         />
       )}
     </div>

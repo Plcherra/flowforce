@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { InventoryService } from '@/services/inventory';
 import type { InventoryCount, InventoryCountLine } from './types';
+
+type CreateCountInput = Parameters<typeof InventoryService.createCount>[0];
 
 export function useInventoryCounts() {
   const [counts, setCounts] = useState<InventoryCount[]>([]);
@@ -9,14 +11,10 @@ export function useInventoryCounts() {
   const { toast } = useToast();
 
   const fetchCounts = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('inv_counts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCounts(data || []);
+      const data = await InventoryService.listCounts();
+      setCounts(data);
     } catch (error) {
       console.error('Error fetching counts:', error);
       toast({
@@ -29,41 +27,22 @@ export function useInventoryCounts() {
     }
   };
 
-  const createCount = async (countData: {
-    type: string;
-    locations: string[];
-    categories: string[];
-    scheduleDate: string;
-    notes: string;
-  }) => {
+  const createCount = async (countData: CreateCountInput) => {
     try {
-      const { data, error } = await supabase
-        .from('inv_counts')
-        .insert({
-          count_type: countData.type,
-          count_date: countData.scheduleDate.split('T')[0],
-          location_id: countData.locations[0] || null,
-          notes: countData.notes,
-          status: 'planned',
-          counted_by: (await supabase.auth.getUser()).data.user?.id
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const created = await InventoryService.createCount(countData);
 
       toast({
         title: "Success",
         description: "Inventory count created successfully",
       });
 
-      fetchCounts(); // Refresh the list
-      return data;
-    } catch (error) {
+      fetchCounts();
+      return created;
+    } catch (error: any) {
       console.error('Error creating count:', error);
       toast({
         title: "Error",
-        description: "Failed to create inventory count",
+        description: error?.message || "Failed to create inventory count",
         variant: "destructive",
       });
       throw error;
@@ -72,12 +51,7 @@ export function useInventoryCounts() {
 
   const updateCount = async (countId: string, updates: Partial<InventoryCount>) => {
     try {
-      const { error } = await supabase
-        .from('inv_counts')
-        .update(updates)
-        .eq('id', countId);
-
-      if (error) throw error;
+      await InventoryService.updateCount(countId, updates);
 
       toast({
         title: "Success",
@@ -85,11 +59,11 @@ export function useInventoryCounts() {
       });
 
       fetchCounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating count:', error);
       toast({
         title: "Error", 
-        description: "Failed to update count",
+        description: error?.message || "Failed to update count",
         variant: "destructive",
       });
       throw error;
@@ -98,27 +72,19 @@ export function useInventoryCounts() {
 
   const completeCount = async (countId: string) => {
     try {
-      const { error } = await supabase
-        .from('inv_counts')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', countId);
-
-      if (error) throw error;
+      await InventoryService.completeCount(countId);
 
       toast({
         title: "Success",
-        description: "Count completed successfully",
+        description: "Count submitted for review",
       });
 
       fetchCounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing count:', error);
       toast({
         title: "Error",
-        description: "Failed to complete count",
+        description: error?.message || "Failed to complete count",
         variant: "destructive",
       });
       throw error;
@@ -127,21 +93,7 @@ export function useInventoryCounts() {
 
   const deleteCount = async (countId: string) => {
     try {
-      // First delete all related count lines
-      const { error: linesError } = await supabase
-        .from('inv_count_lines')
-        .delete()
-        .eq('count_id', countId);
-
-      if (linesError) throw linesError;
-
-      // Then delete the count itself
-      const { error } = await supabase
-        .from('inv_counts')
-        .delete()
-        .eq('id', countId);
-
-      if (error) throw error;
+      await InventoryService.deleteCount(countId);
 
       toast({
         title: "Success",
@@ -149,11 +101,68 @@ export function useInventoryCounts() {
       });
 
       fetchCounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting count:', error);
       toast({
         title: "Error",
-        description: "Failed to delete count", 
+        description: error?.message || "Failed to delete count", 
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const submitCountForReview = async (countId: string) => {
+    try {
+      await InventoryService.submitCountForReview(countId);
+      toast({
+        title: "Submitted",
+        description: "Count sent for supervisor review",
+      });
+      fetchCounts();
+    } catch (error: any) {
+      console.error('Error submitting count:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to submit count for review",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const approveCount = async (countId: string, notes?: string) => {
+    try {
+      await InventoryService.approveCount(countId, { notes });
+      toast({
+        title: "Approved",
+        description: "Inventory count approved",
+      });
+      fetchCounts();
+    } catch (error: any) {
+      console.error('Error approving count:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to approve count",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const rejectCount = async (countId: string, notes?: string) => {
+    try {
+      await InventoryService.rejectCount(countId, { notes });
+      toast({
+        title: "Sent back",
+        description: "Count requires additional review",
+      });
+      fetchCounts();
+    } catch (error: any) {
+      console.error('Error rejecting count:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to send count back for revisions",
         variant: "destructive",
       });
       throw error;
@@ -171,6 +180,9 @@ export function useInventoryCounts() {
     updateCount,
     deleteCount,
     completeCount,
+    submitCountForReview,
+    approveCount,
+    rejectCount,
     refetch: fetchCounts
   };
 }
@@ -187,19 +199,10 @@ export function useInventoryCountLines(countId?: string) {
       return;
     }
 
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('inv_count_lines')
-        .select(`
-          *,
-          inv_items (
-            name
-          )
-        `)
-        .eq('count_id', countId);
-
-      if (error) throw error;
-      setCountLines(data || []);
+      const data = await InventoryService.getCountLines(countId);
+      setCountLines(data);
     } catch (error) {
       console.error('Error fetching count lines:', error);
       toast({
@@ -212,49 +215,34 @@ export function useInventoryCountLines(countId?: string) {
     }
   };
 
-  const addItemToCount = async (itemId: string, expectedQuantity: number = 0) => {
-    if (!countId) return;
+  const addItemsToCount = async (items: Array<{ id: string; expectedQuantity?: number }>) => {
+    if (!countId || items.length === 0) return;
 
     try {
-      const { data, error } = await supabase
-        .from('inv_count_lines')
-        .insert({
-          count_id: countId,
-          item_id: itemId,
-          expected_quantity: expectedQuantity,
-          counted_quantity: 0
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      await InventoryService.addItemsToCount(countId, items);
       toast({
         title: "Success",
-        description: "Item added to count",
+        description: items.length > 1 ? "Items added to count" : "Item added to count",
       });
-
       fetchCountLines();
-      return data;
     } catch (error) {
-      console.error('Error adding item to count:', error);
+      console.error('Error adding items to count:', error);
       toast({
         title: "Error",
-        description: "Failed to add item to count",
-        variant: "destructive", 
+        description: "Failed to add items to count",
+        variant: "destructive",
       });
       throw error;
     }
   };
 
+  const addItemToCount = async (itemId: string, expectedQuantity: number = 0) => {
+    return addItemsToCount([{ id: itemId, expectedQuantity }]);
+  };
+
   const updateCountLine = async (lineId: string, updates: Partial<InventoryCountLine>) => {
     try {
-      const { error } = await supabase
-        .from('inv_count_lines')
-        .update(updates)
-        .eq('id', lineId);
-
-      if (error) throw error;
+      await InventoryService.updateCountLine(lineId, updates);
 
       fetchCountLines();
     } catch (error) {
@@ -270,12 +258,7 @@ export function useInventoryCountLines(countId?: string) {
 
   const removeItemFromCount = async (lineId: string) => {
     try {
-      const { error } = await supabase
-        .from('inv_count_lines')
-        .delete()
-        .eq('id', lineId);
-
-      if (error) throw error;
+      await InventoryService.removeItemFromCount(lineId);
 
       toast({
         title: "Success",
@@ -302,6 +285,7 @@ export function useInventoryCountLines(countId?: string) {
     countLines,
     loading,
     addItemToCount,
+    addItemsToCount,
     updateCountLine,
     removeItemFromCount,
     refetch: fetchCountLines

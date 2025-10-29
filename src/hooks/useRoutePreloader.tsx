@@ -8,7 +8,7 @@ const routePreloadMap: Record<string, string[]> = {
   '/register': ['/onboarding', '/company-registration'],
   '/app/dashboard': ['/app/messages', '/app/employees', '/app/calendar', '/app/settings'],
   '/app/messages': ['/app/calendar', '/app/employees'],
-  '/app/employees': ['/app/invite-employee', '/app/position-management'],
+  '/app/employees': ['/app/position-management'],
   '/templates': ['/templates/retail', '/templates/healthcare', '/templates/manufacturing'],
 };
 

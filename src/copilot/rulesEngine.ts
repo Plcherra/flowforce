@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/public-types';
 import type { EmployeeReport, SkillMatrixEntry } from '@/types/people';
 
 dayjs.extend(relativeTime);
@@ -45,6 +46,8 @@ export interface EmployeeContext {
   reports: EmployeeReport[];
   skills: SkillMatrixEntry[];
   performance: StaffPerformanceEntry[];
+  certifications: CertificationSummary[];
+  awardedBadges: string[];
 }
 
 export interface StaffPerformanceEntry {
@@ -52,6 +55,16 @@ export interface StaffPerformanceEntry {
   attendanceStatus: string | null;
   role: string | null;
   hoursWorked?: number | null;
+}
+
+type CertificationStatus = Tables<'certification_progress'>['status'];
+
+export interface CertificationSummary {
+  code: string;
+  status: CertificationStatus;
+  achievedAt: string | null;
+  badgeCode: string | null;
+  title: string | null;
 }
 
 const POSITIVE_SEVERITY = 4;
@@ -65,7 +78,7 @@ export function evaluateEmployeeContext(context: EmployeeContext, now = dayjs())
   const coachingNotes: string[] = [];
   let promotion: PromotionSuggestion | null = null;
 
-  const { reports, performance, skills, profile } = context;
+  const { reports, performance, skills, profile, certifications, awardedBadges } = context;
 
   const positivePerformanceReports = reports.filter(
     (report) =>
@@ -150,6 +163,22 @@ export function evaluateEmployeeContext(context: EmployeeContext, now = dayjs())
     };
   }
 
+  certifications
+    .filter(
+      (cert) =>
+        cert.status === 'earned' &&
+        cert.badgeCode &&
+        !awardedBadges.includes(cert.badgeCode) &&
+        !badges.some((suggestion) => suggestion.badgeCode === cert.badgeCode),
+    )
+    .forEach((cert) => {
+      badges.push({
+        badgeCode: cert.badgeCode as string,
+        reason: `Certification ${cert.title ?? cert.code} completed`,
+        confidence: 1,
+      });
+    });
+
   return {
     badges,
     skillUpdates,
@@ -161,7 +190,14 @@ export function evaluateEmployeeContext(context: EmployeeContext, now = dayjs())
 export async function evaluateEmployee(employeeId: string): Promise<CopilotDecision> {
   const now = dayjs();
 
-  const [profileResult, reportsResult, skillsResult, performanceResult] = await Promise.all([
+  const [
+    profileResult,
+    reportsResult,
+    skillsResult,
+    performanceResult,
+    certificationResult,
+    badgeResult,
+  ] = await Promise.all([
     supabase
       .from('profiles')
       .select('id, role, first_name, last_name')
@@ -181,6 +217,14 @@ export async function evaluateEmployee(employeeId: string): Promise<CopilotDecis
       .select('date, attendance_status, role, hours_worked')
       .eq('user_id', employeeId)
       .gte('date', now.subtract(120, 'day').format('YYYY-MM-DD')),
+    supabase
+      .from('certification_progress')
+      .select('certification_code, status, achieved_at, certification:certification_catalog(badge_code, title)')
+      .eq('employee_id', employeeId),
+    supabase
+      .from('employee_badge')
+      .select('badge_code')
+      .eq('employee_id', employeeId),
   ]);
 
   if (profileResult.error) throw profileResult.error;
@@ -188,6 +232,8 @@ export async function evaluateEmployee(employeeId: string): Promise<CopilotDecis
   if (reportsResult.error) throw reportsResult.error;
   if (skillsResult.error) throw skillsResult.error;
   if (performanceResult.error) throw performanceResult.error;
+  if (certificationResult.error) throw certificationResult.error;
+  if (badgeResult.error) throw badgeResult.error;
 
   const context: EmployeeContext = {
     profile: {
@@ -223,6 +269,19 @@ export async function evaluateEmployee(employeeId: string): Promise<CopilotDecis
       role: row.role,
       hoursWorked: row.hours_worked ?? null,
     })),
+    certifications: (certificationResult.data ?? []).map((row) => {
+      const typedRow = row as Tables<'certification_progress'> & {
+        certification: Pick<Tables<'certification_catalog'>, 'badge_code' | 'title'> | null;
+      };
+      return {
+        code: typedRow.certification_code,
+        status: typedRow.status as CertificationStatus,
+        achievedAt: typedRow.achieved_at ?? null,
+        badgeCode: typedRow.certification?.badge_code ?? null,
+        title: typedRow.certification?.title ?? null,
+      };
+    }),
+    awardedBadges: (badgeResult.data ?? []).map((row) => row.badge_code),
   };
 
   return evaluateEmployeeContext(context, now);

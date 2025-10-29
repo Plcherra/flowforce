@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 
 interface User {
@@ -15,6 +16,8 @@ interface User {
   last_name: string;
   email: string;
   avatar_url?: string;
+  employment_status?: string | null;
+  role?: string | null;
 }
 
 interface UserSelectorProps {
@@ -25,6 +28,7 @@ interface UserSelectorProps {
 
 export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps) {
   const { user: currentUser } = useAuth();
+  const { profile: currentProfile } = useProfile();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +39,7 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
     if (open) {
       fetchUsers();
     }
-  }, [open]);
+  }, [open, currentProfile?.role, currentProfile?.id]);
 
   useEffect(() => {
     const filtered = users.filter(user => 
@@ -50,15 +54,45 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
     if (!currentUser) return;
 
     setLoading(true);
+    const includeSelf = currentProfile?.role === 'admin';
+    const currentProfileId = currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
+    const selectFields =
+      'id, first_name, last_name, email, avatar_url, employment_status, role';
+
+    const applySelfVisibility = (list: User[] | null | undefined) => {
+      const entries = list ?? [];
+      if (includeSelf || !currentProfileId) {
+        return entries;
+      }
+      return entries.filter((user) => user.id !== currentProfileId);
+    };
+
     try {
-      const { data, error } = await supabase
+      const { data: activeData, error: activeError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, avatar_url')
-        .neq('id', currentUser.id) // Exclude current user
+        .select(selectFields)
+        .eq('employment_status', 'active')
         .order('first_name');
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (activeError) throw activeError;
+
+      let visibleUsers = applySelfVisibility(activeData);
+
+      if (visibleUsers.length === 0) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('profiles')
+          .select(selectFields)
+          .order('first_name');
+
+        if (fallbackError) throw fallbackError;
+        visibleUsers = applySelfVisibility(fallbackData);
+      }
+
+      const deduped = Array.from(
+        new Map(visibleUsers.map((entry) => [entry.id, entry])).values()
+      );
+
+      setUsers(deduped);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -66,6 +100,7 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
         description: 'Failed to load users',
         variant: 'destructive',
       });
+      setUsers([]);
     } finally {
       setLoading(false);
     }

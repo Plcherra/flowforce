@@ -24,6 +24,9 @@ export interface FeatureFlags {
     permissionOverrides: boolean;
     auditLogs: boolean;
   };
+  operations: {
+    engagementMetrics: boolean;
+  };
   intelligence: {
     oodaLoop: boolean;
     connecteamFormsSync: boolean;
@@ -55,6 +58,9 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     companyRoles: true,
     permissionOverrides: true,
     auditLogs: false,
+  },
+  operations: {
+    engagementMetrics: false,
   },
   intelligence: {
     oodaLoop: true,

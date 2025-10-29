@@ -3,11 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, MoreHorizontal, Target, Users, Award, Edit, Trash2, Plus } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CalendarIcon, MoreHorizontal, Award, Edit, Trash2, Plus, ListChecks } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Tables } from '@/integrations/supabase/public-types';
-
-type Goal = Tables<'goals'>;
+import type { Goal } from '@/hooks/useGoals';
 
 interface GoalCardProps {
   goal: Goal;
@@ -18,6 +17,19 @@ interface GoalCardProps {
 }
 
 export function GoalCard({ goal, onEdit, onDelete, onAddTask, onViewDetails }: GoalCardProps) {
+  const owner = goal.participants?.find(participant => participant.role === 'owner');
+  const ownerProfile = owner?.profile;
+  const ownerName = ownerProfile
+    ? `${ownerProfile.first_name} ${ownerProfile.last_name}`
+    : 'Unassigned';
+
+  const ownerInitials = ownerProfile
+    ? `${ownerProfile.first_name.charAt(0)}${ownerProfile.last_name.charAt(0)}`
+    : 'NA';
+
+  const totalTasks = goal.goal_tasks?.length ?? 0;
+  const completedTasks = goal.goal_tasks?.filter(gt => gt.task?.status === 'completed').length ?? 0;
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
@@ -103,16 +115,38 @@ export function GoalCard({ goal, onEdit, onDelete, onAddTask, onViewDetails }: G
                 <span>Due {format(new Date(goal.target_completion_date), 'MMM dd, yyyy')}</span>
               </div>
             )}
-            
+          </div>
+
+          <div className="flex items-center justify-between py-2 rounded-lg bg-muted/40 px-3">
             <div className="flex items-center space-x-3">
-              {goal.reward_type && (
-                <div className="flex items-center">
-                  <Award className="h-4 w-4 mr-1" />
-                  <span className="capitalize">{goal.reward_type}</span>
-                </div>
-              )}
+              <Avatar className="h-9 w-9">
+                {ownerProfile?.avatar_url ? (
+                  <AvatarImage src={ownerProfile.avatar_url} alt={ownerName} />
+                ) : (
+                  <AvatarFallback>{ownerInitials}</AvatarFallback>
+                )}
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">Owner</span>
+                <span className="text-sm font-medium text-foreground">{ownerName}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <ListChecks className="h-4 w-4 text-muted-foreground" />
+              <div className="flex flex-col text-right">
+                <span className="text-xs text-muted-foreground uppercase tracking-wide">Tasks</span>
+                <span className="text-sm font-medium text-foreground">{completedTasks}/{totalTasks}</span>
+              </div>
             </div>
           </div>
+
+          {goal.reward_type && (
+            <div className="flex items-center justify-end text-xs text-muted-foreground space-x-1">
+              <Award className="h-4 w-4" />
+              <span className="capitalize">{goal.reward_type}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

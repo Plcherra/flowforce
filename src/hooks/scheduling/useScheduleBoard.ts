@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { addDays, format, isSameDay, startOfWeek } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useScheduling } from '@/contexts/SchedulingContext';
-import { useEmployees } from '@/hooks/useEmployees';
 import { useProfile } from '@/hooks/useProfile';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { VendorEventWithMetadata } from './useSchedulingConsolidated';
+import type { VendorEventWithMetadata, ProfileSummary } from './useSchedulingConsolidated';
 
 interface LocationOption {
   id: string;
@@ -32,6 +31,13 @@ interface UseScheduleBoardParams {
   pendingVendorEvent?: PendingVendorEvent | null;
 }
 
+type BasicEmployee = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string | null;
+};
+
 export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEvent }: UseScheduleBoardParams) {
   const {
     shifts,
@@ -42,6 +48,7 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
     loading,
     refetchAll,
     mutations,
+    teamMembers,
   } = useScheduling();
   const {
     createSchedule,
@@ -58,7 +65,6 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
     publishWeek,
     generateRecommendations,
   } = mutations;
-  const { employees } = useEmployees();
   const { profile } = useProfile();
 
   const companyId = profile?.companyId ?? null;
@@ -80,6 +86,35 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
     [weekStart],
   );
   const hours = useMemo(() => Array.from({ length: 17 }, (_, index) => index + 6), []);
+
+  const employees = useMemo<BasicEmployee[]>(() => {
+    const map = new Map<string, BasicEmployee>();
+
+    const addProfile = (profile?: ProfileSummary | null) => {
+      if (!profile?.id) return;
+      if (map.has(profile.id)) return;
+      map.set(profile.id, {
+        id: profile.id,
+        first_name: profile.first_name ?? 'Team',
+        last_name: profile.last_name ?? 'Member',
+        avatar_url: profile.avatar_url ?? null,
+      });
+    };
+
+    (teamMembers ?? []).forEach((member) => addProfile(member));
+    assignments.forEach((assignment) => addProfile(assignment.user));
+    timeOffRequests.forEach((request) => addProfile(request.user));
+    unavailability.forEach((entry) => addProfile(entry.user));
+
+    return Array.from(map.values()).sort((a, b) => {
+      const nameA = `${a.first_name} ${a.last_name}`.trim().toLowerCase();
+      const nameB = `${b.first_name} ${b.last_name}`.trim().toLowerCase();
+      if (!nameA && !nameB) return 0;
+      if (!nameA) return 1;
+      if (!nameB) return -1;
+      return nameA.localeCompare(nameB);
+    });
+  }, [assignments, teamMembers, timeOffRequests, unavailability]);
 
   const fetchLocations = useCallback(async () => {
     if (!companyId) {

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuditLogs } from '@/hooks/useAuditLogs';
@@ -6,7 +5,21 @@ import { Activity, User, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AuditLog() {
-  const { data: auditLogs = [], isLoading, error } = useAuditLogs();
+  const { data: auditLogs = [], isLoading, error, isAuditEnabled } = useAuditLogs();
+
+  if (!isAuditEnabled) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-600 mb-2">Audit Logs Disabled</h3>
+          <p className="text-gray-500">
+            Enable the audit logs feature to track administrative actions in this view.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (

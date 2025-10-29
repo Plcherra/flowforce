@@ -14,8 +14,24 @@ import { I18nHelpers } from '@/utils/i18nHelpers';
  * 5. Date/Number Formatting: Regional formatting
  */
 export default function LocalizedAuditLog() {
-  const { data: auditLogs = [], isLoading, error } = useAuditLogs();
+  const { data: auditLogs = [], isLoading, error, isAuditEnabled } = useAuditLogs();
   const { t } = useTranslation();
+
+  if (!isAuditEnabled) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-600 mb-2">
+            {t('audit.disabledTitle', 'Audit Logs Disabled')}
+          </h3>
+          <p className="text-gray-500">
+            {t('audit.disabledDescription', 'Enable audit logging to review localized audit activity.')}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (

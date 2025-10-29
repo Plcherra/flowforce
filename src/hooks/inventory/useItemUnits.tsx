@@ -1,25 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-export interface ItemUnit {
-  id: string;
-  item_id: string;
-  unit_id: string;
-  unit_level: number;
-  conversion_factor: number;
-  is_primary: boolean;
-  is_countable: boolean;
-  cost_per_unit?: number;
-  unit?: {
-    id: string;
-    name: string;
-    abbreviation: string;
-    unit_type: string;
-    is_base_unit: boolean;
-    packaging_info: any;
-  };
-}
+import type { InventoryItemUnit } from './types';
 
 export interface EnhancedInventoryItem {
   id: string;
@@ -41,9 +23,9 @@ export interface EnhancedInventoryItem {
   created_by: string;
   created_at: string;
   updated_at: string;
-  units: ItemUnit[];
-  primary_unit?: ItemUnit;
-  base_unit?: ItemUnit;
+  units: InventoryItemUnit[];
+  primary_unit?: InventoryItemUnit;
+  base_unit?: InventoryItemUnit;
   location?: {
     id: string;
     name: string;
@@ -62,14 +44,14 @@ export function useItemUnits(itemId?: string) {
           unit:inv_units(*)
         `)
         .order('unit_level', { ascending: true });
-      
+    
       if (itemId) {
         query = query.eq('item_id', itemId);
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as ItemUnit[];
+      return data as InventoryItemUnit[];
     },
     enabled: !!itemId,
   });
@@ -106,7 +88,7 @@ export function useEnhancedInventoryItems() {
         if (!acc[unit.item_id]) acc[unit.item_id] = [];
         acc[unit.item_id].push(unit);
         return acc;
-      }, {} as Record<string, ItemUnit[]>);
+      }, {} as Record<string, InventoryItemUnit[]>);
 
       // Combine items with their units
       const enhancedItems: EnhancedInventoryItem[] = items.map(item => {
@@ -134,7 +116,7 @@ export function useCreateItemUnit() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (unitData: Omit<ItemUnit, 'id' | 'unit'> & { item_id: string; unit_id: string }) => {
+    mutationFn: async (unitData: Omit<InventoryItemUnit, 'id' | 'unit'> & { item_id: string; unit_id: string }) => {
       const { data, error } = await supabase
         .from('inv_item_units')
         .insert(unitData)
@@ -170,7 +152,7 @@ export function useUpdateItemUnit() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<ItemUnit> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: Partial<InventoryItemUnit> & { id: string }) => {
       const { data, error } = await supabase
         .from('inv_item_units')
         .update(updates)
@@ -202,18 +184,50 @@ export function useUpdateItemUnit() {
   });
 }
 
+export function useDeleteItemUnit() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('inv_item_units')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['item-units'] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      toast({
+        title: 'Removed',
+        description: 'Unit configuration removed',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove unit configuration',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 // Utility functions for unit conversions
 export const convertBetweenUnits = (
   quantity: number,
-  fromUnit: ItemUnit,
-  toUnit: ItemUnit
+  fromUnit: InventoryItemUnit,
+  toUnit: InventoryItemUnit
 ): number => {
   // Convert to base units first, then to target unit
   const baseQuantity = quantity * fromUnit.conversion_factor;
   return baseQuantity / toUnit.conversion_factor;
 };
 
-export const formatUnitDisplay = (unit: ItemUnit): string => {
+export const formatUnitDisplay = (unit: InventoryItemUnit): string => {
   if (!unit.unit) return 'Unknown';
   
   const unitName = unit.unit.abbreviation || unit.unit.name;
@@ -224,7 +238,7 @@ export const formatUnitDisplay = (unit: ItemUnit): string => {
   return `${unitName}${conversionText}`;
 };
 
-export const getUnitHierarchyDisplay = (units: ItemUnit[]): string => {
+export const getUnitHierarchyDisplay = (units: InventoryItemUnit[]): string => {
   const sortedUnits = units
     .filter(u => u.is_countable)
     .sort((a, b) => a.unit_level - b.unit_level);

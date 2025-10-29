@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CreateReminderDialog } from '@/components/reminders/CreateReminderDialog';
+import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -25,6 +26,12 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
   const { createTask } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
+  const {
+    assignees,
+    goals,
+    loading: optionsLoading,
+    error: optionsError
+  } = useTaskFormOptions(open);
   const [loading, setLoading] = useState(false);
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [createReminder, setCreateReminder] = useState(false);
@@ -34,8 +41,19 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
     title: '',
     description: '',
     priority: 'medium',
-    estimated_hours: ''
+    estimated_hours: '',
+    assigned_to: '',
+    goal_id: ''
   });
+
+  useEffect(() => {
+    if (!optionsError) return;
+    toast({
+      title: 'Unable to load options',
+      description: 'Some fields may be unavailable right now. Please try again later.',
+      variant: 'destructive',
+    });
+  }, [optionsError, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +69,14 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
         created_by: user.id,
         due_date: dueDate?.toISOString() || null,
         estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
-        assigned_to: null,
+        assigned_to: formData.assigned_to ? formData.assigned_to : null,
         department_id: null,
         tags: null,
         attachments: [],
         parent_task_id: null,
         workflow_id: null,
-        actual_hours: null
+        actual_hours: null,
+        goal_id: formData.goal_id ? formData.goal_id : null
       };
 
       const { data: newTask, error } = await createTask(taskData);
@@ -85,7 +104,9 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
           title: '',
           description: '',
           priority: 'medium',
-          estimated_hours: ''
+          estimated_hours: '',
+          assigned_to: '',
+          goal_id: ''
         });
         setDueDate(undefined);
         setCreateReminder(false);
@@ -161,6 +182,62 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
                 value={formData.estimated_hours}
                 onChange={(e) => setFormData(prev => ({ ...prev, estimated_hours: e.target.value }))}
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="assigned_to">Assign To</Label>
+              <Select
+                value={formData.assigned_to || 'none'}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, assigned_to: value === 'none' ? '' : value }))
+                }
+                disabled={optionsLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={optionsLoading ? 'Loading team members…' : 'Select team member'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {assignees.map((assignee) => (
+                    <SelectItem key={assignee.id} value={assignee.id}>
+                      {assignee.first_name} {assignee.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="goal_id">Linked Goal</Label>
+              <Select
+                value={formData.goal_id || 'none'}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, goal_id: value === 'none' ? '' : value }))
+                }
+                disabled={optionsLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      optionsLoading
+                        ? 'Loading goals…'
+                        : goals.length === 0
+                          ? 'No goals available'
+                          : 'Select goal (optional)'
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No goal</SelectItem>
+                  {goals.map((goal) => (
+                    <SelectItem key={goal.id} value={goal.id}>
+                      {goal.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

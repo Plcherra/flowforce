@@ -1,0 +1,341 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import dayjs from 'dayjs';
+import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from '@/hooks/useProfile';
+import { useEmployees } from '@/hooks/useEmployees';
+import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
+import { ensureLeaderboardSynced } from './syncLeaderboard';
+import type {
+  LeaderboardAnalytics,
+  LeaderboardBadgeTier,
+  LeaderboardChallenge,
+  LeaderboardEntry,
+  LeaderboardPeriod,
+} from './types';
+
+const MANAGER_ROLES = new Set(['manager', 'admin', 'company_admin', 'owner']);
+
+const defaultAnalytics: LeaderboardAnalytics = {
+  participantCount: 0,
+  averageXp: 0,
+  updatedAt: null,
+  xpBySource: { tasks: 0, goals: 0, recognitions: 0, training: 0 },
+  badgeTierDistribution: {
+    Bronze: 0,
+    Silver: 0,
+    Gold: 0,
+    Platinum: 0,
+  },
+};
+
+function normaliseTier(tier: string | null | undefined): LeaderboardBadgeTier {
+  if (tier === 'Platinum' || tier === 'Gold' || tier === 'Silver') return tier;
+  return 'Bronze';
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === 'string');
+}
+
+function mapToLeaderboardEntry(
+  row: any,
+  rank: number,
+  employee: ReturnType<typeof useEmployees>['employees'][number] | undefined,
+): LeaderboardEntry | null {
+  if (!employee) return null;
+  const achievements = Array.isArray(row.achievements) ? row.achievements : [];
+  const achievementsMap = new Map<string, any>(
+    achievements
+      .filter((item: any) => item && typeof item === 'object' && typeof item.code === 'string')
+      .map((item: any) => [item.code, item]),
+  );
+  const insights = Array.isArray(row.insights) ? row.insights : [];
+  const challenges = (Array.isArray(row.challenges) ? row.challenges : []).filter(
+    (challenge: any) =>
+      challenge &&
+      typeof challenge === 'object' &&
+      typeof challenge.employeeId === 'string' &&
+      typeof challenge.focus === 'string',
+  );
+  const departmentId = row.department_id ?? employee.department?.id ?? null;
+  const departmentName = employee.department?.name ?? null;
+
+  return {
+    employeeId: row.employee_id,
+    fullName: `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim() || employee.email,
+    email: employee.email,
+    avatarUrl: employee.avatar_url ?? null,
+    role: row.role ?? employee.role,
+    period: row.period,
+    periodStart: row.period_start,
+    department: { id: departmentId, name: departmentName },
+    positionName: employee.position?.name ?? null,
+    xp: {
+      tasks: row.xp_tasks ?? 0,
+      goals: row.xp_goals ?? 0,
+      recognitions: row.xp_recognitions ?? 0,
+      training: row.xp_training ?? 0,
+      total: row.xp_total ?? 0,
+    },
+    badgeTier: normaliseTier(row.badge_tier),
+    badges: toStringArray(row.badge_codes),
+    achievements,
+    insights,
+    challenges,
+    taskCount: achievementsMap.get('task_streak')?.value ?? 0,
+    goalCount: achievementsMap.get('goal_closer')?.value ?? 0,
+    recognitionCount: achievementsMap.get('recognition_star')?.value ?? 0,
+    trainingCount: achievementsMap.get('skills_in_motion')?.value ?? 0,
+    reliability: employee.reliability,
+    updatedAt: row.updated_at ?? row.last_synced_at ?? dayjs().toISOString(),
+    rank: rank + 1,
+  };
+}
+
+function computeAnalytics(entries: LeaderboardEntry[]): LeaderboardAnalytics {
+  if (entries.length === 0) {
+    return defaultAnalytics;
+  }
+
+  const participantCount = entries.length;
+  let totalXp = 0;
+  const xpBySource = {
+    tasks: 0,
+    goals: 0,
+    recognitions: 0,
+    training: 0,
+  };
+  const badgeTierDistribution: LeaderboardAnalytics['badgeTierDistribution'] = {
+    Bronze: 0,
+    Silver: 0,
+    Gold: 0,
+    Platinum: 0,
+  };
+  const departmentTotals = new Map<string | null, { id: string | null; name: string | null; totalXp: number; participantCount: number }>();
+
+  entries.forEach((entry) => {
+    totalXp += entry.xp.total;
+    xpBySource.tasks += entry.xp.tasks;
+    xpBySource.goals += entry.xp.goals;
+    xpBySource.recognitions += entry.xp.recognitions;
+    xpBySource.training += entry.xp.training;
+    badgeTierDistribution[entry.badgeTier] += 1;
+
+    const departmentKey = entry.department?.id ?? null;
+    if (!departmentTotals.has(departmentKey)) {
+      departmentTotals.set(departmentKey, {
+        id: departmentKey,
+        name: entry.department?.name ?? null,
+        totalXp: 0,
+        participantCount: 0,
+      });
+    }
+    const aggregate = departmentTotals.get(departmentKey)!;
+    aggregate.totalXp += entry.xp.total;
+    aggregate.participantCount += 1;
+  });
+
+  const topDepartment = Array.from(departmentTotals.values()).sort((a, b) => b.totalXp - a.totalXp)[0];
+
+  return {
+    participantCount,
+    averageXp: participantCount > 0 ? Math.round(totalXp / participantCount) : 0,
+    updatedAt: entries[0]?.updatedAt ?? null,
+    xpBySource,
+    badgeTierDistribution,
+    topDepartment,
+  };
+}
+
+export interface UseLeaderboardDataResult {
+  loading: boolean;
+  syncing: boolean;
+  error: string | null;
+  entries: LeaderboardEntry[];
+  analytics: LeaderboardAnalytics;
+  departments: { id: string | null; name: string | null; count: number }[];
+  roles: { role: string; count: number }[];
+  challenges: LeaderboardChallenge[];
+  lastUpdated: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDataResult {
+  const { profile, loading: profileLoading } = useProfile();
+  const {
+    employees,
+    loading: employeesLoading,
+  } = useEmployees();
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [analytics, setAnalytics] = useState<LeaderboardAnalytics>(defaultAnalytics);
+  const [challenges, setChallenges] = useState<LeaderboardChallenge[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const setLeaderboardInsights = useLeaderboardInsightsStore((state) => state.setInsights);
+  const clearLeaderboardInsights = useLeaderboardInsightsStore((state) => state.clear);
+
+  const companyId = profile?.companyId ?? null;
+  const canMaintain = profile?.role ? MANAGER_ROLES.has(profile.role) : false;
+
+  const departments = useMemo(() => {
+    const map = new Map<string | null, { id: string | null; name: string | null; count: number }>();
+    employees.forEach((employee) => {
+      const key = (employee as any).department_id ?? employee.department?.id ?? null;
+      const name = employee.department?.name ?? null;
+      if (!map.has(key)) {
+        map.set(key, { id: key, name, count: 0 });
+      }
+      map.get(key)!.count += 1;
+    });
+    return Array.from(map.values()).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
+  }, [employees]);
+
+  const roles = useMemo(() => {
+    const map = new Map<string, number>();
+    employees.forEach((employee) => {
+      map.set(employee.role, (map.get(employee.role) ?? 0) + 1);
+    });
+    return Array.from(map.entries())
+      .map(([role, count]) => ({ role, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [employees]);
+
+  const refresh = useCallback(async () => {
+    if (!companyId) {
+      setEntries([]);
+      setAnalytics(defaultAnalytics);
+      setChallenges([]);
+      setLastUpdated(null);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (canMaintain && employees.length > 0) {
+        setSyncing(true);
+        await ensureLeaderboardSynced(companyId, employees, period);
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('gamification_leaderboard')
+        .select(
+          `
+            employee_id,
+            department_id,
+            role,
+            period,
+            period_start,
+            xp_total,
+            xp_tasks,
+            xp_goals,
+            xp_recognitions,
+            xp_training,
+            badge_tier,
+            badge_codes,
+            achievements,
+            insights,
+            challenges,
+            updated_at,
+            last_synced_at
+          `,
+        )
+        .eq('company_id', companyId)
+        .eq('period', period)
+        .order('xp_total', { ascending: false });
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      const rows = data ?? [];
+      if (rows.length === 0 && canMaintain && employees.length > 0) {
+        // No rows after fetch – force a sync and refetch once
+        await ensureLeaderboardSynced(companyId, employees, period);
+        const retry = await supabase
+          .from('gamification_leaderboard')
+          .select('*')
+          .eq('company_id', companyId)
+          .eq('period', period)
+          .order('xp_total', { ascending: false });
+        if (retry.error) throw retry.error;
+        rows.splice(0, rows.length, ...(retry.data ?? []));
+      }
+
+      const employeeMap = new Map(employees.map((employee) => [employee.id, employee]));
+      const enriched: LeaderboardEntry[] = [];
+
+      rows.forEach((row, index) => {
+        const employee = employeeMap.get(row.employee_id);
+        const entry = mapToLeaderboardEntry(row, index, employee);
+        if (entry) {
+          enriched.push(entry);
+        }
+      });
+
+      setEntries(enriched);
+      setAnalytics(computeAnalytics(enriched));
+      setChallenges(enriched.flatMap((entry) => entry.challenges));
+      const updatedTimestamp = rows[0]?.last_synced_at ?? rows[0]?.updated_at ?? null;
+      setLastUpdated(updatedTimestamp);
+
+      if (enriched.length > 0) {
+        const insightPayload = enriched.slice(0, 5).map((entry) => ({
+          employeeId: entry.employeeId,
+          name: entry.fullName,
+          role: entry.role,
+          badgeTier: entry.badgeTier,
+          xp: entry.xp.total,
+          period: entry.period,
+          periodStart: entry.periodStart,
+          achievements: entry.achievements.map((achievement) => achievement.label),
+          recognitionCount: entry.recognitionCount,
+        }));
+        setLeaderboardInsights(insightPayload, updatedTimestamp ?? dayjs().toISOString());
+      } else {
+        clearLeaderboardInsights();
+      }
+    } catch (err) {
+      console.error('[leaderboard] Failed to load leaderboard data', err);
+      setError('Unable to load leaderboard data at the moment.');
+      setEntries([]);
+      setAnalytics(defaultAnalytics);
+      setChallenges([]);
+      setLastUpdated(null);
+      clearLeaderboardInsights();
+    } finally {
+      setLoading(false);
+      setSyncing(false);
+    }
+  }, [companyId, canMaintain, employees, period, setLeaderboardInsights, clearLeaderboardInsights]);
+
+  useEffect(() => {
+    if (profileLoading || employeesLoading) return;
+    if (!companyId) {
+      setEntries([]);
+      setAnalytics(defaultAnalytics);
+      setChallenges([]);
+      setLastUpdated(null);
+      clearLeaderboardInsights();
+      return;
+    }
+    refresh();
+  }, [companyId, period, profileLoading, employeesLoading, refresh, clearLeaderboardInsights]);
+
+  return {
+    loading: loading || profileLoading || employeesLoading,
+    syncing,
+    error,
+    entries,
+    analytics,
+    departments,
+    roles,
+    challenges,
+    lastUpdated,
+    refresh,
+  };
+}

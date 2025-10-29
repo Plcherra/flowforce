@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,9 @@ import {
   Clock,
   CheckSquare,
   AlertTriangle,
+  Bug,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { EnhancedCalendarView } from './EnhancedCalendarView';
 import { AIInsightsDashboard } from './AIInsightsDashboard';
 import { WeeklySchedulingChecklist } from './WeeklySchedulingChecklist';
@@ -29,12 +31,57 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AutoScheduleDialog } from './AutoScheduleDialog';
 import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
+import { useSearchParams } from 'react-router-dom';
 
 export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: string }) {
-  const [activeTab, setActiveTab] = useState('schedule');
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'schedule',
+        label: 'Schedule',
+        icon: Calendar,
+        description: 'Month, week, and staff grid views',
+      },
+      {
+        id: 'analytics',
+        label: 'AI Insights',
+        icon: Brain,
+        description: 'Performance analytics and recommendations',
+      },
+      {
+        id: 'staff',
+        label: 'Staff Management',
+        icon: Users,
+        description: 'Shift swapping and availability',
+      },
+      {
+        id: 'workflow',
+        label: 'Automation',
+        icon: Settings,
+        description: 'Automated workflows and reminders',
+      },
+      {
+        id: 'availability',
+        label: 'Availability',
+        icon: Clock,
+        description: 'Personal and team availability tools',
+      },
+    ],
+    [],
+  );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const requestedTab = searchParams.get('tab');
+    return requestedTab && tabs.some((tab) => tab.id === requestedTab) ? requestedTab : 'schedule';
+  });
+  const [availabilityView, setAvailabilityView] = useState<'personal' | 'team'>(() => {
+    const requestedView = searchParams.get('availability');
+    return requestedView === 'team' ? 'team' : 'personal';
+  });
   const [showChecklist, setShowChecklist] = useState(false);
   const [showAutoScheduler, setShowAutoScheduler] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [showDebugDialog, setShowDebugDialog] = useState(false);
   const { profile } = useProfile();
   const {
     shifts,
@@ -47,6 +94,22 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     refetchAll,
     isFallbackData,
   } = useScheduling();
+
+  useEffect(() => {
+    const requestedTab = searchParams.get('tab');
+    if (requestedTab && tabs.some((tab) => tab.id === requestedTab)) {
+      if (requestedTab !== activeTab) {
+        setActiveTab(requestedTab);
+      }
+    } else if (!requestedTab && activeTab !== 'schedule') {
+      setActiveTab('schedule');
+    }
+  }, [activeTab, searchParams, tabs]);
+
+  useEffect(() => {
+    const requestedView = searchParams.get('availability');
+    setAvailabilityView(requestedView === 'team' ? 'team' : 'personal');
+  }, [searchParams]);
 
   const isManager = useMemo(() => {
     const role = (profile?.role ?? '').toLowerCase();
@@ -161,38 +224,59 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     ? `Filtered by: ${locationFilter}`
     : 'All scheduled locations';
 
-  const tabs = [
-    {
-      id: 'schedule',
-      label: 'Schedule',
-      icon: Calendar,
-      description: 'Month, week, and staff grid views'
-    },
-    {
-      id: 'analytics',
-      label: 'AI Insights',
-      icon: Brain,
-      description: 'Performance analytics and recommendations'
-    },
-    {
-      id: 'staff',
-      label: 'Staff Management',
-      icon: Users,
-      description: 'Shift swapping and availability'
-    },
-    {
-      id: 'workflow',
-      label: 'Automation',
-      icon: Settings,
-      description: 'Automated workflows and reminders'
-    },
-    {
-      id: 'availability',
-      label: 'Availability',
-      icon: Clock,
-      description: 'Personal and team availability tools'
+  const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
+  const showDebugTools = import.meta.env.DEV || isManager;
+
+  const handleTabChange = (value: string) => {
+    if (value !== activeTab) {
+      setActiveTab(value);
     }
-  ];
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (value === 'schedule') {
+      nextParams.delete('tab');
+    } else {
+      nextParams.set('tab', value);
+    }
+
+    if (value === 'availability') {
+      if (availabilityView === 'team') {
+        nextParams.set('availability', 'team');
+      } else {
+        nextParams.delete('availability');
+      }
+    } else {
+      nextParams.delete('availability');
+    }
+
+    if (locationFilter) {
+      nextParams.set('location', locationFilter);
+    } else {
+      nextParams.delete('location');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleAvailabilityViewChange = (value: string) => {
+    const normalizedValue = value === 'team' ? 'team' : 'personal';
+    setAvailabilityView(normalizedValue);
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set('tab', 'availability');
+    if (normalizedValue === 'team') {
+      nextParams.set('availability', 'team');
+    } else {
+      nextParams.delete('availability');
+    }
+
+    if (locationFilter) {
+      nextParams.set('location', locationFilter);
+    } else {
+      nextParams.delete('location');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const showStatusAlert = Boolean(schedulingError) || isFallbackData;
   const statusTitle = isFallbackData ? 'Viewing demo scheduling data' : 'Scheduling data unavailable';
@@ -208,43 +292,6 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
 
   return (
     <div className="min-h-screen bg-background">
-      {isManager && (
-        <div className="border-b border-amber-200/60 bg-amber-50/70">
-          <div className="container mx-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-amber-900">
-            <div className="flex flex-wrap items-center justify-between gap-3 text-amber-700">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide">Scheduling Debug</span>
-                {isFallbackData && (
-                  <span className="rounded-full bg-amber-200 px-2 py-[2px] text-[10px] font-semibold text-amber-900">
-                    Preview data
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-[10px]">Manager view only</span>
-                <button
-                  type="button"
-                  onClick={() => setShowDebugPanel((prev) => !prev)}
-                  className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 transition hover:text-amber-900"
-                >
-                  {showDebugPanel ? 'Hide details' : 'Show details'}
-                </button>
-              </div>
-            </div>
-            {showDebugPanel && (
-              <>
-                <pre className="mt-2 whitespace-pre-wrap break-words text-xs" data-testid="scheduling-debug-json">
-                  {JSON.stringify(debugPayload, null, 2)}
-                </pre>
-                <div className="mt-2 text-xs" data-testid="scheduling-debug-error">
-                  <span className="font-semibold text-amber-700">lastError:</span>{' '}
-                  {lastApiError && lastApiError.trim().length > 0 ? lastApiError : 'none'}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
       <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -268,6 +315,17 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                 <Clock className="h-3 w-3" />
                 Real-time
               </Badge>
+              {showDebugTools && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => setShowDebugDialog(true)}
+                >
+                  <Bug className="h-3 w-3" />
+                  Diagnostics
+                </Button>
+              )}
               <Button
                 size="sm"
                 className="flex items-center gap-2"
@@ -283,6 +341,19 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
               </Button>
             </div>
           </div>
+          {showDebugTools && (
+            <div className="mt-4 flex items-center gap-2 md:hidden">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setShowDebugDialog(true)}
+              >
+                <Bug className="h-4 w-4" />
+                Diagnostics
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -299,7 +370,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
             </div>
           </Alert>
         )}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           {/* Enhanced Tab Navigation */}
           <div className="overflow-x-auto">
             <TabsList className="grid grid-cols-5 w-full min-w-[520px] h-auto p-1">
@@ -419,28 +490,116 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
           </TabsContent>
 
           <TabsContent value="analytics">
-            <AIInsightsDashboard />
+            {advancedFeaturesDisabled ? (
+              <FeatureUnavailableCard
+                icon={Brain}
+                title="AI Insights unavailable"
+                description="Connect live scheduling data to unlock AI-powered recommendations and analytics."
+                actionLabel="Retry data sync"
+                onAction={handleRetry}
+                disabled={retryDisabled}
+              />
+            ) : (
+              <AIInsightsDashboard />
+            )}
           </TabsContent>
 
           <TabsContent value="staff">
-            <StaffShiftManagement />
+            {advancedFeaturesDisabled ? (
+              <FeatureUnavailableCard
+                icon={Users}
+                title="Staff management disabled"
+                description="We need real-time staff data to process swaps and time-off requests."
+                actionLabel="Retry data sync"
+                onAction={handleRetry}
+                disabled={retryDisabled}
+              />
+            ) : (
+              <StaffShiftManagement />
+            )}
           </TabsContent>
 
           <TabsContent value="workflow" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SchedulingWorkflow />
-              <SchedulingNotifications />
-            </div>
+            {advancedFeaturesDisabled ? (
+              <FeatureUnavailableCard
+                icon={Settings}
+                title="Automation paused"
+                description="Automations and reminders resume once scheduling data is back online."
+                actionLabel="Retry data sync"
+                onAction={handleRetry}
+                disabled={retryDisabled}
+              />
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SchedulingWorkflow />
+                <SchedulingNotifications />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="availability" className="space-y-6">
-            <PersonalAvailabilityPanel />
-            <TeamAvailabilityPanel />
+            {advancedFeaturesDisabled ? (
+              <FeatureUnavailableCard
+                icon={Clock}
+                title="Availability preview mode"
+                description="Employee availability updates are read-only until the live connection is restored."
+                actionLabel="Retry data sync"
+                onAction={handleRetry}
+                disabled={retryDisabled}
+              />
+            ) : (
+              <Tabs
+                value={availabilityView}
+                onValueChange={handleAvailabilityViewChange}
+                className="space-y-4"
+              >
+                <div className="overflow-x-auto">
+                  <TabsList className="grid min-w-[320px] grid-cols-2 sm:w-auto">
+                    <TabsTrigger value="personal">My Availability</TabsTrigger>
+                    <TabsTrigger value="team">Manage Availability</TabsTrigger>
+                  </TabsList>
+                </div>
+                <TabsContent value="personal" className="mt-0 space-y-6">
+                  <PersonalAvailabilityPanel />
+                </TabsContent>
+                <TabsContent value="team" className="mt-0 space-y-6">
+                  <TeamAvailabilityPanel />
+                </TabsContent>
+              </Tabs>
+            )}
           </TabsContent>
         </Tabs>
       </div>
 
       {/* Checklist Modal */}
+      <Dialog open={showDebugDialog} onOpenChange={setShowDebugDialog}>
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Scheduling Diagnostics</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {isFallbackData && (
+              <Alert variant="default">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Preview data in use</AlertTitle>
+                <AlertDescription>
+                  Live scheduling data is unavailable. Scheduling actions are temporarily read-only.
+                </AlertDescription>
+              </Alert>
+            )}
+            <div className="rounded-md border bg-muted/50 p-3">
+              <pre className="whitespace-pre-wrap break-words text-xs" data-testid="scheduling-debug-json">
+                {JSON.stringify(debugPayload, null, 2)}
+              </pre>
+            </div>
+            <div className="text-xs" data-testid="scheduling-debug-error">
+              <span className="font-semibold">Last error:</span>{' '}
+              {lastApiError && lastApiError.trim().length > 0 ? lastApiError : 'none'}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showChecklist} onOpenChange={setShowChecklist}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
@@ -456,5 +615,42 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
         defaultLocationId={locationFilter ?? undefined}
       />
     </div>
+  );
+}
+
+interface FeatureUnavailableCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  disabled?: boolean;
+}
+
+function FeatureUnavailableCard({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  disabled,
+}: FeatureUnavailableCardProps) {
+  return (
+    <Card className="border-dashed">
+      <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+        <div className="rounded-full bg-muted p-3 text-muted-foreground">
+          <Icon className="h-6 w-6" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">{description}</p>
+        </div>
+        {actionLabel && onAction && (
+          <Button size="sm" onClick={onAction} disabled={disabled}>
+            {actionLabel}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }

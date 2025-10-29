@@ -30,7 +30,8 @@ import {
   Filter,
   MoreHorizontal,
   Archive,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { useCan } from '@/hooks/useCan';
@@ -40,6 +41,19 @@ import { formatDistanceToNow } from 'date-fns';
 import CreateUpdateWizard from '@/components/updates/CreateUpdateWizard';
 import { WizardFormData } from '@/components/updates/CreateUpdateWizard';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { useRecognitions } from '@/hooks/useRecognitions';
+import { recognitionSourceMeta } from '@/lib/recognitionMeta';
+import type { RecognitionRecord } from '@/types/recognition';
+
+const ENGAGEMENT_DEFAULTS = {
+  allowLikes: true,
+  allowComments: true,
+  allowSharing: false,
+  requireConfirmation: false,
+  showAsPopup: false
+} as const;
 
 export default function CompanyUpdates() {
   const isMobile = useIsMobile();
@@ -65,6 +79,12 @@ export default function CompanyUpdates() {
     deleteUpdate
   } = useCompanyUpdates();
 
+  const { recognitions: recognitionFeed, loading: recognitionLoading } = useRecognitions();
+  const recognitionHighlights = useMemo(
+    () => recognitionFeed.slice(0, 3),
+    [recognitionFeed]
+  );
+
   const canCreateUpdate = useMemo(() => {
     if (can('systemSettings') || can('manageCompany')) {
       return true;
@@ -82,6 +102,8 @@ export default function CompanyUpdates() {
       type: formData.type,
       priority: formData.priority,
       backgroundStyle: formData.backgroundStyle,
+      publishingSettings: formData.publishingSettings,
+      recipients: formData.recipients,
       isPinned: false
     });
   };
@@ -128,27 +150,47 @@ export default function CompanyUpdates() {
     }
   };
 
-  const handleLike = (updateId: string) => {
+  const getEngagementSettings = (update: CompanyUpdate) => ({
+    ...ENGAGEMENT_DEFAULTS,
+    ...(update.publishingSettings?.engagement ?? {})
+  });
+
+  const handleLike = (update: CompanyUpdate) => {
+    const engagement = getEngagementSettings(update);
+    if (!engagement.allowLikes) {
+      return;
+    }
+
     const newLikedUpdates = new Set(likedUpdates);
-    if (likedUpdates.has(updateId)) {
-      newLikedUpdates.delete(updateId);
+    if (likedUpdates.has(update.id)) {
+      newLikedUpdates.delete(update.id);
     } else {
-      newLikedUpdates.add(updateId);
+      newLikedUpdates.add(update.id);
     }
     setLikedUpdates(newLikedUpdates);
-    likeUpdate(updateId);
+    likeUpdate(update.id);
   };
 
-  const handleComment = (updateId: string) => {
-    const content = commentInputs[updateId];
+  const handleComment = (update: CompanyUpdate) => {
+    const engagement = getEngagementSettings(update);
+    if (!engagement.allowComments) {
+      return;
+    }
+
+    const content = commentInputs[update.id];
     if (content?.trim()) {
-      addComment(updateId, content);
-      setCommentInputs(prev => ({ ...prev, [updateId]: '' }));
+      addComment(update.id, content);
+      setCommentInputs(prev => ({ ...prev, [update.id]: '' }));
     }
   };
 
-  const toggleComments = (updateId: string) => {
-    setShowComments(prev => ({ ...prev, [updateId]: !prev[updateId] }));
+  const toggleComments = (update: CompanyUpdate) => {
+    const engagement = getEngagementSettings(update);
+    if (!engagement.allowComments) {
+      return;
+    }
+
+    setShowComments(prev => ({ ...prev, [update.id]: !prev[update.id] }));
   };
 
   const getUpdateComments = (updateId: string) => {
@@ -247,9 +289,70 @@ export default function CompanyUpdates() {
         {/* Updates */}
         {viewMode === 'feed' && (
         <div className="px-4 py-6 space-y-4">
+          {recognitionLoading ? (
+            <Card className="flex items-center gap-3 p-4 border-primary/20 bg-primary/5">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm text-primary">Gathering recognition highlights…</span>
+            </Card>
+          ) : recognitionHighlights.length > 0 ? (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold flex items-center gap-2">
+                    Team Recognition Highlights
+                    <Badge className="bg-primary text-primary-foreground">
+                      {recognitionHighlights.length} new
+                    </Badge>
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Recent celebrations from goals, tasks, and training accomplishments.
+                  </p>
+                </div>
+                <Button variant="link" className="px-0" asChild>
+                  <Link to="/recognition">View all recognitions</Link>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {recognitionHighlights.map((recognition: RecognitionRecord) => {
+                  const details = recognition.reward_details;
+                  const source = details?.source ?? 'manual';
+                  const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
+                  const Icon = meta.icon;
+                  const recipientName = recognition.recipient
+                    ? `${recognition.recipient.first_name ?? ''} ${recognition.recipient.last_name ?? ''}`.trim()
+                    : 'Team Member';
+                  const awardedDistance = recognition.awarded_at
+                    ? formatDistanceToNow(new Date(recognition.awarded_at), { addSuffix: true })
+                    : 'just now';
+
+                  return (
+                    <div key={recognition.id} className="flex items-start gap-3">
+                      <div className={cn('rounded-full p-2 bg-white shadow-sm', meta.color)}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium">{recipientName}</span>
+                          <Badge variant="outline" className={meta.badgeColor}>
+                            {meta.label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{awardedDistance}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {details?.message ?? 'Notable achievement recognised by the team.'}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          ) : null}
+
           {filteredUpdates.map((update) => {
             const updateComments = getUpdateComments(update.id);
             const isLiked = likedUpdates.has(update.id);
+            const engagement = getEngagementSettings(update);
             
             return (
               <Card key={update.id} className={`${update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}>
@@ -331,40 +434,50 @@ export default function CompanyUpdates() {
                         <Eye className="h-3 w-3" />
                         <span>{update.views}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        <span>{update.likes}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="h-3 w-3" />
-                        <span>{update.comments}</span>
-                      </div>
+                      {engagement.allowLikes && (
+                        <div className="flex items-center gap-1">
+                          <Heart className="h-3 w-3" />
+                          <span>{update.likes}</span>
+                        </div>
+                      )}
+                      {engagement.allowComments && (
+                        <div className="flex items-center gap-1">
+                          <MessageCircle className="h-3 w-3" />
+                          <span>{update.comments}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleLike(update.id)}
-                        className={`h-8 px-3 ${isLiked ? 'text-red-600 hover:text-red-700' : ''}`}
-                      >
-                        <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-                        <span className="text-xs">Like</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleComments(update.id)}
-                        className="h-8 px-3"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        <span className="text-xs">Comment</span>
-                      </Button>
-                    </div>
+                    {(engagement.allowLikes || engagement.allowComments) && (
+                      <div className="flex items-center gap-1">
+                        {engagement.allowLikes && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleLike(update)}
+                            className={`h-8 px-3 ${isLiked ? 'text-red-600 hover:text-red-700' : ''}`}
+                          >
+                            <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+                            <span className="text-xs">Like</span>
+                          </Button>
+                        )}
+                        {engagement.allowComments && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleComments(update)}
+                            className="h-8 px-3"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            <span className="text-xs">Comment</span>
+                          </Button>
+                        )}
+                      </div>
+                    )}
 
                     {/* Comments Section */}
-                    {showComments[update.id] && (
+                    {engagement.allowComments && showComments[update.id] && (
                       <div className="space-y-3 pt-3 border-t border-border">
                         {/* Comment Input */}
                         <div className="space-y-2">
@@ -380,7 +493,7 @@ export default function CompanyUpdates() {
                           <div className="flex justify-end">
                             <Button
                               size="sm"
-                              onClick={() => handleComment(update.id)}
+                              onClick={() => handleComment(update)}
                               disabled={!commentInputs[update.id]?.trim()}
                               className="h-8"
                             >

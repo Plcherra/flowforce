@@ -16,9 +16,21 @@ interface UserAuditTabProps {
 }
 
 export function UserAuditTab({ user }: UserAuditTabProps) {
-  const { data: allAuditLogs, isLoading, error } = useAuditLogs();
+  const { data: allAuditLogs, isLoading, error, isAuditEnabled } = useAuditLogs();
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+
+  if (!isAuditEnabled) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">
+            <p>Audit logging is currently disabled for this workspace.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Filter audit logs for this specific user
   const userAuditLogs = allAuditLogs?.filter(log => 

@@ -37,10 +37,11 @@
     "delete": "Supprimer",
     "back": "Retour",
     "continue": "Continuer",
+    "refresh": "Actualiser",
     "viewCertificate": "Voir le Certificat",
     "startCertification": "Commencer la Certification",
     "inventoryCountExecution": "Exécution du Comptage d'Inventaire",
-    "positionManagement": "Gestion des Postes"
+    "positionManagement": "Gestion d'équipe"
   },
   "dashboard": {
     "greeting": {
@@ -49,6 +50,20 @@
       "evening": "Bonsoir"
     },
     "welcome": "Bienvenue sur votre tableau de bord FlowForce",
+    "stats": {
+      "totalEmployees": "Nombre total d’employés",
+      "activeEmployees": "actifs",
+      "departments": "Départements",
+      "activeDepartments": "Départements actifs",
+      "todaysShifts": "Shifts du jour",
+      "scheduledToday": "Planifiés aujourd'hui",
+      "pendingRequests": "Demandes en attente",
+      "timeOffRequests": "Demandes de congé",
+      "timeOffRequestsDetail": "{{approved}} approuvées à venir • {{used}} jours utilisés cette année",
+      "timeOffBalance": "Solde de congés",
+      "timeOffBalanceHint": "{{used}} jours consommés cette année",
+      "currentTime": "Heure actuelle"
+    },
     "operationsSummary": {
       "title": "Instantané Opérationnel",
       "description": "Gardez une longueur d'avance avec un aperçu rapide de l'activité du jour.",
@@ -56,6 +71,7 @@
       "shiftsHint": "Planifiés sur tous les sites",
       "pendingTimeOff": "Congés en attente",
       "requestsHint": "En attente d'approbation",
+      "requestsHintDetailed": "{{approved}} approuvées à venir • {{balance}} jours restants",
       "activeEmployees": "Employés actifs",
       "activeEmployeesHint": "Sur {{total}} au total",
       "departmentCount": "Départements",

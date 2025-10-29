@@ -17,7 +17,6 @@ const CompanyRegistration = lazy(() => import('../pages/CompanyRegistration.tsx'
 const Messages = lazy(() => import('../pages/MessagesPage.tsx'));
 const EventsHub = lazy(() => import('../pages/events/EventsHub.tsx'));
 const Employees = lazy(() => import('../pages/Employees.tsx'));
-const InviteEmployee = lazy(() => import('../pages/InviteEmployee.tsx'));
 const PositionManagement = lazy(() => import('../pages/PositionManagement.tsx'));
 const Goals = lazy(() => import('../pages/Goals.tsx'));
 const Tasks = lazy(() => import('../pages/Tasks.tsx'));
@@ -38,8 +37,6 @@ const ItemsSetup = lazy(() => import('../pages/ItemsSetup.tsx'));
 const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));
 const EnhancedScheduling = lazy(() => import('../pages/EnhancedScheduling.tsx'));
 const ScheduleLobby = lazy(() => import('../pages/ScheduleLobby.tsx'));
-const Availability = lazy(() => import('../pages/availability/index.tsx'));
-const ManageAvailability = lazy(() => import('../pages/availability/manage.tsx'));
 const Certifications = lazy(() => import('../pages/Certifications.tsx'));
 const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
 const Resources = lazy(() => import('../pages/Resources.tsx'));
@@ -51,6 +48,7 @@ const Admin = lazy(() => import('../pages/Admin.tsx'));
 const SectionsPermissions = lazy(() => import('../pages/SectionsPermissions.tsx'));
 const AddSection = lazy(() => import('../pages/AddSection.tsx'));
 const PermissionDemo = lazy(() => import('../pages/PermissionDemo.tsx'));
+const DynamicSection = lazy(() => import('../components/sections/DynamicSection.tsx'));
 // Template components - use the page wrappers
 const TemplatesOverview = lazy(() => import('../pages/Templates.tsx'));
 const TemplateDetail = lazy(() => import('../pages/TemplateDetail.tsx'));
@@ -117,6 +115,10 @@ export const router = createBrowserRouter([
             element: <Messages />,
           },
           {
+            path: "messages/:filter",
+            element: <Messages />,
+          },
+          {
             path: "calendar",
             element: <EventsHub />,
           },
@@ -134,7 +136,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "invite-employee",
-            element: <InviteEmployee />,
+            element: <Navigate to="/app/employees?invite=1" replace />,
           },
           {
             path: "position-management",
@@ -206,11 +208,11 @@ export const router = createBrowserRouter([
           },
           {
             path: "availability",
-            element: <Availability />,
+            element: <Navigate to="/app/enhanced-scheduling?tab=availability" replace />,
           },
           {
             path: "availability/manage",
-            element: <ManageAvailability />,
+            element: <Navigate to="/app/enhanced-scheduling?tab=availability&availability=team" replace />,
           },
           {
             path: "certifications",
@@ -257,6 +259,10 @@ export const router = createBrowserRouter([
             element: <PermissionDemo />,
           },
           {
+            path: "section/:path/*",
+            element: <DynamicSection />,
+          },
+          {
             index: true,
             element: <Navigate to="dashboard" replace />,
           },
@@ -285,7 +291,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "invite-employee",
-        element: <Navigate to="/app/invite-employee" replace />,
+        element: <Navigate to="/app/employees?invite=1" replace />,
       },
       {
         path: "position-management",

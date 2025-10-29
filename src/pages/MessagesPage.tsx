@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,8 @@ import { loadUsers, saveUsers, ensureCurrentUser, type ChatUser } from '@/compon
 import { loadConversations, saveConversations, getConversationName, type Conversation, type ChatMessage } from '@/components/messages/conversations';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Users as UsersIcon, MessageSquare, Paperclip, Image, Smile } from 'lucide-react';
+
+type FilterKey = 'all' | 'unread' | 'teams' | 'helpdesk';
 
 const CURRENT_USER: ChatUser = {
   id: 'current-user',
@@ -35,10 +38,53 @@ export default function MessagesPage() {
   });
   const [conversations, setConversations] = useState<Conversation[]>(() => loadConversations());
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'teams' | 'helpdesk'>('all');
   const [query, setQuery] = useState('');
   const [draftMessage, setDraftMessage] = useState('');
   const [showNewConversation, setShowNewConversation] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { filter: filterParam } = useParams<{ filter?: string }>();
+
+  const normalizeFilter = (value?: string | null): FilterKey | null => {
+    if (!value) return null;
+    const normalized = value.toLowerCase();
+    switch (normalized) {
+      case 'all':
+      case 'unread':
+      case 'teams':
+      case 'helpdesk':
+        return normalized as FilterKey;
+      default:
+        return null;
+    }
+  };
+
+  const routeFilter = normalizeFilter(filterParam);
+  const queryFilter = normalizeFilter(new URLSearchParams(location.search).get('filter'));
+  const filter: FilterKey = routeFilter ?? queryFilter ?? 'all';
+
+  useEffect(() => {
+    if (filterParam && !routeFilter) {
+      navigate('/app/messages', { replace: true });
+    }
+  }, [filterParam, routeFilter, navigate]);
+
+  useEffect(() => {
+    const normalizedPath = location.pathname.replace(/\/+$/, '');
+    if (!filterParam && queryFilter && queryFilter !== 'all' && normalizedPath === '/app/messages') {
+      navigate(`/app/messages/${queryFilter}`, { replace: true });
+    }
+  }, [filterParam, queryFilter, location.pathname, navigate]);
+
+  const handleFilterChange = (next: FilterKey) => {
+    if (next === filter) return;
+    if (next === 'all') {
+      navigate('/app/messages');
+    } else {
+      navigate(`/app/messages/${next}`);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -217,6 +263,7 @@ export default function MessagesPage() {
         })),
     [users]
   );
+  const hasTeammates = teammateOptions.length > 0;
 
   const renderConversationMeta = (conversation: Conversation) => {
     const name = getConversationName(conversation, usersById, CURRENT_USER.id);
@@ -310,7 +357,7 @@ export default function MessagesPage() {
     <div className="flex h-full min-h-0 flex-col px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
       <div className="mx-auto flex w-full flex-1 max-w-7xl">
         <ResizablePanelGroup direction="horizontal" className="flex w-full flex-1 items-stretch">
-          <ResizablePanel defaultSize={32} minSize={22} maxSize={44} className="flex min-w-[220px]">
+          <ResizablePanel defaultSize={32} minSize={22} maxSize={44} className="flex min-w-[280px]">
             <div className="flex h-full w-full flex-col pr-3 lg:pr-4">
               <Card className="flex flex-1 flex-col">
                 <CardHeader className="space-y-3">
@@ -322,6 +369,8 @@ export default function MessagesPage() {
                     <Button
                       size="sm"
                       onClick={() => setShowNewConversation(true)}
+                      disabled={!hasTeammates}
+                      title={hasTeammates ? undefined : 'Invite teammates to start a new chat'}
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       New chat
@@ -332,7 +381,7 @@ export default function MessagesPage() {
                   <div className="flex flex-col gap-2">
                     <MessageFilterBar
                       active={filter}
-                      onChange={setFilter}
+                      onChange={handleFilterChange}
                       labels={{ all: 'All', unread: 'Unread', teams: 'Teams', helpdesk: 'Help Desk' }}
                     />
                     <Input
@@ -343,6 +392,15 @@ export default function MessagesPage() {
                     />
                   </div>
 
+                  {!hasTeammates && (
+                    <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/30 p-4 text-xs text-muted-foreground">
+                      <p className="text-sm font-medium text-foreground">You&apos;re the first one here.</p>
+                      <p className="mt-1">
+                        Invite teammates to the workspace and your conversations will appear once they join.
+                      </p>
+                    </div>
+                  )}
+
                   <ScrollArea className="flex-1 min-h-0 pr-1">
                     <div className="space-y-3">
                       {filteredConversations.map((conversation) => renderConversationMeta(conversation))}
@@ -350,7 +408,13 @@ export default function MessagesPage() {
                       {filteredConversations.length === 0 && (
                         <div className="text-center py-12 text-muted-foreground text-sm">
                           <UsersIcon className="mx-auto mb-3 h-8 w-8" />
-                          <p>{conversations.length === 0 ? 'No conversations yet' : 'No conversations match the current filters'}</p>
+                          <p>
+                            {hasTeammates
+                              ? conversations.length === 0
+                                ? 'No conversations yet'
+                                : 'No conversations match the current filters'
+                              : 'Invite teammates to start your first conversation'}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -438,7 +502,11 @@ export default function MessagesPage() {
                     <div className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
                       <div className="space-y-2">
                         <MessageSquare className="mx-auto h-10 w-10" />
-                        <p>Select a conversation to view the chat history.</p>
+                        <p>
+                          {hasTeammates
+                            ? 'Select a conversation to view the chat history.'
+                            : 'Invite teammates to start your first conversation.'}
+                        </p>
                       </div>
                     </div>
                   )}
