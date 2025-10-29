@@ -42,20 +42,35 @@ Reviewer: _________  \
 
 | Inventory – Actions |  |  |  |  |  |
 | Inventory – Count Execution | Current inventory count module is non-functional; missing process flow for daily or end-of-day counts | Implement full inventory count workflow modeled after mobile design (images 2–4): organized by date and count type (Day Start / Day End); select storage area with associated items; allow adding descriptions and notes; support measurement units (lb, g, kg, EA, box, etc.) and auto-calculation for multi-unit items (e.g., 1 box = 5 bottles of 16oz); add optional barcode scanning for future release; store counts and history in Supabase; enable supervisors to review and approve counts | Critical | 12h | ☐ |
-| Inventory – Items & Setup |  |  |  |  |  |
-| Inventory – Purchasing |  |  |  |  |  |
-| Inventory – Cookbook |  |  |  |  |  |
+| Inventory – Production Events | Not implemented; production flow missing | Implement Production Events similar to Inventory Counts but focused on production tracking; allow selection of production type (e.g., prep, batch, cooked, baked); items will have multiple measurement options (lb, grams, kg, oz, EA); calculate material use, yield, and output cost; auto-sync produced quantities to Items & Setup inventory; record data in Supabase with production cost summaries and approval logs | High | 10h | ☐ |
+| Inventory – Internal Transfers | Missing complete functionality for inter-store transfers | Build transfer process between two store locations with recipient and fulfiller roles, delivery date, and comments; enable notifications and “receive” confirmation buttons; allow adding multiple items with measurement units; show transfer status (requested, sent, received, rejected); store records with audit trail in Supabase; integrate cost tracking per transfer for reports | High | 10h | ☐ |
+| Inventory – Items & Setup | Unit configuration partially broken; categories and cost calculations not functional | Fix multi-unit configuration and price logic; allow admin to create categories (Menu Item, Production, Raw Material, etc.); support unit conversions (oz → lb → kg); calculate costs dynamically based on quantities and linked ingredients; integrate with Menu Items, Waste Events, and Inventory Count modules; add recipe breakdown linking ingredients to menu items (e.g., Latte = Espresso + 10oz Whole Milk, auto-debit milk from inventory); support barcode and supplier linkage | Critical | 14h | ☐ |
+| Inventory – Purchasing | Empty placeholder; requires full procurement workflow | Implement purchasing system to manage orders, receipts, and suppliers; tabs include Place Orders, Receive Orders, Order History, and Invoices; integrate with Items & Setup for pricing and categories; allow vendor selection and API linkage to external suppliers (MarketMan, US Foods, Baldor, etc.); add PO generation, approval, and receiving status tracking; log purchase costs and update inventory automatically | Critical | 14h | ☐ |
+| Inventory – Cookbook | Currently functional visually but unaligned with Items & Setup; redundant internal tabs | Merge cookbook data model with Items & Setup; remove unnecessary sub-tabs (Menu Items, Preparation, Ingredients, Planning) but keep “Favorites”; link each recipe to inventory items for cost tracking and ingredient usage; display live item costs from Items & Setup; add nutrition and yield fields; enable exportable recipe sheets and daily prep summaries; integrate with Waste Events and Production Events for smart inventory deduction | High | 12h | ☐ |
 
-| Accounting – Expenses |  |  |  |  |  |
+| Accounting – Financial Management | Page currently limited to expense tracking; missing integrations, employee, and business financial systems | Expand module into dual-access Financial Management system:  
+**Employee Area:** integrate with Toast API for hour tracking, payments, and performance insights; allow employees to view hours worked, earnings, and AI financial tips.  
+**Owner/Manager Area:** display payroll summaries, total labor costs, store expenses (shipping, purchasing, utilities, etc.), and sales/gains overview; integrate Waste Events and Inventory data for cost impact analysis; add dashboard for profit/loss visualization and forecasts; enable permissions for managers to approve expenses or payroll; support integration with external systems (Toast, QuickBooks, or MarketMan) for automated synchronization. | Critical | 16h | ☐ |
 
-| Analytics & Reports – Analytics |  |  |  |  |  |
+| Analytics & Reports – Analytics | Currently functional only as static form analytics; AI Assistant and Reports tabs need restructuring | Consolidate Reports into Analytics as a “Reports Analyzer” tab powered by AI; analyze all submitted forms including internal reports; add metrics such as completion rate, engagement, accuracy, and follow-up actions; enhance AI to generate summaries, predictions, and improvement tips; move AI Assistant from tab to floating chat widget (bottom-right Co-Pilot style) for live insights and support; allow AI Assistant to analyze any form or report, suggest fixes, and trigger Co-Pilot actions; include chart visualizations, comparison filters, and export options | High | 12h | ☐ |
 | Analytics & Reports – Reports |  |  |  |  |  |
 
-| Admin & Setup – User Management |  |  |  |  |  |
-| Admin & Setup – Invite Employee |  |  |  |  |  |
-| Admin & Setup – Position Management |  |  |  |  |  |
-| Admin & Setup – Sections & Permissions |  |  |  |  |  |
-| Admin & Setup – System Settings |  |  |  |  |  |
+| Admin & Setup – User Management | Current structure fragmented across multiple pages; lacks unified employee control center | Redesign into a single “Team Management” dashboard similar to Connecteam; merge Invite, Position, and Permissions into a modular interface; allow search, filters, and quick actions (edit role, reset password, deactivate, etc.); display employees by department or role; integrate with AI Co-Pilot for quick insights and recommendations on role gaps or inactive users; include profile cards linking to performance and scheduling | Critical | 10h | ☐ |
+| Admin & Setup – Invite Employee | Currently a separate page and redundant with Employee Directory “Add User” | Remove standalone page; implement integrated invite modal directly in Employee Directory with one-click “Add User” button; allow bulk invitations via CSV or link; auto-assign default role and permissions; trigger onboarding checklist automatically after invite | High | 6h | ☐ |
+| Admin & Setup – Position Management | Isolated management flow; hard to connect roles to permissions or scheduling | Merge into the new Team Management dashboard; allow quick editing of positions, role-based templates, and scheduling linkage; integrate role hierarchy and default permissions; sync with Sections & Permissions for unified access control; allow Co-Pilot to suggest position optimizations based on team workload | High | 8h | ☐ |
+| Admin & Setup – Sections & Permissions | Complex UX and disconnected permission layers | Simplify into visual Role Matrix similar to Connecteam’s grid; manage roles (Owner, Admin, Manager, Supervisor, Staff) with toggle-based access for modules; unify backend logic with Position Management; display live permission previews; enable real-time role propagation across all employees; integrate AI-based suggestions to adjust permissions based on performance or risk | Critical | 10h | ☐ |
+| Admin & Setup – System Settings | System Settings tabs currently visual-only; features not functional | Expand System Settings into fully working Admin Configuration Hub:  
+**General:** Enable saving of company name, contact info, and logo; connect to Supabase and sync across modules.  
+**Security:** Make Two-Factor Authentication functional; add configurable password strength rules and session timeout controls.  
+**Localization:** Enable live saving of Timezone, Language, and Currency preferences; auto-update across scheduling and finance areas.  
+**Notifications:** Redesign into unified configuration system; allow company-wide defaults but also per-module overrides (Scheduling, Tasks, Payments, Inventory, etc.); consider modular settings in each section for better UX.  
+**Integrations:** Build API integration panel allowing owners to connect third-party systems like Toast (for payroll, scheduling, and sales data), MarketMan (inventory sync), and Connecteam (scheduling and HR data); include a field for user-provided API keys or OAuth authentication; auto-detect compatible data models and sync fields dynamically.  
+**Appearance:** Make theme editor functional; allow customization of colors, logo placement, sidebar branding, and dashboard layout; store configurations per business in Supabase; add “Preview Mode” before saving.  
+**Admin Configurations (New Section):** Add an Admin Config area (beside System Settings) for:  
+- Managing business structure (locations, departments, working hours)  
+- Default role templates and permissions  
+- API usage logs and system monitoring  
+- AI Co-Pilot configuration for automation scopes. | Critical | 16h | ☐ |
 
 ---\
 
