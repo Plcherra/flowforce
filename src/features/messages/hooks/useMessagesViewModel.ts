@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useMessages } from '@/hooks/messages/useMessages';
 import { useProfile } from '@/hooks/useProfile';
@@ -24,6 +25,9 @@ export function useMessagesViewModel() {
   const { profile } = useProfile();
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams<{ filter?: string }>();
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -45,6 +49,44 @@ export function useMessagesViewModel() {
     () => channels.find((channel) => channel.id === currentChannelId) ?? null,
     [channels, currentChannelId],
   );
+
+  const normalizeFilter = useCallback((value?: string | null): FilterType | null => {
+    if (!value) return null;
+    const normalized = value.toLowerCase();
+    switch (normalized) {
+      case 'all':
+      case 'unread':
+      case 'teams':
+      case 'helpdesk':
+        return normalized as FilterType;
+      default:
+        return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    const basePath = '/app/messages';
+    const currentPath = location.pathname.replace(/\/+$/, '') || '/';
+
+    const routeFilter = normalizeFilter(params.filter);
+    const queryFilter = normalizeFilter(new URLSearchParams(location.search).get('filter'));
+    const nextFilter = routeFilter ?? queryFilter ?? 'all';
+    setActiveFilter(nextFilter);
+
+    if (params.filter && !routeFilter) {
+      if (currentPath !== basePath) {
+        navigate(basePath, { replace: true });
+      }
+      return;
+    }
+
+    if (!params.filter && queryFilter && queryFilter !== 'all') {
+      const target = `${basePath}/${queryFilter}`;
+      if (currentPath !== target) {
+        navigate(target, { replace: true });
+      }
+    }
+  }, [location.pathname, location.search, navigate, normalizeFilter, params.filter]);
 
   useEffect(() => {
     (async () => {
@@ -197,7 +239,14 @@ export function useMessagesViewModel() {
     sidebarWidth,
     setSidebarWidth,
     activeFilter,
-    setActiveFilter,
+    setActiveFilter: (value: FilterType) => {
+      setActiveFilter(value);
+      const basePath = '/app/messages';
+      const target = value === 'all' ? basePath : `${basePath}/${value}`;
+      if (location.pathname !== target) {
+        navigate(target, { replace: true });
+      }
+    },
     query,
     setQuery,
     available,
