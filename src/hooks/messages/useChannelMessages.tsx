@@ -9,12 +9,19 @@ export function useChannelMessages(channelId: string | null) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (channelId) {
-      fetchMessages(channelId);
-      subscribeToChannelMessages(channelId);
-    } else {
+    if (!channelId) {
       setMessages([]);
+      return;
     }
+
+    fetchMessages(channelId);
+    const unsubscribe = subscribeToChannelMessages(channelId);
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [channelId]);
 
   const fetchMessages = async (channelId: string) => {

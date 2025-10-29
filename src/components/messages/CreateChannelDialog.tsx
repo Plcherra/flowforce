@@ -111,6 +111,7 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
                 <SelectItem value="group">Group Channel</SelectItem>
                 <SelectItem value="department">Department Channel</SelectItem>
                 <SelectItem value="direct">Direct Message</SelectItem>
+                <SelectItem value="helpdesk">Help Desk Channel</SelectItem>
               </SelectContent>
             </Select>
           </div>

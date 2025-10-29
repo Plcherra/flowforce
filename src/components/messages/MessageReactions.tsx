@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Smile, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -27,17 +27,12 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  useEffect(() => {
-    fetchReactions();
-    subscribeToReactions();
-  }, [messageId]);
-
-  const fetchReactions = async () => {
+  const fetchReactions = useCallback(async (targetMessageId: string) => {
     try {
       const { data, error } = await supabase
         .from('message_reactions')
         .select('*')
-        .eq('message_id', messageId)
+        .eq('message_id', targetMessageId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -45,21 +40,21 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
     } catch (error) {
       console.error('Error fetching reactions:', error);
     }
-  };
+  }, []);
 
-  const subscribeToReactions = () => {
+  const subscribeToReactions = useCallback((targetMessageId: string) => {
     const channel = supabase
-      .channel(`reactions:${messageId}`)
+      .channel(`reactions:${targetMessageId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'message_reactions',
-          filter: `message_id=eq.${messageId}`
+          filter: `message_id=eq.${targetMessageId}`
         },
         () => {
-          fetchReactions();
+          fetchReactions(targetMessageId);
         }
       )
       .subscribe();
@@ -67,7 +62,16 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [fetchReactions]);
+
+  useEffect(() => {
+    fetchReactions(messageId);
+    const unsubscribe = subscribeToReactions(messageId);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [fetchReactions, messageId, subscribeToReactions]);
 
   const addReaction = async (emoji: string) => {
     if (!user) return;

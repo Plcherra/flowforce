@@ -26,18 +26,22 @@ export function MessageInput({ channelId, channelName, onSendMessage }: MessageI
     if ((!messageInput.trim() && messageAttachments.length === 0)) return;
 
     const content = messageInput.trim() || '[File attachment]';
-    await onSendMessage(content, messageAttachments);
-    setMessageInput('');
-    setMessageAttachments([]);
+    try {
+      await onSendMessage(content, messageAttachments);
+      setMessageInput('');
+      setMessageAttachments([]);
+    } catch (error) {
+      console.error('Failed to send message', error);
+    }
   };
 
   return (
     <div className="p-4 border-t border-gray-200">
       {/* File Attachments */}
       <MessageAttachments
-        messageId={channelId} // Use channel ID as temp message ID
-        attachments={messageAttachments as any}
-        onAttachmentsChange={setMessageAttachments as any}
+        messageId={channelId} // Use channel ID as temporary scope until message is persisted
+        attachments={messageAttachments}
+        onAttachmentsChange={setMessageAttachments}
       />
       
       <form onSubmit={handleSendMessage} className="flex items-end gap-2 mt-3">

@@ -1,12 +1,33 @@
 import { useAuth } from '../useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { SearchResult } from '@/types/messages';
+import type { MessageAttachment, SearchResult } from '@/types/messages';
 
 export function useMessageOperations() {
   const { user } = useAuth();
 
-  const sendMessage = async (channelId: string, content: string, replyToId?: string) => {
+  const sendMessage = async (
+    channelId: string,
+    content: string,
+    options: { replyToId?: string; attachments?: MessageAttachment[] } = {},
+  ) => {
     if (!user) return { data: null, error: 'User not authenticated' };
+
+    const { replyToId, attachments = [] } = options;
+    const messageType =
+      attachments.length === 0
+        ? 'text'
+        : attachments.every((attachment) => attachment.type?.startsWith('image/'))
+          ? 'image'
+          : 'file';
+
+    const attachmentsPayload = attachments.map((attachment) => ({
+      id: attachment.id ?? (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : undefined),
+      name: attachment.name,
+      path: attachment.path ?? null,
+      url: attachment.url ?? null,
+      type: attachment.type,
+      size: attachment.size ?? null,
+    }));
 
     try {
       const { data, error } = await supabase
@@ -15,7 +36,9 @@ export function useMessageOperations() {
           channel_id: channelId,
           sender_id: user.id,
           content,
-          reply_to_id: replyToId || null
+          reply_to_id: replyToId || null,
+          attachments: attachmentsPayload,
+          message_type: messageType,
         })
         .select()
         .single();

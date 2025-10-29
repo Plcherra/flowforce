@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,20 +6,12 @@ import { Paperclip, X, File, Image, Download, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
-interface FileAttachment {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  url?: string;
-  path?: string;
-}
+import type { MessageAttachment } from '@/types/messages';
 
 interface MessageAttachmentsProps {
   messageId?: string;
-  attachments?: FileAttachment[];
-  onAttachmentsChange?: (attachments: FileAttachment[]) => void;
+  attachments?: MessageAttachment[];
+  onAttachmentsChange?: (attachments: MessageAttachment[]) => void;
   readOnly?: boolean;
 }
 
@@ -43,7 +35,7 @@ export function MessageAttachments({
     setUploadProgress(0);
 
     try {
-      const newAttachments: FileAttachment[] = [];
+      const newAttachments: MessageAttachment[] = [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -100,7 +92,7 @@ export function MessageAttachments({
     }
   };
 
-  const removeAttachment = async (attachment: FileAttachment) => {
+  const removeAttachment = async (attachment: MessageAttachment) => {
     try {
       // Remove from storage if it has a path
       if (attachment.path) {
@@ -126,7 +118,7 @@ export function MessageAttachments({
     }
   };
 
-  const downloadAttachment = async (attachment: FileAttachment) => {
+  const downloadAttachment = async (attachment: MessageAttachment) => {
     try {
       if (attachment.path) {
         const { data, error } = await supabase.storage

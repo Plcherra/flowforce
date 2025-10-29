@@ -19,6 +19,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import type { MessageAttachment, ThreadMessage } from '@/types/messages';
+import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
 
 export default function Messages() {
@@ -33,6 +34,7 @@ export default function Messages() {
   } = useMessages();
   const { profile } = useProfile();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
@@ -141,11 +143,23 @@ export default function Messages() {
   }, []);
 
   const handleSendMessage = useCallback(
-    async (content: string, _attachments: MessageAttachment[]) => {
+    async (content: string, attachments: MessageAttachment[]) => {
       if (!currentChannelId) return;
-      await sendMessage(currentChannelId, content);
+      const { error } = await sendMessage(currentChannelId, content, {
+        attachments,
+      });
+
+      if (error) {
+        logger.error?.('Failed to send message', error);
+        toast({
+          title: 'Unable to send message',
+          description: 'Please try again in a moment.',
+          variant: 'destructive',
+        });
+        throw error;
+      }
     },
-    [currentChannelId, sendMessage],
+    [currentChannelId, sendMessage, toast],
   );
 
   const handleStartVideoCall = useCallback((type: 'video' | 'audio') => {
@@ -303,7 +317,7 @@ export default function Messages() {
                   />
                 </div>
                 <div
-                  className="w-[6px] shrink-0 cursor-col-resize bg-border hover:bg-primary/40"
+                  className="group relative hidden h-full w-px shrink-0 cursor-col-resize items-stretch lg:flex after:absolute after:inset-y-0 after:-left-[3px] after:w-4 after:cursor-col-resize after:content-['']"
                   onMouseDown={(event) => {
                     const startX = event.clientX;
                     const start = sidebarWidth;
@@ -319,7 +333,9 @@ export default function Messages() {
                     window.addEventListener('mousemove', handleMove);
                     window.addEventListener('mouseup', handleUp);
                   }}
-                />
+                >
+                  <span className="mx-auto h-full w-px rounded bg-neutral-200 transition-colors duration-200 group-hover:bg-neutral-300 group-active:bg-neutral-300" />
+                </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <MessagesMainArea
                     channel={currentChannel}
