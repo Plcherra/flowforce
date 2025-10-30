@@ -99,7 +99,7 @@ export default function EventsCalendarPage() {
               </CardHeader>
               <CardContent className="p-4">
                 <SchedulingProvider>
-                  <SchedulingCalendar />
+                  <SchedulingCalendar mode="events" />
                 </SchedulingProvider>
               </CardContent>
             </Card>

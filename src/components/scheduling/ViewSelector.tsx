@@ -7,9 +7,12 @@ interface ViewSelectorProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
   isMobile?: boolean;
+  mode?: 'scheduling' | 'events';
 }
 
-export function ViewSelector({ currentView, onViewChange, isMobile = false }: ViewSelectorProps) {
+export function ViewSelector({ currentView, onViewChange, isMobile = false, mode = 'scheduling' }: ViewSelectorProps) {
+  const isScheduling = mode === 'scheduling';
+
   if (isMobile) {
     return (
       <div className="space-y-3">
@@ -39,21 +42,23 @@ export function ViewSelector({ currentView, onViewChange, isMobile = false }: Vi
             Month
           </Button>
         </div>
-        
-        <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span>Published</span>
+
+        {isScheduling && (
+          <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Published</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <span>Draft</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span>Understaffed</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-            <span>Draft</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            <span>Understaffed</span>
-          </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -82,29 +87,33 @@ export function ViewSelector({ currentView, onViewChange, isMobile = false }: Vi
         >
           Month
         </Button>
-        <Button
-          variant={currentView === 'year' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onViewChange('year')}
-        >
-          Year
-        </Button>
+        {isScheduling && (
+          <Button
+            variant={currentView === 'year' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onViewChange('year')}
+          >
+            Year
+          </Button>
+        )}
       </div>
 
-      <div className="flex items-center space-x-2 text-sm text-gray-600">
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
-          <span>Published</span>
+      {isScheduling && (
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-green-500 rounded"></div>
+            <span>Published</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+            <span>Draft</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-red-500 rounded"></div>
+            <span>Understaffed</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-          <span>Draft</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-red-500 rounded"></div>
-          <span>Understaffed</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

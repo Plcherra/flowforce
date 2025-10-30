@@ -105,6 +105,7 @@ export default function EventsHubPage() {
                 </CardHeader>
                 <CardContent className="p-4">
                   <SchedulingCalendar
+                    mode="events"
                     hideShiftActions
                     externalDetails
                     onShiftSelect={setSelectedShiftId}

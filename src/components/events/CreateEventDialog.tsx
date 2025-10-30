@@ -64,32 +64,51 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
     }
   }, [open, defaultType]);
 
-  const teamMembers = useMemo(() => {
+  const attendeeOptions: EventAttendee[] = (() => {
     const map = new Map<string, EventAttendee>();
-    shifts.forEach((shift) => {
-      shift.assignments?.forEach((assignment) => {
-        const user = assignment.user;
-        if (!user?.id) return;
-        if (!map.has(user.id)) {
-          const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || 'Team member';
-          map.set(user.id, {
-            id: user.id,
-            name,
-            avatar_url: user.avatar_url ?? null,
-            role: user.role ?? shift.job_position?.name ?? undefined,
-          });
-        }
+
+    employees.forEach((employee) => {
+      if (!employee.id) return;
+      const name =
+        `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim() ||
+        employee.email ||
+        'Team member';
+      map.set(employee.id, {
+        id: employee.id,
+        name,
+        avatar_url: employee.avatar_url ?? null,
+        role: employee.position?.name ?? employee.role ?? null,
       });
     });
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [shifts]);
 
-  const filteredMembers = useMemo(() => {
-    if (!participantQuery.trim()) return teamMembers;
-    return teamMembers.filter((member) =>
-      member.name.toLowerCase().includes(participantQuery.trim().toLowerCase()),
-    );
-  }, [participantQuery, teamMembers]);
+    events.forEach((event) => {
+      (event.attendees ?? []).forEach((attendee) => {
+        if (!attendee?.id || map.has(attendee.id)) return;
+        map.set(attendee.id, {
+          id: attendee.id,
+          name: attendee.name,
+          avatar_url: attendee.avatar_url ?? null,
+          role: attendee.role ?? null,
+        });
+      });
+    });
+
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  })();
+
+  const filteredAttendees = !participantQuery.trim()
+    ? attendeeOptions
+    : attendeeOptions.filter((attendee) =>
+        attendee.name.toLowerCase().includes(participantQuery.trim().toLowerCase()),
+      );
+
+  const attendeeMap = (() => {
+    const map = new Map<string, EventAttendee>();
+    attendeeOptions.forEach((attendee) => {
+      map.set(attendee.id, attendee);
+    });
+    return map;
+  })();
 
   const shiftSuggestions = useMemo(() => {
     if (!start || !end) return [] as Schedule[];
@@ -122,7 +141,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
     };
 
     participantIds.forEach((id) => {
-      const match = teamMembers.find((member) => member.id === id);
+      const match = attendeeMap.get(id);
       if (match) push(match);
     });
 
@@ -191,7 +210,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
         <DialogHeader>
           <DialogTitle>{sessionType === 'meeting' ? 'Schedule meeting' : 'Create event'}</DialogTitle>
           <DialogDescription>
-            Capture details, invite team members, and link the session to shifts on the schedule.
+            Capture details, invite teammates from your directory, and optionally link related shifts.
           </DialogDescription>
         </DialogHeader>
 
@@ -268,35 +287,38 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
               />
             </div>
             <div className="mt-2 max-h-48 overflow-auto space-y-2 pr-2">
-              {filteredMembers.length === 0 && (
+              {employeesLoading ? (
+                <div className="text-xs text-muted-foreground px-1 py-2">Loading team directory…</div>
+              ) : filteredAttendees.length === 0 ? (
                 <div className="text-xs text-muted-foreground px-1 py-2">
-                  No team members found. Assign team members to shifts to invite them here.
+                  No matching people found. Update your directory or adjust the search to invite teammates.
                 </div>
+              ) : (
+                filteredAttendees.map((attendee) => (
+                  <label key={attendee.id} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={!!selectedParticipants[attendee.id]}
+                      onCheckedChange={(value) => toggleSelection(setSelectedParticipants)(attendee.id, value)}
+                    />
+                    <div>
+                      <div className="font-medium leading-none">{attendee.name}</div>
+                      {attendee.role && <div className="text-xs text-muted-foreground">{attendee.role}</div>}
+                    </div>
+                  </label>
+                ))
               )}
-              {filteredMembers.map((member) => (
-                <label key={member.id} className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={!!selectedParticipants[member.id]}
-                    onCheckedChange={(value) => toggleSelection(setSelectedParticipants)(member.id, value)}
-                  />
-                  <div>
-                    <div className="font-medium leading-none">{member.name}</div>
-                    {member.role && <div className="text-xs text-muted-foreground">{member.role}</div>}
-                  </div>
-                </label>
-              ))}
             </div>
           </div>
 
           <div>
-            <Label>Link to scheduled shifts</Label>
+            <Label>Link to scheduled shifts (optional)</Label>
             <p className="text-xs text-muted-foreground mb-2">
               Select the shifts this session supports. Linked shifts will surface the meeting to assigned staff.
             </p>
             <div className="max-h-48 overflow-auto space-y-2 pr-2 border rounded-md p-2">
               {shiftSuggestions.length === 0 && (
                 <div className="text-xs text-muted-foreground px-1 py-2">
-                  No overlapping shifts found for the selected time window.
+                  No overlapping shifts found for the selected time window. You can still create the event without linking.
                 </div>
               )}
               {shiftSuggestions.map((shift) => (

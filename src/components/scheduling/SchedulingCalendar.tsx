@@ -18,7 +18,10 @@ const INITIAL_FILTERS: SchedulingFilterState = {
   published: 'all',
 };
 
+type CalendarMode = 'scheduling' | 'events';
+
 interface SchedulingCalendarProps {
+  mode?: CalendarMode;
   onCreateShift?: () => void;
   hideShiftActions?: boolean;
   externalDetails?: boolean;
@@ -26,6 +29,7 @@ interface SchedulingCalendarProps {
 }
 
 export function SchedulingCalendar({
+  mode = 'scheduling',
   onCreateShift: _onCreateShift,
   hideShiftActions = false,
   externalDetails = false,
@@ -39,6 +43,8 @@ export function SchedulingCalendar({
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SchedulingFilterState>(INITIAL_FILTERS);
+  const isSchedulingMode = mode === 'scheduling';
+  const effectiveHideShiftActions = hideShiftActions || !isSchedulingMode;
 
   const filteredShifts = useMemo<ShiftWithAssignments[]>(() => {
     return shifts.filter((shift) => {
@@ -141,24 +147,28 @@ export function SchedulingCalendar({
   return (
     <div className="space-y-6">
       <ScheduleHeader 
+        mode={mode}
         onPrevDate={() => handleDateChange('prev')}
         onNextDate={() => handleDateChange('next')}
-        onToggleFilters={() => setShowFilters(!showFilters)}
+        onToggleFilters={
+          isSchedulingMode ? () => setShowFilters((previous) => !previous) : undefined
+        }
         selectedDate={selectedDate}
         currentView={currentView}
         isMobile={isMobile}
         dateRangeText={selectedDate.toDateString()}
-        showFilters={showFilters}
-        hideToolbar={hideShiftActions}
+        showFilters={isSchedulingMode ? showFilters : false}
+        hideToolbar={effectiveHideShiftActions || !isSchedulingMode}
       />
 
       <ViewSelector
         currentView={currentView}
         onViewChange={(view: ViewType) => setCurrentView(view)}
         isMobile={isMobile}
+        mode={mode}
       />
 
-      {showFilters && (
+      {isSchedulingMode && showFilters && (
         <SchedulingFilters 
           filters={filters}
           onFiltersChange={setFilters}
@@ -177,7 +187,7 @@ export function SchedulingCalendar({
             loading={loading}
             isMobile={isMobile}
             overlayEvents={overlayEvents}
-            hideShiftActions={hideShiftActions}
+            hideShiftActions={effectiveHideShiftActions}
             selectedEventId={selectedEventId}
           />
         </div>

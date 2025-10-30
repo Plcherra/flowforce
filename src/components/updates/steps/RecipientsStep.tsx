@@ -1,33 +1,41 @@
 import React, { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Users, Search, Building, UserCheck, Globe } from 'lucide-react';
-import { WizardFormData } from '../CreateUpdateWizard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Users, Search, Building, UserCheck, Globe, Target, AlertCircle } from 'lucide-react';
+
+import type { WizardFormData } from '../CreateUpdateWizard';
 import { useProfile } from '@/hooks/useProfile';
+import { useRecipientInsights } from '@/features/company-updates/wizard/useRecipientInsights';
 
 interface RecipientsStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
 }
 
-// TODO: Connect to real employee data system
-const DEPARTMENTS = [
-  { id: 'hr', name: 'Human Resources', count: 0 },
-  { id: 'engineering', name: 'Engineering', count: 0 },
-  { id: 'sales', name: 'Sales', count: 0 },
-  { id: 'marketing', name: 'Marketing', count: 0 },
-  { id: 'operations', name: 'Operations', count: 0 },
-  { id: 'finance', name: 'Finance', count: 0 }
+const STATIC_DEPARTMENTS = [
+  { id: 'hr', name: 'Human Resources' },
+  { id: 'engineering', name: 'Engineering' },
+  { id: 'sales', name: 'Sales' },
+  { id: 'marketing', name: 'Marketing' },
+  { id: 'operations', name: 'Operations' },
+  { id: 'finance', name: 'Finance' },
 ];
 
-const ROLES = [
-  { id: 'admin', name: 'Admin', count: 0 },
-  { id: 'manager', name: 'Manager', count: 0 },
-  { id: 'employee', name: 'Employee', count: 0 },
-  { id: 'contractor', name: 'Contractor', count: 0 }
+const STATIC_ROLES = [
+  { id: 'admin', name: 'Admin' },
+  { id: 'manager', name: 'Manager' },
+  { id: 'employee', name: 'Employee' },
+  { id: 'contractor', name: 'Contractor' },
 ];
 
 type RecipientUser = {
@@ -42,6 +50,7 @@ const STATIC_USERS: RecipientUser[] = [];
 export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { profile } = useProfile();
+  const insights = useRecipientInsights(formData);
 
   const availableUsers = useMemo<RecipientUser[]>(() => {
     const users = [...STATIC_USERS];
@@ -58,7 +67,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
           id,
           name: displayName,
           role: profile.role ?? 'Member',
-          department: null
+          department: null,
         });
       }
     }
@@ -68,25 +77,25 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
 
   const updateRecipients = (updates: Partial<typeof formData.recipients>) => {
     updateFormData({
-      recipients: { ...formData.recipients, ...updates }
+      recipients: { ...formData.recipients, ...updates },
     });
   };
 
   const handleRecipientTypeChange = (type: typeof formData.recipients.type) => {
-    updateRecipients({ 
-      type, 
-      targets: type === 'all' ? [] : formData.recipients.targets 
+    updateRecipients({
+      type,
+      targets: type === 'all' ? [] : formData.recipients.targets,
     });
   };
 
   const toggleTarget = (targetId: string, category: 'departments' | 'roles' | 'individuals') => {
     const currentTargets = formData.recipients.targets;
     const prefixedId = `${category}:${targetId}`;
-    
+
     const newTargets = currentTargets.includes(prefixedId)
-      ? currentTargets.filter(id => id !== prefixedId)
+      ? currentTargets.filter((id) => id !== prefixedId)
       : [...currentTargets, prefixedId];
-    
+
     updateRecipients({ targets: newTargets });
   };
 
@@ -116,7 +125,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
       roles: { singular: 'role', plural: 'roles' },
       individuals: { singular: 'person', plural: 'people' },
       groups: { singular: 'group', plural: 'groups' },
-      all: { singular: 'employee', plural: 'employees' }
+      all: { singular: 'employee', plural: 'employees' },
     };
     const selectedCount = selectionByCategory[appliedCategory] ?? 0;
     return selectedCount > 0
@@ -127,88 +136,165 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
   const filteredUsers = availableUsers.filter((user: RecipientUser) =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.department?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.department?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const insightsBanner = (
+    <Card className="border-primary/40 bg-primary/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-primary">
+          <Target className="h-4 w-4" />
+          Audience Insights
+        </CardTitle>
+        <CardDescription className="text-xs text-primary/80">
+          Estimated reach uses active employee data from the last sync.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+        {insights.loading ? (
+          <Skeleton className="h-14 rounded-md" />
+        ) : (
+          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
+            <p className="text-xs text-muted-foreground">Estimated reach</p>
+            <p className="text-lg font-semibold text-primary">{insights.estimatedReach}</p>
+          </div>
+        )}
+
+        {insights.loading ? (
+          <Skeleton className="h-14 rounded-md" />
+        ) : (
+          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
+            <p className="text-xs text-muted-foreground">Total employees</p>
+            <p className="text-lg font-semibold">{insights.totalEmployees}</p>
+          </div>
+        )}
+
+        {insights.loading ? (
+          <Skeleton className="h-14 rounded-md" />
+        ) : (
+          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
+            <p className="text-xs text-muted-foreground">Active filters</p>
+            <p className="text-lg font-semibold">{insights.activeFilters}</p>
+          </div>
+        )}
+
+        {!insights.loading && insights.actionItems.length > 0 && (
+          <div className="col-span-full space-y-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="flex items-center gap-2 font-medium">
+              <AlertCircle className="h-3.5 w-3.5" />
+              Review before publishing
+            </div>
+            <ul className="list-disc space-y-1 pl-4">
+              {insights.actionItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const segmentSuggestions = (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Suggested Segments</CardTitle>
+        <CardDescription className="text-xs">Pull in frequent audiences with one click.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-wrap gap-2">
+        {insights.loading && <Skeleton className="h-8 w-32 rounded-full" />}
+        {!insights.loading && insights.segments.length === 0 && (
+          <p className="text-xs text-muted-foreground">No suggestions yet—adjust filters to see recommendations.</p>
+        )}
+        {insights.segments.map((segment) => (
+          <Button
+            key={`${segment.type}:${segment.id}`}
+            variant="secondary"
+            size="sm"
+            onClick={() => toggleTarget(segment.id, segment.type)}
+          >
+            {segment.name}
+            <Badge variant="outline" className="ml-2">
+              {segment.count}
+            </Badge>
+          </Button>
+        ))}
+      </CardContent>
+    </Card>
   );
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Select Recipients</h3>
-        <p className="text-muted-foreground">
-          Choose who should receive this update
-        </p>
+        <h3 className="mb-2 text-lg font-semibold">Select Recipients</h3>
+        <p className="text-muted-foreground">Choose who should receive this update and confirm their reach.</p>
       </div>
 
+      {insightsBanner}
+      {segmentSuggestions}
+
       {/* Recipient Type Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card 
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
             formData.recipients.type === 'all' ? 'ring-2 ring-primary' : ''
           }`}
           onClick={() => handleRecipientTypeChange('all')}
         >
           <CardContent className="p-4 text-center">
-            <Globe className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <Globe className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">All Employees</h4>
             <p className="text-sm text-muted-foreground">Everyone in company</p>
-            {formData.recipients.type === 'all' && (
-              <Badge variant="default" className="mt-2">Selected</Badge>
-            )}
+            {formData.recipients.type === 'all' && <Badge variant="default" className="mt-2">Selected</Badge>}
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
             formData.recipients.type === 'departments' ? 'ring-2 ring-primary' : ''
           }`}
           onClick={() => handleRecipientTypeChange('departments')}
         >
           <CardContent className="p-4 text-center">
-            <Building className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <Building className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Departments</h4>
             <p className="text-sm text-muted-foreground">Select by department</p>
-            {formData.recipients.type === 'departments' && (
-              <Badge variant="default" className="mt-2">Selected</Badge>
-            )}
+            {formData.recipients.type === 'departments' && <Badge variant="default" className="mt-2">Selected</Badge>}
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
             formData.recipients.type === 'roles' ? 'ring-2 ring-primary' : ''
           }`}
           onClick={() => handleRecipientTypeChange('roles')}
         >
           <CardContent className="p-4 text-center">
-            <UserCheck className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <UserCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Roles</h4>
             <p className="text-sm text-muted-foreground">Select by role</p>
-            {formData.recipients.type === 'roles' && (
-              <Badge variant="default" className="mt-2">Selected</Badge>
-            )}
+            {formData.recipients.type === 'roles' && <Badge variant="default" className="mt-2">Selected</Badge>}
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
             formData.recipients.type === 'individuals' ? 'ring-2 ring-primary' : ''
           }`}
           onClick={() => handleRecipientTypeChange('individuals')}
         >
           <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Individuals</h4>
             <p className="text-sm text-muted-foreground">Select specific users</p>
-            {formData.recipients.type === 'individuals' && (
-              <Badge variant="default" className="mt-2">Selected</Badge>
-            )}
+            {formData.recipients.type === 'individuals' && <Badge variant="default" className="mt-2">Selected</Badge>}
           </CardContent>
         </Card>
       </div>
 
       {/* Selection Details */}
       {formData.recipients.type !== 'all' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             {/* Departments Selection */}
             {formData.recipients.type === 'departments' && (
@@ -217,18 +303,29 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                   <CardTitle className="text-base">Select Departments</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {DEPARTMENTS.map((dept) => (
-                    <div key={dept.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={isTargetSelected(dept.id, 'departments')}
-                          onCheckedChange={() => toggleTarget(dept.id, 'departments')}
-                        />
-                        <span className="font-medium">{dept.name}</span>
+                  {(insights.segments.filter((segment) => segment.type === 'departments').length > 0
+                    ? insights.segments.filter((segment) => segment.type === 'departments')
+                    : STATIC_DEPARTMENTS
+                  ).map((dept) => {
+                    const id = (dept as any).id;
+                    const name = (dept as any).name;
+                    const count = 'count' in dept ? (dept as any).count : undefined;
+
+                    return (
+                      <div key={`department-${id}`} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={isTargetSelected(id, 'departments')}
+                            onCheckedChange={() => toggleTarget(id, 'departments')}
+                          />
+                          <span className="font-medium">{name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {count !== undefined ? `${count} employees` : 'Connect a directory to view counts'}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">Connect a directory to view counts</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               </Card>
             )}
@@ -240,109 +337,10 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                   <CardTitle className="text-base">Select Roles</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {ROLES.map((role) => (
-                    <div key={role.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={isTargetSelected(role.id, 'roles')}
-                          onCheckedChange={() => toggleTarget(role.id, 'roles')}
-                        />
-                        <span className="font-medium">{role.name}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">Connect a directory to view counts</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Individual Users Selection */}
-            {formData.recipients.type === 'individuals' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Select Individuals</CardTitle>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search employees..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 max-h-60 overflow-y-auto">
-                  {filteredUsers.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Users className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm">No employees available. Connect your employee system to select recipients.</p>
-                    </div>
-                  ) : (
-                    filteredUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={isTargetSelected(user.id, 'individuals')}
-                          onCheckedChange={() => toggleTarget(user.id, 'individuals')}
-                        />
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {[user.role, user.department].filter(Boolean).join(' • ') || 'Profile details pending'}
-                          </div>
-                        </div>
-                      </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Summary */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Recipients Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-                    <div className="text-2xl font-semibold">{getRecipientCount()}</div>
-                    <p className="text-sm text-muted-foreground">will receive this update</p>
-                  </div>
-                  
-                  {formData.recipients.targets.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Selected:</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.recipients.targets.map((target) => {
-                          const [category, id] = target.split(':');
-                          let name = '';
-                          if (category === 'departments') {
-                            name = DEPARTMENTS.find(d => d.id === id)?.name || id;
-                          } else if (category === 'roles') {
-                            name = ROLES.find(r => r.id === id)?.name || id;
-                           } else if (category === 'individuals') {
-                             name = availableUsers.find((u: RecipientUser) => u.id === id)?.name || id;
-                          }
-                          return (
-                            <Badge key={target} variant="secondary">
-                              {name}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                  {(insights.segments.filter((segment) => segment.type === 'roles').length > 0
+                    ? insights.segments filter((segment) => segment.type === 'roles')
+                    : STATIC_ROLES
+                  ).map((role) => {
+                    const id = (role as any).id;
+                    const name = (role as any).name;
+                    const count = 'count' in role ? (role]
