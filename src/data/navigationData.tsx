@@ -64,6 +64,7 @@ export const navigationSections: NavigationSection[] = [
     title: 'Operations',
     translationKey: 'operations',
     items: [
+      { name: 'Operations Intelligence', href: '/operations', icon: Brain, translationKey: 'operationsIntelligence' },
       { name: 'Goals', href: '/goals', icon: Target, translationKey: 'goals' },
       { name: 'Tasks', href: '/tasks', icon: CheckSquare, translationKey: 'tasks' },
       { name: 'Forms', href: '/forms', icon: FileText, translationKey: 'forms' },

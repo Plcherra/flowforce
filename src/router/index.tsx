@@ -37,6 +37,7 @@ const ItemsSetup = lazy(() => import('../pages/ItemsSetup.tsx'));
 const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));
 const EnhancedScheduling = lazy(() => import('../pages/EnhancedScheduling.tsx'));
 const ScheduleLobby = lazy(() => import('../pages/ScheduleLobby.tsx'));
+const Operations = lazy(() => import('../modules/operations/pages/OperationsPage.tsx'));
 const Certifications = lazy(() => import('../pages/Certifications.tsx'));
 const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
 const Resources = lazy(() => import('../pages/Resources.tsx'));
@@ -129,6 +130,10 @@ export const router = createBrowserRouter([
           {
             path: "employees",
             element: <Employees />,
+          },
+          {
+            path: "operations",
+            element: <Operations />,
           },
           {
             path: "goals",

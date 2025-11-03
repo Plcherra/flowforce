@@ -32,6 +32,10 @@ describe('SystemSettingsLayout', () => {
       canEdit: false,
       role: null,
       isCompanyAdmin: false,
+      missingCompany: false,
+      linkingCompany: false,
+      linkCompanyError: null,
+      linkCompany: vi.fn(),
       refresh: vi.fn(),
       updateSettings: vi.fn(),
     } as any);
@@ -49,6 +53,10 @@ describe('SystemSettingsLayout', () => {
       canEdit: false,
       role: null,
       isCompanyAdmin: false,
+      missingCompany: false,
+      linkingCompany: false,
+      linkCompanyError: null,
+      linkCompany: vi.fn(),
       refresh: vi.fn(),
       updateSettings: vi.fn(),
     } as any);
@@ -66,11 +74,36 @@ describe('SystemSettingsLayout', () => {
       canEdit: true,
       role: 'admin',
       isCompanyAdmin: true,
+      missingCompany: false,
+      linkingCompany: false,
+      linkCompanyError: null,
+      linkCompany: vi.fn(),
       refresh: vi.fn(),
       updateSettings: vi.fn(),
     } as any);
 
     render(<SystemSettingsLayout tabs={baseTabs} />);
     expect(screen.getByText(/No settings available/i)).toBeInTheDocument();
+  });
+
+  it('renders missing company fallback when profile lacks company context', () => {
+    useSystemSettingsMock.mockReturnValue({
+      company: null,
+      settings: null,
+      loading: false,
+      error: null,
+      canEdit: false,
+      role: null,
+      isCompanyAdmin: false,
+      missingCompany: true,
+      linkingCompany: false,
+      linkCompanyError: null,
+      linkCompany: vi.fn(),
+      refresh: vi.fn(),
+      updateSettings: vi.fn(),
+    } as any);
+
+    render(<SystemSettingsLayout tabs={baseTabs} />);
+    expect(screen.getByText(/No company detected/i)).toBeInTheDocument();
   });
 });

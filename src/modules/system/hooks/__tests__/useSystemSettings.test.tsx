@@ -109,10 +109,10 @@ describe('useSystemSettings', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.error).toBeTruthy();
+      expect(result.current.missingCompany).toBe(true);
     });
 
-    expect(result.current.error?.message).toBe('No active company context');
+    expect(result.current.error).toBeNull();
   });
 
   it('loads settings for provided company id', async () => {
@@ -152,6 +152,7 @@ describe('useSystemSettings', () => {
     });
 
     expect(result.current.settings?.companyId).toBe('company-123');
+    expect(result.current.missingCompany).toBe(false);
 
     await act(async () => {
       await result.current.updateSettings({ general: { companyName: 'Acme Updated' } as any });

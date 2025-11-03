@@ -3,7 +3,7 @@ import type { Tables } from '@/integrations/supabase/public-types';
 export type IngestedFile = Tables<'files'>;
 export type ExtractedDocument = Tables<'documents'>;
 export type DocumentEvent = Tables<'events'>;
-export type OodaCycle = Tables<'ooda_cycles'>;
+export type IdeaCycle = Tables<'idea_cycles'>;
 export type TaskRecord = Tables<'tasks'>;
 
 export type DocumentProcessingState = ExtractedDocument['processing_state'];
@@ -25,4 +25,3 @@ export interface TaskWithOrigins extends TaskRecord {
   origin_event?: DocumentEvent | null;
   origin_document?: ExtractedDocument | null;
 }
-

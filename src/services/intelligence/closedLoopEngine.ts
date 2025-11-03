@@ -11,7 +11,7 @@ type TimeOffRow = Tables<'time_off_requests'>;
 type ShiftSwapRow = Tables<'shift_swaps'>;
 type ScheduleRow = Tables<'schedules'>;
 type AssignmentRow = Tables<'schedule_assignments'>;
-type OodaCycleRow = Tables<'ooda_cycles'>;
+type IdeaCycleRow = Tables<'idea_cycles'>;
 type ProfileRow = Tables<'profiles'>;
 
 export type ClosedLoopSignalSeverity = NonNullable<EventRow['severity']>;
@@ -68,7 +68,7 @@ export interface ClosedLoopEvidenceSnapshot {
 }
 
 export interface ClosedLoopLearningReport {
-  oodaCycles: OodaCycleRow[];
+  ideaCycles: IdeaCycleRow[];
   summary: string;
   acknowledgmentRate: number | null;
   completedTasks: number;
@@ -427,9 +427,9 @@ async function fetchAiSummary(
   }
 }
 
-function buildLearningSummary(metrics: ClosedLoopMetrics, cycles: OodaCycleRow[]): string {
+function buildLearningSummary(metrics: ClosedLoopMetrics, cycles: IdeaCycleRow[]): string {
   if (cycles.length === 0) {
-    return 'No OODA cycles captured yet. Capture a cycle to benchmark improvements.';
+    return 'No IDEA cycles captured yet. Capture a cycle to benchmark improvements.';
   }
 
   const latest = cycles[0];
@@ -515,21 +515,21 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
     .gte('updated_at', rangeStartIso)
     .limit(100);
 
-  const oodaPromise = supabase
-    .from('ooda_cycles')
-    .select('id,period,start_at,end_at,status,created_at,updated_at,context,company_id')
+  const ideaPromise = supabase
+    .from('idea_cycles')
+    .select('id,stage,range,created_at,updated_at,insights,actions,assessments,company_id')
     .eq('company_id', companyId)
-    .order('start_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(5);
 
   const [
     eventRows,
     taskRows,
     timeOffRows,
-    swapRows,
+    shiftSwapRows,
     scheduleRows,
     profileRows,
-    oodaRows,
+    ideaCycleRows,
   ] = await Promise.all([
     fetchOrDefault<EventRow[]>(eventsPromise, [], 'events'),
     fetchOrDefault<TaskRow[]>(tasksPromise, [], 'tasks'),
@@ -537,7 +537,7 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
     fetchOrDefault<ShiftSwapRow[]>(shiftSwapPromise, [], 'shift_swaps'),
     fetchOrDefault<ScheduleRow[]>(schedulePromise, [], 'schedules'),
     fetchOrDefault<ProfileRow[]>(profilePromise, [], 'profiles'),
-    fetchOrDefault<OodaCycleRow[]>(oodaPromise, [], 'ooda_cycles'),
+    fetchOrDefault<IdeaCycleRow[]>(ideaPromise, [], 'idea_cycles'),
   ]);
 
   const scheduleIds = scheduleRows.map((schedule) => schedule.id).filter(Boolean);
@@ -604,7 +604,7 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
       : Number((scheduleRows.filter((schedule) => schedule.hourly_rate != null).length / scheduleRows.length).toFixed(2));
 
   const pendingPto = timeOffRows.filter((row) => row.status === 'requested').length;
-  const pendingShiftSwaps = swapRows.filter((swap) => swap.status === 'pending').length;
+  const pendingShiftSwaps = shiftSwapRows.filter((swap) => swap.status === 'pending').length;
 
   const complianceIncidents = signals.filter((signal) => signal.type === 'policy_violation' && signal.severity !== 'low').length;
   const skillMixAlerts = signals.filter((signal) => signal.type === 'prep_gap' && signal.severity !== 'low').length;
@@ -695,8 +695,8 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
   };
 
   const learning: ClosedLoopLearningReport = {
-    oodaCycles: oodaRows,
-    summary: buildLearningSummary(metrics, oodaRows),
+    ideaCycles: ideaCycleRows,
+    summary: buildLearningSummary(metrics, ideaCycleRows),
     acknowledgmentRate: metrics.acknowledgmentRate,
     completedTasks: metrics.completedTasks,
     resolvedEvents: metrics.resolvedEvents,

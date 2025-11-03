@@ -166,7 +166,7 @@ function calculateReviewHealth(reviews: PerformanceReview[]): number {
 function buildEmployeePerformance(
   profile: Tables<'profiles'>,
   performanceRows: Tables<'staff_performance'>[],
-  reviewRows: Tables<'employee_report'>[],
+  reviewRows: Tables<'performance_reviews'>[],
   goalRows: Tables<'goals'>[],
   participantRows: Tables<'goal_participants'>[],
 ): EmployeePerformance {
@@ -494,26 +494,31 @@ export async function deletePerformanceRecord(
 }
 
 export async function createPerformanceReview(
-  review: TablesInsert<'employee_report'>,
+  review: TablesInsert<'performance_reviews'>,
   client: SupabaseClient = supabase,
 ) {
-  const payload: TablesInsert<'employee_report'> = {
+  const payload: TablesInsert<'performance_reviews'> = {
+    review_cycle: 'Quarterly',
+    action_items: [],
     ...review,
-    category: 'performance',
   };
-  const { data, error } = await client.from('employee_report').insert(payload).select().single();
+  const { data, error } = await client
+    .from('performance_reviews')
+    .insert(payload)
+    .select()
+    .single();
   if (error) throw new Error(`Failed to create performance review: ${error.message}`);
   return data;
 }
 
 export async function updatePerformanceReview(
-  id: Tables<'employee_report'>['id'],
-  updates: TablesUpdate<'employee_report'>,
+  id: Tables<'performance_reviews'>['id'],
+  updates: TablesUpdate<'performance_reviews'>,
   client: SupabaseClient = supabase,
 ) {
   const { data, error } = await client
-    .from('employee_report')
-    .update({ ...updates, category: 'performance' })
+    .from('performance_reviews')
+    .update(updates)
     .eq('id', id)
     .select()
     .single();
@@ -522,10 +527,10 @@ export async function updatePerformanceReview(
 }
 
 export async function deletePerformanceReview(
-  id: Tables<'employee_report'>['id'],
+  id: Tables<'performance_reviews'>['id'],
   client: SupabaseClient = supabase,
 ) {
-  const { error } = await client.from('employee_report').delete().eq('id', id);
+  const { error } = await client.from('performance_reviews').delete().eq('id', id);
   if (error) throw new Error(`Failed to delete performance review: ${error.message}`);
 }
 
@@ -609,8 +614,8 @@ export interface PerformanceCrudSimulationSnapshot {
 
 export interface PerformanceCrudSimulationResult {
   review: {
-    created: Tables<'employee_report'>;
-    updated: Tables<'employee_report'>;
+    created: Tables<'performance_reviews'>;
+    updated: Tables<'performance_reviews'>;
   };
   goal: {
     created: Tables<'goals'>;
@@ -636,7 +641,7 @@ export async function simulatePerformanceCrud(
   const snapshots: Partial<PerformanceCrudSimulationSnapshot> = {};
 
   const createdResources: {
-    review?: Tables<'employee_report'>;
+    review?: Tables<'performance_reviews'>;
     goal?: Tables<'goals'>;
     participant?: Tables<'goal_participants'>;
   } = {};
@@ -644,13 +649,17 @@ export async function simulatePerformanceCrud(
   snapshots.baseline = await fetchPerformanceDataset(client);
 
   try {
-    const reviewPayload: TablesInsert<'employee_report'> = {
+    const reviewPayload: TablesInsert<'performance_reviews'> = {
+      company_id: companyId,
       employee_id: employeeId,
-      created_by: reviewerId,
-      date: referenceDate.format('YYYY-MM-DD'),
-      severity: 3,
-      notes: 'Simulation: Initial performance check-in.',
-      category: 'performance',
+      reviewer_id: reviewerId,
+      review_cycle: 'Quarterly',
+      review_period_start: referenceDate.subtract(90, 'day').format('YYYY-MM-DD'),
+      review_period_end: referenceDate.format('YYYY-MM-DD'),
+      review_date: referenceDate.format('YYYY-MM-DD'),
+      score: 3,
+      summary: 'Simulation: Initial performance check-in.',
+      action_items: [],
     };
     const createdReview = await createPerformanceReview(reviewPayload, client);
     createdResources.review = createdReview;
@@ -678,10 +687,10 @@ export async function simulatePerformanceCrud(
 
     snapshots.postCreate = await fetchPerformanceDataset(client);
 
-    const reviewUpdates: TablesUpdate<'employee_report'> = {
-      severity: 5,
-      notes: 'Simulation: Elevated to top performer.',
-      date: referenceDate.add(7, 'day').format('YYYY-MM-DD'),
+    const reviewUpdates: TablesUpdate<'performance_reviews'> = {
+      score: 5,
+      summary: 'Simulation: Elevated to top performer.',
+      review_date: referenceDate.add(7, 'day').format('YYYY-MM-DD'),
     };
     const updatedReview = await updatePerformanceReview(createdReview.id, reviewUpdates, client);
 

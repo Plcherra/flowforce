@@ -4247,56 +4247,88 @@ export type Database = {
           },
         ]
       }
-      ooda_cycles: {
+      idea_actions: {
         Row: {
+          action_name: string
           company_id: string
-          context: Json
           created_at: string
-          end_at: string | null
+          cycle_id: string | null
           id: string
-          owner_id: string | null
-          period: Database["public"]["Enums"]["ooda_period"]
-          start_at: string
-          status: Database["public"]["Enums"]["ooda_status"]
-          updated_at: string
+          result: Json | null
+          status: string
         }
         Insert: {
+          action_name: string
           company_id: string
-          context?: Json
           created_at?: string
-          end_at?: string | null
+          cycle_id?: string | null
           id?: string
-          owner_id?: string | null
-          period: Database["public"]["Enums"]["ooda_period"]
-          start_at: string
-          status?: Database["public"]["Enums"]["ooda_status"]
-          updated_at?: string
+          result?: Json | null
+          status?: string
         }
         Update: {
+          action_name?: string
           company_id?: string
-          context?: Json
           created_at?: string
-          end_at?: string | null
+          cycle_id?: string | null
           id?: string
-          owner_id?: string | null
-          period?: Database["public"]["Enums"]["ooda_period"]
-          start_at?: string
-          status?: Database["public"]["Enums"]["ooda_status"]
-          updated_at?: string
+          result?: Json | null
+          status?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ooda_cycles_company_id_fkey"
+            foreignKeyName: "idea_actions_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ooda_cycles_owner_id_fkey"
-            columns: ["owner_id"]
+            foreignKeyName: "idea_actions_cycle_id_fkey"
+            columns: ["cycle_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "idea_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idea_cycles: {
+        Row: {
+          actions: Json | null
+          assessments: Json | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          insights: Json | null
+          range: unknown
+          stage: string
+        }
+        Insert: {
+          actions?: Json | null
+          assessments?: Json | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          insights?: Json | null
+          range: unknown
+          stage: string
+        }
+        Update: {
+          actions?: Json | null
+          assessments?: Json | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          insights?: Json | null
+          range?: unknown
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -6213,8 +6245,6 @@ export type Database = {
         | "image_selection"
       form_status: "draft" | "published" | "archived"
       learning_course_status: "not_started" | "in_progress" | "completed"
-      ooda_period: "daily" | "weekly" | "monthly" | "quarterly"
-      ooda_status: "open" | "closed"
       schedule_status:
         | "scheduled"
         | "confirmed"
@@ -6435,8 +6465,6 @@ export const Constants = {
       ],
       form_status: ["draft", "published", "archived"],
       learning_course_status: ["not_started", "in_progress", "completed"],
-      ooda_period: ["daily", "weekly", "monthly", "quarterly"],
-      ooda_status: ["open", "closed"],
       schedule_status: [
         "scheduled",
         "confirmed",

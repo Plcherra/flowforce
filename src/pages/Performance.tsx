@@ -91,7 +91,7 @@ export default function Performance() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
-  const { employees, goals, reviews, goalReviews, loading, error, refetch } = usePerformanceOverview();
+  const { employees, goals, reviews, goalReviews = [], loading, error, refetch } = usePerformanceOverview();
   const { recognitions, loading: recognitionLoading } = useRecognitions();
 
   const isLoading = loading;

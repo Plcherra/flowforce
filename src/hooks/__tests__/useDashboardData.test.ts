@@ -142,7 +142,7 @@ describe('useDashboardData', () => {
       JSON.stringify({ removed: 1, companyId: 'company-123' }),
     );
     expect(warnSpy).toHaveBeenCalledWith(
-      '[useDashboardData] Filtered pending time off requests from other companies',
+      '[useDashboardData] Filtered requested time off from other companies',
       JSON.stringify({ removed: 1, companyId: 'company-123' }),
     );
     expect(warnSpy).toHaveBeenCalledWith(

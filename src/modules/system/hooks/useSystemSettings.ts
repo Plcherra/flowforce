@@ -62,6 +62,10 @@ export interface SystemSettingsHook {
   canEdit: boolean;
   role: ProfileRow['role'] | null;
   isCompanyAdmin: boolean;
+  missingCompany: boolean;
+  linkingCompany: boolean;
+  linkCompanyError: Error | null;
+  linkCompany: () => Promise<void>;
   refresh: () => Promise<void>;
   updateSettings: (changes: PartialUpdate) => Promise<SystemSettingsModel | null>;
 }
@@ -78,6 +82,9 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
   const [role, setRole] = useState<ProfileRow['role'] | null>(null);
   const [isCompanyAdmin, setIsCompanyAdmin] = useState(false);
   const [permissionsReady, setPermissionsReady] = useState(false);
+  const [missingCompany, setMissingCompany] = useState(false);
+  const [linkingCompany, setLinkingCompany] = useState(false);
+  const [linkCompanyError, setLinkCompanyError] = useState<Error | null>(null);
 
   const canEdit = useMemo(
     () => (role ? allowedManagerRoles.includes(role) : false) || isCompanyAdmin,
@@ -126,11 +133,14 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
 
   const fetchSettings = useCallback(async () => {
     if (!companyId) {
+      setMissingCompany(true);
       setSettings(null);
-      setError(new Error('No active company context'));
+      setError(null);
+      setFetching(false);
       return;
     }
 
+    setMissingCompany(false);
     setFetching(true);
     try {
       const { data: row, error: fetchError } = await supabase
@@ -216,6 +226,82 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
     await Promise.all([refetchCompany(), fetchSettings()]);
   }, [fetchSettings, refetchCompany]);
 
+  const linkCompany = useCallback(async () => {
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+
+    setLinkingCompany(true);
+    setLinkCompanyError(null);
+    try {
+      let targetCompanyId: string | null = null;
+
+      const { data: existing, error: existingError } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingError) {
+        throw existingError;
+      }
+
+      if (existing?.id) {
+        targetCompanyId = existing.id;
+      } else {
+        const { data: created, error: createError } = await supabase.rpc('create_company_with_setup', {
+          company_data: {
+            name: 'Demo Workspace',
+            industry: null,
+            size: null,
+            description: 'Automatically generated workspace',
+            website: null,
+            phone: null,
+            primary_color: '#3b82f6',
+            secondary_color: '#1e40af',
+            template_id: null,
+            template_name: null,
+            enabled_sections: [],
+            template_config: JSON.stringify({}),
+          },
+          custom_roles: [],
+          positions_data: [],
+          owner_user_id: user.id,
+        });
+
+        if (createError) {
+          throw createError;
+        }
+
+        targetCompanyId = typeof created === 'string' ? created : created?.id ?? null;
+      }
+
+      if (!targetCompanyId) {
+        throw new Error('Unable to determine company to link');
+      }
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ company_id: targetCompanyId })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setMissingCompany(false);
+      await Promise.all([refetchCompany(), fetchSettings()]);
+    } catch (err) {
+      const handled = handleError(err, 'linkCompany');
+      setLinkCompanyError(new Error(handled.message));
+      throw err;
+    } finally {
+      setLinkingCompany(false);
+    }
+  }, [user, fetchSettings, refetchCompany]);
+
   const loading = companyLoading || fetching || !permissionsReady;
 
   return {
@@ -226,6 +312,10 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
     canEdit,
     role,
     isCompanyAdmin,
+    missingCompany,
+    linkingCompany,
+    linkCompanyError,
+    linkCompany,
     refresh,
     updateSettings,
   };

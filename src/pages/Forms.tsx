@@ -26,7 +26,7 @@ const matchesQuery = (form: FormWithMeta, query: string) => {
 export default function Forms() {
   const { user } = useAuth();
   const { can: canUse } = useCan();
-  const { forms, isInitialLoading } = useForms();
+  const { forms, isInitialLoading, refetchForms } = useForms();
 
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
@@ -184,8 +184,10 @@ export default function Forms() {
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           onFormCreated={(formId) => {
+            setCreateDialogOpen(false);
             ensureBuilderDefaults(formId, { title: 'New Form', description: '' });
             setBuilderFormId(formId);
+            void refetchForms();
           }}
         />
       </ErrorBoundary>
@@ -214,6 +216,7 @@ export default function Forms() {
               if (!open && builderFormId) {
                 delete builderDefaultsRef.current[builderFormId];
                 setBuilderFormId(null);
+                void refetchForms();
               }
             }}
             formId={builderFormId}

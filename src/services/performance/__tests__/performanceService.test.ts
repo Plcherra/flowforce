@@ -134,12 +134,19 @@ function createCrudSupabaseStub() {
   };
 }
 
-type SimulationTable = 'profiles' | 'staff_performance' | 'employee_report' | 'goals' | 'goal_participants';
+type SimulationTable =
+  | 'profiles'
+  | 'staff_performance'
+  | 'performance_reviews'
+  | 'performance_goal_reviews'
+  | 'goals'
+  | 'goal_participants';
 
 interface SimulationState {
   profiles: Record<string, any>[];
   staff_performance: Record<string, any>[];
-  employee_report: Record<string, any>[];
+  performance_reviews: Record<string, any>[];
+  performance_goal_reviews: Record<string, any>[];
   goals: Record<string, any>[];
   goal_participants: Record<string, any>[];
 }
@@ -152,11 +159,49 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
   const state: SimulationState = {
     profiles: [],
     staff_performance: [],
-    employee_report: [],
+    performance_reviews: [],
+    performance_goal_reviews: [],
     goals: [],
     goal_participants: [],
     ...initialState,
   };
+
+  function rebuildPerformanceGoalReviews() {
+    state.performance_goal_reviews = state.performance_reviews.map((review) => {
+      const goal = state.goals.find((candidate) => candidate.id === review.goal_id);
+      return {
+        review_id: review.id,
+        company_id: review.company_id ?? null,
+        employee_id: review.employee_id ?? null,
+        goal_id: review.goal_id ?? null,
+        review_cycle: review.review_cycle ?? 'Quarterly',
+        review_period_start: review.review_period_start ?? null,
+        review_period_end: review.review_period_end ?? null,
+        review_date: review.review_date ?? null,
+        reviewer_id: review.reviewer_id ?? null,
+        score: review.score ?? null,
+        summary: review.summary ?? null,
+        ai_summary: review.ai_summary ?? null,
+        action_items: Array.isArray(review.action_items) ? review.action_items : [],
+        created_at: review.created_at ?? dayjs().toISOString(),
+        updated_at: review.updated_at ?? dayjs().toISOString(),
+        goal_title: goal?.title ?? null,
+        goal_status: goal?.status ?? null,
+        goal_progress: goal?.progress ?? null,
+        target_completion_date: goal?.target_completion_date ?? null,
+        goal_completed_at: goal?.completed_at ?? null,
+        goal_priority: goal?.priority ?? null,
+        goal_owner_id: goal?.created_by ?? null,
+        ai_insight_id: review.ai_insight_id ?? null,
+        insight_type: null,
+        insight_data: null,
+        insight_generated_at: null,
+        insight_expires_at: null,
+      };
+    });
+  }
+
+  rebuildPerformanceGoalReviews();
 
   const counters = new Map<SimulationTable, number>();
 
@@ -248,6 +293,9 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
     }
 
     state[table] = [...state[table], record];
+    if (table === 'performance_reviews' || table === 'goals') {
+      rebuildPerformanceGoalReviews();
+    }
 
     return {
       select() {
@@ -279,6 +327,9 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
         if ('updated_at' in record) {
           record.updated_at = dayjs().toISOString();
         }
+        if (table === 'performance_reviews' || table === 'goals') {
+          rebuildPerformanceGoalReviews();
+        }
 
         return {
           select: () => ({
@@ -296,6 +347,9 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
         const index = rows.findIndex((row) => row[column] === value);
         if (index !== -1) {
           rows.splice(index, 1);
+        }
+        if (table === 'performance_reviews' || table === 'goals') {
+          rebuildPerformanceGoalReviews();
         }
         return Promise.resolve({ error: null });
       },
@@ -385,16 +439,59 @@ describe('performance service utilities', () => {
         ],
         error: null,
       },
-      employee_report: {
+      performance_reviews: {
         data: [
           {
             id: 'review-1',
+            company_id: null,
             employee_id: 'emp-1',
-            date: dayjs().subtract(20, 'day').format('YYYY-MM-DD'),
-            severity: 4,
-            notes: 'Great leadership on recent launch.',
-            created_by: 'mgr-1',
-            category: 'performance',
+            goal_id: 'goal-1',
+            review_cycle: 'Quarterly',
+            review_period_start: dayjs().subtract(90, 'day').format('YYYY-MM-DD'),
+            review_period_end: dayjs().format('YYYY-MM-DD'),
+            review_date: dayjs().subtract(20, 'day').format('YYYY-MM-DD'),
+            reviewer_id: 'mgr-1',
+            score: 4,
+            summary: 'Great leadership on recent launch.',
+            ai_summary: 'AI highlighted positive coaching momentum.',
+            action_items: [],
+            ai_insight_id: null,
+            created_at: dayjs().subtract(19, 'day').toISOString(),
+            updated_at: dayjs().subtract(19, 'day').toISOString(),
+          },
+        ],
+        error: null,
+      },
+      performance_goal_reviews: {
+        data: [
+          {
+            review_id: 'review-1',
+            company_id: null,
+            employee_id: 'emp-1',
+            goal_id: 'goal-1',
+            review_cycle: 'Quarterly',
+            review_period_start: dayjs().subtract(90, 'day').format('YYYY-MM-DD'),
+            review_period_end: dayjs().format('YYYY-MM-DD'),
+            review_date: dayjs().subtract(20, 'day').format('YYYY-MM-DD'),
+            reviewer_id: 'mgr-1',
+            score: 4,
+            summary: 'Great leadership on recent launch.',
+            ai_summary: 'AI highlighted positive coaching momentum.',
+            action_items: [],
+            created_at: dayjs().subtract(19, 'day').toISOString(),
+            updated_at: dayjs().subtract(19, 'day').toISOString(),
+            goal_title: 'Boost launch readiness',
+            goal_status: 'active',
+            goal_progress: 80,
+            target_completion_date: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+            goal_completed_at: null,
+            goal_priority: 'high',
+            goal_owner_id: 'emp-1',
+            ai_insight_id: null,
+            insight_type: null,
+            insight_data: null,
+            insight_generated_at: null,
+            insight_expires_at: null,
           },
         ],
         error: null,
@@ -430,7 +527,14 @@ describe('performance service utilities', () => {
     const dataset = await fetchPerformanceDataset(client);
 
     expect(calls).toEqual(
-      expect.arrayContaining(['profiles', 'staff_performance', 'employee_report', 'goals', 'goal_participants']),
+      expect.arrayContaining([
+        'profiles',
+        'staff_performance',
+        'performance_reviews',
+        'performance_goal_reviews',
+        'goals',
+        'goal_participants',
+      ]),
     );
     expect(dataset.employees).toHaveLength(1);
     const employee = dataset.employees[0];
@@ -508,7 +612,7 @@ describe('performance service utilities', () => {
     expect(postCreate.employees[0].goals).toHaveLength(1);
     expect(postCreate.employees[0].goals[0].title).toContain('Simulation goal');
 
-    expect(postUpdate.employees[0].reviews[0].severity).toBe(5);
+    expect(postUpdate.employees[0].reviews[0].score).toBe(5);
     expect(postUpdate.employees[0].goals[0].progress).toBe(85);
 
     expect(postCleanup.employees[0].reviews).toHaveLength(0);

@@ -73,7 +73,7 @@ test.describe('System settings workflow', () => {
     await page.waitForURL('**/app/dashboard**', { timeout: 30_000 });
 
     await page.goto('/app/settings');
-    await expect(page.getByText(/No active company context/i)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/No company detected/i)).toBeVisible({ timeout: 30_000 });
 
     await page.unroute('**/rest/v1/profiles**');
   });

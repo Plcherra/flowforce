@@ -21,7 +21,17 @@ type SystemSettingsLayoutProps = {
 
 export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
   const system = useSystemSettings();
-  const { company, settings, loading, error, refresh, canEdit, role, isCompanyAdmin } = system;
+  const {
+    company,
+    settings,
+    loading,
+    error,
+    refresh,
+    canEdit,
+    role,
+    isCompanyAdmin,
+    missingCompany,
+  } = system;
 
   const [activeTab, setActiveTab] = useState(() => tabs[0]?.key ?? '');
 
@@ -48,6 +58,18 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
     />
   );
 
+  const missingCompanyFallback = (
+    <EmptyState
+      title="No company detected"
+      description="Your profile is not linked to a company yet. Create a new company or ask an administrator to grant access."
+      action={
+        <Button asChild>
+          <a href="/company-registration">Go to company setup</a>
+        </Button>
+      }
+    />
+  );
+
   if (loading) {
     return (
       <RoleGuard roles={['admin', 'company_admin', 'owner', 'manager']} fallback={fallback}>
@@ -65,6 +87,35 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
     return (
       <RoleGuard roles={['admin', 'company_admin', 'owner', 'manager']} fallback={fallback}>
         <ErrorState message={error.message} onRetry={refresh} />
+      </RoleGuard>
+    );
+  }
+
+  if (missingCompany) {
+    return (
+      <RoleGuard roles={['admin', 'company_admin', 'owner', 'manager']} fallback={missingCompanyFallback}>
+        <div className="flex h-full flex-col items-center justify-center gap-4 p-10 text-center">
+          <div className="space-y-2 max-w-md">
+            <h2 className="text-xl font-semibold text-foreground">No company detected</h2>
+            <p className="text-sm text-muted-foreground">
+              Your profile isn&apos;t linked to a workspace yet. You can create a demo workspace now or ask an administrator to grant access.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button onClick={() => system.linkCompany()} disabled={system.linkingCompany}>
+              {system.linkingCompany ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Create demo workspace
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/company-registration">Go to company setup</a>
+            </Button>
+          </div>
+          {system.linkCompanyError && (
+            <p className="text-sm text-destructive">
+              {system.linkCompanyError.message}
+            </p>
+          )}
+        </div>
       </RoleGuard>
     );
   }
