@@ -551,6 +551,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
 
+      const isCompanyMember = teamMembers.some((member) => member.id === payload.userId);
+      if (!isCompanyMember) {
+        toast({
+          title: 'Unavailability rejected',
+          description: 'You can only submit availability updates for members of your company.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
       try {
         const { error: insertError } = await supabase.from('user_unavailability').insert({
           user_id: payload.userId,
@@ -575,7 +585,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+    [isUsingFallbackData, refetchAll, showReadOnlyNotice, teamMembers, toast],
   );
 
   const requestTimeOff = useCallback(

@@ -13,7 +13,8 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useManagerFinancialMetrics } from '@/hooks/useFinancialManagement';
-import { useSystemSettings } from '@/hooks/useSystemSettings';
+import useSystemSettings from '@/hooks/useSystemSettings';
+import { useIntegrationSettings } from '@/modules/system/hooks/useIntegrationSettings';
 import { useToast } from '@/hooks/use-toast';
 import { generateFinancialDemoData } from '@/services/financialDemoData';
 import {
@@ -108,15 +109,19 @@ const getUuid = () =>
 
 export function ManagerFinancialOverview() {
   const metrics = useManagerFinancialMetrics();
-  const { settings: systemSettings, updateIntegrations, loading: settingsLoading, canEdit } =
-    useSystemSettings();
+  const system = useSystemSettings();
+  const {
+    integrations: integrationSettings,
+    updateIntegrations,
+    loading: integrationLoading,
+    canEdit,
+  } = useIntegrationSettings(system);
+  const settingsLoading = system.loading || integrationLoading;
   const { toast } = useToast();
 
   const [autoSyncBusy, setAutoSyncBusy] = useState<IntegrationId | null>(null);
   const [syncingIntegration, setSyncingIntegration] = useState<IntegrationId | null>(null);
   const [seeding, setSeeding] = useState(false);
-
-  const integrationSettings = systemSettings?.integrations;
 
   const autoSyncMap = useMemo(() => {
     const raw = integrationSettings?.syncMappings?.autoSync;

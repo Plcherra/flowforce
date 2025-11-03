@@ -78,7 +78,14 @@ export function evaluateEmployeeContext(context: EmployeeContext, now = dayjs())
   const coachingNotes: string[] = [];
   let promotion: PromotionSuggestion | null = null;
 
-  const { reports, performance, skills, profile, certifications, awardedBadges } = context;
+  const {
+    reports = [],
+    performance = [],
+    skills = [],
+    profile,
+    certifications = [],
+    awardedBadges = [],
+  } = context;
 
   const positivePerformanceReports = reports.filter(
     (report) =>

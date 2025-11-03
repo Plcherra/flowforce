@@ -1,55 +1,72 @@
 /* @vitest-environment jsdom */
 
-import React from 'react';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useForms } from '../useForms';
 
-const mocks = vi.hoisted(() => {
-  const sampleData = [
-    {
-      id: 'form-1',
-      title: 'Safety Inspection',
-      description: null,
-      status: 'published',
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-02T00:00:00.000Z',
-      created_by: 'user-1',
-      created_profile: { first_name: 'Alex', last_name: 'Smith' },
-      department: { name: 'Operations' },
-      submission_stats: [{ count: 3 }],
-      latest_submission: [{ submitted_at: '2024-01-03T00:00:00.000Z' }],
-    },
-  ];
+type FormsResponse = Array<{
+  id: string;
+  title: string;
+  status: string;
+  created_by: string;
+  created_profile: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    company_id: string | null;
+  };
+  submission_stats?: { count: number | null }[];
+  latest_submission?: { submitted_at: string | null }[];
+}>;
 
-  const limitMock = vi.fn(() => Promise.resolve({ data: sampleData, error: null }));
+const currentResponses = vi.hoisted(() => ({
+  forms: [] as FormsResponse,
+}));
 
-  const createBuilder = () => {
+const supabaseMock = vi.hoisted(() => {
+  const createFormsBuilder = () => {
     const builder: any = {};
     builder.select = vi.fn(() => builder);
     builder.order = vi.fn(() => builder);
-    builder.limit = limitMock;
+    builder.eq = vi.fn(() => builder);
+    builder.limit = vi.fn(() => Promise.resolve({ data: currentResponses.forms, error: null }));
     return builder;
   };
 
-  const fromMock = vi.fn(() => createBuilder());
+  const builders: Record<string, any> = {};
 
   return {
-    sampleData,
-    limitMock,
-    fromMock,
+    builders,
+    from: vi.fn((table: string) => {
+      if (table === 'forms') {
+        const builder = createFormsBuilder();
+        builders.forms = builder;
+        return builder;
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    }),
   };
 });
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: mocks.fromMock,
+    from: supabaseMock.from,
   },
 }));
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 'user-1' } }),
+}));
+
+vi.mock('@/hooks/useProfile', () => ({
+  useProfile: () => ({
+    profile: {
+      companyId: 'company-123',
+      userId: 'user-1',
+      role: 'manager',
+    },
+  }),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
@@ -62,62 +79,96 @@ vi.mock('@/stores/useFormSchemaStore', () => ({
   },
 }));
 
-function FormsConsumer() {
-  const { forms, loading, refetchForms } = useForms();
-
-  return (
-    <div>
-      <div data-testid="loading-state">{loading ? 'loading' : 'ready'}</div>
-      <div data-testid="form-count">{forms.length}</div>
-      <button
-        data-testid="refetch-button"
-        onClick={() => {
-          void refetchForms();
-        }}
-      >
-        Refetch
-      </button>
-    </div>
-  );
-}
-
-function renderWithClient(ui: React.ReactElement) {
+const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
+      queries: {
+        retry: false,
+      },
     },
   });
 
-  return {
-    queryClient,
-    ...render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>),
-  };
-}
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 
-describe('useForms hook', () => {
+  return { wrapper, queryClient };
+};
+
+describe('useForms', () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
-    mocks.limitMock.mockClear();
-    mocks.fromMock.mockClear();
+    currentResponses.forms = [
+      {
+        id: 'form-tenant',
+        title: 'Safety Inspection',
+        status: 'published',
+        created_by: 'user-1',
+        created_profile: {
+          id: 'user-1',
+          first_name: 'Alex',
+          last_name: 'Smith',
+          company_id: 'company-123',
+        },
+        submission_stats: [{ count: 3 }],
+        latest_submission: [{ submitted_at: '2024-01-03T00:00:00.000Z' }],
+      },
+      {
+        id: 'form-foreign',
+        title: 'Another Form',
+        status: 'draft',
+        created_by: 'user-9',
+        created_profile: {
+          id: 'user-9',
+          first_name: 'Casey',
+          last_name: 'Lee',
+          company_id: 'other-company',
+        },
+        submission_stats: [{ count: 10 }],
+        latest_submission: [{ submitted_at: '2024-02-01T00:00:00.000Z' }],
+      },
+    ];
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    supabaseMock.from.mockClear();
+    supabaseMock.builders.forms = undefined;
   });
 
   afterEach(() => {
-    cleanup();
+    warnSpy.mockRestore();
   });
 
-  test('invokes the paginated forms query and refetches with the latest submission limit', async () => {
-    const { queryClient } = renderWithClient(<FormsConsumer />);
+  it('filters out forms from other companies', async () => {
+    const { wrapper, queryClient } = createWrapper();
 
-    await waitFor(() => expect(screen.getByTestId('loading-state').textContent).toBe('ready'));
+    const { result } = renderHook(() => useForms(), { wrapper });
 
-    expect(screen.getByTestId('form-count').textContent).toBe('1');
-    expect(mocks.fromMock).toHaveBeenCalledWith('forms');
-    expect(mocks.limitMock).toHaveBeenCalledTimes(1);
-    expect(mocks.limitMock).toHaveBeenCalledWith(1, { foreignTable: 'latest_submission' });
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    fireEvent.click(screen.getByTestId('refetch-button'));
+    expect(result.current.forms).toHaveLength(1);
+    expect(result.current.forms[0].id).toBe('form-tenant');
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[useForms] Filtered out forms from other companies',
+      JSON.stringify({ removed: 1, tenantCompanyId: 'company-123' }),
+    );
 
-    await waitFor(() => expect(mocks.limitMock).toHaveBeenCalledTimes(2));
-    expect(mocks.limitMock.mock.calls[1]).toEqual([1, { foreignTable: 'latest_submission' }]);
+    expect(supabaseMock.from).toHaveBeenCalledWith('forms');
+    expect(supabaseMock.builders.forms.select).toHaveBeenCalled();
+    expect(supabaseMock.builders.forms.eq).toHaveBeenCalledWith('profiles!forms_created_by_fkey.company_id', 'company-123');
+
+    queryClient.clear();
+  });
+
+  it('returns an empty list without error when tenant has no forms', async () => {
+    currentResponses.forms = [];
+    const { wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(() => useForms(), { wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.forms).toHaveLength(0);
+    expect(warnSpy).not.toHaveBeenCalled();
 
     queryClient.clear();
   });

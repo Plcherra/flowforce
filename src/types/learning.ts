@@ -2,6 +2,7 @@ export type LearningDeliveryMode = 'self_paced' | 'live' | 'blended';
 
 export interface LearningCourse {
   id: string;
+  companyId: string | null;
   slug: string;
   title: string;
   description: string | null;

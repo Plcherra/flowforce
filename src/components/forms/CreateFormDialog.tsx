@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, FileText, Upload, X, Users, Loader2 } from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
-import FormBuilderDialog from './FormBuilderDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { importFormFromFile } from '@/services/forms/formImportService';
@@ -19,7 +18,7 @@ interface CreateFormDialogProps {
   onPreferredMethodHandled?: () => void;
 }
 
-type CreationStep = 'select-method' | 'template-selection' | 'file-upload' | 'build-fields';
+type CreationStep = 'select-method' | 'template-selection' | 'file-upload';
 
 interface FormTemplate {
   id: string;
@@ -97,16 +96,12 @@ export default function CreateFormDialog({
   const [currentStep, setCurrentStep] = useState<CreationStep>('select-method');
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [createdFormId, setCreatedFormId] = useState<string | null>(null);
-  const [formTitleOverride, setFormTitleOverride] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const resetDialog = () => {
     setCurrentStep('select-method');
     setSelectedTemplate(null);
     setUploadedFile(null);
-    setCreatedFormId(null);
-    setFormTitleOverride(null);
     setCreating(false);
   };
 
@@ -134,11 +129,10 @@ export default function CreateFormDialog({
 
         const baseName = uploadedFile.name.replace(/\.[^/.]+$/, '');
         const { form } = await importFormFromFile(uploadedFile, user.id);
-        setCreatedFormId(form.id);
-        setCurrentStep('build-fields');
         setUploadedFile(null);
-        setFormTitleOverride(baseName);
         onFormCreated?.(form.id);
+        resetDialog();
+        onOpenChange(false);
         toast({
           title: 'Form imported',
           description: `${uploadedFile.name} is ready for refinement.`,
@@ -157,10 +151,9 @@ export default function CreateFormDialog({
       if (error || !data) {
         throw error ?? new Error('Failed to create form');
       }
-      setCreatedFormId(data.id);
-      setCurrentStep('build-fields');
-      setFormTitleOverride(title);
       onFormCreated?.(data.id);
+      resetDialog();
+      onOpenChange(false);
     } catch (error) {
       console.error('Unable to create form', error);
       toast({
@@ -191,14 +184,6 @@ export default function CreateFormDialog({
     }
     onPreferredMethodHandled?.();
   }, [open, preferredMethod, creating, createFormAndStartBuilder, onPreferredMethodHandled]);
-
-  const handleFormBuilderClose = (open: boolean) => {
-    if (!open && createdFormId) {
-      resetDialog();
-      onOpenChange(false);
-      onFormCreated?.(createdFormId);
-    }
-  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (creating) return;
@@ -403,18 +388,6 @@ export default function CreateFormDialog({
       )}
     </div>
   );
-
-  if (currentStep === 'build-fields' && createdFormId) {
-    return (
-      <FormBuilderDialog 
-        open={open} 
-        onOpenChange={handleFormBuilderClose} 
-        formId={createdFormId}
-        initialTitle={formTitleOverride || selectedTemplate?.name || 'New Form'}
-        initialDescription={selectedTemplate?.description || ""}
-      />
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

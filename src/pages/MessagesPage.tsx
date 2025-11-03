@@ -16,6 +16,7 @@ import { loadUsers, saveUsers, ensureCurrentUser, type ChatUser } from '@/compon
 import { loadConversations, saveConversations, getConversationName, type Conversation, type ChatMessage } from '@/components/messages/conversations';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Users as UsersIcon, MessageSquare, Paperclip, Image, Smile } from 'lucide-react';
+import ErrorBoundary from '@/components/ui/error-boundary';
 
 type FilterKey = 'all' | 'unread' | 'teams' | 'helpdesk';
 
@@ -268,6 +269,8 @@ export default function MessagesPage() {
   const renderConversationMeta = (conversation: Conversation) => {
     const name = getConversationName(conversation, usersById, CURRENT_USER.id);
     const lastMessage = conversation.messages[conversation.messages.length - 1];
+    const authorName = lastMessage ? usersById.get(lastMessage.authorId)?.name : undefined;
+    const firstName = authorName?.split?.(' ')?.[0] ?? 'Unknown';
 
     const counterpartId =
       conversation.type === 'direct'
@@ -310,7 +313,7 @@ export default function MessagesPage() {
             </div>
             {lastMessage ? (
               <p className="text-xs text-muted-foreground/80 line-clamp-2 leading-relaxed">
-                {usersById.get(lastMessage.authorId)?.name.split(' ')[0] ?? 'Someone'}: {lastMessage.content}
+                {firstName || '—'}: {lastMessage.content}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">No messages yet</p>
@@ -464,9 +467,19 @@ export default function MessagesPage() {
                               Be the first to say something in this chat.
                             </div>
                           ) : (
-                            activeConversation.messages.map((message, index) =>
-                              renderMessageBubble(message, activeConversation.messages[index - 1])
-                            )
+                            <ErrorBoundary
+                              fallback={
+                                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                                  Message unavailable. Some content could not be displayed.
+                                </div>
+                              }
+                            >
+                              <>
+                                {activeConversation.messages.map((message, index) =>
+                                  renderMessageBubble(message, activeConversation.messages[index - 1])
+                                )}
+                              </>
+                            </ErrorBoundary>
                           )}
                         </div>
                       </ScrollArea>

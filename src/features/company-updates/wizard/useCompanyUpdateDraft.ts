@@ -86,10 +86,6 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
 
   const progress = useMemo(() => ((currentStepIndex + 1) / steps.length) * 100, [currentStepIndex, steps.length]);
 
-  const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
-  }, []);
-
   const canProceedToStep = useCallback(
     (stepId: WizardStepId) => {
       const validator = STEP_VALIDATORS[stepId];

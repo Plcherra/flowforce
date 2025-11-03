@@ -442,7 +442,7 @@ export function AIQuickActions({ className }: { className?: string }) {
     try {
       const targetCompletion = addDays(new Date(), 28).toISOString();
 
-      const { error } = await createGoal({
+      await createGoal({
         title: '[AI] Goal checkpoint sprint',
         description:
           atRiskGoals.length > 0
@@ -451,12 +451,7 @@ export function AIQuickActions({ className }: { className?: string }) {
         status: 'active',
         priority: atRiskGoals.length > 0 ? 'high' : 'medium',
         target_completion_date: targetCompletion,
-        ownerId: user.id,
       });
-
-      if (error) {
-        throw error;
-      }
 
       toast({
         title: 'Goal launched',

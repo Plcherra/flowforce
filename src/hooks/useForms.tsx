@@ -6,13 +6,16 @@ import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { useFormSchemaStore } from '@/stores/useFormSchemaStore';
+import { useProfile } from '@/hooks/useProfile';
 
 type FormTable = Tables<'forms'>;
 
 type FormQueryRow = FormTable & {
   created_profile?: {
+    id: string;
     first_name: string;
     last_name: string;
+    company_id: string | null;
   };
   department?: {
     name: string;
@@ -72,22 +75,26 @@ const buildFormFieldFallback = (formId: string): FormField[] => {
 export function useForms() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { profile } = useProfile();
+
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const formsQueryKey = useMemo(
-    () => [...FORMS_QUERY_SCOPE, user?.id ?? 'anonymous'] as const,
-    [user?.id],
+    () => [...FORMS_QUERY_SCOPE, companyId ?? 'no-company'] as const,
+    [companyId],
   );
 
-  const fetchForms = useCallback(async (): Promise<FormWithMeta[]> => {
+  const fetchForms = useCallback(async (tenantCompanyId: string): Promise<FormWithMeta[]> => {
     const { data, error } = await supabase
       .from('forms')
       .select(`
         *,
-        created_profile:profiles!forms_created_by_fkey(first_name, last_name),
+        created_profile:profiles!forms_created_by_fkey(id, first_name, last_name, company_id),
         department:departments(name),
         submission_stats:form_submissions(count),
         latest_submission:form_submissions(submitted_at)
       `)
+      .eq('profiles!forms_created_by_fkey.company_id', tenantCompanyId)
       .order('created_at', { ascending: false })
       .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
       .limit(1, { foreignTable: 'latest_submission' });
@@ -95,22 +102,59 @@ export function useForms() {
     if (error) throw error;
 
     const rows = (data ?? []) as FormQueryRow[];
-    return rows.map((form) => {
+    const filteredRows = rows.filter((form) => form.created_profile?.company_id === tenantCompanyId);
+
+    if (filteredRows.length !== rows.length) {
+      const removed = rows.length - filteredRows.length;
+      console.warn('[useForms] Filtered out forms from other companies', JSON.stringify({ removed, tenantCompanyId }));
+    }
+
+    return filteredRows.map((form) => {
       const { submission_stats, latest_submission, ...rest } = form;
-      const stats = submission_stats?.[0];
-      const latest = latest_submission?.[0];
+      const schemaFallback = useFormSchemaStore.getState().schema;
+
+      const statsArray = Array.isArray(submission_stats) ? submission_stats : [];
+      const latestArray = Array.isArray(latest_submission) ? latest_submission : [];
+
+      const statsEntry = statsArray.find(
+        (item): item is { count: number | null } => item !== null && typeof item === 'object',
+      );
+      const rawCount = statsEntry?.count;
+      const fallbackMeta = schemaFallback && schemaFallback.id === rest.id ? schemaFallback.metadata : undefined;
+      const fallbackCount =
+        fallbackMeta && typeof (fallbackMeta as Record<string, unknown>).submissionCount === 'number'
+          ? ((fallbackMeta as { submissionCount: number }).submissionCount)
+          : 0;
+      const submissionsCount =
+        typeof rawCount === 'number' && Number.isFinite(rawCount)
+          ? rawCount
+          : fallbackCount;
+
+      const latestEntry = latestArray.find(
+        (item): item is { submitted_at?: string | null } => item !== null && typeof item === 'object',
+      );
+      const latestSubmissionAt =
+        typeof latestEntry?.submitted_at === 'string' && latestEntry.submitted_at.length > 0
+          ? latestEntry.submitted_at
+          : null;
+
       return {
         ...rest,
-        submissions_count: stats?.count ?? 0,
-        latest_submission_at: latest?.submitted_at ?? null,
+        submissions_count: submissionsCount,
+        latest_submission_at: latestSubmissionAt,
       };
     });
   }, []);
 
   const formsQuery = useQuery<FormWithMeta[]>({
     queryKey: formsQueryKey,
-    queryFn: fetchForms,
-    enabled: Boolean(user),
+    queryFn: async () => {
+      if (!companyId) {
+        return [];
+      }
+      return fetchForms(companyId);
+    },
+    enabled: Boolean(user && companyId),
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
     suspense: false,
@@ -127,7 +171,8 @@ export function useForms() {
   });
 
   const forms = formsQuery.data ?? [];
-  const loading = user ? formsQuery.isLoading || formsQuery.isFetching : false;
+  const isInitialLoading = formsQuery.isLoading || (formsQuery.isFetching && !formsQuery.data);
+  const loading = user ? isInitialLoading : false;
 
   const createForm = async (formData: {
     title: string;
@@ -136,6 +181,15 @@ export function useForms() {
     is_anonymous?: boolean;
   }) => {
     if (!user) return { data: null, error: 'User not authenticated' };
+    if (!companyId) {
+      const error = new Error('Company context unavailable');
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return { data: null, error };
+    }
 
     try {
       const { data, error } = await supabase
@@ -168,6 +222,15 @@ export function useForms() {
   };
 
   const updateForm = async (formId: string, updates: Partial<FormTable>) => {
+    if (!companyId) {
+      const error = new Error('Company context unavailable');
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return { error };
+    }
     try {
       const { error } = await supabase
         .from('forms')
@@ -195,6 +258,15 @@ export function useForms() {
   };
 
   const deleteForm = async (formId: string) => {
+    if (!companyId) {
+      const error = new Error('Company context unavailable');
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return { error };
+    }
     try {
       const { error } = await supabase
         .from('forms')
@@ -342,6 +414,8 @@ export function useForms() {
   return {
     forms,
     loading,
+    isInitialLoading,
+    isFetching: formsQuery.isFetching,
     createForm,
     updateForm,
     deleteForm,

@@ -194,24 +194,15 @@ export function useRecognitions() {
   const fetchExistingRecognitions = useCallback(async () => {
     if (!companyId) return [];
 
-    const baseQuery = supabase
-      .from('goal_rewards')
-      .select('id, goal_id, user_id, reward_details, reward_type, awarded_at, created_by, goal:goals(id, title, status, company_id)')
-      .eq('reward_type', 'recognition')
+    const { data, error } = await supabase
+      .rpc('get_recognitions', { company: companyId })
       .order('awarded_at', { ascending: false });
-
-    const companyFilter = [
-      `goal.company_id.eq.${companyId}`,
-      `reward_details->metadata->>company_id.eq.${companyId}`,
-    ].join(',');
-
-    const { data, error } = await baseQuery.or(companyFilter);
 
     if (error) {
       throw error;
     }
 
-    return data ?? [];
+    return (data ?? []) as GoalRewardRow[];
   }, [companyId]);
 
   const generateTrainingRecognitions = useCallback(
@@ -294,6 +285,7 @@ export function useRecognitions() {
           reward_details: details,
           awarded_at: completion.completed_at ?? new Date().toISOString(),
           created_by: user.id,
+          company_id: companyId,
         });
       }
 
@@ -370,14 +362,15 @@ export function useRecognitions() {
             },
           };
 
-          newRecognitionsPayload.push({
-            goal_id: milestone.goal_id,
-            user_id: participant.user_id,
-            reward_type: 'recognition',
-            reward_details: details,
-            awarded_at: milestone.completed_at ?? new Date().toISOString(),
-            created_by: user.id,
-          });
+        newRecognitionsPayload.push({
+          goal_id: milestone.goal_id,
+          user_id: participant.user_id,
+          reward_type: 'recognition',
+          reward_details: details,
+          awarded_at: milestone.completed_at ?? new Date().toISOString(),
+          created_by: user.id,
+          company_id: companyId,
+        });
         }
       }
 
@@ -461,6 +454,7 @@ export function useRecognitions() {
           reward_details: details,
           awarded_at: task.completed_at ?? new Date().toISOString(),
           created_by: user.id,
+          company_id: companyId,
         });
       }
 
@@ -486,42 +480,32 @@ export function useRecognitions() {
     setPartialState({ loading: true, error: null });
 
     try {
-      const baseQuery = supabase
-        .from('goal_rewards')
-        .select('id, goal_id, user_id, reward_type, reward_details, awarded_at, created_by, goal:goals(id, title, status, company_id)')
-        .eq('reward_type', 'recognition')
+      const { data, error } = await supabase
+        .rpc('get_recognitions', { company: companyId })
         .order('awarded_at', { ascending: false });
-
-      const filter = [
-        `goal.company_id.eq.${companyId}`,
-        `reward_details->metadata->>company_id.eq.${companyId}`,
-      ].join(',');
-
-      const { data, error } = await baseQuery.or(filter);
 
       if (error) {
         throw error;
       }
 
-      const rawRewards = (data ?? []) as (GoalRewardRow & { goal: GoalRow | null })[];
-      const relevantRewards = rawRewards.filter((reward) => {
-        const details = parseRecognitionDetails(reward.reward_details);
-        const metadataCompanyId = details?.metadata?.company_id;
-        return reward.goal?.company_id === companyId || metadataCompanyId === companyId;
-      });
+      const rewards = (data ?? []).filter(
+        (reward): reward is GoalRewardRow => reward.reward_type === 'recognition',
+      );
 
-      if (relevantRewards.length === 0) {
+      if (rewards.length === 0) {
         setPartialState({ records: [], loading: false });
         return;
       }
 
+      const goalIds = new Set<string>();
       const recipientIds = new Set<string>();
       const creatorIds = new Set<string>();
       const milestoneIds = new Set<string>();
       const taskIds = new Set<string>();
       const assignmentIds = new Set<string>();
 
-      relevantRewards.forEach((reward) => {
+      rewards.forEach((reward) => {
+        goalIds.add(reward.goal_id);
         recipientIds.add(reward.user_id);
         creatorIds.add(reward.created_by);
         const details = parseRecognitionDetails(reward.reward_details);
@@ -531,15 +515,22 @@ export function useRecognitions() {
       });
 
       const [
+        { data: goalData },
         { data: profilesData },
         { data: milestonesData },
         { data: tasksData },
         assignmentsResponse,
       ] = await Promise.all([
         supabase
+          .from('goals')
+          .select('id, title, status, company_id')
+          .in('id', Array.from(goalIds))
+          .eq('company_id', companyId),
+        supabase
           .from('profiles')
           .select('id, first_name, last_name, avatar_url, position_id')
-          .in('id', Array.from(new Set([...recipientIds, ...creatorIds]))),
+          .in('id', Array.from(new Set([...recipientIds, ...creatorIds])))
+          .eq('company_id', companyId),
         milestoneIds.size > 0
           ? supabase
               .from('goal_milestones')
@@ -555,10 +546,13 @@ export function useRecognitions() {
         assignmentIds.size > 0
           ? supabase
               .from('training_assignments' as any)
-              .select('id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward, category, level), employee:profiles(id, first_name, last_name, avatar_url)')
+              .select('id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward, category, level, company_id), employee:profiles(id, first_name, last_name, avatar_url)')
               .in('id', Array.from(assignmentIds))
           : Promise.resolve({ data: [] }),
       ]);
+
+      const goalMap = new Map<string, GoalRow>();
+      (goalData ?? []).forEach((goal) => goalMap.set(goal.id, goal as GoalRow));
 
       const profileMap = new Map<string, ProfileRow>();
       (profilesData ?? []).forEach((profile) => profileMap.set(profile.id, profile));
@@ -570,10 +564,15 @@ export function useRecognitions() {
       (tasksData ?? []).forEach((task) => taskMap.set(task.id, task));
 
       const assignmentMap = new Map<string, TrainingAssignment>();
-      (assignmentsResponse.data ?? []).forEach((assignment: TrainingAssignment) => assignmentMap.set(assignment.id, assignment));
+      const scopedAssignments = (assignmentsResponse.data ?? []).filter(
+        (assignment: TrainingAssignment & { module?: { company_id?: string | null } }) =>
+          !assignment.module || assignment.module.company_id === companyId,
+      );
+      scopedAssignments.forEach((assignment: TrainingAssignment) => assignmentMap.set(assignment.id, assignment));
 
-      const records: RecognitionRecord[] = relevantRewards.map((reward) => {
+      const records: RecognitionRecord[] = rewards.map((reward) => {
         const details = parseRecognitionDetails(reward.reward_details);
+        const goal = goalMap.get(reward.goal_id) ?? null;
         return {
           id: reward.id,
           goal_id: reward.goal_id,
@@ -582,12 +581,12 @@ export function useRecognitions() {
           reward_details: details,
           awarded_at: reward.awarded_at,
           created_by: reward.created_by,
-          goal: reward.goal
+          goal: goal
             ? {
-                id: reward.goal.id,
-                title: reward.goal.title ?? '',
-                status: reward.goal.status ?? '',
-                company_id: reward.goal.company_id ?? '',
+                id: goal.id,
+                title: goal.title ?? '',
+                status: goal.status ?? '',
+                company_id: goal.company_id ?? '',
               }
             : null,
           recipient: profileMap.get(reward.user_id) ?? null,
@@ -670,6 +669,7 @@ export function useRecognitions() {
           reward_details: details,
           awarded_at: new Date().toISOString(),
           created_by: user.id,
+          company_id: companyId,
         });
 
       if (error) {

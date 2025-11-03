@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -36,6 +36,7 @@ export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const companyCacheRef = useRef<Map<string, Employee[]>>(new Map());
 
   const fetchEmployees = useCallback(async () => {
     const authUser = user;
@@ -56,7 +57,6 @@ export function useEmployees() {
           ? (authUser.user_metadata.company_id as string)
           : null;
 
-      // Resolve company context from the profile, falling back to user metadata if needed
       const { data: currentProfile, error: currentProfileError } = await supabase
         .from('profiles')
         .select('company_id')
@@ -65,6 +65,9 @@ export function useEmployees() {
 
       if (currentProfileError) {
         console.error('Error resolving current profile for employee fetch:', currentProfileError);
+        setError(`Failed to resolve company context: ${currentProfileError.message ?? 'unknown error'}`);
+        setEmployees([]);
+        return;
       }
 
       const companyId = currentProfile?.company_id ?? metadataCompanyId;
@@ -73,6 +76,25 @@ export function useEmployees() {
         setError('No company context available');
         setEmployees([]);
         return;
+      }
+
+      let cachedEmployees = companyCacheRef.current.get(companyId);
+
+      if (!cachedEmployees) {
+        const { data: rosterCache } = await supabase
+          .from('hr_roster_cache')
+          .select('snapshot, synced_at')
+          .eq('company_id', companyId)
+          .maybeSingle();
+
+        if (rosterCache?.snapshot && Array.isArray(rosterCache.snapshot)) {
+          cachedEmployees = rosterCache.snapshot as Employee[];
+          companyCacheRef.current.set(companyId, cachedEmployees);
+        }
+      }
+
+      if (cachedEmployees) {
+        setEmployees(cachedEmployees);
       }
 
       const { data, error: fetchError } = await supabase
@@ -103,10 +125,17 @@ export function useEmployees() {
 
       if (fetchError) throw fetchError;
 
-      const employeeList = data || [];
+      const employeeList = data ?? [];
+      if (employeeList.length === 0) {
+        companyCacheRef.current.set(companyId, []);
+        setEmployees([]);
+        return;
+      }
+
       const ids = employeeList.map((employee) => employee.id);
 
       if (ids.length === 0) {
+        companyCacheRef.current.set(companyId, []);
         setEmployees([]);
         return;
       }
@@ -201,14 +230,16 @@ export function useEmployees() {
       });
 
       setEmployees(enriched);
+      companyCacheRef.current.set(companyId, enriched);
     } catch (error) {
       console.error('Error fetching employees:', error);
-      setError('Failed to fetch employees');
+      const message = error instanceof Error ? error.message : 'Failed to fetch employees';
+      setError(message || 'Failed to fetch employees');
       setEmployees([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id, user?.user_metadata?.company_id]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {

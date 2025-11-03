@@ -10,17 +10,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
+const AvatarPlaceholder = ({ name }: { name: string }) => (
+  <AvatarFallback className="bg-muted text-muted-foreground">
+    {name.slice(0, 2).toUpperCase() || 'UN'}
+  </AvatarFallback>
+);
+
 interface ChannelMember {
-  id: string;
+  id?: string | null;
   user_id: string;
   role: string;
   joined_at: string;
-  user_profile: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    avatar_url?: string;
-  };
+  user_profile?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+    avatar_url?: string | null;
+  } | null;
 }
 
 interface ChannelMembersProps {
@@ -179,70 +185,93 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
             </div>
           ) : (
             <div className="space-y-3">
-              {members.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/50">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={member.user_profile.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary/20 text-primary">
-                        {member.user_profile.first_name[0]}{member.user_profile.last_name[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">
-                          {member.user_profile.first_name} {member.user_profile.last_name}
-                        </p>
-                        {getRoleIcon(member.role)}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs text-muted-foreground">
-                          {member.user_profile.email}
-                        </p>
-                        <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(member.role)}`}>
-                          {member.role}
-                        </Badge>
+              {members.map((member, index) => {
+                const profile = member.user_profile;
+                const firstName = profile?.first_name ?? '';
+                const lastName = profile?.last_name ?? '';
+                const displayName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'Unknown member';
+                const email = profile?.email ?? 'Profile not available';
+                const initials =
+                  (profile?.first_name?.[0] ?? '') + (profile?.last_name?.[0] ?? '');
+                const fallbackInitials =
+                  initials.trim() || displayName.slice(0, 2).toUpperCase() || 'UN';
+                const rowKey = member.id ?? `${member.user_id}-${member.joined_at ?? index}`;
+                const canManage = canManageMember(member) && Boolean(member.id);
+
+                return (
+                  <div
+                    key={rowKey}
+                    className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/50"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-10 w-10">
+                        {profile?.avatar_url ? (
+                          <AvatarImage src={profile.avatar_url || undefined} />
+                        ) : null}
+                        {profile ? (
+                          <AvatarFallback className="bg-primary/20 text-primary">
+                            {fallbackInitials}
+                          </AvatarFallback>
+                        ) : (
+                          <AvatarPlaceholder name="Unknown" />
+                        )}
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">
+                            {displayName}
+                          </p>
+                          {getRoleIcon(member.role)}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            {email}
+                          </p>
+                          <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(member.role)}`}>
+                            {member.role}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {canManageMember(member) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {member.role !== 'admin' && (
-                          <DropdownMenuItem onClick={() => updateMemberRole(member.id, 'admin')}>
-                            <Crown className="h-4 w-4 mr-2" />
-                            Make Admin
+                    {canManage ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {member.role !== 'admin' && (
+                            <DropdownMenuItem onClick={() => updateMemberRole(member.id!, 'admin')}>
+                              <Crown className="h-4 w-4 mr-2" />
+                              Make Admin
+                            </DropdownMenuItem>
+                          )}
+                          {member.role !== 'moderator' && member.role !== 'admin' && (
+                            <DropdownMenuItem onClick={() => updateMemberRole(member.id!, 'moderator')}>
+                              <Shield className="h-4 w-4 mr-2" />
+                              Make Moderator
+                            </DropdownMenuItem>
+                          )}
+                          {(member.role === 'admin' || member.role === 'moderator') && (
+                            <DropdownMenuItem onClick={() => updateMemberRole(member.id!, 'member')}>
+                              <UserIcon className="h-4 w-4 mr-2" />
+                              Make Member
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={() => removeMember(member.id!, displayName)}
+                            className="text-destructive"
+                          >
+                            Remove
                           </DropdownMenuItem>
-                        )}
-                        {member.role !== 'moderator' && member.role !== 'admin' && (
-                          <DropdownMenuItem onClick={() => updateMemberRole(member.id, 'moderator')}>
-                            <Shield className="h-4 w-4 mr-2" />
-                            Make Moderator
-                          </DropdownMenuItem>
-                        )}
-                        {(member.role === 'admin' || member.role === 'moderator') && (
-                          <DropdownMenuItem onClick={() => updateMemberRole(member.id, 'member')}>
-                            <UserIcon className="h-4 w-4 mr-2" />
-                            Make Member
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem 
-                          onClick={() => removeMember(member.id, `${member.user_profile.first_name} ${member.user_profile.last_name}`)}
-                          className="text-destructive"
-                        >
-                          Remove
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           )}
         </ScrollArea>

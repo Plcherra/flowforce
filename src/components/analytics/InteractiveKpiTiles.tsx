@@ -18,7 +18,7 @@ import { useEmployeePerformance } from '@/hooks/useAnalytics';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { CreateGoalDialog } from '@/components/goals/CreateGoalDialog';
+import { CreateGoalModal, type GoalFormValues } from '@/components/goals/CreateGoalModal';
 
 type TaskRecord = ReturnType<typeof useTasks>['tasks'][number];
 type GoalRecord = ReturnType<typeof useGoals>['goals'][number];
@@ -55,7 +55,7 @@ export default function InteractiveKpiTiles() {
   const isMobile = useIsMobile();
 
   const { tasks, loading: tasksLoading } = useTasks();
-  const { goals, loading: goalsLoading } = useGoals();
+  const { goals, isLoading: goalsLoading, createGoal, creating } = useGoals();
   const { stats: schedulingStats, loading: schedulingLoading } = useDashboardData();
   const { data: performanceData, isLoading: performanceLoading } = useEmployeePerformance();
 
@@ -734,7 +734,21 @@ export default function InteractiveKpiTiles() {
       </Sheet>
 
       <CreateTaskDialog open={showTaskDialog} onClose={() => setShowTaskDialog(false)} />
-      <CreateGoalDialog open={showGoalDialog} onOpenChange={setShowGoalDialog} />
+      <CreateGoalModal
+        open={showGoalDialog}
+        onOpenChange={setShowGoalDialog}
+        saving={creating}
+        onSubmit={async (values: GoalFormValues) => {
+          await createGoal({
+            title: values.title,
+            description: values.description ?? null,
+            status: values.status,
+            target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
+            priority: values.priority,
+            progress: values.progress,
+          });
+        }}
+      />
     </>
   );
 }

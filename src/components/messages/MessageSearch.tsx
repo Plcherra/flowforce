@@ -18,10 +18,10 @@ interface SearchResult {
   description?: string;
   created_at: string;
   sender_profile?: {
-    first_name: string;
-    last_name: string;
-    avatar_url?: string;
-  };
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
+  } | null;
   channel?: {
     id: string;
     name: string;
@@ -234,25 +234,48 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                         </div>
                         
                         <div className="flex items-start gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={result.sender_profile?.avatar_url || undefined} />
-                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                              {result.sender_profile?.first_name[0]}{result.sender_profile?.last_name[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium">
-                                {result.sender_profile?.first_name} {result.sender_profile?.last_name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(result.created_at), 'MMM dd, yyyy')}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {result.content && highlightQuery(result.content, searchQuery)}
-                            </p>
-                          </div>
+                          {(() => {
+                            const senderName = result.sender_profile?.first_name ?? 'Unknown';
+                            const senderLast = result.sender_profile?.last_name ?? '';
+                            const initial =
+                              result.sender_profile?.first_name?.[0] ??
+                              result.sender_profile?.last_name?.[0] ??
+                              'H';
+                            const secondaryInitial =
+                              result.sender_profile?.last_name?.[0] ??
+                              result.sender_profile?.first_name?.[1] ??
+                              '';
+                            const initials = `${initial}${secondaryInitial}`.trim() || 'HU';
+                            const label = result.sender_profile
+                              ? `${senderName} ${senderLast}`.trim() || 'Hidden User'
+                              : 'Hidden User';
+
+                            return (
+                              <>
+                                <Avatar className="h-8 w-8">
+                                  {result.sender_profile?.avatar_url ? (
+                                    <AvatarImage src={result.sender_profile.avatar_url || undefined} />
+                                  ) : null}
+                                  <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                    {initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-sm font-medium">
+                                      {label}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {format(new Date(result.created_at), 'MMM dd, yyyy')}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {result.content && highlightQuery(result.content, searchQuery)}
+                                  </p>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     ) : (

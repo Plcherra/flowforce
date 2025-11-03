@@ -727,6 +727,7 @@ export type Database = {
       }
       custom_sections: {
         Row: {
+          company_id: string
           category: string
           company_id: string
           created_at: string
@@ -1582,6 +1583,7 @@ export type Database = {
       }
       goal_rewards: {
         Row: {
+          company_id: string
           awarded_at: string
           created_by: string
           goal_id: string
@@ -1591,6 +1593,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id?: string
           awarded_at?: string
           created_by: string
           goal_id: string
@@ -1600,6 +1603,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string
           awarded_at?: string
           created_by?: string
           goal_id?: string
@@ -1614,6 +1618,39 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rewards_company_fk"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_roster_cache: {
+        Row: {
+          company_id: string
+          snapshot: Json
+          synced_at: string
+        }
+        Insert: {
+          company_id: string
+          snapshot?: Json
+          synced_at?: string
+        }
+        Update: {
+          company_id?: string
+          snapshot?: Json
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_roster_cache_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1734,6 +1771,7 @@ export type Database = {
           xp_reward: number
         }
         Insert: {
+          company_id?: string
           category: string
           certification_code?: string | null
           created_at?: string
@@ -1751,6 +1789,7 @@ export type Database = {
           xp_reward?: number
         }
         Update: {
+          company_id?: string
           category?: string
           certification_code?: string | null
           created_at?: string
@@ -1769,6 +1808,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "learning_courses_company_fk"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "learning_courses_certification_fk"
             columns: ["certification_code"]
             isOneToOne: false
@@ -1786,6 +1832,7 @@ export type Database = {
       }
       learning_enrollments: {
         Row: {
+          company_id: string
           completed_at: string | null
           course_id: string
           created_at: string
@@ -1801,6 +1848,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           completed_at?: string | null
           course_id: string
           created_at?: string
@@ -1816,6 +1864,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           completed_at?: string | null
           course_id?: string
           created_at?: string
@@ -1845,10 +1894,18 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "learning_enrollments_company_fk"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       learning_modules: {
         Row: {
+          company_id: string
           content: string | null
           course_id: string
           created_at: string
@@ -1860,6 +1917,7 @@ export type Database = {
           xp_award: number
         }
         Insert: {
+          company_id?: string
           content?: string | null
           course_id: string
           created_at?: string
@@ -1871,6 +1929,7 @@ export type Database = {
           xp_award?: number
         }
         Update: {
+          company_id?: string
           content?: string | null
           course_id?: string
           created_at?: string
@@ -1887,6 +1946,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_modules_company_fk"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

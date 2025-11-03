@@ -12,6 +12,7 @@ const { supabaseMock } = vi.hoisted(() => ({
 
 let profileBuilder: Builder;
 let tasksBuilder: Builder;
+let warnSpy: ReturnType<typeof vi.spyOn>;
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: supabaseMock,
@@ -24,6 +25,7 @@ vi.mock('@/hooks/useAuth', () => ({
 type Builder = {
   select: ReturnType<typeof vi.fn>;
   eq: ReturnType<typeof vi.fn>;
+  or?: ReturnType<typeof vi.fn>;
   single?: ReturnType<typeof vi.fn>;
   order?: ReturnType<typeof vi.fn>;
 };
@@ -48,11 +50,13 @@ const createTasksBuilder = (response: TaskWithRelations[]) => {
   const builder: Builder = {
     select: vi.fn(),
     eq: vi.fn(),
+    or: vi.fn(),
     order: vi.fn(),
   };
 
   builder.select.mockReturnValue(builder);
   builder.eq.mockReturnValue(builder);
+  builder.or!.mockReturnValue(builder);
   builder.order!.mockResolvedValue({ data: response, error: null });
 
   return builder;
@@ -95,6 +99,7 @@ const makeTask = (overrides: Partial<TaskWithRelations> & { id: string }): TaskW
 describe('useTasks', () => {
   beforeEach(() => {
     supabaseMock.from.mockReset();
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     profileBuilder = createProfileBuilder({
       data: { company_id: companyId },
@@ -119,12 +124,36 @@ describe('useTasks', () => {
     });
   });
 
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
   it('filters tasks to the active company', async () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => expect(result.current.tasks).toHaveLength(1));
     expect(result.current.tasks[0].id).toBe('task-company');
 
-    expect(tasksBuilder.eq).toHaveBeenCalledWith('profiles!tasks_created_by_fkey.company_id', companyId);
+    expect(tasksBuilder.or).toHaveBeenCalledWith(
+      `profiles!tasks_created_by_fkey.company_id.eq.${companyId},profiles!tasks_assigned_to_fkey.company_id.eq.${companyId}`,
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[useTasks] Filtered out tasks from other companies',
+      JSON.stringify({ removed: 1, companyId }),
+    );
+  });
+
+  it('returns an empty list when no tasks exist for the company', async () => {
+    tasksBuilder = createTasksBuilder([]);
+    supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'profiles') return profileBuilder;
+      if (table === 'tasks') return tasksBuilder;
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const { result } = renderHook(() => useTasks());
+
+    await waitFor(() => expect(result.current.tasks).toHaveLength(0));
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 });

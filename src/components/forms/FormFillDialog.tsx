@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -242,6 +242,28 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
     }
     updateVisibleFields();
   }, [fields, updateVisibleFields]);
+
+  const orderedFields = useMemo(() => {
+    return fields
+      .map((field, index) => ({ field, index }))
+      .sort((a, b) => {
+        const orderA =
+          typeof a.field.field_order === 'number' && Number.isFinite(a.field.field_order)
+            ? a.field.field_order
+            : Number.MAX_SAFE_INTEGER;
+        const orderB =
+          typeof b.field.field_order === 'number' && Number.isFinite(b.field.field_order)
+            ? b.field.field_order
+            : Number.MAX_SAFE_INTEGER;
+
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.index - b.index;
+      })
+      .map(({ field }) => field);
+  }, [fields]);
 
   const onSubmit = async (values: FormSubmissionData) => {
     const { error } = await submitForm(formId, values);
@@ -885,8 +907,7 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {fields
-                .sort((a, b) => a.field_order - b.field_order)
+              {orderedFields
                 .filter(field => visibleFields.has(field.id))
                 .map(renderField)}
               <div className="flex gap-2 pt-4">

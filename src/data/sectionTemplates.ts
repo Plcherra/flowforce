@@ -132,27 +132,6 @@ export const QUICK_TEMPLATES: QuickTemplate[] = [
 
   // Operations Templates
   {
-    id: 'quick-tasks',
-    name: 'Quick Tasks',
-    description: 'Simple task management and reminders',
-    icon: 'CheckSquare',
-    category: 'operations',
-    config: {
-      path: '/quick-tasks',
-      permissions: ['viewOwnTasks'],
-      pages: [
-        {
-          name: 'my-tasks',
-          title: 'My Tasks',
-          icon: 'ListTodo',
-          route: '/quick-tasks/my-tasks',
-          content: [],
-          permissions: ['viewOwnTasks']
-        }
-      ]
-    }
-  },
-  {
     id: 'job-scheduling',
     name: 'Job Scheduling',
     description: 'Schedule jobs and assignments',

@@ -34,7 +34,7 @@ const hasId = (value: unknown): value is { id: string } =>
   typeof (value as { id: unknown }).id === 'string';
 
 function EmployeeAvailabilityContent() {
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading, error: profileError } = useProfile();
   const { loading: schedulingLoading, refetchAll } = useScheduling();
   const queryClient = useQueryClient();
 
@@ -48,8 +48,8 @@ function EmployeeAvailabilityContent() {
   }, []);
 
   const availabilityQuery = useQuery({
-    queryKey: ['availability-grid', employeeId, weekStart],
-    enabled: Boolean(employeeId) && !profileLoading,
+    queryKey: ['availability', orgId, employeeId, weekStart],
+    enabled: Boolean(employeeId && orgId && !profileLoading),
     queryFn: async () => {
       if (!employeeId) return [];
       const { data, error } = await supabase
@@ -98,10 +98,11 @@ function EmployeeAvailabilityContent() {
         }
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['availability-grid', employeeId, weekStart] });
+      await queryClient.invalidateQueries({ queryKey: ['availability', orgId, employeeId] });
+      await queryClient.invalidateQueries({ queryKey: ['scheduling', orgId] });
       await refetchAll();
     },
-    [employeeId, queryClient, refetchAll, weekStart],
+    [employeeId, orgId, queryClient, refetchAll, weekStart],
   );
 
   if (profileLoading || schedulingLoading) {
@@ -112,14 +113,15 @@ function EmployeeAvailabilityContent() {
     );
   }
 
-  if (!profile || !employeeId) {
+  if (!profile || !employeeId || !orgId) {
     return (
       <div className="p-6">
         <Alert variant="destructive" className="border-destructive/40">
           <ShieldAlert className="h-5 w-5 text-destructive" />
           <AlertTitle>No profile found</AlertTitle>
           <AlertDescription>
-            We couldn&apos;t load your profile information. Try reloading the page or contact your manager for help.
+            {profileError ??
+              'We couldn’t load your profile information. Try reloading the page or contact your manager for help.'}
           </AlertDescription>
         </Alert>
       </div>

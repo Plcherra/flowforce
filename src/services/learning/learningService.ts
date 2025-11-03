@@ -1,4 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
+
+let learningClient = supabase;
+
+export function __setLearningServiceClient(client: typeof supabase) {
+  learningClient = client;
+}
+
+export function __resetLearningServiceClient() {
+  learningClient = supabase;
+}
 import { toast } from '@/hooks/use-toast';
 import type {
   CourseCreationPayload,
@@ -56,6 +66,7 @@ type EnrollmentRow = {
   id: string;
   course_id: string;
   employee_id: string;
+  company_id: string | null;
   status: string;
   progress_percent: string | number | null;
   hours_completed: string | number | null;
@@ -94,7 +105,7 @@ type MetricsRow = {
   total_xp_awarded: string | number | null;
 };
 
-const fromTable = <Row>(table: string) => supabase.from<Row>(table as any);
+const fromTable = <Row>(table: string) => learningClient.from<Row>(table as any);
 
 const toNumber = (value: string | number | null | undefined, fallback = 0): number => {
   if (value == null) return fallback;
@@ -105,6 +116,7 @@ const toNumber = (value: string | number | null | undefined, fallback = 0): numb
 
 const mapCourse = (row: CourseRow): LearningCourse => ({
   id: row.id,
+  companyId: row.company_id ?? null,
   slug: row.slug,
   title: row.title,
   description: row.description,
@@ -224,7 +236,11 @@ export async function fetchLearningCatalog(companyId: string): Promise<LearningC
   });
 }
 
-export async function createLearningCourse(payload: CourseCreationPayload, createdBy: string) {
+export async function createLearningCourse(payload: CourseCreationPayload, createdBy: string, companyId: string) {
+  if (!companyId) {
+    throw new Error('Company context is required to create learning courses.');
+  }
+
   const slug = buildSlug(payload.title);
 
   const { data: courseRow, error: insertCourseError } = await fromTable<CourseRow>(TABLE_COURSES)
@@ -240,6 +256,7 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
       target_roles: payload.targetRoles,
       featured: payload.featured ?? false,
       certification_code: payload.certificationCode ?? null,
+      company_id: companyId,
       created_by: createdBy,
     })
     .select()
@@ -251,6 +268,7 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
 
   const modulesPayload = payload.modules.map((module, index) => ({
     course_id: courseRow.id,
+    company_id: companyId,
     title: module.title,
     description: module.description ?? null,
     content: module.content ?? null,
@@ -271,12 +289,17 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
   return mapCourse(courseRow);
 }
 
-export async function enrollInCourse(courseId: string, employeeId: string) {
+export async function enrollInCourse(courseId: string, employeeId: string, companyId: string) {
+  if (!companyId) {
+    throw new Error('Company context is required to enroll in a course.');
+  }
+
   const { data, error } = await fromTable<EnrollmentRow>(TABLE_ENROLLMENTS)
     .upsert(
       {
         course_id: courseId,
         employee_id: employeeId,
+        company_id: companyId,
         status: 'in_progress',
         progress_percent: 0,
         hours_completed: 0,
@@ -292,20 +315,30 @@ export async function enrollInCourse(courseId: string, employeeId: string) {
   return mapEnrollment(data);
 }
 
-export async function fetchEnrollments(employeeId: string): Promise<LearningEnrollment[]> {
+export async function fetchEnrollments(employeeId: string, companyId: string): Promise<LearningEnrollment[]> {
+  if (!companyId) {
+    throw new Error('Company context is required to fetch enrollments.');
+  }
+
   const { data, error } = await fromTable<EnrollmentRow>(TABLE_ENROLLMENTS)
     .select('*')
     .eq('employee_id', employeeId)
+    .eq('company_id', companyId)
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
   return (data ?? []).map(mapEnrollment);
 }
 
-export async function fetchCourseEnrollments(courseId: string): Promise<LearningEnrollment[]> {
+export async function fetchCourseEnrollments(courseId: string, companyId: string): Promise<LearningEnrollment[]> {
+  if (!companyId) {
+    throw new Error('Company context is required to fetch course enrollments.');
+  }
+
   const { data, error } = await fromTable<EnrollmentRow>(TABLE_ENROLLMENTS)
     .select('*')
     .eq('course_id', courseId)
+    .eq('company_id', companyId)
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
@@ -425,7 +458,7 @@ export async function ensureCourseCompletionRewards(
   const role = options.roleHint ?? course.targetRoles[0] ?? 'staff';
 
   if (course.xpReward > 0) {
-    const { data: existingSkill } = await supabase
+    const { data: existingSkill } = await learningClient
       .from('skill_matrix')
       .select('id, xp, level')
       .eq('employee_id', options.employeeId)
@@ -436,12 +469,12 @@ export async function ensureCourseCompletionRewards(
     const nextLevel = Math.max(existingSkill?.level ?? 1, 1);
 
     if (existingSkill?.id) {
-      await supabase
+      await learningClient
         .from('skill_matrix')
         .update({ xp: nextXp, level: nextLevel })
         .eq('id', existingSkill.id);
     } else {
-      await supabase.from('skill_matrix').insert({
+      await learningClient.from('skill_matrix').insert({
         employee_id: options.employeeId,
         role,
         xp: nextXp,
@@ -451,7 +484,7 @@ export async function ensureCourseCompletionRewards(
   }
 
   if (course.certificationCode) {
-    const { data: existingBadge } = await supabase
+    const { data: existingBadge } = await learningClient
       .from('employee_badge')
       .select('id')
       .eq('employee_id', options.employeeId)
@@ -459,7 +492,7 @@ export async function ensureCourseCompletionRewards(
       .maybeSingle();
 
     if (!existingBadge) {
-      await supabase.from('employee_badge').insert({
+      await learningClient.from('employee_badge').insert({
         employee_id: options.employeeId,
         badge_code: course.certificationCode,
         awarded_by: options.awardingProfileId ?? null,
@@ -558,7 +591,7 @@ export async function getCourseRecommendations(options: {
 }) {
   const [catalog, enrollments, metrics] = await Promise.all([
     fetchLearningCatalog(options.companyId),
-    fetchEnrollments(options.employeeId),
+    fetchEnrollments(options.employeeId, options.companyId),
     fetchCourseMetrics(options.companyId),
   ]);
 

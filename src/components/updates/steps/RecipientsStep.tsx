@@ -7,10 +7,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Users, Search, Building, UserCheck, Globe, Target, AlertCircle } from 'lucide-react';
 
 import type { WizardFormData } from '../CreateUpdateWizard';
@@ -22,7 +22,13 @@ interface RecipientsStepProps {
   updateFormData: (updates: Partial<WizardFormData>) => void;
 }
 
-const STATIC_DEPARTMENTS = [
+type SegmentOption = {
+  id: string;
+  name: string;
+  count?: number;
+};
+
+const STATIC_DEPARTMENTS: SegmentOption[] = [
   { id: 'hr', name: 'Human Resources' },
   { id: 'engineering', name: 'Engineering' },
   { id: 'sales', name: 'Sales' },
@@ -31,7 +37,7 @@ const STATIC_DEPARTMENTS = [
   { id: 'finance', name: 'Finance' },
 ];
 
-const STATIC_ROLES = [
+const STATIC_ROLES: SegmentOption[] = [
   { id: 'admin', name: 'Admin' },
   { id: 'manager', name: 'Manager' },
   { id: 'employee', name: 'Employee' },
@@ -46,6 +52,21 @@ type RecipientUser = {
 };
 
 const STATIC_USERS: RecipientUser[] = [];
+
+function resolveSegmentOptions(
+  segments: Array<{ id: string; name: string; count?: number; type: string }>,
+  segmentType: string,
+  fallback: SegmentOption[],
+): SegmentOption[] {
+  const filtered = segments
+    .filter((segment) => segment.type === segmentType)
+    .map<SegmentOption>((segment) => ({
+      id: segment.id,
+      name: segment.name,
+      count: segment.count,
+    }));
+  return filtered.length > 0 ? filtered : fallback;
+}
 
 export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,7 +109,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
     });
   };
 
-  const toggleTarget = (targetId: string, category: 'departments' | 'roles' | 'individuals') => {
+  const toggleTarget = (targetId: string, category: 'departments' | 'roles' | 'individuals' | 'groups') => {
     const currentTargets = formData.recipients.targets;
     const prefixedId = `${category}:${targetId}`;
 
@@ -103,7 +124,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
     return formData.recipients.targets.includes(`${category}:${targetId}`);
   };
 
-  const getRecipientCount = () => {
+  const getRecipientCountLabel = () => {
     if (formData.recipients.type === 'all') {
       return 'All employees';
     }
@@ -139,6 +160,35 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
     user.department?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  const departmentOptions = useMemo(
+    () => resolveSegmentOptions(insights.segments, 'departments', STATIC_DEPARTMENTS),
+    [insights.segments],
+  );
+
+  const roleOptions = useMemo(
+    () => resolveSegmentOptions(insights.segments, 'roles', STATIC_ROLES),
+    [insights.segments],
+  );
+
+  const selectedTargetBadges = useMemo(() => {
+    return formData.recipients.targets.map((target) => {
+      const [category, id] = target.split(':');
+      if (category === 'departments') {
+        const match = departmentOptions.find((dept) => dept.id === id);
+        return { target, label: match?.name ?? id };
+      }
+      if (category === 'roles') {
+        const match = roleOptions.find((role) => role.id === id);
+        return { target, label: match?.name ?? id };
+      }
+      if (category === 'individuals') {
+        const match = availableUsers.find((user) => user.id === id);
+        return { target, label: match?.name ?? id };
+      }
+      return { target, label: id };
+    });
+  }, [availableUsers, departmentOptions, formData.recipients.targets, roleOptions]);
+
   const insightsBanner = (
     <Card className="border-primary/40 bg-primary/5">
       <CardHeader className="pb-2">
@@ -156,7 +206,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
             <p className="text-xs text-muted-foreground">Estimated reach</p>
-            <p className="text-lg font-semibold text-primary">{insights.estimatedReach}</p>
+            <p className="text-lg font-semibold text-primary">{insights.estimatedReach.toLocaleString()}</p>
           </div>
         )}
 
@@ -165,7 +215,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
             <p className="text-xs text-muted-foreground">Total employees</p>
-            <p className="text-lg font-semibold">{insights.totalEmployees}</p>
+            <p className="text-lg font-semibold">{insights.totalEmployees.toLocaleString()}</p>
           </div>
         )}
 
@@ -211,7 +261,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
             key={`${segment.type}:${segment.id}`}
             variant="secondary"
             size="sm"
-            onClick={() => toggleTarget(segment.id, segment.type)}
+            onClick={() => toggleTarget(segment.id, segment.type as 'departments' | 'roles' | 'groups')}
           >
             {segment.name}
             <Badge variant="outline" className="ml-2">
@@ -233,7 +283,6 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
       {insightsBanner}
       {segmentSuggestions}
 
-      {/* Recipient Type Selection */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
@@ -292,25 +341,16 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
         </Card>
       </div>
 
-      {/* Selection Details */}
       {formData.recipients.type !== 'all' && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-4">
-            {/* Departments Selection */}
             {formData.recipients.type === 'departments' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Select Departments</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {(insights.segments.filter((segment) => segment.type === 'departments').length > 0
-                    ? insights.segments.filter((segment) => segment.type === 'departments')
-                    : STATIC_DEPARTMENTS
-                  ).map((dept) => {
-                    const id = (dept as any).id;
-                    const name = (dept as any).name;
-                    const count = 'count' in dept ? (dept as any).count : undefined;
-
+                  {departmentOptions.map(({ id, name, count }) => {
                     return (
                       <div key={`department-${id}`} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
@@ -330,17 +370,145 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
               </Card>
             )}
 
-            {/* Roles Selection */}
             {formData.recipients.type === 'roles' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Select Roles</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {(insights.segments.filter((segment) => segment.type === 'roles').length > 0
-                    ? insights.segments filter((segment) => segment.type === 'roles')
-                    : STATIC_ROLES
-                  ).map((role) => {
-                    const id = (role as any).id;
-                    const name = (role as any).name;
-                    const count = 'count' in role ? (role]
+                  {roleOptions.map(({ id, name, count }) => {
+                    return (
+                      <div key={`role-${id}`} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={isTargetSelected(id, 'roles')}
+                            onCheckedChange={() => toggleTarget(id, 'roles')}
+                          />
+                          <span className="font-medium">{name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {count !== undefined ? `${count} employees` : 'Connect a directory to view counts'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+
+            {formData.recipients.type === 'individuals' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Select Individuals</CardTitle>
+                  <CardDescription className="text-sm">
+                    Add specific teammates or search across your directory.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Search by name, role, or department"
+                      className="pl-9"
+                    />
+                  </div>
+
+                  {filteredUsers.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">
+                      No people found. Connect a directory or adjust your search.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredUsers.map((user) => (
+                        <div key={user.id} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={isTargetSelected(user.id, 'individuals')}
+                              onCheckedChange={() => toggleTarget(user.id, 'individuals')}
+                            />
+                            <div>
+                              <p className="font-medium">{user.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {[user.role, user.department].filter(Boolean).join(' • ')}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Selection Summary</CardTitle>
+                <CardDescription className="text-sm">
+                  Review the expected reach before sending your announcement.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Selected audience</span>
+                  <span className="text-sm text-muted-foreground">{getRecipientCountLabel()}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Estimated reach</span>
+                  {insights.loading ? (
+                    <Skeleton className="h-5 w-16 rounded" />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      {insights.estimatedReach.toLocaleString()} people
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Active filters</span>
+                  {insights.loading ? (
+                    <Skeleton className="h-5 w-10 rounded" />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">{insights.activeFilters}</span>
+                  )}
+                </div>
+
+                {selectedTargetBadges.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-medium uppercase text-muted-foreground tracking-wide">
+                      Current selection
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTargetBadges.map(({ target, label }) => (
+                        <Badge
+                          key={target}
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => {
+                            const [category, id] = target.split(':');
+                            toggleTarget(id, category as 'departments' | 'roles' | 'individuals' | 'groups');
+                          }}
+                        >
+                          {label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {insights.error && (
+                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+                    {insights.error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

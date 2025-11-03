@@ -1,154 +1,117 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CalendarIcon, MoreHorizontal, Award, Edit, Trash2, Plus, ListChecks } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { CalendarIcon, CheckCircle2, PencilLine, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Goal } from '@/hooks/useGoals';
+import type { Goal, GoalStatus } from '@/hooks/useGoals';
 
 interface GoalCardProps {
   goal: Goal;
   onEdit: (goal: Goal) => void;
-  onDelete: (goalId: string) => void;
-  onAddTask: (goalId: string) => void;
-  onViewDetails: (goal: Goal) => void;
+  onToggleStatus: (goal: Goal, status: GoalStatus) => void;
+  onDelete: (goal: Goal) => void;
 }
 
-export function GoalCard({ goal, onEdit, onDelete, onAddTask, onViewDetails }: GoalCardProps) {
-  const owner = goal.participants?.find(participant => participant.role === 'owner');
-  const ownerProfile = owner?.profile;
-  const ownerName = ownerProfile
-    ? `${ownerProfile.first_name} ${ownerProfile.last_name}`
+const statusStyles: Record<GoalStatus, string> = {
+  active: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+  completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+};
+
+export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardProps) {
+  const ownerName = goal.owner
+    ? [goal.owner.first_name, goal.owner.last_name].filter(Boolean).join(' ')
     : 'Unassigned';
 
-  const ownerInitials = ownerProfile
-    ? `${ownerProfile.first_name.charAt(0)}${ownerProfile.last_name.charAt(0)}`
-    : 'NA';
+  const ownerInitials =
+    goal.owner && (goal.owner.first_name || goal.owner.last_name)
+      ? `${goal.owner.first_name?.[0] ?? ''}${goal.owner.last_name?.[0] ?? ''}`.trim().toUpperCase()
+      : 'NA';
 
-  const totalTasks = goal.goal_tasks?.length ?? 0;
-  const completedTasks = goal.goal_tasks?.filter(gt => gt.task?.status === 'completed').length ?? 0;
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'active': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
+  const nextStatus: GoalStatus = goal.status === 'completed' ? 'active' : 'completed';
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1" onClick={() => onViewDetails(goal)}>
-            <CardTitle className="text-lg mb-2">{goal.title}</CardTitle>
-            <div className="flex items-center space-x-2 mb-2">
-              <Badge className={getPriorityColor(goal.priority)}>
-                {goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}
-              </Badge>
-              <Badge className={getStatusColor(goal.status)}>
-                {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
-              </Badge>
-            </div>
+    <Card className="border border-border/60 bg-background/60 shadow-sm transition hover:shadow-lg">
+      <CardHeader className="space-y-3 pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Badge className={`${statusStyles[goal.status]} w-fit`}>
+              {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
+            </Badge>
+            <CardTitle className="text-xl font-semibold text-foreground">{goal.title}</CardTitle>
           </div>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(goal)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Goal
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onAddTask(goal.id)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Task
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => onDelete(goal.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Goal
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
+        {goal.description && (
+          <p className="text-sm leading-6 text-muted-foreground line-clamp-3">
+            {goal.description}
+          </p>
+        )}
       </CardHeader>
 
-      <CardContent>
-        <div className="space-y-4" onClick={() => onViewDetails(goal)}>
-          {goal.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {goal.description}
-            </p>
-          )}
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Progress</span>
-              <span className="font-medium">{goal.progress}%</span>
-            </div>
-            <Progress value={goal.progress} className="h-2" />
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Progress</span>
+            <span className="font-semibold text-foreground">{goal.progress ?? 0}%</span>
           </div>
+          <Progress
+            value={goal.progress ?? 0}
+            className="h-2"
+          />
+        </div>
 
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            {goal.target_completion_date && (
-              <div className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-1" />
-                <span>Due {format(new Date(goal.target_completion_date), 'MMM dd, yyyy')}</span>
-              </div>
-            )}
-          </div>
+        <Separator />
 
-          <div className="flex items-center justify-between py-2 rounded-lg bg-muted/40 px-3">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-9 w-9">
-                {ownerProfile?.avatar_url ? (
-                  <AvatarImage src={ownerProfile.avatar_url} alt={ownerName} />
-                ) : (
-                  <AvatarFallback>{ownerInitials}</AvatarFallback>
-                )}
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Owner</span>
-                <span className="text-sm font-medium text-foreground">{ownerName}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <ListChecks className="h-4 w-4 text-muted-foreground" />
-              <div className="flex flex-col text-right">
-                <span className="text-xs text-muted-foreground uppercase tracking-wide">Tasks</span>
-                <span className="text-sm font-medium text-foreground">{completedTasks}/{totalTasks}</span>
-              </div>
+        <div className="flex flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 border border-border/50">
+              {goal.owner?.avatar_url ? (
+                <AvatarImage src={goal.owner.avatar_url} alt={ownerName} />
+              ) : (
+                <AvatarFallback>{ownerInitials}</AvatarFallback>
+              )}
+            </Avatar>
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Owner
+              </span>
+              <p className="font-medium text-foreground">{ownerName}</p>
             </div>
           </div>
 
-          {goal.reward_type && (
-            <div className="flex items-center justify-end text-xs text-muted-foreground space-x-1">
-              <Award className="h-4 w-4" />
-              <span className="capitalize">{goal.reward_type}</span>
+          {goal.target_completion_date && (
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <span>
+                Due{' '}
+                <span className="font-medium text-foreground">
+                  {format(new Date(goal.target_completion_date), 'MMM d, yyyy')}
+                </span>
+              </span>
             </div>
           )}
         </div>
       </CardContent>
+
+      <CardFooter className="flex items-center justify-between gap-3 border-t border-border/60 bg-muted/30 p-4">
+        <div className="flex gap-2">
+          <Button variant="default" size="sm" onClick={() => onToggleStatus(goal, nextStatus)}>
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Mark {nextStatus === 'completed' ? 'Complete' : 'Active'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onEdit(goal)}>
+            <PencilLine className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+        </div>
+        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDelete(goal)}>
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

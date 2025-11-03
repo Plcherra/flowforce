@@ -102,14 +102,26 @@ export function useLearningCenter() {
   );
 
   const loadData = useCallback(async () => {
-    if (!user?.id || !profile?.userId || !companyId) {
+    if (!user?.id || !profile?.userId) {
       setCatalog([]);
       setEnrollments([]);
       setMetrics([]);
       setRecommendations([]);
       setSnapshot(null);
       setProgressByEnrollment({});
-      setError(user?.id && profile?.userId && !companyId ? 'Company context missing for learning data.' : null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    if (!companyId) {
+      setCatalog([]);
+      setEnrollments([]);
+      setMetrics([]);
+      setRecommendations([]);
+      setSnapshot(null);
+      setProgressByEnrollment({});
+      setError('Company context missing for learning data.');
       setLoading(false);
       return;
     }
@@ -118,8 +130,10 @@ export function useLearningCenter() {
     setError(null);
 
     try {
-      const personalEnrollmentsPromise = fetchEnrollments(profile.userId);
-      const adminEnrollmentsPromise = trainingAdmin ? fetchAllEnrollments() : Promise.resolve<LearningEnrollment[]>([]);
+      const personalEnrollmentsPromise = fetchEnrollments(profile.userId, companyId);
+      const adminEnrollmentsPromise = trainingAdmin
+        ? fetchAllEnrollments({ companyId, requireAdmin: true })
+        : Promise.resolve<LearningEnrollment[]>([]);
 
       const [catalogData, personalEnrollments, skillSnapshot, adminEnrollmentsData] = await Promise.all([
         fetchLearningCatalog(companyId),
@@ -174,10 +188,10 @@ export function useLearningCenter() {
 
   const handleCreateCourse = useCallback(
     async (payload: CourseCreationPayload) => {
-      if (!user?.id) {
+      if (!user?.id || !companyId) {
         toast({
           title: 'Not signed in',
-          description: 'Please sign in to create training courses.',
+          description: !user?.id ? 'Please sign in to create training courses.' : 'Company context missing for learning data.',
           variant: 'destructive',
         });
         return null;
@@ -185,7 +199,7 @@ export function useLearningCenter() {
 
       setSaving(true);
       try {
-        const course = await createLearningCourse(payload, user.id);
+        const course = await createLearningCourse(payload, user.id, companyId);
         toast({
           title: 'Course created',
           description: `'${course.title}' has been added to the catalog.`,
@@ -219,7 +233,7 @@ export function useLearningCenter() {
       }
 
       try {
-        const enrollment = await enrollInCourse(courseId, profile.userId);
+        const enrollment = await enrollInCourse(courseId, profile.userId, companyId);
         setEnrollments((previous) => {
           const exists = previous.find((entry) => entry.id === enrollment.id);
           if (exists) {
@@ -431,10 +445,19 @@ export function useLearningCenter() {
   };
 }
 
-async function fetchAllEnrollments(): Promise<LearningEnrollment[]> {
+async function fetchAllEnrollments(options: { companyId: string; requireAdmin: boolean }): Promise<LearningEnrollment[]> {
+  if (!options.requireAdmin) {
+    throw new Error('Admin privileges are required to view enrollments across the company.');
+  }
+
+  if (!options.companyId) {
+    throw new Error('Company context is required to fetch enrollments.');
+  }
+
   const { data, error } = await supabase
     .from('learning_enrollments' as any)
     .select('*')
+    .eq('company_id', options.companyId)
     .order('updated_at', { ascending: false })
     .limit(200);
 

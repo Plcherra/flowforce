@@ -1,280 +1,296 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Plus, Search, AlertTriangle, Sparkles } from 'lucide-react';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Target, TrendingUp, Users, Award } from 'lucide-react';
-import { useGoals, type Goal } from '@/hooks/useGoals';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { CreateGoalDialog } from '@/components/goals/CreateGoalDialog';
-import { EditGoalDialog } from '@/components/goals/EditGoalDialog';
-import { GoalDetailsDialog } from '@/components/goals/GoalDetailsDialog';
-import { GoalCard } from '@/components/goals/GoalCard';
-import LoadingSpinner from '@/components/resources/LoadingSpinner';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { GoalCard } from '@/components/goals/GoalCard';
+import { GoalProgress } from '@/components/goals/GoalProgress';
+import { CreateGoalModal, type GoalFormValues } from '@/components/goals/CreateGoalModal';
+import { Goal, GoalStatus, useGoals } from '@/hooks/useGoals';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
+const FILTERS = ['all', 'active', 'completed', 'draft'] as const;
+type GoalFilter = (typeof FILTERS)[number];
+
+function AISuggestions() {
+  return null;
+}
 
 export default function Goals() {
-  const isMobile = useIsMobile();
-  const { goals, loading, deleteGoal } = useGoals();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-  type GoalFilter = 'all' | 'active' | 'completed' | 'draft';
-  const [activeTab, setActiveTab] = useState<GoalFilter>('all');
-  const [query, setQuery] = useState('');
+  const {
+    goals,
+    stats,
+    isLoading,
+    isFetching: _isFetching,
+    error,
+    refetch,
+    createGoal,
+    updateGoal,
+    deleteGoal,
+    toggleStatus,
+    creating,
+    updating,
+    deleting: _deleting,
+    togglingStatus: _togglingStatus,
+  } = useGoals();
+  const { toast } = useToast();
 
-  const handleFilterChange = (value: string) => {
-    if (value === 'all' || value === 'active' || value === 'completed' || value === 'draft') {
-      setActiveTab(value);
+  const [activeFilter, setActiveFilter] = useState<GoalFilter>('all');
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [aiSuggestion, setAiSuggestion] = useState<{ title: string; description: string } | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+
+  const normalizedQuery = search.trim().toLowerCase();
+  const filteredGoals = useMemo(() => {
+    return goals.filter((goal) => {
+      const matchesFilter =
+        activeFilter === 'all' ? true : goal.status === activeFilter;
+
+      if (!matchesFilter) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      const haystack = `${goal.title ?? ''} ${goal.description ?? ''}`.toLowerCase();
+      return haystack.includes(normalizedQuery);
+    });
+  }, [goals, activeFilter, normalizedQuery]);
+
+  const handleCreate = async (values: GoalFormValues) => {
+    await createGoal({
+      title: values.title,
+      description: values.description ?? null,
+      status: values.status,
+      target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
+      priority: values.priority,
+      progress: values.progress,
+    });
+  };
+
+  const handleUpdate = async (goal: Goal, values: GoalFormValues) => {
+    await updateGoal({
+      id: goal.id,
+      updates: {
+        title: values.title,
+        description: values.description ?? null,
+        status: values.status,
+        priority: values.priority,
+        target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
+        progress: values.progress,
+      },
+    });
+  };
+
+  const handleDelete = async (goal: Goal) => {
+    const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
+    if (!confirmed) {
+      return;
+    }
+    await deleteGoal(goal.id);
+  };
+
+  const handleToggleStatus = async (goal: Goal, status: GoalStatus) => {
+    await toggleStatus({ id: goal.id, status });
+  };
+
+  const handleSuggestGoal = async () => {
+    setSuggesting(true);
+    try {
+      // TODO: Integrate with AI service for contextual suggestions.
+      const suggestion = {
+        title: 'Improve onboarding completion rate',
+        description:
+          'Launch a cross-functional initiative to boost onboarding completion to 95% by end of quarter with improved training paths and regular checkpoints.',
+      };
+      setAiSuggestion(suggestion);
+      setEditingGoal(null);
+      setModalOpen(true);
+    } catch (suggestionError) {
+      toast({
+        title: 'Unable to fetch suggestion',
+        description:
+          suggestionError instanceof Error ? suggestionError.message : 'Try again shortly.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSuggesting(false);
     }
   };
 
-  const selectedGoal = useMemo(() => {
-    if (!selectedGoalId) return null;
-    return goals.find(goal => goal.id === selectedGoalId) ?? null;
-  }, [goals, selectedGoalId]);
-
-  useEffect(() => {
-    if (selectedGoalId && !selectedGoal) {
-      setShowDetailsDialog(false);
-      setShowEditDialog(false);
-      setSelectedGoalId(null);
-    }
-  }, [selectedGoalId, selectedGoal]);
-
-  const handleEdit = (goal: Goal) => {
-    setSelectedGoalId(goal.id);
-    setShowEditDialog(true);
-  };
-
-  const handleDelete = async (goalId: string) => {
-    if (confirm('Are you sure you want to delete this goal?')) {
-      await deleteGoal(goalId);
-    }
-  };
-
-  const handleAddTask = (goalId: string) => {
-    setSelectedGoalId(goalId);
-    setShowDetailsDialog(true);
-  };
-
-  const handleViewDetails = (goal: Goal) => {
-    setSelectedGoalId(goal.id);
-    setShowDetailsDialog(true);
-  };
-
-  const normalized = goals.filter(g => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return (
-      (g.title || '').toLowerCase().includes(q) ||
-      (g.description || '').toLowerCase().includes(q)
-    );
-  });
-  const activeGoals = normalized.filter(goal => goal.status === 'active');
-  const completedGoals = normalized.filter(goal => goal.status === 'completed');
-  const draftGoals = normalized.filter(goal => goal.status === 'draft');
-
-  const stats = {
-    total: goals.length,
-    active: activeGoals.length,
-    completed: completedGoals.length,
-    averageProgress: goals.length > 0 ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length) : 0
-  };
-
-  const statusColumns = [
-    {
-      key: 'active' as const,
-      title: 'Active Goals',
-      description: 'Goals currently in progress and moving forward.',
-      goals: activeGoals,
-      emptyMessage: 'No active goals at the moment. Create one to get started.'
-    },
-    {
-      key: 'draft' as const,
-      title: 'Draft Goals',
-      description: 'Goals still being refined before kickoff.',
-      goals: draftGoals,
-      emptyMessage: 'Draft your next big initiative to keep plans flowing.'
-    },
-    {
-      key: 'completed' as const,
-      title: 'Completed Goals',
-      description: 'Wins the team has already achieved.',
-      goals: completedGoals,
-      emptyMessage: 'No completed goals yet—celebrations await!'
-    }
-  ];
-
-  const visibleColumns = activeTab === 'all'
-    ? statusColumns
-    : statusColumns.filter(column => column.key === activeTab);
-
-  const columnClass =
-    visibleColumns.length === 1
-      ? 'grid-cols-1'
-      : visibleColumns.length === 2
-        ? 'grid-cols-1 lg:grid-cols-2'
-        : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3';
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  const saving = creating || updating;
 
   return (
-    <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
-      {/* Header */}
-      <div className={`${isMobile ? 'flex flex-col space-y-3 px-4 py-3' : 'flex items-center justify-between'}`}>
-        <div>
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900 dark:text-white`}>Goals & Objectives</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Track team progress and celebrate achievements
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)} size={isMobile ? "sm" : "default"}>
-          <Plus className="h-4 w-4 mr-2" />
-          {isMobile ? 'New Goal' : 'Create Goal'}
-        </Button>
-      </div>
+    <ErrorBoundary>
+      <div className="space-y-6 px-4 pt-4 pb-8 md:px-8 lg:px-12">
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-2xl space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              Goals &amp; Objectives
+            </h1>
+            <p className="text-muted-foreground">
+              Track strategic initiatives, celebrate achievements, and keep teams aligned in real time.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleSuggestGoal} disabled={suggesting}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              {suggesting ? 'Generating…' : 'Suggest a goal'}
+            </Button>
+            <Button
+              onClick={() => {
+                setAiSuggestion(null);
+                setEditingGoal(null);
+                setModalOpen(true);
+              }}
+              disabled={creating}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create goal
+            </Button>
+          </div>
+        </header>
 
-      {/* Stats Overview */}
-      <div className={`${isMobile ? 'px-4 grid grid-cols-2 gap-3' : 'grid grid-cols-1 md:grid-cols-4 gap-6'}`}>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Goals</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
+        <ErrorBoundary>
+          <GoalProgress totals={stats} isLoading={isLoading && goals.length === 0} />
+        </ErrorBoundary>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Goals</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active}</div>
-          </CardContent>
-        </Card>
+        <AISuggestions />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completed}</div>
-          </CardContent>
-        </Card>
+        <div className="sticky top-20 z-10 space-y-4 rounded-xl border border-border/60 bg-background/90 p-4 shadow-sm backdrop-blur-md">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as GoalFilter)}>
+              <TabsList>
+                {FILTERS.map((filter) => (
+                  <TabsTrigger key={filter} value={filter} className="capitalize">
+                    {filter}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.averageProgress}%</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <div className={`${isMobile ? 'px-4' : ''}`}>
-        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'} mb-4`}>
-          <Tabs value={activeTab} onValueChange={handleFilterChange}>
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="draft">Drafts</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <div className={`${isMobile ? '' : 'w-72'}`}>
-            <Input
-              placeholder="Search goals..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+            <div className="relative w-full md:w-72">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search goals"
+                className="pl-9"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Goals Content */}
-      <div className={isMobile ? 'px-4' : ''}>
-        {goals.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Goals Yet</CardTitle>
-              <CardDescription>
-                Create your first goal to start tracking progress and motivating your team.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Goal
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className={`grid gap-6 ${columnClass}`}>
-            {visibleColumns.map((column) => (
-              <div key={column.key} className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-foreground">{column.title}</h2>
-                    <p className="text-sm text-muted-foreground">{column.description}</p>
+        <Tabs value={activeFilter}>
+          {FILTERS.map((filter) => (
+            <TabsContent key={filter} value={filter} className="mt-0">
+              <ErrorBoundary>
+                {error ? (
+                  <Card className="border border-destructive/20 bg-destructive/5">
+                    <CardHeader className="space-y-1">
+                      <CardTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="h-5 w-5" />
+                        Unable to load goals
+                      </CardTitle>
+                      <CardDescription className="text-destructive/80">
+                        {error instanceof Error ? error.message : 'An unexpected error occurred.'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button variant="outline" onClick={() => refetch()} size="sm">
+                        Try again
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : isLoading && goals.length === 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <Card key={index} className="border border-border/60 bg-background/70">
+                        <CardHeader>
+                          <Skeleton className="h-6 w-2/3" />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <Skeleton className="h-3 w-full" />
+                          <Skeleton className="h-3 w-5/6" />
+                          <Skeleton className="h-2 w-full" />
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                  <Badge variant="secondary">{column.goals.length}</Badge>
-                </div>
-                <div className="space-y-4">
-                  {column.goals.length > 0 ? (
-                    column.goals.map((goal) => (
+                ) : filteredGoals.length === 0 ? (
+                  <Card className="border border-dashed border-border/60 bg-muted/20 py-12">
+                    <CardHeader className="space-y-2 text-center">
+                      <CardTitle>No goals found</CardTitle>
+                      <CardDescription>
+                        {goals.length === 0
+                          ? 'Create your first goal to begin tracking progress.'
+                          : 'No goals match your filters yet.'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex justify-center">
+                      <Button onClick={() => setModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create goal
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div
+                    className={cn(
+                      'grid gap-4',
+                      'md:grid-cols-2',
+                      'xl:grid-cols-3',
+                    )}
+                  >
+                    {filteredGoals.map((goal) => (
                       <GoalCard
                         key={goal.id}
                         goal={goal}
-                        onEdit={handleEdit}
+                        onEdit={(selected) => {
+                          setEditingGoal(selected);
+                          setModalOpen(true);
+                        }}
+                        onToggleStatus={handleToggleStatus}
                         onDelete={handleDelete}
-                        onAddTask={handleAddTask}
-                        onViewDetails={handleViewDetails}
                       />
-                    ))
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-muted-foreground/30 p-6 text-sm text-muted-foreground">
-                      {column.emptyMessage}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                    ))}
+                  </div>
+                )}
+              </ErrorBoundary>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
 
-      <CreateGoalDialog 
-        open={showCreateDialog} 
-        onOpenChange={setShowCreateDialog}
+      <CreateGoalModal
+        open={modalOpen}
+        onOpenChange={(next) => {
+          setModalOpen(next);
+          if (!next) {
+            setEditingGoal(null);
+            setAiSuggestion(null);
+          }
+        }}
+        initialGoal={editingGoal ?? undefined}
+        aiSuggestion={aiSuggestion}
+        saving={saving}
+        onSubmit={async (values) => {
+          if (editingGoal) {
+            await handleUpdate(editingGoal, values);
+          } else {
+            await handleCreate(values);
+          }
+          setAiSuggestion(null);
+        }}
       />
-      
-      <EditGoalDialog
-        goal={selectedGoal}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
-      
-      <GoalDetailsDialog
-        goal={selectedGoal}
-        open={showDetailsDialog}
-        onOpenChange={setShowDetailsDialog}
-        onEdit={handleEdit}
-      />
-    </div>
+    </ErrorBoundary>
   );
 }

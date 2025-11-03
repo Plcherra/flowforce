@@ -13,35 +13,54 @@ import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PageAsyncWrapper } from '@/components/ui/async-wrapper';
 import ErrorBoundary from '@/components/ui/error-boundary';
-import { useMemo } from 'react';
 
 export default function Dashboard() {
   const isMobile = useIsMobile();
-  const { stats, loading: statsLoading } = useDashboardData();
-  const { profile, loading: profileLoading, error: profileError } = useProfile();
-
-  // Memoize the profile data to prevent unnecessary re-renders
-  const memoizedProfile = useMemo(() => profile, [profile]);
+  const { stats, loading: statsLoading, error: statsError, refetch } = useDashboardData();
+  const { loading: profileLoading, error: profileError, refreshProfile } = useProfile();
 
   const handleRetry = () => {
-    window.location.reload();
+    void Promise.allSettled([
+      refreshProfile(),
+      refetch(),
+    ]);
   };
 
+  const devDiagnostics =
+    import.meta.env.DEV && profileError
+      ? (
+          <div className="mx-auto w-full max-w-7xl px-6 pb-6">
+            <div className="rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+              <p className="font-semibold">Supabase profile error</p>
+              <pre className="mt-2 whitespace-pre-wrap break-words">
+                {typeof profileError === 'string' ? profileError : profileError?.message ?? 'Unknown error'}
+              </pre>
+            </div>
+          </div>
+        )
+      : null;
+
   return (
-    <PageAsyncWrapper
-      isLoading={profileLoading}
-      error={profileError}
-      onRetry={handleRetry}
-      loadingTitle="Loading Dashboard"
-      loadingDescription="Setting up your workspace..."
-    >
+    <>
+      <PageAsyncWrapper
+        isLoading={profileLoading}
+        error={profileError}
+        onRetry={handleRetry}
+        loadingTitle="Loading Dashboard"
+        loadingDescription="Setting up your workspace..."
+      >
       <div className={`${isMobile ? 'px-3 py-4 space-y-4' : 'px-6 py-6 space-y-6'} max-w-7xl mx-auto`}>
         <ErrorBoundary>
           <DashboardHeader />
         </ErrorBoundary>
         
         <ErrorBoundary>
-          <DashboardStats stats={stats} loading={statsLoading} />
+          <DashboardStats
+            stats={stats}
+            loading={statsLoading}
+            error={statsError}
+            onRetry={refetch}
+          />
         </ErrorBoundary>
 
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[2fr_1fr]">
@@ -83,6 +102,8 @@ export default function Dashboard() {
       <ErrorBoundary>
         <AIChatAssistant context="dashboard" />
       </ErrorBoundary>
-    </PageAsyncWrapper>
+      </PageAsyncWrapper>
+      {devDiagnostics}
+    </>
   );
 }

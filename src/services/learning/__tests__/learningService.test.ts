@@ -80,7 +80,7 @@ vi.mock('@/integrations/supabase/client', () => {
 });
 
 import { supabase } from '@/integrations/supabase/client';
-import { fetchCourseMetrics, fetchLearningCatalog } from '@/services/learning/learningService';
+import { fetchCourseMetrics, fetchEnrollments, fetchLearningCatalog } from '@/services/learning/learningService';
 
 type SupabaseMock = typeof supabase & {
   __setTableRows: (table: string, rows: any[]) => void;
@@ -221,6 +221,41 @@ const seedLearningData = () => {
       total_xp_awarded: 100,
     },
   ]);
+
+  supabaseMock.__setTableRows('learning_enrollments', [
+    {
+      id: 'enrollment-1',
+      course_id: 'course-1',
+      employee_id: 'employee-1',
+      company_id: 'company-1',
+      status: 'in_progress',
+      progress_percent: 50,
+      hours_completed: 2,
+      current_module: 1,
+      level: 1,
+      started_at: defaultTimestamps.created,
+      completed_at: null,
+      last_activity_at: defaultTimestamps.updated,
+      created_at: defaultTimestamps.created,
+      updated_at: defaultTimestamps.updated,
+    },
+    {
+      id: 'enrollment-2',
+      course_id: 'course-3',
+      employee_id: 'employee-1',
+      company_id: 'company-2',
+      status: 'completed',
+      progress_percent: 100,
+      hours_completed: 2,
+      current_module: 1,
+      level: 1,
+      started_at: defaultTimestamps.created,
+      completed_at: defaultTimestamps.updated,
+      last_activity_at: defaultTimestamps.updated,
+      created_at: defaultTimestamps.created,
+      updated_at: defaultTimestamps.updated,
+    },
+  ]);
 };
 
 describe('learningService tenant isolation', () => {
@@ -256,7 +291,23 @@ describe('learningService tenant isolation', () => {
     expect(metricsState?.eqCalls).toEqual([{ column: 'company_id', value: 'company-1' }]);
   });
 
+  it('scopes fetchEnrollments to the active company', async () => {
+    const enrollments = await fetchEnrollments('employee-1', 'company-1');
+
+    expect(enrollments).toHaveLength(1);
+    expect(enrollments[0]?.id).toBe('enrollment-1');
+    const enrollmentState = supabaseMock.__getTableState('learning_enrollments');
+    expect(enrollmentState?.eqCalls).toEqual([
+      { column: 'employee_id', value: 'employee-1' },
+      { column: 'company_id', value: 'company-1' },
+    ]);
+  });
+
   it('throws when fetchLearningCatalog is invoked without a company id', async () => {
     await expect(fetchLearningCatalog('')).rejects.toThrow(/Company context is required/i);
+  });
+
+  it('throws when fetchEnrollments is invoked without a company id', async () => {
+    await expect(fetchEnrollments('employee-1', '')).rejects.toThrow(/Company context is required/i);
   });
 });

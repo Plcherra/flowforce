@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { differenceInCalendarDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 
 export interface DashboardStats {
   totalEmployees: number;
@@ -14,76 +15,153 @@ export interface DashboardStats {
   timeOffBalanceRemaining: number;
 }
 
+type ScheduleRow = {
+  id: string;
+  start_time: string;
+  company_id: string | null;
+};
+
+type PendingTimeOffRow = {
+  id: string;
+  company_id: string | null;
+};
+
+type ApprovedTimeOffRow = {
+  start_date: string | null;
+  end_date: string | null;
+  company_id: string | null;
+};
+
 const TIME_OFF_ALLOWANCE_PER_EMPLOYEE = 25;
+const DEFAULT_STATS: DashboardStats = {
+  totalEmployees: 0,
+  activeEmployees: 0,
+  totalDepartments: 0,
+  todaysShifts: 0,
+  pendingTimeOff: 0,
+  approvedTimeOffUpcoming: 0,
+  timeOffDaysUsed: 0,
+  timeOffBalanceRemaining: 0,
+};
+
+const FALLBACK_STATS: DashboardStats = {
+  totalEmployees: 42,
+  activeEmployees: 38,
+  totalDepartments: 6,
+  todaysShifts: 12,
+  pendingTimeOff: 4,
+  approvedTimeOffUpcoming: 5,
+  timeOffDaysUsed: 128,
+  timeOffBalanceRemaining: 922,
+};
 
 export function useDashboardData() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalEmployees: 0,
-    activeEmployees: 0,
-    totalDepartments: 0,
-    todaysShifts: 0,
-    pendingTimeOff: 0,
-    approvedTimeOffUpcoming: 0,
-    timeOffDaysUsed: 0,
-    timeOffBalanceRemaining: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const fetchDashboardData = useCallback(async () => {
+    if (!companyId) {
+      setStats(DEFAULT_STATS);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
-      // Fetch employee statistics
-      const { data: employees, error: employeesError } = await supabase
-        .from('profiles')
-        .select('employment_status');
+      const todayIso = new Date().toISOString().split('T')[0];
+      const dayStart = `${todayIso}T00:00:00`;
+      const dayEnd = `${todayIso}T23:59:59`;
 
-      if (employeesError) throw employeesError;
+      const [
+        employeesResponse,
+        departmentsResponse,
+        schedulesResponse,
+        pendingRequestsResponse,
+        approvedRequestsResponse,
+      ] = await Promise.all([
+        supabase.from('profiles').select('employment_status').eq('company_id', companyId),
+        supabase.from('departments').select('id').eq('company_id', companyId),
+        supabase
+          .from('schedules')
+          .select('id, start_time, company_id')
+          .eq('company_id', companyId)
+          .gte('start_time', dayStart)
+          .lt('start_time', dayEnd),
+        supabase
+          .from('time_off_requests')
+          .select('id, company_id')
+          .eq('company_id', companyId)
+          .eq('status', 'pending'),
+        supabase
+          .from('time_off_requests')
+          .select('start_date, end_date, company_id')
+          .eq('company_id', companyId)
+          .eq('status', 'approved'),
+      ]);
 
-      const { data: departments, error: departmentsError } = await supabase
-        .from('departments')
-        .select('id');
+      const failedResponses = [
+        { label: 'profiles', response: employeesResponse },
+        { label: 'departments', response: departmentsResponse },
+        { label: 'schedules', response: schedulesResponse },
+        { label: 'time_off_requests (pending)', response: pendingRequestsResponse },
+        { label: 'time_off_requests (approved)', response: approvedRequestsResponse },
+      ].filter(({ response }) => response.error);
 
-      if (departmentsError) throw departmentsError;
+      if (failedResponses.length > 0) {
+        failedResponses.forEach(({ label, response }) => {
+          console.error('[useDashboardData] Query failed', {
+            label,
+            companyId,
+            error: response.error,
+          });
+        });
+        const messages = failedResponses
+          .map(({ label, response }) => `${label}: ${response.error?.message ?? 'unknown error'}`)
+          .join('; ');
+        throw new Error(messages);
+      }
 
-      const today = new Date().toISOString().split('T')[0];
-      const { data: schedules, error: schedulesError } = await supabase
-        .from('schedules')
-        .select('*')
-        .gte('start_time', today)
-        .lt('start_time', `${today}T23:59:59`);
+      const employees = employeesResponse.data ?? [];
+      const departments = departmentsResponse.data ?? [];
+      const rawSchedules = (schedulesResponse.data ?? []) as ScheduleRow[];
+      const rawPendingRequests = (pendingRequestsResponse.data ?? []) as PendingTimeOffRow[];
+      const rawApprovedRequests = (approvedRequestsResponse.data ?? []) as ApprovedTimeOffRow[];
 
-      if (schedulesError) throw schedulesError;
+      const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
+      if (schedules.length !== rawSchedules.length) {
+        console.warn('[useDashboardData] Filtered schedules from other companies', JSON.stringify({ removed: rawSchedules.length - schedules.length, companyId }));
+      }
 
-      const { data: timeOffRequests, error: timeOffError } = await supabase
-        .from('time_off_requests')
-        .select('*')
-        .eq('status', 'pending');
+      const timeOffRequests = rawPendingRequests.filter((entry) => entry?.company_id === companyId);
+      if (timeOffRequests.length !== rawPendingRequests.length) {
+        console.warn('[useDashboardData] Filtered pending time off requests from other companies', JSON.stringify({ removed: rawPendingRequests.length - timeOffRequests.length, companyId }));
+      }
 
-      if (timeOffError) throw timeOffError;
+      const approvedTimeOff = rawApprovedRequests.filter((entry) => entry?.company_id === companyId);
+      if (approvedTimeOff.length !== rawApprovedRequests.length) {
+        console.warn('[useDashboardData] Filtered approved time off requests from other companies', JSON.stringify({ removed: rawApprovedRequests.length - approvedTimeOff.length, companyId }));
+      }
 
-      const { data: approvedTimeOff, error: approvedError } = await supabase
-        .from('time_off_requests')
-        .select('start_date, end_date')
-        .eq('status', 'approved');
+      const totalEmployees = employees.length;
+      const activeEmployees = employees.filter(employee => employee?.employment_status === 'active').length;
+      const totalDepartments = departments.length;
+      const todaysShifts = schedules.length;
+      const pendingTimeOff = timeOffRequests.length;
 
-      if (approvedError) throw approvedError;
-
-      const totalEmployees = employees?.length || 0;
-      const activeEmployees = employees?.filter(emp => emp.employment_status === 'active').length || 0;
-      const totalDepartments = departments?.length || 0;
-      const todaysShifts = schedules?.length || 0;
-      const pendingTimeOff = timeOffRequests?.length || 0;
-      const approvedUpcoming = (approvedTimeOff ?? []).filter(request => {
+      const approvedUpcoming = approvedTimeOff.filter(request => {
         if (!request.end_date) return false;
         return new Date(request.end_date) >= new Date();
       }).length;
 
       const currentYearStart = new Date(new Date().getFullYear(), 0, 1);
-      const approvedDaysUsed = (approvedTimeOff ?? []).reduce((total, request) => {
+      const approvedDaysUsed = approvedTimeOff.reduce((total, request) => {
         if (!request.start_date || !request.end_date) return total;
         const requestStart = new Date(request.start_date);
         const requestEnd = new Date(request.end_date);
@@ -110,23 +188,25 @@ export function useDashboardData() {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
       console.error('Error fetching dashboard data:', error);
       setError(errorMessage);
-      
+      setStats(FALLBACK_STATS);
       toast({
         title: "Error loading dashboard",
-        description: errorMessage,
+        description: `${errorMessage}. Showing sample data for now.`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [companyId, toast]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    if (companyId) {
+      fetchDashboardData();
+    }
+  }, [companyId, fetchDashboardData]);
 
   const refetch = useCallback(() => {
-    fetchDashboardData();
+    return fetchDashboardData();
   }, [fetchDashboardData]);
 
   return { 

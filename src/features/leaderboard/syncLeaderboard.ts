@@ -157,13 +157,14 @@ async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRan
   return metrics;
 }
 
-async function collectTrainingMetrics(employeeIds: string[], range: PeriodRange) {
+async function collectTrainingMetrics(employeeIds: string[], range: PeriodRange, companyId: string) {
   if (employeeIds.length === 0) return new Map<string, LeaderboardSyncMetrics>();
 
   let query = supabase
     .from('learning_enrollments')
     .select('employee_id, completed_at, course:learning_courses (title, xp_reward)')
     .in('employee_id', employeeIds)
+    .eq('company_id', companyId)
     .not('completed_at', 'is', null);
 
   if (range.start) {
@@ -313,7 +314,7 @@ export async function syncLeaderboard({
         collectTaskMetrics(employeeIds, range),
         collectGoalMetrics(employeeIds, range),
         collectRecognitionMetrics(employeeIds, range),
-        collectTrainingMetrics(employeeIds, range),
+        collectTrainingMetrics(employeeIds, range, companyId),
       ]);
 
       const merged = mergeMetrics([tasks, goals, recognition, training]);

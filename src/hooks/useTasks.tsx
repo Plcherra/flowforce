@@ -90,16 +90,28 @@ export function useTasks() {
           department:departments(name),
           goal:goals(id, title, status, progress, target_completion_date)
         `)
-        .eq('profiles!tasks_created_by_fkey.company_id', companyId)
+        .or(
+          `profiles!tasks_created_by_fkey.company_id.eq.${companyId},profiles!tasks_assigned_to_fkey.company_id.eq.${companyId}`,
+        )
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const scopedTasks = ((data ?? []) as TaskWithRelations[]).filter((task) => {
+      const allTasks = (data ?? []) as TaskWithRelations[];
+
+      const scopedTasks = allTasks.filter((task) => {
         const assignedCompanyId = task.assigned_profile?.company_id ?? null;
         const createdCompanyId = task.created_profile?.company_id ?? null;
         return assignedCompanyId === companyId || createdCompanyId === companyId;
       });
+
+      if (scopedTasks.length !== allTasks.length) {
+        const removed = allTasks.length - scopedTasks.length;
+        console.warn(
+          '[useTasks] Filtered out tasks from other companies',
+          JSON.stringify({ removed, companyId }),
+        );
+      }
 
       setTasks(scopedTasks);
     } catch (error) {

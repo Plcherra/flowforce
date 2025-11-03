@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import CreateFormDialog from '@/components/forms/CreateFormDialog';
 import FormBuilderDialog from '@/components/forms/FormBuilderDialog';
@@ -26,15 +26,15 @@ const matchesQuery = (form: FormWithMeta, query: string) => {
 export default function Forms() {
   const { user } = useAuth();
   const { can: canUse } = useCan();
-  const { forms, loading } = useForms();
+  const { forms, isInitialLoading } = useForms();
 
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
-  const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
-  const [fillDialogOpen, setFillDialogOpen] = useState(false);
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
+  const [builderFormId, setBuilderFormId] = useState<string | null>(null);
+  const builderDefaultsRef = useRef<Record<string, { title?: string | null; description?: string | null }>>({});
+  const [fillFormId, setFillFormId] = useState<string | null>(null);
 
   const canCreateForms = canUse('createForms');
 
@@ -76,14 +76,39 @@ export default function Forms() {
     ];
   }, [filteredForms, user?.id, canCreateForms]);
 
+  const ensureBuilderDefaults = (formId: string, fallback?: { title?: string | null; description?: string | null }) => {
+    const matchingForm = forms.find((form) => form.id === formId);
+    if (matchingForm) {
+      builderDefaultsRef.current[formId] = {
+        title: matchingForm.title ?? undefined,
+        description: matchingForm.description ?? undefined,
+      };
+      return;
+    }
+
+    if (fallback) {
+      builderDefaultsRef.current[formId] = fallback;
+    }
+  };
+
+  const builderForm = builderFormId ? forms.find((form) => form.id === builderFormId) : null;
+  const builderDefaults = builderFormId ? builderDefaultsRef.current[builderFormId] : undefined;
+
+  const builderInitialTitle = builderForm?.title ?? builderDefaults?.title ?? 'New Form';
+  const builderInitialDescription = builderForm?.description ?? builderDefaults?.description ?? '';
+
+  useEffect(() => {
+    if (!builderFormId) return;
+    ensureBuilderDefaults(builderFormId);
+  }, [builderFormId, forms]);
+
   const handleOpenBuilder = (formId: string) => {
-    setSelectedFormId(formId);
-    setBuilderDialogOpen(true);
+    ensureBuilderDefaults(formId);
+    setBuilderFormId(formId);
   };
 
   const handleOpenFill = (formId: string) => {
-    setSelectedFormId(formId);
-    setFillDialogOpen(true);
+    setFillFormId(formId);
   };
 
   return (
@@ -137,7 +162,7 @@ export default function Forms() {
                   <FormsSection
                     title={section.title}
                     forms={section.forms}
-                    loading={loading}
+                    loading={isInitialLoading}
                     emptyMessage={section.emptyMessage}
                     onFill={handleOpenFill}
                     onEdit={handleOpenBuilder}
@@ -159,8 +184,8 @@ export default function Forms() {
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           onFormCreated={(formId) => {
-            setSelectedFormId(formId);
-            setBuilderDialogOpen(true);
+            ensureBuilderDefaults(formId, { title: 'New Form', description: '' });
+            setBuilderFormId(formId);
           }}
         />
       </ErrorBoundary>
@@ -175,32 +200,47 @@ export default function Forms() {
         <FormFieldTest open={testDialogOpen} onOpenChange={setTestDialogOpen} />
       </ErrorBoundary>
 
-      {selectedFormId && (
-        <>
-          <ErrorBoundary
-            fallback={
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                Unable to open the form builder. Please refresh and try again.
-              </div>
-            }
-          >
-            <FormBuilderDialog open={builderDialogOpen} onOpenChange={setBuilderDialogOpen} formId={selectedFormId} />
-          </ErrorBoundary>
-          <ErrorBoundary
-            fallback={
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                Unable to load the form fill experience.
-              </div>
-            }
-          >
-            <FormFillDialog
-              open={fillDialogOpen}
-              onOpenChange={setFillDialogOpen}
-              formId={selectedFormId}
-              onSubmitted={() => setFillDialogOpen(false)}
-            />
-          </ErrorBoundary>
-        </>
+      {builderFormId && (
+        <ErrorBoundary
+          fallback={
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+              Unable to open the form builder. Please refresh and try again.
+            </div>
+          }
+        >
+          <FormBuilderDialog
+            open
+            onOpenChange={(open) => {
+              if (!open && builderFormId) {
+                delete builderDefaultsRef.current[builderFormId];
+                setBuilderFormId(null);
+              }
+            }}
+            formId={builderFormId}
+            initialTitle={builderInitialTitle}
+            initialDescription={builderInitialDescription}
+          />
+        </ErrorBoundary>
+      )}
+      {fillFormId && (
+        <ErrorBoundary
+          fallback={
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+              Unable to load the form fill experience.
+            </div>
+          }
+        >
+          <FormFillDialog
+            open
+            onOpenChange={(open) => {
+              if (!open) {
+                setFillFormId(null);
+              }
+            }}
+            formId={fillFormId}
+            onSubmitted={() => setFillFormId(null)}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );

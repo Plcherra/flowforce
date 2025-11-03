@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -40,21 +41,65 @@ const ProfileContext = createContext<ProfileContextValue | undefined>(undefined)
 
 const profileCache = new Map<string, ProfileDetails | null>();
 
-async function fetchProfileFromSupabase(userId: string): Promise<ProfileDetails | null> {
-  const { data, error } = await supabase
+const buildCacheKey = (userId: string, companyId: string | null | undefined) =>
+  `${userId}:${companyId ?? 'none'}`;
+
+const readMetadataValue = (source: Record<string, unknown> | undefined, key: string) => {
+  const value = source?.[key];
+  return typeof value === 'string' && value.trim().length > 0 ? value : null;
+};
+
+const resolveActiveCompanyIdFromUser = (user: User | null) => {
+  if (!user) return null;
+  const appMeta = user.app_metadata as Record<string, unknown> | undefined;
+  const userMeta = user.user_metadata as Record<string, unknown> | undefined;
+  return (
+    readMetadataValue(appMeta, 'active_company_id') ??
+    readMetadataValue(appMeta, 'company_id') ??
+    readMetadataValue(userMeta, 'active_company_id') ??
+    readMetadataValue(userMeta, 'company_id') ??
+    null
+  );
+};
+
+async function fetchProfileFromSupabase(userId: string, companyId: string | null): Promise<ProfileDetails | null> {
+  let query = supabase
     .from('profiles')
     .select(
       'id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date',
     )
-    .eq('id', userId)
-    .maybeSingle();
+    .eq('id', userId);
+
+  if (companyId) {
+    query = query.eq('company_id', companyId);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
+    if (import.meta.env.DEV) {
+      console.error('[ProfileProvider] Failed to load profile', {
+        userId,
+        companyId,
+        error,
+      });
+    }
     throw error;
   }
 
   if (!data) {
-    return null;
+    const missingError = new Error(
+      companyId
+        ? `Profile not found for user ${userId} in company ${companyId}`
+        : `Profile not found for user ${userId}`,
+    );
+    if (import.meta.env.DEV) {
+      console.error('[ProfileProvider] Missing profile row', {
+        userId,
+        companyId,
+      });
+    }
+    throw missingError;
   }
 
   // NOTE: locationIds are currently unavailable via Supabase relationships in this context.
@@ -82,13 +127,14 @@ async function fetchProfileFromSupabase(userId: string): Promise<ProfileDetails 
   };
 }
 
-async function getProfile(userId: string, forceRefresh = false): Promise<ProfileDetails | null> {
-  if (!forceRefresh && profileCache.has(userId)) {
-    return profileCache.get(userId) ?? null;
+async function getProfile(userId: string, companyId: string | null, forceRefresh = false): Promise<ProfileDetails | null> {
+  const cacheKey = buildCacheKey(userId, companyId);
+  if (!forceRefresh && profileCache.has(cacheKey)) {
+    return profileCache.get(cacheKey) ?? null;
   }
 
-  const profile = await fetchProfileFromSupabase(userId);
-  profileCache.set(userId, profile ?? null);
+  const profile = await fetchProfileFromSupabase(userId, companyId);
+  profileCache.set(cacheKey, profile ?? null);
   return profile;
 }
 
@@ -97,23 +143,25 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [resolvedUserId, setResolvedUserId] = useState<string | null>(null);
+  const [resolvedCacheKey, setResolvedCacheKey] = useState<string | null>(null);
 
   const loadProfile = useCallback(
     async (forceRefresh = false) => {
       if (!user?.id) {
         setProfile(null);
-        setResolvedUserId(null);
+        setResolvedCacheKey(null);
         setError(null);
         setLoading(false);
         return;
       }
 
       const userId = user.id;
+      const activeCompanyId = resolveActiveCompanyIdFromUser(user);
+      const cacheKey = buildCacheKey(userId, activeCompanyId);
 
-      if (!forceRefresh && profileCache.has(userId)) {
-        setProfile(profileCache.get(userId) ?? null);
-        setResolvedUserId(userId);
+      if (!forceRefresh && profileCache.has(cacheKey)) {
+        setProfile(profileCache.get(cacheKey) ?? null);
+        setResolvedCacheKey(cacheKey);
         setError(null);
         setLoading(false);
         return;
@@ -121,19 +169,27 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
       setLoading(true);
       try {
-        const nextProfile = await getProfile(userId, forceRefresh);
+        const nextProfile = await getProfile(userId, activeCompanyId, forceRefresh);
         setProfile(nextProfile);
-        setResolvedUserId(userId);
+        setResolvedCacheKey(cacheKey);
         setError(null);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load profile';
+        if (import.meta.env.DEV) {
+          console.error('[ProfileProvider] loadProfile error', {
+            userId,
+            companyId: activeCompanyId,
+            error: err,
+          });
+        }
+        profileCache.delete(cacheKey);
         setProfile(null);
         setError(message);
       } finally {
         setLoading(false);
       }
     },
-    [user?.id],
+    [user],
   );
 
   useEffect(() => {
@@ -143,20 +199,23 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     if (!user?.id) {
       setProfile(null);
-      setResolvedUserId(null);
+      setResolvedCacheKey(null);
       setError(null);
       setLoading(false);
       return;
     }
 
-    if (resolvedUserId === user.id) {
+    const activeCompanyId = resolveActiveCompanyIdFromUser(user);
+    const cacheKey = buildCacheKey(user.id, activeCompanyId);
+
+    if (resolvedCacheKey === cacheKey) {
       return;
     }
 
     loadProfile(false).catch(() => {
       // Errors are handled inside loadProfile.
     });
-  }, [authLoading, loadProfile, profile, resolvedUserId, user?.id]);
+  }, [authLoading, loadProfile, resolvedCacheKey, user]);
 
   const refreshProfile = useCallback(async () => {
     await loadProfile(true);

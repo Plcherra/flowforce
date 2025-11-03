@@ -12,10 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar_url?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
   employment_status?: string | null;
   role?: string | null;
 }
@@ -42,11 +42,15 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
   }, [open, currentProfile?.role, currentProfile?.id]);
 
   useEffect(() => {
-    const filtered = users.filter(user => 
-      user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const loweredQuery = searchQuery.toLowerCase();
+    const filtered = users.filter(user => {
+      const fields = [user.first_name, user.last_name, user.email]
+        .filter((value): value is string => Boolean(value));
+      if (fields.length === 0) {
+        return 'unknown user'.includes(loweredQuery);
+      }
+      return fields.some((value) => value.toLowerCase().includes(loweredQuery));
+    });
     setFilteredUsers(filtered);
   }, [users, searchQuery]);
 
@@ -107,7 +111,12 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
   };
 
   const handleUserSelect = (user: User) => {
-    onUserSelect(user);
+    onUserSelect({
+      ...user,
+      first_name: user.first_name ?? 'Unknown',
+      last_name: user.last_name ?? '',
+      email: user.email ?? 'Profile not available',
+    });
     onClose();
     setSearchQuery('');
   };
@@ -147,31 +156,45 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredUsers.map((user) => (
-                  <Button
-                    key={user.id}
-                    variant="ghost"
-                    className="w-full justify-start h-auto p-3 rounded-xl hover:bg-primary/10"
-                    onClick={() => handleUserSelect(user)}
-                  >
-                    <div className="flex items-center space-x-3 w-full">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar_url || undefined} />
-                        <AvatarFallback className="bg-primary/20 text-primary">
-                          {user.first_name[0]}{user.last_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left">
-                        <p className="font-medium text-sm">
-                          {user.first_name} {user.last_name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {user.email}
-                        </p>
+                {filteredUsers.map((user) => {
+                  const firstName = user.first_name ?? undefined;
+                  const lastName = user.last_name ?? undefined;
+                  const hasProfile = Boolean(firstName || lastName || user.email);
+                  const displayName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'Unknown user';
+                  const email = user.email ?? 'Profile not available';
+                  const initial = firstName?.[0] ?? lastName?.[0] ?? 'U';
+                  const secondInitial = lastName?.[0] ?? firstName?.[1] ?? '';
+                  const initials = `${initial}${secondInitial}`.trim() || displayName.slice(0, 2).toUpperCase();
+                  const isSelectable = hasProfile;
+
+                  return (
+                    <Button
+                      key={user.id}
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-3 rounded-xl hover:bg-primary/10"
+                      onClick={() => isSelectable && handleUserSelect(user)}
+                      disabled={!isSelectable}
+                      title={isSelectable ? undefined : 'Profile not available'}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <Avatar className="h-10 w-10">
+                          {user.avatar_url ? <AvatarImage src={user.avatar_url || undefined} /> : null}
+                          <AvatarFallback className="bg-primary/20 text-primary">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-sm">
+                            {displayName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {email}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </Button>
-                ))}
+                    </Button>
+                  );
+                })}
               </div>
             )}
           </ScrollArea>

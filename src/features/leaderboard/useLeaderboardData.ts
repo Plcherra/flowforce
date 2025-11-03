@@ -303,10 +303,70 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
       }
 
       const employeeMap = new Map(employees.map((employee) => [employee.id, employee]));
+      const fallbackEmployeeMap = new Map<string, Employee>();
+      const missingEmployeeIds = Array.from(
+        new Set(rows.map((row) => row.employee_id).filter((id) => id && !employeeMap.has(id))),
+      );
+
+      if (missingEmployeeIds.length > 0) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            avatar_url,
+            role,
+            employment_status,
+            department_id,
+            department:departments(
+              id,
+              name,
+              color
+            ),
+            position:positions(
+              id,
+              name,
+              role
+            )
+          `)
+          .eq('company_id', companyId)
+          .in('id', missingEmployeeIds);
+
+        if (fallbackError) {
+          console.warn('[leaderboard] Fallback employee fetch failed', fallbackError);
+        } else {
+          (fallbackData ?? []).forEach((profile: any) => {
+            const fallbackEmployee: Employee = {
+              id: profile.id,
+              first_name: profile.first_name ?? '',
+              last_name: profile.last_name ?? '',
+              email: profile.email ?? profile.id,
+              avatar_url: profile.avatar_url ?? undefined,
+              role: profile.role ?? 'employee',
+              employment_status: profile.employment_status ?? 'active',
+              department_id: profile.department_id ?? null,
+              department: profile.department ?? null,
+              position: profile.position ?? undefined,
+              skillLevel: undefined,
+              skillXp: undefined,
+              badges: [],
+              reliability: undefined,
+              positiveReportCount: undefined,
+              lateCount: undefined,
+              noShowCount: undefined,
+            };
+
+            fallbackEmployeeMap.set(profile.id, fallbackEmployee);
+          });
+        }
+      }
+
       const enriched: LeaderboardEntry[] = [];
 
       rows.forEach((row, index) => {
-        const employee = employeeMap.get(row.employee_id);
+        const employee = employeeMap.get(row.employee_id) ?? fallbackEmployeeMap.get(row.employee_id);
         const entry = mapToLeaderboardEntry(row, index, employee);
         if (entry) {
           enriched.push(entry);
