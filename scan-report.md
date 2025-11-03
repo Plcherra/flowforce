@@ -34,7 +34,7 @@
 -   413  src/components/forms/fields/FormulaField.tsx
 -   408  src/data/scheduling/locationRuleSets.ts
 -   407  src/components/reports/ReportInbox.tsx
--   405  src/pages/Settings.tsx
+-   405  src/modules/system/pages/SettingsPage.tsx
 -   403  src/components/scheduling/ComplianceMonitor.tsx
 -   401  src/components/forms/CreateFormDialog.tsx
 -   399  src/components/onboarding/SectionBuilder.tsx
@@ -275,4 +275,3 @@ src/components/examples/PermissionExamples.tsx:21:  const canViewOrEdit = useCan
 src/components/examples/PermissionExamples.tsx:112:              strategy="any"
 src/components/examples/PermissionExamples.tsx:152:            strategy="any"
 src/components/examples/PermissionExamples.tsx:204:                    {getSource(permission as any)}
-

@@ -18,12 +18,25 @@ export interface PasswordPolicy {
   requireSpecial: boolean;
 }
 
+export interface TokenAccessSettings {
+  enabled: boolean;
+  rotateEveryDays: number;
+  lastRotatedAt?: string | null;
+}
+
+export interface RowLevelSecuritySettings {
+  enforced: boolean;
+  allowExternalAnalytics: boolean;
+}
+
 export interface SecuritySettings {
   twoFactorRequired: boolean;
   enforceForAdmins: boolean;
   passwordPolicy: PasswordPolicy;
   sessionTimeout: number;
   trustedDeviceWindow: number;
+  apiTokenAccess: TokenAccessSettings;
+  rowLevelSecurity: RowLevelSecuritySettings;
 }
 
 export interface LocalizationSettings {
@@ -129,6 +142,22 @@ export interface ApiMonitoringSettings {
   }>;
 }
 
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  actor: string;
+  occurredAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TenantManagementSettings {
+  primaryOwnerEmail: string | null;
+  activeSeats: number;
+  maxSeats: number;
+  plan: string;
+  trialEndsAt?: string | null;
+}
+
 export type AutomationScopeLevel = 'suggestion' | 'assist' | 'autopilot';
 
 export interface AICopilotSettings {
@@ -144,6 +173,8 @@ export interface AdminConfigurationSettings {
   roleTemplates: CompanyRole[];
   apiMonitoring: ApiMonitoringSettings;
   aiCopilot: AICopilotSettings;
+  auditLogs?: AuditLogEntry[];
+  tenantManagement?: TenantManagementSettings;
 }
 
 export interface SystemSettings {

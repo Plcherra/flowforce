@@ -27,5 +27,8 @@ Execution Notes
 
 - Run this task in Codex using the existing project code.
 - Focus only on the files listed under "Affected Areas".
-- After completion, test and push a commit titled "[R02] {short_summary}".
-- Mark the task complete in /refactor_tasks_progress.md.
+Implementation Summary
+
+- `useTasks` now scopes the Supabase select via a combined `or` filter and locally removes any stragglers, logging whenever off-tenant rows are discarded.
+- Vitest coverage (`src/hooks/__tests__/useTasks.test.tsx`) asserts both the tenant filter and the empty-state behaviour.
+- See `/refactor_tasks_progress.md` for completion tracking.

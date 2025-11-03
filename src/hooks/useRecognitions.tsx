@@ -4,13 +4,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import type { RecognitionDetails, RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
 import type { TrainingAssignment, TrainingModule } from '@/types/training';
-import type { Tables } from '@/integrations/supabase/public-types';
+import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
 import { formatISO, subDays } from 'date-fns';
 
 type GoalRow = Tables<'goals'>;
 type GoalMilestoneRow = Tables<'goal_milestones'>;
 type GoalTaskRow = Tables<'goal_tasks'>;
-type GoalRewardRow = Tables<'goal_rewards'>;
+type RecognitionRow = Tables<'recognitions'>;
+type AwardRuleRow = Tables<'recognition_award_rules'>;
 type TaskRow = Tables<'tasks'>;
 type ProfileRow = Tables<'profiles'>;
 
@@ -40,7 +41,7 @@ const DEFAULT_STATE: RecognitionsState = {
   error: null,
 };
 
-function parseRecognitionDetails(raw: GoalRewardRow['reward_details']): RecognitionDetails | null {
+function parseRecognitionDetails(raw: RecognitionRow['reward_details']): RecognitionDetails | null {
   if (!raw) return null;
   if (typeof raw === 'string') {
     try {
@@ -195,18 +196,20 @@ export function useRecognitions() {
     if (!companyId) return [];
 
     const { data, error } = await supabase
-      .rpc('get_recognitions', { company: companyId })
+      .from('recognitions' as any)
+      .select('*')
+      .eq('company_id', companyId)
       .order('awarded_at', { ascending: false });
 
     if (error) {
       throw error;
     }
 
-    return (data ?? []) as GoalRewardRow[];
+    return (data ?? []) as RecognitionRow[];
   }, [companyId]);
 
   const generateTrainingRecognitions = useCallback(
-    async (existing: GoalRewardRow[]) => {
+    async (existing: RecognitionRow[]) => {
       if (!companyId || !user?.id) return;
 
       const { data: completions, error } = await supabase
@@ -303,7 +306,7 @@ export function useRecognitions() {
   );
 
   const generateMilestoneRecognitions = useCallback(
-    async (existing: GoalRewardRow[]) => {
+    async (existing: RecognitionRow[]) => {
       if (!companyId || !user?.id) return;
 
       const { data: milestones, error } = await supabase
@@ -388,7 +391,7 @@ export function useRecognitions() {
   );
 
   const generateTaskRecognitions = useCallback(
-    async (existing: GoalRewardRow[]) => {
+    async (existing: RecognitionRow[]) => {
       if (!companyId || !user?.id) return;
 
       const { data: goalTasks, error } = await supabase
@@ -471,6 +474,211 @@ export function useRecognitions() {
     [companyId, user?.id],
   );
 
+  const applyAwardRules = useCallback(
+    async (existing: RecognitionRow[]) => {
+      if (!companyId || !user?.id) return;
+
+      const { data: rules, error: rulesError } = await supabase
+        .from('recognition_award_rules')
+        .select('*')
+        .or(`company_id.is.null,company_id.eq.${companyId}`)
+        .eq('active', true);
+
+      if (rulesError) {
+        console.warn('Failed to load recognition award rules', rulesError);
+        return;
+      }
+
+      if (!rules || rules.length === 0) {
+        return;
+      }
+
+      const awardedKey = new Set(
+        existing
+          .filter((record) => record.award_rule)
+          .map((record) => `${record.award_rule}:${record.user_id}`),
+      );
+
+      const groupedRules = rules.reduce<Record<AwardRuleRow['trigger_type'], AwardRuleRow[]>>(
+        (acc, rule) => {
+          acc[rule.trigger_type] = acc[rule.trigger_type] ?? [];
+          acc[rule.trigger_type]!.push(rule);
+          return acc;
+        },
+        {
+          goal_completed: [],
+          goal_streak: [],
+          recognition_count: [],
+          learning_completed: [],
+        },
+      );
+
+      const inserts: TablesInsert<'goal_rewards'>[] = [];
+
+      const buildDetails = (
+        rule: AwardRuleRow,
+        message: string,
+        source: RecognitionDetails['source'],
+      ): RecognitionDetails => ({
+        source,
+        message,
+        xp_awarded: rule.xp_award ?? null,
+        metadata: {
+          award_rule: rule.code,
+          trigger_type: rule.trigger_type,
+          threshold: rule.threshold,
+        },
+      });
+
+      const queueInsert = (employeeId: string, rule: AwardRuleRow, source: RecognitionDetails['source']) => {
+        const key = `${rule.code}:${employeeId}`;
+        if (awardedKey.has(key)) {
+          return;
+        }
+
+        const message = rule.description ?? `Unlocked ${rule.badge_code ?? rule.code}`;
+        const details = buildDetails(rule, message, source);
+
+        inserts.push({
+          goal_id: null,
+          user_id: employeeId,
+          reward_type: 'recognition',
+          reward_details: details,
+          awarded_at: new Date().toISOString(),
+          created_by: user.id,
+          company_id: companyId,
+          award_rule: rule.code,
+        });
+        awardedKey.add(key);
+      };
+
+      const needsGoalCounts = groupedRules.goal_completed.length > 0 || groupedRules.goal_streak.length > 0;
+      const needsLearningCounts = groupedRules.learning_completed.length > 0;
+
+      const [goalCounts, learningCounts] = await Promise.all([
+        (async () => {
+          if (!needsGoalCounts) return new Map<string, number>();
+
+          const { data: goalsData, error: goalsError } = await supabase
+            .from('goals')
+            .select('id, created_by, company_id')
+            .eq('company_id', companyId)
+            .eq('status', 'completed');
+
+          if (goalsError) {
+            console.warn('Failed to load completed goals for award rules', goalsError);
+            return new Map<string, number>();
+          }
+
+          const goalIds = (goalsData ?? []).map((goal) => goal.id);
+          if (goalIds.length === 0) {
+            return new Map<string, number>();
+          }
+
+          const { data: participantData, error: participantError } = await supabase
+            .from('goal_participants')
+            .select('goal_id, user_id, role')
+            .in('goal_id', goalIds);
+
+          if (participantError) {
+            console.warn('Failed to load goal participants for award rules', participantError);
+            return new Map<string, number>();
+          }
+
+          const counts = new Map<string, number>();
+          (goalsData ?? []).forEach((goal) => {
+            const ownerId = goal.created_by;
+            if (ownerId) {
+              counts.set(ownerId, (counts.get(ownerId) ?? 0) + 1);
+            }
+          });
+
+          (participantData ?? []).forEach((participant) => {
+            if (!participant?.user_id) return;
+            counts.set(participant.user_id, (counts.get(participant.user_id) ?? 0) + 1);
+          });
+
+          return counts;
+        })(),
+        (async () => {
+          if (!needsLearningCounts) return new Map<string, number>();
+
+          const { data: enrollments, error: enrollmentsError } = await supabase
+            .from('learning_enrollments')
+            .select('employee_id')
+            .eq('company_id', companyId)
+            .eq('status', 'completed');
+
+          if (enrollmentsError) {
+            console.warn('Failed to load learning completions for award rules', enrollmentsError);
+            return new Map<string, number>();
+          }
+
+          const counts = new Map<string, number>();
+          (enrollments ?? []).forEach((row) => {
+            counts.set(row.employee_id, (counts.get(row.employee_id) ?? 0) + 1);
+          });
+          return counts;
+        })(),
+      ]);
+
+      if (groupedRules.goal_completed.length > 0) {
+        groupedRules.goal_completed.forEach((rule) => {
+          goalCounts.forEach((count, employeeId) => {
+            if (count >= rule.threshold) {
+              queueInsert(employeeId, rule, 'goal_completion');
+            }
+          });
+        });
+      }
+
+      if (groupedRules.goal_streak.length > 0) {
+        groupedRules.goal_streak.forEach((rule) => {
+          goalCounts.forEach((count, employeeId) => {
+            if (count >= rule.threshold) {
+              queueInsert(employeeId, rule, 'goal_completion');
+            }
+          });
+        });
+      }
+
+      if (groupedRules.learning_completed.length > 0) {
+        groupedRules.learning_completed.forEach((rule) => {
+          learningCounts.forEach((count, employeeId) => {
+            if (count >= rule.threshold) {
+              queueInsert(employeeId, rule, 'training_completion');
+            }
+          });
+        });
+      }
+
+      if (groupedRules.recognition_count.length > 0) {
+        const recognitionCounts = new Map<string, number>();
+        existing.forEach((record) => {
+          recognitionCounts.set(record.user_id, (recognitionCounts.get(record.user_id) ?? 0) + 1);
+        });
+
+        groupedRules.recognition_count.forEach((rule) => {
+          recognitionCounts.forEach((count, employeeId) => {
+            if (count >= rule.threshold) {
+              queueInsert(employeeId, rule, 'manual');
+            }
+          });
+        });
+      }
+
+      if (inserts.length === 0) {
+        return;
+      }
+
+      const { error: insertError } = await supabase.from('goal_rewards').insert(inserts);
+      if (insertError) {
+        console.warn('Failed to insert award rule recognitions', insertError);
+      }
+    },
+    [companyId, user?.id],
+  );
+
   const fetchRecognitions = useCallback(async () => {
     if (!companyId) {
       setPartialState({ records: [], loading: false });
@@ -481,16 +689,16 @@ export function useRecognitions() {
 
     try {
       const { data, error } = await supabase
-        .rpc('get_recognitions', { company: companyId })
+        .from('recognitions' as any)
+        .select('*')
+        .eq('company_id', companyId)
         .order('awarded_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      const rewards = (data ?? []).filter(
-        (reward): reward is GoalRewardRow => reward.reward_type === 'recognition',
-      );
+      const rewards = (data ?? []) as RecognitionRow[];
 
       if (rewards.length === 0) {
         setPartialState({ records: [], loading: false });
@@ -581,6 +789,7 @@ export function useRecognitions() {
           reward_details: details,
           awarded_at: reward.awarded_at,
           created_by: reward.created_by,
+          award_rule: reward.award_rule ?? null,
           goal: goal
             ? {
                 id: goal.id,
@@ -621,6 +830,9 @@ export function useRecognitions() {
         generateTaskRecognitions(existing),
       ]);
 
+      const refreshed = await fetchExistingRecognitions();
+      await applyAwardRules(refreshed);
+
       await fetchRecognitions();
     } catch (error) {
       console.warn('Recognition automation sync failed', error);
@@ -637,6 +849,7 @@ export function useRecognitions() {
     generateTrainingRecognitions,
     generateMilestoneRecognitions,
     generateTaskRecognitions,
+    applyAwardRules,
     fetchRecognitions,
   ]);
 

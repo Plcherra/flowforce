@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { Profiler, ReactNode, useState } from 'react';
 import RoleGuard from '@/components/RoleGuard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,15 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
   const [activeTab, setActiveTab] = useState(() => tabs[0]?.key ?? '');
 
   const hasTabs = tabs.length > 0;
+
+  const handleProfilerRender = (id: string, phase: 'mount' | 'update', actualDuration: number) => {
+    if (import.meta.env.DEV) {
+      console.debug(`[system-settings] ${id} ${phase} render: ${actualDuration.toFixed(1)}ms`);
+    }
+    if (typeof performance !== 'undefined' && 'mark' in performance) {
+      performance.mark(`system-settings:${id}:${phase}`);
+    }
+  };
 
   const fallback = (
     <EmptyState
@@ -99,7 +108,7 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
 
           {hasTabs ? (
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value)}>
-              <TabsList className="grid w-full grid-cols-2 md:w-auto md:grid-cols-4">
+              <TabsList className="flex w-full flex-wrap gap-2">
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.key} value={tab.key}>
                     {tab.label}
@@ -107,9 +116,11 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
                 ))}
               </TabsList>
               {tabs.map((tab) => (
-                <TabsContent key={tab.key} value={tab.key} className="mt-6">
-                  {tab.content}
-                </TabsContent>
+                <Profiler key={tab.key} id={`settings-${tab.key}`} onRender={handleProfilerRender}>
+                  <TabsContent value={tab.key} className="mt-6">
+                    {tab.content}
+                  </TabsContent>
+                </Profiler>
               ))}
             </Tabs>
           ) : (

@@ -38,12 +38,12 @@ type TimeOffRequestPanelProps = {
 };
 
 type TimeOffType = 'vacation' | 'sick' | 'personal' | 'other';
-type TimeOffStatus = 'pending' | 'approved' | 'rejected';
+type TimeOffStatus = 'requested' | 'approved' | 'denied';
 
 const STATUS_STYLES: Record<TimeOffStatus, string> = {
-  pending: 'bg-amber-100 text-amber-800 border-amber-200',
+  requested: 'bg-amber-100 text-amber-800 border-amber-200',
   approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  rejected: 'bg-rose-100 text-rose-800 border-rose-200',
+  denied: 'bg-rose-100 text-rose-800 border-rose-200',
 };
 
 const TYPE_STYLES: Record<TimeOffType, string> = {
@@ -109,16 +109,16 @@ export function TimeOffRequestPanel({ employeeId, availabilityGrid }: TimeOffReq
     [personalRequests],
   );
 
-  const pendingDays = useMemo(
+  const requestedDays = useMemo(
     () =>
       personalRequests
-        .filter((request) => request.status === 'pending')
+        .filter((request) => request.status === 'requested')
         .reduce((total, request) => total + dayCount(request.start_date, request.end_date), 0),
     [personalRequests],
   );
 
-  const pendingRequestCount = useMemo(
-    () => personalRequests.filter((request) => request.status === 'pending').length,
+  const requestedRequestCount = useMemo(
+    () => personalRequests.filter((request) => request.status === 'requested').length,
     [personalRequests],
   );
 
@@ -162,10 +162,10 @@ export function TimeOffRequestPanel({ employeeId, availabilityGrid }: TimeOffReq
     return map;
   }, [employeeId, personalRequests, myUpcomingShifts]);
 
-  const pendingConflicts = useMemo(() => {
+  const requestedConflicts = useMemo(() => {
     let total = 0;
     personalRequests.forEach((request) => {
-      if (request.status !== 'pending') return;
+      if (request.status !== 'requested') return;
       total += conflictsByRequest.get(request.id)?.length ?? 0;
     });
     return total;
@@ -332,10 +332,10 @@ export function TimeOffRequestPanel({ employeeId, availabilityGrid }: TimeOffReq
           />
           <SummaryTile
             icon={CheckCircle2}
-            label="Pending requests"
-            value={`${pendingRequestCount} open`}
-            hint={`${pendingDays} day${pendingDays === 1 ? '' : 's'} awaiting approval`}
-            tone={pendingRequestCount > 0 ? 'warning' : 'default'}
+            label="Requested"
+            value={`${requestedRequestCount} open`}
+            hint={`${requestedDays} day${requestedDays === 1 ? '' : 's'} awaiting approval`}
+            tone={requestedRequestCount > 0 ? 'warning' : 'default'}
           />
           <SummaryTile
             icon={Clock}
@@ -346,9 +346,9 @@ export function TimeOffRequestPanel({ employeeId, availabilityGrid }: TimeOffReq
           <SummaryTile
             icon={AlertTriangle}
             label="Coverage impact"
-            value={`${pendingConflicts} shift${pendingConflicts === 1 ? '' : 's'}`}
-            hint="Shifts overlapping pending requests"
-            tone={pendingConflicts > 0 ? 'warning' : 'default'}
+            value={`${requestedConflicts} shift${requestedConflicts === 1 ? '' : 's'}`}
+            hint="Shifts overlapping requested time off"
+            tone={requestedConflicts > 0 ? 'warning' : 'default'}
           />
         </div>
 
@@ -403,7 +403,7 @@ export function TimeOffRequestPanel({ employeeId, availabilityGrid }: TimeOffReq
                         <Badge
                           className={cn(
                             'border text-xs capitalize',
-                            STATUS_STYLES[(request.status as TimeOffStatus) ?? 'pending'] ?? STATUS_STYLES.pending,
+                                STATUS_STYLES[(request.status as TimeOffStatus) ?? 'requested'] ?? STATUS_STYLES.requested,
                           )}
                         >
                           {request.status}

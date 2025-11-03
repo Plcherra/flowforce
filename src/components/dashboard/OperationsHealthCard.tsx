@@ -78,7 +78,7 @@ export function OperationsHealthCard({ className, stats, loading }: OperationsHe
       description: t('dashboard.operationsSummary.viewScheduleDesc')
     },
     {
-      to: '/app/time-off',
+      to: '/app/scheduling/timeoff',
       label: t('dashboard.operationsSummary.reviewTimeOff'),
       description: t('dashboard.operationsSummary.reviewTimeOffDesc')
     },

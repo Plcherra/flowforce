@@ -38,6 +38,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_insights: {
+        Row: {
+          company_id: string | null
+          data: Json
+          expires_at: string | null
+          generated_at: string | null
+          goal_id: string | null
+          id: string
+          insight_type: string
+        }
+        Insert: {
+          company_id?: string | null
+          data: Json
+          expires_at?: string | null
+          generated_at?: string | null
+          goal_id?: string | null
+          id?: string
+          insight_type: string
+        }
+        Update: {
+          company_id?: string | null
+          data?: Json
+          expires_at?: string | null
+          generated_at?: string | null
+          goal_id?: string | null
+          id?: string
+          insight_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_insights_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -1583,6 +1628,7 @@ export type Database = {
       }
       goal_rewards: {
         Row: {
+          award_rule: string | null
           company_id: string
           awarded_at: string
           created_by: string
@@ -1593,6 +1639,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          award_rule?: string | null
           company_id?: string
           awarded_at?: string
           created_by: string
@@ -1603,6 +1650,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          award_rule?: string | null
           company_id?: string
           awarded_at?: string
           created_by?: string
@@ -6765,6 +6813,194 @@ export const Constants = {
         }
         Relationships: []
       }
+      learning_progress: {
+        Row: {
+          ai_recommendation: string | null
+          enrollment_id: string
+          id: string
+          metadata: Json | null
+          module_id: string | null
+          progress_percent: number
+          recorded_at: string
+          recorded_by: string | null
+          quiz_score: number | null
+          time_spent_minutes: number
+        }
+        Insert: {
+          ai_recommendation?: string | null
+          enrollment_id: string
+          id?: string
+          metadata?: Json | null
+          module_id?: string | null
+          progress_percent?: number
+          recorded_at?: string
+          recorded_by?: string | null
+          quiz_score?: number | null
+          time_spent_minutes?: number
+        }
+        Update: {
+          ai_recommendation?: string | null
+          enrollment_id?: string
+          id?: string
+          metadata?: Json | null
+          module_id?: string | null
+          progress_percent?: number
+          recorded_at?: string
+          recorded_by?: string | null
+          quiz_score?: number | null
+          time_spent_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "learning_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learning_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_progress_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_reviews: {
+        Row: {
+          action_items: Json
+          ai_insight_id: string | null
+          ai_summary: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          goal_id: string | null
+          id: string
+          review_cycle: string
+          review_date: string
+          review_period_end: string | null
+          review_period_start: string | null
+          reviewer_id: string | null
+          score: number
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json
+          ai_insight_id?: string | null
+          ai_summary?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          goal_id?: string | null
+          id?: string
+          review_cycle?: string
+          review_date?: string
+          review_period_end?: string | null
+          review_period_start?: string | null
+          reviewer_id?: string | null
+          score: number
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          ai_insight_id?: string | null
+          ai_summary?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          goal_id?: string | null
+          id?: string
+          review_cycle?: string
+          review_date?: string
+          review_period_end?: string | null
+          review_period_start?: string | null
+          reviewer_id?: string | null
+          score?: number
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_reviews_ai_insight_id_fkey"
+            columns: ["ai_insight_id"]
+            isOneToOne: false
+            referencedRelation: "ai_insights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_goal_reviews: {
+        Row: {
+          action_items: Json
+          ai_insight_id: string | null
+          ai_summary: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          goal_completed_at: string | null
+          goal_id: string | null
+          goal_owner_id: string | null
+          goal_priority: string | null
+          goal_progress: number | null
+          goal_status: string | null
+          goal_title: string | null
+          insight_data: Json | null
+          insight_expires_at: string | null
+          insight_generated_at: string | null
+          insight_type: string | null
+          review_cycle: string
+          review_date: string
+          review_id: string
+          review_period_end: string | null
+          review_period_start: string | null
+          reviewer_id: string | null
+          score: number
+          summary: string | null
+          target_completion_date: string | null
+          updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       promotion_proposal: {
         Row: {
           created_at: string
@@ -6815,6 +7051,59 @@ export const Constants = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_award_rules: {
+        Row: {
+          active: boolean
+          badge_code: string | null
+          code: string
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json
+          threshold: number
+          trigger_type: string
+          updated_at: string
+          xp_award: number
+        }
+        Insert: {
+          active?: boolean
+          badge_code?: string | null
+          code: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          threshold: number
+          trigger_type: string
+          updated_at?: string
+          xp_award?: number
+        }
+        Update: {
+          active?: boolean
+          badge_code?: string | null
+          code?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          threshold?: number
+          trigger_type?: string
+          updated_at?: string
+          xp_award?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_award_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

@@ -83,7 +83,7 @@ export function useDashboardData() {
         employeesResponse,
         departmentsResponse,
         schedulesResponse,
-        pendingRequestsResponse,
+        requestedRequestsResponse,
         approvedRequestsResponse,
       ] = await Promise.all([
         supabase.from('profiles').select('employment_status').eq('company_id', companyId),
@@ -98,7 +98,7 @@ export function useDashboardData() {
           .from('time_off_requests')
           .select('id, company_id')
           .eq('company_id', companyId)
-          .eq('status', 'pending'),
+          .eq('status', 'requested'),
         supabase
           .from('time_off_requests')
           .select('start_date, end_date, company_id')
@@ -110,7 +110,7 @@ export function useDashboardData() {
         { label: 'profiles', response: employeesResponse },
         { label: 'departments', response: departmentsResponse },
         { label: 'schedules', response: schedulesResponse },
-        { label: 'time_off_requests (pending)', response: pendingRequestsResponse },
+        { label: 'time_off_requests (requested)', response: requestedRequestsResponse },
         { label: 'time_off_requests (approved)', response: approvedRequestsResponse },
       ].filter(({ response }) => response.error);
 
@@ -131,7 +131,7 @@ export function useDashboardData() {
       const employees = employeesResponse.data ?? [];
       const departments = departmentsResponse.data ?? [];
       const rawSchedules = (schedulesResponse.data ?? []) as ScheduleRow[];
-      const rawPendingRequests = (pendingRequestsResponse.data ?? []) as PendingTimeOffRow[];
+      const rawRequestedRequests = (requestedRequestsResponse.data ?? []) as PendingTimeOffRow[];
       const rawApprovedRequests = (approvedRequestsResponse.data ?? []) as ApprovedTimeOffRow[];
 
       const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
@@ -139,9 +139,9 @@ export function useDashboardData() {
         console.warn('[useDashboardData] Filtered schedules from other companies', JSON.stringify({ removed: rawSchedules.length - schedules.length, companyId }));
       }
 
-      const timeOffRequests = rawPendingRequests.filter((entry) => entry?.company_id === companyId);
-      if (timeOffRequests.length !== rawPendingRequests.length) {
-        console.warn('[useDashboardData] Filtered pending time off requests from other companies', JSON.stringify({ removed: rawPendingRequests.length - timeOffRequests.length, companyId }));
+      const timeOffRequests = rawRequestedRequests.filter((entry) => entry?.company_id === companyId);
+      if (timeOffRequests.length !== rawRequestedRequests.length) {
+        console.warn('[useDashboardData] Filtered requested time off from other companies', JSON.stringify({ removed: rawRequestedRequests.length - timeOffRequests.length, companyId }));
       }
 
       const approvedTimeOff = rawApprovedRequests.filter((entry) => entry?.company_id === companyId);

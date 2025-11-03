@@ -9,7 +9,7 @@ Admin profile fetches (`useProfiles`, `useCompanyRolesSnapshot`) do not filter b
 
 Affected Areas
 
-src/hooks/useRoles.tsx, src/pages/Settings.tsx
+src/hooks/useRoles.tsx, src/modules/system/pages/SettingsPage.tsx
 
 Proposed Solution
 

@@ -3,6 +3,7 @@
 | Task ID | Status | Notes |
 | --- | --- | --- |
 | R01 | Completed | Scoped `clearWeek` deletes to the active company and added guard coverage. |
+| R02 | Completed | Hardened the tasks hook with tenant filters and regression tests. |
 | R05 | Completed | Memoised the forms fetcher, moved reads to React Query, and added coverage for the paginated latest submission. |
 | R07 | Completed | Restricted admin enrollment fetch to the active company and blocked non-admin access. |
 | R24 | Completed | Delegated weekly report summarization to a Supabase function. |

@@ -37,7 +37,7 @@ export function useAnalytics() {
       const { count: pendingTimeOffRequests } = await supabase
         .from('time_off_requests')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+        .eq('status', 'requested');
 
       // Get completed tasks
       const { count: completedTasks } = await supabase

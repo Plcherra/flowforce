@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useManagerFinancialMetrics } from '@/hooks/useFinancialManagement';
-import useSystemSettings from '@/hooks/useSystemSettings';
+import { useSystemSettings } from '@/modules/system/hooks/useSystemSettings';
 import { useIntegrationSettings } from '@/modules/system/hooks/useIntegrationSettings';
 import { useToast } from '@/hooks/use-toast';
 import { generateFinancialDemoData } from '@/services/financialDemoData';

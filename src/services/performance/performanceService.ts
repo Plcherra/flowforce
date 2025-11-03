@@ -8,6 +8,7 @@ import {
   type EmployeePerformance,
   type PerformanceDataset,
   type PerformanceGoal,
+  type PerformanceGoalReview,
   type PerformanceReview,
   type PerformanceReviewStatus,
   type PerformanceRadarMetric,
@@ -60,7 +61,7 @@ async function resolveActiveCompanyId(
 
 export function determineReviewStatus(
   reviewDate: string | null,
-  severity: number | null,
+  score: number | null,
   referenceDate: dayjs.Dayjs = dayjs(),
 ): PerformanceReviewStatus {
   if (!reviewDate) {
@@ -75,25 +76,30 @@ export function determineReviewStatus(
     return performanceReviewStatusSchema.parse('due_soon');
   }
 
-  if ((severity ?? 3) <= 2) {
+  if ((score ?? 3) <= 2) {
     return performanceReviewStatusSchema.parse('needs_coaching');
   }
 
   return performanceReviewStatusSchema.parse('on_track');
 }
 
-function buildReviewEntries(rows: Tables<'employee_report'>[]): PerformanceReview[] {
+function buildReviewEntries(rows: Tables<'performance_reviews'>[]): PerformanceReview[] {
   return rows
-    .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf())
+    .sort((a, b) => dayjs(b.review_date).valueOf() - dayjs(a.review_date).valueOf())
     .map((row) => {
-      const status = determineReviewStatus(row.date, row.severity);
+      const status = determineReviewStatus(row.review_date, row.score);
       return {
         id: row.id,
-        date: row.date,
-        severity: row.severity,
-        notes: row.notes,
-        reviewerId: row.created_by,
+        goalId: row.goal_id,
+        date: row.review_date,
+        score: row.score,
+        summary: row.summary,
+        reviewerId: row.reviewer_id,
         status,
+        aiSummary: row.ai_summary,
+        aiInsightId: row.ai_insight_id,
+        actionItems: (row.action_items ?? []) as PerformanceReview['actionItems'],
+        reviewCycle: row.review_cycle,
       };
     });
 }
@@ -245,6 +251,38 @@ function buildGoalSummary(employees: EmployeePerformance[]) {
   };
 }
 
+function mapGoalReviewRow(row: Tables<'performance_goal_reviews'>): PerformanceGoalReview {
+  return {
+    reviewId: row.review_id,
+    companyId: row.company_id,
+    employeeId: row.employee_id,
+    reviewerId: row.reviewer_id,
+    goalId: row.goal_id,
+    goalTitle: row.goal_title,
+    goalStatus: row.goal_status,
+    goalProgress: row.goal_progress,
+    targetCompletionDate: row.target_completion_date,
+    goalCompletedAt: row.goal_completed_at,
+    goalOwnerId: row.goal_owner_id,
+    reviewDate: row.review_date,
+    reviewCycle: row.review_cycle,
+    score: row.score,
+    summary: row.summary,
+    aiSummary: row.ai_summary,
+    actionItems: (row.action_items ?? []) as PerformanceGoalReview['actionItems'],
+    reviewPeriodStart: row.review_period_start,
+    reviewPeriodEnd: row.review_period_end,
+    aiInsightId: row.ai_insight_id,
+    insightType: row.insight_type,
+    insightData: row.insight_data,
+    insightGeneratedAt: row.insight_generated_at,
+    insightExpiresAt: row.insight_expires_at,
+    goalPriority: row.goal_priority,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export async function fetchPerformanceDataset(
   client: SupabaseClient = supabase,
 ): Promise<PerformanceDataset> {
@@ -267,33 +305,70 @@ export async function fetchPerformanceDataset(
     goalsQuery = goalsQuery.eq('company_id', companyId);
   }
 
+  let reviewQuery = client
+    .from('performance_reviews')
+    .select(
+      [
+        'id',
+        'company_id',
+        'employee_id',
+        'goal_id',
+        'review_cycle',
+        'review_period_start',
+        'review_period_end',
+        'review_date',
+        'reviewer_id',
+        'score',
+        'summary',
+        'ai_summary',
+        'action_items',
+        'ai_insight_id',
+        'created_at',
+        'updated_at',
+      ].join(','),
+    )
+    .gte('review_date', dayjs().subtract(365, 'day').format('YYYY-MM-DD'));
+
+  if (companyId) {
+    reviewQuery = reviewQuery.eq('company_id', companyId);
+  }
+
+  let goalReviewQuery = client
+    .from('performance_goal_reviews')
+    .select('*')
+    .order('review_date', { ascending: false })
+    .limit(200);
+
+  if (companyId) {
+    goalReviewQuery = goalReviewQuery.eq('company_id', companyId);
+  }
+
   const [
     profileResult,
     performanceResult,
-    reportResult,
+    reviewResult,
     goalsResult,
     participantResult,
+    goalReviewResult,
   ] = await Promise.all([
     profileQuery,
     client
       .from('staff_performance')
       .select('id, user_id, performance_score, attendance_status, date')
       .gte('date', dayjs().subtract(180, 'day').format('YYYY-MM-DD')),
-    client
-      .from('employee_report')
-      .select('id, employee_id, date, severity, notes, created_by, category')
-      .eq('category', 'performance')
-      .gte('date', dayjs().subtract(365, 'day').format('YYYY-MM-DD')),
+    reviewQuery,
     goalsQuery,
     client.from('goal_participants').select('id, goal_id, user_id, role, contribution_score'),
+    goalReviewQuery,
   ]);
 
   const errors = [
     profileResult.error,
     performanceResult.error,
-    reportResult.error,
+    reviewResult.error,
     goalsResult.error,
     participantResult.error,
+    goalReviewResult.error,
   ].filter(Boolean);
 
   if (errors.length) {
@@ -318,14 +393,14 @@ export async function fetchPerformanceDataset(
     performanceByUser.set(row.user_id, list);
   });
 
-  const reportRows = (reportResult.data ?? []).filter((row) => {
-    return !companyId || employeeIds.has(row.employee_id);
+  const reviewRows = (reviewResult.data ?? []).filter((row) => {
+    return !companyId || row.company_id === companyId;
   });
-  const reportsByUser = new Map<string, Tables<'employee_report'>[]>();
-  reportRows.forEach((row) => {
-    const list = reportsByUser.get(row.employee_id) ?? [];
+  const reviewsByUser = new Map<string, Tables<'performance_reviews'>[]>();
+  reviewRows.forEach((row) => {
+    const list = reviewsByUser.get(row.employee_id) ?? [];
     list.push(row);
-    reportsByUser.set(row.employee_id, list);
+    reviewsByUser.set(row.employee_id, list);
   });
 
   const goals = (goalsResult.data ?? []).filter((goal) => {
@@ -350,16 +425,24 @@ export async function fetchPerformanceDataset(
     buildEmployeePerformance(
       profile,
       performanceByUser.get(profile.id) ?? [],
-      reportsByUser.get(profile.id) ?? [],
+      reviewsByUser.get(profile.id) ?? [],
       goals,
       participantsByUser.get(profile.id) ?? [],
     ),
   );
 
+  const goalReviewRows = (goalReviewResult.data ?? []).filter((row) => {
+    return (!companyId || row.company_id === companyId) && employeeIds.has(row.employee_id);
+  });
+  const goalReviews = goalReviewRows
+    .map(mapGoalReviewRow)
+    .sort((a, b) => dayjs(b.reviewDate).valueOf() - dayjs(a.reviewDate).valueOf());
+
   return {
     employees,
     radar: buildRadarMetrics(employees),
     goalSummary: buildGoalSummary(employees),
+    goalReviews,
   };
 }
 

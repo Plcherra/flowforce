@@ -250,7 +250,7 @@
 ## Category: [BUGFIX]
 ## Priority: Critical
 ## Description: Admin profile fetches (`useProfiles`, `useCompanyRolesSnapshot`) do not filter by company, so administrators can list every user in the system.
-## Affected Areas: src/hooks/useRoles.tsx, src/pages/Settings.tsx
+## Affected Areas: src/hooks/useRoles.tsx, src/modules/system/pages/SettingsPage.tsx
 ## Proposed Solution: Scope the queries with the current company id and extend RLS policies if necessary.
 ## Expected Outcome: Admin consoles only enumerate users within the active tenant.
 ## Estimated Effort: 4h

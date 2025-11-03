@@ -130,8 +130,8 @@ export function StaffShiftManagement() {
       const { error } = await supabase
         .from('time_off_requests')
         .update({ 
-          status: action === 'approve' ? 'approved' : 'rejected',
-          approved_at: new Date().toISOString()
+          status: action === 'approve' ? 'approved' : 'denied',
+          approved_at: action === 'approve' ? new Date().toISOString() : null
         })
         .eq('id', requestId);
 
@@ -139,7 +139,7 @@ export function StaffShiftManagement() {
 
       await loadData();
       toast({
-        title: `Time off request ${action}d`,
+        title: `Time off request ${action === 'approve' ? 'approved' : 'denied'}`,
         description: "Employee has been notified",
       });
     } catch {
@@ -218,7 +218,7 @@ export function StaffShiftManagement() {
           </TabsTrigger>
           <TabsTrigger value="timeoff" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Time Off ({timeOffRequests.filter(r => r.status === 'pending').length})
+            Time Off ({timeOffRequests.filter(r => r.status === 'requested').length})
           </TabsTrigger>
           <TabsTrigger value="availability" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
@@ -353,7 +353,7 @@ export function StaffShiftManagement() {
                         <Badge 
                           variant={
                             request.status === 'approved' ? 'default' : 
-                            request.status === 'rejected' ? 'destructive' : 
+                            request.status === 'denied' ? 'destructive' : 
                             'secondary'
                           }
                           className="capitalize"
@@ -362,7 +362,7 @@ export function StaffShiftManagement() {
                         </Badge>
                       </div>
 
-                      {request.status === 'pending' && (
+                      {request.status === 'requested' && (
                         <div className="flex gap-2">
                           <Button
                             size="sm"

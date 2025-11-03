@@ -59,6 +59,19 @@ export interface LearningProgressEvent {
   createdAt: string;
 }
 
+export interface LearningProgressSnapshot {
+  id: string;
+  enrollmentId: string;
+  moduleId: string | null;
+  progressPercent: number;
+  timeSpentMinutes: number;
+  quizScore: number | null;
+  aiRecommendation: string | null;
+  recordedAt: string;
+  recordedBy: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
 export interface LearningCourseMetrics {
   courseId: string;
   title: string;

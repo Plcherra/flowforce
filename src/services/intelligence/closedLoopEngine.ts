@@ -603,7 +603,7 @@ export async function buildClosedLoopState(params: BuildClosedLoopStateParams = 
       ? null
       : Number((scheduleRows.filter((schedule) => schedule.hourly_rate != null).length / scheduleRows.length).toFixed(2));
 
-  const pendingPto = timeOffRows.filter((row) => row.status === 'pending').length;
+  const pendingPto = timeOffRows.filter((row) => row.status === 'requested').length;
   const pendingShiftSwaps = swapRows.filter((swap) => swap.status === 'pending').length;
 
   const complianceIncidents = signals.filter((signal) => signal.type === 'policy_violation' && signal.severity !== 'low').length;

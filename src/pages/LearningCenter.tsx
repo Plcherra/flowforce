@@ -32,6 +32,7 @@ export default function LearningCenter() {
     snapshot,
     recommendations,
     progressByEnrollment,
+    progressSnapshotsByEnrollment,
     refresh,
     handleCreateCourse,
     handleEnroll,
@@ -126,6 +127,7 @@ export default function LearningCenter() {
             enrollments={enrollments}
             courses={courseById}
             progressEvents={progressByEnrollment}
+            progressSnapshots={progressSnapshotsByEnrollment}
             onCompleteNextModule={handleModuleCompletion}
           />
         </TabsContent>

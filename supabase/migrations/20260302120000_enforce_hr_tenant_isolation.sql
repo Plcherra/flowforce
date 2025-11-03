@@ -329,3 +329,145 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_recognitions(uuid) TO authenticated;
 
 COMMIT;
+-- Enforce tenant-aware row level security across core operations tables
+
+begin;
+
+-- Helper expression
+drop function if exists public.current_company_id();
+create or replace function public.current_company_id() returns text
+  language sql
+  stable
+as $$
+  select nullif(current_setting('request.jwt.claims.company_id', true), '')
+$$;
+
+-- Profiles
+alter table public.profiles enable row level security;
+
+drop policy if exists "profiles_select_self" on public.profiles;
+create policy "profiles_select_self" on public.profiles
+  for select
+  using (
+    auth.uid() = id
+    and coalesce(company_id::text, '') = coalesce(public.current_company_id(), '')
+  );
+
+drop policy if exists "profiles_update_self" on public.profiles;
+create policy "profiles_update_self" on public.profiles
+  for update
+  using (
+    auth.uid() = id
+    and coalesce(company_id::text, '') = coalesce(public.current_company_id(), '')
+  )
+  with check (
+    auth.uid() = id
+    and coalesce(company_id::text, '') = coalesce(public.current_company_id(), '')
+  );
+
+-- Shared predicate helper
+drop function if exists public.viewer_in_company(uuid);
+create or replace function public.viewer_in_company(target_company uuid) returns boolean
+  language sql
+  stable
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.company_id = target_company
+      and coalesce(p.company_id::text, '') = coalesce(public.current_company_id(), '')
+  )
+$$;
+
+-- Departments
+alter table public.departments enable row level security;
+
+drop policy if exists "departments_tenant_all" on public.departments;
+create policy "departments_tenant_all" on public.departments
+  for all
+  using (public.viewer_in_company(company_id))
+  with check (public.viewer_in_company(company_id));
+
+-- Schedules
+alter table public.schedules enable row level security;
+
+drop policy if exists "schedules_tenant_all" on public.schedules;
+create policy "schedules_tenant_all" on public.schedules
+  for all
+  using (public.viewer_in_company(company_id))
+  with check (public.viewer_in_company(company_id));
+
+-- Time off requests
+alter table public.time_off_requests enable row level security;
+
+drop policy if exists "time_off_requests_tenant_all" on public.time_off_requests;
+create policy "time_off_requests_tenant_all" on public.time_off_requests
+  for all
+  using (
+    public.viewer_in_company(company_id)
+  )
+  with check (
+    public.viewer_in_company(company_id)
+  );
+
+-- Goals
+alter table public.goals enable row level security;
+
+drop policy if exists "goals_tenant_all" on public.goals;
+create policy "goals_tenant_all" on public.goals
+  for all
+  using (public.viewer_in_company(company_id))
+  with check (public.viewer_in_company(company_id));
+
+-- Tasks
+alter table public.tasks enable row level security;
+
+drop policy if exists "tasks_tenant_all" on public.tasks;
+create policy "tasks_tenant_all" on public.tasks
+  for all
+  using (public.viewer_in_company(company_id))
+  with check (public.viewer_in_company(company_id));
+
+-- Forms (scoped via owner profile)
+alter table public.forms enable row level security;
+
+drop policy if exists "forms_tenant_select" on public.forms;
+create policy "forms_tenant_select" on public.forms
+  for select
+  using (
+    exists (
+      select 1
+      from public.profiles viewer
+      join public.profiles owner on owner.id = forms.created_by
+      where viewer.id = auth.uid()
+        and viewer.company_id = owner.company_id
+        and coalesce(viewer.company_id::text, '') = coalesce(public.current_company_id(), '')
+    )
+  );
+
+drop policy if exists "forms_tenant_mutation" on public.forms;
+create policy "forms_tenant_mutation" on public.forms
+  for all
+  using (
+    exists (
+      select 1
+      from public.profiles viewer
+      join public.profiles owner on owner.id = forms.created_by
+      where viewer.id = auth.uid()
+        and viewer.company_id = owner.company_id
+        and coalesce(viewer.company_id::text, '') = coalesce(public.current_company_id(), '')
+    )
+  )
+  with check (
+    exists (
+      select 1
+      from public.profiles viewer
+      join public.profiles owner on owner.id = forms.created_by
+      where viewer.id = auth.uid()
+        and viewer.company_id = owner.company_id
+        and coalesce(viewer.company_id::text, '') = coalesce(public.current_company_id(), '')
+    )
+  );
+
+commit;

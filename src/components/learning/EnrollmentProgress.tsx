@@ -4,16 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import type { LearningCatalogRecord, LearningEnrollment, LearningProgressEvent } from '@/types/learning';
+import type {
+  LearningCatalogRecord,
+  LearningEnrollment,
+  LearningProgressEvent,
+  LearningProgressSnapshot,
+} from '@/types/learning';
 
 interface EnrollmentProgressProps {
   enrollments: LearningEnrollment[];
   courses: Map<string, LearningCatalogRecord>;
   progressEvents: Record<string, LearningProgressEvent[]>;
+  progressSnapshots: Record<string, LearningProgressSnapshot[]>;
   onCompleteNextModule: (enrollmentId: string, moduleIndex: number) => void;
 }
 
-export function EnrollmentProgress({ enrollments, courses, progressEvents, onCompleteNextModule }: EnrollmentProgressProps) {
+export function EnrollmentProgress({ enrollments, courses, progressEvents, progressSnapshots, onCompleteNextModule }: EnrollmentProgressProps) {
   if (enrollments.length === 0) {
     return (
       <Card className="border-dashed">
@@ -38,6 +44,7 @@ export function EnrollmentProgress({ enrollments, courses, progressEvents, onCom
         const nextModuleIndex = Math.min(enrollment.currentModule, Math.max(course.modules.length - 1, 0));
         const nextModule = course.modules[nextModuleIndex];
         const events = progressEvents[enrollment.id] ?? [];
+        const snapshots = progressSnapshots[enrollment.id] ?? [];
 
         return (
           <Card key={enrollment.id} className="shadow-sm">
@@ -104,6 +111,31 @@ export function EnrollmentProgress({ enrollments, courses, progressEvents, onCom
                           {event.note && <div className="text-muted-foreground">{event.note}</div>}
                         </div>
                       </Fragment>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {snapshots.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">Progress checkpoints</p>
+                  <div className="space-y-2">
+                    {snapshots.slice(0, 3).map((snapshot) => (
+                      <div key={snapshot.id} className="rounded-md border p-3 text-xs">
+                        <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                          <div className="space-y-1">
+                            <div className="text-sm font-medium text-foreground">
+                              {snapshot.progressPercent.toFixed(0)}% complete · {snapshot.timeSpentMinutes} min logged
+                            </div>
+                            {snapshot.aiRecommendation && (
+                              <p className="text-muted-foreground">{snapshot.aiRecommendation}</p>
+                            )}
+                          </div>
+                          <span className="text-muted-foreground">
+                            {new Date(snapshot.recordedAt).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>

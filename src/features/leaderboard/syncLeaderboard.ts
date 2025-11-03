@@ -2,6 +2,7 @@ import dayjs, { type Dayjs } from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateEmployee } from '@/copilot/rulesEngine';
 import type { Employee } from '@/hooks/useEmployees';
+import type { RecognitionDetails } from '@/types/recognition';
 import {
   BASE_TRAINING_XP,
   GOAL_COMPLETION_XP,
@@ -66,6 +67,22 @@ function ensureMetrics(map: Map<string, LeaderboardSyncMetrics>, employeeId: str
   return map.get(employeeId)!;
 }
 
+function parseRecognitionDetails(raw: unknown): RecognitionDetails | null {
+  if (!raw) return null;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as RecognitionDetails;
+    } catch (error) {
+      console.warn('[leaderboard] unable to parse recognition details string', error);
+      return null;
+    }
+  }
+  if (typeof raw === 'object') {
+    return raw as RecognitionDetails;
+  }
+  return null;
+}
+
 async function collectTaskMetrics(employeeIds: string[], range: PeriodRange) {
   if (employeeIds.length === 0) return new Map<string, LeaderboardSyncMetrics>();
 
@@ -126,13 +143,14 @@ async function collectGoalMetrics(employeeIds: string[], range: PeriodRange) {
   return metrics;
 }
 
-async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRange) {
+async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRange, companyId: string) {
   if (employeeIds.length === 0) return new Map<string, LeaderboardSyncMetrics>();
 
   let query = supabase
-    .from('employee_badge')
-    .select('employee_id, badge_code, awarded_at')
-    .in('employee_id', employeeIds);
+    .from('recognitions' as any)
+    .select('user_id, awarded_at, reward_details, award_rule')
+    .eq('company_id', companyId)
+    .in('user_id', employeeIds);
 
   if (range.start) {
     query = query.gte('awarded_at', range.start.toISOString());
@@ -145,12 +163,19 @@ async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRan
   if (error) throw error;
 
   const metrics = new Map<string, LeaderboardSyncMetrics>();
-  (data ?? []).forEach((row) => {
-    const entry = ensureMetrics(metrics, row.employee_id);
-    entry.xpRecognitions += RECOGNITION_XP;
+  (data ?? []).forEach((row: any) => {
+    const employeeId = row.user_id as string | null;
+    if (!employeeId) return;
+    const entry = ensureMetrics(metrics, employeeId);
+    const details = parseRecognitionDetails(row.reward_details);
+    const xpAward = Math.max(details?.xp_awarded ?? RECOGNITION_XP, 0);
+    entry.xpRecognitions += xpAward;
     entry.recognitionCount += 1;
-    if (row.badge_code) {
-      entry.badgeCodes.add(row.badge_code);
+    const awardRule = details?.metadata && typeof details.metadata.award_rule === 'string'
+      ? details.metadata.award_rule
+      : (row.award_rule as string | null);
+    if (awardRule) {
+      entry.badgeCodes.add(awardRule);
     }
   });
 
@@ -313,7 +338,7 @@ export async function syncLeaderboard({
       const [tasks, goals, recognition, training] = await Promise.all([
         collectTaskMetrics(employeeIds, range),
         collectGoalMetrics(employeeIds, range),
-        collectRecognitionMetrics(employeeIds, range),
+        collectRecognitionMetrics(employeeIds, range, companyId),
         collectTrainingMetrics(employeeIds, range, companyId),
       ]);
 

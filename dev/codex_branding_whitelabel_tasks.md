@@ -3,14 +3,14 @@
 ## Theme System (Current)
 - `AppearanceSettings` tracks theme mode, three branding colors, logo placement, sidebar background, dashboard layout, and preview metadata (`src/types/system-settings.ts:82`).
 - `DEFAULT_APPEARANCE` seeds tenant defaults and `normalizeAppearance` merges stored values with company-level overrides, keeping colors in sync with `companies.primary_color` and `secondary_color` (`src/hooks/useSystemSettings.ts:105`, `src/hooks/useSystemSettings.ts:353`).
-- `AppearanceSettingsPanel` surfaces color pickers, theme selector, logo placement, layout toggles, sidebar styling, and light/dark live previews under admin-only access (`src/pages/Settings.tsx:1652`).
-- Previewing themes updates local state only and sets a 30-minute expiry, while publishing persists to Supabase and refreshes cached settings (`src/pages/Settings.tsx:411`, `src/pages/Settings.tsx:133`, `src/hooks/useSystemSettings.ts:995`).
+- Appearance and branding controls live in their own panel inside `src/modules/system/components`; see the modular architecture doc for the latest entry point.
+- Previewing themes updates local state only and sets a 30-minute expiry, while publishing persists to Supabase and refreshes cached settings (see new modular hooks in `src/modules/system/hooks`).
 - `updateAppearance` also pushes colors to the company profile so other modules can reuse the palette; preview snapshots are stored but currently unused elsewhere (`src/hooks/useSystemSettings.ts:1024`).
 
 ## Business Branding UI (Current)
-- `GeneralSettingsForm` lets admins manage name, site, contacts, HQ address, and description with immediate dirty-state tracking and reset support (`src/pages/Settings.tsx:531`).
+- `GeneralSettingsPanel` lets admins manage name, site, contacts, HQ address, and description with immediate dirty-state tracking and reset support (`src/modules/system/components/GeneralSettingsPanel.tsx`).
 - Logo uploads stream to the `company-assets` bucket, fetching a public URL for reuse across dashboards, emails, and reports (`src/hooks/useSystemSettings.ts:552`).
-- Role-guarded access ensures only administrators reach the settings shell, with badges reflecting permission state (`src/pages/Settings.tsx:1`, `src/pages/Settings.tsx:318`).
+- Role-guarded access ensures only administrators reach the settings shell, with badges reflecting permission state (`src/modules/system/components/SystemSettingsLayout.tsx`).
 - Saving general settings updates both `system_settings.general` and the parent `companies` row, keeping downstream consumers aligned (`src/hooks/useSystemSettings.ts:680`).
 - Branding controls in onboarding (`src/components/onboarding/BrandingCustomizer.tsx`) duplicate color pickers; consolidating these with the appearance panel will reduce drift.
 

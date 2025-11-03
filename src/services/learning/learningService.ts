@@ -28,6 +28,7 @@ const TABLE_COURSES = 'learning_courses';
 const TABLE_MODULES = 'learning_modules';
 const TABLE_ENROLLMENTS = 'learning_enrollments';
 const TABLE_PROGRESS = 'learning_progress_events';
+const TABLE_PROGRESS_SNAPSHOTS = 'learning_progress';
 const VIEW_METRICS = 'learning_course_metrics';
 
 type CourseRow = {
@@ -90,6 +91,8 @@ type ProgressRow = {
   created_by: string | null;
   created_at: string;
 };
+
+type ProgressSnapshotRow = Tables<'learning_progress'>;
 
 type MetricsRow = {
   course_id: string;
@@ -171,6 +174,19 @@ const mapProgressEvent = (row: ProgressRow): LearningProgressEvent => ({
   note: row.note,
   createdBy: row.created_by,
   createdAt: row.created_at,
+});
+
+const mapProgressSnapshot = (row: ProgressSnapshotRow) => ({
+  id: row.id,
+  enrollmentId: row.enrollment_id,
+  moduleId: row.module_id,
+  progressPercent: toNumber(row.progress_percent),
+  timeSpentMinutes: toNumber(row.time_spent_minutes),
+  quizScore: row.quiz_score != null ? toNumber(row.quiz_score) : null,
+  aiRecommendation: row.ai_recommendation ?? null,
+  recordedAt: row.recorded_at,
+  recordedBy: row.recorded_by ?? null,
+  metadata: row.metadata ?? null,
 });
 
 const mapMetrics = (row: MetricsRow): LearningCourseMetrics => ({
@@ -376,7 +392,16 @@ export async function recordProgressEvent(
 export async function updateEnrollmentProgress(
   enrollmentId: string,
   updates: Partial<Pick<LearningEnrollment, 'progressPercent' | 'hoursCompleted' | 'status' | 'currentModule' | 'level' | 'completedAt'>>,
+  options: {
+    recordedBy?: string | null;
+    moduleId?: string | null;
+    aiRecommendation?: string | null;
+    quizScore?: number | null;
+    timeSpentMinutes?: number | null;
+    metadata?: Record<string, unknown> | null;
+  } = {},
 ) {
+  const timestamp = new Date().toISOString();
   const { data, error } = await fromTable<EnrollmentRow>(TABLE_ENROLLMENTS)
     .update({
       progress_percent: updates.progressPercent,
@@ -385,13 +410,33 @@ export async function updateEnrollmentProgress(
       current_module: updates.currentModule,
       level: updates.level,
       completed_at: updates.completedAt ?? null,
-      last_activity_at: new Date().toISOString(),
+      last_activity_at: timestamp,
     })
     .eq('id', enrollmentId)
     .select()
     .single();
 
   if (error) throw error;
+
+  const snapshotPayload: TablesInsert<'learning_progress'> = {
+    enrollment_id: enrollmentId,
+    module_id: options.moduleId ?? null,
+    progress_percent: updates.progressPercent ?? toNumber(data.progress_percent),
+    time_spent_minutes:
+      options.timeSpentMinutes ?? Math.max(0, Math.round(toNumber(updates.hoursCompleted ?? data.hours_completed) * 60)),
+    quiz_score: options.quizScore ?? null,
+    ai_recommendation: options.aiRecommendation ?? null,
+    recorded_at: timestamp,
+    recorded_by: options.recordedBy ?? null,
+    metadata: (options.metadata as any) ?? null,
+  };
+
+  try {
+    await supabase.from(TABLE_PROGRESS_SNAPSHOTS as any).insert(snapshotPayload);
+  } catch (snapshotError) {
+    console.warn('[learning] unable to persist progress snapshot', snapshotError);
+  }
+
   return mapEnrollment(data);
 }
 
@@ -403,6 +448,17 @@ export async function fetchProgressEvents(enrollmentId: string): Promise<Learnin
 
   if (error) throw error;
   return (data ?? []).map(mapProgressEvent);
+}
+
+export async function fetchProgressSnapshots(enrollmentId: string) {
+  const { data, error } = await supabase
+    .from(TABLE_PROGRESS_SNAPSHOTS as any)
+    .select('*')
+    .eq('enrollment_id', enrollmentId)
+    .order('recorded_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapProgressSnapshot);
 }
 
 export async function fetchCourseMetrics(companyId: string): Promise<LearningCourseMetrics[]> {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, subDays } from 'date-fns';
 import { Loader2, RefreshCw, Sparkles, Filter, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +29,26 @@ const FILTER_CONFIG: Array<{ key: RecognitionFilterKey; label: string; sources?:
   { key: 'manual', label: 'Manual', sources: ['manual'] },
 ];
 
+const TIMELINE_OPTIONS: Array<{ value: '30' | '90' | '365' | 'all'; label: string }> = [
+  { value: '30', label: 'Last 30 days' },
+  { value: '90', label: 'Last 90 days' },
+  { value: '365', label: 'Last 12 months' },
+  { value: 'all', label: 'All time' },
+];
+
 const LEADERBOARD_TIER_BADGE: Record<string, string> = {
   Bronze: 'bg-amber-900/15 text-amber-900 border-amber-900/40',
   Silver: 'bg-slate-200 text-slate-700 border-slate-300',
   Gold: 'bg-amber-400/20 text-amber-700 border-amber-500/30',
   Platinum: 'bg-indigo-100 text-indigo-700 border-indigo-300',
 };
+
+function formatAwardRule(code: string) {
+  return code
+    .split('_')
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
+    .join(' ');
+}
 
 type ManualRecognitionForm = {
   userId: string;
@@ -170,6 +184,7 @@ function RecognitionCard({ record }: { record: RecognitionRecord }) {
   const source = details?.source ?? 'manual';
   const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
   const Icon = meta.icon;
+  const awardRuleLabel = record.award_rule ? formatAwardRule(record.award_rule) : null;
 
   const recipientInitials = record.recipient
     ? `${record.recipient.first_name?.[0] ?? ''}${record.recipient.last_name?.[0] ?? ''}`.toUpperCase()
@@ -184,6 +199,7 @@ function RecognitionCard({ record }: { record: RecognitionRecord }) {
   if (record.milestone?.title) supportingTags.push(`Milestone: ${record.milestone.title}`);
   if (record.task?.title) supportingTags.push(`Task: ${record.task.title}`);
   if (record.training?.module?.title) supportingTags.push(`Training: ${record.training.module.title}`);
+  if (awardRuleLabel) supportingTags.push(`Rule: ${awardRuleLabel}`);
 
   return (
     <Card>
@@ -197,6 +213,11 @@ function RecognitionCard({ record }: { record: RecognitionRecord }) {
               <CardTitle className="flex items-center gap-2 text-lg">
                 {meta.label}
                 <Badge className={meta.badgeColor}>{awardedDistance}</Badge>
+                {awardRuleLabel && (
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                    {awardRuleLabel}
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription className="mt-2">
                 {details?.message || 'Great work and outstanding contribution!'}
@@ -250,6 +271,8 @@ export default function Recognition() {
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<RecognitionFilterKey>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<'all' | string>('all');
+  const [timelineFilter, setTimelineFilter] = useState<'30' | '90' | '365' | 'all'>('30');
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -297,9 +320,29 @@ export default function Recognition() {
     };
   }, [recognitions]);
 
+  const departmentOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    employees.forEach((employee) => {
+      if (employee.department?.id) {
+        map.set(employee.department.id, employee.department.name ?? 'Unnamed department');
+      }
+    });
+    return Array.from(map.entries());
+  }, [employees]);
+
+  const departmentIdByUser = useMemo(() => {
+    const map = new Map<string, string | null>();
+    employees.forEach((employee) => {
+      map.set(employee.id, employee.department_id ?? null);
+    });
+    return map;
+  }, [employees]);
+
   const filteredRecognitions = useMemo(() => {
     const lowered = searchTerm.toLowerCase();
     const sourceFilter = FILTER_CONFIG.find((entry) => entry.key === filter);
+    const timelineDays = timelineFilter === 'all' ? null : Number(timelineFilter);
+    const timelineCutoff = timelineDays ? subDays(new Date(), timelineDays) : null;
 
     return recognitions.filter((record) => {
       const details = record.reward_details;
@@ -307,6 +350,20 @@ export default function Recognition() {
 
       if (sourceFilter?.sources && !sourceFilter.sources.includes(source)) {
         return false;
+      }
+
+      if (departmentFilter !== 'all') {
+        const departmentId = departmentIdByUser.get(record.user_id) ?? null;
+        if (departmentId !== departmentFilter) {
+          return false;
+        }
+      }
+
+      if (timelineCutoff && record.awarded_at) {
+        const awardedAt = new Date(record.awarded_at);
+        if (Number.isNaN(awardedAt.getTime()) || awardedAt < timelineCutoff) {
+          return false;
+        }
       }
 
       if (!lowered) return true;
@@ -325,7 +382,7 @@ export default function Recognition() {
         message.includes(lowered)
       );
     });
-  }, [recognitions, filter, searchTerm]);
+  }, [recognitions, filter, searchTerm, departmentFilter, departmentIdByUser, timelineFilter]);
 
   const handleCreateRecognition = async (form: ManualRecognitionForm) => {
     setCreating(true);
@@ -507,14 +564,41 @@ export default function Recognition() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="relative w-full md:w-72">
-            <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder="Search recognitions..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
+          <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-end">
+            <div className="relative w-full md:w-64">
+              <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Search recognitions..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </div>
+            <Select value={timelineFilter} onValueChange={(value) => setTimelineFilter(value as typeof timelineFilter)}>
+              <SelectTrigger className="md:w-44">
+                <SelectValue placeholder="Timeline" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMELINE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger className="md:w-48">
+                <SelectValue placeholder="Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All departments</SelectItem>
+                {departmentOptions.map(([id, name]) => (
+                  <SelectItem key={id} value={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <TabsContent value={filter}>

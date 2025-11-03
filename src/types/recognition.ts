@@ -29,6 +29,7 @@ export interface RecognitionRecord {
   reward_details: RecognitionDetails | null;
   awarded_at: string;
   created_by: string;
+  award_rule?: string | null;
   goal?: {
     id: string;
     title: string;

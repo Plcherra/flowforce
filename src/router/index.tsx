@@ -42,7 +42,7 @@ const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
 const Resources = lazy(() => import('../pages/Resources.tsx'));
 const Cookbook = lazy(() => import('../pages/Cookbook.tsx'));
 const AIInsights = lazy(() => import('../pages/AIInsights.tsx'));
-const Settings = lazy(() => import('../pages/Settings.tsx'));
+const Settings = lazy(() => import('../modules/system/pages/SettingsPage.tsx'));
 const Profile = lazy(() => import('../pages/Profile.tsx'));
 const Admin = lazy(() => import('../pages/Admin.tsx'));
 const SectionsPermissions = lazy(() => import('../pages/SectionsPermissions.tsx'));
@@ -152,6 +152,10 @@ export const router = createBrowserRouter([
           },
           {
             path: "time-off",
+            element: <Navigate to="/app/scheduling/timeoff" replace />,
+          },
+          {
+            path: "scheduling/timeoff",
             element: <TimeOff />,
           },
           {
@@ -301,10 +305,10 @@ export const router = createBrowserRouter([
         path: "performance",
         element: <Navigate to="/app/performance" replace />,
       },
-      {
-        path: "time-off",
-        element: <Navigate to="/app/time-off" replace />,
-      },
+          {
+            path: "time-off",
+            element: <Navigate to="/app/scheduling/timeoff" replace />,
+          },
       {
         path: "recognition",
         element: <Navigate to="/app/recognition" replace />,

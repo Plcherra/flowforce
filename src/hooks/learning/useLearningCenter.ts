@@ -13,6 +13,7 @@ import {
   fetchEnrollments,
   fetchLearningCatalog,
   fetchProgressEvents,
+  fetchProgressSnapshots,
   recordProgressEvent,
   updateEnrollmentProgress,
 } from '@/services/learning/learningService';
@@ -23,6 +24,7 @@ import type {
   LearningCourseMetrics,
   LearningEnrollment,
   LearningProgressEvent,
+  LearningProgressSnapshot,
   PersonalLearningSnapshot,
 } from '@/types/learning';
 
@@ -49,6 +51,7 @@ export function useLearningCenter() {
   const [snapshot, setSnapshot] = useState<PersonalLearningSnapshot | null>(null);
   const [recommendations, setRecommendations] = useState<CourseRecommendation[]>([]);
   const [progressByEnrollment, setProgressByEnrollment] = useState<Record<string, LearningProgressEvent[]>>({});
+  const [progressSnapshotsByEnrollment, setProgressSnapshotsByEnrollment] = useState<Record<string, LearningProgressSnapshot[]>>({});
 
   const trainingAdmin = useMemo(() => {
     if (!profile?.role) return false;
@@ -87,18 +90,29 @@ export function useLearningCenter() {
     };
   }, [profile?.userId]);
 
-  const loadProgressEvents = useCallback(
+  const loadProgressData = useCallback(
     async (enrollmentList: LearningEnrollment[]) => {
       const entries = await Promise.all(
         enrollmentList.map(async (enrollment) => {
-          const events = await fetchProgressEvents(enrollment.id);
-          return [enrollment.id, events] as const;
+          const [events, snapshots] = await Promise.all([
+            fetchProgressEvents(enrollment.id),
+            fetchProgressSnapshots(enrollment.id),
+          ]);
+          return [enrollment.id, { events, snapshots }] as const;
         }),
       );
 
-      setProgressByEnrollment(Object.fromEntries(entries));
+      const eventMap: Record<string, LearningProgressEvent[]> = {};
+      const snapshotMap: Record<string, LearningProgressSnapshot[]> = {};
+      entries.forEach(([enrollmentId, data]) => {
+        eventMap[enrollmentId] = data.events;
+        snapshotMap[enrollmentId] = data.snapshots;
+      });
+
+      setProgressByEnrollment(eventMap);
+      setProgressSnapshotsByEnrollment(snapshotMap);
     },
-    [setProgressByEnrollment],
+    [],
   );
 
   const loadData = useCallback(async () => {
@@ -162,7 +176,7 @@ export function useLearningCenter() {
       setMetrics(courseMetrics);
       setRecommendations(recommendationList);
       setSnapshot(personalSnapshot);
-      await loadProgressEvents(personalEnrollments);
+      await loadProgressData(personalEnrollments);
     } catch (err) {
       console.error('Failed to load learning center data', err);
       setError('Unable to load learning center data right now.');
@@ -177,7 +191,7 @@ export function useLearningCenter() {
     trainingAdmin,
     collectMetrics,
     fetchSkillSnapshot,
-    loadProgressEvents,
+    loadProgressData,
   ]);
 
   useEffect(() => {
@@ -241,7 +255,7 @@ export function useLearningCenter() {
           }
           return [enrollment, ...previous];
         });
-        await loadProgressEvents([enrollment]);
+        await loadProgressData([enrollment]);
         toast({
           title: 'Enrolled',
           description: 'You are enrolled in this course. Progress will sync automatically.',
@@ -257,7 +271,7 @@ export function useLearningCenter() {
         return null;
       }
     },
-    [profile?.userId, loadProgressEvents],
+    [profile?.userId, loadProgressData],
   );
 
   const handleModuleCompletion = useCallback(
@@ -277,11 +291,20 @@ export function useLearningCenter() {
       const rollupHours = enrollment.hoursCompleted + estimatedHours;
 
       try {
-        const updated = await updateEnrollmentProgress(enrollment.id, {
-          progressPercent: newProgress,
-          hoursCompleted: rollupHours,
-          currentModule: moduleIndex + 1,
-        });
+        const updated = await updateEnrollmentProgress(
+          enrollment.id,
+          {
+            progressPercent: newProgress,
+            hoursCompleted: rollupHours,
+            currentModule: moduleIndex + 1,
+          },
+          {
+            recordedBy: profile?.userId ?? null,
+            moduleId: module.id,
+            timeSpentMinutes: Math.round(module.estimatedMinutes),
+            metadata: { source: 'module_completion' },
+          },
+        );
 
         await recordProgressEvent(enrollment.id, {
           moduleId: module.id,
@@ -296,7 +319,7 @@ export function useLearningCenter() {
           previous.map((entry) => (entry.id === updated.id ? updated : entry)),
         );
 
-        await loadProgressEvents([updated]);
+        await loadProgressData([updated]);
 
         if (newProgress >= 100) {
           await completeEnrollment(updated, course, {
@@ -315,7 +338,7 @@ export function useLearningCenter() {
         });
       }
     },
-    [enrollments, catalog, profile?.userId, profile?.role, loadProgressEvents, loadData],
+    [enrollments, catalog, profile?.userId, profile?.role, loadProgressData, loadData],
   );
 
   const handleManualProgressUpdate = useCallback(
@@ -324,10 +347,18 @@ export function useLearningCenter() {
       if (!enrollment) return;
 
       try {
-        const updated = await updateEnrollmentProgress(enrollment.id, {
-          progressPercent,
-          hoursCompleted: Math.max(0, enrollment.hoursCompleted + hoursAdjustment),
-        });
+        const updated = await updateEnrollmentProgress(
+          enrollment.id,
+          {
+            progressPercent,
+            hoursCompleted: Math.max(0, enrollment.hoursCompleted + hoursAdjustment),
+          },
+          {
+            recordedBy: profile?.userId ?? null,
+            timeSpentMinutes: Math.max(0, Math.round(hoursAdjustment * 60)),
+            metadata: { source: 'manual_adjustment' },
+          },
+        );
 
         await recordProgressEvent(enrollment.id, {
           eventType: 'checkpoint',
@@ -340,7 +371,7 @@ export function useLearningCenter() {
         setEnrollments((previous) =>
           previous.map((entry) => (entry.id === updated.id ? updated : entry)),
         );
-        await loadProgressEvents([updated]);
+        await loadProgressData([updated]);
       } catch (err) {
         console.error('Failed to adjust progress', err);
         toast({
@@ -350,7 +381,7 @@ export function useLearningCenter() {
         });
       }
     },
-    [enrollments, profile?.userId, loadProgressEvents],
+    [enrollments, profile?.userId, loadProgressData],
   );
 
   const courseById = useMemo(() => new Map(catalog.map((course) => [course.id, course])), [catalog]);
@@ -436,6 +467,7 @@ export function useLearningCenter() {
     snapshot,
     recommendations,
     progressByEnrollment,
+    progressSnapshotsByEnrollment,
     refresh,
     handleCreateCourse,
     handleEnroll,

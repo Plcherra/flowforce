@@ -9,7 +9,6 @@ The System Settings hub consolidates company configuration into one place. The h
 - **Localization** – Timezone, language, currency, and regional formats. Timezone/currency sync to the `companies` table while the full config lives in `system_settings.localization`.
 - **Notifications** – Default delivery channels, digest schedule, per-module overrides, and escalation window with data stored in `system_settings.notifications`.
 - **Integrations** – Connect/disconnect Toast, MarketMan, Connecteam integrations. Connections, metadata, and provider status are tracked in `system_settings.integrations` and Supabase tables.
-- **Appearance** – Theme colours, layout, and preview workflow. Preview mode is client-side; saving updates company branding colours and `system_settings.appearance`.
 - **Admin Configuration**:
   - **Business Structure** – Working hours saved to `companies.working_hours`; locations sync with `inv_locations`; departments stored in `system_settings.admin_config`.
   - **Role Templates** – Pull live company roles (via `useCompanyRoles`) and sync into `system_settings.admin_config.roleTemplates`.
@@ -19,8 +18,8 @@ The System Settings hub consolidates company configuration into one place. The h
 ## Underlying Data
 
 - New Supabase table `system_settings` (see migration `20251103090000_create_system_settings.sql`) stores JSON snapshots per company.
-- `useSystemSettings` hook coordinates fetching/updating Supabase records, uploading logos, and refreshing state.
-- UI components in `src/pages/Settings.tsx` handle all forms, preview workflow, and admin-side management.
+- `useSystemSettings` hook (`src/modules/system/hooks/useSystemSettings.ts`) coordinates fetching/updating Supabase records, uploading logos, and refreshing state.
+- UI components live in `src/modules/system/pages/SettingsPage.tsx` and related module components.
 
 ## Usage Tips
 

@@ -543,7 +543,7 @@ export default function InteractiveKpiTiles() {
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    navigate('/app/time-off');
+                  navigate('/app/scheduling/timeoff');
                     setActiveTile(null);
                   }}
                 >

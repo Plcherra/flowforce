@@ -38,6 +38,7 @@ import { RatingField } from './fields/RatingField';
 import { ScannerField } from './fields/ScannerField';
 import { TaskField } from './fields/TaskField';
 import { ImageSelectionField } from './fields/ImageSelectionField';
+import { orderFormFields } from './utils/orderFormFields';
 
 type FormFieldDataLocal = Tables<'form_fields'>;
 
@@ -243,27 +244,7 @@ export default function FormFillDialog({ open, onOpenChange, formId, onSubmitted
     updateVisibleFields();
   }, [fields, updateVisibleFields]);
 
-  const orderedFields = useMemo(() => {
-    return fields
-      .map((field, index) => ({ field, index }))
-      .sort((a, b) => {
-        const orderA =
-          typeof a.field.field_order === 'number' && Number.isFinite(a.field.field_order)
-            ? a.field.field_order
-            : Number.MAX_SAFE_INTEGER;
-        const orderB =
-          typeof b.field.field_order === 'number' && Number.isFinite(b.field.field_order)
-            ? b.field.field_order
-            : Number.MAX_SAFE_INTEGER;
-
-        if (orderA !== orderB) {
-          return orderA - orderB;
-        }
-
-        return a.index - b.index;
-      })
-      .map(({ field }) => field);
-  }, [fields]);
+  const orderedFields = useMemo(() => orderFormFields(fields), [fields]);
 
   const onSubmit = async (values: FormSubmissionData) => {
     const { error } = await submitForm(formId, values);

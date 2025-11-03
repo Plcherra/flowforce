@@ -83,6 +83,29 @@ const normalizeSectionPage = (page: any): CustomSectionPage => ({
   permissions: parseJsonArray(page?.permissions),
 });
 
+const isQuickTasksString = (value?: string | null) =>
+  typeof value === 'string' && value.toLowerCase().includes('quick-task');
+
+const shouldExcludeSection = (section: Partial<CustomSection>) => {
+  if (!section) return false;
+  return (
+    isQuickTasksString(section.id) ||
+    isQuickTasksString(section.template_id) ||
+    isQuickTasksString(section.path) ||
+    isQuickTasksString((section.template_config as any)?.path) ||
+    isQuickTasksString(section.name)
+  );
+};
+
+const shouldExcludeTemplate = (template: Partial<SectionTemplate>) => {
+  if (!template) return false;
+  return (
+    isQuickTasksString(template.id) ||
+    isQuickTasksString(template.name) ||
+    isQuickTasksString((template.config as any)?.path)
+  );
+};
+
 const normalizeSectionRecord = (section: any): CustomSection => ({
   ...section,
   permissions: parseJsonArray(section?.permissions),
@@ -108,7 +131,11 @@ export function useCustomSections() {
         .order('sort_order');
 
       if (error) throw error;
-      setSections((data || []).map(normalizeSectionRecord));
+      setSections(
+        (data || [])
+          .map(normalizeSectionRecord)
+          .filter((section) => !shouldExcludeSection(section))
+      );
     } catch (error) {
       console.error('Error fetching custom sections:', error);
       toast({
@@ -127,12 +154,16 @@ export function useCustomSections() {
         .order('category, name');
 
       if (error) throw error;
-      setTemplates((data || []).map(template => ({
-        ...template,
-        config: typeof template.config === 'object' ? template.config : JSON.parse(template.config as string || '{}'),
-        default_pages: parseJsonArray(template.default_pages),
-        default_permissions: parseJsonArray(template.default_permissions)
-      })));
+      setTemplates(
+        (data || [])
+          .map(template => ({
+            ...template,
+            config: typeof template.config === 'object' ? template.config : JSON.parse(template.config as string || '{}'),
+            default_pages: parseJsonArray(template.default_pages),
+            default_permissions: parseJsonArray(template.default_permissions)
+          }))
+          .filter((template) => !shouldExcludeTemplate(template))
+      );
     } catch (error) {
       console.error('Error fetching section templates:', error);
       toast({
@@ -158,6 +189,14 @@ export function useCustomSections() {
 
       let template: any = null;
       if (templateId) {
+        if (isQuickTasksString(templateId)) {
+          toast({
+            title: 'Template unavailable',
+            description: 'Quick Tasks have been merged into the main Tasks experience.',
+          });
+          return null;
+        }
+
         const { data: templateData } = await supabase
           .from('section_templates')
           .select('*')
@@ -174,7 +213,7 @@ export function useCustomSections() {
         } else {
           // Fallback to local quick templates if DB template not found
           const local = QUICK_TEMPLATES.find(t => t.id === templateId);
-          if (local) {
+          if (local && !isQuickTasksString(local.id)) {
             template = {
               id: local.id,
               name: local.name,

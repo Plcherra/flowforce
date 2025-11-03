@@ -30,10 +30,15 @@ export interface PerformanceReviewEntry {
   id: string;
   employeeId: string;
   employeeName: string;
+  goalId: string | null;
   date: string;
-  severity: number;
-  notes: string | null;
-  createdAt: string;
+  score: number;
+  summary: string | null;
+  aiSummary: string | null;
+  reviewerId: string | null;
+  reviewCycle: string;
+  actionItems: unknown;
+  aiInsightId: string | null;
 }
 
 export function usePerformanceOverview() {
@@ -60,7 +65,7 @@ export function usePerformanceOverview() {
         const averageReviewScore =
           reviewCount > 0
             ? Math.round(
-                (employee.reviews.reduce((sum, review) => sum + review.severity, 0) / reviewCount) * 10,
+                (employee.reviews.reduce((sum, review) => sum + (review.score ?? 0), 0) / reviewCount) * 10,
               ) / 10
             : null;
 
@@ -132,10 +137,15 @@ export function usePerformanceOverview() {
           id: review.id,
           employeeId: employee.id,
           employeeName: fullName,
+          goalId: review.goalId ?? null,
           date: review.date,
-          severity: review.severity,
-          notes: review.notes,
-          createdAt: review.date,
+          score: review.score ?? 0,
+          summary: review.summary ?? null,
+          aiSummary: review.aiSummary ?? null,
+          reviewerId: review.reviewerId ?? null,
+          reviewCycle: review.reviewCycle,
+          actionItems: review.actionItems,
+          aiInsightId: review.aiInsightId ?? null,
         });
       });
     });
@@ -149,6 +159,7 @@ export function usePerformanceOverview() {
     employees,
     goals,
     reviews,
+    goalReviews: query.data?.goalReviews ?? [],
     radar: query.data?.radar ?? [],
     dataset: query.data ?? null,
     loading: query.isLoading,

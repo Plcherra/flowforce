@@ -10,7 +10,9 @@ import type {
   BusinessStructureSettings,
   ApiMonitoringSettings,
   AICopilotSettings,
+  TenantManagementSettings,
 } from '@/types/system-settings';
+import type { Company } from '@/hooks/useCompany';
 
 export const DEFAULT_GENERAL: GeneralSettings = {
   companyName: '',
@@ -36,6 +38,15 @@ export const DEFAULT_SECURITY: SecuritySettings = {
   passwordPolicy: DEFAULT_PASSWORD_POLICY,
   sessionTimeout: 30,
   trustedDeviceWindow: 14,
+  apiTokenAccess: {
+    enabled: false,
+    rotateEveryDays: 90,
+    lastRotatedAt: null,
+  },
+  rowLevelSecurity: {
+    enforced: true,
+    allowExternalAnalytics: false,
+  },
 };
 
 export const DEFAULT_LOCALIZATION: LocalizationSettings = {
@@ -127,9 +138,44 @@ const DEFAULT_AI_COPILOT: AICopilotSettings = {
   lastAuditAt: null,
 };
 
+const DEFAULT_TENANT_MANAGEMENT: TenantManagementSettings = {
+  primaryOwnerEmail: null,
+  activeSeats: 0,
+  maxSeats: 10,
+  plan: 'starter',
+  trialEndsAt: null,
+};
+
 export const DEFAULT_ADMIN_CONFIG: AdminConfigurationSettings = {
   businessStructure: DEFAULT_BUSINESS_STRUCTURE,
   roleTemplates: [],
   apiMonitoring: DEFAULT_API_MONITORING,
   aiCopilot: DEFAULT_AI_COPILOT,
+  auditLogs: [],
+  tenantManagement: DEFAULT_TENANT_MANAGEMENT,
 };
+
+export function seedSystemSettings(company: Company | null) {
+  return {
+    general: {
+      ...DEFAULT_GENERAL,
+      companyName: company?.name ?? DEFAULT_GENERAL.companyName,
+      contactPhone: company?.phone ?? DEFAULT_GENERAL.contactPhone,
+      website: company?.website ?? DEFAULT_GENERAL.website,
+    },
+    security: DEFAULT_SECURITY,
+    localization: {
+      ...DEFAULT_LOCALIZATION,
+      timezone: company?.timezone ?? DEFAULT_LOCALIZATION.timezone,
+      currency: company?.currency ?? DEFAULT_LOCALIZATION.currency,
+    },
+    notifications: DEFAULT_NOTIFICATIONS,
+    integrations: DEFAULT_INTEGRATIONS,
+    appearance: {
+      ...DEFAULT_APPEARANCE,
+      primaryColor: company?.primary_color ?? DEFAULT_APPEARANCE.primaryColor,
+      secondaryColor: company?.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
+    },
+    admin_config: DEFAULT_ADMIN_CONFIG,
+  };
+}

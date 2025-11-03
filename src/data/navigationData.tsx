@@ -84,7 +84,7 @@ export const navigationSections: NavigationSection[] = [
     items: [
       { name: 'AI Insights', href: '/ai-insights', icon: Brain, translationKey: 'aiInsights' },
       { name: 'Performance', href: '/performance', icon: TrendingUp, translationKey: 'performance', roles: ['supervisor', 'manager', 'company_admin'] },
-      { name: 'Time Off', href: '/time-off', icon: CalendarClock, translationKey: 'timeOff' },
+      { name: 'Time Off', href: '/scheduling/timeoff', icon: CalendarClock, translationKey: 'timeOff' },
       { name: 'Recognition', href: '/recognition', icon: Star, translationKey: 'recognition' },
       { name: 'Leaderboard', href: '/leaderboard', icon: Trophy, translationKey: 'leaderboard' },
       { name: 'Certifications', href: '/certifications', icon: Award, translationKey: 'certifications' },

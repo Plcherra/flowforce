@@ -1,8 +1,9 @@
 import { useMemo, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { RefreshCw, Target, BarChart3, Loader2, Sparkles } from 'lucide-react';
+import { RefreshCw, Target, BarChart3, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -90,11 +91,12 @@ export default function Performance() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
-  const { employees, goals, reviews, loading, error, refetch } = usePerformanceOverview();
+  const { employees, goals, reviews, goalReviews, loading, error, refetch } = usePerformanceOverview();
   const { recognitions, loading: recognitionLoading } = useRecognitions();
 
   const isLoading = loading;
   const recentReviews = reviews.slice(0, 20);
+  const unifiedReviews = goalReviews.slice(0, 10);
   const topRecognitions = useMemo(() => recognitions.slice(0, 5), [recognitions]);
   const { insights: leaderboardInsights, lastUpdated: leaderboardSyncedAt } = useLeaderboardInsightsStore((state) => ({
     insights: state.insights,
@@ -253,6 +255,102 @@ export default function Performance() {
                     </div>
                   </div>
                 ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="space-y-2">
+              <CardTitle>Performance Review Snapshot</CardTitle>
+              <CardDescription>
+                Unified feedback tying goals, review scores, and Co-Pilot highlights together.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {unifiedReviews.length === 0 ? (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  No performance reviews have been synced yet. Create entries in the performance reviews table to see goal summaries and AI insights here.
+                </div>
+              ) : (
+                unifiedReviews.map((review) => {
+                  const progressValue = typeof review.goalProgress === 'number' ? review.goalProgress : 0;
+                  const scoreValue = typeof review.score === 'number' ? review.score : 0;
+                  const actionItems = Array.isArray(review.actionItems) ? review.actionItems : [];
+
+                  return (
+                    <div key={review.reviewId} className="space-y-3 rounded-lg border p-4">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-semibold text-sm md:text-base">
+                              {review.goalTitle ?? 'Untitled goal'}
+                            </span>
+                            {review.goalStatus && (
+                              <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                                {toTitleCase(review.goalStatus)}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Reviewed {review.reviewDate ? new Date(review.reviewDate).toLocaleDateString() : 'recently'} · {review.reviewCycle}
+                          </p>
+                        </div>
+                        <Badge variant={reviewScoreVariant(scoreValue)} className="text-xs">
+                          Score {scoreValue.toFixed(1)}/5
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span>Goal progress</span>
+                          <span className="font-medium">{Math.round(progressValue)}%</span>
+                        </div>
+                        <Progress value={progressValue} />
+                      </div>
+
+                      {review.summary && (
+                        <p className="text-sm text-muted-foreground">{review.summary}</p>
+                      )}
+
+                      {review.aiSummary && (
+                        <div className="flex items-start gap-3 rounded-md bg-muted/50 p-3 text-xs">
+                          <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
+                          <span>{review.aiSummary}</span>
+                        </div>
+                      )}
+
+                      {actionItems.length > 0 && (
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold uppercase text-muted-foreground">Action items</p>
+                          <div className="grid gap-1">
+                            {actionItems.slice(0, 3).map((item, index) => {
+                              const itemRecord = (item && typeof item === 'object') ? (item as Record<string, unknown>) : null;
+                              const label = typeof itemRecord?.label === 'string'
+                                ? (itemRecord.label as string)
+                                : typeof item === 'string'
+                                  ? item
+                                  : 'Follow-up';
+                              const status = typeof itemRecord?.status === 'string' ? (itemRecord.status as string) : undefined;
+                              return (
+                                <div key={`${review.reviewId}-action-${index}`} className="flex items-center justify-between rounded-md border border-dashed px-3 py-2 text-xs">
+                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                    <CheckCircle2 className="h-3 w-3 text-primary" />
+                                    <span className="text-foreground">{label}</span>
+                                  </div>
+                                  {status && (
+                                    <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                                      {toTitleCase(status)}
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </CardContent>
           </Card>
@@ -458,16 +556,21 @@ export default function Performance() {
               ) : (
                 <div className="space-y-4">
                   {recentReviews.map((review) => (
-                    <div key={review.id} className="border rounded-lg p-4">
+                    <div key={review.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="font-semibold text-foreground">{review.employeeName}</div>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {review.notes ?? 'No notes were provided with this review.'}
+                            {review.summary ?? 'No summary was provided with this review.'}
                           </p>
+                          {review.aiSummary && (
+                            <p className="mt-1 text-xs text-primary/80">
+                              Copilot: {review.aiSummary}
+                            </p>
+                          )}
                         </div>
-                        <Badge variant={reviewScoreVariant(review.severity)}>
-                          Score {review.severity}/5
+                        <Badge variant={reviewScoreVariant(review.score)}>
+                          Score {Math.round((review.score ?? 0) * 10) / 10}/5
                         </Badge>
                       </div>
                       <div className="text-xs text-muted-foreground mt-3">

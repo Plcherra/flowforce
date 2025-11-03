@@ -13,6 +13,7 @@ import {
   DEFAULT_LOCALIZATION,
   DEFAULT_NOTIFICATIONS,
   DEFAULT_SECURITY,
+  seedSystemSettings,
 } from './systemSettingsDefaults';
 import { normalizeSystemSettingsRow, type SystemSettingsRow } from './systemSettingsNormalizer';
 
@@ -34,40 +35,24 @@ type PartialUpdate = Partial<
 
 const allowedManagerRoles: ProfileRow['role'][] = ['admin', 'owner', 'company_admin', 'manager'];
 
-const ensureDefaults = (company: Company, companyId: string): SystemSettingsRow => ({
-  id: `virtual-${companyId}`,
-  company_id: companyId,
-  general: {
-    ...DEFAULT_GENERAL,
-    companyName: company.name ?? DEFAULT_GENERAL.companyName,
-    companyDescription: company.description ?? DEFAULT_GENERAL.companyDescription,
-    website: company.website ?? DEFAULT_GENERAL.website,
-    contactPhone: company.phone ?? DEFAULT_GENERAL.contactPhone,
-    logoUrl: company.logo_url ?? DEFAULT_GENERAL.logoUrl,
-  },
-  security: DEFAULT_SECURITY,
-  localization: {
-    ...DEFAULT_LOCALIZATION,
-    timezone: company.timezone ?? DEFAULT_LOCALIZATION.timezone,
-    currency: company.currency ?? DEFAULT_LOCALIZATION.currency,
-  },
-  notifications: DEFAULT_NOTIFICATIONS,
-  integrations: DEFAULT_INTEGRATIONS,
-  appearance: {
-    ...DEFAULT_APPEARANCE,
-    primaryColor: company.primary_color ?? DEFAULT_APPEARANCE.primaryColor,
-    secondaryColor: company.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
-  },
-  admin_config: {
-    ...DEFAULT_ADMIN_CONFIG,
-    businessStructure: {
-      ...DEFAULT_ADMIN_CONFIG.businessStructure,
-      workingHours: company.working_hours ?? DEFAULT_ADMIN_CONFIG.businessStructure.workingHours,
+const ensureDefaults = (company: Company, companyId: string): SystemSettingsRow => {
+  const seeded = seedSystemSettings(company);
+  return {
+    id: `virtual-${companyId}`,
+    company_id: companyId,
+    ...seeded,
+    admin_config: {
+      ...seeded.admin_config,
+      businessStructure: {
+        ...seeded.admin_config.businessStructure,
+        workingHours:
+          company.working_hours ?? seeded.admin_config.businessStructure.workingHours,
+      },
     },
-  },
-  created_at: company.created_at ?? new Date().toISOString(),
-  updated_at: company.updated_at ?? new Date().toISOString(),
-});
+    created_at: company.created_at ?? new Date().toISOString(),
+    updated_at: company.updated_at ?? new Date().toISOString(),
+  } as SystemSettingsRow;
+};
 
 export interface SystemSettingsHook {
   company: Company | null;
