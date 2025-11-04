@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { differenceInMilliseconds } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
 
 export interface IdeaAssessmentMetric {
@@ -27,6 +28,21 @@ async function fetchKpiSnapshot(companyId: string, range: { start: string; end: 
   });
 
   if (error) {
+    if (error.message?.includes('function public.get_kpi_summary')) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          '[useIdeaAssessments] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary.',
+          error.message,
+        );
+      }
+      return MOCK_IDEA_KPI_SUMMARY.map((item) => ({
+        id: item.id,
+        label: item.label,
+        metric: item.label,
+        value: item.value,
+        unit: item.unit,
+      }));
+    }
     throw error;
   }
 

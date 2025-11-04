@@ -33,6 +33,7 @@ export default function LearningCenter() {
     recommendations,
     progressByEnrollment,
     progressSnapshotsByEnrollment,
+    trainingInsights,
     refresh,
     handleCreateCourse,
     handleEnroll,
@@ -165,7 +166,13 @@ export default function LearningCenter() {
 
         {trainingAdmin && (
           <TabsContent value="analytics" className="space-y-6">
-            <AnalyticsOverview metrics={metrics} totals={totalMetrics} adminEnrollments={adminEnrollments} courseById={courseById} />
+            <AnalyticsOverview
+              metrics={metrics}
+              totals={totalMetrics}
+              adminEnrollments={adminEnrollments}
+              courseById={courseById}
+              trainingInsights={trainingInsights ?? undefined}
+            />
           </TabsContent>
         )}
 

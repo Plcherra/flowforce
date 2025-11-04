@@ -12,6 +12,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LearningCatalogRecord, LearningCourseMetrics, LearningEnrollment } from '@/types/learning';
 
+interface TrainingInsightSummary {
+  totalCompletions: number;
+  avgXP: number;
+  suggestions: string;
+}
+
 interface AnalyticsOverviewProps {
   metrics: LearningCourseMetrics[];
   totals: {
@@ -24,9 +30,10 @@ interface AnalyticsOverviewProps {
   };
   adminEnrollments: LearningEnrollment[];
   courseById: Map<string, LearningCatalogRecord>;
+  trainingInsights?: TrainingInsightSummary | null;
 }
 
-export function AnalyticsOverview({ metrics, totals, adminEnrollments, courseById }: AnalyticsOverviewProps) {
+export function AnalyticsOverview({ metrics, totals, adminEnrollments, courseById, trainingInsights }: AnalyticsOverviewProps) {
   const topCourses = useMemo(() => {
     return [...metrics]
       .sort((a, b) => (b.completions ?? 0) - (a.completions ?? 0))
@@ -108,6 +115,28 @@ export function AnalyticsOverview({ metrics, totals, adminEnrollments, courseByI
           </CardContent>
         </Card>
       </div>
+
+      {trainingInsights && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold">Copilot insights</CardTitle>
+            <CardDescription>AI summary of recent completions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Total completions</span>
+              <span className="font-semibold">{trainingInsights.totalCompletions}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Average XP per course</span>
+              <span className="font-semibold">{trainingInsights.avgXP.toFixed(0)} XP</span>
+            </div>
+            <p className="rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">
+              {trainingInsights.suggestions}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {topCourses.length > 0 && (
         <Card>

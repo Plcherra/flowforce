@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,60 +17,138 @@ import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 type TaskActivity = Tables<'task_activities'>;
+type TaskActivityWithTask = TaskActivity & {
+  tasks: {
+    id: string;
+    company_id: string | null;
+    assigned_to: string | null;
+    created_by: string;
+  };
+};
 
 export function TaskActivityFeed() {
   const { user } = useAuth();
   const [activities, setActivities] = useState<TaskActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const subscriptionRef = useRef<RealtimeChannel | null>(null);
+  const isMountedRef = useRef(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchActivities();
-      const cleanup = subscribeToActivities();
-      return cleanup;
-    }
-  }, [user]);
-
-  const fetchActivities = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('task_activities')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      setActivities(data || []);
-    } catch (error) {
-      console.error('Error fetching task activities:', error);
-    } finally {
-      setLoading(false);
+  const cleanupSubscription = () => {
+    if (subscriptionRef.current) {
+      supabase.removeChannel(subscriptionRef.current);
+      subscriptionRef.current = null;
     }
   };
 
-  const subscribeToActivities = () => {
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      cleanupSubscription();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      cleanupSubscription();
+      setActivities([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    fetchActivities(user.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const subscribeToActivities = (taskIds: string[], userId: string) => {
+    cleanupSubscription();
+    if (taskIds.length === 0) return;
+
+    const formattedIds = taskIds.map((id) => `"${id.replace(/"/g, '""')}"`).join(',');
+    const filter = `task_id=in.(${formattedIds})`;
+
     const channel = supabase
-      .channel('task-activities')
+      .channel(`task-activities-${userId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'task_activities'
+          table: 'task_activities',
+          filter,
         },
         () => {
-          fetchActivities(); // Refresh the list when new activity is added
+          fetchActivities(userId);
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    subscriptionRef.current = channel;
+  };
+
+  const fetchActivities = async (userId: string) => {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const companyId = profileData?.company_id;
+
+      if (!companyId) {
+        if (isMountedRef.current) {
+          setActivities([]);
+          cleanupSubscription();
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('task_activities')
+        .select(`
+          *,
+          tasks:tasks!inner(id, company_id, assigned_to, created_by)
+        `)
+        .eq('tasks.company_id', companyId)
+        .or(`tasks.assigned_to.eq.${userId},tasks.created_by.eq.${userId}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      if (!isMountedRef.current) return;
+
+      const typed = (data ?? []) as TaskActivityWithTask[];
+      const allowedTaskIds = Array.from(
+        new Set(
+          typed
+            .map((row) => row.task_id)
+            .filter((value): value is string => Boolean(value))
+        )
+      );
+
+      const sanitized = typed.map(({ tasks, ...rest }) => rest as TaskActivity);
+
+      setActivities(sanitized);
+      subscribeToActivities(allowedTaskIds, userId);
+    } catch (error) {
+      console.error('Error fetching task activities:', error);
+      if (isMountedRef.current) {
+        setActivities([]);
+        cleanupSubscription();
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+    }
   };
 
   const getActivityIcon = (actionType: string) => {

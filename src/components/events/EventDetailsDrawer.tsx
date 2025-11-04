@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import {
   Drawer,
@@ -15,6 +15,8 @@ import { Separator } from '@/components/ui/separator';
 import { useEventLinks } from '@/hooks/useEventLinks';
 import { useEvents } from '@/hooks/useEvents';
 import type { CalendarEvent } from '@/hooks/useCalendarEvents';
+import { upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
+import { useToast } from '@/hooks/use-toast';
 import { LinkShiftsPanel } from './LinkShiftsPanel';
 
 interface EventDetailsDrawerProps {
@@ -35,13 +37,19 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: EventDetailsDrawerProps) {
   const eventId = event?.id ?? null;
-  const { linkVisitToShifts, deleteEvent } = useEvents();
+  const { deleteEvent } = useEvents();
+  const { toast } = useToast();
   const canManageLinks = Boolean(eventId && UUID_PATTERN.test(eventId));
   const { links, loading: linksLoading, error: linksError, refresh } = useEventLinks(canManageLinks ? eventId : null);
   const [activeTab, setActiveTab] = useState<'details' | 'participants' | 'shifts'>('details');
   const [busy, setBusy] = useState(false);
+  const [localShiftIds, setLocalShiftIds] = useState<string[]>([]);
 
-  const fallbackShiftIds = useMemo(() => event?.shiftIds ?? [], [event]);
+  useEffect(() => {
+    setLocalShiftIds(event?.shiftIds ?? []);
+  }, [event?.id, event?.shiftIds]);
+
+  const fallbackShiftIds = useMemo(() => localShiftIds, [localShiftIds]);
   const linkedShiftIds = useMemo(() => {
     if (links.length > 0) {
       return links.map((link) => link.shift_id);
@@ -51,13 +59,30 @@ export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: Eve
 
   const handleLinkUpdate = async (next: string[]) => {
     if (!eventId) return;
+    setLocalShiftIds(next);
     setBusy(true);
     try {
-      await linkVisitToShifts(eventId, next);
       if (canManageLinks) {
+        const companyId = event?.raw?.company_id ?? null;
+        await upsertEventShiftLinks({
+          eventId,
+          shiftIds: next,
+          companyId,
+        });
         await refresh();
       }
       onRefresh?.();
+      toast({
+        title: 'Saved',
+        description: 'Linked shifts updated.',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({
+        title: 'Unable to link shifts',
+        description: message,
+        variant: 'destructive',
+      });
     } finally {
       setBusy(false);
     }
@@ -160,7 +185,7 @@ export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: Eve
                     storeId={event?.storeId ?? null}
                     linkedShiftIds={linkedShiftIds}
                     onChange={handleLinkUpdate}
-                    disabled={busy || linksLoading}
+                    disabled={!eventId || busy || linksLoading}
                     busy={busy || linksLoading}
                   />
                   {!canManageLinks && eventId && (

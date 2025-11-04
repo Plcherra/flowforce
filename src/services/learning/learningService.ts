@@ -20,6 +20,7 @@ import type {
   LearningEnrollment,
   LearningModule,
   LearningProgressEvent,
+  ModuleAsset,
   PersonalLearningSnapshot,
 } from '@/types/learning';
 import { slugify } from '@/utils/slugify';
@@ -45,6 +46,9 @@ type CourseRow = {
   target_roles: string[] | null;
   featured: boolean | null;
   certification_code: string | null;
+  certification_id: string | null;
+  role_unlock: string[] | null;
+  auto_schedule_eligible: boolean | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -131,22 +135,61 @@ const mapCourse = (row: CourseRow): LearningCourse => ({
   targetRoles: row.target_roles ?? [],
   featured: Boolean(row.featured),
   certificationCode: row.certification_code,
+  certificationId: row.certification_id ?? null,
+  roleUnlock: row.role_unlock ?? [],
+  autoScheduleEligible: Boolean(row.auto_schedule_eligible),
   createdBy: row.created_by,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
 
-const mapModule = (row: ModuleRow): LearningModule => ({
-  id: row.id,
-  courseId: row.course_id,
-  title: row.title,
-  description: row.description,
-  content: row.content,
-  orderIndex: row.order_index,
-  estimatedMinutes: row.estimated_minutes ?? 0,
-  xpAward: row.xp_award ?? 0,
-  createdAt: row.created_at,
-});
+const mapModule = (row: ModuleRow): LearningModule => {
+  let moduleType: string | null = null;
+  let assets: ModuleAsset[] | null = null;
+  let metadata: Record<string, unknown> | null = null;
+
+  if (row.content) {
+    try {
+      const parsed = JSON.parse(row.content);
+      if (typeof parsed === 'object' && parsed !== null) {
+        metadata = parsed as Record<string, unknown>;
+        if (typeof (parsed as any).type === 'string') {
+          moduleType = (parsed as any).type;
+        }
+        if (Array.isArray((parsed as any).assets)) {
+          assets = (parsed as any).assets
+            .map((asset: any) => {
+              if (!asset || typeof asset !== 'object') return null;
+              return {
+                name: typeof asset.name === 'string' ? asset.name : 'Attachment',
+                size: typeof asset.size === 'number' ? asset.size : undefined,
+                type: typeof asset.type === 'string' ? asset.type : undefined,
+                url: typeof asset.url === 'string' ? asset.url : undefined,
+              };
+            })
+            .filter(Boolean) as ModuleAsset[];
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to parse module content metadata', error);
+    }
+  }
+
+  return {
+    id: row.id,
+    courseId: row.course_id,
+    title: row.title,
+    description: row.description,
+    content: row.content,
+    moduleType,
+    assets,
+    metadata,
+    orderIndex: row.order_index,
+    estimatedMinutes: row.estimated_minutes ?? 0,
+    xpAward: row.xp_award ?? 0,
+    createdAt: row.created_at,
+  };
+};
 
 const mapEnrollment = (row: EnrollmentRow): LearningEnrollment => ({
   id: row.id,
@@ -270,8 +313,11 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
       estimated_hours: payload.estimatedHours,
       delivery_mode: payload.deliveryMode,
       target_roles: payload.targetRoles,
+      role_unlock: payload.roleUnlock ?? [],
       featured: payload.featured ?? false,
       certification_code: payload.certificationCode ?? null,
+      certification_id: payload.certificationId ?? null,
+      auto_schedule_eligible: payload.autoScheduleEligible ?? false,
       company_id: companyId,
       created_by: createdBy,
     })
@@ -282,12 +328,25 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
     throw insertCourseError;
   }
 
+  const serializeModuleContent = (module: CourseModuleInput) => {
+    if (typeof module.content === 'string') {
+      return module.content;
+    }
+    if (module.content && typeof module.content === 'object') {
+      return JSON.stringify(module.content);
+    }
+    if (module.moduleType || (module.assets && module.assets.length > 0)) {
+      return JSON.stringify({ type: module.moduleType, assets: module.assets });
+    }
+    return null;
+  };
+
   const modulesPayload = payload.modules.map((module, index) => ({
     course_id: courseRow.id,
     company_id: companyId,
     title: module.title,
     description: module.description ?? null,
-    content: module.content ?? null,
+    content: serializeModuleContent(module),
     order_index: index + 1,
     estimated_minutes: module.estimatedMinutes,
     xp_award: module.xpAward,

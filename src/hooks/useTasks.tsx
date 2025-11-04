@@ -34,13 +34,52 @@ type TaskInsert = TablesInsert<'tasks'>;
 type TaskComment = Tables<'task_comments'>;
 type TaskActivity = Tables<'task_activities'>;
 
-export const TASK_STATUS_TRANSITIONS: Record<TaskRow['status'], TaskRow['status'][]> = {
-  todo: ['in_progress'],
-  in_progress: ['todo', 'completed'],
-  completed: ['todo'],
-  review: ['in_progress', 'completed'],
-  cancelled: [],
+const STATUS_ALIASES: Record<string, TaskStatus> = {
+  completed: 'done',
 };
+
+const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow['status']>> = {
+  done: 'completed' as TaskRow['status'],
+};
+
+export const TASK_STATUS_TRANSITIONS = {
+  todo: ['in_progress', 'cancelled'],
+  in_progress: ['review', 'blocked', 'cancelled', 'todo'],
+  review: ['done', 'todo', 'cancelled'],
+  blocked: ['in_progress', 'cancelled'],
+  done: [],
+  cancelled: ['todo'],
+} as const;
+
+export type TaskStatus = keyof typeof TASK_STATUS_TRANSITIONS;
+type TaskStatusValue = TaskStatus | TaskRow['status'];
+
+const STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  review: 'In Review',
+  blocked: 'Blocked',
+  done: 'Done',
+  cancelled: 'Cancelled',
+};
+
+export const labelFor = (status: TaskStatusValue | null | undefined) => {
+  if (!status) return 'Unknown';
+  const normalized = normalizeTaskStatus(status);
+  if (!normalized) return capitalizeFallback(String(status));
+  return STATUS_LABELS[normalized];
+};
+
+export const normalizeTaskStatus = (status: TaskStatusValue | null | undefined): TaskStatus | null => {
+  if (!status) return null;
+  if ((status as TaskStatus) in TASK_STATUS_TRANSITIONS) {
+    return status as TaskStatus;
+  }
+  const alias = STATUS_ALIASES[status];
+  return alias ?? null;
+};
+
+const capitalizeFallback = (value: string) => value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 
 export function useTasks() {
   const { user } = useAuth();
@@ -78,6 +117,7 @@ export function useTasks() {
 
       if (!companyId) {
         setTasks([]);
+        setLoading(false);
         return;
       }
 
@@ -90,30 +130,12 @@ export function useTasks() {
           department:departments(name),
           goal:goals(id, title, status, progress, target_completion_date)
         `)
-        .or(
-          `profiles!tasks_created_by_fkey.company_id.eq.${companyId},profiles!tasks_assigned_to_fkey.company_id.eq.${companyId}`,
-        )
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const allTasks = (data ?? []) as TaskWithRelations[];
-
-      const scopedTasks = allTasks.filter((task) => {
-        const assignedCompanyId = task.assigned_profile?.company_id ?? null;
-        const createdCompanyId = task.created_profile?.company_id ?? null;
-        return assignedCompanyId === companyId || createdCompanyId === companyId;
-      });
-
-      if (scopedTasks.length !== allTasks.length) {
-        const removed = allTasks.length - scopedTasks.length;
-        console.warn(
-          '[useTasks] Filtered out tasks from other companies',
-          JSON.stringify({ removed, companyId }),
-        );
-      }
-
-      setTasks(scopedTasks);
+      setTasks((data ?? []) as TaskWithRelations[]);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       setTasks([]);
@@ -308,20 +330,31 @@ export function useTasks() {
     }
   };
 
-  const transitionTaskStatus = async (task: TaskRow, nextStatus: TaskRow['status']) => {
-    const allowedTransitions = TASK_STATUS_TRANSITIONS[task.status] ?? [];
-    if (!allowedTransitions.includes(nextStatus)) {
-      const errorMessage = `Invalid status transition from ${task.status} to ${nextStatus}`;
-      console.warn(errorMessage);
-      return { data: null, error: new Error(errorMessage) };
+  const updateStatus = async (taskId: string, nextStatus: TaskStatus) => {
+    const task = tasks.find((item) => item.id === taskId);
+    const current = normalizeTaskStatus(task?.status ?? null);
+
+    if (!task || !current) {
+      const error = new Error('Task not found for status transition.');
+      console.warn(error.message);
+      return { data: null, error };
     }
 
+    const allowedTransitions = TASK_STATUS_TRANSITIONS[current] ?? [];
+
+    if (!allowedTransitions.includes(nextStatus)) {
+      const message = `Invalid status transition from ${current} to ${nextStatus}`;
+      console.warn(message);
+      return { data: null, error: new Error(message) };
+    }
+
+    const statusForWrite = (STATUS_WRITE_TARGET[nextStatus] ?? nextStatus) as TaskRow['status'];
     const updates: Partial<TaskRow> = {
-      status: nextStatus,
-      completed_at: nextStatus === 'completed' ? new Date().toISOString() : null,
+      status: statusForWrite,
+      completed_at: nextStatus === 'done' ? new Date().toISOString() : null,
     };
 
-    return updateTask(task.id, updates);
+    return updateTask(taskId, updates);
   };
 
   return {
@@ -333,7 +366,7 @@ export function useTasks() {
     addComment,
     getTaskComments,
     getTaskTimeline,
-    transitionTaskStatus,
-    refetchTasks: fetchTasks
+    updateStatus,
+    refetchTasks: fetchTasks,
   };
 }

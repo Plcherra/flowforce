@@ -5,10 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useEvents, type EventAttendee } from '@/hooks/useEvents';
+import { type EventAttendee } from '@/hooks/useEvents';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { Schedule } from '@/types/common';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
+import { createEvent as createCalendarEvent, upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
@@ -18,8 +21,9 @@ interface CreateVendorVisitDialogProps {
 
 export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: CreateVendorVisitDialogProps) {
   const { shifts } = useScheduling();
-  const { createVendorVisit, linkVisitToShifts } = useEvents();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile } = useProfile();
 
   const [title, setTitle] = useState('Vendor Visit');
   const [vendorName, setVendorName] = useState('');
@@ -85,28 +89,65 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
 
   const handleCreate = async () => {
     if (!start || !end || !title.trim() || !vendorName.trim()) return;
+
+    const companyId = profile?.companyId ?? profile?.company_id ?? null;
+    if (!companyId) {
+      toast({
+        title: 'Missing company context',
+        description: 'You need an active company to create vendor visits.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    let startIso: Date;
+    let endIso: Date;
+    try {
+      startIso = new Date(start);
+      endIso = new Date(end);
+      if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
+        throw new Error('Invalid date');
+      }
+    } catch {
+      toast({
+        title: 'Invalid date',
+        description: 'Please provide valid start and end times.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const linkedShiftIds = Object.entries(selectedShiftIds)
       .filter(([, v]) => v)
       .map(([id]) => id);
 
     try {
-      const visit = await createVendorVisit({
-        title,
-        description,
-        start: new Date(start).toISOString(),
-        end: new Date(end).toISOString(),
-        location,
-        vendor: { name: vendorName, service_type: serviceType },
-        related_shift_ids: linkedShiftIds,
-        attendees: buildAttendees(linkedShiftIds),
-        checklist: [
-          { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
-          { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
-        ],
+      const visit = await createCalendarEvent({
+        payload: {
+          title,
+          description: description || null,
+          location,
+          type: 'vendor',
+          start: startIso,
+          end: endIso,
+          relatedShiftIds: linkedShiftIds,
+          attendees: buildAttendees(linkedShiftIds),
+          checklist: [
+            { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
+            { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
+          ],
+          vendor: { name: vendorName, service_type: serviceType },
+        },
+        companyId,
+        createdBy: user?.id ?? null,
       });
 
-      if (visit.related_shift_ids && visit.related_shift_ids.length > 0) {
-        await linkVisitToShifts(visit.id, visit.related_shift_ids);
+      if (linkedShiftIds.length > 0) {
+        await upsertEventShiftLinks({
+          eventId: visit.id,
+          shiftIds: linkedShiftIds,
+          companyId,
+        });
       }
 
       if (visit.id) {
@@ -119,7 +160,12 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
       });
       onOpenChange(false);
     } catch (error) {
-      console.warn('Vendor visit creation failed', error);
+      const message = error instanceof Error ? error.message : String(error);
+      toast({
+        title: 'Vendor visit not saved',
+        description: message,
+        variant: 'destructive',
+      });
     }
   };
 

@@ -40,6 +40,13 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
 
       const companyId = profileData?.company_id ?? null;
 
+      if (!companyId) {
+        setAssignees([]);
+        setGoals([]);
+        setLoading(false);
+        return;
+      }
+
       let assigneeQuery = supabase
         .from('profiles')
         .select('id, first_name, last_name')
@@ -51,10 +58,8 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
         .select('id, title, status, progress, target_completion_date')
         .order('created_at', { ascending: false });
 
-      if (companyId) {
-        assigneeQuery = assigneeQuery.eq('company_id', companyId);
-        goalsQuery = goalsQuery.eq('company_id', companyId);
-      }
+      assigneeQuery = assigneeQuery.eq('company_id', companyId);
+      goalsQuery = goalsQuery.eq('company_id', companyId);
 
       const [assigneesResult, goalsResult] = await Promise.all([assigneeQuery, goalsQuery]);
 

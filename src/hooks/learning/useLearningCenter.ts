@@ -17,6 +17,7 @@ import {
   recordProgressEvent,
   updateEnrollmentProgress,
 } from '@/services/learning/learningService';
+import { analyzeTrainingProgress } from '@/services/ai/trainingInsights';
 import type {
   CourseCreationPayload,
   CourseRecommendation,
@@ -32,6 +33,8 @@ type SkillSnapshot = {
   role: string;
   xp: number;
 };
+
+type TrainingInsights = Awaited<ReturnType<typeof analyzeTrainingProgress>>;
 
 const TRAINING_ADMIN_ROLES = new Set(['manager', 'admin', 'company_admin', 'owner']);
 
@@ -52,6 +55,7 @@ export function useLearningCenter() {
   const [recommendations, setRecommendations] = useState<CourseRecommendation[]>([]);
   const [progressByEnrollment, setProgressByEnrollment] = useState<Record<string, LearningProgressEvent[]>>({});
   const [progressSnapshotsByEnrollment, setProgressSnapshotsByEnrollment] = useState<Record<string, LearningProgressSnapshot[]>>({});
+  const [trainingInsights, setTrainingInsights] = useState<TrainingInsights | null>(null);
 
   const trainingAdmin = useMemo(() => {
     if (!profile?.role) return false;
@@ -123,6 +127,7 @@ export function useLearningCenter() {
       setRecommendations([]);
       setSnapshot(null);
       setProgressByEnrollment({});
+      setTrainingInsights(null);
       setError(null);
       setLoading(false);
       return;
@@ -135,6 +140,7 @@ export function useLearningCenter() {
       setRecommendations([]);
       setSnapshot(null);
       setProgressByEnrollment({});
+      setTrainingInsights(null);
       setError('Company context missing for learning data.');
       setLoading(false);
       return;
@@ -148,12 +154,17 @@ export function useLearningCenter() {
       const adminEnrollmentsPromise = trainingAdmin
         ? fetchAllEnrollments({ companyId, requireAdmin: true })
         : Promise.resolve<LearningEnrollment[]>([]);
+      const insightsPromise = analyzeTrainingProgress(companyId).catch((err) => {
+        console.warn('Unable to analyze training progress', err);
+        return null;
+      });
 
-      const [catalogData, personalEnrollments, skillSnapshot, adminEnrollmentsData] = await Promise.all([
+      const [catalogData, personalEnrollments, skillSnapshot, adminEnrollmentsData, insights] = await Promise.all([
         fetchLearningCatalog(companyId),
         personalEnrollmentsPromise,
         fetchSkillSnapshot(),
         adminEnrollmentsPromise,
+        insightsPromise,
       ]);
 
       const courseMetrics = collectMetrics(catalogData);
@@ -177,9 +188,11 @@ export function useLearningCenter() {
       setRecommendations(recommendationList);
       setSnapshot(personalSnapshot);
       await loadProgressData(personalEnrollments);
+      setTrainingInsights(insights);
     } catch (err) {
       console.error('Failed to load learning center data', err);
       setError('Unable to load learning center data right now.');
+      setTrainingInsights(null);
     } finally {
       setLoading(false);
     }
@@ -233,6 +246,74 @@ export function useLearningCenter() {
       }
     },
     [user?.id, loadData],
+  );
+
+  const markCourseComplete = useCallback(
+    async (employeeId: string, course: LearningCatalogRecord) => {
+      if (!companyId) {
+        return false;
+      }
+
+      try {
+        const existingCompletion = await supabase
+          .from('learning_completions')
+          .select('id')
+          .eq('employee_id', employeeId)
+          .eq('course_id', course.id)
+          .maybeSingle();
+
+        if (!existingCompletion.data) {
+          const { error: completionError } = await supabase.from('learning_completions').insert({
+            employee_id: employeeId,
+            company_id: companyId,
+            course_id: course.id,
+            xp_earned: course.xpReward ?? 0,
+            passed: true,
+            certification_awarded: course.certificationId ?? null,
+          });
+
+          if (completionError) throw completionError;
+        }
+
+        if (course.certificationId) {
+          const { error: certificationError } = await supabase
+            .from('employee_certifications')
+            .upsert(
+              {
+                employee_id: employeeId,
+                certification_id: course.certificationId,
+                awarded_by: profile?.userId ?? null,
+              },
+              { onConflict: 'employee_id,certification_id' },
+            );
+
+          if (certificationError) throw certificationError;
+        }
+
+        const profileUpdates: Record<string, unknown> = {};
+        if (course.roleUnlock && course.roleUnlock.length > 0) {
+          profileUpdates.role = course.roleUnlock[0];
+        }
+        if (course.autoScheduleEligible) {
+          profileUpdates.eligible_for_schedule = true;
+        }
+
+        if (Object.keys(profileUpdates).length > 0) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update(profileUpdates)
+            .eq('id', employeeId);
+
+          if (profileError) throw profileError;
+        }
+
+        return true;
+      } catch (err) {
+        console.warn('Failed to finalize course completion metadata', err);
+        return false;
+      }
+    },
+    [companyId, profile?.userId],
   );
 
   const handleEnroll = useCallback(
@@ -327,6 +408,7 @@ export function useLearningCenter() {
             awardingProfileId: profile?.userId ?? undefined,
             roleHint: profile?.role ?? undefined,
           });
+          await markCourseComplete(enrollment.employeeId, course);
           await loadData();
         }
       } catch (err) {
@@ -338,7 +420,7 @@ export function useLearningCenter() {
         });
       }
     },
-    [enrollments, catalog, profile?.userId, profile?.role, loadProgressData, loadData],
+    [enrollments, catalog, profile?.userId, profile?.role, loadProgressData, loadData, markCourseComplete],
   );
 
   const handleManualProgressUpdate = useCallback(
@@ -372,6 +454,14 @@ export function useLearningCenter() {
           previous.map((entry) => (entry.id === updated.id ? updated : entry)),
         );
         await loadProgressData([updated]);
+
+        if (updated.status === 'completed') {
+          const course = catalog.find((item) => item.id === enrollment.courseId);
+          if (course) {
+            await markCourseComplete(enrollment.employeeId, course);
+            await loadData();
+          }
+        }
       } catch (err) {
         console.error('Failed to adjust progress', err);
         toast({
@@ -381,7 +471,7 @@ export function useLearningCenter() {
         });
       }
     },
-    [enrollments, profile?.userId, loadProgressData],
+    [enrollments, profile?.userId, loadProgressData, catalog, markCourseComplete, loadData],
   );
 
   const courseById = useMemo(() => new Map(catalog.map((course) => [course.id, course])), [catalog]);
@@ -468,6 +558,7 @@ export function useLearningCenter() {
     recommendations,
     progressByEnrollment,
     progressSnapshotsByEnrollment,
+    trainingInsights,
     refresh,
     handleCreateCourse,
     handleEnroll,

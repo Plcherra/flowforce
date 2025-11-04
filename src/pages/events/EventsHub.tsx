@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
 import { CalendarDays, Plus, Search, Video, Wrench } from 'lucide-react';
 import { SchedulingProvider } from '@/contexts/SchedulingContext';
@@ -13,6 +13,7 @@ import { CalendarView } from '@/components/events/CalendarView';
 import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
 import { useCalendarEvents, mapAppEventToCalendarEvent } from '@/hooks/useCalendarEvents';
 import { useEvents } from '@/hooks/useEvents';
+import { useToast } from '@/hooks/use-toast';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -41,17 +42,38 @@ export default function EventsHubPage() {
   const range = useMemo(() => computeRange(view, currentDate), [view, currentDate]);
   const { events, loading, error, refresh } = useCalendarEvents({ range });
   const { events: cachedEvents, loading: cachedLoading } = useEvents();
+  const { toast } = useToast();
 
   const fallbackEvents = useMemo(
     () => cachedEvents.map(mapAppEventToCalendarEvent),
     [cachedEvents],
   );
 
-  const hasRemoteEvents = events.length > 0;
-  const mergedEvents = hasRemoteEvents ? events : fallbackEvents;
-  const mergedLoading = hasRemoteEvents ? loading : (loading && fallbackEvents.length === 0) || cachedLoading;
-  const offlineNotice = !hasRemoteEvents && !!error;
-  const displayError = hasRemoteEvents ? error : null;
+  const [offline, setOffline] = useState(false);
+  const offlineToastShown = useRef(false);
+
+  useEffect(() => {
+    if (error) {
+      setOffline(true);
+      if (!offlineToastShown.current) {
+        toast({
+          title: 'Calendar offline',
+          description: error,
+          variant: 'destructive',
+        });
+        offlineToastShown.current = true;
+      }
+    } else {
+      if (offline) {
+        setOffline(false);
+      }
+      offlineToastShown.current = false;
+    }
+  }, [error, offline, toast]);
+
+  const mergedEvents = offline ? fallbackEvents : events;
+  const mergedLoading = offline ? cachedLoading : loading;
+  const displayError = offline ? null : error;
 
   const selectedEvent = useMemo(
     () => mergedEvents.find((event) => event.id === selectedEventId) ?? null,
@@ -187,9 +209,9 @@ export default function EventsHubPage() {
                     onViewChange={(next) => setView(next)}
                     onSelectEvent={(event) => handleSelectEvent(event.id)}
                   />
-                  {offlineNotice && (
+                  {offline && (
                     <div className="mt-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                      Calendar offline. Showing cached events while we reconnect.
+                      Showing cached events while we reconnect.
                     </div>
                   )}
                 </CardContent>

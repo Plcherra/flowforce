@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { CourseModulesForm } from '@/components/learning/CourseModulesForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { CourseCreationPayload, CourseModuleInput, LearningDeliveryMode } from '@/types/learning';
@@ -159,33 +160,28 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
     });
   };
 
-  const addModule = useCallback(() => {
-    if (!moduleDraft.title.trim()) {
-      toast({
-        title: 'Module title required',
-        description: 'Add a module title before adding it to the course.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleModuleAdd = useCallback(
+    (module: CourseModuleInput) => {
+      if (!module.title.trim()) {
+        toast({
+          title: 'Module title required',
+          description: 'Add a module title before saving it.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    setModules((prev) => [
-      ...prev,
-      {
-        ...moduleDraft,
-        estimatedMinutes: Math.max(10, moduleDraft.estimatedMinutes),
-        xpAward: Math.max(50, moduleDraft.xpAward),
-      },
-    ]);
-
-    setModuleDraft({
-      title: '',
-      description: '',
-      estimatedMinutes: 30,
-      xpAward: 100,
-      content: '',
-    });
-  }, [moduleDraft, toast]);
+      setModules((prev) => [
+        ...prev,
+        {
+          ...module,
+          estimatedMinutes: Math.max(10, module.estimatedMinutes),
+          xpAward: Math.max(50, module.xpAward),
+        },
+      ]);
+    },
+    [toast],
+  );
 
   const removeModule = (index: number) => {
     setModules((prev) => prev.filter((_, idx) => idx !== index));
@@ -519,66 +515,8 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                       Add module
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="module-title">Module title</Label>
-                      <Input
-                        id="module-title"
-                        value={moduleDraft.title}
-                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, title: event.target.value }))}
-                        placeholder="Example: Opening checklist"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="module-description">Description</Label>
-                      <Textarea
-                        id="module-description"
-                        rows={3}
-                        value={moduleDraft.description}
-                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, description: event.target.value }))}
-                        placeholder="What does this module cover?"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label htmlFor="module-duration">Duration (minutes)</Label>
-                        <Input
-                          id="module-duration"
-                          type="number"
-                          min={5}
-                          value={moduleDraft.estimatedMinutes}
-                          onChange={(event) =>
-                            setModuleDraft((prev) => ({ ...prev, estimatedMinutes: Number(event.target.value) }))
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="module-xp">XP reward</Label>
-                        <Input
-                          id="module-xp"
-                          type="number"
-                          min={50}
-                          step={25}
-                          value={moduleDraft.xpAward}
-                          onChange={(event) =>
-                            setModuleDraft((prev) => ({ ...prev, xpAward: Number(event.target.value) }))
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="module-content">Content / assets</Label>
-                      <Textarea
-                        id="module-content"
-                        rows={3}
-                        value={moduleDraft.content}
-                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, content: event.target.value }))}
-                        placeholder="Link to SOPs, videos, or assessments"
-                      />
-                    </div>
-                    <Button type="button" className="w-full" onClick={addModule}>
-                      Add module
-                    </Button>
+                  <CardContent>
+                    <CourseModulesForm onAdd={handleModuleAdd} />
                   </CardContent>
                 </Card>
 

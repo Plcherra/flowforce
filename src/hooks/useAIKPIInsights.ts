@@ -92,7 +92,7 @@ export function useAIKPIInsights(companyId?: string | null, range?: RangeInput) 
               error.message,
             );
           }
-          return MOCK_KPI_INSIGHTS;
+          return MOCK_KPI_INSIGHTS.map((item) => ({ ...item })) as AIKpiInsight[];
         }
         throw error;
       }

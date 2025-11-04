@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
-import type { AppEvent, EventAttendee } from '@/hooks/useEvents';
+import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
 
 type CalendarEventRow = Tables<'calendar_events'> & {
   event_participants?: Tables<'event_participants'>[] | null;
@@ -48,6 +48,15 @@ export interface UseCalendarEventsResult {
   error: string | null;
   refresh: () => Promise<void>;
 }
+
+const toIsoString = (value: Date | string | null | undefined) => {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error('Invalid date value');
+  }
+  return date.toISOString();
+};
 
 const toIsoRange = (range: CalendarRange) => {
   const parse = (value: Date | string) => {
@@ -213,6 +222,94 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
     refresh,
   };
 }
+
+export interface CalendarEventCreateInput {
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  type?: 'event' | 'meeting' | 'vendor';
+  color?: string | null;
+  start: string | Date;
+  end?: string | Date | null;
+  storeId?: string | null;
+  attendees?: EventAttendee[];
+  relatedShiftIds?: string[];
+  checklist?: ChecklistItem[];
+  vendor?: AppEvent['vendor'];
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateEventOptions {
+  payload: CalendarEventCreateInput;
+  companyId: string | null;
+  createdBy: string | null;
+}
+
+export const createEvent = async ({ payload, companyId, createdBy }: CreateEventOptions): Promise<CalendarEvent> => {
+  if (!companyId) {
+    throw new Error('Company context is required to create events.');
+  }
+
+  const insertPayload = {
+    company_id: companyId,
+    created_by: createdBy,
+    store_id: payload.storeId ?? null,
+    title: payload.title,
+    description: payload.description ?? null,
+    location: payload.location ?? null,
+    event_type: payload.type ?? 'event',
+    color: payload.color ?? null,
+    start_time: toIsoString(payload.start),
+    end_time: toIsoString(payload.end),
+    attendees: payload.attendees ?? [],
+    related_shift_ids: payload.relatedShiftIds ?? [],
+    checklist: payload.checklist ?? [],
+    vendor: payload.vendor ?? null,
+    metadata: payload.metadata ?? {},
+  };
+
+  const response = await supabase
+    .from('calendar_events')
+    .insert(insertPayload)
+    .select('*, event_participants(*), event_shift_links(*)')
+    .single();
+
+  if (response.error) {
+    throw response.error;
+  }
+
+  return mapRowToEvent(response.data as CalendarEventRow);
+};
+
+export const upsertEventShiftLinks = async ({
+  eventId,
+  shiftIds,
+  companyId,
+}: {
+  eventId: string;
+  shiftIds: string[];
+  companyId: string | null;
+}) => {
+  if (!eventId || !companyId) return;
+
+  await supabase.from('event_shift_links').delete().eq('event_id', eventId);
+
+  if (shiftIds.length === 0) return;
+
+  const payload = shiftIds.map((shiftId) => ({
+    event_id: eventId,
+    shift_id: shiftId,
+    company_id: companyId,
+  }));
+
+  const { error } = await supabase
+    .from('event_shift_links')
+    .upsert(payload, { onConflict: 'event_id,shift_id' });
+
+  if (error) {
+    throw error;
+  }
+};
 
 export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
   const participants: CalendarEventParticipant[] = (event.attendees ?? []).map((attendee) => ({

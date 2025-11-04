@@ -4,26 +4,26 @@ import { GoalHeader } from '@/components/goals/GoalHeader';
 import { GoalList } from '@/components/goals/GoalList';
 import { GoalModal } from '@/components/goals/GoalModal';
 import { GoalEmptyState } from '@/components/goals/GoalEmptyState';
-import { useGoals, type Goal, type GoalStatus } from '@/hooks/useGoals';
-import { useGoalDialogs } from '@/hooks/useGoalDialogs';
+import { useGoals, type Goal, type GoalStatus, type UseGoalsReturn } from '@/hooks/useGoals';
+import { useGoalDialogs, type GoalDialogs } from '@/hooks/useGoalDialogs';
 import type { GoalFormValues } from '@/components/goals/CreateGoalModal';
 import { useToast } from '@/hooks/use-toast';
 
 export default function GoalsPage() {
+  const goalsState = useGoals();
   const {
     goals,
     stats,
     isLoading,
     isFetching,
     error,
-    refetch,
     createGoal,
     updateGoal,
     deleteGoal,
     toggleStatus,
     creating,
     updating,
-  } = useGoals();
+  } = goalsState;
 
   const dialogs = useGoalDialogs();
   const { toast } = useToast();
@@ -91,16 +91,11 @@ export default function GoalsPage() {
     }
   };
 
-  if (error) {
-    throw error;
-  }
-
-  if (isLoading && goals.length === 0) {
-    return <div className="p-8 text-center text-muted-foreground">Loading goals...</div>;
-  }
-
   return (
     <ErrorBoundary
+      onReset={() => {
+        void goalsState.refetch();
+      }}
       fallbackRender={({ error: boundaryError, resetErrorBoundary }) => (
         <div className="p-8 text-center">
           <h2 className="text-red-600 font-semibold">Error loading goals</h2>
@@ -108,7 +103,6 @@ export default function GoalsPage() {
           <button
             onClick={() => {
               resetErrorBoundary();
-              void refetch();
             }}
             className="mt-4 rounded bg-indigo-600 px-3 py-1 text-white"
           >
@@ -117,35 +111,83 @@ export default function GoalsPage() {
         </div>
       )}
     >
-      <main className="space-y-6 p-6">
-        <GoalHeader
-          dialogs={dialogs}
-          count={goals.length}
-          stats={stats}
-          isLoadingStats={isLoading && goals.length === 0}
-          onSuggestGoal={handleSuggestGoal}
-          suggesting={suggesting}
-        />
-
-        {goals.length > 0 ? (
-          <GoalList
-            data={goals}
-            dialogs={dialogs}
-            isLoading={isLoading}
-            isFetching={isFetching}
-            error={null}
-            onToggleStatus={handleToggleStatus}
-            onDelete={handleDelete}
-            onRetry={() => {
-              void refetch();
-            }}
-          />
-        ) : (
-          <GoalEmptyState dialogs={dialogs} />
-        )}
-
-        <GoalModal dialogs={dialogs} saving={saving} onCreate={handleCreate} onUpdate={handleUpdate} />
-      </main>
+      <GoalsContent
+        state={goalsState}
+        dialogs={dialogs}
+        suggesting={suggesting}
+        onSuggestGoal={handleSuggestGoal}
+        onToggleStatus={handleToggleStatus}
+        onDelete={handleDelete}
+        onCreate={handleCreate}
+        onUpdate={handleUpdate}
+        saving={saving}
+      />
     </ErrorBoundary>
+  );
+}
+
+interface GoalsContentProps {
+  state: UseGoalsReturn;
+  dialogs: GoalDialogs;
+  suggesting: boolean;
+  onSuggestGoal: () => void;
+  onToggleStatus: (goal: Goal, status: GoalStatus) => Promise<void>;
+  onDelete: (goal: Goal) => Promise<void>;
+  onCreate: (values: GoalFormValues) => Promise<void>;
+  onUpdate: (goal: Goal, values: GoalFormValues) => Promise<void>;
+  saving: boolean;
+}
+
+function GoalsContent({
+  state,
+  dialogs,
+  suggesting,
+  onSuggestGoal,
+  onToggleStatus,
+  onDelete,
+  onCreate,
+  onUpdate,
+  saving,
+}: GoalsContentProps) {
+  const { goals, stats, isLoading, isFetching, error, refetch } = state;
+
+  if (error && goals.length === 0) {
+    throw error;
+  }
+
+  if (isLoading && goals.length === 0) {
+    return <div className="p-8 text-center text-muted-foreground">Loading goals...</div>;
+  }
+
+  return (
+    <main className="space-y-6 p-6">
+      <GoalHeader
+        dialogs={dialogs}
+        count={goals.length}
+        stats={stats}
+        isLoadingStats={isLoading && goals.length === 0}
+        onSuggestGoal={onSuggestGoal}
+        suggesting={suggesting}
+      />
+
+      {goals.length > 0 ? (
+        <GoalList
+          data={goals}
+          dialogs={dialogs}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          error={error}
+          onToggleStatus={onToggleStatus}
+          onDelete={onDelete}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      ) : (
+        <GoalEmptyState dialogs={dialogs} />
+      )}
+
+      <GoalModal dialogs={dialogs} saving={saving} onCreate={onCreate} onUpdate={onUpdate} />
+    </main>
   );
 }

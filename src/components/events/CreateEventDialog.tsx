@@ -21,6 +21,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useEvents, type EventAttendee } from '@/hooks/useEvents';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
+import { createEvent as createCalendarEvent, upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
 import type { Schedule } from '@/types/common';
 
 type SessionType = 'meeting' | 'event';
@@ -37,7 +40,9 @@ type SelectionRecord = Record<string, boolean>;
 export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting', onCreated }: CreateEventDialogProps) {
   const { toast } = useToast();
   const { shifts, teamMembers: roster, loading: schedulingLoading } = useScheduling();
-  const { events, createEvent } = useEvents();
+  const { events } = useEvents();
+  const { user } = useAuth();
+  const { profile } = useProfile();
 
   const [sessionType, setSessionType] = useState<SessionType>(defaultType);
   const [title, setTitle] = useState('');
@@ -181,6 +186,33 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
       return;
     }
 
+    const companyId = profile?.companyId ?? profile?.company_id ?? null;
+    if (!companyId) {
+      toast({
+        title: 'Missing company context',
+        description: 'You need an active company to create events.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    let startIso: Date;
+    let endIso: Date;
+    try {
+      startIso = new Date(start);
+      endIso = new Date(end);
+      if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
+        throw new Error('Invalid date');
+      }
+    } catch (error) {
+      toast({
+        title: 'Invalid date',
+        description: 'Please provide valid start and end times.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const selectedParticipantIds = Object.entries(selectedParticipants)
       .filter(([, value]) => value)
       .map(([id]) => id);
@@ -191,16 +223,28 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     const attendees = buildAttendeesFromSelections(selectedParticipantIds, selectedShiftList);
 
     try {
-      const created = await createEvent({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        start: new Date(start).toISOString(),
-        end: new Date(end).toISOString(),
-        location: location.trim() || undefined,
-        type: sessionType,
-        related_shift_ids: selectedShiftList,
-        attendees,
+      const created = await createCalendarEvent({
+        payload: {
+          title: title.trim(),
+          description: description.trim() || null,
+          location: location.trim() || null,
+          type: sessionType,
+          start: startIso,
+          end: endIso,
+          attendees,
+          relatedShiftIds: selectedShiftList,
+        },
+        companyId,
+        createdBy: user?.id ?? null,
       });
+
+      if (selectedShiftList.length > 0) {
+        await upsertEventShiftLinks({
+          eventId: created.id,
+          shiftIds: selectedShiftList,
+          companyId,
+        });
+      }
 
       if (created?.id) {
         onCreated?.(created.id);
@@ -208,12 +252,17 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
 
       toast({
         title: sessionType === 'meeting' ? 'Meeting scheduled' : 'Event created',
-        description: `${title.trim()} on ${new Date(start).toLocaleString()}`,
+        description: `${title.trim()} on ${new Date(startIso).toLocaleString()}`,
       });
 
       onOpenChange(false);
     } catch (error) {
-      console.warn('Event creation failed', error);
+      const message = error instanceof Error ? error.message : String(error);
+      toast({
+        title: 'Event not saved',
+        description: message,
+        variant: 'destructive',
+      });
     }
   };
 

@@ -33,6 +33,9 @@ import { format } from 'date-fns';
 import {
   useTasks,
   TASK_STATUS_TRANSITIONS,
+  labelFor,
+  normalizeTaskStatus,
+  type TaskStatus as WorkflowStatus,
   type TaskWithRelations,
 } from '@/hooks/useTasks';
 import { useToast } from '@/hooks/use-toast';
@@ -41,7 +44,6 @@ import {
   getTaskStatusBadgeClass,
   getTaskStatusLabel,
   TASK_STATUS_FLOW,
-  type TaskStatus,
 } from '@/constants/taskStatus';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
@@ -77,17 +79,30 @@ const getPriorityColor = (priority?: string | null) => {
   }
 };
 
-const getActionLabel = (current: TaskStatus, target: TaskStatus) => {
+const getActionLabel = (current: WorkflowStatus, target: WorkflowStatus) => {
   if (current === 'todo' && target === 'in_progress') return 'Start Task';
-  if (current === 'in_progress' && target === 'completed') return 'Mark Done';
-  if (current === 'in_progress' && target === 'todo') return 'Move to To Do';
-  if (current === 'completed' && target === 'todo') return 'Reopen Task';
-  return `Move to ${getTaskStatusLabel(target)}`;
+  if (current === 'in_progress' && target === 'review') return 'Send to Review';
+  if (current === 'in_progress' && target === 'blocked') return 'Mark Blocked';
+  if (current === 'blocked' && target === 'in_progress') return 'Unblock Task';
+  if (target === 'cancelled') return 'Cancel Task';
+  if (target === 'done') return 'Mark Done';
+  if (target === 'todo') {
+    if (current === 'cancelled') return 'Reopen Task';
+    if (current === 'review') return 'Send Back to To Do';
+    return 'Move to To Do';
+  }
+  return `Move to ${labelFor(target)}`;
 };
 
-const getActionVariant = (current: TaskStatus, target: TaskStatus): ButtonVariant => {
+const getActionVariant = (current: WorkflowStatus, target: WorkflowStatus): ButtonVariant => {
   if (target === 'todo') {
-    return current === 'completed' ? 'outline' : 'secondary';
+    return current === 'cancelled' ? 'outline' : 'secondary';
+  }
+  if (target === 'cancelled') {
+    return 'outline';
+  }
+  if (target === 'blocked') {
+    return 'secondary';
   }
   return 'default';
 };
@@ -98,7 +113,7 @@ export function TaskDetailsDialog({
   onClose,
   onTaskUpdate,
 }: TaskDetailsDialogProps) {
-  const { addComment, getTaskComments, transitionTaskStatus, updateTask } = useTasks();
+  const { addComment, getTaskComments, updateStatus, updateTask } = useTasks();
   const { toast } = useToast();
   const {
     assignees,
@@ -111,7 +126,7 @@ export function TaskDetailsDialog({
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   const [addingComment, setAddingComment] = useState(false);
-  const [pendingTarget, setPendingTarget] = useState<TaskStatus | null>(null);
+  const [pendingTarget, setPendingTarget] = useState<WorkflowStatus | null>(null);
   const [assignmentValue, setAssignmentValue] = useState('none');
   const [goalValue, setGoalValue] = useState('none');
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
@@ -309,12 +324,12 @@ export function TaskDetailsDialog({
     }
   };
 
-  const handleStatusChange = async (targetStatus: TaskStatus) => {
+  const handleStatusChange = async (targetStatus: WorkflowStatus) => {
     if (!currentTask) return;
     setPendingTarget(targetStatus);
 
     try {
-      const { data, error } = await transitionTaskStatus(currentTask, targetStatus);
+      const { data, error } = await updateStatus(currentTask.id, targetStatus);
       if (error || !data) {
         const errorMessage =
           (error as Error)?.message ?? 'Unable to update task status. Please try again.';
@@ -334,18 +349,24 @@ export function TaskDetailsDialog({
       setCurrentTask(updatedTask);
       onTaskUpdate?.(updatedTask);
 
-      const previous = currentTask.status;
-      let successMessage = `Task status updated to ${getTaskStatusLabel(targetStatus)}.`;
+      const previous = normalizeTaskStatus(currentTask.status);
+      let successMessage = `Task status updated to ${labelFor(targetStatus)}.`;
 
       if (targetStatus === 'in_progress') {
         successMessage = 'Task is now in progress.';
-      } else if (targetStatus === 'completed') {
+      } else if (targetStatus === 'done') {
         successMessage = 'Task marked as done.';
+      } else if (targetStatus === 'blocked') {
+        successMessage = 'Task marked as blocked.';
       } else if (targetStatus === 'todo') {
         successMessage =
-          previous === 'completed'
+          previous === 'cancelled'
             ? 'Task reopened and moved back to To Do.'
             : 'Task moved back to To Do.';
+      } else if (targetStatus === 'review') {
+        successMessage = 'Task moved to review.';
+      } else if (targetStatus === 'cancelled') {
+        successMessage = 'Task cancelled.';
       }
 
       toast({
@@ -366,17 +387,22 @@ export function TaskDetailsDialog({
 
   const statusActions = useMemo(() => {
     if (!currentTask) return [];
-    const transitions = TASK_STATUS_TRANSITIONS[currentTask.status] ?? [];
+    const current = normalizeTaskStatus(currentTask.status);
+    if (!current) return [];
+    const transitions = TASK_STATUS_TRANSITIONS[current] ?? [];
     return transitions.map((target) => ({
       target,
-      label: getActionLabel(currentTask.status, target),
-      variant: getActionVariant(currentTask.status, target),
+      label: getActionLabel(current, target),
+      variant: getActionVariant(current, target),
     }));
   }, [currentTask]);
 
-  const activeFlowIndex = currentTask
-    ? TASK_STATUS_FLOW.indexOf(currentTask.status as TaskStatus)
-    : -1;
+  const activeFlowIndex = (() => {
+    if (!currentTask) return -1;
+    const normalized = normalizeTaskStatus(currentTask.status);
+    if (!normalized) return -1;
+    return TASK_STATUS_FLOW.indexOf(normalized as (typeof TASK_STATUS_FLOW)[number]);
+  })();
 
   if (!currentTask) return null;
 

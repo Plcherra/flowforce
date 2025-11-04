@@ -13,22 +13,32 @@ export function useTaskNotifications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      const cleanup = subscribeToNotifications();
-      
-      // Check for due tasks periodically
-      const interval = setInterval(checkDueTasks, 5 * 60 * 1000); // Check every 5 minutes
-      
-      return () => {
-        clearInterval(interval);
-        if (cleanup) cleanup();
-      };
-    } else {
+    if (!user) {
       setNotifications([]);
       setUnreadCount(0);
       setLoading(false);
+      return;
     }
+
+    let isActive = true;
+    const initialize = async () => {
+      await fetchNotifications();
+      if (isActive) {
+        await checkDueTasks();
+      }
+    };
+
+    initialize();
+    const cleanup = subscribeToNotifications();
+
+    // Check for due tasks periodically
+    const interval = setInterval(checkDueTasks, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => {
+      isActive = false;
+      clearInterval(interval);
+      if (cleanup) cleanup();
+    };
   }, [user]);
 
   const fetchNotifications = async () => {
@@ -120,7 +130,8 @@ export function useTaskNotifications() {
         .gte('due_date', new Date().toISOString())
         .lte('due_date', tomorrow.toISOString())
         .neq('status', 'completed')
-        .neq('status', 'cancelled');
+        .neq('status', 'cancelled')
+        .neq('status', 'done');
 
       if (dueSoonError) throw dueSoonError;
 
@@ -131,7 +142,8 @@ export function useTaskNotifications() {
         .eq('assigned_to', user.id)
         .lt('due_date', new Date().toISOString())
         .neq('status', 'completed')
-        .neq('status', 'cancelled');
+        .neq('status', 'cancelled')
+        .neq('status', 'done');
 
       if (overdueError) throw overdueError;
 

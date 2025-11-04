@@ -4741,6 +4741,7 @@ export type Database = {
           emergency_contact: Json | null
           employee_id: string | null
           employment_status: Database["public"]["Enums"]["employment_status"]
+          eligible_for_schedule: boolean
           first_name: string
           hire_date: string | null
           id: string
@@ -4764,6 +4765,7 @@ export type Database = {
           emergency_contact?: Json | null
           employee_id?: string | null
           employment_status?: Database["public"]["Enums"]["employment_status"]
+          eligible_for_schedule?: boolean
           first_name: string
           hire_date?: string | null
           id: string
@@ -4787,6 +4789,7 @@ export type Database = {
           emergency_contact?: Json | null
           employee_id?: string | null
           employment_status?: Database["public"]["Enums"]["employment_status"]
+          eligible_for_schedule?: boolean
           first_name?: string
           hire_date?: string | null
           id?: string
@@ -5815,6 +5818,7 @@ export type Database = {
           source: Database["public"]["Enums"]["task_source"]
           tags: string[] | null
           title: string
+          company_id: string | null
           updated_at: string
           workflow_id: string | null
         }
@@ -5840,6 +5844,7 @@ export type Database = {
           source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title: string
+          company_id?: string | null
           updated_at?: string
           workflow_id?: string | null
         }
@@ -5865,6 +5870,7 @@ export type Database = {
           source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title?: string
+          company_id?: string | null
           updated_at?: string
           workflow_id?: string | null
         }
@@ -6553,7 +6559,7 @@ export type Database = {
       schedule_type: "shift" | "meeting" | "task" | "break" | "time_off"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_source: "manual" | "from_report" | "auto"
-      task_status: "todo" | "in_progress" | "review" | "completed" | "cancelled"
+      task_status: "todo" | "in_progress" | "review" | "blocked" | "done" | "cancelled" | "completed"
       time_entry_type: "clock_in" | "clock_out" | "break_start" | "break_end"
       user_role:
         | "admin"
@@ -6774,7 +6780,7 @@ export const Constants = {
       schedule_type: ["shift", "meeting", "task", "break", "time_off"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_source: ["manual", "from_report", "auto"],
-      task_status: ["todo", "in_progress", "review", "completed", "cancelled"],
+      task_status: ["todo", "in_progress", "review", "blocked", "done", "cancelled", "completed"],
       time_entry_type: ["clock_in", "clock_out", "break_start", "break_end"],
       user_role: [
         "admin",

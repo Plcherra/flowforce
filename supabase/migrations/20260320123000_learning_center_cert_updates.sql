@@ -11,6 +11,10 @@ ALTER TABLE public.certification_catalog
   ADD COLUMN IF NOT EXISTS unlocks_role text,
   ADD COLUMN IF NOT EXISTS linked_course_id uuid REFERENCES public.learning_courses (id) ON DELETE SET NULL;
 
+-- Flag employees who are eligible for automated scheduling once requirements are met
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS eligible_for_schedule boolean NOT NULL DEFAULT false;
+
 -- Track when learners finish courses and award XP / certification credits
 CREATE TABLE IF NOT EXISTS public.learning_completions (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),

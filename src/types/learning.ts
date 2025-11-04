@@ -14,9 +14,19 @@ export interface LearningCourse {
   targetRoles: string[];
   featured: boolean;
   certificationCode: string | null;
+  certificationId: string | null;
+  roleUnlock: string[];
+  autoScheduleEligible: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ModuleAsset {
+  name: string;
+  size?: number;
+  type?: string;
+  url?: string;
 }
 
 export interface LearningModule {
@@ -25,6 +35,9 @@ export interface LearningModule {
   title: string;
   description: string | null;
   content: string | null;
+  moduleType?: string | null;
+  assets?: ModuleAsset[] | null;
+  metadata?: Record<string, unknown> | null;
   orderIndex: number;
   estimatedMinutes: number;
   xpAward: number;
@@ -90,7 +103,9 @@ export interface CourseModuleInput {
   description?: string;
   estimatedMinutes: number;
   xpAward: number;
-  content?: string;
+  content?: string | Record<string, unknown>;
+  moduleType?: string;
+  assets?: ModuleAsset[];
 }
 
 export interface CourseCreationPayload {
@@ -104,6 +119,9 @@ export interface CourseCreationPayload {
   targetRoles: string[];
   featured?: boolean;
   certificationCode?: string | null;
+  certificationId?: string | null;
+  roleUnlock?: string[];
+  autoScheduleEligible?: boolean;
   modules: CourseModuleInput[];
 }
 

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, User, Flag, MessageSquare, Search, Target } from 'lucide-react';
-import { useTasks, type TaskWithRelations } from '@/hooks/useTasks';
+import { useTasks, type TaskWithRelations, normalizeTaskStatus, labelFor } from '@/hooks/useTasks';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
 import { TaskDetailsDialog } from '@/components/tasks/TaskDetailsDialog';
@@ -16,16 +16,17 @@ import { RemindersPanel } from '@/components/reminders/RemindersPanel';
 import { format, differenceInDays } from 'date-fns';
 import { getTaskStatusBadgeClass, getTaskStatusLabel } from '@/constants/taskStatus';
 
-const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'completed', 'cancelled'] as const;
+const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
 type TaskStatusFilter = KnownTaskStatus | 'all' | 'other';
 
 const STATUS_LABELS: Record<KnownTaskStatus, string> = {
-  todo: getTaskStatusLabel('todo'),
-  in_progress: getTaskStatusLabel('in_progress'),
-  review: getTaskStatusLabel('review'),
-  completed: getTaskStatusLabel('completed'),
-  cancelled: getTaskStatusLabel('cancelled'),
+  todo: labelFor('todo'),
+  in_progress: labelFor('in_progress'),
+  review: labelFor('review'),
+  blocked: labelFor('blocked'),
+  done: labelFor('done'),
+  cancelled: labelFor('cancelled'),
 };
 
 const KNOWN_PRIORITIES = ['urgent', 'high', 'medium', 'low'] as const;
@@ -40,8 +41,9 @@ const PRIORITY_LABELS: Record<KnownTaskPriority, string> = {
 };
 
 const normalizeStatus = (status: string | null | undefined): KnownTaskStatus | 'other' => {
-  if (KNOWN_STATUSES.includes((status ?? '') as KnownTaskStatus)) {
-    return status as KnownTaskStatus;
+  const normalized = normalizeTaskStatus(status);
+  if (normalized && KNOWN_STATUSES.includes(normalized as KnownTaskStatus)) {
+    return normalized as KnownTaskStatus;
   }
   return 'other';
 };
@@ -95,7 +97,7 @@ export default function Tasks() {
     const dueDate = new Date(task.due_date);
     const normalizedStatus = normalizeStatus(task.status);
 
-    if (normalizedStatus === 'completed') {
+    if (normalizedStatus === 'done') {
       return {
         label: 'Completed',
         className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -126,7 +128,7 @@ export default function Tasks() {
 
   const tasksByStatus = useMemo(() => {
     return tasks.reduce<Record<string, number>>((acc, task) => {
-      const key = task.status ?? 'other';
+      const key = normalizeStatus(task.status);
       acc[key] = (acc[key] ?? 0) + 1;
       return acc;
     }, {});
@@ -139,19 +141,20 @@ export default function Tasks() {
 
   const activeCount = tasks.reduce((count, task) => {
     const status = normalizeStatus(task.status);
-    return status === 'completed' || status === 'cancelled' ? count : count + 1;
+    return status === 'done' || status === 'cancelled' ? count : count + 1;
   }, 0);
 
   const overdueCount = tasks.reduce((count, task) => {
     if (!task.due_date) return count;
     const dueDate = new Date(task.due_date);
-    return dueDate < now && normalizeStatus(task.status) !== 'completed' ? count + 1 : count;
+    return dueDate < now && normalizeStatus(task.status) !== 'done' ? count + 1 : count;
   }, 0);
 
   const dueSoonCount = tasks.reduce((count, task) => {
     if (!task.due_date) return count;
     const dueDate = new Date(task.due_date);
     if (dueDate < now) return count;
+    if (normalizeStatus(task.status) === 'done') return count;
     return differenceInDays(dueDate, now) <= 7 ? count + 1 : count;
   }, 0);
 

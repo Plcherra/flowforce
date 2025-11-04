@@ -11,19 +11,21 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
+import { Search, Mail, Phone, Building2, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
 import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { EmployeeDrawer, type EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
-import { usePermission } from '@/hooks/usePermission';
+import { TeamActionsBar } from '@/components/employees/TeamActionsBar';
+import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialog';
+import { RoleManagerDialog } from '@/components/employees/RoleManagerDialog';
+import { PermissionManagerDialog } from '@/components/employees/PermissionManagerDialog';
 
 type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;
@@ -53,7 +55,9 @@ export default function Employees() {
     notes: ''
   });
   const [searchParams, setSearchParams] = useSearchParams();
-  const canInvite = usePermission('invite_employees');
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [roleManagerOpen, setRoleManagerOpen] = useState(false);
+  const [permissionManagerOpen, setPermissionManagerOpen] = useState(false);
 
   // Vendor hooks
   const { data: vendors, isLoading: vendorsLoading } = useInventorySuppliers();
@@ -65,14 +69,11 @@ export default function Employees() {
   }, []);
 
   useEffect(() => {
-    if (!canInvite) return;
     const inviteParam = searchParams.get('invite');
     if (inviteParam && ['1', 'true', 'open'].includes(inviteParam.toLowerCase())) {
-      setSelectedEmployee(null);
-      setDrawerTab('invite');
-      setDrawerOpen(true);
+      setInviteOpen(true);
     }
-  }, [searchParams, canInvite]);
+  }, [searchParams]);
 
   const clearInviteParam = () => {
     const inviteParam = searchParams.get('invite');
@@ -82,25 +83,18 @@ export default function Employees() {
     setSearchParams(next, { replace: true });
   };
 
+  const handleInviteChange = (open: boolean) => {
+    setInviteOpen(open);
+    if (!open) {
+      clearInviteParam();
+    }
+  };
+
   const handleDrawerChange = (open: boolean) => {
     setDrawerOpen(open);
     if (!open) {
       setSelectedEmployee(null);
       setDrawerTab('profile');
-      clearInviteParam();
-    }
-  };
-
-  const openInvitationDrawer = () => {
-    if (!canInvite) return;
-    setSelectedEmployee(null);
-    setDrawerTab('invite');
-    setDrawerOpen(true);
-    const inviteParam = searchParams.get('invite');
-    if (!inviteParam) {
-      const next = new URLSearchParams(searchParams);
-      next.set('invite', '1');
-      setSearchParams(next, { replace: true });
     }
   };
 
@@ -216,7 +210,9 @@ export default function Employees() {
     ? Math.max(1, Math.ceil(filteredVendors.length / pageSize))
     : Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
 
-  const canManageEmployees = currentUserProfile?.role === 'admin' || currentUserProfile?.role === 'manager';
+  const currentRole = currentUserProfile?.role?.toLowerCase() ?? '';
+  const isAdmin = ['owner', 'admin', 'manager'].includes(currentRole);
+  const canManageEmployees = ['admin', 'manager'].includes(currentRole);
 
   return (
     <div>
@@ -309,12 +305,14 @@ export default function Employees() {
                 </DialogContent>
               </Dialog>
             )}
-            {canInvite && (
-              <Button size={isMobile ? 'sm' : 'default'} onClick={openInvitationDrawer}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                {isMobile ? 'Invite' : 'Invite Teammate'}
-              </Button>
-            )}
+            <TeamActionsBar
+              isAdmin={isAdmin}
+              onOpenInvite={() => handleInviteChange(true)}
+              onOpenRoles={() => setRoleManagerOpen(true)}
+              onOpenPermissions={() => setPermissionManagerOpen(true)}
+              onExportFiltered={() => exportCSV(filteredEmployees)}
+              onExportAll={() => exportCSV(employees)}
+            />
           </div>
         </div>
 
@@ -365,22 +363,6 @@ export default function Employees() {
                       ))}
                     </SelectContent>
                   </Select>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="whitespace-nowrap">
-                        <Download className="mr-2 h-4 w-4" /> Export
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => exportCSV(filteredEmployees)}>
-                        CSV (filtered)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => exportCSV(employees)}>
-                        CSV (all)
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
 
@@ -630,6 +612,24 @@ export default function Employees() {
           open={drawerOpen}
           initialTab={drawerTab}
           onOpenChange={handleDrawerChange}
+        />
+
+        <InviteEmployeeDialog
+          open={inviteOpen}
+          onOpenChange={handleInviteChange}
+          onSuccess={fetchEmployees}
+        />
+
+        <RoleManagerDialog
+          open={roleManagerOpen}
+          onOpenChange={setRoleManagerOpen}
+          employees={employees}
+          onRoleUpdated={fetchEmployees}
+        />
+
+        <PermissionManagerDialog
+          open={permissionManagerOpen}
+          onOpenChange={setPermissionManagerOpen}
         />
       </div>
     </div>

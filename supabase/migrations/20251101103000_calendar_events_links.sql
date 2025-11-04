@@ -33,6 +33,9 @@ CREATE INDEX IF NOT EXISTS calendar_events_type_idx
 CREATE INDEX IF NOT EXISTS calendar_events_store_idx
   ON public.calendar_events (company_id, store_id, start_time DESC);
 
+CREATE INDEX IF NOT EXISTS calendar_events_company_start_end_idx
+  ON public.calendar_events (company_id, start_time, end_time);
+
 ALTER TABLE public.calendar_events ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "calendar_events_company_read" ON public.calendar_events;
