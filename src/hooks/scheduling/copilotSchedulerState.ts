@@ -1,0 +1,45 @@
+import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
+import type {
+  CoverageGap,
+  CoverageTemplatePlan,
+  DraftShift,
+  ScheduleSummary,
+  SwapSuggestion,
+  SchedulerEmployee,
+} from '@/hooks/scheduling/copilotSchedulerTypes';
+
+export interface UseCopilotSchedulerOptions {
+  weekStart: Date;
+  weekEnd: Date;
+  location?: string;
+  existingShifts?: Array<{ employee_id: string | null; start_time: string; end_time: string; location?: string | null }>;
+  autoGenerate?: boolean;
+  onPublished?: () => void | Promise<void>;
+}
+
+export interface CopilotSchedulerState {
+  loading: boolean;
+  error: string | null;
+  employees: SchedulerEmployee[];
+  templates: CoverageTemplatePlan[];
+  draftShifts: DraftShift[];
+  coverageGaps: CoverageGap[];
+  swapSuggestions: SwapSuggestion[];
+  summary: ScheduleSummary;
+  coverageGapActions: CopilotActionPayload[];
+  swapActions: CopilotActionPayload[];
+  lastGeneratedAt?: string;
+}
+
+export const INITIAL_STATE: CopilotSchedulerState = {
+  loading: false,
+  error: null,
+  employees: [],
+  templates: [],
+  draftShifts: [],
+  coverageGaps: [],
+  swapSuggestions: [],
+  summary: { totalHours: 0, hoursByEmployee: {}, hoursByStore: {} },
+  coverageGapActions: [],
+  swapActions: [],
+};

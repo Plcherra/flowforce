@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import dayjs from 'dayjs';
 import { evaluateEmployeeContext } from '@/copilot/rulesEngine';
 import type { EmployeeContext } from '@/copilot/rulesEngine';
+import dayjs from 'dayjs';
 
 const baseContext: EmployeeContext = {
   profile: {
@@ -11,6 +11,8 @@ const baseContext: EmployeeContext = {
   reports: [],
   skills: [],
   performance: [],
+  certifications: [],
+  awardedBadges: [],
 };
 
 describe('Copilot rules engine', () => {
@@ -54,7 +56,7 @@ describe('Copilot rules engine', () => {
       ],
     };
 
-    const decision = evaluateEmployeeContext(context, dayjs());
+    const decision = evaluateEmployeeContext(context, new Date());
     const consistency = decision.badges.find((badge) => badge.badgeCode === 'CONSISTENCY_STAR');
     expect(consistency).toBeDefined();
     expect(consistency?.confidence).toBeGreaterThan(0);
@@ -77,7 +79,7 @@ describe('Copilot rules engine', () => {
       ],
     };
 
-    const decision = evaluateEmployeeContext(context, dayjs());
+    const decision = evaluateEmployeeContext(context, new Date());
     const levelUp = decision.skillUpdates.find((update) => update.levelUp);
     expect(levelUp).toBeDefined();
     expect(levelUp?.newLevel).toBe(3);

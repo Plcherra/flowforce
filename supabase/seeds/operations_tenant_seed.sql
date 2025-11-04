@@ -123,8 +123,15 @@ select
 from temp_ids;
 
 -- Department
-insert into public.departments (id, name, type, created_at, updated_at)
-values ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Front of House', 'operations', now(), now());
+insert into public.departments (id, company_id, name, type, created_at, updated_at)
+select
+  'dddddddd-dddd-dddd-dddd-dddddddddddd',
+  company_id,
+  'Front of House',
+  'operations',
+  now(),
+  now()
+from temp_ids;
 
 -- Schedule
 insert into public.schedules (
