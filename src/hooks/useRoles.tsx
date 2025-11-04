@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +13,12 @@ export interface Profile {
   employee_id: string;
 }
 
+export interface DirectoryRole {
+  id: string;
+  name: string;
+  permissions: string[];
+}
+
 export function useProfiles() {
   const { user } = useAuth();
 
@@ -21,26 +26,14 @@ export function useProfiles() {
     queryKey: ['profiles', user?.id ?? 'guest'],
     enabled: Boolean(user?.id),
     queryFn: async () => {
+      if (!user) return [] as Profile[];
+
       const metadataCompanyId =
-        typeof user?.user_metadata?.company_id === 'string'
+        typeof user.user_metadata?.company_id === 'string'
           ? (user.user_metadata.company_id as string)
           : null;
 
-      const { data: currentProfile, error: currentProfileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user!.id)
-        .single();
-
-      if (currentProfileError) {
-        console.error('Error resolving current profile for admin listing:', currentProfileError);
-      }
-
-      const companyId = currentProfile?.company_id ?? metadataCompanyId;
-
-      if (!companyId) {
-        throw new Error('No company context available for profile listing');
-      }
+      const companyId = await resolveCompanyId(user.id, metadataCompanyId);
 
       const { data, error } = await supabase
         .from('profiles')
@@ -50,6 +43,41 @@ export function useProfiles() {
 
       if (error) throw error;
       return data as Profile[];
+    },
+  });
+}
+
+export function useRoles() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['directory-roles', user?.id ?? 'guest'],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      if (!user) return [] as DirectoryRole[];
+      const metadataCompanyId =
+        typeof user.user_metadata?.company_id === 'string'
+          ? (user.user_metadata.company_id as string)
+          : null;
+
+      const companyId = await resolveCompanyId(user.id, metadataCompanyId);
+
+      const { data, error } = await supabase
+        .from('company_roles')
+        .select('id, name, permissions')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .order('hierarchy_level', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map((role) => ({
+        id: role.id,
+        name: role.name,
+        permissions: parsePermissions(role.permissions),
+      }));
     },
   });
 }
@@ -83,4 +111,134 @@ export function useUpdateRole() {
       });
     },
   });
+}
+
+export function useAssignRole() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ employeeId, roleId }: { employeeId: string; roleId: string }) => {
+      const { data: role, error: roleError } = await supabase
+        .from('company_roles')
+        .select('id, name')
+        .eq('id', roleId)
+        .maybeSingle();
+
+      if (roleError) {
+        throw roleError;
+      }
+
+      if (!role) {
+        throw new Error('Selected role is no longer available.');
+      }
+
+      const normalizedRole = normalizeRoleName(role.name);
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          role_id: role.id,
+          role: normalizedRole,
+        })
+        .eq('id', employeeId);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      await supabase
+        .from('user_roles')
+        .upsert(
+          {
+            user_id: employeeId,
+            role: normalizedRole,
+          },
+          { onConflict: 'user_id, role' },
+        );
+
+      return { employeeId, roleId };
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['directory-roles'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-access', variables.employeeId] });
+      toast({
+        title: 'Role updated',
+        description: 'The employee role was updated successfully.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update role',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+function parsePermissions(raw: unknown): string[] {
+  if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw.filter((value): value is string => typeof value === 'string');
+  }
+
+  if (typeof raw === 'object') {
+    return Object.entries(raw as Record<string, boolean>)
+      .filter(([, enabled]) => Boolean(enabled))
+      .map(([permission]) => permission);
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      return parsePermissions(JSON.parse(raw));
+    } catch {
+      return raw
+        .split(',')
+        .map((permission) => permission.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function normalizeRoleName(roleName: string) {
+  const normalized = roleName.toLowerCase();
+  const allowed: Array<'admin' | 'manager' | 'employee' | 'staff' | 'supervisor' | 'owner'> = [
+    'admin',
+    'manager',
+    'employee',
+    'staff',
+    'supervisor',
+    'owner',
+  ];
+
+  if (allowed.includes(normalized as (typeof allowed)[number])) {
+    return normalized as (typeof allowed)[number];
+  }
+
+  return 'staff';
+}
+
+async function resolveCompanyId(userId: string, fallback: string | null) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const companyId = data?.company_id ?? fallback;
+
+  if (!companyId) {
+    throw new Error('No company context available for this request');
+  }
+
+  return companyId;
 }

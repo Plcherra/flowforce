@@ -37,7 +37,7 @@ const persistUpdates = (updates: CompanyUpdate[]) => {
 interface CompanyUpdatesStore {
   updates: CompanyUpdate[];
   loading: boolean;
-  addUpdate: (update: Omit<CompanyUpdate, 'id' | 'createdAt' | 'updatedAt' | 'publishDate'>) => void;
+  addUpdate: (update: Omit<CompanyUpdate, 'id' | 'createdAt' | 'updatedAt'>) => void;
   removeUpdate: (id: string) => void;
   togglePin: (id: string) => void;
   likeUpdate: (id: string) => void;
@@ -54,9 +54,10 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
     const newUpdate: CompanyUpdate = {
       ...updateData,
       id: Date.now().toString(),
+      viewerHasLiked: updateData.viewerHasLiked ?? false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      publishDate: new Date().toISOString()
+      publishDate: updateData.publishDate ?? new Date().toISOString()
     };
 
     const updates = [newUpdate, ...state.updates];
@@ -80,17 +81,24 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
   }),
 
   likeUpdate: (id) => set((state) => {
-    const updates = state.updates.map((update) =>
-      update.id === id
-        ? {
-            ...update,
-            likes:
-              update.publishingSettings?.engagement?.allowLikes === false
-                ? update.likes
-                : update.likes + 1,
-          }
-        : update
-    );
+    const updates = state.updates.map((update) => {
+      if (update.id !== id) {
+        return update;
+      }
+
+      if (update.publishingSettings?.engagement?.allowLikes === false) {
+        return update;
+      }
+
+      const viewerHasLiked = Boolean(update.viewerHasLiked);
+      const likes = viewerHasLiked ? Math.max(0, update.likes - 1) : update.likes + 1;
+
+      return {
+        ...update,
+        likes,
+        viewerHasLiked: !viewerHasLiked,
+      };
+    });
     persistUpdates(updates);
     return { updates };
   }),
@@ -120,11 +128,21 @@ export const useCompanyUpdatesStore = create<CompanyUpdatesStore>((set) => ({
   }),
 
   updateStatus: (id, status) => set((state) => {
-    const updates = state.updates.map((update) =>
-      update.id === id
-        ? { ...update, status, updatedAt: new Date().toISOString() }
-        : update
-    );
+    const updates = state.updates.map((update) => {
+      if (update.id !== id) {
+        return update;
+      }
+
+      const updatedAt = new Date().toISOString();
+      const isPublishing = status === 'published' && update.status !== 'published';
+
+      return {
+        ...update,
+        status,
+        updatedAt,
+        publishDate: isPublishing ? updatedAt : update.publishDate,
+      };
+    });
     persistUpdates(updates);
     return { updates };
   }),

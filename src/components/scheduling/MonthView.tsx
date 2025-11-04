@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
 import type { SchedulingFilterState } from './SchedulingFilters';
-import type { AppEvent } from '@/hooks/useEvents';
+import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 import { useMemo, useState } from 'react';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
 
@@ -17,7 +17,7 @@ interface MonthViewProps {
   filters: SchedulingFilterState;
   isMobile?: boolean;
   hideShiftActions?: boolean;
-  overlayEvents?: AppEvent[];
+  overlayEvents?: CalendarEvent[];
   selectedEventId?: string | null;
 }
 

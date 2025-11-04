@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../useAuth';
 import type { Message } from '@/types/messages';
@@ -7,24 +7,9 @@ export function useChannelMessages(channelId: string | null) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (!channelId) {
-      setMessages([]);
-      return;
-    }
-
-    fetchMessages(channelId);
-    const unsubscribe = subscribeToChannelMessages(channelId);
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [channelId]);
-
-  const fetchMessages = async (channelId: string) => {
+  const fetchMessages = useCallback(async (targetChannelId: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -37,52 +22,82 @@ export function useChannelMessages(channelId: string | null) {
             sender_profile:profiles!sender_id(first_name, last_name)
           )
         `)
-        .eq('channel_id', channelId)
+        .eq('channel_id', targetChannelId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
       
-      // Transform the data to handle the reply_to_message properly
-      const transformedMessages = (data || []).map(message => ({
+      const transformedMessages = (data ?? []).map((message) => ({
         ...message,
-        reply_to_message: Array.isArray(message.reply_to_message) && message.reply_to_message.length > 0 
-          ? message.reply_to_message[0] 
-          : null
+        reply_to_message:
+          Array.isArray(message.reply_to_message) && message.reply_to_message.length > 0
+            ? message.reply_to_message[0]
+            : null,
       }));
-      
+
       setMessages(transformedMessages);
+      setError(null);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      const issue = error instanceof Error ? error : new Error('Error fetching messages');
+      console.error('Error fetching messages:', issue);
+      setError(issue);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const subscribeToChannelMessages = (channelId: string) => {
-    const channel = supabase
-      .channel(`messages:${channelId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `channel_id=eq.${channelId}`
-        },
-        (payload) => {
-          fetchMessages(channelId); // Refresh messages to get the full data with joins
-        }
-      )
-      .subscribe();
+  const subscribeToChannelMessages = useCallback(
+    (targetChannelId: string) => {
+      const channel = supabase
+        .channel(`messages:${targetChannelId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `channel_id=eq.${targetChannelId}`,
+          },
+          () => {
+            fetchMessages(targetChannelId);
+          },
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    },
+    [fetchMessages],
+  );
+
+  useEffect(() => {
+    if (!channelId) {
+      setMessages([]);
+      setError(null);
+      return;
+    }
+
+    fetchMessages(channelId);
+    const unsubscribe = subscribeToChannelMessages(channelId);
 
     return () => {
-      supabase.removeChannel(channel);
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
-  };
+  }, [channelId, fetchMessages, subscribeToChannelMessages, user?.id]);
+
+  const clearError = useCallback(() => setError(null), []);
 
   return {
     messages,
     loading,
-    refetchMessages: () => channelId && fetchMessages(channelId)
+    refetchMessages: () => {
+      if (!channelId) return Promise.resolve();
+      return fetchMessages(channelId);
+    },
+    error,
+    clearError,
   };
 }

@@ -143,6 +143,77 @@ const mapRowToEvent = (row: CalendarEventRow): AppEvent => {
   };
 };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const syncEventParticipants = async (
+  companyId: string | null,
+  eventId: string,
+  attendees?: EventAttendee[],
+) => {
+  if (!companyId) return;
+  try {
+    await supabase
+      .from('event_participants')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('company_id', companyId);
+
+    const entries = (attendees ?? []).filter((attendee) => !!attendee?.id);
+    if (entries.length === 0) {
+      return;
+    }
+
+    const payload = entries.map((attendee) => ({
+      event_id: eventId,
+      company_id: companyId,
+      profile_id: UUID_PATTERN.test(attendee.id) ? attendee.id : null,
+      email: null,
+      name: attendee.name,
+      role: attendee.role ?? null,
+      avatar_url: attendee.avatar_url ?? null,
+      response_status: 'invited',
+      metadata: { source_attendee_id: attendee.id },
+    }));
+
+    await supabase.from('event_participants').insert(payload);
+  } catch (error) {
+    console.warn('Failed to sync event participants', error);
+  }
+};
+
+const syncEventShiftLinks = async (
+  companyId: string | null,
+  eventId: string,
+  shiftIds?: string[],
+) => {
+  if (!companyId) return;
+  try {
+    await supabase
+      .from('event_shift_links')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('company_id', companyId);
+
+    const uniqueShiftIds = Array.from(new Set((shiftIds ?? []).filter(Boolean)));
+    if (uniqueShiftIds.length === 0) {
+      return;
+    }
+
+    const payload = uniqueShiftIds.map((shiftId) => ({
+      event_id: eventId,
+      shift_id: shiftId,
+      company_id: companyId,
+      store_id: null,
+      metadata: {},
+    }));
+
+    await supabase.from('event_shift_links').insert(payload);
+  } catch (error) {
+    console.warn('Failed to sync event shift links', error);
+  }
+};
+
 const toInsertPayload = (
   event: Omit<AppEvent, 'id' | 'persisted' | 'source'>,
   companyId: string | null,
@@ -334,6 +405,10 @@ export function useEvents() {
         if (response.error) throw response.error;
 
         const persisted = mapRowToEvent(response.data);
+        await Promise.all([
+          syncEventParticipants(companyId, persisted.id, normalized.attendees),
+          syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
+        ]);
         setEvents((prev) =>
           sortEvents(
             prev.map((entry) => (entry.id === optimistic.id ? { ...persisted, source: 'calendar' } : entry)),
@@ -384,6 +459,10 @@ export function useEvents() {
         if (response.error) throw response.error;
 
         const persisted = mapRowToEvent(response.data);
+        await Promise.all([
+          syncEventParticipants(companyId, persisted.id, normalized.attendees),
+          syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
+        ]);
         setEvents((prev) =>
           sortEvents(
             prev.map((entry) => (entry.id === optimistic.id ? { ...persisted, source: 'vendor' } : entry)),
@@ -428,6 +507,10 @@ export function useEvents() {
         if (response?.error) throw response.error;
         if (response?.data) {
           const persisted = mapRowToEvent(response.data);
+          await Promise.all([
+            syncEventParticipants(companyId, id, persisted.attendees),
+            syncEventShiftLinks(companyId, id, persisted.related_shift_ids),
+          ]);
           setEvents((prev) =>
             sortEvents(prev.map((entry) => (entry.id === id ? { ...persisted, source: target.source } : entry))),
           );
@@ -506,6 +589,7 @@ export function useEvents() {
           .update({ related_shift_ids: shiftIds, updated_at: new Date().toISOString() })
           .eq('id', eventId);
         if (response.error) throw response.error;
+        await syncEventShiftLinks(companyId, eventId, shiftIds);
       } catch (error) {
         console.error('Failed to link event to shifts', error);
         setEvents(previous);

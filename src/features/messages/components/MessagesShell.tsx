@@ -6,6 +6,7 @@ import { ChannelMembers } from '@/components/messages/ChannelMembers';
 import { ChannelSettings } from '@/components/messages/ChannelSettings';
 import { DirectMessageDialog } from '@/components/messages/DirectMessageDialog';
 import { MessageSearch } from '@/components/messages/MessageSearch';
+import { MessagesLayout } from '@/components/messages/MessagesLayout';
 import { MessagesMainArea } from '@/components/messages/MessagesMainArea';
 import { MessagesSidebar } from '@/components/messages/MessagesSidebar';
 import { ThreadedMessageView } from '@/components/messages/ThreadedMessageView';
@@ -137,8 +138,17 @@ function MobileLayout({ vm }: MessagesSubSectionProps) {
 
 function DesktopLayout({ vm }: MessagesSubSectionProps) {
   return (
-    <div className="flex h-full flex-1">
-      <div className="relative h-full border-r" style={{ width: vm.sidebarWidth, minWidth: 240, maxWidth: 340 }}>
+    <MessagesLayout
+      className="messages-page flex-1"
+      sidebarWidth={vm.sidebarWidth}
+      onSidebarWidthChange={vm.setSidebarWidth}
+      minSidebarWidth={240}
+      maxSidebarWidth={360}
+      minContentWidth={420}
+      dividerAriaLabel="Resize channels panel"
+      sidebarId="messages-shell-sidebar"
+      contentId="messages-shell-content"
+      sidebar={
         <MessagesSidebar
           channels={vm.filteredChannels}
           currentChannelId={vm.currentChannelId}
@@ -155,28 +165,8 @@ function DesktopLayout({ vm }: MessagesSubSectionProps) {
           available={vm.available}
           onToggleAvailable={vm.handleAvailabilityChange}
         />
-      </div>
-      <div
-        className="group relative hidden h-full w-px shrink-0 cursor-col-resize items-stretch lg:flex after:absolute after:inset-y-0 after:-left-[3px] after:w-4 after:cursor-col-resize after:content-['']"
-        onMouseDown={(event) => {
-          const startX = event.clientX;
-          const start = vm.sidebarWidth;
-          const handleMove = (moveEvent: MouseEvent) => {
-            const delta = moveEvent.clientX - startX;
-            const next = Math.min(Math.max(start + delta, 240), 340);
-            vm.setSidebarWidth(next);
-          };
-          const handleUp = () => {
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('mouseup', handleUp);
-          };
-          window.addEventListener('mousemove', handleMove);
-          window.addEventListener('mouseup', handleUp);
-        }}
-      >
-        <span className="mx-auto h-full w-px rounded bg-neutral-200 transition-colors duration-200 group-hover:bg-neutral-300 group-active:bg-neutral-300" />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col">
+      }
+      content={
         <MessagesMainArea
           channel={vm.currentChannel}
           messages={vm.messages}
@@ -198,8 +188,8 @@ function DesktopLayout({ vm }: MessagesSubSectionProps) {
           available={vm.available}
           onToggleAvailable={vm.handleAvailabilityChange}
         />
-      </div>
-    </div>
+      }
+    />
   );
 }
 

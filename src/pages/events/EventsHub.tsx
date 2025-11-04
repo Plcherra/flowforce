@@ -1,176 +1,242 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { addDays, endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
+import { CalendarDays, Plus, Search, Video, Wrench } from 'lucide-react';
+import { SchedulingProvider } from '@/contexts/SchedulingContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Plus, Search, Video, Wrench } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
-import { ShiftDetailsPanel } from '@/components/scheduling/ShiftDetailsPanel';
-import { SchedulingProvider } from '@/contexts/SchedulingContext';
-import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
 import { CreateEventDialog } from '@/components/events/CreateEventDialog';
-import { useEvents } from '@/hooks/useEvents';
+import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
+import { CalendarView } from '@/components/events/CalendarView';
+import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+
+type ViewMode = 'month' | 'week' | 'day';
+
+const computeRange = (view: ViewMode, base: Date) => {
+  switch (view) {
+    case 'month':
+      return { start: startOfDay(startOfMonth(base)), end: endOfDay(endOfMonth(base)) };
+    case 'week':
+      return { start: startOfDay(startOfWeek(base)), end: endOfDay(endOfWeek(base)) };
+    default:
+      return { start: startOfDay(base), end: endOfDay(base) };
+  }
+};
 
 export default function EventsHubPage() {
   const isMobile = useIsMobile();
+  const [view, setView] = useState<ViewMode>('week');
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [search, setSearch] = useState('');
-  const { events } = useEvents();
-  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [sessionDialogType, setSessionDialogType] = useState<'meeting' | 'event'>('meeting');
-  const [selectedShiftId, setSelectedShiftId] = useState<string | null>(null);
+  const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
+
+  const range = useMemo(() => computeRange(view, currentDate), [view, currentDate]);
+  const { events, loading, error, refresh } = useCalendarEvents({ range });
+
+  const selectedEvent = useMemo(() => events.find((event) => event.id === selectedEventId) ?? null, [events, selectedEventId]);
 
   const upcoming = useMemo(() => {
+    const query = search.trim().toLowerCase();
     const now = Date.now();
     return events
-      .filter(e => {
-        const t = new Date(e.start).getTime();
-        const match = (e.title || '').toLowerCase().includes(search.toLowerCase());
-        return t >= now && match;
+      .filter((event) => {
+        const time = safeTime(event.start);
+        if (!time || time < now) return false;
+        return query ? (event.title || '').toLowerCase().includes(query) : true;
       })
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-      .slice(0, 8);
+      .sort((a, b) => (safeTime(a.start) ?? 0) - (safeTime(b.start) ?? 0))
+      .slice(0, 6);
   }, [events, search]);
+
+  const handleEventCreated = (id: string) => {
+    setSelectedEventId(id);
+    setDetailsOpen(true);
+    void refresh();
+  };
+
+  const handleVendorCreated = () => {
+    void refresh();
+  };
+
+  const handleSelectEvent = (eventId: string) => {
+    setSelectedEventId(eventId);
+    setDetailsOpen(true);
+  };
+
+  const handleDetailsOpenChange = (open: boolean) => {
+    setDetailsOpen(open);
+    if (!open) {
+      setSelectedEventId(null);
+    }
+  };
+
+  const handleShiftRangeNav = (delta: number) => {
+    if (view === 'month') setCurrentDate((prev) => addMonthsSafe(prev, delta));
+    else if (view === 'week') setCurrentDate((prev) => addDays(prev, delta * 7));
+    else setCurrentDate((prev) => addDays(prev, delta));
+  };
 
   return (
     <SchedulingProvider>
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <div className="bg-card border-b border-border sticky top-0 z-10">
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <CalendarDays className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">Events & Meetings</h1>
-                  <p className="text-sm text-muted-foreground">Plan, manage and track all sessions</p>
-                </div>
+        <header className="sticky top-0 z-10 border-b border-border bg-card">
+          <div className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <CalendarDays className="h-6 w-6 text-primary" />
               </div>
-
+              <div>
+                <h1 className="text-xl font-bold">Events & Meetings</h1>
+                <p className="text-sm text-muted-foreground">Coordinate team sessions and vendor visits</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-10"
+                  placeholder="Search upcoming events"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </div>
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search upcoming..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <div className="hidden sm:flex gap-2">
-                  <Button
-                    variant="outline"
-                    size={isMobile ? 'sm' : 'default'}
-                    onClick={() => {
-                      setSessionDialogType('meeting');
-                      setSessionDialogOpen(true);
-                    }}
-                  >
-                    <Video className="h-4 w-4 mr-2" />
-                    {isMobile ? '' : 'New Meeting'}
-                  </Button>
-                  <Button
-                    size={isMobile ? 'sm' : 'default'}
-                    onClick={() => {
-                      setSessionDialogType('event');
-                      setSessionDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {isMobile ? '' : 'New Event'}
-                  </Button>
-                  <Button variant="outline" size={isMobile ? 'sm' : 'default'} onClick={() => setVendorDialogOpen(true)}>
-                    <Wrench className="h-4 w-4 mr-2" />
-                    {isMobile ? '' : 'Vendor Visit'}
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size={isMobile ? 'sm' : 'default'}
+                  onClick={() => {
+                    setSessionDialogType('meeting');
+                    setSessionDialogOpen(true);
+                  }}
+                >
+                  <Video className="mr-2 h-4 w-4" />
+                  {isMobile ? 'Meeting' : 'New Meeting'}
+                </Button>
+                <Button
+                  size={isMobile ? 'sm' : 'default'}
+                  onClick={() => {
+                    setSessionDialogType('event');
+                    setSessionDialogOpen(true);
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {isMobile ? 'Event' : 'New Event'}
+                </Button>
+                <Button variant="outline" size={isMobile ? 'sm' : 'default'} onClick={() => setVendorDialogOpen(true)}>
+                  <Wrench className="mr-2 h-4 w-4" />
+                  Vendor Visit
+                </Button>
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Main */}
-        <div className="px-4 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+        <main className="px-4 py-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <section className="lg:col-span-2 space-y-4">
               <Card>
                 <CardHeader className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3">
                     <CalendarDays className="h-4 w-4" />
-                    <h3 className="text-sm font-medium">Calendar</h3>
+                    <h3 className="text-sm font-medium">Calendar overview</h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Button variant="ghost" size="sm" onClick={() => handleShiftRangeNav(-1)}>
+                      Previous
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setCurrentDate(new Date())}>
+                      Today
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleShiftRangeNav(1)}>
+                      Next
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <SchedulingCalendar
-                    mode="events"
-                    hideShiftActions
-                    externalDetails
-                    onShiftSelect={setSelectedShiftId}
+                  <CalendarView
+                    events={events}
+                    date={currentDate}
+                    view={view}
+                    loading={loading}
+                    error={error}
+                    selectedEventId={selectedEventId}
+                    onDateChange={setCurrentDate}
+                    onViewChange={(next) => setView(next)}
+                    onSelectEvent={(event) => handleSelectEvent(event.id)}
                   />
                 </CardContent>
               </Card>
-            </div>
+            </section>
 
-            <div className="space-y-4">
+            <aside className="space-y-4">
               <Card>
                 <CardHeader className="px-4 py-3">
-                  <h3 className="text-sm font-medium">Upcoming</h3>
+                  <h3 className="text-sm font-medium">Upcoming in range</h3>
                 </CardHeader>
-                <CardContent className="p-2">
+                <CardContent className="space-y-2 p-3">
                   {upcoming.length === 0 && (
-                    <div className="p-4 text-sm text-muted-foreground">No upcoming items.</div>
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">No upcoming items.</div>
                   )}
-                  <ul className="space-y-2">
-                    {upcoming.map((e) => (
-                      <li key={e.id} className="rounded-md border p-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium">{e.title}</div>
-                            <div className="text-xs text-muted-foreground">{new Date(e.start).toLocaleString()}</div>
-                          </div>
-                          <Badge variant="outline" className="capitalize">{e.type || 'event'}</Badge>
+                  {upcoming.map((event) => (
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => handleSelectEvent(event.id)}
+                      className="w-full rounded-md border bg-card p-3 text-left transition hover:border-primary"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{event.title || 'Untitled'}</p>
+                          <p className="text-xs text-muted-foreground">{formatPreview(event.start)}</p>
                         </div>
-                        {e.description && (
-                          <div className="mt-1 text-xs text-muted-foreground line-clamp-2">{e.description}</div>
-                        )}
-                        {e.attendees && e.attendees.length > 0 && (
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            Attendees: {e.attendees.slice(0, 3).map((attendee) => attendee.name).join(', ')}
-                            {e.attendees.length > 3 ? ` (+${e.attendees.length - 3})` : ''}
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                        <Badge variant="outline" className="capitalize text-[11px]">
+                          {event.type ?? 'event'}
+                        </Badge>
+                      </div>
+                      {event.description && (
+                        <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{event.description}</p>
+                      )}
+                    </button>
+                  ))}
                 </CardContent>
               </Card>
-
-              {selectedShiftId && (
-                <Card>
-                  <CardHeader className="px-4 py-3">
-                    <h3 className="text-sm font-medium">Shift Details</h3>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <ShiftDetailsPanel
-                      shiftId={selectedShiftId}
-                      onClose={() => setSelectedShiftId(null)}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            </aside>
           </div>
-        </div>
+        </main>
       </div>
-      <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
+
       <CreateEventDialog
         open={sessionDialogOpen}
         onOpenChange={setSessionDialogOpen}
         defaultType={sessionDialogType}
+        onCreated={handleEventCreated}
       />
+      <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} onCreated={handleVendorCreated} />
+      <EventDetailsDrawer event={selectedEvent} open={detailsOpen} onOpenChange={handleDetailsOpenChange} onRefresh={refresh} />
     </SchedulingProvider>
   );
 }
+
+const addMonthsSafe = (date: Date, delta: number) => {
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + delta);
+  return next;
+};
+
+const safeTime = (iso: string) => {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date.getTime();
+};
+
+const formatPreview = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  return date.toLocaleString();
+};

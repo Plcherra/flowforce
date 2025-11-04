@@ -88,7 +88,7 @@ export function useCompanyUpdates() {
     };
 
     const publishingSettings = {
-      publishNow: true,
+      publishNow: updateData.publishingSettings?.publishNow ?? true,
       notifications: {
         ...notificationDefaults,
         ...updateData.publishingSettings?.notifications,
@@ -102,7 +102,6 @@ export function useCompanyUpdates() {
       scheduledDate: updateData.publishingSettings?.scheduledDate,
       scheduledTime: updateData.publishingSettings?.scheduledTime,
       timezone: updateData.publishingSettings?.timezone,
-      publishNow: updateData.publishingSettings?.publishNow ?? true,
     };
 
     const recipients = updateData.recipients
@@ -122,13 +121,29 @@ export function useCompanyUpdates() {
       ? publishingSettings.authorName || 'Current User'
       : 'Company Updates';
 
+    const nowIso = new Date().toISOString();
+    const scheduledDateIso = !publishingSettings.publishNow && publishingSettings.scheduledDate
+      ? new Date(
+          `${publishingSettings.scheduledDate}${
+            publishingSettings.scheduledTime ? `T${publishingSettings.scheduledTime}` : 'T09:00'
+          }`
+        ).toISOString()
+      : undefined;
+
+    const isPublishingNow = publishingSettings.publishNow || !scheduledDateIso;
+    const status = isPublishingNow ? 'published' : 'scheduled';
+    const publishDate = isPublishingNow ? nowIso : scheduledDateIso ?? nowIso;
+
     const fullUpdateData = {
       ...updateData,
       isPinned: updateData.isPinned ?? false,
-      status: 'published' as const,
+      status,
       likes: 0,
       comments: 0,
       views: 0,
+      viewerHasLiked: false,
+      publishDate,
+      scheduledDate: scheduledDateIso,
       publishingSettings,
       recipients,
       assignedEmployees,

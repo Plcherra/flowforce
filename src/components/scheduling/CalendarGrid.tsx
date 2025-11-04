@@ -5,7 +5,7 @@ import { MonthView } from './MonthView';
 import { DayView } from './DayView';
 import type { SchedulingFilterState } from './SchedulingFilters';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { AppEvent } from '@/hooks/useEvents';
+import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 
 type ViewType = 'month' | 'week' | 'day' | 'year';
 
@@ -18,7 +18,7 @@ interface CalendarGridProps {
   filters: SchedulingFilterState;
   loading: boolean;
   isMobile?: boolean;
-  overlayEvents?: AppEvent[];
+  overlayEvents?: CalendarEvent[];
   hideShiftActions?: boolean;
   selectedEventId?: string | null;
 }

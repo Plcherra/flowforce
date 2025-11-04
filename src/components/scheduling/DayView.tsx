@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, Users, Plus, CalendarDays } from 'lucide-react';
 import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
 import type { SchedulingFilterState } from './SchedulingFilters';
-import type { AppEvent } from '@/hooks/useEvents';
+import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 import { useMemo, useState } from 'react';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor } from '@/utils/schedulingUtils';
@@ -19,7 +19,7 @@ interface DayViewProps {
   filters: SchedulingFilterState;
   isMobile?: boolean;
   hideShiftActions?: boolean;
-  overlayEvents?: AppEvent[];
+  overlayEvents?: CalendarEvent[];
   selectedEventId?: string | null;
 }
 

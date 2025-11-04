@@ -30,6 +30,22 @@ interface ThreadedMessageViewProps {
   className?: string;
 }
 
+const getInitialsFromName = (name: string) => {
+  const safeName = name.trim();
+  if (!safeName) return 'U';
+  const segments = safeName.split(/\s+/).filter(Boolean);
+  if (segments.length === 0) return 'U';
+  if (segments.length === 1) return segments[0].slice(0, 2).toUpperCase();
+  return (segments[0][0] ?? 'U').toUpperCase() + (segments[1][0] ?? '').toUpperCase();
+};
+
+const formatThreadTimestamp = (value: Date) => {
+  if (!(value instanceof Date)) return '';
+  const time = value.getTime();
+  if (Number.isNaN(time)) return '';
+  return format(value, 'MMM dd, h:mm a');
+};
+
 export function ThreadedMessageView({ 
   message, 
   allReplies, 
@@ -72,51 +88,53 @@ export function ThreadedMessageView({
     return 1; // Default to level 1 for safety
   };
 
-  const renderMessage = (msg: ThreadMessage, level: number = 0) => (
-    <div 
-      key={msg.id} 
-      className={`flex gap-3 p-3 rounded-lg ${
-        level === 0 ? 'bg-muted/50' : level === 1 ? 'bg-background' : 'bg-muted/30'
-      } ${level > 0 ? `ml-${Math.min(level * 6, 12)}` : ''}`}
-    >
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={msg.sender.avatar} alt={msg.sender.name} />
-        <AvatarFallback>
-          {msg.sender.name.split(' ').map(n => n[0]).join('')}
-        </AvatarFallback>
-      </Avatar>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-medium text-sm">{msg.sender.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {format(msg.createdAt, 'MMM dd, h:mm a')}
-          </span>
-          {level === 0 && (
-            <Badge variant="outline" className="text-xs">
-              Original
-            </Badge>
+  const renderMessage = (msg: ThreadMessage, level: number = 0) => {
+    const displayName = msg.sender.name?.trim() || 'Unknown teammate';
+    const initials = getInitialsFromName(displayName);
+    const createdAtLabel = formatThreadTimestamp(msg.createdAt);
+    const indentation = level > 0 ? Math.min(level * 24, 48) : 0;
+
+    return (
+      <div
+        key={msg.id}
+        className={`flex gap-3 rounded-lg p-3 ${
+          level === 0 ? 'bg-muted/50' : level === 1 ? 'bg-background' : 'bg-muted/30'
+        }`}
+        style={{ marginLeft: indentation }}
+      >
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          {msg.sender.avatar ? <AvatarImage src={msg.sender.avatar} alt={displayName} /> : null}
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="text-sm font-medium">{displayName}</span>
+            {createdAtLabel && <span className="text-xs text-muted-foreground">{createdAtLabel}</span>}
+            {level === 0 && (
+              <Badge variant="outline" className="text-xs">
+                Original
+              </Badge>
+            )}
+          </div>
+
+          <p className="mb-2 text-sm leading-relaxed text-foreground">{msg.content}</p>
+
+          {level < 2 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => handleReplyToMessage(msg.id)}
+            >
+              <Reply className="mr-1 h-3 w-3" />
+              Reply
+            </Button>
           )}
         </div>
-        
-        <p className="text-sm text-foreground leading-relaxed mb-2">
-          {msg.content}
-        </p>
-
-        {level < 2 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => handleReplyToMessage(msg.id)}
-          >
-            <Reply className="h-3 w-3 mr-1" />
-            Reply
-          </Button>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Card className={`flex flex-col h-full ${className}`}>

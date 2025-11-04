@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useMessageChannels } from './useMessageChannels';
 import { useChannelMessages } from './useChannelMessages';
 import { useMessageOperations } from './useMessageOperations';
@@ -12,19 +12,28 @@ export function useMessages() {
     createChannel,
     joinChannel,
     updateLastRead,
-    refetchChannels
+    refetchChannels,
+    error: channelsError,
+    clearError: clearChannelsError,
   } = useMessageChannels();
 
   const {
     messages,
     loading: messagesLoading,
-    refetchMessages
+    refetchMessages,
+    error: messagesError,
+    clearError: clearMessagesError,
   } = useChannelMessages(currentChannelId);
 
   const {
     sendMessage,
     searchMessages
   } = useMessageOperations();
+
+  const clearError = useCallback(() => {
+    clearChannelsError();
+    clearMessagesError();
+  }, [clearChannelsError, clearMessagesError]);
 
   return {
     // Channel state
@@ -45,6 +54,10 @@ export function useMessages() {
     // Message operations
     sendMessage,
     searchMessages,
-    refetchMessages
+    refetchMessages,
+
+    // Error state
+    error: channelsError ?? messagesError ?? null,
+    clearError,
   };
 }

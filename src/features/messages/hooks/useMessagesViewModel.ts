@@ -21,6 +21,8 @@ export function useMessagesViewModel() {
     setCurrentChannelId,
     sendMessage,
     updateLastRead,
+    error: messagesError,
+    clearError: clearMessagesError,
   } = useMessages();
   const { profile } = useProfile();
   const isMobile = useIsMobile();
@@ -119,6 +121,18 @@ export function useMessagesViewModel() {
       updateLastRead(currentChannelId);
     }
   }, [currentChannelId, updateLastRead]);
+
+  useEffect(() => {
+    if (!messagesError) return;
+
+    logger.error?.('Messages module error', messagesError);
+    toast({
+      title: 'Something went wrong',
+      description: messagesError.message ?? 'Please try again shortly.',
+      variant: 'destructive',
+    });
+    clearMessagesError();
+  }, [clearMessagesError, messagesError, toast]);
 
   const canToggleAvailability = useMemo(() => {
     const role = (profile?.role ?? '').toLowerCase();

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, Clock, Users, Building2, ArrowUpRight } from 'lucide-react';
+import { CalendarDays, Clock, CheckCircle, GaugeCircle, ArrowUpRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DashboardStats } from '@/hooks/useDashboardData';
 import { cn } from '@/lib/utils';
@@ -31,42 +31,33 @@ const SummarySkeleton = () => (
 export function OperationsHealthCard({ className, stats, loading }: OperationsHealthCardProps) {
   const { t } = useTranslation();
 
-  const coverage = stats.totalEmployees > 0
-    ? Math.round((stats.activeEmployees / stats.totalEmployees) * 100)
-    : null;
-
   const summaryItems = [
+    {
+      icon: GaugeCircle,
+      label: t('dashboard.operationsSummary.coverageCompleteness', { defaultValue: 'Coverage completeness' }),
+      value: `${stats.coverageCompleteness}%`,
+      hint: t('dashboard.operationsSummary.coverageCompletenessHint', { defaultValue: 'Scheduled coverage vs required shifts this week.' }),
+      iconClass: 'text-primary'
+    },
+    {
+      icon: Clock,
+      label: t('dashboard.operationsSummary.hoursUtilisation', { defaultValue: 'Hours utilisation' }),
+      value: `${stats.hoursUtilization}%`,
+      hint: t('dashboard.operationsSummary.hoursUtilisationHint', { defaultValue: 'Scheduled hours compared with capacity.' }),
+      iconClass: 'text-secondary'
+    },
+    {
+      icon: CheckCircle,
+      label: t('dashboard.operationsSummary.taskCompletion', { defaultValue: 'Task completion' }),
+      value: `${stats.taskCompletion}%`,
+      hint: t('dashboard.operationsSummary.taskCompletionHint', { defaultValue: 'Operations tasks completed this week.' }),
+      iconClass: 'text-emerald-500'
+    },
     {
       icon: CalendarDays,
       label: t('dashboard.operationsSummary.shiftsToday'),
       value: stats.todaysShifts,
       hint: t('dashboard.operationsSummary.shiftsHint'),
-      iconClass: 'text-primary'
-    },
-    {
-      icon: Clock,
-      label: t('dashboard.operationsSummary.pendingTimeOff'),
-      value: stats.pendingTimeOff,
-      hint: t('dashboard.operationsSummary.requestsHintDetailed', {
-        approved: stats.approvedTimeOffUpcoming,
-        balance: stats.timeOffBalanceRemaining,
-      }),
-      iconClass: 'text-secondary'
-    },
-    {
-      icon: Users,
-      label: t('dashboard.operationsSummary.activeEmployees'),
-      value: stats.activeEmployees,
-      hint: t('dashboard.operationsSummary.activeEmployeesHint', { total: stats.totalEmployees }),
-      iconClass: 'text-emerald-500'
-    },
-    {
-      icon: Building2,
-      label: t('dashboard.operationsSummary.departmentCount'),
-      value: stats.totalDepartments,
-      hint: coverage !== null
-        ? t('dashboard.operationsSummary.coverageHint', { coverage })
-        : t('dashboard.operationsSummary.noCoverage'),
       iconClass: 'text-amber-500'
     }
   ];

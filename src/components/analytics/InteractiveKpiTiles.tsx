@@ -145,17 +145,20 @@ export default function InteractiveKpiTiles() {
   }, [goals]);
 
   const schedulingMetrics = useMemo(() => {
-    const coverage =
-      schedulingStats.totalEmployees > 0
-        ? Math.round((schedulingStats.activeEmployees / schedulingStats.totalEmployees) * 100)
-        : 0;
-    const hasCapacityGap = coverage < 70;
+    const coverage = schedulingStats.coverageCompleteness ?? 0;
+    const hoursUtilization = schedulingStats.hoursUtilization ?? 0;
+    const taskCompletion = schedulingStats.taskCompletion ?? 0;
+    const hasCapacityGap = coverage < 80 || hoursUtilization > 110;
+    const tasksBehind = taskCompletion < 60;
 
     return {
       coverage,
+      hoursUtilization,
+      taskCompletion,
       todaysShifts: schedulingStats.todaysShifts,
       pendingTimeOff: schedulingStats.pendingTimeOff,
       hasCapacityGap,
+      tasksBehind,
     };
   }, [schedulingStats]);
 
@@ -204,12 +207,24 @@ export default function InteractiveKpiTiles() {
           : goalsMetrics.averageProgress < 60
             ? `Co-Pilot wants to tighten follow-through — average progress is ${goalsMetrics.averageProgress}%. Consider a checkpoint huddle.`
             : 'Co-Pilot is happy with goal velocity. Capture any wins in recognition before the cycle ends.',
-      scheduling:
-        schedulingMetrics.pendingTimeOff > 4
-          ? `Co-Pilot spotted ${schedulingMetrics.pendingTimeOff} pending time-off requests. Queue a coverage sweep before publishing shifts.`
-          : schedulingMetrics.hasCapacityGap
-            ? 'Co-Pilot noticed coverage dipping below 70%. Running a quick balance will steady the floor.'
-            : 'Co-Pilot confirms coverage looks solid. Keep an eye on new requests as they flow in.',
+      scheduling: (() => {
+        const coverageAlert = schedulingMetrics.coverage < 80;
+        const hoursAlert = schedulingMetrics.hoursUtilization > 110;
+        const tasksLagging = schedulingMetrics.tasksBehind;
+        if (schedulingMetrics.pendingTimeOff > 4) {
+          return `Co-Pilot spotted ${schedulingMetrics.pendingTimeOff} pending time-off requests. Queue a coverage sweep before publishing shifts.`;
+        }
+        if (coverageAlert) {
+          return `Coverage is only ${schedulingMetrics.coverage}%. Reassign a supervisor or tap Copilot to draft backup coverage before publish.`;
+        }
+        if (hoursAlert) {
+          return `Hours utilisation is ${schedulingMetrics.hoursUtilization}% this week. Consider offloading or redistributing longer shifts to avoid burnout.`;
+        }
+        if (tasksLagging) {
+          return `Only ${schedulingMetrics.taskCompletion}% of checklist tasks are closed. Ping the on-duty leads to wrap outstanding items.`;
+        }
+        return 'Coverage, hours, and checklists look healthy. Publish with confidence and keep monitoring new requests.';
+      })(),
       performance:
         performanceMetrics.averageCompletionRate < 70
           ? `Co-Pilot suggests a coaching sprint — team completion is averaging ${performanceMetrics.averageCompletionRate}%.`
@@ -290,20 +305,24 @@ export default function InteractiveKpiTiles() {
         icon: CalendarDays,
         accent: 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300',
         metric: schedulingMetrics.coverage > 0 ? `${schedulingMetrics.coverage}%` : '—',
-        metricLabel: 'Coverage this week',
-        secondary: `${schedulingMetrics.todaysShifts} shifts today • ${schedulingMetrics.pendingTimeOff} pending PTO`,
+        metricLabel: 'Coverage completeness',
+        secondary: `${schedulingMetrics.hoursUtilization}% hours utilised • ${schedulingMetrics.taskCompletion}% tasks complete`,
         trend:
           schedulingMetrics.pendingTimeOff > 4
             ? 'down'
             : schedulingMetrics.hasCapacityGap
-              ? 'flat'
-              : 'up',
+              ? 'down'
+              : schedulingMetrics.tasksBehind
+                ? 'flat'
+                : 'up',
         trendLabel:
           schedulingMetrics.pendingTimeOff > 4
-            ? 'Needs review'
+            ? 'Pending PTO backlog'
             : schedulingMetrics.hasCapacityGap
-              ? 'Monitor coverage'
-              : 'Balanced',
+              ? 'Coverage gap'
+              : schedulingMetrics.tasksBehind
+                ? 'Tasks lagging'
+                : 'Balanced',
         suggestion: copilotMessages.scheduling,
       },
       {
@@ -359,12 +378,18 @@ export default function InteractiveKpiTiles() {
   const activeTileDescriptor = activeTile ? tileMap[activeTile] : undefined;
   const ActiveTileIcon = activeTileDescriptor?.icon;
 
-  const renderMetricBlock = (label: string, value: React.ReactNode, tone: 'default' | 'warning' | 'success' = 'default') => {
+  const renderMetricBlock = (
+    label: string,
+    value: React.ReactNode,
+    tone: 'default' | 'warning' | 'success' | 'info' = 'default',
+  ) => {
     const toneClass =
       tone === 'warning'
         ? 'border-amber-300/70 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/10'
         : tone === 'success'
           ? 'border-emerald-300/70 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-500/10'
+          : tone === 'info'
+            ? 'border-sky-300/70 bg-sky-50/60 dark:border-sky-500/30 dark:bg-sky-500/10'
           : 'border-border/60 bg-muted/40';
 
     return (
@@ -513,10 +538,22 @@ export default function InteractiveKpiTiles() {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-3">
-              {renderMetricBlock('Coverage', schedulingMetrics.coverage > 0 ? `${schedulingMetrics.coverage}%` : '—')}
-              {renderMetricBlock('Shifts today', schedulingMetrics.todaysShifts)}
+              {renderMetricBlock(
+                'Coverage',
+                schedulingMetrics.coverage > 0 ? `${schedulingMetrics.coverage}%` : '—',
+                schedulingMetrics.hasCapacityGap ? 'warning' : 'success',
+              )}
+              {renderMetricBlock(
+                'Hours utilisation',
+                schedulingMetrics.hoursUtilization > 0 ? `${schedulingMetrics.hoursUtilization}%` : '—',
+                schedulingMetrics.hoursUtilization > 110 ? 'warning' : schedulingMetrics.hoursUtilization > 95 ? 'info' : 'default',
+              )}
+              {renderMetricBlock(
+                'Task completion',
+                schedulingMetrics.taskCompletion > 0 ? `${schedulingMetrics.taskCompletion}%` : '—',
+                schedulingMetrics.tasksBehind ? 'warning' : 'success',
+              )}
               {renderMetricBlock('Pending PTO', schedulingMetrics.pendingTimeOff, schedulingMetrics.pendingTimeOff > 4 ? 'warning' : 'default')}
-              {renderMetricBlock('Status', schedulingMetrics.hasCapacityGap ? 'Monitor' : 'Healthy', schedulingMetrics.hasCapacityGap ? 'warning' : 'success')}
             </div>
 
             <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">

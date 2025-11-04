@@ -13,9 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 interface CreateVendorVisitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreated?: (eventId: string) => void;
 }
 
-export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisitDialogProps) {
+export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: CreateVendorVisitDialogProps) {
   const { shifts } = useScheduling();
   const { createVendorVisit, linkVisitToShifts } = useEvents();
   const { toast } = useToast();
@@ -88,28 +89,38 @@ export function CreateVendorVisitDialog({ open, onOpenChange }: CreateVendorVisi
       .filter(([, v]) => v)
       .map(([id]) => id);
 
-    const visit = await createVendorVisit({
-      title,
-      description,
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
-      location,
-      vendor: { name: vendorName, service_type: serviceType },
-      related_shift_ids: linkedShiftIds,
-      attendees: buildAttendees(linkedShiftIds),
-      checklist: [
-        { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
-        { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
-      ]
-    });
-    if (visit.related_shift_ids && visit.related_shift_ids.length > 0) {
-      await linkVisitToShifts(visit.id, visit.related_shift_ids);
+    try {
+      const visit = await createVendorVisit({
+        title,
+        description,
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        location,
+        vendor: { name: vendorName, service_type: serviceType },
+        related_shift_ids: linkedShiftIds,
+        attendees: buildAttendees(linkedShiftIds),
+        checklist: [
+          { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
+          { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
+        ],
+      });
+
+      if (visit.related_shift_ids && visit.related_shift_ids.length > 0) {
+        await linkVisitToShifts(visit.id, visit.related_shift_ids);
+      }
+
+      if (visit.id) {
+        onCreated?.(visit.id);
+      }
+
+      toast({
+        title: 'Vendor visit created',
+        description: `${vendorName} scheduled for ${new Date(start).toLocaleString()}.`,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.warn('Vendor visit creation failed', error);
     }
-    toast({
-      title: 'Vendor visit created',
-      description: `${vendorName} scheduled for ${new Date(start).toLocaleString()}.`,
-    });
-    onOpenChange(false);
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../useAuth';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
@@ -7,50 +7,12 @@ export function useMessageChannels() {
   const { user } = useAuth();
   const [channels, setChannels] = useState<MessageChannel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchChannels();
-      
-      // Set up real-time subscription for channels
-      const channelSubscription = supabase
-        .channel('message_channels_changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'message_channels'
-          },
-          () => {
-            fetchChannels(); // Refetch when channels change
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'channel_members'
-          },
-          () => {
-            fetchChannels(); // Refetch when memberships change
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channelSubscription);
-      };
-    } else {
-      setChannels([]);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchChannels = async () => {
+  const fetchChannels = useCallback(async () => {
     if (!user) return;
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('message_channels')
@@ -63,91 +25,158 @@ export function useMessageChannels() {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setChannels(data || []);
+      setChannels(data ?? []);
+      setError(null);
     } catch (error) {
-      console.error('Error fetching channels:', error);
+      const issue = error instanceof Error ? error : new Error('Error fetching channels');
+      console.error('Error fetching channels:', issue);
+      setError(issue);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const createChannel = async (channelData: CreateChannelData) => {
-    if (!user) return { data: null, error: 'User not authenticated' };
+  useEffect(() => {
+    if (!user) {
+      setChannels([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-    try {
-      const { data: channel, error: channelError } = await supabase
-        .from('message_channels')
-        .insert({
-          name: channelData.name,
-          description: channelData.description,
-          type: channelData.type,
-          department_id: channelData.department_id,
-          created_by: user.id,
-          is_private: channelData.is_private || false
-        })
-        .select()
-        .single();
+    fetchChannels();
 
-      if (channelError) throw channelError;
+    const channelSubscription = supabase
+      .channel('message_channels_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'message_channels',
+        },
+        () => {
+          fetchChannels();
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'channel_members',
+        },
+        () => {
+          fetchChannels();
+        },
+      )
+      .subscribe();
 
-      // Add creator as admin member
-      await supabase.from('channel_members').insert({
-        channel_id: channel.id,
-        user_id: user.id,
-        role: 'admin'
-      });
+    return () => {
+      supabase.removeChannel(channelSubscription);
+    };
+  }, [fetchChannels, user]);
 
-      // Add other members if specified
-      if (channelData.member_ids && channelData.member_ids.length > 0) {
-        const memberInserts = channelData.member_ids.map(userId => ({
-          channel_id: channel.id,
-          user_id: userId,
-          role: 'member'
-        }));
-        
-        await supabase.from('channel_members').insert(memberInserts);
+  const createChannel = useCallback(
+    async (channelData: CreateChannelData) => {
+      if (!user) {
+        const issue = new Error('User not authenticated');
+        setError(issue);
+        return { data: null, error: issue };
       }
 
-      await fetchChannels(); // Refresh channels list
-      return { data: channel, error: null };
-    } catch (error) {
-      return { data: null, error };
-    }
-  };
+      try {
+        const { data: channel, error: channelError } = await supabase
+          .from('message_channels')
+          .insert({
+            name: channelData.name,
+            description: channelData.description,
+            type: channelData.type,
+            department_id: channelData.department_id,
+            created_by: user.id,
+            is_private: channelData.is_private || false,
+          })
+          .select()
+          .single();
 
-  const joinChannel = async (channelId: string) => {
-    if (!user) return { error: 'User not authenticated' };
+        if (channelError) throw channelError;
 
-    try {
-      const { error } = await supabase
-        .from('channel_members')
-        .insert({
-          channel_id: channelId,
+        await supabase.from('channel_members').insert({
+          channel_id: channel.id,
           user_id: user.id,
-          role: 'member'
+          role: 'admin',
         });
 
-      if (error) throw error;
-      await fetchChannels();
-      return { error: null };
-    } catch (error) {
-      return { error };
-    }
-  };
+        if (channelData.member_ids && channelData.member_ids.length > 0) {
+          const memberInserts = channelData.member_ids.map((userId) => ({
+            channel_id: channel.id,
+            user_id: userId,
+            role: 'member',
+          }));
 
-  const updateLastRead = async (channelId: string) => {
-    if (!user) return;
+          await supabase.from('channel_members').insert(memberInserts);
+        }
 
-    try {
-      await supabase
-        .from('channel_members')
-        .update({ last_read_at: new Date().toISOString() })
-        .eq('channel_id', channelId)
-        .eq('user_id', user.id);
-    } catch (error) {
-      console.error('Error updating last read:', error);
-    }
-  };
+        await fetchChannels();
+        setError(null);
+        return { data: channel, error: null };
+      } catch (error) {
+        const issue = error instanceof Error ? error : new Error('Failed to create channel');
+        setError(issue);
+        return { data: null, error: issue };
+      }
+    },
+    [fetchChannels, user],
+  );
+
+  const joinChannel = useCallback(
+    async (channelId: string) => {
+      if (!user) {
+        const issue = new Error('User not authenticated');
+        setError(issue);
+        return { error: issue };
+      }
+
+      try {
+        const { error } = await supabase.from('channel_members').insert({
+          channel_id: channelId,
+          user_id: user.id,
+          role: 'member',
+        });
+
+        if (error) throw error;
+        await fetchChannels();
+        setError(null);
+        return { error: null };
+      } catch (error) {
+        const issue = error instanceof Error ? error : new Error('Failed to join channel');
+        setError(issue);
+        return { error: issue };
+      }
+    },
+    [fetchChannels, user],
+  );
+
+  const updateLastRead = useCallback(
+    async (channelId: string) => {
+      if (!user) return;
+
+      try {
+        await supabase
+          .from('channel_members')
+          .update({ last_read_at: new Date().toISOString() })
+          .eq('channel_id', channelId)
+          .eq('user_id', user.id);
+      } catch (error) {
+        const issue = error instanceof Error ? error : new Error('Error updating last read');
+        console.error(issue);
+        setError(issue);
+      }
+    },
+    [user],
+  );
+
+  const clearError = useCallback(() => setError(null), []);
 
   return {
     channels,
@@ -155,6 +184,8 @@ export function useMessageChannels() {
     createChannel,
     joinChannel,
     updateLastRead,
-    refetchChannels: fetchChannels
+    refetchChannels: fetchChannels,
+    error,
+    clearError,
   };
 }

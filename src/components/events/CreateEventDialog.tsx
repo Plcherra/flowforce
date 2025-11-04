@@ -29,14 +29,15 @@ interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultType?: SessionType;
+  onCreated?: (eventId: string) => void;
 }
 
 type SelectionRecord = Record<string, boolean>;
 
-export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' }: CreateEventDialogProps) {
+export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting', onCreated }: CreateEventDialogProps) {
   const { toast } = useToast();
-  const { shifts } = useScheduling();
-  const { createEvent } = useEvents();
+  const { shifts, teamMembers: roster, loading: schedulingLoading } = useScheduling();
+  const { events, createEvent } = useEvents();
 
   const [sessionType, setSessionType] = useState<SessionType>(defaultType);
   const [title, setTitle] = useState('');
@@ -47,6 +48,10 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
   const [participantQuery, setParticipantQuery] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState<SelectionRecord>({});
   const [selectedShiftIds, setSelectedShiftIds] = useState<SelectionRecord>({});
+
+  const employees = roster ?? [];
+  const employeesLoading = schedulingLoading;
+  const safeShifts = shifts ?? [];
 
   useEffect(() => {
     if (open) {
@@ -115,7 +120,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
     const startDate = new Date(start);
     const endDate = new Date(end);
     const overlaps = (a: Date, b: Date, c: Date, d: Date) => a <= d && c <= b;
-    return (shifts ?? [])
+    return safeShifts
       .filter((shift) => {
         const shiftStart = new Date(shift.start_time);
         const shiftEnd = new Date(shift.end_time);
@@ -124,7 +129,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
         return timeOverlap && locationMatch;
       })
       .slice(0, 20);
-  }, [end, location, shifts, start]);
+  }, [end, location, safeShifts, start]);
 
   const toggleSelection = (setState: (value: SelectionRecord) => void) => (id: string, next: boolean | string) => {
     const value = Boolean(next);
@@ -146,7 +151,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
     });
 
     if (shiftIds.length > 0) {
-      shifts
+      safeShifts
         .filter((shift) => shiftIds.includes(shift.id))
         .forEach((shift) => {
           shift.assignments?.forEach((assignment) => {
@@ -185,23 +190,31 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting' 
 
     const attendees = buildAttendeesFromSelections(selectedParticipantIds, selectedShiftList);
 
-    await createEvent({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
-      location: location.trim() || undefined,
-      type: sessionType,
-      related_shift_ids: selectedShiftList,
-      attendees,
-    });
+    try {
+      const created = await createEvent({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        location: location.trim() || undefined,
+        type: sessionType,
+        related_shift_ids: selectedShiftList,
+        attendees,
+      });
 
-    toast({
-      title: sessionType === 'meeting' ? 'Meeting scheduled' : 'Event created',
-      description: `${title.trim()} on ${new Date(start).toLocaleString()}`,
-    });
+      if (created?.id) {
+        onCreated?.(created.id);
+      }
 
-    onOpenChange(false);
+      toast({
+        title: sessionType === 'meeting' ? 'Meeting scheduled' : 'Event created',
+        description: `${title.trim()} on ${new Date(start).toLocaleString()}`,
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.warn('Event creation failed', error);
+    }
   };
 
   return (

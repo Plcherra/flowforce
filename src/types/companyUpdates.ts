@@ -25,6 +25,7 @@ export interface CompanyUpdate {
   likes: number;
   comments: number;
   views: number;
+  viewerHasLiked?: boolean;
   assignedEmployees: string[];
   createdBy: string;
   createdAt: string;

@@ -193,6 +193,202 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          attendees: Json
+          checklist: Json
+          color: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_time: string | null
+          event_type: string
+          id: string
+          location: string | null
+          metadata: Json
+          related_shift_ids: string[]
+          start_time: string
+          store_id: string | null
+          title: string
+          updated_at: string
+          vendor: Json | null
+        }
+        Insert: {
+          attendees?: Json
+          checklist?: Json
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          related_shift_ids?: string[]
+          start_time: string
+          store_id?: string | null
+          title: string
+          updated_at?: string
+          vendor?: Json | null
+        }
+        Update: {
+          attendees?: Json
+          checklist?: Json
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          metadata?: Json
+          related_shift_ids?: string[]
+          start_time?: string
+          store_id?: string | null
+          title?: string
+          updated_at?: string
+          vendor?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_participants: {
+        Row: {
+          avatar_url: string | null
+          company_id: string
+          created_at: string
+          email: string | null
+          event_id: string
+          id: string
+          metadata: Json
+          name: string | null
+          profile_id: string | null
+          response_status: string
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_id: string
+          created_at?: string
+          email?: string | null
+          event_id: string
+          id?: string
+          metadata?: Json
+          name?: string | null
+          profile_id?: string | null
+          response_status?: string
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          id?: string
+          metadata?: Json
+          name?: string | null
+          profile_id?: string | null
+          response_status?: string
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_shift_links: {
+        Row: {
+          company_id: string
+          created_at: string
+          event_id: string
+          id: string
+          linked_at: string
+          metadata: Json
+          shift_id: string
+          store_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+          linked_at?: string
+          metadata?: Json
+          shift_id: string
+          store_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          linked_at?: string
+          metadata?: Json
+          shift_id?: string
+          store_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_shift_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_shift_links_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_shift_links_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channel_members: {
         Row: {
           channel_id: string

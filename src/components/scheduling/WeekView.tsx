@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Clock } from 'lucide-react';
 import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
 import type { SchedulingFilterState } from './SchedulingFilters';
-import type { AppEvent } from '@/hooks/useEvents';
+import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor, calculateCoverageStats } from '@/utils/schedulingUtils';
 
@@ -17,7 +17,7 @@ interface WeekViewProps {
   onSelectEvent?: (eventId: string | null) => void;
   filters: SchedulingFilterState;
   isMobile?: boolean;
-  overlayEvents?: AppEvent[];
+  overlayEvents?: CalendarEvent[];
   hideShiftActions?: boolean;
   selectedEventId?: string | null;
 }
@@ -49,8 +49,28 @@ export function WeekView({
     return calculateCoverageStats(dayShifts);
   }, [getShiftsForDay]);
 
-  const getEventsForDay = useMemo(() => (day: Date) => {
-    return overlayEvents.filter(ev => isSameDay(new Date(ev.start), day));
+  const getEventsForDay = useMemo(
+    () => (day: Date) =>
+      overlayEvents.filter((event) => {
+        const start = new Date(event.start);
+        return !Number.isNaN(start.getTime()) && isSameDay(start, day);
+      }),
+    [overlayEvents],
+  );
+
+  const eventsByShiftId = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    overlayEvents.forEach((event) => {
+      const fallback = Array.isArray(event.raw?.related_shift_ids) ? event.raw.related_shift_ids : [];
+      const ids = event.shiftIds?.length ? event.shiftIds : fallback;
+      ids.forEach((shiftId) => {
+        if (!shiftId) return;
+        const list = map.get(shiftId) ?? [];
+        list.push(event);
+        map.set(shiftId, list);
+      });
+    });
+    return map;
   }, [overlayEvents]);
 
   const handleEventClick = (eventId: string) => {
@@ -62,7 +82,7 @@ export function WeekView({
     }
   };
 
-  const renderAttendeeSummary = (event: AppEvent) => {
+  const renderAttendeeSummary = (event: CalendarEvent) => {
     const attendees = event.attendees ?? [];
     if (attendees.length === 0) return null;
     const names = attendees.map((attendee) => attendee.name).filter(Boolean);
@@ -343,30 +363,62 @@ export function WeekView({
                           {employeeShifts.length === 0 ? (
                             <div className="h-16" />
                           ) : (
-                            employeeShifts.map((shift) => (
-                              <div
-                                key={shift.id}
-                                className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-white text-xs"
-                                style={{
-                                  backgroundColor: getShiftColor(shift),
-                                  opacity: shift.is_published ? 1 : 0.9,
-                                }}
-                                onClick={() => onSelectShift(shift.id)}
-                              >
-                                <div className="font-medium truncate mb-1">
-                                  {shift.title || shift.job_position?.name || 'Shift'}
+                            employeeShifts.map((shift) => {
+                              const linkedEvents = eventsByShiftId.get(shift.id) ?? [];
+                              return (
+                                <div
+                                  key={shift.id}
+                                  className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-white text-xs"
+                                  style={{
+                                    backgroundColor: getShiftColor(shift),
+                                    opacity: shift.is_published ? 1 : 0.9,
+                                  }}
+                                  onClick={() => onSelectShift(shift.id)}
+                                >
+                                  <div className="font-medium truncate mb-1">
+                                    {shift.title || shift.job_position?.name || 'Shift'}
+                                  </div>
+                                  <div className="flex items-center gap-1 text-[11px] opacity-90">
+                                    <Clock className="h-3 w-3" />
+                                    {format(new Date(shift.start_time), 'HH:mm')} - {format(new Date(shift.end_time), 'HH:mm')}
+                                  </div>
+                                  {!shift.is_published && (
+                                    <Badge variant="secondary" className="text-[10px] mt-1">
+                                      Draft
+                                    </Badge>
+                                  )}
+                                  {linkedEvents.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {linkedEvents.map((event) => {
+                                        const startTime = new Date(event.start);
+                                        const timeLabel = Number.isNaN(startTime.getTime())
+                                          ? ''
+                                          : `${format(startTime, 'HH:mm')} · `;
+                                        const isSelected = selectedEventId === event.id;
+                                        return (
+                                          <button
+                                            key={event.id}
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onSelectEvent?.(event.id);
+                                            }}
+                                            className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
+                                              isSelected
+                                                ? 'border-white bg-white/20 text-white'
+                                                : 'border-white/50 bg-white/10 text-white hover:border-white'
+                                            }`}
+                                          >
+                                            {timeLabel}
+                                            {event.title || 'Session'}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-1 text-[11px] opacity-90">
-                                  <Clock className="h-3 w-3" />
-                                  {format(new Date(shift.start_time), 'HH:mm')} - {format(new Date(shift.end_time), 'HH:mm')}
-                                </div>
-                                {!shift.is_published && (
-                                  <Badge variant="secondary" className="text-[10px] mt-1">
-                                    Draft
-                                  </Badge>
-                                )}
-                              </div>
-                            ))
+                              );
+                            })
                           )}
                         </div>
                       );

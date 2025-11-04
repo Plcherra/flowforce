@@ -8,6 +8,7 @@ import LoadingSpinner from '@/components/resources/LoadingSpinner';
 import { usePerformanceOverview } from '@/hooks/usePerformanceOverview';
 import { Brain, TrendingUp, Users, Target } from 'lucide-react';
 import AIQuickActions from '@/components/ai/AIQuickActions';
+import EngagementOverview from '@/components/company-updates/EngagementOverview';
 
 export default function AIInsights() {
   const { radar, loading } = usePerformanceOverview();
@@ -75,6 +76,21 @@ export default function AIInsights() {
                 </Card>
 
                 <AIQuickActions />
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Users className="h-5 w-5 mr-2" />
+                      Engagement Intelligence
+                    </CardTitle>
+                    <CardDescription>
+                      AI-driven summaries of company update engagement for admins and managers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <EngagementOverview />
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>

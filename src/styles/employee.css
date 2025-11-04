@@ -1,0 +1,18 @@
+.drawer-body {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-200) transparent;
+}
+
+.drawer-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.drawer-body::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.6);
+  border-radius: 9999px;
+}
+
+.drawer-body::-webkit-scrollbar-track {
+  background: transparent;
+}

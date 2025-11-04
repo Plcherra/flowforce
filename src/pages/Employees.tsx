@@ -20,10 +20,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, UserPlus, Mail, Phone, Building2, Download, Filter, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
 import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
-import { UserProfileDrawer } from '@/components/users/UserProfileDrawer';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Tables } from '@/integrations/supabase/public-types';
-import { InviteEmployeesModal } from '@/components/users/InviteEmployeesModal';
+import { EmployeeDrawer, type EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
+import { usePermission } from '@/hooks/usePermission';
 
 type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;
@@ -40,8 +40,9 @@ export default function Employees() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [showAddVendorDialog, setShowAddVendorDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
-  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Profile | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<EmployeeDrawerTab>('profile');
   const [error, setError] = useState<string | null>(null);
   const [vendorForm, setVendorForm] = useState({
     name: '',
@@ -52,7 +53,7 @@ export default function Employees() {
     notes: ''
   });
   const [searchParams, setSearchParams] = useSearchParams();
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const canInvite = usePermission('invite_employees');
 
   // Vendor hooks
   const { data: vendors, isLoading: vendorsLoading } = useInventorySuppliers();
@@ -64,22 +65,50 @@ export default function Employees() {
   }, []);
 
   useEffect(() => {
+    if (!canInvite) return;
     const inviteParam = searchParams.get('invite');
-    if (!inviteModalOpen && inviteParam && ['1', 'true', 'open'].includes(inviteParam.toLowerCase())) {
-      setInviteModalOpen(true);
+    if (inviteParam && ['1', 'true', 'open'].includes(inviteParam.toLowerCase())) {
+      setSelectedEmployee(null);
+      setDrawerTab('invite');
+      setDrawerOpen(true);
     }
-  }, [searchParams, inviteModalOpen]);
+  }, [searchParams, canInvite]);
 
-  const handleInviteModalChange = (open: boolean) => {
-    setInviteModalOpen(open);
+  const clearInviteParam = () => {
+    const inviteParam = searchParams.get('invite');
+    if (!inviteParam) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('invite');
+    setSearchParams(next, { replace: true });
+  };
+
+  const handleDrawerChange = (open: boolean) => {
+    setDrawerOpen(open);
     if (!open) {
-      const inviteParam = searchParams.get('invite');
-      if (inviteParam) {
-        const next = new URLSearchParams(searchParams);
-        next.delete('invite');
-        setSearchParams(next, { replace: true });
-      }
+      setSelectedEmployee(null);
+      setDrawerTab('profile');
+      clearInviteParam();
     }
+  };
+
+  const openInvitationDrawer = () => {
+    if (!canInvite) return;
+    setSelectedEmployee(null);
+    setDrawerTab('invite');
+    setDrawerOpen(true);
+    const inviteParam = searchParams.get('invite');
+    if (!inviteParam) {
+      const next = new URLSearchParams(searchParams);
+      next.set('invite', '1');
+      setSearchParams(next, { replace: true });
+    }
+  };
+
+  const openEmployeeDrawer = (employee: Profile) => {
+    setSelectedEmployee(employee);
+    setDrawerTab('profile');
+    setDrawerOpen(true);
+    clearInviteParam();
   };
 
   const handleCreateVendor = async (e: React.FormEvent) => {
@@ -193,108 +222,100 @@ export default function Employees() {
     <div>
       <div className={`${isMobile ? 'p-4 space-y-4' : 'p-6 space-y-6'}`}>
         {/* Header */}
-        <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex items-center justify-between'}`}>
+        <div className={`${isMobile ? 'flex flex-col space-y-3' : 'flex items-center justify-between gap-3'}`}>
           <div>
             <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900`}>Team Directory</h1>
             <p className="text-gray-600 mt-1">
               Browse, filter and export your company roster
             </p>
           </div>
-          {canManageEmployees && (
-            <>
-              {activeTab === 'vendors' ? (
-                <Dialog open={showAddVendorDialog} onOpenChange={setShowAddVendorDialog}>
-                  <DialogTrigger asChild>
-                    <Button size={isMobile ? 'sm' : 'default'}>
-                      <Truck className="mr-2 h-4 w-4" />
-                      {isMobile ? 'Add' : 'Add Vendor'}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New Vendor</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateVendor} className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {canManageEmployees && activeTab === 'vendors' && (
+              <Dialog open={showAddVendorDialog} onOpenChange={setShowAddVendorDialog}>
+                <DialogTrigger asChild>
+                  <Button size={isMobile ? 'sm' : 'default'}>
+                    <Truck className="mr-2 h-4 w-4" />
+                    {isMobile ? 'Add' : 'Add Vendor'}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Vendor</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateVendor} className="space-y-4">
+                    <div>
+                      <Label htmlFor="vendor-name">Company Name *</Label>
+                      <Input
+                        id="vendor-name"
+                        value={vendorForm.name}
+                        onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="contact-name">Contact Name</Label>
+                      <Input
+                        id="contact-name"
+                        value={vendorForm.contact_name}
+                        onChange={(e) => setVendorForm({ ...vendorForm, contact_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="vendor-name">Company Name *</Label>
+                        <Label htmlFor="vendor-email">Email</Label>
                         <Input
-                          id="vendor-name"
-                          value={vendorForm.name}
-                          onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
-                          required
+                          id="vendor-email"
+                          type="email"
+                          value={vendorForm.email}
+                          onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="contact-name">Contact Name</Label>
+                        <Label htmlFor="vendor-phone">Phone</Label>
                         <Input
-                          id="contact-name"
-                          value={vendorForm.contact_name}
-                          onChange={(e) => setVendorForm({ ...vendorForm, contact_name: e.target.value })}
+                          id="vendor-phone"
+                          value={vendorForm.phone}
+                          onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="vendor-email">Email</Label>
-                          <Input
-                            id="vendor-email"
-                            type="email"
-                            value={vendorForm.email}
-                            onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="vendor-phone">Phone</Label>
-                          <Input
-                            id="vendor-phone"
-                            value={vendorForm.phone}
-                            onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="vendor-address">Address</Label>
-                        <Textarea
-                          id="vendor-address"
-                          value={vendorForm.address}
-                          onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })}
-                          rows={2}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="vendor-notes">Notes</Label>
-                        <Textarea
-                          id="vendor-notes"
-                          value={vendorForm.notes}
-                          onChange={(e) => setVendorForm({ ...vendorForm, notes: e.target.value })}
-                          rows={2}
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setShowAddVendorDialog(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit" disabled={createVendor.isPending}>
-                          {createVendor.isPending ? 'Adding...' : 'Add Vendor'}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              ) : (
-                <InviteEmployeesModal
-                  trigger={
-                    <Button size={isMobile ? 'sm' : 'default'}>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      {isMobile ? 'Add' : 'Add User'}
-                    </Button>
-                  }
-                  onInvitesCreated={fetchEmployees}
-                  open={inviteModalOpen}
-                  onOpenChange={handleInviteModalChange}
-                />
-              )}
-            </>
-          )}
+                    </div>
+                    <div>
+                      <Label htmlFor="vendor-address">Address</Label>
+                      <Textarea
+                        id="vendor-address"
+                        value={vendorForm.address}
+                        onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vendor-notes">Notes</Label>
+                      <Textarea
+                        id="vendor-notes"
+                        value={vendorForm.notes}
+                        onChange={(e) => setVendorForm({ ...vendorForm, notes: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setShowAddVendorDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={createVendor.isPending}>
+                        {createVendor.isPending ? 'Adding...' : 'Add Vendor'}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+            {canInvite && (
+              <Button size={isMobile ? 'sm' : 'default'} onClick={openInvitationDrawer}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                {isMobile ? 'Invite' : 'Invite Teammate'}
+              </Button>
+            )}
+          </div>
         </div>
 
         {error && (
@@ -496,13 +517,10 @@ export default function Employees() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => {
-                                  setSelectedUser(employee);
-                                  setShowUserProfile(true);
-                                }}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEmployeeDrawer(employee)}
                                 aria-label="View Profile"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -606,11 +624,12 @@ export default function Employees() {
           </CardContent>
         </Card>
 
-        {/* User Profile Drawer */}
-        <UserProfileDrawer
-          user={selectedUser}
-          open={showUserProfile}
-          onOpenChange={setShowUserProfile}
+        {/* Employee Drawer */}
+        <EmployeeDrawer
+          employee={selectedEmployee}
+          open={drawerOpen}
+          initialTab={drawerTab}
+          onOpenChange={handleDrawerChange}
         />
       </div>
     </div>

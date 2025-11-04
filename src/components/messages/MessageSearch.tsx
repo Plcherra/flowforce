@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -42,6 +42,8 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const escapeRegExp = useCallback((value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), []);
 
   useEffect(() => {
     if (!open) {
@@ -149,18 +151,24 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
     return <Hash className="h-4 w-4" />;
   };
 
-  const highlightQuery = (text: string, query: string) => {
-    if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
-    const parts = text.split(regex);
-    return parts.map((part, index) => 
-      regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 dark:bg-yellow-800 rounded px-1">
-          {part}
-        </mark>
-      ) : part
-    );
-  };
+  const highlightQuery = useCallback(
+    (text: string, query: string) => {
+      if (!query) return text;
+      const safeQuery = escapeRegExp(query);
+      const regex = new RegExp(`(${safeQuery})`, 'gi');
+      const parts = text.split(regex);
+      return parts.map((part, index) =>
+        index % 2 === 1 ? (
+          <mark key={`${part}-${index}`} className="rounded px-1 bg-yellow-200 dark:bg-yellow-800">
+            {part}
+          </mark>
+        ) : (
+          part
+        ),
+      );
+    },
+    [escapeRegExp],
+  );
 
   if (!open) return null;
 
@@ -235,42 +243,39 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                         
                         <div className="flex items-start gap-3">
                           {(() => {
-                            const senderName = result.sender_profile?.first_name ?? 'Unknown';
-                            const senderLast = result.sender_profile?.last_name ?? '';
-                            const initial =
-                              result.sender_profile?.first_name?.[0] ??
-                              result.sender_profile?.last_name?.[0] ??
-                              'H';
-                            const secondaryInitial =
-                              result.sender_profile?.last_name?.[0] ??
-                              result.sender_profile?.first_name?.[1] ??
-                              '';
-                            const initials = `${initial}${secondaryInitial}`.trim() || 'HU';
-                            const label = result.sender_profile
-                              ? `${senderName} ${senderLast}`.trim() || 'Hidden User'
-                              : 'Hidden User';
+                            const firstName = result.sender_profile?.first_name?.trim() ?? '';
+                            const lastName = result.sender_profile?.last_name?.trim() ?? '';
+                            const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Hidden user';
+                            const firstInitial = firstName.charAt(0) || lastName.charAt(0) || 'U';
+                            const secondInitial = lastName.charAt(0) || firstName.charAt(1) || '';
+                            const initials = `${firstInitial}${secondInitial}`.toUpperCase().slice(0, 2) || 'U';
+                            const createdAt = new Date(result.created_at);
+                            const createdAtLabel = Number.isNaN(createdAt.getTime())
+                              ? ''
+                              : format(createdAt, 'MMM dd, yyyy');
 
                             return (
                               <>
                                 <Avatar className="h-8 w-8">
                                   {result.sender_profile?.avatar_url ? (
-                                    <AvatarImage src={result.sender_profile.avatar_url || undefined} />
+                                    <AvatarImage
+                                      src={result.sender_profile.avatar_url ?? undefined}
+                                      alt={displayName}
+                                    />
                                   ) : null}
                                   <AvatarFallback className="bg-primary/20 text-primary text-xs">
                                     {initials}
                                   </AvatarFallback>
                                 </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm font-medium">
-                                      {label}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {format(new Date(result.created_at), 'MMM dd, yyyy')}
-                                    </span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <span className="text-sm font-medium">{displayName}</span>
+                                    {createdAtLabel && (
+                                      <span className="text-xs text-muted-foreground">{createdAtLabel}</span>
+                                    )}
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    {result.content && highlightQuery(result.content, searchQuery)}
+                                    {result.content ? highlightQuery(result.content, searchQuery) : null}
                                   </p>
                                 </div>
                               </>

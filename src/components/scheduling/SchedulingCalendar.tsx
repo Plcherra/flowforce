@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
 import { CalendarGrid } from './CalendarGrid';
 import { ScheduleHeader } from './ScheduleHeader';
 import { ShiftDetailsPanel } from './ShiftDetailsPanel';
@@ -7,8 +8,8 @@ import { SchedulingFilters, type SchedulingFilterState } from './SchedulingFilte
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ViewType } from '@/types/scheduling-unified';
 import { useScheduling } from '@/contexts/SchedulingContext';
-import { useEvents } from '@/hooks/useEvents';
-import { EventDetailsPanel } from '@/components/events/EventDetailsPanel';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
 
 const INITIAL_FILTERS: SchedulingFilterState = {
@@ -45,6 +46,22 @@ export function SchedulingCalendar({
   const [filters, setFilters] = useState<SchedulingFilterState>(INITIAL_FILTERS);
   const isSchedulingMode = mode === 'scheduling';
   const effectiveHideShiftActions = hideShiftActions || !isSchedulingMode;
+
+  const eventRange = useMemo(() => {
+    if (currentView === 'month') {
+      return { start: startOfDay(startOfMonth(selectedDate)), end: endOfDay(endOfMonth(selectedDate)) };
+    }
+    if (currentView === 'day') {
+      return { start: startOfDay(selectedDate), end: endOfDay(selectedDate) };
+    }
+    return { start: startOfDay(startOfWeek(selectedDate)), end: endOfDay(endOfWeek(selectedDate)) };
+  }, [currentView, selectedDate]);
+
+  const {
+    events: overlayEvents,
+    loading: eventsLoading,
+    refresh: refreshEvents,
+  } = useCalendarEvents({ range: eventRange });
 
   const filteredShifts = useMemo<ShiftWithAssignments[]>(() => {
     return shifts.filter((shift) => {
@@ -89,20 +106,11 @@ export function SchedulingCalendar({
     });
   }, [filters, shifts]);
 
-  const { events } = useEvents();
-  const overlayEvents = events.filter(
-    (event) => event.type === 'vendor' || event.type === 'meeting' || event.type === 'event',
-  );
   const selectedEvent = useMemo(
     () => overlayEvents.find((event) => event.id === selectedEventId) ?? null,
     [overlayEvents, selectedEventId],
   );
-  const relatedShifts = useMemo(() => {
-    if (!selectedEvent) return [];
-    const ids = new Set(selectedEvent.related_shift_ids ?? []);
-    if (ids.size === 0) return [];
-    return shifts.filter((shift) => ids.has(shift.id));
-  }, [selectedEvent, shifts]);
+  const combinedLoading = loading || eventsLoading;
 
   useEffect(() => {
     if (selectedShift && !filteredShifts.some((shift) => shift.id === selectedShift)) {
@@ -184,7 +192,7 @@ export function SchedulingCalendar({
             onSelectShift={handleSelectShift}
             onSelectEvent={handleSelectEvent}
             filters={filters}
-            loading={loading}
+            loading={combinedLoading}
             isMobile={isMobile}
             overlayEvents={overlayEvents}
             hideShiftActions={effectiveHideShiftActions}
@@ -201,16 +209,6 @@ export function SchedulingCalendar({
           </div>
         )}
 
-        {selectedEvent && !selectedShift && !isMobile && !externalDetails && (
-          <div className="w-96">
-            <EventDetailsPanel
-              event={selectedEvent}
-              relatedShifts={relatedShifts}
-              onClose={() => handleSelectEvent(null)}
-              onViewShift={(shiftId) => handleSelectShift(shiftId)}
-            />
-          </div>
-        )}
       </div>
 
       {selectedShift && selectedSchedule && isMobile && !externalDetails && (
@@ -222,20 +220,17 @@ export function SchedulingCalendar({
         </div>
       )}
 
-      {selectedEvent && !selectedShift && isMobile && !externalDetails && (
-        <div className="fixed inset-0 bg-background z-50 overflow-auto">
-          <div className="p-4">
-            <EventDetailsPanel
-              event={selectedEvent}
-              relatedShifts={relatedShifts}
-              onClose={() => handleSelectEvent(null)}
-              onViewShift={(shiftId) => {
-                handleSelectEvent(null);
-                handleSelectShift(shiftId);
-              }}
-            />
-          </div>
-        </div>
+      {!externalDetails && (
+        <EventDetailsDrawer
+          event={selectedEvent}
+          open={Boolean(selectedEventId)}
+          onOpenChange={(open) => {
+            if (!open) {
+              handleSelectEvent(null);
+            }
+          }}
+          onRefresh={refreshEvents}
+        />
       )}
     </div>
   );
