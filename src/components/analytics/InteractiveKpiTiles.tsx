@@ -776,6 +776,16 @@ export default function InteractiveKpiTiles() {
         onOpenChange={setShowGoalDialog}
         saving={creating}
         onSubmit={async (values: GoalFormValues) => {
+          const summary = values.rewardSummary?.trim() ?? '';
+          const xp = values.xpValue != null && !Number.isNaN(values.xpValue) ? values.xpValue : null;
+          const rewardDetails =
+            summary || xp != null
+              ? {
+                  ...(summary ? { summary } : {}),
+                  ...(xp != null ? { xp } : {}),
+                }
+              : null;
+
           await createGoal({
             title: values.title,
             description: values.description ?? null,
@@ -783,6 +793,8 @@ export default function InteractiveKpiTiles() {
             target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
             priority: values.priority,
             progress: values.progress,
+            reward_type: values.rewardType,
+            reward_details: rewardDetails,
           });
         }}
       />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import CreateFormDialog from '@/components/forms/CreateFormDialog';
 import FormBuilderDialog from '@/components/forms/FormBuilderDialog';
@@ -31,7 +31,9 @@ export default function Forms() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
-  const builderDefaultsRef = useRef<Record<string, { title?: string | null; description?: string | null }>>({});
+  const [builderPrefill, setBuilderPrefill] = useState<{ title?: string | null; description?: string | null } | null>(
+    null,
+  );
   const [fillFormId, setFillFormId] = useState<string | null>(null);
 
   const canCreateForms = canUse('createForms');
@@ -74,34 +76,31 @@ export default function Forms() {
     ];
   }, [filteredForms, user?.id, canCreateForms]);
 
-  const ensureBuilderDefaults = (formId: string, fallback?: { title?: string | null; description?: string | null }) => {
-    const matchingForm = forms.find((form) => form.id === formId);
-    if (matchingForm) {
-      builderDefaultsRef.current[formId] = {
-        title: matchingForm.title ?? undefined,
-        description: matchingForm.description ?? undefined,
-      };
-      return;
-    }
-
-    if (fallback) {
-      builderDefaultsRef.current[formId] = fallback;
-    }
-  };
-
   const builderForm = builderFormId ? forms.find((form) => form.id === builderFormId) : null;
-  const builderDefaults = builderFormId ? builderDefaultsRef.current[builderFormId] : undefined;
-
-  const builderInitialTitle = builderForm?.title ?? builderDefaults?.title ?? 'New Form';
-  const builderInitialDescription = builderForm?.description ?? builderDefaults?.description ?? '';
+  const builderInitialTitle = builderForm?.title ?? builderPrefill?.title ?? 'New Form';
+  const builderInitialDescription = builderForm?.description ?? builderPrefill?.description ?? '';
 
   useEffect(() => {
     if (!builderFormId) return;
-    ensureBuilderDefaults(builderFormId);
+    const matchingForm = forms.find((form) => form.id === builderFormId);
+    if (matchingForm) {
+      setBuilderPrefill({
+        title: matchingForm.title ?? null,
+        description: matchingForm.description ?? null,
+      });
+    }
   }, [builderFormId, forms]);
 
   const handleOpenBuilder = (formId: string) => {
-    ensureBuilderDefaults(formId);
+    const matchingForm = forms.find((form) => form.id === formId);
+    setBuilderPrefill(
+      matchingForm
+        ? {
+            title: matchingForm.title ?? null,
+            description: matchingForm.description ?? null,
+          }
+        : null,
+    );
     setBuilderFormId(formId);
   };
 
@@ -180,7 +179,7 @@ export default function Forms() {
           onOpenChange={setCreateDialogOpen}
           onFormCreated={(formId) => {
             setCreateDialogOpen(false);
-            ensureBuilderDefaults(formId, { title: 'New Form', description: '' });
+            setBuilderPrefill({ title: 'New Form', description: '' });
             setBuilderFormId(formId);
             void refetchForms();
           }}
@@ -198,9 +197,9 @@ export default function Forms() {
           <FormBuilderDialog
             open
             onOpenChange={(open) => {
-              if (!open && builderFormId) {
-                delete builderDefaultsRef.current[builderFormId];
+              if (!open) {
                 setBuilderFormId(null);
+                setBuilderPrefill(null);
                 void refetchForms();
               }
             }}

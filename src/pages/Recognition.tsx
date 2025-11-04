@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -561,53 +560,65 @@ export default function Recognition() {
         </CardContent>
       </Card>
 
-      <Tabs value={filter} onValueChange={(value) => setFilter(value as RecognitionFilterKey)}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <TabsList className="w-full md:w-auto">
-            {FILTER_CONFIG.map((item) => (
-              <TabsTrigger key={item.key} value={item.key} className="text-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex w-full flex-wrap gap-1 rounded-md bg-muted p-1 md:w-auto">
+          {FILTER_CONFIG.map((item) => {
+            const isActive = filter === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                className={cn(
+                  'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-background hover:text-foreground',
+                )}
+                onClick={() => setFilter(item.key)}
+                aria-pressed={isActive}
+              >
                 {item.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-end">
-            <div className="relative w-full md:w-64">
-              <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                placeholder="Search recognitions..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </div>
-            <Select value={timelineFilter} onValueChange={(value) => setTimelineFilter(value as typeof timelineFilter)}>
-              <SelectTrigger className="md:w-44">
-                <SelectValue placeholder="Timeline" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMELINE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger className="md:w-48">
-                <SelectValue placeholder="Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All departments</SelectItem>
-                {departmentOptions.map(([id, name]) => (
-                  <SelectItem key={id} value={id}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              </button>
+            );
+          })}
         </div>
-      </Tabs>
+        <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-end">
+          <div className="relative w-full md:w-64">
+            <Filter className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Search recognitions..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </div>
+          <Select value={timelineFilter} onValueChange={(value) => setTimelineFilter(value as typeof timelineFilter)}>
+            <SelectTrigger className="md:w-44">
+              <SelectValue placeholder="Timeline" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMELINE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <SelectTrigger className="md:w-48">
+              <SelectValue placeholder="Department" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All departments</SelectItem>
+              {departmentOptions.map(([id, name]) => (
+                <SelectItem key={id} value={id}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <div className="mt-6 space-y-4">
         {loading ? (
           <div className="flex h-48 items-center justify-center">

@@ -8,9 +8,15 @@ import type { Tables } from '@/integrations/supabase/public-types';
 import { useFormSchemaStore } from '@/stores/useFormSchemaStore';
 import { useProfile } from '@/hooks/useProfile';
 
-type FormTable = Tables<'forms'>;
+/**
+ * Raw Supabase row shapes used by the forms feature.
+ * Exported so other modules can reason about the exact persisted structure.
+ */
+export type FormRow = Tables<'forms'>;
+export type FormFieldRow = Tables<'form_fields'>;
+export type FormSubmissionRow = Tables<'form_submissions'>;
 
-type FormQueryRow = FormTable & {
+type FormQueryRow = FormRow & {
   created_profile?: {
     id: string;
     first_name: string;
@@ -28,8 +34,6 @@ type FormQueryRow = FormTable & {
   }[];
 };
 
-type FormField = Tables<'form_fields'>;
-
 export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submission'> & {
   submissions_count: number;
   latest_submission_at: string | null;
@@ -37,7 +41,7 @@ export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submi
 
 const FORMS_QUERY_SCOPE = ['forms'] as const;
 
-const buildFormFieldFallback = (formId: string): FormField[] => {
+const buildFormFieldFallback = (formId: string): FormFieldRow[] => {
   const schema = useFormSchemaStore.getState().schema;
   if (!schema || schema.id !== formId) {
     return [];
@@ -51,10 +55,10 @@ const buildFormFieldFallback = (formId: string): FormField[] => {
       id: field.id,
       form_id: formId,
       field_order: order++,
-      field_type: field.type as FormField['field_type'],
+      field_type: field.type as FormFieldRow['field_type'],
       label: field.label,
       placeholder: field.placeholder ?? null,
-      description: null,
+      description: field.content ?? null,
       is_required: field.required ?? false,
       options: field.options && field.options.length > 0 ? field.options : null,
       validation_rules: field.validation ?? null,
@@ -221,7 +225,7 @@ export function useForms() {
     }
   };
 
-  const updateForm = async (formId: string, updates: Partial<FormTable>) => {
+  const updateForm = async (formId: string, updates: Partial<FormRow>) => {
     if (!companyId) {
       const error = new Error('Company context unavailable');
       toast({
@@ -303,7 +307,7 @@ export function useForms() {
 
       if (error) throw error;
 
-      const rows = data ?? [];
+      const rows = (data ?? []) as FormFieldRow[];
       if (!rows.length) {
         const fallback = buildFormFieldFallback(formId);
         if (fallback.length) {
@@ -324,7 +328,10 @@ export function useForms() {
     }
   };
 
-  const saveFormFields = async (formId: string, fields: Omit<FormField, 'id' | 'form_id' | 'created_at' | 'updated_at'>[]) => {
+  const saveFormFields = async (
+    formId: string,
+    fields: Omit<FormFieldRow, 'id' | 'form_id' | 'created_at' | 'updated_at'>[],
+  ) => {
     try {
       // Delete existing fields
       await supabase.from('form_fields').delete().eq('form_id', formId);

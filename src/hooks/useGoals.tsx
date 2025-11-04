@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import type { RecognitionDetails } from '@/types/recognition';
+
+const DEFAULT_RECOGNITION_XP = 110;
 
 export type GoalStatus = 'active' | 'completed' | 'draft';
 
@@ -16,8 +19,38 @@ type OwnerProfile = {
   avatar_url: string | null;
 };
 
+type GoalTaskWithDetails = {
+  id: string;
+  weight: number | null;
+  task: {
+    id: string;
+    title: string | null;
+    status: string | null;
+    assigned_to: string | null;
+    completed_at: string | null;
+    priority: string | null;
+  } | null;
+};
+
+type GoalRecognition = {
+  id: string;
+  rewardType: string;
+  awardedAt: string;
+  xpAwarded: number;
+  message: string | null;
+  user: OwnerProfile | null;
+  userId: string | null;
+};
+
 export type Goal = GoalRow & {
   owner?: OwnerProfile | null;
+  tasks: GoalTaskWithDetails[];
+  recognitions: GoalRecognition[];
+  xpSummary: {
+    totalXp: number;
+    rewardCount: number;
+  };
+  rewardSummary: string;
 };
 
 export interface GoalStats {
@@ -35,6 +68,8 @@ export interface CreateGoalInput {
   target_completion_date?: string | null;
   priority?: string | null;
   progress?: number;
+  reward_type?: string | null;
+  reward_details?: Record<string, unknown> | null;
 }
 
 export type UpdateGoalInput = TablesUpdate<'goals'>;
@@ -44,6 +79,54 @@ const goalsQueryKey = (companyId: string | null) => ['goals', companyId] as cons
 type GoalRecord = GoalRow & {
   owner_id?: string | null;
 };
+
+type RewardDetailsNormalized = {
+  xp: number | null;
+  summary: string;
+};
+
+function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
+  if (!raw) return null;
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as RecognitionDetails;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof raw === 'object') {
+    return raw as RecognitionDetails;
+  }
+  return null;
+}
+
+function parseRewardDetails(raw: unknown): RewardDetailsNormalized {
+  if (!raw) {
+    return { xp: null, summary: '' };
+  }
+
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as { xp?: number | null; summary?: string | null };
+      return {
+        xp: typeof parsed.xp === 'number' ? parsed.xp : null,
+        summary: parsed.summary ?? '',
+      };
+    } catch {
+      return { xp: null, summary: raw };
+    }
+  }
+
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    return {
+      xp: typeof obj.xp === 'number' ? obj.xp : null,
+      summary: typeof obj.summary === 'string' ? obj.summary : '',
+    };
+  }
+
+  return { xp: null, summary: '' };
+}
 
 async function fetchGoals(companyId: string): Promise<Goal[]> {
   const { data, error } = await supabase
@@ -57,6 +140,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
   }
 
   const rows = (data ?? []) as GoalRecord[];
+
   const filteredRows = rows.filter((goal) => goal.company_id === companyId);
 
   if (filteredRows.length !== rows.length) {
@@ -98,11 +182,145 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
       }, {});
   }
 
+  const goalIds = filteredRows.map((goal) => goal.id);
+
+  const goalTasksMap = new Map<string, GoalTaskWithDetails[]>();
+  const recognitionsMap = new Map<string, GoalRecognition[]>();
+
+  if (goalIds.length > 0) {
+    const [{ data: goalTasksData, error: goalTasksError }, { data: rewardsData, error: rewardsError }] =
+      await Promise.all([
+        supabase
+          .from('goal_tasks')
+          .select(
+            `
+              id,
+              goal_id,
+              weight,
+              task:tasks(
+                id,
+                title,
+                status,
+                assigned_to,
+                completed_at,
+                priority
+              )
+            `,
+          )
+          .in('goal_id', goalIds),
+        supabase
+          .from('goal_rewards')
+          .select('id, goal_id, reward_type, reward_details, awarded_at, user_id, company_id')
+          .in('goal_id', goalIds)
+          .eq('company_id', companyId),
+      ]);
+
+    if (goalTasksError) {
+      console.warn('[useGoals] Failed to load goal task links', goalTasksError);
+    } else {
+      (goalTasksData ?? []).forEach((record) => {
+        const goalId = (record as { goal_id?: string }).goal_id;
+        if (!goalId) return;
+        const existing = goalTasksMap.get(goalId) ?? [];
+        const sanitized: GoalTaskWithDetails = {
+          id: (record as { id?: string }).id ?? `${goalId}-${existing.length}`,
+          weight: (record as { weight?: number | null }).weight ?? null,
+          task: (record as { task?: GoalTaskWithDetails['task'] }).task ?? null,
+        };
+        existing.push(sanitized);
+        goalTasksMap.set(goalId, existing);
+      });
+    }
+
+    const rewardList = rewardsError ? [] : (rewardsData ?? []);
+    let rewardUserIds: string[] = [];
+    if (rewardList.length > 0) {
+      const availableIds = rewardList
+        .map((reward) => reward?.user_id)
+        .filter((value): value is string => Boolean(value));
+      rewardUserIds = Array.from(new Set(availableIds));
+    }
+
+    let rewardUsers: Record<string, OwnerProfile> = {};
+    if (rewardUserIds.length > 0) {
+      const { data: rewardProfiles, error: rewardProfileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url, company_id')
+        .in('id', rewardUserIds)
+        .eq('company_id', companyId);
+
+      if (rewardProfileError) {
+        console.warn('[useGoals] Failed to load recognition recipients', rewardProfileError);
+      } else {
+        rewardUsers = (rewardProfiles ?? []).reduce<Record<string, OwnerProfile>>((acc, profile) => {
+          acc[profile.id] = {
+            id: profile.id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            avatar_url: profile.avatar_url,
+          };
+          return acc;
+        }, {});
+      }
+    }
+
+    rewardList.forEach((reward) => {
+      const goalId = reward?.goal_id;
+      if (!goalId) return;
+      const existing = recognitionsMap.get(goalId) ?? [];
+      const details = parseRecognitionDetailsValue(reward?.reward_details);
+      const explicitXp =
+        typeof details?.xp_awarded === 'number'
+          ? details.xp_awarded
+          : details && typeof (details as Record<string, unknown>)?.xp === 'number'
+            ? ((details as Record<string, unknown>).xp as number)
+            : null;
+      const xp =
+        explicitXp != null
+          ? explicitXp
+          : reward.reward_type === 'recognition'
+            ? DEFAULT_RECOGNITION_XP
+            : 0;
+
+      const normalizedUser = reward?.user_id ? rewardUsers[reward.user_id] ?? null : null;
+
+      existing.push({
+        id: reward.id,
+        rewardType: reward.reward_type,
+        awardedAt: reward.awarded_at,
+        xpAwarded: Math.max(xp ?? DEFAULT_RECOGNITION_XP, 0),
+        message: details?.message ?? null,
+        user: normalizedUser,
+        userId: reward.user_id ?? null,
+      });
+
+      recognitionsMap.set(goalId, existing);
+    });
+  }
+
   return filteredRows.map((goal) => {
     const ownerId = goal.owner_id ?? goal.created_by ?? null;
+    const goalTasks = goalTasksMap.get(goal.id) ?? [];
+    const recognitionList = recognitionsMap.get(goal.id) ?? [];
+
+    const xpSummary = recognitionList.reduce(
+      (acc, recognition) => {
+        acc.totalXp += recognition.xpAwarded;
+        acc.rewardCount += 1;
+        return acc;
+      },
+      { totalXp: 0, rewardCount: 0 },
+    );
+
+    const rewardDetails = parseRewardDetails(goal.reward_details);
+
     return {
       ...goal,
       owner: ownerId ? owners[ownerId] ?? null : null,
+      tasks: goalTasks,
+      recognitions: recognitionList,
+      xpSummary,
+      rewardSummary: rewardDetails.summary ?? '',
     };
   });
 }
@@ -148,8 +366,8 @@ export function useGoals() {
         progress: input.progress ?? 0,
         priority: input.priority ?? 'medium',
         target_completion_date: input.target_completion_date ?? null,
-        reward_type: null,
-        reward_details: null,
+        reward_type: input.reward_type ?? 'recognition',
+        reward_details: input.reward_details ?? null,
         completed_at: input.status === 'completed' ? new Date().toISOString() : null,
       };
 

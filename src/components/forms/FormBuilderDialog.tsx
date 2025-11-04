@@ -4,7 +4,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useForms } from '@/hooks/useForms';
+import { useForms, type FormFieldRow } from '@/hooks/useForms';
 import { useToast } from '@/hooks/use-toast';
 import { useFormSchemaStore, useFormSchema } from '@/stores/useFormSchemaStore';
 import FormFieldLibrary, { type FieldTemplate } from '@/components/forms/editor/FormFieldLibrary';
@@ -12,7 +12,6 @@ import FormEditorPanel from '@/components/forms/editor/FormEditorPanel';
 import FormLivePreview from '@/components/forms/editor/FormLivePreview';
 import type { FormField } from '@/types/forms';
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
 import { Loader2 } from 'lucide-react';
 
 interface FormBuilderDialogProps {
@@ -71,7 +70,6 @@ export default function FormBuilderDialog({
       return;
     }
 
-    type FormFieldRow = Tables<'form_fields'>;
     const rows = ((data ?? []) as FormFieldRow[]).sort(
       (a, b) => (a.field_order ?? 0) - (b.field_order ?? 0),
     );
@@ -156,7 +154,7 @@ export default function FormBuilderDialog({
         return;
       }
 
-      type SaveField = Omit<Tables<'form_fields'>, 'id' | 'form_id' | 'created_at' | 'updated_at'>;
+      type SaveField = Omit<FormFieldRow, 'id' | 'form_id' | 'created_at' | 'updated_at'>;
       const payload: SaveField[] = fields.map((field, index) => ({
         field_order: index + 1,
         field_type: field.type,

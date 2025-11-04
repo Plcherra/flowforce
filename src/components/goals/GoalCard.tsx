@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { CalendarIcon, CheckCircle2, PencilLine, Trash2 } from 'lucide-react';
+import { CalendarIcon, CheckCircle2, Circle, Medal, PencilLine, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Goal, GoalStatus } from '@/hooks/useGoals';
 
@@ -25,6 +25,14 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
   const ownerName = goal.owner
     ? [goal.owner.first_name, goal.owner.last_name].filter(Boolean).join(' ')
     : 'Unassigned';
+
+  const tasks = goal.tasks ?? [];
+  const completedTasks = tasks.filter(
+    (item) => item.task?.status && item.task.status.toLowerCase() === 'completed',
+  ).length;
+  const totalTasks = tasks.length;
+  const xpSummary = goal.xpSummary ?? { totalXp: 0, rewardCount: 0 };
+  const rewardSummary = goal.rewardSummary?.trim() ?? '';
 
   const ownerInitials =
     goal.owner && (goal.owner.first_name || goal.owner.last_name)
@@ -61,6 +69,71 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
             value={goal.progress ?? 0}
             className="h-2"
           />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Linked tasks</span>
+              <span className="font-medium text-foreground">
+                {completedTasks}/{totalTasks} completed
+              </span>
+            </div>
+            {totalTasks > 0 ? (
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {tasks.slice(0, 3).map((taskLink) => {
+                  const task = taskLink.task;
+                  const done = task?.status?.toLowerCase() === 'completed';
+                  return (
+                    <li key={taskLink.id} className="flex items-start gap-2">
+                      {done ? (
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <Circle className="mt-0.5 h-4 w-4 text-muted-foreground/60" />
+                      )}
+                      <div className="flex-1">
+                        <p className="line-clamp-1 font-medium text-foreground">
+                          {task?.title ?? 'Untitled task'}
+                        </p>
+                        <p className="text-xs">
+                          {done ? 'Completed' : task?.status ?? 'In progress'}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+                {tasks.length > 3 && (
+                  <li className="text-xs text-muted-foreground">
+                    +{tasks.length - 3} more linked task{tasks.length - 3 === 1 ? '' : 's'}
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No tasks linked yet. Associate tasks to track progress automatically.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Medal className="h-4 w-4 text-amber-500" />
+                <span>Recognition XP</span>
+              </div>
+              <span className="font-semibold text-foreground">{xpSummary.totalXp}</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {xpSummary.rewardCount > 0
+                ? `${xpSummary.rewardCount} reward${xpSummary.rewardCount === 1 ? '' : 's'} linked to this goal`
+                : 'No recognitions earned yet'}
+            </p>
+            {rewardSummary && (
+              <p className="mt-2 text-xs text-muted-foreground">{rewardSummary}</p>
+            )}
+          </div>
         </div>
 
         <Separator />

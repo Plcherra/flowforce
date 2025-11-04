@@ -8,10 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Sparkles } from 'lucide-react';
+import { CalendarIcon, Gift, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Goal, GoalStatus } from '@/hooks/useGoals';
 import { useProfile } from '@/hooks/useProfile';
+
+const REWARD_TYPES = [
+  { value: 'recognition', label: 'Recognition XP' },
+  { value: 'bonus', label: 'Bonus' },
+  { value: 'badge', label: 'Badge' },
+  { value: 'time_off', label: 'Time Off' },
+  { value: 'custom', label: 'Custom' },
+] as const;
+
+export type GoalRewardType = (typeof REWARD_TYPES)[number]['value'];
 
 export interface GoalFormValues {
   title: string;
@@ -20,6 +30,9 @@ export interface GoalFormValues {
   priority: string;
   dueDate: Date | null;
   progress: number;
+  rewardType: GoalRewardType;
+  xpValue: number | null;
+  rewardSummary: string;
 }
 
 interface CreateGoalModalProps {
@@ -38,6 +51,9 @@ const defaultForm: GoalFormValues = {
   priority: 'medium',
   dueDate: null,
   progress: 0,
+  rewardType: 'recognition',
+  xpValue: 110,
+  rewardSummary: '',
 };
 
 export function CreateGoalModal({
@@ -52,9 +68,33 @@ export function CreateGoalModal({
   const [values, setValues] = useState<GoalFormValues>(defaultForm);
   const [error, setError] = useState<string | null>(null);
 
+  const parseRewardDetails = (details: Goal['reward_details']) => {
+    if (!details) return { xp: null, summary: '' };
+    if (typeof details === 'string') {
+      try {
+        const parsed = JSON.parse(details) as { xp?: number | null; summary?: string | null };
+        return {
+          xp: typeof parsed.xp === 'number' ? parsed.xp : null,
+          summary: parsed.summary ?? '',
+        };
+      } catch {
+        return { xp: null, summary: details };
+      }
+    }
+    if (typeof details === 'object') {
+      const typed = details as Record<string, unknown>;
+      return {
+        xp: typeof typed.xp === 'number' ? typed.xp : null,
+        summary: typeof typed.summary === 'string' ? typed.summary : '',
+      };
+    }
+    return { xp: null, summary: '' };
+  };
+
   useEffect(() => {
     if (open) {
       if (initialGoal) {
+        const rewardDetails = parseRewardDetails(initialGoal.reward_details);
         setValues({
           title: initialGoal.title ?? '',
           description: initialGoal.description ?? '',
@@ -64,6 +104,14 @@ export function CreateGoalModal({
             ? new Date(initialGoal.target_completion_date)
             : null,
           progress: initialGoal.progress ?? 0,
+          rewardType: (initialGoal.reward_type as GoalRewardType) ?? 'recognition',
+          xpValue:
+            typeof rewardDetails.xp === 'number'
+              ? rewardDetails.xp
+              : (initialGoal.reward_type as GoalRewardType) === 'recognition'
+                ? 110
+                : null,
+          rewardSummary: rewardDetails.summary ?? '',
         });
       } else if (aiSuggestion) {
         setValues({
@@ -87,6 +135,19 @@ export function CreateGoalModal({
 
     if (Number.isNaN(values.progress) || values.progress < 0 || values.progress > 100) {
       setError('Progress must be between 0 and 100');
+      return;
+    }
+
+    if (
+      values.rewardType === 'recognition' &&
+      (values.xpValue == null || Number.isNaN(values.xpValue) || values.xpValue < 0)
+    ) {
+      setError('Recognition goals require a non-negative XP reward value.');
+      return;
+    }
+
+    if (values.xpValue != null && values.xpValue < 0) {
+      setError('XP reward cannot be negative.');
       return;
     }
 
@@ -228,6 +289,75 @@ export function CreateGoalModal({
                       : Number(event.target.value),
                   }))
                 }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Gift className="h-4 w-4 text-amber-500" />
+              <span className="font-medium text-foreground">Rewards &amp; XP</span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="goal-reward-type">Reward Type</Label>
+                <Select
+                  value={values.rewardType}
+                  onValueChange={(value) =>
+                    setValues((prev) => {
+                      const nextType = value as GoalRewardType;
+                      return {
+                        ...prev,
+                        rewardType: nextType,
+                        xpValue:
+                          nextType === 'recognition'
+                            ? prev.xpValue ?? 110
+                            : null,
+                      };
+                    })
+                  }
+                >
+                  <SelectTrigger id="goal-reward-type">
+                    <SelectValue placeholder="Select reward" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REWARD_TYPES.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="goal-xp">XP Reward</Label>
+                <Input
+                  id="goal-xp"
+                  type="number"
+                  min={0}
+                  value={values.xpValue ?? ''}
+                  onChange={(event) => {
+                    const raw = event.target.value;
+                    const parsed = Number(raw);
+                    setValues((prev) => ({
+                      ...prev,
+                      xpValue: raw === '' || Number.isNaN(parsed) ? null : parsed,
+                    }));
+                  }}
+                  placeholder="110"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="goal-reward-summary">Reward Notes</Label>
+              <Textarea
+                id="goal-reward-summary"
+                value={values.rewardSummary}
+                onChange={(event) =>
+                  setValues((prev) => ({ ...prev, rewardSummary: event.target.value }))
+                }
+                placeholder="Describe how recognition or rewards will be granted for this goal."
+                rows={3}
               />
             </div>
           </div>

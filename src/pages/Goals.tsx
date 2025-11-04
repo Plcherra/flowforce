@@ -31,6 +31,22 @@ export default function GoalsPage() {
 
   const saving = creating || updating;
 
+  const buildRewardDetails = (values: GoalFormValues) => {
+    const summary = values.rewardSummary?.trim() ?? '';
+    const xp = values.xpValue != null && !Number.isNaN(values.xpValue) ? values.xpValue : null;
+    if (!summary && xp == null) {
+      return null;
+    }
+    const payload: Record<string, unknown> = {};
+    if (summary) {
+      payload.summary = summary;
+    }
+    if (xp != null) {
+      payload.xp = xp;
+    }
+    return payload;
+  };
+
   const handleCreate = async (values: GoalFormValues) => {
     await createGoal({
       title: values.title,
@@ -39,6 +55,8 @@ export default function GoalsPage() {
       target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
       priority: values.priority,
       progress: values.progress,
+      reward_type: values.rewardType,
+      reward_details: buildRewardDetails(values),
     });
   };
 
@@ -52,6 +70,8 @@ export default function GoalsPage() {
         priority: values.priority,
         target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
         progress: values.progress,
+        reward_type: values.rewardType,
+        reward_details: buildRewardDetails(values),
       },
     });
   };
