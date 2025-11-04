@@ -1,10 +1,11 @@
 import { Lightbulb, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { IdeaKpiInsight } from '../../hooks/useIdeaInsights';
-import IdeaMetricCard from './IdeaMetricCard';
+import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
+import IdeaMetricCard from '@/modules/operations/components/idea/IdeaMetricCard';
+import { KPICharts } from '@/components/operations/KPICharts';
 
-interface IdeaIdentifyPanelProps {
+interface IdentifyPanelProps {
   insights: IdeaKpiInsight[];
   loading: boolean;
   stageDescription: string;
@@ -25,7 +26,7 @@ function InsightsSkeleton() {
   );
 }
 
-export function IdeaIdentifyPanel({ insights, loading, stageDescription, onDiagnose }: IdeaIdentifyPanelProps) {
+export function IdentifyPanel({ insights, loading, stageDescription, onDiagnose }: IdentifyPanelProps) {
   const hasInsights = insights.length > 0;
 
   return (
@@ -47,30 +48,27 @@ export function IdeaIdentifyPanel({ insights, loading, stageDescription, onDiagn
 
       {loading ? (
         <InsightsSkeleton />
-      ) : hasInsights ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {insights.map((insight) => (
-            <IdeaMetricCard
-              key={insight.id}
-              title={insight.label}
-              value={insight.value}
-              delta={insight.delta ?? undefined}
-              unit={insight.unit ?? undefined}
-              description={insight.trend ? `Trend: ${insight.trend}` : undefined}
-            />
-          ))}
-        </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-border/60 bg-muted/30 p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No KPI insights available for the selected range. Try broadening the date window or ensure data sources are
-            connected.
-          </p>
-        </div>
+        <>
+          <KPICharts data={insights} title="KPI movement" />
+          {hasInsights ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {insights.map((insight) => (
+                <IdeaMetricCard
+                  key={insight.id}
+                  title={insight.label}
+                  value={insight.value}
+                  delta={insight.delta ?? undefined}
+                  unit={insight.unit ?? undefined}
+                  description={insight.trend ? `Trend: ${insight.trend}` : undefined}
+                />
+              ))}
+            </div>
+          ) : null}
+        </>
       )}
     </section>
   );
 }
 
-export default IdeaIdentifyPanel;
-
+export default IdentifyPanel;

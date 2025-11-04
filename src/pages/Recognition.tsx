@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { formatDistanceToNow, subDays } from 'date-fns';
 import { Loader2, RefreshCw, Sparkles, Filter, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -76,6 +76,12 @@ function ManualRecognitionDialog({
     source: 'manual',
     xpAwarded: null,
   });
+
+  useEffect(() => {
+    if (!open) {
+      setForm({ userId: '', message: '', source: 'manual', xpAwarded: null });
+    }
+  }, [open]);
 
   const resetAndClose = () => {
     onOpenChange(false);
@@ -601,38 +607,38 @@ export default function Recognition() {
             </Select>
           </div>
         </div>
-        <TabsContent value={filter}>
-          {loading ? (
-            <div className="flex h-48 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredRecognitions.length === 0 ? (
-            <Card className="p-10 text-center">
-              <Sparkles className="mx-auto h-10 w-10 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">No recognitions yet</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Run automations or give a shout-out to celebrate your first achievement.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {filteredRecognitions.map((record) => (
-                <RecognitionCard key={record.id} record={record} />
-              ))}
-            </div>
-          )}
-          {error ? (
-            <Card className="mt-4 border-destructive/40 bg-destructive/10 text-destructive">
-              <CardHeader>
-                <CardTitle className="text-base">Unable to load recognitions</CardTitle>
-                <CardDescription className="text-destructive">
-                  {error}. Please try refreshing or running automation again.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ) : null}
-        </TabsContent>
       </Tabs>
+      <div className="mt-6 space-y-4">
+        {loading ? (
+          <div className="flex h-48 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredRecognitions.length === 0 ? (
+          <Card className="p-10 text-center">
+            <Sparkles className="mx-auto h-10 w-10 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">No recognitions yet</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Run automations or give a shout-out to celebrate your first achievement.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {filteredRecognitions.map((record) => (
+              <RecognitionCard key={record.id} record={record} />
+            ))}
+          </div>
+        )}
+        {error ? (
+          <Card className="border-destructive/40 bg-destructive/10 text-destructive">
+            <CardHeader>
+              <CardTitle className="text-base">Unable to load recognitions</CardTitle>
+              <CardDescription className="text-destructive">
+                {error}. Please try refreshing or running automation again.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : null}
+      </div>
 
       <ManualRecognitionDialog
         open={dialogOpen}

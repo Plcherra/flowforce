@@ -3,7 +3,6 @@ import { Plus, Search } from 'lucide-react';
 import CreateFormDialog from '@/components/forms/CreateFormDialog';
 import FormBuilderDialog from '@/components/forms/FormBuilderDialog';
 import FormFillDialog from '@/components/forms/FormFillDialog';
-import FormFieldTest from '@/components/forms/FormFieldTest';
 import FormsSection from '@/components/forms/FormsSection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +30,6 @@ export default function Forms() {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
   const builderDefaultsRef = useRef<Record<string, { title?: string | null; description?: string | null }>>({});
   const [fillFormId, setFillFormId] = useState<string | null>(null);
@@ -134,9 +132,6 @@ export default function Forms() {
               New form
             </Button>
           )}
-          <Button variant="outline" onClick={() => setTestDialogOpen(true)}>
-            Test fields
-          </Button>
         </div>
       </div>
 
@@ -190,16 +185,6 @@ export default function Forms() {
             void refetchForms();
           }}
         />
-      </ErrorBoundary>
-
-      <ErrorBoundary
-        fallback={
-          <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-            Unable to load the test fields dialog.
-          </div>
-        }
-      >
-        <FormFieldTest open={testDialogOpen} onOpenChange={setTestDialogOpen} />
       </ErrorBoundary>
 
       {builderFormId && (

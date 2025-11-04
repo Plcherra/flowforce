@@ -2008,8 +2008,11 @@ export type Database = {
       }
       learning_courses: {
         Row: {
+          auto_schedule_eligible: boolean
           category: string
           certification_code: string | null
+          certification_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           delivery_mode: string
@@ -2018,6 +2021,7 @@ export type Database = {
           featured: boolean
           id: string
           level_requirement: number
+          role_unlock: string[]
           slug: string
           target_roles: string[]
           title: string
@@ -2025,9 +2029,11 @@ export type Database = {
           xp_reward: number
         }
         Insert: {
+          auto_schedule_eligible?: boolean
           company_id?: string
           category: string
           certification_code?: string | null
+          certification_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_mode?: string
@@ -2036,6 +2042,7 @@ export type Database = {
           featured?: boolean
           id?: string
           level_requirement?: number
+          role_unlock?: string[]
           slug: string
           target_roles?: string[]
           title: string
@@ -2043,9 +2050,11 @@ export type Database = {
           xp_reward?: number
         }
         Update: {
+          auto_schedule_eligible?: boolean
           company_id?: string
           category?: string
           certification_code?: string | null
+          certification_id?: string | null
           created_at?: string
           created_by?: string | null
           delivery_mode?: string
@@ -2054,6 +2063,7 @@ export type Database = {
           featured?: boolean
           id?: string
           level_requirement?: number
+          role_unlock?: string[]
           slug?: string
           target_roles?: string[]
           title?: string
@@ -2076,8 +2086,80 @@ export type Database = {
             referencedColumns: ["code"]
           },
           {
+            foreignKeyName: "learning_courses_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "certification_catalog"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "learning_courses_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_completions: {
+        Row: {
+          certification_awarded: string | null
+          company_id: string | null
+          completed_at: string
+          course_id: string
+          employee_id: string
+          id: string
+          metadata: Json
+          passed: boolean
+          xp_earned: number
+        }
+        Insert: {
+          certification_awarded?: string | null
+          company_id?: string | null
+          completed_at?: string
+          course_id: string
+          employee_id: string
+          id?: string
+          metadata?: Json
+          passed?: boolean
+          xp_earned?: number
+        }
+        Update: {
+          certification_awarded?: string | null
+          company_id?: string | null
+          completed_at?: string
+          course_id?: string
+          employee_id?: string
+          id?: string
+          metadata?: Json
+          passed?: boolean
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_completions_certification_awarded_fkey"
+            columns: ["certification_awarded"]
+            isOneToOne: false
+            referencedRelation: "certification_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_completions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_completions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_completions_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -6751,8 +6833,10 @@ export const Constants = {
           description: string | null
           id: string
           issuer: string | null
+          linked_course_id: string | null
           requirement_config: Json
           title: string
+          unlocks_role: string | null
           updated_at: string
           xp_reward: number
         }
@@ -6763,8 +6847,10 @@ export const Constants = {
           description?: string | null
           id?: string
           issuer?: string | null
+          linked_course_id?: string | null
           requirement_config?: Json
           title: string
+          unlocks_role?: string | null
           updated_at?: string
           xp_reward?: number
         }
@@ -6775,8 +6861,10 @@ export const Constants = {
           description?: string | null
           id?: string
           issuer?: string | null
+          linked_course_id?: string | null
           requirement_config?: Json
           title?: string
+          unlocks_role?: string | null
           updated_at?: string
           xp_reward?: number
         }
@@ -6787,6 +6875,13 @@ export const Constants = {
             isOneToOne: false
             referencedRelation: "badge_catalog"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "certification_catalog_linked_course_id_fkey"
+            columns: ["linked_course_id"]
+            isOneToOne: false
+            referencedRelation: "learning_courses"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6852,6 +6947,55 @@ export const Constants = {
           },
           {
             foreignKeyName: "certification_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_certifications: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          certification_id: string
+          employee_id: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by?: string | null
+          certification_id: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          certification_id?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_certifications_awarded_by_fkey"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certifications_certification_id_fkey"
+            columns: ["certification_id"]
+            isOneToOne: false
+            referencedRelation: "certification_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certifications_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"

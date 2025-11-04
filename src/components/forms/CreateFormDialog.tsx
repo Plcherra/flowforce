@@ -4,7 +4,20 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, FileText, Upload, X, Users, Loader2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  Calendar,
+  Clock,
+  Edit,
+  FileText,
+  Loader2,
+  Star,
+  Upload,
+  Users,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -25,7 +38,7 @@ interface FormTemplate {
   name: string;
   description: string;
   category: string;
-  icon: string;
+  icon: LucideIcon;
   fields: number;
   popular?: boolean;
 }
@@ -36,7 +49,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Employee Feedback',
     description: 'Collect feedback from employees about workplace satisfaction',
     category: 'HR',
-    icon: 'Users',
+    icon: Users,
     fields: 8,
     popular: true,
   },
@@ -45,7 +58,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Event Registration',
     description: 'Register attendees for company events',
     category: 'Events',
-    icon: 'Calendar',
+    icon: Calendar,
     fields: 6,
   },
   {
@@ -53,7 +66,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Incident Report',
     description: 'Report workplace incidents and safety concerns',
     category: 'Safety',
-    icon: 'AlertTriangle',
+    icon: AlertTriangle,
     fields: 10,
     popular: true,
   },
@@ -62,7 +75,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Leave Request',
     description: 'Submit time off and leave requests',
     category: 'HR',
-    icon: 'Clock',
+    icon: Clock,
     fields: 7,
   },
   {
@@ -70,7 +83,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Customer Survey',
     description: 'Gather customer feedback and satisfaction ratings',
     category: 'Customer',
-    icon: 'Star',
+    icon: Star,
     fields: 12,
   },
   {
@@ -78,7 +91,7 @@ const formTemplates: FormTemplate[] = [
     name: 'Training Evaluation',
     description: 'Evaluate training effectiveness and gather feedback',
     category: 'Training',
-    icon: 'BookOpen',
+    icon: BookOpen,
     fields: 9,
   },
 ];
@@ -194,67 +207,95 @@ export default function CreateFormDialog({
   };
 
   const renderMethodSelection = () => {
-    const cardBaseClasses =
-      'relative cursor-pointer border-2 transition-shadow hover:shadow-md hover:border-primary/20';
-    const disabledClasses = creating ? 'pointer-events-none opacity-60 cursor-not-allowed' : '';
+    const methods: Array<{
+      id: string;
+      title: string;
+      description: string;
+      icon: LucideIcon;
+      onSelect: () => void;
+      badge?: string;
+    }> = [
+      {
+        id: 'scratch',
+        title: 'Start from scratch',
+        description: 'Create a custom form from the ground up',
+        icon: Edit,
+        onSelect: () => {
+          void createFormAndStartBuilder();
+        },
+      },
+      {
+        id: 'template',
+        title: 'Use a template',
+        description: 'Choose from pre-built form templates',
+        icon: FileText,
+        onSelect: () => setCurrentStep('template-selection'),
+      },
+      {
+        id: 'upload',
+        title: 'Create from file',
+        description: 'Upload a document to generate a form',
+        icon: Upload,
+        badge: 'Beta',
+        onSelect: () => setCurrentStep('file-upload'),
+      },
+    ];
+
+    const isDisabled = creating;
 
     return (
       <div className="space-y-6">
         <div className="text-center">
           <h3 className="mb-2 text-lg font-semibold">How would you like to create your form?</h3>
-          <p className="text-muted-foreground">Choose the method that works best for you</p>
+          <p className="text-sm text-muted-foreground">Choose the method that works best for you.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card
-            className={`${cardBaseClasses} ${disabledClasses}`}
-            onClick={() => {
-              if (creating) return;
-              void createFormAndStartBuilder();
-            }}
-          >
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Edit className="h-6 w-6 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Start from scratch</h4>
-            <CardDescription>Create a custom form from the ground up</CardDescription>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {methods.map((method) => {
+            const Icon = method.icon;
+            const handleActivate = () => {
+              if (isDisabled) return;
+              method.onSelect();
+            };
 
-          <Card
-            className={`${cardBaseClasses} ${disabledClasses}`}
-            onClick={() => {
-              if (creating) return;
-              setCurrentStep('template-selection');
-            }}
-          >
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Use a template</h4>
-            <CardDescription>Choose from pre-built form templates</CardDescription>
-          </CardContent>
-        </Card>
-
-          <Card
-            className={`${cardBaseClasses} ${disabledClasses}`}
-            onClick={() => {
-              if (creating) return;
-              setCurrentStep('file-upload');
-            }}
-          >
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Upload className="h-6 w-6 text-primary" />
-            </div>
-            <h4 className="font-semibold mb-2">Create from file</h4>
-            <Badge variant="secondary" className="text-xs mb-2">Beta</Badge>
-            <CardDescription>Upload a document to generate a form</CardDescription>
-          </CardContent>
-        </Card>
-      </div>
+            return (
+              <Card
+                key={method.id}
+                role="button"
+                tabIndex={isDisabled ? -1 : 0}
+                aria-disabled={isDisabled}
+                className={`relative h-full min-h-[220px] border-2 transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
+                  isDisabled
+                    ? 'pointer-events-none cursor-not-allowed opacity-60'
+                    : 'hover:border-primary/20 hover:shadow-md'
+                }`}
+                onClick={handleActivate}
+                onKeyDown={(event) => {
+                  if (isDisabled) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    method.onSelect();
+                  }
+                }}
+              >
+                <CardContent className="flex h-full flex-col items-center gap-4 p-6 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-base font-semibold">{method.title}</h4>
+                    <CardDescription>{method.description}</CardDescription>
+                  </div>
+                  {method.badge && (
+                    <Badge variant="secondary" className="mt-auto text-xs uppercase tracking-wide">
+                      {method.badge}
+                    </Badge>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -274,6 +315,7 @@ export default function CreateFormDialog({
       <div className="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
         {formTemplates.map((template) => {
           const isSelected = selectedTemplate?.id === template.id;
+          const Icon = template.icon;
           return (
             <Card
               key={template.id}
@@ -289,7 +331,7 @@ export default function CreateFormDialog({
                 <div className="mb-3 flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10">
-                      <Users className="h-4 w-4 text-primary" />
+                      <Icon className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">{template.name}</h4>
@@ -391,20 +433,24 @@ export default function CreateFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="relative max-h-[80vh] overflow-y-auto sm:max-w-[800px]">
-        <DialogHeader>
-          <DialogTitle>Create New Form</DialogTitle>
-          <DialogDescription>
-            Create a new form to collect data from your team or customers.
-          </DialogDescription>
-        </DialogHeader>
-        
-        {currentStep === 'select-method' && renderMethodSelection()}
-        {currentStep === 'template-selection' && renderTemplateSelection()}
-        {currentStep === 'file-upload' && renderFileUpload()}
+      <DialogContent className="relative flex max-h-[85vh] flex-col overflow-hidden p-0 sm:max-w-[900px]">
+        <div className="flex max-h-full flex-1 flex-col">
+          <DialogHeader className="space-y-2 border-b px-6 py-6">
+            <DialogTitle>Create New Form</DialogTitle>
+            <DialogDescription>
+              Create a new form to collect data from your team or customers.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            {currentStep === 'select-method' && renderMethodSelection()}
+            {currentStep === 'template-selection' && renderTemplateSelection()}
+            {currentStep === 'file-upload' && renderFileUpload()}
+          </div>
+        </div>
 
         {creating && (
-          <div className="pointer-events-auto absolute inset-0 z-10 flex items-center justify-center bg-background/75">
+          <div className="pointer-events-auto absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               Preparing your form…

@@ -31,21 +31,32 @@ const formatDateTime = (iso?: string | null) => {
   return format(date, 'EEE, MMM d · HH:mm');
 };
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: EventDetailsDrawerProps) {
   const eventId = event?.id ?? null;
   const { linkVisitToShifts, deleteEvent } = useEvents();
-  const { links, loading: linksLoading, error: linksError, refresh } = useEventLinks(eventId);
+  const canManageLinks = Boolean(eventId && UUID_PATTERN.test(eventId));
+  const { links, loading: linksLoading, error: linksError, refresh } = useEventLinks(canManageLinks ? eventId : null);
   const [activeTab, setActiveTab] = useState<'details' | 'participants' | 'shifts'>('details');
   const [busy, setBusy] = useState(false);
 
-  const linkedShiftIds = useMemo(() => links.map((link) => link.shift_id), [links]);
+  const fallbackShiftIds = useMemo(() => event?.shiftIds ?? [], [event]);
+  const linkedShiftIds = useMemo(() => {
+    if (links.length > 0) {
+      return links.map((link) => link.shift_id);
+    }
+    return fallbackShiftIds;
+  }, [links, fallbackShiftIds]);
 
   const handleLinkUpdate = async (next: string[]) => {
     if (!eventId) return;
     setBusy(true);
     try {
       await linkVisitToShifts(eventId, next);
-      await refresh();
+      if (canManageLinks) {
+        await refresh();
+      }
       onRefresh?.();
     } finally {
       setBusy(false);
@@ -149,16 +160,30 @@ export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: Eve
                     storeId={event?.storeId ?? null}
                     linkedShiftIds={linkedShiftIds}
                     onChange={handleLinkUpdate}
-                    disabled={!eventId}
+                    disabled={busy || linksLoading}
                     busy={busy || linksLoading}
                   />
+                  {!canManageLinks && eventId && (
+                    <div className="rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                      Linked shifts will sync once this event is saved to the calendar.
+                    </div>
+                  )}
                   <div className="space-y-2 text-xs text-muted-foreground">
-                    {links.map((link) => (
-                      <div key={link.id} className="rounded-md border px-3 py-2">
-                        <p className="font-semibold text-foreground">{link.shift?.title || 'Shift'}</p>
-                        <p>{timeRange(link.shift)}</p>
+                    {links.length > 0 &&
+                      links.map((link) => (
+                        <div key={link.id} className="rounded-md border px-3 py-2">
+                          <p className="font-semibold text-foreground">{link.shift?.title || 'Shift'}</p>
+                          <p>{timeRange(link.shift)}</p>
+                        </div>
+                      ))}
+                    {links.length === 0 && fallbackShiftIds.length > 0 && (
+                      <div className="rounded-md border px-3 py-2">
+                        <p className="font-semibold text-foreground">Linked shifts</p>
+                        <p className="text-xs text-muted-foreground">
+                          {fallbackShiftIds.length} shift{fallbackShiftIds.length === 1 ? '' : 's'} linked locally.
+                        </p>
                       </div>
-                    ))}
+                    )}
                     {linksLoading && <div>Updating linked shifts…</div>}
                   </div>
                 </TabsContent>

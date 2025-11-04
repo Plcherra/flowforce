@@ -226,16 +226,21 @@ export default function FormBuilderDialog({
         </DialogHeader>
 
         <div className="relative flex flex-1 flex-col">
-          <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="min-h-0 min-w-[220px]">
+          <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 overflow-hidden">
+            <ResizablePanel
+              defaultSize={20}
+              minSize={15}
+              maxSize={25}
+              className="flex min-h-0 min-w-[220px] flex-col"
+            >
               <FormFieldLibrary onAddField={handleAddTemplate} />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50} minSize={40} className="min-h-0">
+            <ResizablePanel defaultSize={50} minSize={40} className="flex min-h-0 flex-col">
               <FormEditorPanel />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={30} minSize={25} className="min-h-0">
+            <ResizablePanel defaultSize={30} minSize={25} className="flex min-h-0 flex-col">
               <FormLivePreview />
             </ResizablePanel>
           </ResizablePanelGroup>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
-import type { EventAttendee } from '@/hooks/useEvents';
+import type { AppEvent, EventAttendee } from '@/hooks/useEvents';
 
 type CalendarEventRow = Tables<'calendar_events'> & {
   event_participants?: Tables<'event_participants'>[] | null;
@@ -213,3 +213,51 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
     refresh,
   };
 }
+
+export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
+  const participants: CalendarEventParticipant[] = (event.attendees ?? []).map((attendee) => ({
+    id: attendee.id,
+    name: attendee.name,
+    avatar_url: attendee.avatar_url ?? null,
+    role: attendee.role ?? null,
+  }));
+
+  const rawRow: CalendarEventRow = {
+    id: event.id,
+    company_id: null,
+    store_id: null,
+    created_by: null,
+    title: event.title ?? 'Untitled',
+    description: event.description ?? null,
+    location: event.location ?? null,
+    event_type: event.type ?? 'event',
+    color: event.color ?? null,
+    start_time: event.start,
+    end_time: event.end ?? null,
+    attendees: event.attendees ?? [],
+    related_shift_ids: event.related_shift_ids ?? [],
+    checklist: event.checklist ?? [],
+    vendor: event.vendor ?? null,
+    metadata: { source: event.source ?? 'local' } as Record<string, unknown>,
+    created_at: event.created_at ?? new Date().toISOString(),
+    updated_at: event.created_at ?? new Date().toISOString(),
+    event_participants: [],
+    event_shift_links: [],
+  };
+
+  return {
+    id: event.id,
+    title: event.title ?? 'Untitled',
+    description: event.description ?? null,
+    start: event.start,
+    end: event.end ?? null,
+    location: event.location ?? null,
+    type: event.type ?? 'event',
+    color: event.color ?? null,
+    storeId: null,
+    participants,
+    shiftIds: event.related_shift_ids ?? [],
+    metadata: rawRow.metadata,
+    raw: rawRow,
+  };
+};

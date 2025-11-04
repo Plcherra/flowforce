@@ -4,17 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { IdeaKpiInsight } from '../../hooks/useIdeaInsights';
-import type { useIdeaAssessments } from '../../hooks/useIdeaAssessments';
+import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
+import type { useIdeaAssessments } from '@/modules/operations/hooks/useIdeaAssessments';
 
-interface IdeaAssessPanelProps {
+interface AssessPanelProps {
   insights: IdeaKpiInsight[];
   assessments: ReturnType<typeof useIdeaAssessments>;
   stageDescription: string;
   onRestart: () => void;
 }
 
-export function IdeaAssessPanel({ insights, assessments, stageDescription, onRestart }: IdeaAssessPanelProps) {
+export function AssessPanel({ insights, assessments, stageDescription, onRestart }: AssessPanelProps) {
   const [saving, setSaving] = useState(false);
   const hasAssessments = assessments.data.length > 0;
 
@@ -79,9 +79,7 @@ export function IdeaAssessPanel({ insights, assessments, stageDescription, onRes
                 </CardTitle>
                 <CardDescription>
                   ROI{' '}
-                  {metric.roi === null
-                    ? 'n/a'
-                    : `${metric.roi > 0 ? '+' : ''}${metric.roi.toFixed(1)}%`}
+                  {metric.roi === null ? 'n/a' : `${metric.roi > 0 ? '+' : ''}${metric.roi.toFixed(1)}%`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
@@ -114,12 +112,8 @@ export function IdeaAssessPanel({ insights, assessments, stageDescription, onRes
       ) : (
         <Card className="border-border/60 bg-background/70 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-              Awaiting actions
-            </CardTitle>
-            <CardDescription>
-              Complete execute-stage work to unlock assessment insights.
-            </CardDescription>
+            <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Awaiting actions</CardTitle>
+            <CardDescription>Complete execute-stage work to unlock assessment insights.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>
@@ -133,5 +127,4 @@ export function IdeaAssessPanel({ insights, assessments, stageDescription, onRes
   );
 }
 
-export default IdeaAssessPanel;
-
+export default AssessPanel;

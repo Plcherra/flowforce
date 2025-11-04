@@ -3,9 +3,9 @@ import { format } from 'date-fns';
 import { CalendarRange, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useIdeaContext } from '../../contexts/IdeaProvider';
+import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
 
-interface IdeaHeaderProps {
+interface IDEAHeaderProps {
   onRefresh?: () => void;
   stageLoading?: boolean;
   children?: React.ReactNode;
@@ -17,7 +17,7 @@ const RANGE_PRESETS: Record<string, number> = {
   'last-30-days': 30,
 };
 
-export function IdeaHeader({ onRefresh, stageLoading = false, children }: IdeaHeaderProps) {
+export function IDEAHeader({ onRefresh, stageLoading = false, children }: IDEAHeaderProps) {
   const { range, setRange } = useIdeaContext();
 
   const activePreset = useMemo<string>(() => {
@@ -76,4 +76,4 @@ export function IdeaHeader({ onRefresh, stageLoading = false, children }: IdeaHe
   );
 }
 
-export default IdeaHeader;
+export default IDEAHeader;

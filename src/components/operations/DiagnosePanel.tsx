@@ -3,17 +3,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { IdeaKpiInsight } from '../../hooks/useIdeaInsights';
-import type { useIdeaDiagnostics } from '../../hooks/useIdeaDiagnostics';
+import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
+import type { useIdeaDiagnostics } from '@/modules/operations/hooks/useIdeaDiagnostics';
+import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
+import { useAIKPIInsights } from '@/hooks/useAIKPIInsights';
 
-interface IdeaDiagnosePanelProps {
+interface DiagnosePanelProps {
   insights: IdeaKpiInsight[];
   diagnostics: ReturnType<typeof useIdeaDiagnostics>;
   stageDescription: string;
   onRecommend: () => void;
 }
 
-export function IdeaDiagnosePanel({ insights, diagnostics, stageDescription, onRecommend }: IdeaDiagnosePanelProps) {
+export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecommend }: DiagnosePanelProps) {
+  const { companyId, range } = useIdeaContext();
+  const aiInsightsQuery = useAIKPIInsights(companyId, {
+    start: range.start,
+    end: range.end,
+  });
+  const aiInsights = aiInsightsQuery.data ?? [];
   const anomalies = insights.filter((insight) => Math.abs(insight.delta ?? 0) >= 1);
 
   return (
@@ -42,7 +50,7 @@ export function IdeaDiagnosePanel({ insights, diagnostics, stageDescription, onR
       ) : null}
 
       {diagnostics.loading ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 4 }).map((_, index) => (
             <Card key={index} className="border-border/60 bg-muted/30">
               <CardHeader>
@@ -56,7 +64,7 @@ export function IdeaDiagnosePanel({ insights, diagnostics, stageDescription, onR
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Card className="border-border/60 bg-background/70 shadow-sm">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Top anomalies</CardTitle>
@@ -91,9 +99,51 @@ export function IdeaDiagnosePanel({ insights, diagnostics, stageDescription, onR
                 diagnostics.data.causes.map((cause) => (
                   <div key={cause.id} className="rounded-md border border-border/40 bg-muted/20 p-3">
                     <div className="text-sm font-medium text-foreground">{cause.summary}</div>
-                    <div className="text-xs text-muted-foreground">Confidence {Math.round(cause.confidence * 100)}%</div>
+                    <div className="text-xs text-muted-foreground">
+                      Confidence {Math.round(cause.confidence * 100)}%
+                    </div>
                   </div>
                 ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/60 bg-background/70 shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI KPI insights</CardTitle>
+              <CardDescription>Signals surfaced by GPT co-pilot.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {aiInsightsQuery.isLoading ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3">
+                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                ))
+              ) : aiInsightsQuery.isError ? (
+                <p className="text-sm text-muted-foreground">
+                  Unable to load AI KPI insights right now. Try again after refreshing.
+                </p>
+              ) : aiInsights.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  AI KPI insights will populate once diagnostic runs complete.
+                </p>
+              ) : (
+                aiInsights.map((entry) => {
+                  const changeValue = typeof entry.change === 'number' ? entry.change : 0;
+                  const formattedChange = `${changeValue > 0 ? '+' : ''}${changeValue.toFixed(1)}`;
+
+                  return (
+                    <div key={entry.metric} className="space-y-1 rounded-md border border-border/50 bg-muted/20 p-3">
+                      <div className="text-sm font-medium text-foreground">{entry.metric}</div>
+                      <div className="text-xs text-muted-foreground capitalize">Signal: {entry.signal}</div>
+                      <div className="text-xs text-muted-foreground">Change: {formattedChange}%</div>
+                      <div className="text-xs text-muted-foreground">Impact: {entry.impact}</div>
+                    </div>
+                  );
+                })
               )}
             </CardContent>
           </Card>
@@ -103,5 +153,4 @@ export function IdeaDiagnosePanel({ insights, diagnostics, stageDescription, onR
   );
 }
 
-export default IdeaDiagnosePanel;
-
+export default DiagnosePanel;

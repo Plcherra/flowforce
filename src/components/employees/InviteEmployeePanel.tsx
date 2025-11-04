@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,12 @@ export function InviteEmployeePanel() {
       value: role.id,
     }));
   }, [roles]);
+
+  useEffect(() => {
+    if (!roles.length) return;
+    if (roles.some((role) => role.id === form.role)) return;
+    setForm((prev) => ({ ...prev, role: roles[0].id }));
+  }, [roles, form.role]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -159,7 +165,7 @@ function deriveRolePayload(selectedValue: string, roles: Array<{ id: string; nam
   if (!match) {
     return {
       roleKey: normalizeRole(selectedValue),
-      roleId: match?.id ?? null,
+      roleId: null,
     };
   }
 

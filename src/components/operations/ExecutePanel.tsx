@@ -6,12 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
-import { useIdeaContext } from '../../contexts/IdeaProvider';
-import type { IdeaKpiInsight } from '../../hooks/useIdeaInsights';
-import type { useIdeaDiagnostics } from '../../hooks/useIdeaDiagnostics';
-import type { useIdeaActions } from '../../hooks/useIdeaActions';
+import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
+import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
+import type { useIdeaDiagnostics } from '@/modules/operations/hooks/useIdeaDiagnostics';
+import type { useIdeaActions } from '@/modules/operations/hooks/useIdeaActions';
 
-interface IdeaExecutePanelProps {
+interface ExecutePanelProps {
   insights: IdeaKpiInsight[];
   diagnostics: ReturnType<typeof useIdeaDiagnostics>;
   actionsState: ReturnType<typeof useIdeaActions>;
@@ -19,13 +19,13 @@ interface IdeaExecutePanelProps {
   onStageComplete: (cycleId: string) => void;
 }
 
-export function IdeaExecutePanel({
+export function ExecutePanel({
   insights,
   diagnostics,
   actionsState,
   stageDescription,
   onStageComplete,
-}: IdeaExecutePanelProps) {
+}: ExecutePanelProps) {
   const { companyId, range, activeCycleId, setActiveCycleId } = useIdeaContext();
   const [creatingCycle, setCreatingCycle] = useState(false);
   const [cycleError, setCycleError] = useState<Error | null>(null);
@@ -175,7 +175,9 @@ export function IdeaExecutePanel({
             </CardHeader>
             <CardContent className="space-y-4">
               {pendingActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No pending actions. Add recommendations to the queue.</p>
+                <p className="text-sm text-muted-foreground">
+                  No pending actions. Add recommendations to the queue.
+                </p>
               ) : (
                 pendingActions.map((action) => (
                   <div key={action.id} className="rounded-md border border-border/50 bg-muted/20 p-3">
@@ -204,33 +206,37 @@ export function IdeaExecutePanel({
 
           <Card className="border-border/60 bg-background/70 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI recommendations</CardTitle>
-              <CardDescription>Convert recommended plays into tasks.</CardDescription>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Recommended plays</CardTitle>
+              <CardDescription>Queue AI recommendations for execution.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {recommendations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Run diagnostics to generate targeted recommendations.</p>
+                <p className="text-sm text-muted-foreground">No AI recommendations yet. Diagnose to generate actions.</p>
               ) : (
                 recommendations.map((recommendation) => {
-                  const alreadyQueued = queuedRecommendationIds.has(recommendation.id);
+                  const queued = queuedRecommendationIds.has(recommendation.id);
                   return (
-                    <div key={recommendation.id} className="rounded-md border border-border/40 bg-muted/20 p-3">
+                    <div key={recommendation.id} className="rounded-md border border-border/50 bg-muted/20 p-3">
                       <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <div className="text-sm font-medium text-foreground">{recommendation.action}</div>
-                          <div className="text-xs text-muted-foreground">{recommendation.impact}</div>
-                        </div>
-                        {alreadyQueued ? (
-                          <Badge variant="secondary">Queued</Badge>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
-                          >
-                            Add to queue
-                          </Button>
-                        )}
+                        <div className="text-sm font-medium text-foreground">{recommendation.action}</div>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {queued ? 'Queued' : 'Suggested'}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">{recommendation.impact}</div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={queued}
+                          onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
+                        >
+                          Queue action
+                        </Button>
+                        <Button size="sm" onClick={() => handleCreateAction(recommendation.action, recommendation.id)}>
+                          <Zap className="mr-2 h-4 w-4" />
+                          Execute now
+                        </Button>
                       </div>
                     </div>
                   );
@@ -238,36 +244,41 @@ export function IdeaExecutePanel({
               )}
             </CardContent>
           </Card>
+
+          {executedActions.length > 0 ? (
+            <Card className="lg:col-span-2 border-border/60 bg-background/70 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Executed plays</CardTitle>
+                <CardDescription>Completed actions with recorded outcomes.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {executedActions.map((action) => (
+                  <div key={action.id} className="rounded-md border border-border/40 bg-muted/20 p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium text-foreground">{action.action_name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Executed {new Date(action.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {action.status}
+                      </Badge>
+                    </div>
+                    {action.result ? (
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        {JSON.stringify(action.result, null, 2)}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       )}
-
-      {executedActions.length > 0 ? (
-        <Card className="border-border/60 bg-background/70 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Recently executed</CardTitle>
-            <CardDescription>Track automated and manual completions.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {executedActions.map((action) => (
-              <div key={action.id} className="rounded-md border border-border/30 bg-muted/20 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{action.action_name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Executed {new Date(action.created_at).toLocaleString()}
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="border-emerald-400 text-emerald-500">
-                    Executed
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
     </section>
   );
 }
 
-export default IdeaExecutePanel;
+export default ExecutePanel;

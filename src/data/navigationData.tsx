@@ -23,10 +23,7 @@ import {
   ClipboardCheck,
   UserCheck,
   Users,
-  UserPlus,
   User,
-  Layers,
-  Settings,
   Shield,
   Crown,
   Trophy,
@@ -84,8 +81,8 @@ export const navigationSections: NavigationSection[] = [
     translationKey: 'hrDevelopment',
     items: [
       { name: 'AI Insights', href: '/ai-insights', icon: Brain, translationKey: 'aiInsights' },
+      { name: 'Team Directory', href: '/employees', icon: Users, translationKey: 'employees' },
       { name: 'Performance', href: '/performance', icon: TrendingUp, translationKey: 'performance', roles: ['supervisor', 'manager', 'company_admin'] },
-      { name: 'Time Off', href: '/scheduling/timeoff', icon: CalendarClock, translationKey: 'timeOff' },
       { name: 'Recognition', href: '/recognition', icon: Star, translationKey: 'recognition' },
       { name: 'Leaderboard', href: '/leaderboard', icon: Trophy, translationKey: 'leaderboard' },
       { name: 'Certifications', href: '/certifications', icon: Award, translationKey: 'certifications' },
@@ -118,19 +115,7 @@ export const navigationSections: NavigationSection[] = [
       { name: 'Reports', href: '/reports', icon: FileText, translationKey: 'reports' },
     ],
   },
-  {
-    title: 'Admin & Setup',
-    translationKey: 'adminSetup',
-    roles: ['manager', 'admin', 'company_admin', 'owner'],
-    items: [
-      { name: 'User Management', href: '/admin', icon: UserCheck, translationKey: 'userManagement', roles: ['admin', 'company_admin', 'owner'] },
-      { name: 'Employees', href: '/employees', icon: Users, translationKey: 'employees', roles: ['manager', 'admin', 'company_admin', 'owner'] },
-      { name: 'Invite Employee', href: '/employees?invite=1', icon: UserPlus, translationKey: 'inviteEmployee', roles: ['admin', 'company_admin', 'owner'] },
-      { name: 'Team Management', href: '/position-management', icon: User, translationKey: 'positionManagement', roles: ['manager', 'admin', 'company_admin', 'owner'] },
-      { name: 'Sections & Permissions', href: '/sections-permissions', icon: Layers, translationKey: 'sectionsPermissions', roles: ['company_admin', 'owner'] },
-      { name: 'System Settings', href: '/settings', icon: Settings, translationKey: 'systemSettings', roles: ['admin', 'company_admin', 'owner'] },
-    ],
-  },
+  // All admin functions now handled in Team Directory
 ];
 
 export const getRoleBadgeColor = (role: string) => {

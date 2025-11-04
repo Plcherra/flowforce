@@ -27,20 +27,6 @@ export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) 
     assignRole.mutate({ employeeId, roleId });
   };
 
-  const suggestions = useCopilotSuggestion('employee_management', {
-    context: {
-      role: employee?.role,
-      department: employee?.department_id,
-      engagement: employee?.engagement_score ?? null,
-      availableRoles: availableRoleOptions,
-    },
-    onAccept: (suggestion) => {
-      if (suggestion.roleId) {
-        handleAssignRole(suggestion.roleId);
-      }
-    },
-  });
-
   const availableRoleOptions = useMemo(
     () =>
       roles.map((role) => ({
@@ -49,6 +35,19 @@ export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) 
       })),
     [roles],
   );
+
+  const suggestions = useCopilotSuggestion('employee_management', {
+    context: {
+      role: employee?.role,
+      department: employee?.department_id,
+      availableRoles: availableRoleOptions,
+    },
+    onAccept: (suggestion) => {
+      if (suggestion.roleId) {
+        handleAssignRole(suggestion.roleId);
+      }
+    },
+  });
 
   return (
     <div className="space-y-6">

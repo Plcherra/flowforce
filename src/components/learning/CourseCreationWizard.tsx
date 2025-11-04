@@ -7,6 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { CourseCreationPayload, CourseModuleInput, LearningDeliveryMode } from '@/types/learning';
@@ -33,16 +36,26 @@ const CATEGORY_OPTIONS = [
 
 const ROLE_OPTIONS = [
   { value: 'staff', label: 'Staff' },
+  { value: 'barista', label: 'Barista' },
   { value: 'supervisor', label: 'Supervisor' },
   { value: 'manager', label: 'Manager' },
   { value: 'company_admin', label: 'Company Admin' },
   { value: 'owner', label: 'Owner' },
 ];
 
+const ROLE_UNLOCK_OPTIONS = [
+  { value: 'staff', label: 'Staff' },
+  { value: 'barista', label: 'Barista' },
+  { value: 'supervisor', label: 'Supervisor' },
+  { value: 'manager', label: 'Manager' },
+];
+
+const NO_CERTIFICATION_VALUE = 'none';
+
 interface CertificationOption {
-  code: string;
+  id: string;
   title: string;
-  min_level: number | null;
+  unlocksRole: string | null;
 }
 
 interface CourseCreationWizardProps {
@@ -61,20 +74,30 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
   const [deliveryMode, setDeliveryMode] = useState<LearningDeliveryMode>('self_paced');
   const [targetRoles, setTargetRoles] = useState<string[]>(['staff']);
   const [levelRequirement, setLevelRequirement] = useState(1);
-  const [certificationCode, setCertificationCode] = useState<string | null>(null);
+  const [certificationId, setCertificationId] = useState<string | null>(null);
+  const [roleUnlock, setRoleUnlock] = useState<string[]>([]);
+  const [autoScheduleEligible, setAutoScheduleEligible] = useState(false);
   const [manualXpReward, setManualXpReward] = useState(300);
 
   const [modules, setModules] = useState<CourseModuleInput[]>([]);
-  const [moduleDraft, setModuleDraft] = useState<CourseModuleInput>({
-    title: '',
-    description: '',
-    estimatedMinutes: 30,
-    xpAward: 100,
-    content: '',
-  });
 
   const [certificationOptions, setCertificationOptions] = useState<CertificationOption[]>([]);
   const [loadingCertifications, setLoadingCertifications] = useState(false);
+
+  const roleLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    [...ROLE_OPTIONS, ...ROLE_UNLOCK_OPTIONS].forEach((role) => {
+      if (!map.has(role.value)) {
+        map.set(role.value, role.label);
+      }
+    });
+    return map;
+  }, []);
+
+  const selectedCertification = useMemo(
+    () => (certificationId ? certificationOptions.find((option) => option.id === certificationId) ?? null : null),
+    [certificationId, certificationOptions],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -85,23 +108,18 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
       setDeliveryMode('self_paced');
       setTargetRoles(['staff']);
       setLevelRequirement(1);
-      setCertificationCode(null);
+      setCertificationId(null);
+      setRoleUnlock([]);
+      setAutoScheduleEligible(false);
       setManualXpReward(300);
       setModules([]);
-      setModuleDraft({
-        title: '',
-        description: '',
-        estimatedMinutes: 30,
-        xpAward: 100,
-        content: '',
-      });
       return;
     }
 
     setLoadingCertifications(true);
     supabase
-      .from('badge_catalog')
-      .select('code, title, min_level')
+      .from('certification_catalog')
+      .select('id, title, unlocks_role')
       .order('title', { ascending: true })
       .then(({ data, error }) => {
         if (error) {
@@ -111,14 +129,22 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
         }
         setCertificationOptions(
           (data ?? []).map((row) => ({
-            code: row.code,
+            id: row.id,
             title: row.title,
-            min_level: row.min_level,
+            unlocksRole: row.unlocks_role,
           })),
         );
       })
       .finally(() => setLoadingCertifications(false));
   }, [open]);
+
+  useEffect(() => {
+    if (!certificationId) return;
+    const option = certificationOptions.find((item) => item.id === certificationId);
+    if (option?.unlocksRole && roleUnlock.length === 0) {
+      setRoleUnlock([option.unlocksRole]);
+    }
+  }, [certificationId, certificationOptions, roleUnlock.length]);
 
   const workload = useMemo(() => calculateCourseWorkload(modules), [modules]);
   const estimatedHours = useMemo(() => Math.round((workload.totalMinutes / 60) * 100) / 100, [workload.totalMinutes]);
@@ -188,13 +214,15 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
       title: title.trim(),
       description: description.trim() || undefined,
       category,
-      levelRequirement: levelRequirement,
-      xpReward: xpReward,
+      levelRequirement,
+      xpReward,
       estimatedHours,
       deliveryMode,
       targetRoles: targetRoles.length > 0 ? targetRoles : ['staff'],
       featured: false,
-      certificationCode: certificationCode ?? undefined,
+      certificationId: certificationId ?? undefined,
+      roleUnlock,
+      autoScheduleEligible,
       modules,
     };
 
@@ -258,9 +286,10 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
           ))}
         </div>
 
+        <div className="flex flex-col max-h-[85vh] overflow-y-auto">
         {step === 0 && (
-          <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col p-6 space-y-6">
+            <section className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="course-title">Course title</Label>
                 <Input
@@ -272,22 +301,22 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
               </div>
               <div className="space-y-2">
                 <Label htmlFor="course-category">Category</Label>
-                <select
-                  id="course-category"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                >
-                  {CATEGORY_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                <Select value={category} onValueChange={(value) => setCategory(value)}>
+                  <SelectTrigger id="course-category">
+                    <SelectValue placeholder="Choose a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
+            </section>
 
-            <div className="space-y-2">
+            <section className="space-y-2">
               <Label htmlFor="course-description">Description</Label>
               <Textarea
                 id="course-description"
@@ -296,10 +325,10 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                 placeholder="What outcomes should learners expect?"
                 rows={4}
               />
-            </div>
+            </section>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+            <section className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-3">
                 <Label>Delivery mode</Label>
                 <div className="grid gap-2">
                   {DELIVERY_OPTIONS.map((option) => (
@@ -311,7 +340,11 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                         deliveryMode === option.value ? 'border-primary bg-primary/5' : 'border-muted'
                       }`}
                     >
-                      <div className={`mt-1 h-2 w-2 rounded-full ${deliveryMode === option.value ? 'bg-primary' : 'bg-muted-foreground/40'}`} />
+                      <div
+                        className={`mt-1 h-2 w-2 rounded-full ${
+                          deliveryMode === option.value ? 'bg-primary' : 'bg-muted-foreground/40'
+                        }`}
+                      />
                       <div>
                         <p className="text-sm font-medium">{option.label}</p>
                         <p className="text-xs text-muted-foreground">{option.description}</p>
@@ -320,8 +353,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                   ))}
                 </div>
               </div>
-
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label>Target roles</Label>
                   <div className="flex flex-wrap gap-2">
@@ -338,8 +370,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                     ))}
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 md:grid-cols-2">
                   <div className="space-y-1">
                     <Label htmlFor="level-requirement">Recommended level</Label>
                     <Input
@@ -362,183 +393,224 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                     />
                   </div>
                 </div>
+              </div>
+            </section>
 
-                <div className="space-y-1">
-                  <Label htmlFor="certification">Linked certification</Label>
-                  {loadingCertifications ? (
-                    <div className="flex items-center gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading certifications...
-                    </div>
-                  ) : (
-                    <select
-                      id="certification"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      value={certificationCode ?? ''}
-                      onChange={(event) => {
-                        const selected = event.target.value;
-                        setCertificationCode(selected || null);
-                      }}
-                    >
-                      <option value="">No certification</option>
+            <section className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="linked-certification">Linked certification</Label>
+                {loadingCertifications ? (
+                  <div className="flex items-center gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading certifications...
+                  </div>
+                ) : (
+                  <Select
+                    value={certificationId ?? NO_CERTIFICATION_VALUE}
+                    onValueChange={(value) => setCertificationId(value === NO_CERTIFICATION_VALUE ? null : value)}
+                  >
+                    <SelectTrigger id="linked-certification">
+                      <SelectValue placeholder="Optional" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NO_CERTIFICATION_VALUE}>No certification</SelectItem>
                       {certificationOptions.map((option) => (
-                        <option key={option.code} value={option.code}>
+                        <SelectItem key={option.id} value={option.id}>
                           {option.title}
-                        </option>
+                        </SelectItem>
                       ))}
-                    </select>
-                  )}
-                </div>
+                    </SelectContent>
+                  </Select>
+                )}
+                {selectedCertification?.unlocksRole && (
+                  <p className="text-xs text-muted-foreground">
+                    Completers unlock {roleLabelMap.get(selectedCertification.unlocksRole) ?? selectedCertification.unlocksRole}.
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Unlocks roles</Label>
+                <ToggleGroup
+                  type="multiple"
+                  className="flex flex-wrap gap-2"
+                  value={roleUnlock}
+                  onValueChange={(values) => setRoleUnlock(values)}
+                >
+                  {ROLE_UNLOCK_OPTIONS.map((role) => (
+                    <ToggleGroupItem
+                      key={role.value}
+                      value={role.value}
+                      className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                    >
+                      {role.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+                <p className="text-xs text-muted-foreground">
+                  Choose which scheduling roles this course unlocks for graduates.
+                </p>
+              </div>
+            </section>
+
+            <section className="flex items-center justify-between rounded-lg border p-4">
+              <div className="max-w-md space-y-1">
+                <Label className="text-sm font-medium">Auto-schedule eligibility</Label>
+                <p className="text-xs text-muted-foreground">
+                  Automatically mark teammates as eligible for shift scheduling after they complete this course.
+                </p>
+              </div>
+              <Switch checked={autoScheduleEligible} onCheckedChange={setAutoScheduleEligible} />
+            </section>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="flex flex-col p-6 space-y-6">
+            <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                      <Layers className="h-4 w-4 text-primary" />
+                      Course modules
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {modules.length === 0 ? (
+                      <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                        Start building modules. Each module can include reading, video, or assessments.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {modules.map((module, index) => (
+                          <div key={`${module.title}-${index}`} className="flex items-start justify-between rounded-md border p-3">
+                            <div>
+                              <p className="font-medium text-sm">
+                                {index + 1}. {module.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{module.description}</p>
+                              <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {module.estimatedMinutes} min
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Target className="h-3 w-3" />
+                                  {module.xpAward} XP
+                                </span>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => removeModule(index)}>
+                              <span className="sr-only">Remove module</span>
+                              ✕
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="space-y-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                      <Plus className="h-4 w-4 text-primary" />
+                      Add module
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="module-title">Module title</Label>
+                      <Input
+                        id="module-title"
+                        value={moduleDraft.title}
+                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, title: event.target.value }))}
+                        placeholder="Example: Opening checklist"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="module-description">Description</Label>
+                      <Textarea
+                        id="module-description"
+                        rows={3}
+                        value={moduleDraft.description}
+                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, description: event.target.value }))}
+                        placeholder="What does this module cover?"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="module-duration">Duration (minutes)</Label>
+                        <Input
+                          id="module-duration"
+                          type="number"
+                          min={5}
+                          value={moduleDraft.estimatedMinutes}
+                          onChange={(event) =>
+                            setModuleDraft((prev) => ({ ...prev, estimatedMinutes: Number(event.target.value) }))
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="module-xp">XP reward</Label>
+                        <Input
+                          id="module-xp"
+                          type="number"
+                          min={50}
+                          step={25}
+                          value={moduleDraft.xpAward}
+                          onChange={(event) =>
+                            setModuleDraft((prev) => ({ ...prev, xpAward: Number(event.target.value) }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="module-content">Content / assets</Label>
+                      <Textarea
+                        id="module-content"
+                        rows={3}
+                        value={moduleDraft.content}
+                        onChange={(event) => setModuleDraft((prev) => ({ ...prev, content: event.target.value }))}
+                        placeholder="Link to SOPs, videos, or assessments"
+                      />
+                    </div>
+                    <Button type="button" className="w-full" onClick={addModule}>
+                      Add module
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                      Course workload
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span>Total modules</span>
+                      <span className="font-semibold">{modules.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Total time</span>
+                      <span className="font-semibold">{estimatedHours} hours</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>XP award</span>
+                      <span className="font-semibold">{xpReward} XP</span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         )}
 
-        {step === 1 && (
-          <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <Layers className="h-4 w-4 text-primary" />
-                    Course modules
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {modules.length === 0 ? (
-                    <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-                      Start building modules. Each module can include reading, video, or assessments.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {modules.map((module, index) => (
-                        <div key={`${module.title}-${index}`} className="flex items-start justify-between rounded-md border p-3">
-                          <div>
-                            <p className="font-medium text-sm">
-                              {index + 1}. {module.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{module.description}</p>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {module.estimatedMinutes} min
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Target className="h-3 w-3" />
-                                {module.xpAward} XP
-                              </span>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" onClick={() => removeModule(index)}>
-                            <span className="sr-only">Remove module</span>
-                            ✕
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-            <div className="space-y-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <Plus className="h-4 w-4 text-primary" />
-                    Add module
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="module-title">Module title</Label>
-                    <Input
-                      id="module-title"
-                      value={moduleDraft.title}
-                      onChange={(event) => setModuleDraft((prev) => ({ ...prev, title: event.target.value }))}
-                      placeholder="Example: Opening checklist"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="module-description">Description</Label>
-                    <Textarea
-                      id="module-description"
-                      rows={3}
-                      value={moduleDraft.description}
-                      onChange={(event) => setModuleDraft((prev) => ({ ...prev, description: event.target.value }))}
-                      placeholder="What does this module cover?"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="module-duration">Duration (minutes)</Label>
-                      <Input
-                        id="module-duration"
-                        type="number"
-                        min={5}
-                        value={moduleDraft.estimatedMinutes}
-                        onChange={(event) =>
-                          setModuleDraft((prev) => ({ ...prev, estimatedMinutes: Number(event.target.value) }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="module-xp">XP reward</Label>
-                      <Input
-                        id="module-xp"
-                        type="number"
-                        min={50}
-                        step={25}
-                        value={moduleDraft.xpAward}
-                        onChange={(event) =>
-                          setModuleDraft((prev) => ({ ...prev, xpAward: Number(event.target.value) }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="module-content">Content / assets</Label>
-                    <Textarea
-                      id="module-content"
-                      rows={3}
-                      value={moduleDraft.content}
-                      onChange={(event) => setModuleDraft((prev) => ({ ...prev, content: event.target.value }))}
-                      placeholder="Link to SOPs, videos, or assessments"
-                    />
-                  </div>
-                  <Button type="button" className="w-full" onClick={addModule}>
-                    Add module
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <ShieldCheck className="h-4 w-4 text-primary" />
-                    Course workload
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span>Total modules</span>
-                    <span className="font-semibold">{modules.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Total time</span>
-                    <span className="font-semibold">{estimatedHours} hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>XP award</span>
-                    <span className="font-semibold">{xpReward} XP</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
-
         {step === 2 && (
-          <div className="space-y-6">
+          <div className="flex flex-col p-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">Course summary</CardTitle>
@@ -550,7 +622,18 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
                   <Badge variant="outline">Level {levelRequirement}+</Badge>
                   <Badge variant="outline">{estimatedHours} hrs</Badge>
                   <Badge variant="outline">{xpReward} XP</Badge>
-                  {certificationCode && <Badge variant="default">Cert: {certificationCode}</Badge>}
+                  {selectedCertification && <Badge variant="default">Certification: {selectedCertification.title}</Badge>}
+                  {targetRoles.map((role) => (
+                    <Badge key={`target-${role}`} variant="outline">
+                      Audience: {roleLabelMap.get(role) ?? role}
+                    </Badge>
+                  ))}
+                  {roleUnlock.map((role) => (
+                    <Badge key={`unlock-${role}`} variant="secondary">
+                      Unlocks {roleLabelMap.get(role) ?? role}
+                    </Badge>
+                  ))}
+                  {autoScheduleEligible && <Badge variant="secondary">Auto-schedule eligible</Badge>}
                 </div>
                 <div>
                   <p className="text-lg font-semibold">{title}</p>
@@ -574,6 +657,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
             </Card>
           </div>
         )}
+        </div>
 
         <DialogFooter className="mt-6 flex items-center justify-between">
           <div className="space-x-2">

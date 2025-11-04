@@ -1,13 +1,22 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ComponentType, ErrorInfo, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
+export interface ErrorBoundaryRenderProps {
+  error: Error;
+  resetErrorBoundary: () => void;
+}
+
 interface Props {
-  children: ReactNode;
+  children?: ReactNode;
   fallback?: ReactNode;
-  showDetails?: boolean;
+  fallbackRender?: (props: ErrorBoundaryRenderProps) => ReactNode;
+  FallbackComponent?: ComponentType<ErrorBoundaryRenderProps>;
+  onReset?: () => void;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  showDetails?: boolean;
 }
 
 interface State {
@@ -32,80 +41,92 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+    console.error('ErrorBoundary caught:', error, errorInfo);
+
     this.setState({
+      hasError: true,
       error,
       errorInfo,
     });
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
   }
 
-  private handleRetry = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
+  private resetErrorBoundary = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
+    this.props.onReset?.();
   };
 
   public render() {
-    if (this.state.hasError) {
-      // Custom fallback UI
-      if (this.props.fallback) {
-        return this.props.fallback;
+    const { hasError, error } = this.state;
+    const { children, fallback, fallbackRender, FallbackComponent } = this.props;
+
+    if (hasError && error) {
+      const renderProps = {
+        error,
+        resetErrorBoundary: this.resetErrorBoundary,
+      };
+
+      if (FallbackComponent) {
+        return <FallbackComponent {...renderProps} />;
       }
 
-      // Default error UI
+      if (fallbackRender) {
+        return fallbackRender(renderProps);
+      }
+
+      if (fallback) {
+        return fallback;
+      }
+
       return (
-        <ErrorFallback
-          error={this.state.error}
+        <DefaultErrorFallback
+          error={error}
           errorInfo={this.state.errorInfo}
-          onRetry={this.handleRetry}
+          resetErrorBoundary={this.resetErrorBoundary}
           showDetails={this.props.showDetails}
         />
       );
     }
 
-    return this.props.children;
+    return children ?? null;
   }
 }
 
-interface ErrorFallbackProps {
-  error: Error | null;
+interface DefaultFallbackProps {
+  error: Error;
   errorInfo: ErrorInfo | null;
-  onRetry: () => void;
+  resetErrorBoundary: () => void;
   showDetails?: boolean;
 }
 
-import { useNavigate } from 'react-router-dom';
-
-function ErrorFallback({ error, errorInfo, onRetry, showDetails = false }: ErrorFallbackProps) {
+function DefaultErrorFallback({
+  error,
+  errorInfo,
+  resetErrorBoundary,
+  showDetails = false,
+}: DefaultFallbackProps) {
   const navigate = useNavigate();
-  
+
   const handleGoHome = () => {
     navigate('/', { replace: true });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-lg border border-border/60 shadow-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             <AlertTriangle className="h-12 w-12 text-destructive" />
           </div>
           <CardTitle className="text-xl">Something went wrong</CardTitle>
-          <CardDescription>
-            An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
-          </CardDescription>
+          <CardDescription>An unexpected error occurred. Please try again.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={onRetry} className="flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button onClick={resetErrorBoundary} className="flex-1">
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
@@ -114,16 +135,15 @@ function ErrorFallback({ error, errorInfo, onRetry, showDetails = false }: Error
               Go Home
             </Button>
           </div>
-          
-          {showDetails && error && (
+          {showDetails && (
             <details className="mt-4">
               <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
                 Error Details
               </summary>
-              <div className="mt-2 p-3 bg-muted rounded-md">
+              <div className="mt-2 space-y-2 rounded-md bg-muted p-3">
                 <p className="text-sm font-mono text-destructive">{error.message}</p>
-                {errorInfo && (
-                  <pre className="mt-2 text-xs text-muted-foreground overflow-auto">
+                {errorInfo?.componentStack && (
+                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap text-xs text-muted-foreground">
                     {errorInfo.componentStack}
                   </pre>
                 )}
@@ -136,12 +156,5 @@ function ErrorFallback({ error, errorInfo, onRetry, showDetails = false }: Error
   );
 }
 
-// Hook version for functional components
-export function useErrorHandler() {
-  return (error: Error, errorInfo?: ErrorInfo) => {
-    console.error('Error caught by useErrorHandler:', error, errorInfo);
-    // You can add additional error reporting logic here
-  };
-}
-
+export { ErrorBoundary };
 export default ErrorBoundary;

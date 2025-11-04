@@ -1,13 +1,13 @@
-import IdeaIdentifyPanel from '../IdeaIdentifyPanel';
-import IdeaDiagnosePanel from '../IdeaDiagnosePanel';
-import IdeaExecutePanel from '../IdeaExecutePanel';
-import IdeaAssessPanel from '../IdeaAssessPanel';
+import IdentifyPanel from '@/components/operations/IdentifyPanel';
+import DiagnosePanel from '@/components/operations/DiagnosePanel';
+import ExecutePanel from '@/components/operations/ExecutePanel';
+import AssessPanel from '@/components/operations/AssessPanel';
 import { IdeaContext, type IdeaContextValue } from '../../../contexts/IdeaProvider';
 import type { IdeaKpiInsight } from '../../../hooks/useIdeaInsights';
 
 const meta = {
   title: 'Operations/IDEA/Panels',
-  component: IdeaIdentifyPanel,
+  component: IdentifyPanel,
 };
 
 export default meta;
@@ -73,7 +73,7 @@ const StoryStageProvider = ({ stage, children }: { stage: IdeaContextValue['stag
 
 export const IdentifyStagePanel = () => (
   <StoryStageProvider stage="identify">
-    <IdeaIdentifyPanel
+    <IdentifyPanel
       insights={sampleInsights}
       loading={false}
       stageDescription="Surface KPI swings and frontline signals in seconds."
@@ -84,7 +84,7 @@ export const IdentifyStagePanel = () => (
 
 export const DiagnoseStagePanel = () => (
   <StoryStageProvider stage="diagnose">
-    <IdeaDiagnosePanel
+    <DiagnosePanel
       insights={sampleInsights}
       diagnostics={diagnosticsMock as any}
       stageDescription="Inspect anomalies with AI-generated causal analysis."
@@ -95,7 +95,7 @@ export const DiagnoseStagePanel = () => (
 
 export const ExecuteStagePanel = () => (
   <StoryStageProvider stage="execute">
-    <IdeaExecutePanel
+    <ExecutePanel
       insights={sampleInsights}
       diagnostics={diagnosticsMock as any}
       actionsState={actionsStateMock as any}
@@ -107,7 +107,7 @@ export const ExecuteStagePanel = () => (
 
 export const AssessStagePanel = () => (
   <StoryStageProvider stage="assess">
-    <IdeaAssessPanel
+    <AssessPanel
       insights={sampleInsights}
       assessments={assessmentsMock as any}
       stageDescription="Measure outcomes, capture ROI, and reset the cycle."

@@ -6,11 +6,11 @@ import { useIdeaInsights } from '../../hooks/useIdeaInsights';
 import { useIdeaDiagnostics } from '../../hooks/useIdeaDiagnostics';
 import { useIdeaActions } from '../../hooks/useIdeaActions';
 import { useIdeaAssessments } from '../../hooks/useIdeaAssessments';
-import IdeaHeader from './IdeaHeader';
-import IdeaIdentifyPanel from './IdeaIdentifyPanel';
-import IdeaDiagnosePanel from './IdeaDiagnosePanel';
-import IdeaExecutePanel from './IdeaExecutePanel';
-import IdeaAssessPanel from './IdeaAssessPanel';
+import IDEAHeader from '@/components/operations/IDEAHeader';
+import IdentifyPanel from '@/components/operations/IdentifyPanel';
+import DiagnosePanel from '@/components/operations/DiagnosePanel';
+import ExecutePanel from '@/components/operations/ExecutePanel';
+import AssessPanel from '@/components/operations/AssessPanel';
 
 const STAGES: { id: IdeaStage; label: string; description: string }[] = [
   { id: 'identify', label: 'Identify', description: 'Surface operational signals and KPI shifts.' },
@@ -40,7 +40,7 @@ export function IdeaLayout() {
   return (
     <Tabs value={stage} onValueChange={handleStageChange}>
       <div className="space-y-6">
-        <IdeaHeader onRefresh={refreshInsights} stageLoading={insightsLoading}>
+        <IDEAHeader onRefresh={refreshInsights} stageLoading={insightsLoading}>
           <TabsList>
             {STAGES.map((stageDefinition) => (
               <TabsTrigger key={stageDefinition.id} value={stageDefinition.id} className="capitalize">
@@ -48,7 +48,7 @@ export function IdeaLayout() {
               </TabsTrigger>
             ))}
           </TabsList>
-        </IdeaHeader>
+        </IDEAHeader>
 
         {insightsError ? (
           <Alert variant="destructive">
@@ -59,7 +59,7 @@ export function IdeaLayout() {
         ) : null}
 
         <TabsContent value="identify" className="mt-0">
-          <IdeaIdentifyPanel
+          <IdentifyPanel
             insights={insights}
             loading={insightsLoading}
             stageDescription={STAGES[0].description}
@@ -68,7 +68,7 @@ export function IdeaLayout() {
         </TabsContent>
 
         <TabsContent value="diagnose" className="mt-0">
-          <IdeaDiagnosePanel
+          <DiagnosePanel
             insights={insights}
             diagnostics={diagnostics}
             stageDescription={STAGES[1].description}
@@ -77,7 +77,7 @@ export function IdeaLayout() {
         </TabsContent>
 
         <TabsContent value="execute" className="mt-0">
-          <IdeaExecutePanel
+          <ExecutePanel
             diagnostics={diagnostics}
             actionsState={actionsState}
             stageDescription={STAGES[2].description}
@@ -90,7 +90,7 @@ export function IdeaLayout() {
         </TabsContent>
 
         <TabsContent value="assess" className="mt-0">
-          <IdeaAssessPanel
+          <AssessPanel
             insights={insights}
             assessments={assessments}
             stageDescription={STAGES[3].description}

@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { subWeeks } from 'date-fns';
 import { useCompany } from '@/hooks/useCompany';
+import { useProfile } from '@/hooks/useProfile';
 import type { DateRange } from '../hooks/useIdeaInsights';
 
 export type IdeaStage = 'identify' | 'diagnose' | 'execute' | 'assess';
@@ -30,6 +31,22 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
   });
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
   const { company } = useCompany();
+  const { profile } = useProfile();
+
+  const normalizeCompanyId = (value: string | null | undefined) => {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  };
+
+  const fallbackCompanyId =
+    normalizeCompanyId(profile?.company_id) ??
+    normalizeCompanyId(profile?.companyId) ??
+    normalizeCompanyId(import.meta.env.VITE_DEFAULT_COMPANY_ID);
+
+  const resolvedCompanyId = normalizeCompanyId(company?.id) ?? fallbackCompanyId;
 
   const value = useMemo<IdeaContextValue>(
     () => ({
@@ -37,11 +54,11 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
       setStage,
       range,
       setRange,
-      companyId: company?.id,
+      companyId: resolvedCompanyId,
       activeCycleId,
       setActiveCycleId,
     }),
-    [activeCycleId, company?.id, range, stage],
+    [activeCycleId, range, resolvedCompanyId, stage],
   );
 
   return <IdeaContext.Provider value={value}>{children}</IdeaContext.Provider>;
@@ -54,4 +71,3 @@ export function useIdeaContext(): IdeaContextValue {
   }
   return context;
 }
-

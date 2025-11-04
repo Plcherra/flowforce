@@ -11,7 +11,8 @@ import { CreateEventDialog } from '@/components/events/CreateEventDialog';
 import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
 import { CalendarView } from '@/components/events/CalendarView';
 import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { useCalendarEvents, mapAppEventToCalendarEvent } from '@/hooks/useCalendarEvents';
+import { useEvents } from '@/hooks/useEvents';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -39,13 +40,28 @@ export default function EventsHubPage() {
 
   const range = useMemo(() => computeRange(view, currentDate), [view, currentDate]);
   const { events, loading, error, refresh } = useCalendarEvents({ range });
+  const { events: cachedEvents, loading: cachedLoading } = useEvents();
 
-  const selectedEvent = useMemo(() => events.find((event) => event.id === selectedEventId) ?? null, [events, selectedEventId]);
+  const fallbackEvents = useMemo(
+    () => cachedEvents.map(mapAppEventToCalendarEvent),
+    [cachedEvents],
+  );
+
+  const hasRemoteEvents = events.length > 0;
+  const mergedEvents = hasRemoteEvents ? events : fallbackEvents;
+  const mergedLoading = hasRemoteEvents ? loading : (loading && fallbackEvents.length === 0) || cachedLoading;
+  const offlineNotice = !hasRemoteEvents && !!error;
+  const displayError = hasRemoteEvents ? error : null;
+
+  const selectedEvent = useMemo(
+    () => mergedEvents.find((event) => event.id === selectedEventId) ?? null,
+    [mergedEvents, selectedEventId],
+  );
 
   const upcoming = useMemo(() => {
     const query = search.trim().toLowerCase();
     const now = Date.now();
-    return events
+    return mergedEvents
       .filter((event) => {
         const time = safeTime(event.start);
         if (!time || time < now) return false;
@@ -53,7 +69,7 @@ export default function EventsHubPage() {
       })
       .sort((a, b) => (safeTime(a.start) ?? 0) - (safeTime(b.start) ?? 0))
       .slice(0, 6);
-  }, [events, search]);
+  }, [mergedEvents, search]);
 
   const handleEventCreated = (id: string) => {
     setSelectedEventId(id);
@@ -161,16 +177,21 @@ export default function EventsHubPage() {
                 </CardHeader>
                 <CardContent className="p-4">
                   <CalendarView
-                    events={events}
+                    events={mergedEvents}
                     date={currentDate}
                     view={view}
-                    loading={loading}
-                    error={error}
+                    loading={Boolean(mergedLoading)}
+                    error={displayError}
                     selectedEventId={selectedEventId}
                     onDateChange={setCurrentDate}
                     onViewChange={(next) => setView(next)}
                     onSelectEvent={(event) => handleSelectEvent(event.id)}
                   />
+                  {offlineNotice && (
+                    <div className="mt-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                      Calendar offline. Showing cached events while we reconnect.
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </section>

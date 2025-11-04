@@ -78,7 +78,9 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
 
       {canManage && (
         <div className="flex justify-end">
-          <Button variant="outline">Edit Access</Button>
+          <Button type="button" variant="outline">
+            Edit Access
+          </Button>
         </div>
       )}
     </div>
@@ -145,7 +147,7 @@ export function useEmployeeAccess(employeeId: string) {
 
 function AccessCard({ title, permissions }: { title: string; permissions: string[] }) {
   return (
-    <Card variant="ghost">
+    <Card className="border border-muted/30">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>

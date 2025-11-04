@@ -20,6 +20,14 @@ export type Goal = GoalRow & {
   owner?: OwnerProfile | null;
 };
 
+export interface GoalStats {
+  total: number;
+  active: number;
+  completed: number;
+  drafts: number;
+  averageProgress: number;
+}
+
 export interface CreateGoalInput {
   title: string;
   description?: string | null;
@@ -104,7 +112,12 @@ export function useGoals() {
   const { profile } = useProfile();
   const queryClient = useQueryClient();
 
-  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const windowCompanyId =
+    typeof window !== 'undefined' && typeof (window as { activeCompanyId?: string }).activeCompanyId === 'string'
+      ? (window as { activeCompanyId?: string }).activeCompanyId ?? null
+      : null;
+
+  const companyId = profile?.companyId ?? profile?.company_id ?? windowCompanyId ?? null;
   const userId = profile?.userId ?? profile?.id ?? null;
 
   const goalsQuery = useQuery({
@@ -116,7 +129,8 @@ export function useGoals() {
       return fetchGoals(companyId);
     },
     enabled: Boolean(companyId),
-    staleTime: 1000 * 60,
+    staleTime: 60_000,
+    retry: 1,
   });
 
   const createGoalMutation = useMutation({
@@ -277,7 +291,7 @@ export function useGoals() {
     },
   });
 
-  const stats = useMemo(() => {
+  const stats: GoalStats = useMemo(() => {
     const list = goalsQuery.data ?? [];
     if (list.length === 0) {
       return {
@@ -306,13 +320,23 @@ export function useGoals() {
     };
   }, [goalsQuery.data]);
 
+  const queryError = goalsQuery.error;
+  const normalizedError =
+    queryError instanceof Error
+      ? queryError
+      : queryError && typeof queryError === 'object' && 'message' in queryError
+        ? new Error(String((queryError as { message?: unknown }).message ?? 'Failed to load goals'))
+        : queryError
+          ? new Error('Failed to load goals')
+          : null;
+
   return {
     goals: goalsQuery.data ?? [],
     stats,
     loading: goalsQuery.isLoading,
     isLoading: goalsQuery.isLoading,
     isFetching: goalsQuery.isFetching,
-    error: goalsQuery.error,
+    error: normalizedError,
     refetch: goalsQuery.refetch,
     refetchGoals: goalsQuery.refetch,
     calculateGoalProgress: (goal: Goal) => goal.progress ?? 0,
