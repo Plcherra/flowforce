@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Reports
+reports/
+structure.txt
+scan-report.md
