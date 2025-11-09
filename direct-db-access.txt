@@ -1,0 +1,747 @@
+src/sections/templates/CalendarPage.tsx:          {Array.from({ length: 35 }).map((_, i) => (
+src/sections/events/index.tsx:    const hours = Array.from({length: endHour - startHour}, (_,i)=> startHour + i);
+src/sections/events/index.tsx:    const days = Array.from({length:7}).map((_,i)=> addDays(start,i));
+src/sections/events/index.tsx:    const hours = Array.from({length: endHour - startHour}, (_,i)=> startHour + i);
+src/contexts/ProfileContext.tsx:    .from('profiles')
+src/contexts/SchedulingContext.tsx:        const { error: deleteError } = await supabase.from('schedules').delete().eq('id', id);
+src/contexts/SchedulingContext.tsx:        const { error: deleteError } = await supabase.from('vendor_event').delete().eq('id', id);
+src/contexts/SchedulingContext.tsx:        const { error: insertError } = await supabase.from('schedules').insert(normalizedPayloads);
+src/contexts/SchedulingContext.tsx:          .from('schedules')
+src/contexts/SchedulingContext.tsx:          .from('schedules')
+src/contexts/SchedulingContext.tsx:          .from('vendor_event')
+src/contexts/SchedulingContext.tsx:          .from('schedules')
+src/contexts/SchedulingContext.tsx:        const { error: insertError } = await supabase.from('user_unavailability').insert({
+src/contexts/SchedulingContext.tsx:        const { error: insertError } = await supabase.from('time_off_requests').insert({
+src/contexts/SchedulingContext.tsx:          .from('time_off_requests')
+src/features/leaderboard/useLeaderboardData.ts:  const topDepartment = Array.from(departmentTotals.values()).sort((a, b) => b.totalXp - a.totalXp)[0];
+src/features/leaderboard/useLeaderboardData.ts:    return Array.from(map.values()).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
+src/features/leaderboard/useLeaderboardData.ts:    return Array.from(map.entries())
+src/features/leaderboard/useLeaderboardData.ts:        .from('gamification_leaderboard')
+src/features/leaderboard/useLeaderboardData.ts:          .from('gamification_leaderboard')
+src/features/leaderboard/useLeaderboardData.ts:      const missingEmployeeIds = Array.from(
+src/features/leaderboard/useLeaderboardData.ts:          .from('profiles')
+src/features/leaderboard/syncLeaderboard.ts:    .from('tasks')
+src/features/leaderboard/syncLeaderboard.ts:    .from('goal_participants')
+src/features/leaderboard/syncLeaderboard.ts:    .from('recognitions' as any)
+src/features/leaderboard/syncLeaderboard.ts:    .from('learning_enrollments')
+src/features/leaderboard/syncLeaderboard.ts:          badge_codes: Array.from(metrics.badgeCodes),
+src/features/leaderboard/syncLeaderboard.ts:    .from('gamification_leaderboard')
+src/features/leaderboard/syncLeaderboard.ts:    .from('gamification_leaderboard')
+src/features/inventory/routes/Purchasing.tsx:    () => Array.from(outstandingByPo.values()).reduce((sum, value) => sum + value, 0),
+src/features/inventory/routes/Purchasing.tsx:                            {Array.from(new Set(purchaseOrders.map((po) => po.supplier_name))).map(
+src/features/availability/manage/RequestsQueue.tsx:      const added = Array.from(desired).filter((hour) => !original.has(hour));
+src/features/availability/manage/RequestsQueue.tsx:      const removed = Array.from(original).filter((hour) => !desired.has(hour));
+src/features/availability/manage/useAvailabilityManagement.ts:const HOUR_OPTIONS: HourOption[] = Array.from({ length: 24 }).map((_, index) => ({
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('profiles')
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('org_prefs')
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('availability_request')
+src/features/availability/manage/useAvailabilityManagement.ts:      const employeeIds = Array.from(new Set(requests.map((req) => req.employee_id))).filter(Boolean);
+src/features/availability/manage/useAvailabilityManagement.ts:      const weekStarts = Array.from(new Set(requests.map((req) => req.week_start))).filter(Boolean);
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('profiles')
+src/features/availability/manage/useAvailabilityManagement.ts:          .from('staff_availability')
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('availability_exception')
+src/features/availability/manage/useAvailabilityManagement.ts:      const { error } = await supabase.from('org_prefs').upsert(payload, { onConflict: 'id' });
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('staff_availability')
+src/features/availability/manage/useAvailabilityManagement.ts:        const insertResult = await supabase.from('staff_availability').insert(insertRows);
+src/features/availability/manage/useAvailabilityManagement.ts:      const exceptionInsert = await supabase.from('availability_exception').insert({
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('availability_request')
+src/features/availability/manage/useAvailabilityManagement.ts:      const auditResult = await supabase.from('audit_log').insert({
+src/features/availability/manage/useAvailabilityManagement.ts:        .from('availability_request')
+src/features/availability/manage/useAvailabilityManagement.ts:      const auditResult = await supabase.from('audit_log').insert({
+src/features/availability/manage/useAvailabilityManagement.ts:      const insertResult = await supabase.from('availability_exception').insert({
+src/features/availability/manage/useAvailabilityManagement.ts:        const auditResult = await supabase.from('audit_log').insert({
+src/server/vendorEvents.ts:    .from('vendor_event')
+src/server/vendorEvents.ts:      .from('vendor_event')
+src/server/vendorEvents.ts:  return supabaseAdmin.from('vendor_event').insert(rest).select().single();
+src/server/vendorEvents.ts:    .from('vendor_event')
+src/utils/schedulingUtils.ts:  return Array.from(hourlyUsers.values());
+src/components/ui/loading-states.tsx:        {Array.from({ length: columns }).map((_, i) => (
+src/components/ui/loading-states.tsx:      {Array.from({ length: rows }).map((_, rowIndex) => (
+src/components/ui/loading-states.tsx:          {Array.from({ length: columns }).map((_, colIndex) => (
+src/components/ui/loading-states.tsx:      {Array.from({ length: count }).map((_, i) => (
+src/components/ui/loading-states.tsx:      {Array.from({ length: 4 }).map((_, i) => (
+src/components/ui/loading-states.tsx:      {Array.from({ length: count }).map((_, i) => (
+src/components/sections/DynamicSection.tsx:        .from('custom_sections')
+src/components/sections/DynamicSection.tsx:        .from('custom_section_pages')
+src/components/sections/DynamicSection.tsx:        await supabase.from('custom_section_pages').update(values).eq('id', id);
+src/components/sections/DynamicSection.tsx:        await supabase.from('custom_section_pages').insert(pagesToInsert);
+src/components/sections/DynamicSection.tsx:        await supabase.from('custom_section_pages').delete().in('id', pagesToDelete);
+src/components/sections/SectionTemplateSelector.tsx:  const categories = Array.from(new Set(templates.map(t => t.category)));
+src/components/tasks/TaskActivityFeed.tsx:        .from('profiles')
+src/components/tasks/TaskActivityFeed.tsx:        .from('task_activities')
+src/components/tasks/TaskActivityFeed.tsx:      const allowedTaskIds = Array.from(
+src/components/tasks/TaskTimeline.tsx:          .from('task_activities')
+src/components/messages/MessageReactions.tsx:        .from('message_reactions')
+src/components/messages/MessageReactions.tsx:        .from('message_reactions')
+src/components/messages/MessageReactions.tsx:        .from('message_reactions')
+src/components/messages/ChannelMembers.tsx:        .from('channel_members')
+src/components/messages/ChannelMembers.tsx:        .from('channel_members')
+src/components/messages/ChannelMembers.tsx:        .from('channel_members')
+src/components/messages/AnimatedChannelWizard.tsx:          .from('profiles')
+src/components/messages/AnimatedChannelWizard.tsx:            .from('profiles')
+src/components/messages/AnimatedChannelWizard.tsx:        const deduped = Array.from(
+src/components/messages/UserSelector.tsx:        .from('profiles')
+src/components/messages/UserSelector.tsx:          .from('profiles')
+src/components/messages/UserSelector.tsx:      const deduped = Array.from(
+src/components/messages/MessageAttachments.tsx:          .from('message-attachments')
+src/components/messages/MessageAttachments.tsx:          .from('message-attachments')
+src/components/messages/MessageAttachments.tsx:          .from('message-attachments')
+src/components/messages/MessageAttachments.tsx:          .from('message-attachments')
+src/components/messages/MessageSearch.tsx:        .from('messages')
+src/components/messages/MessageSearch.tsx:        .from('message_channels')
+src/components/messages/ChannelSettings.tsx:        .from('message_channels')
+src/components/messages/ChannelSettings.tsx:        .from('message_channels')
+src/components/forms/FormFillDialog.tsx:                      const files = Array.from(e.target.files || []);
+src/components/forms/FormBuilderDialog.tsx:        .from('forms')
+src/components/forms/fields/VideoUploadField.tsx:        .from('form-videos')
+src/components/forms/fields/VideoUploadField.tsx:        .from('form-videos')
+src/components/forms/fields/VideoUploadField.tsx:    const files = Array.from(event.target.files || []);
+src/components/forms/fields/FileUploadField.tsx:        .from('form-uploads')
+src/components/forms/fields/FileUploadField.tsx:        .from('form-uploads')
+src/components/forms/fields/FileUploadField.tsx:    const files = Array.from(event.target.files || []);
+src/components/forms/fields/SignatureField.tsx:        .from('form-signatures')
+src/components/forms/fields/SignatureField.tsx:        .from('form-signatures')
+src/components/forms/fields/ImageUploadField.tsx:        .from('form-images')
+src/components/forms/fields/ImageUploadField.tsx:        .from('form-images')
+src/components/forms/fields/ImageUploadField.tsx:    const files = Array.from(event.target.files || []);
+src/components/forms/fields/RatingField.tsx:        {Array.from({ length: maxRating }, (_, index) => {
+src/components/forms/fields/RatingField.tsx:          {Array.from({ length: maxRating }, (_, index) => {
+src/components/forms/fields/AudioRecordingField.tsx:        .from('form-audio')
+src/components/forms/fields/AudioRecordingField.tsx:        .from('form-audio')
+src/components/forms/fields/AudioRecordingField.tsx:    const files = Array.from(event.target.files || []);
+src/components/goals/GoalList.tsx:                {Array.from({ length: 6 }).map((_, index) => (
+src/components/scheduling/ComplianceMonitor.tsx:          {Array.from({ length: 4 }).map((_, i) => (
+src/components/scheduling/DayView.tsx:            {Array.from({ length: 24 }, (_, hour) => {
+src/components/scheduling/DayView.tsx:              const userList = Array.from(hourlyUsers);
+src/components/scheduling/WeekView.tsx:  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+src/components/scheduling/WeekView.tsx:          const employees = Array.from(employeeMap.values());
+src/components/scheduling/shift-wizard/DetailsTab.tsx:          .from('shift_templates')
+src/components/scheduling/availability/PersonalAvailabilityPanel.tsx:        .from('staff_availability')
+src/components/scheduling/availability/PersonalAvailabilityPanel.tsx:        .from('staff_availability')
+src/components/scheduling/availability/PersonalAvailabilityPanel.tsx:        const insertResult = await supabase.from('staff_availability').insert(insertRows);
+src/components/scheduling/ShiftWizardDialog.tsx:      Array.from(
+src/components/scheduling/AIInsightsDashboard.tsx:          {Array.from({ length: 4 }).map((_, i) => (
+src/components/scheduling/StaffShiftManagement.tsx:        .from('shift_swaps')
+src/components/scheduling/StaffShiftManagement.tsx:        .from('time_off_requests')
+src/components/scheduling/StaffShiftManagement.tsx:        .from('shift_swaps')
+src/components/scheduling/StaffShiftManagement.tsx:        .from('time_off_requests')
+src/components/auth/InviteSignUpForm.tsx:          .from('company_invites')
+src/components/learning/CourseModulesForm.tsx:    const uploaded: ModuleAsset[] = Array.from(files).map((file) => ({
+src/components/learning/AnalyticsOverview.tsx:    return Array.from(map.entries()).map(([category, value]) => ({ category, ...value }));
+src/components/learning/CatalogGrid.tsx:    return ['all', ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+src/components/learning/CourseCreationWizard.tsx:      .from('certification_catalog')
+src/components/RoleManager.tsx:        .from('profiles')
+src/components/admin/UserManagement.tsx:        .from('departments')
+src/components/admin/UserManagement.tsx:        .from(COMPANY_INVITES_TABLE)
+src/components/admin/UserManagement.tsx:        .from('profiles')
+src/components/admin/UserManagement.tsx:        .from('profiles')
+src/components/admin/UserManagement.tsx:        .from('profiles')
+src/components/admin/UserManagement.tsx:    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+src/components/admin/UserManagement.tsx:    return Array.from(combined.values());
+src/components/admin/UserManagement.tsx:    return Array.from(unique.values()).slice(0, 6);
+src/components/announcements/AnnouncementBanner.tsx:        .from('announcements')
+src/components/announcements/AnnouncementBanner.tsx:        .from('announcement_reads')
+src/components/announcements/AnnouncementBanner.tsx:        .from('announcement_reads')
+src/components/announcements/CreateAnnouncement.tsx:        .from('announcements')
+src/components/operations/AssessPanel.tsx:          {Array.from({ length: 4 }).map((_, index) => (
+src/components/operations/ExecutePanel.tsx:          .from('idea_cycles')
+src/components/operations/ExecutePanel.tsx:          {Array.from({ length: 4 }).map((_, index) => (
+src/components/operations/IdentifyPanel.tsx:      {Array.from({ length: 6 }).map((_, index) => (
+src/components/operations/DiagnosePanel.tsx:          {Array.from({ length: 4 }).map((_, index) => (
+src/components/operations/DiagnosePanel.tsx:                Array.from({ length: 3 }).map((_, index) => (
+src/components/dashboard/OperationsHealthCard.tsx:    {Array.from({ length: 4 }).map((_, index) => (
+src/components/profile/ProfileForm.tsx:        .from('profiles')
+src/components/profile/AccountDeletionVerification.tsx:        .from('profiles')
+src/components/profile/AccountDeletionVerification.tsx:          .from('time_entries')
+src/components/profile/AccountDeletionVerification.tsx:          .from('tasks')
+src/components/profile/AccountDeletionVerification.tsx:          .from('messages')
+src/components/profile/AccountDeletionVerification.tsx:          .from('expenses')
+src/components/ai/AIQuickActions.tsx:            {Array.from({ length: 4 }).map((_, index) => (
+src/components/ai/ClosedLoopSummary.tsx:            {Array.from({ length: 5 }).map((_, index) => (
+src/components/inventory/ProductionEventList.tsx:    {Array.from({ length: 2 }).map((_, index) => (
+src/components/inventory/NewCountWizard.tsx:  return Array.from(map.values());
+src/components/inventory/ItemSelector.tsx:    const selectedItemsData = Array.from(selectedItems).map(itemId => {
+src/components/inventory/MarketManCountingInterface.tsx:    return Array.from(
+src/components/inventory/EnhancedCountingTable.tsx:  const categories = Array.from(new Set(items.map(item => item.category).filter(Boolean)));
+src/components/users/InviteEmployeesModal.tsx:        .from('company_invites')
+src/components/users/InviteEmployeesModal.tsx:        .from('company_invites')
+src/components/users/InviteEmployeesModal.tsx:            .from('company_invites')
+src/components/users/UserPermissionsTab.tsx:                  {Array.from({ length: totalPages }).map((_, index) => {
+src/components/users/UserAuditTab.tsx:  const uniqueActions = Array.from(new Set(userAuditLogs.map(log => log.action)));
+src/components/positions/UserPositionAssignment.tsx:        .from('profiles')
+src/components/availability/AvailabilityRequestForm.tsx:const HOURS = Array.from({ length: 16 }).map((_, index) => 6 + index); // 06:00 -> 21:00
+src/components/availability/AvailabilityRequestForm.tsx:        .from('org_prefs')
+src/components/availability/AvailabilityRequestForm.tsx:        .from('availability_exception')
+src/components/availability/AvailabilityRequestForm.tsx:        .from('availability_request')
+src/components/availability/AvailabilityRequestForm.tsx:      next[dayIndex] = Array.from(hours).sort((a, b) => a - b);
+src/components/availability/AvailabilityRequestForm.tsx:      const added = Array.from(updated).filter((hour) => !original.has(hour));
+src/components/availability/AvailabilityRequestForm.tsx:      const removed = Array.from(original).filter((hour) => !updated.has(hour));
+src/components/availability/AvailabilityRequestForm.tsx:        .from('availability_request')
+src/components/availability/AvailabilityRequestForm.tsx:      await supabase.from('audit_log').insert({
+src/components/events/LinkShiftsPanel.tsx:    await onChange(Array.from(next));
+src/components/events/CreateVendorVisitDialog.tsx:    return Array.from(map.values());
+src/components/events/EventDetailsPanel.tsx:  return Array.from(map.values());
+src/components/events/CreateEventDialog.tsx:    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+src/components/events/CreateEventDialog.tsx:    return Array.from(map.values());
+src/components/analytics/BusinessAnalyticsBoard.tsx:    {Array.from({ length: 3 }).map((_, index) => (
+src/components/analytics/ReportsAnalyzer.tsx:    return Array.from(map.values());
+src/components/analytics/ReportsAnalyzer.tsx:              {Array.from({ length: 4 }).map((_, index) => (
+src/components/analytics/FormAnalytics.tsx:    return Array.from(counts.entries()).map(([iso, count]) => ({
+src/components/analytics/InteractiveKpiTiles.tsx:          ? Array.from({ length: isMobile ? 2 : 4 }).map((_, index) => (
+src/components/reports/ReportInbox.tsx:        .from('profiles')
+src/components/reports/ReportInbox.tsx:        .from('employee_report')
+src/components/reports/ReportInbox.tsx:        .from('employee_report_summary')
+src/components/reports/ReportInbox.tsx:        const { error: uploadError } = await supabase.storage.from('attachments').upload(path, values.attachment);
+src/components/reports/ReportInbox.tsx:        const { data: signed } = supabase.storage.from('attachments').getPublicUrl(path);
+src/components/reports/ReportInbox.tsx:      const { error } = await supabase.from('employee_report').insert(insertPayload);
+src/components/reports/ReportInbox.tsx:        .from('employee_report_summary')
+src/components/reports/ReportInbox.tsx:    .from('employee_report')
+src/components/employees/RoleConfigPanel.tsx:    return Array.from(permissionSet).sort();
+src/components/employees/AccessControlPanel.tsx:        .from('user_roles')
+src/components/employees/AccessControlPanel.tsx:        .from('company_roles')
+src/hooks/useShiftsForDate.ts:  return Array.from(staffMap.values());
+src/hooks/useTimeEntries.tsx:        .from('time_entries')
+src/hooks/useTimeEntries.tsx:        .from('time_entries')
+src/hooks/useAuditLogs.tsx:        .from('audit_logs' as any)
+src/hooks/useAuditLogs.tsx:                .from('profiles')
+src/hooks/useAuditLogs.tsx:                .from('profiles')
+src/hooks/useForms.tsx:      .from('forms')
+src/hooks/useForms.tsx:        .from('forms')
+src/hooks/useForms.tsx:        .from('forms')
+src/hooks/useForms.tsx:        .from('forms')
+src/hooks/useForms.tsx:        .from('form_fields')
+src/hooks/useForms.tsx:      await supabase.from('form_fields').delete().eq('form_id', formId);
+src/hooks/useForms.tsx:        .from('form_fields')
+src/hooks/useForms.tsx:        .from('form_submissions')
+src/hooks/useForms.tsx:        .from('form_submissions')
+src/hooks/useAnnouncements.tsx:        .from('announcements')
+src/hooks/useAnnouncements.tsx:        .from('announcement_reads')
+src/hooks/useAnnouncements.tsx:        .from('announcement_reads')
+src/hooks/useAnnouncements.tsx:        .from('announcements')
+src/hooks/useAnnouncements.tsx:        .from('announcements')
+src/hooks/useAnnouncements.tsx:        .from('announcements')
+src/hooks/messages/useMessageChannels.tsx:        .from('message_channels')
+src/hooks/messages/useMessageChannels.tsx:          .from('message_channels')
+src/hooks/messages/useMessageChannels.tsx:        await supabase.from('channel_members').insert({
+src/hooks/messages/useMessageChannels.tsx:          await supabase.from('channel_members').insert(memberInserts);
+src/hooks/messages/useMessageChannels.tsx:        const { error } = await supabase.from('channel_members').insert({
+src/hooks/messages/useMessageChannels.tsx:          .from('channel_members')
+src/hooks/messages/useChannelMessages.tsx:        .from('messages')
+src/hooks/messages/useMessageOperations.tsx:        .from('messages')
+src/hooks/messages/useMessageOperations.tsx:        .from('messages')
+src/hooks/useExpenses.tsx:        .from('expenses')
+src/hooks/useExpenses.tsx:        .from('expenses')
+src/hooks/useExpenses.tsx:        .from('expenses')
+src/hooks/useExpenses.tsx:        .from('expenses')
+src/hooks/useExpenses.tsx:        .from('expenses')
+src/hooks/useCompany.tsx:        .from('profiles')
+src/hooks/useCompany.tsx:          .from('companies')
+src/hooks/useCompany.tsx:        .from('companies')
+src/hooks/useCompany.tsx:        .from('companies')
+src/hooks/useCompanyRoles.tsx:        .from('profiles')
+src/hooks/useCompanyRoles.tsx:        .from('profiles')
+src/hooks/useCompanyRoles.tsx:        .from('company_roles')
+src/hooks/useCompanyRoles.tsx:        .from('company_roles')
+src/hooks/useCompanyRoles.tsx:        .from('company_roles')
+src/hooks/scheduling/useSchedulingConsolidated.ts:        .from('profiles')
+src/hooks/scheduling/useSchedulingConsolidated.ts:        .from('schedules')
+src/hooks/scheduling/useSchedulingConsolidated.ts:        .from('vendor_event')
+src/hooks/scheduling/useSchedulingConsolidated.ts:              .from('schedule_assignments')
+src/hooks/scheduling/useSchedulingConsolidated.ts:              .from('time_off_requests')
+src/hooks/scheduling/useSchedulingConsolidated.ts:              .from('user_unavailability')
+src/hooks/scheduling/useSchedulingConsolidated.ts:        const { error: insertError } = await supabase.from('schedule_assignments').insert({
+src/hooks/scheduling/useSchedulingConsolidated.ts:          .from('schedule_assignments')
+src/hooks/scheduling/useSchedulingConsolidated.ts:            .from('schedules')
+src/hooks/scheduling/useSchedulingConsolidated.ts:          .from('schedules')
+src/hooks/scheduling/useSchedulingConsolidated.ts:          response = await supabase.from('vendor_event').update(updates).eq('id', payload.id).select().single();
+src/hooks/scheduling/useSchedulingConsolidated.ts:          response = await supabase.from('vendor_event').insert(baseEvent).select().single();
+src/hooks/scheduling/useScheduleBoard.ts:    () => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)),
+src/hooks/scheduling/useScheduleBoard.ts:  const hours = useMemo(() => Array.from({ length: 17 }, (_, index) => index + 6), []);
+src/hooks/scheduling/useScheduleBoard.ts:    return Array.from(map.values()).sort((a, b) => {
+src/hooks/scheduling/useScheduleBoard.ts:        .from('inv_locations')
+src/hooks/scheduling/useWeekTemplates.tsx:        .from('week_templates')
+src/hooks/scheduling/useWeekTemplates.tsx:        .from('week_templates')
+src/hooks/scheduling/useShiftTemplates.tsx:        .from('shift_templates')
+src/hooks/scheduling/useShiftTemplates.tsx:        .from('shift_templates')
+src/hooks/scheduling/useCopilotScheduler.ts:      const employeeQuery = supabase.from('employees').select('*').eq('company_id', companyId).order('role');
+src/hooks/scheduling/useCopilotScheduler.ts:        .from('coverage_templates')
+src/hooks/scheduling/useCopilotScheduler.ts:      .from('schedule_shifts')
+src/hooks/scheduling/copilotSchedulerPlan.ts:      const eligible = Array.from(employeeStateMap.values()).filter((state) => {
+src/hooks/scheduling/copilotSchedulerPlan.ts:      const crossStoreCandidate = Array.from(employeeStateMap.values()).find((state) => {
+src/hooks/useUserPermissions.tsx:        .from('user_permissions')
+src/hooks/useUserPermissions.tsx:          .from('company_roles')
+src/hooks/useUserPermissions.tsx:          .from('user_permissions')
+src/hooks/useUserPermissions.tsx:        .from('user_permissions')
+src/hooks/useUserPermissions.tsx:          .from('user_permissions')
+src/hooks/useUserPermissions.tsx:          .from('user_permissions')
+src/hooks/useUserPermissions.tsx:        .from('profiles')
+src/hooks/usePayments.tsx:        .from('payments')
+src/hooks/usePayments.tsx:        .from('payments')
+src/hooks/usePayments.tsx:        .from('payments')
+src/hooks/usePerformanceOverview.tsx:    return Array.from(goalMap.values()).map((entry) => ({
+src/hooks/usePerformanceOverview.tsx:      participantIds: Array.from(entry.participantSet),
+src/hooks/learning/useLearningCenter.ts:      .from('skill_matrix')
+src/hooks/learning/useLearningCenter.ts:          .from('learning_completions')
+src/hooks/learning/useLearningCenter.ts:          const { error: completionError } = await supabase.from('learning_completions').insert({
+src/hooks/learning/useLearningCenter.ts:            .from('employee_certifications')
+src/hooks/learning/useLearningCenter.ts:            .from('profiles')
+src/hooks/learning/useLearningCenter.ts:    .from('learning_enrollments' as any)
+src/hooks/useDashboardData.tsx:        supabase.from('profiles').select('employment_status').eq('company_id', companyId),
+src/hooks/useDashboardData.tsx:        supabase.from('departments').select('id').eq('company_id', companyId),
+src/hooks/useDashboardData.tsx:          .from('schedules')
+src/hooks/useDashboardData.tsx:          .from('time_off_requests')
+src/hooks/useDashboardData.tsx:          .from('time_off_requests')
+src/hooks/useDashboardData.tsx:          .from('coverage_templates')
+src/hooks/useDashboardData.tsx:          .from('schedule_shifts')
+src/hooks/useDashboardData.tsx:          .from('operations_tasks')
+src/hooks/useDashboardData.tsx:          .from('employees')
+src/hooks/useEvents.tsx:      .from('event_participants')
+src/hooks/useEvents.tsx:    await supabase.from('event_participants').insert(payload);
+src/hooks/useEvents.tsx:      .from('event_shift_links')
+src/hooks/useEvents.tsx:    const uniqueShiftIds = Array.from(new Set((shiftIds ?? []).filter(Boolean)));
+src/hooks/useEvents.tsx:    await supabase.from('event_shift_links').insert(payload);
+src/hooks/useEvents.tsx:        const response = await supabase.from(CALENDAR_TABLE as never).delete().eq('id', id);
+src/hooks/useEvents.tsx:          .from(CALENDAR_TABLE as never)
+src/hooks/useEvents.tsx:          .from(CALENDAR_TABLE as never)
+src/hooks/useRoutePreloader.tsx:        Array.from(preloadLinks)
+src/hooks/usePermissionAudit.tsx:      // await supabase.from('permission_audit_logs').insert(auditEntry);
+src/hooks/useAccountDeletionTests.tsx:        .from('profiles')
+src/hooks/useAnalytics.tsx:        .from('profiles')
+src/hooks/useAnalytics.tsx:        .from('profiles')
+src/hooks/useAnalytics.tsx:        .from('time_off_requests')
+src/hooks/useAnalytics.tsx:        .from('tasks')
+src/hooks/useAnalytics.tsx:        .from('tasks')
+src/hooks/useAnalytics.tsx:        .from('forms')
+src/hooks/useAnalytics.tsx:        .from('form_submissions')
+src/hooks/useAnalytics.tsx:        .from('profiles')
+src/hooks/useAnalytics.tsx:            .from('tasks')
+src/hooks/useAnalytics.tsx:            .from('tasks')
+src/hooks/useScenarioSimulator.ts:        .from('tasks')
+src/hooks/useReminders.tsx:        .from('reminders')
+src/hooks/useReminders.tsx:        .from('reminders')
+src/hooks/useReminders.tsx:        .from('reminders')
+src/hooks/useReminders.tsx:        .from('reminders')
+src/hooks/useTeamManagement.ts:        .from('company_roles')
+src/hooks/useTeamManagement.ts:        .from('company_roles')
+src/hooks/useTeamManagement.ts:        .from('profiles')
+src/hooks/useTeamManagement.ts:        .from('user_roles')
+src/hooks/useTeamManagement.ts:        .from('company_roles')
+src/hooks/useReports.tsx:        .from('custom_reports')
+src/hooks/useReports.tsx:        .from('custom_reports')
+src/hooks/useReports.tsx:        .from('custom_reports')
+src/hooks/useReports.tsx:        .from('custom_reports')
+src/hooks/useReports.tsx:      let query = supabase.from(tableName as any).select('*');
+src/hooks/useRecognitions.tsx:      .from('training_modules' as any)
+src/hooks/useRecognitions.tsx:      .from('training_modules' as any)
+src/hooks/useRecognitions.tsx:        .from('training_modules' as any)
+src/hooks/useRecognitions.tsx:        .from('profiles')
+src/hooks/useRecognitions.tsx:      .from('training_assignments' as any)
+src/hooks/useRecognitions.tsx:      .from('training_assignments' as any)
+src/hooks/useRecognitions.tsx:      .from('recognitions' as any)
+src/hooks/useRecognitions.tsx:        .from('v_training_completion_events' as any)
+src/hooks/useRecognitions.tsx:          .from('training_assignments' as any)
+src/hooks/useRecognitions.tsx:          .in('id', Array.from(assignmentsToFetch)),
+src/hooks/useRecognitions.tsx:          .from('profiles')
+src/hooks/useRecognitions.tsx:          .in('id', Array.from(employeesToFetch)),
+src/hooks/useRecognitions.tsx:        .from('goal_rewards')
+src/hooks/useRecognitions.tsx:        .from('goal_milestones')
+src/hooks/useRecognitions.tsx:        .from('goal_participants')
+src/hooks/useRecognitions.tsx:        .from('goal_rewards')
+src/hooks/useRecognitions.tsx:        .from('goal_tasks')
+src/hooks/useRecognitions.tsx:      const tasksToFetch = Array.from(new Set(filtered.map((gt: any) => gt.task?.id).filter(Boolean)));
+src/hooks/useRecognitions.tsx:        .from('profiles')
+src/hooks/useRecognitions.tsx:        .from('goal_rewards')
+src/hooks/useRecognitions.tsx:        .from('recognition_award_rules')
+src/hooks/useRecognitions.tsx:            .from('goals')
+src/hooks/useRecognitions.tsx:            .from('goal_participants')
+src/hooks/useRecognitions.tsx:            .from('learning_enrollments')
+src/hooks/useRecognitions.tsx:      const { error: insertError } = await supabase.from('goal_rewards').insert(inserts);
+src/hooks/useRecognitions.tsx:        .from('recognitions' as any)
+src/hooks/useRecognitions.tsx:          .from('goals')
+src/hooks/useRecognitions.tsx:          .in('id', Array.from(goalIds))
+src/hooks/useRecognitions.tsx:          .from('profiles')
+src/hooks/useRecognitions.tsx:          .in('id', Array.from(new Set([...recipientIds, ...creatorIds])))
+src/hooks/useRecognitions.tsx:              .from('goal_milestones')
+src/hooks/useRecognitions.tsx:              .in('id', Array.from(milestoneIds))
+src/hooks/useRecognitions.tsx:              .from('tasks')
+src/hooks/useRecognitions.tsx:              .in('id', Array.from(taskIds))
+src/hooks/useRecognitions.tsx:              .from('training_assignments' as any)
+src/hooks/useRecognitions.tsx:              .in('id', Array.from(assignmentIds))
+src/hooks/useRecognitions.tsx:        .from('goal_rewards')
+src/hooks/useTaskNotifications.tsx:        .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:        .from('tasks')
+src/hooks/useTaskNotifications.tsx:        .from('tasks')
+src/hooks/useTaskNotifications.tsx:          .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:          .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:        .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:        .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:        .from('task_notifications')
+src/hooks/useTaskNotifications.tsx:        .from('task_notifications')
+src/hooks/useEmployeeEngagement.ts:          .from('skill_matrix')
+src/hooks/useEmployeeEngagement.ts:          .from('employee_badge')
+src/hooks/useRoleValidation.tsx:            .from('profiles')
+src/hooks/useRoleValidation.tsx:              .from('profiles')
+src/hooks/usePositions.tsx:        .from('positions')
+src/hooks/usePositions.tsx:        .from('position_assignments')
+src/hooks/usePositions.tsx:            .from('profiles')
+src/hooks/usePositions.tsx:        .from('profiles')
+src/hooks/usePositions.tsx:        .from('positions')
+src/hooks/usePositions.tsx:        .from('positions')
+src/hooks/usePositions.tsx:        .from('positions')
+src/hooks/usePositions.tsx:        .from('profiles')
+src/hooks/usePositions.tsx:        .from('position_assignments')
+src/hooks/usePositions.tsx:        .from('position_assignments')
+src/hooks/inventory/useInventoryLocations.tsx:        .from('inv_locations')
+src/hooks/inventory/useInventoryLocations.tsx:        .from('inv_locations')
+src/hooks/inventory/useInventoryLocations.tsx:        .from('inv_locations')
+src/hooks/inventory/useInventoryCategories.tsx:        .from('inventory_categories')
+src/hooks/inventory/useInventoryCategories.tsx:        .from('inventory_categories')
+src/hooks/inventory/useInventoryCategories.tsx:        .from('inventory_categories')
+src/hooks/inventory/useInventoryUnits.tsx:        .from('inv_units')
+src/hooks/inventory/useInventorySuppliers.tsx:        .from('inv_suppliers')
+src/hooks/inventory/useInventorySuppliers.tsx:        .from('profiles')
+src/hooks/inventory/useInventorySuppliers.tsx:        .from('inv_suppliers')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_item_units')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_items')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_item_units')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_item_units')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_item_units')
+src/hooks/inventory/useItemUnits.tsx:        .from('inv_item_units')
+src/hooks/inventory/useInventoryTransactions.tsx:        .from('inventory_transactions')
+src/hooks/inventory/useInventoryTransactions.tsx:        .from('inventory_transactions')
+src/hooks/useEventLinks.ts:        .from('event_shift_links')
+src/hooks/useEventLinks.ts:        const response = await supabase.from('event_shift_links').insert(payload).select('*, shift:schedules(*)');
+src/hooks/useEventLinks.ts:          .from('event_shift_links')
+src/hooks/useFinancialManagement.ts:          .from('time_entries')
+src/hooks/useFinancialManagement.ts:          .from('payments')
+src/hooks/useFinancialManagement.ts:          .from('payments')
+src/hooks/useFinancialManagement.ts:  return Array.from(breakdown.entries())
+src/hooks/useFinancialManagement.ts:            .from('payments')
+src/hooks/useFinancialManagement.ts:            .from('expenses')
+src/hooks/useFinancialManagement.ts:            .from('inventory_transactions')
+src/hooks/useFinancialManagement.ts:            .from('inv_waste')
+src/hooks/useCopilotEngagement.ts:        .from('company_update_engagement')
+src/hooks/useTasks.tsx:        .from('profiles')
+src/hooks/useTasks.tsx:        .from('tasks')
+src/hooks/useTasks.tsx:        .from('goal_tasks')
+src/hooks/useTasks.tsx:        .from('goal_tasks')
+src/hooks/useTasks.tsx:        .from('tasks')
+src/hooks/useTasks.tsx:        .from('tasks')
+src/hooks/useTasks.tsx:        .from('tasks')
+src/hooks/useTasks.tsx:        .from('task_comments')
+src/hooks/useTasks.tsx:        .from('task_comments')
+src/hooks/useTasks.tsx:        .from('task_activities')
+src/hooks/useCalendarEvents.ts:  const shiftIds = Array.from(
+src/hooks/useCalendarEvents.ts:    participants: Array.from(participantMap.values()),
+src/hooks/useCalendarEvents.ts:        .from('calendar_events')
+src/hooks/useCalendarEvents.ts:    .from('calendar_events')
+src/hooks/useCalendarEvents.ts:  await supabase.from('event_shift_links').delete().eq('event_id', eventId);
+src/hooks/useCalendarEvents.ts:    .from('event_shift_links')
+src/hooks/useCertifications.ts:          .from('certification_catalog')
+src/hooks/useCertifications.ts:          .from('certification_progress')
+src/hooks/useCertifications.ts:          .from('tasks')
+src/hooks/useCertifications.ts:          .from('goal_participants')
+src/hooks/useCertifications.ts:          .from('skill_matrix')
+src/hooks/useCertifications.ts:          .from('learning_course_progress')
+src/hooks/useCertifications.ts:          .from('employee_badge')
+src/hooks/useCertifications.ts:          .from('profiles')
+src/hooks/useCertifications.ts:          .from('goals')
+src/hooks/useCertifications.ts:          .from('certification_progress')
+src/hooks/useCertifications.ts:              await supabase.from('employee_badge').upsert(
+src/hooks/useCertifications.ts:    .from('skill_matrix')
+src/hooks/useCertifications.ts:    .from('skill_matrix')
+src/hooks/useRoles.tsx:        .from('profiles')
+src/hooks/useRoles.tsx:        .from('company_roles')
+src/hooks/useRoles.tsx:        .from('profiles')
+src/hooks/useRoles.tsx:        .from('company_roles')
+src/hooks/useRoles.tsx:        .from('profiles')
+src/hooks/useRoles.tsx:        .from('user_roles')
+src/hooks/useRoles.tsx:    .from('profiles')
+src/hooks/useInvites.ts:      const { error } = await supabase.from('company_invites').insert({
+src/hooks/useTaskFormOptions.tsx:        .from('profiles')
+src/hooks/useTaskFormOptions.tsx:        .from('profiles')
+src/hooks/useTaskFormOptions.tsx:        .from('goals')
+src/hooks/useWorkflows.tsx:        .from('workflows')
+src/hooks/useWorkflows.tsx:        .from('workflows')
+src/hooks/useWorkflows.tsx:        .from('workflows')
+src/hooks/useWorkflows.tsx:        .from('workflows')
+src/hooks/useWorkflows.tsx:        .from('workflow_steps')
+src/hooks/useWorkflows.tsx:        .from('workflow_steps')
+src/hooks/useGoals.tsx:    .from('goals')
+src/hooks/useGoals.tsx:  const ownerIds = Array.from(
+src/hooks/useGoals.tsx:      .from('profiles')
+src/hooks/useGoals.tsx:          .from('goal_tasks')
+src/hooks/useGoals.tsx:          .from('goal_rewards')
+src/hooks/useGoals.tsx:      rewardUserIds = Array.from(new Set(availableIds));
+src/hooks/useGoals.tsx:        .from('profiles')
+src/hooks/useGoals.tsx:        .from('goals')
+src/hooks/useGoals.tsx:        .from('goals')
+src/hooks/useGoals.tsx:        .from('goals')
+src/hooks/useGoals.tsx:        .from('goals')
+src/hooks/useEmployees.tsx:        .from('profiles')
+src/hooks/useEmployees.tsx:          .from('hr_roster_cache')
+src/hooks/useEmployees.tsx:        .from('profiles')
+src/hooks/useEmployees.tsx:          .from('skill_matrix')
+src/hooks/useEmployees.tsx:          .from('employee_badge')
+src/hooks/useEmployees.tsx:          .from('employee_report')
+src/hooks/useEmployees.tsx:          .from('staff_performance')
+src/hooks/useCustomSections.tsx:        .from('custom_sections')
+src/hooks/useCustomSections.tsx:        .from('section_templates')
+src/hooks/useCustomSections.tsx:        .from('profiles')
+src/hooks/useCustomSections.tsx:          .from('section_templates')
+src/hooks/useCustomSections.tsx:        .from('custom_sections')
+src/hooks/useCustomSections.tsx:        .from('custom_sections')
+src/hooks/useCustomSections.tsx:          .from('custom_section_pages')
+src/hooks/useCustomSections.tsx:        .from('custom_sections')
+src/hooks/useCustomSections.tsx:        .from('custom_sections')
+src/hooks/useCustomSections.tsx:          .from('custom_sections')
+src/hooks/usePermissions.ts:        .from('company_roles')
+src/hooks/usePermissions.ts:      const { error } = await supabase.from('company_roles').update({ permissions }).eq('id', roleId);
+src/hooks/useEngagementAnalytics.ts:        .from('company_updates')
+src/hooks/useEngagementAnalytics.ts:        .from('company_update_engagement')
+src/hooks/useOperationsData.ts:        .from('kpi_insights')
+src/availability/availabilityUtils.ts:    grid[dayIndex] = Array.from(new Set([...(grid[dayIndex] ?? []), ...hours])).sort((a, b) => a - b);
+src/availability/lockEngine.ts:      .from('org_prefs')
+src/availability/lockEngine.ts:      .from('availability_exception')
+src/availability/lockEngine.ts:      .from('availability_exception')
+src/availability/lockEngine.ts:  const exceptEmployeeIds = Array.from(
+src/jobs/lockCron.ts:    .from('org_prefs')
+src/jobs/lockCron.ts:      .from('audit_log')
+src/jobs/lockCron.ts:      const insertResult = await supabaseAdmin.from('audit_log').insert({
+src/modules/operations/hooks/useCopilotChecklist.ts:        .from('operations_checklists')
+src/modules/operations/hooks/useCopilotChecklist.ts:        .from('operations_tasks')
+src/modules/operations/hooks/useCopilotChecklist.ts:        .from('schedule_shifts')
+src/modules/operations/hooks/useCopilotChecklist.ts:        .from('employees')
+src/modules/operations/hooks/useCopilotChecklist.ts:          .from('operations_tasks')
+src/modules/operations/hooks/useCopilotChecklist.ts:          .from('operations_tasks')
+src/modules/operations/hooks/useCopilotChecklist.ts:        .from('operations_tasks')
+src/modules/operations/hooks/useIdeaActions.ts:        .from('idea_actions')
+src/modules/operations/hooks/useIdeaActions.ts:        .from('idea_actions')
+src/modules/operations/hooks/useIdeaActions.ts:          .from('idea_actions')
+src/modules/operations/hooks/useIdeaActions.ts:        .from('idea_actions')
+src/modules/operations/hooks/useIdeaAssessments.ts:        ? supabase.from('idea_cycles').update(payload).eq('id', cycleId).select().single()
+src/modules/operations/hooks/useIdeaAssessments.ts:        : supabase.from('idea_cycles').insert(payload).select().single();
+src/modules/system/hooks/useAdminSettings.ts:          .from('companies')
+src/modules/system/hooks/useAdminSettings.ts:          .from('inv_locations')
+src/modules/system/hooks/useAdminSettings.ts:          .from('company_roles')
+src/modules/system/hooks/useGeneralSettings.ts:      const bucket = supabase.storage.from('company-assets');
+src/modules/system/hooks/useSystemSettings.ts:          .from('profiles')
+src/modules/system/hooks/useSystemSettings.ts:        .from('system_settings')
+src/modules/system/hooks/useSystemSettings.ts:          .from('system_settings')
+src/modules/system/hooks/useSystemSettings.ts:        .from('system_settings')
+src/modules/system/hooks/useSystemSettings.ts:        .from('companies')
+src/modules/system/hooks/useSystemSettings.ts:        .from('profiles')
+src/modules/system/hooks/useIntegrationSettings.ts:          connections: Array.from(
+src/modules/system/hooks/useAICopilotSettings.ts:      return { ...prev, scopes: Array.from(set) };
+src/modules/system/hooks/useAICopilotSettings.ts:      return { ...prev, restrictedModules: Array.from(set) };
+src/pages/Reports.tsx:  const { data } = supabase.storage.from(bucket).getPublicUrl(document.file.storage_path);
+src/pages/Employees.tsx:        .from('profiles')
+src/pages/Employees.tsx:        .from('departments')
+src/pages/Employees.tsx:                      {Array.from({ length: totalPages }).slice(0, 5).map((_, i) => {
+src/pages/copilot/review.tsx:        .from('profiles')
+src/pages/copilot/review.tsx:        .from('skill_matrix')
+src/pages/copilot/review.tsx:      const { error } = await supabase.from('employee_badge').insert({
+src/pages/copilot/review.tsx:        .from('skill_matrix')
+src/pages/copilot/review.tsx:      const { error } = await supabase.from('skill_matrix').upsert(upsertPayload, {
+src/pages/copilot/review.tsx:      const insertResult = await supabase.from('promotion_proposal').insert({
+src/pages/copilot/review.tsx:      const auditResult = await supabase.from('audit_log').insert({
+src/pages/MessagesPage.tsx:          .from('profiles')
+src/pages/MessagesPage.tsx:    const participantIds = Array.from(new Set([CURRENT_USER.id, ...draft.participantIds]));
+src/pages/TimeOff.tsx:        .from('time_off_requests')
+src/pages/TimeOff.tsx:                  {Array.from({ length: 4 }).map((_, index) => (
+src/pages/AddSection.tsx:        .from('custom_sections')
+src/pages/AddSection.tsx:        .from('custom_section_pages')
+src/pages/AddSection.tsx:          .from('custom_section_pages')
+src/pages/AddSection.tsx:          .from('custom_section_pages')
+src/pages/AddSection.tsx:          .from('custom_section_pages')
+src/pages/LearningCenter.tsx:            {Array.from(catalogByCategory.entries()).map(([category, courses]) => {
+src/pages/availability/index.tsx:        .from('staff_availability')
+src/pages/availability/index.tsx:        .from('staff_availability')
+src/pages/availability/index.tsx:        const insertResult = await supabase.from('staff_availability').insert(insertRows);
+src/pages/PositionManagement.tsx:            {Array.from({ length: 4 }).map((_, index) => (
+src/pages/Recognition.tsx:    return Array.from(map.entries());
+src/pages/ScheduleLobby.tsx:    return Array.from(map.values()).filter((group) =>
+src/notifications/availability.ts:    .from('availability_request')
+src/notifications/availability.ts:    .from('profiles')
+src/notifications/availability.ts:      .from('profiles')
+src/services/inventory.ts:      .from('profiles')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:        .from('inv_item_units')
+src/services/inventory.ts:        .from('inv_recipes')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_adjustments')
+src/services/inventory.ts:      .from('inv_waste')
+src/services/inventory.ts:      .from('inv_prep_batches')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_adjustments')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:        .from('inv_count_locations')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_count_lines')
+src/services/inventory.ts:      .from('inv_counts')
+src/services/inventory.ts:      .from('inv_count_events')
+src/services/inventory.ts:      .from('inv_count_scans')
+src/services/inventory.ts:      .from('inv_count_scans')
+src/services/inventory.ts:      .from('inv_count_lines')
+src/services/inventory.ts:      .from('inv_count_lines')
+src/services/inventory.ts:      .from('inv_count_lines')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_items')
+src/services/inventory.ts:      .from('inv_item_units')
+src/services/inventory.ts:      .from('inv_count_lines')
+src/services/inventory.ts:      const { error } = await supabase.from('inv_count_lines').insert(chunk);
+src/services/inventory.ts:    const { error } = await supabase.from('inv_count_events').insert({
+src/services/inventory.ts:      .from('inv_adjustments')
+src/services/inventory.ts:      .from('inv_adjustments')
+src/services/inventory.ts:      .from('purchase_orders')
+src/services/inventory.ts:      .from('purchase_orders')
+src/services/inventory.ts:      .from('purchase_orders')
+src/services/inventory.ts:      const { error: itemsError } = await supabase.from('purchase_order_items').insert(poItems);
+src/services/inventory.ts:        await supabase.from('purchase_orders').delete().eq('id', inserted.id);
+src/services/inventory.ts:      .from('purchase_orders')
+src/services/inventory.ts:        .from('purchase_order_items')
+src/services/inventory.ts:        const { error: txnError } = await supabase.from('inventory_transactions').insert({
+src/services/inventory.ts:      .from('purchase_orders')
+src/services/inventory.ts:      .from('inv_suppliers')
+src/services/inventory.ts:      .from('inv_suppliers')
+src/services/inventory.ts:      .from('payments')
+src/services/inventory.ts:      .from('payments')
+src/services/inventory.ts:      .from('inv_waste')
+src/services/inventory.ts:      .from('inv_waste')
+src/services/inventory.ts:      .from('inv_waste')
+src/services/inventory.ts:      .from('inv_waste')
+src/services/inventory.ts:      .from('inv_production_events')
+src/services/inventory.ts:        .from('inv_items')
+src/services/inventory.ts:        .from('inv_recipes')
+src/services/inventory.ts:      .from('inv_units')
+src/services/inventory.ts:        .from('inv_production_events')
+src/services/inventory.ts:          .from('inv_production_materials')
+src/services/inventory.ts:        .from('inv_production_approvals')
+src/services/inventory.ts:        const { error: adjustmentsError } = await supabase.from('inv_adjustments').insert(adjustmentsPayload);
+src/services/inventory.ts:        await supabase.from('inv_production_materials').delete().eq('production_id', eventId);
+src/services/inventory.ts:        await supabase.from('inv_production_approvals').delete().eq('production_id', eventId);
+src/services/inventory.ts:        await supabase.from('inv_production_events').delete().eq('id', eventId);
+src/services/inventory.ts:      .from('inv_transfers')
+src/services/inventory.ts:      .from('inv_transfers')
+src/services/inventory.ts:      .from('inv_transfers')
+src/services/inventory.ts:        .from('inv_transfer_items')
+src/services/inventory.ts:        await supabase.from('inv_transfers').delete().eq('id', data.id);
+src/services/inventory.ts:      .from('inv_transfers')
+src/services/inventory.ts:  //     .from('inv_prep_plans')
+src/services/inventory.ts:  //     .from('inv_prep_plans')
+src/services/inventory.ts:      .from('inventory_categories')
+src/services/inventory.ts:      .from('inv_locations')
+src/services/inventory.ts:      .from('inv_units')  
+src/services/inventory.ts:      .from('inv_suppliers')
+src/services/inventory.ts:      .from('inv_recipes')
+src/services/inventory.ts:        .from('inv_recipes')
+src/services/inventory.ts:      .from('inv_recipes')
+src/services/inventory.ts:      .from('inv_recipes')
+src/services/ingestion/api.ts:    .from('profiles')
+src/services/ingestion/api.ts:    .from(REPORTS_BUCKET)
+src/services/ingestion/api.ts:    .from('files')
+src/services/ingestion/api.ts:    .from('documents')
+src/services/ingestion/api.ts:    .from('documents')
+src/services/ingestion/api.ts:    .from('documents')
+src/services/ingestion/api.ts:    .from('documents')
+src/services/ingestion/api.ts:    .from('documents')
+src/services/ingestion/api.ts:    .from('events')
+src/services/forms/formImportService.ts:  await supabase.from('form_fields').insert(fields);
+src/services/forms/formImportService.ts:    .from('forms')
+src/services/forms/formImportService.ts:      .from('documents')
+src/services/goals/goalProgressService.ts:    .from('goal_tasks')
+src/services/goals/goalProgressService.ts:    .from('goals')
+src/services/goals/goalProgressService.ts:    .from('goals')
+src/services/scheduling/autoScheduler.ts:    .from('schedules')
+src/services/scheduling/autoScheduler.ts:    .from('schedule_assignments')
+src/services/scheduling/autoScheduler.ts:    .from('schedules')
+src/services/scheduling/autoScheduler.ts:    .from('schedules')
+src/services/scheduling/autoScheduler.ts:      .from('schedule_assignments')
+src/services/intelligence/closedLoopEngine.ts:      .from('profiles')
+src/services/intelligence/closedLoopEngine.ts:  return Array.from(frequencies.entries())
+src/services/intelligence/closedLoopEngine.ts:  const unique = Array.from(new Set(employeeIds)).slice(0, 3);
+src/services/intelligence/closedLoopEngine.ts:    .from('events')
+src/services/intelligence/closedLoopEngine.ts:    .from('tasks')
+src/services/intelligence/closedLoopEngine.ts:    .from('time_off_requests')
+src/services/intelligence/closedLoopEngine.ts:    .from('shift_swaps')
+src/services/intelligence/closedLoopEngine.ts:    .from('schedules')
+src/services/intelligence/closedLoopEngine.ts:    .from('profiles')
+src/services/intelligence/closedLoopEngine.ts:    .from('idea_cycles')
+src/services/intelligence/closedLoopEngine.ts:          .from('schedule_assignments')
+src/services/intelligence/closedLoopEngine.ts:  const unresolvedCriticalEvents = Array.from(highSeveritySignals.values()).filter((signal) => {
+src/services/intelligence/closedLoopEngine.ts:  const resolvedCritical = Array.from(highSeveritySignals.values()).filter((signal) => {
+src/services/learning/learningService.ts:    await supabase.from(TABLE_PROGRESS_SNAPSHOTS as any).insert(snapshotPayload);
+src/services/learning/learningService.ts:    .from(TABLE_PROGRESS_SNAPSHOTS as any)
+src/services/learning/learningService.ts:      .from('skill_matrix')
+src/services/learning/learningService.ts:        .from('skill_matrix')
+src/services/learning/learningService.ts:      await learningClient.from('skill_matrix').insert({
+src/services/learning/learningService.ts:      .from('employee_badge')
+src/services/learning/learningService.ts:      await learningClient.from('employee_badge').insert({
+src/services/financialDemoData.ts:  const months = Array.from({ length: 6 }, (_, index) => subMonths(new Date(), index));
+src/services/financialDemoData.ts:    .from('payments')
+src/services/financialDemoData.ts:    const paymentInsert = await supabase.from('payments').insert(paymentRows);
+src/services/financialDemoData.ts:    .from('expenses')
+src/services/financialDemoData.ts:    const expenseInsert = await supabase.from('expenses').insert(expenseRows);
+src/services/financialDemoData.ts:    .from('inventory_transactions')
+src/services/financialDemoData.ts:      .from('inventory_items')
+src/services/financialDemoData.ts:        .from('inventory_items')
+src/services/financialDemoData.ts:      const transactionInsert = await supabase.from('inventory_transactions').insert(transactionRows);
+src/services/cookbook.ts:    const { data, error } = await supabase.from('inv_recipes').select(`
+src/services/cookbook.ts:    return Array.from(grouped.values()).map(({ item, lines }) =>
+src/services/cookbook.ts:      .from('inv_prep_batches')
+src/services/cookbook.ts:      .from('inv_prep_batches')
+src/services/guardrail/scheduleWorkflowService.ts:    .from('schedule_workflow_steps')
+src/services/guardrail/scheduleWorkflowService.ts:    .from('schedule_workflow_criteria')
+src/services/guardrail/scheduleWorkflowService.ts:    .from('schedule_workflow_criteria')
+src/services/guardrail/scheduleWorkflowService.ts:    .from('schedule_workflow_steps')
+src/services/guardrail/scheduleWorkflowService.ts:  const { error: insertError } = await supabase.from('schedule_workflow_steps').insert(inserts);
+src/services/guardrail/supabaseScheduleRulebookRepository.ts:    .from('schedule_rulebooks')
+src/services/ai/trainingInsights.ts:    .from('learning_completions')
+src/services/rules/ruleRepository.ts:    .from('app_rules')
+src/services/rules/ruleRepository.ts:    .from('app_rules')
+src/services/rules/ruleRepository.ts:    .from('app_rule_audits')
+src/services/performance/performanceService.ts:      .from('profiles')
+src/services/performance/performanceService.ts:    .from('profiles')
+src/services/performance/performanceService.ts:    .from('goals')
+src/services/performance/performanceService.ts:    .from('performance_reviews')
+src/services/performance/performanceService.ts:    .from('performance_goal_reviews')
+src/services/performance/performanceService.ts:      .from('staff_performance')
+src/services/performance/performanceService.ts:    client.from('goal_participants').select('id, goal_id, user_id, role, contribution_score'),
+src/services/performance/performanceService.ts:    .from('staff_performance')
+src/services/performance/performanceService.ts:    .from('staff_performance')
+src/services/performance/performanceService.ts:  const { error } = await client.from('staff_performance').delete().eq('id', id);
+src/services/performance/performanceService.ts:    .from('performance_reviews')
+src/services/performance/performanceService.ts:    .from('performance_reviews')
+src/services/performance/performanceService.ts:  const { error } = await client.from('performance_reviews').delete().eq('id', id);
+src/services/performance/performanceService.ts:  const { data, error } = await client.from('goals').insert(payload).select().single();
+src/services/performance/performanceService.ts:    .from('goals')
+src/services/performance/performanceService.ts:  const { error } = await client.from('goals').delete().eq('id', id);
+src/services/performance/performanceService.ts:    .from('goal_participants')
+src/services/performance/performanceService.ts:  const { error } = await client.from('goal_participants').delete().eq('id', id);
+src/services/performance/performanceAutomation.ts:      .from('profiles')
+src/services/performance/performanceAutomation.ts:      .from('employee_report')
+src/services/performance/performanceAutomation.ts:      .from('tasks')
+src/services/performance/performanceAutomation.ts:      .from('reminders')
+src/services/performance/performanceAutomation.ts:      .from('tasks')
+src/services/performance/performanceAutomation.ts:      .from('reminders')
+src/services/performance/__tests__/performanceService.test.ts:    from(table: string) {
+src/services/performance/__tests__/performanceService.test.ts:    from(table: string) {
+src/services/performance/__tests__/performanceService.test.ts:    from(table: SimulationTable) {
+src/services/analytics/businessAnalyticsService.ts:      .from('profiles')
+src/services/analytics/businessAnalyticsService.ts:      .from('schedules')
+src/services/analytics/businessAnalyticsService.ts:        .from('schedule_assignments')
+src/services/analytics/businessAnalyticsService.ts:      .from('tasks')
+src/services/analytics/businessAnalyticsService.ts:      .from('goals')
+src/services/analytics/businessAnalyticsService.ts:      .from('inventory_transactions')
+src/services/analytics/businessAnalyticsService.ts:      .from('expenses')
