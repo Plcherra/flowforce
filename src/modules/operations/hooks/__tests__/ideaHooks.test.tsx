@@ -10,14 +10,27 @@ type SupabaseMock = {
   from: ReturnType<typeof vi.fn>;
 };
 
-const rpcMock = vi.fn();
-const fromMock = vi.fn();
+const { rpcMock, fromMock } = vi.hoisted(() => ({
+  rpcMock: vi.fn(),
+  fromMock: vi.fn(),
+}));
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     rpc: rpcMock,
     from: fromMock,
   },
+}));
+
+vi.mock('@/hooks/useProfile', () => ({
+  useProfile: () => ({
+    profile: {
+      id: 'user-1',
+      userId: 'user-1',
+      company_id: 'company-1',
+    },
+    loading: false,
+  }),
 }));
 
 describe('IDEA hooks', () => {
@@ -55,8 +68,19 @@ describe('IDEA hooks', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        causes: [{ id: 'c-1', summary: 'Rising labor cost', confidence: 0.82 }],
-        recommendations: [{ id: 'r-1', action: 'Rebalance schedule', impact: 'Reduce overtime by 12%', confidence: 0.71 }],
+        evaluation: {
+          insights: [
+            { id: 'sig-1', message: 'Rising labor cost', severity: 'warning', metadata: { confidence: 0.82 } },
+          ],
+          recommendedActions: [
+            {
+              dedupeKey: 'rec-1',
+              actionType: 'idea.action.correct',
+              confidence: 0.71,
+              impacts: [{ metric: 'Labor %', delta: -3 }],
+            },
+          ],
+        },
       }),
     });
 
@@ -65,11 +89,15 @@ describe('IDEA hooks', () => {
     global.fetch = fetchMock;
 
     const insights = [{ id: 'labor', label: 'Labor %', value: 28, delta: 3, trend: 'up' as const }];
-    const { result } = renderHook(() => useIdeaDiagnostics('company-1', insights));
+    const { result } = renderHook(() => useIdeaDiagnostics('company-1', insights, range));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data.causes[0].summary).toContain('labor');
-    expect(fetchMock).toHaveBeenCalled();
+    expect(result.current.data.recommendations[0].action).toContain('idea.action.correct');
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/functions/v1/copilot-service',
+      expect.objectContaining({ method: 'POST' }),
+    );
 
     global.fetch = originalFetch as typeof global.fetch;
   });
@@ -115,7 +143,7 @@ describe('IDEA hooks', () => {
     ];
 
     rpcMock.mockImplementation((_fn: string, params: any) => {
-      const start = params?.range?.start;
+      const start = params?.range_start;
       if (start === range.start.toISOString()) {
         return Promise.resolve({ data: afterSnapshot, error: null });
       }
@@ -200,8 +228,19 @@ describe('IDEA hooks', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        causes: [{ id: 'c-flow', summary: 'Product mix shift', confidence: 0.78 }],
-        recommendations: [{ id: 'r-flow', action: 'Launch upsell campaign', impact: 'Improve upsell rate', confidence: 0.74 }],
+        evaluation: {
+          insights: [
+            { id: 'c-flow', message: 'Product mix shift', severity: 'warning', metadata: { confidence: 0.78 } },
+          ],
+          recommendedActions: [
+            {
+              dedupeKey: 'r-flow',
+              actionType: 'Launch upsell campaign',
+              confidence: 0.74,
+              impacts: [{ metric: 'Sales', delta: 5, unit: 'USD' }],
+            },
+          ],
+        },
       }),
     });
     const originalFetch: typeof global.fetch | undefined = global.fetch;
@@ -209,7 +248,7 @@ describe('IDEA hooks', () => {
     global.fetch = fetchMock;
 
     const diagnosticsHook = renderHook(
-      ({ data }) => useIdeaDiagnostics('company-99', data),
+      ({ data }) => useIdeaDiagnostics('company-99', data, range),
       { initialProps: { data: [] as ReturnType<typeof useIdeaInsights>['data'] } },
     );
 
@@ -266,12 +305,13 @@ function buildPassthroughActionsMock() {
 }
 
 function createIdeaActionsMock(store: any[]) {
+  const builder = {
+    eq: vi.fn(() => builder),
+    order: vi.fn(() => Promise.resolve({ data: store, error: null })),
+  };
+
   return {
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        order: vi.fn(() => Promise.resolve({ data: store, error: null })),
-      })),
-    })),
+    select: vi.fn(() => builder),
     insert: (payload: any) => ({
       select: () => ({
         single: () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,37 +53,8 @@ export function StaffShiftManagement() {
         `)
         .order('created_at', { ascending: false });
 
-      // Transform data (using unknown for type safety)
-      const transformedSwaps = (swaps?.map(swap => ({
-        ...swap,
-        requesting_user_id: swap.requesting_user_id || '',
-        requesting_user: {
-          first_name: 'Staff',
-          last_name: 'Member',
-          avatar_url: ''
-        },
-        target_user: swap.target_user ? {
-          first_name: 'Target',
-          last_name: 'Staff',
-          avatar_url: ''
-        } : undefined,
-        swap_type: 'swap' as const,
-        status: swap.status as 'pending' | 'approved' | 'rejected'
-      })) || []) as unknown as ShiftSwap[];
-
-      const transformedTimeOff = (timeOff?.map(request => ({
-        ...request,
-        user_id: request.user_id || '',
-        user: {
-          first_name: 'Staff',
-          last_name: 'Member',
-          avatar_url: ''
-        },
-        type: request.type as 'vacation' | 'sick' | 'personal' | 'other'
-      })) || []) as unknown as TimeOffRequest[];
-
-      setShiftSwaps(transformedSwaps);
-      setTimeOffRequests(transformedTimeOff);
+      setShiftSwaps((swaps ?? []) as unknown as ShiftSwap[]);
+      setTimeOffRequests((timeOff ?? []) as unknown as TimeOffRequest[]);
     } catch {
       toast({
         title: "Error loading data",
@@ -98,6 +69,52 @@ export function StaffShiftManagement() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const filteredShiftSwaps = useMemo(() => {
+    if (!normalizedSearch) return shiftSwaps;
+    return shiftSwaps.filter((swap) => {
+      const parts = [
+        swap.requesting_user?.first_name,
+        swap.requesting_user?.last_name,
+        swap.target_user?.first_name,
+        swap.target_user?.last_name,
+        swap.schedule?.title,
+        swap.reason,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return parts.includes(normalizedSearch);
+    });
+  }, [shiftSwaps, normalizedSearch]);
+
+  const filteredTimeOffRequests = useMemo(() => {
+    if (!normalizedSearch) return timeOffRequests;
+    return timeOffRequests.filter((request) => {
+      const parts = [
+        request.user?.first_name,
+        request.user?.last_name,
+        request.type,
+        request.reason,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return parts.includes(normalizedSearch);
+    });
+  }, [timeOffRequests, normalizedSearch]);
+
+  const getDisplayName = (user?: { first_name?: string | null; last_name?: string | null }) => {
+    const name = [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim();
+    return name || 'Team member';
+  };
+
+  const getInitials = (user?: { first_name?: string | null; last_name?: string | null }) => {
+    const initials = `${user?.first_name?.[0] ?? ''}${user?.last_name?.[0] ?? ''}`.trim();
+    return initials || 'TM';
+  };
 
   const handleSwapAction = async (swapId: string, action: 'approve' | 'reject') => {
     try {
@@ -227,8 +244,8 @@ export function StaffShiftManagement() {
         </TabsList>
 
         <TabsContent value="swaps" className="space-y-4">
-          {shiftSwaps.length > 0 ? (
-            shiftSwaps.map((swap) => (
+          {filteredShiftSwaps.length > 0 ? (
+            filteredShiftSwaps.map((swap) => (
               <Card key={swap.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -241,22 +258,18 @@ export function StaffShiftManagement() {
                       </div>
                       
                        <div className="flex items-center gap-2">
-                         <Avatar className="w-8 h-8">
-                           <AvatarFallback>
-                             RS
-                           </AvatarFallback>
+                         <Avatar className="h-8 w-8">
+                           <AvatarFallback>{getInitials(swap.requesting_user)}</AvatarFallback>
                          </Avatar>
-                         <span className="font-medium text-sm">Requesting Staff</span>
+                         <span className="font-medium text-sm">{getDisplayName(swap.requesting_user)}</span>
                          
                          {swap.target_user && (
                            <>
                              <ArrowRightLeft className="h-3 w-3 text-muted-foreground" />
-                             <Avatar className="w-8 h-8">
-                               <AvatarFallback>
-                                 TS
-                               </AvatarFallback>
+                             <Avatar className="h-8 w-8">
+                               <AvatarFallback>{getInitials(swap.target_user)}</AvatarFallback>
                              </Avatar>
-                             <span className="font-medium text-sm">Target Staff</span>
+                             <span className="font-medium text-sm">{getDisplayName(swap.target_user)}</span>
                            </>
                          )}
                        </div>
@@ -264,9 +277,14 @@ export function StaffShiftManagement() {
 
                     <div className="flex items-center gap-3">
                      <div className="text-right text-sm">
-                       <div className="font-medium">Shift Details</div>
+                       <div className="font-medium">{swap.schedule?.title || 'Shift details'}</div>
                        <div className="text-muted-foreground">
-                         Shift information
+                         {swap.schedule?.start_time
+                           ? `${format(new Date(swap.schedule.start_time), 'MMM d, HH:mm')} - ${format(
+                               new Date(swap.schedule.end_time),
+                               'HH:mm',
+                             )}`
+                           : 'Timing to be confirmed'}
                        </div>
                      </div>
                       
@@ -316,28 +334,30 @@ export function StaffShiftManagement() {
             <Card>
               <CardContent className="p-8 text-center">
                 <ArrowRightLeft className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-semibold mb-2">No Shift Swap Requests</h3>
-                <p className="text-muted-foreground">All shift swap requests are up to date</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  {normalizedSearch ? 'No shift swaps match your search' : 'No Shift Swap Requests'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {normalizedSearch ? 'Try a different name or role filter.' : 'All shift swap requests are up to date'}
+                </p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
         <TabsContent value="timeoff" className="space-y-4">
-          {timeOffRequests.length > 0 ? (
-            timeOffRequests.map((request) => (
+          {filteredTimeOffRequests.length > 0 ? (
+            filteredTimeOffRequests.map((request) => (
               <Card key={request.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-4">
-                       <Avatar className="w-10 h-10">
-                         <AvatarFallback>
-                           SM
-                         </AvatarFallback>
+                       <Avatar className="h-10 w-10">
+                         <AvatarFallback>{getInitials(request.user)}</AvatarFallback>
                        </Avatar>
                        
                        <div>
-                         <div className="font-medium">Staff Member</div>
+                         <div className="font-medium">{getDisplayName(request.user)}</div>
                         <div className="text-sm text-muted-foreground">
                           {format(new Date(request.start_date), 'MMM d')} - {format(new Date(request.end_date), 'MMM d, yyyy')}
                         </div>
@@ -394,8 +414,12 @@ export function StaffShiftManagement() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-semibold mb-2">No Time Off Requests</h3>
-                <p className="text-muted-foreground">All time off requests are processed</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  {normalizedSearch ? 'No time off requests match your search' : 'No Time Off Requests'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {normalizedSearch ? 'Try adjusting your search keywords.' : 'All time off requests are processed'}
+                </p>
               </CardContent>
             </Card>
           )}

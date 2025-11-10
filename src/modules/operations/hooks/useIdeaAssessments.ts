@@ -184,7 +184,7 @@ export function useIdeaAssessments(
         throw mutationError;
       }
     },
-    [companyId, cycleId, latestInsights, metrics, range, normalizedRange.end, normalizedRange.start],
+    [companyId, cycleId, latestInsights, metrics, range],
   );
 
   return {

@@ -63,10 +63,10 @@ function UpdatesFeedComponent() {
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             <p className="text-sm text-muted-foreground leading-snug">
-              {update.summary || update.body?.slice(0, 180) || 'No content provided yet.'}
+              {update.body?.slice(0, 180) || 'No content provided yet.'}
             </p>
             <div className="flex items-center gap-3">
-              <Button size="sm" variant="outline" onClick={() => likeUpdate(update.id)}>
+              <Button size="sm" variant="outline" onClick={() => void likeUpdate(update.id)}>
                 👍 {update.likes ?? 0}
               </Button>
               <span className="text-xs text-muted-foreground">

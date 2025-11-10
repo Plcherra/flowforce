@@ -1,10 +1,20 @@
 import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import type { RecognitionDetails } from '@/types/recognition';
+import {
+  deleteGoalRow,
+  fetchGoalRewards,
+  fetchGoalsByCompany,
+  fetchGoalTasks,
+  insertGoalRow,
+  updateGoalRow,
+  updateGoalStatusRow,
+  type GoalRecord,
+} from '@/repositories/goalsRepository';
+import { fetchProfilesByIds } from '@/repositories/profileRepository';
 
 const DEFAULT_RECOGNITION_XP = 110;
 
@@ -77,10 +87,6 @@ export type UpdateGoalInput = TablesUpdate<'goals'>;
 
 const goalsQueryKey = (companyId: string | null) => ['goals', companyId] as const;
 
-type GoalRecord = GoalRow & {
-  owner_id?: string | null;
-};
-
 type RewardDetailsNormalized = {
   xp: number | null;
   summary: string;
@@ -130,130 +136,73 @@ function parseRewardDetails(raw: unknown): RewardDetailsNormalized {
 }
 
 async function fetchGoals(companyId: string): Promise<Goal[]> {
-  const { data, error } = await supabase
-    .from('goals')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  const rows = (data ?? []) as GoalRecord[];
-
-  const filteredRows = rows.filter((goal) => goal.company_id === companyId);
-
-  if (filteredRows.length !== rows.length) {
-    const removed = rows.length - filteredRows.length;
-    console.warn('[useGoals] Filtered out goals from other companies', JSON.stringify({ removed, companyId }));
-  }
+  const rows = await fetchGoalsByCompany(companyId);
 
   const ownerIds = Array.from(
     new Set(
-      filteredRows
+      rows
         .map((goal) => goal.owner_id ?? goal.created_by)
         .filter((value): value is string => Boolean(value)),
     ),
   );
 
   let owners: Record<string, OwnerProfile> = {};
-
   if (ownerIds.length > 0) {
-    const { data: ownerData, error: ownerError } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, avatar_url, company_id')
-      .in('id', ownerIds)
-      .eq('company_id', companyId);
-
-    if (ownerError) {
-      throw ownerError;
-    }
-
-    owners = (ownerData ?? [])
-      .filter((profile) => profile.company_id === companyId)
-      .reduce<Record<string, OwnerProfile>>((acc, profile) => {
-        acc[profile.id] = {
-          id: profile.id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          avatar_url: profile.avatar_url,
-        };
-        return acc;
-      }, {});
+    const ownerProfiles = await fetchProfilesByIds(companyId, ownerIds);
+    owners = ownerProfiles.reduce<Record<string, OwnerProfile>>((acc, profile) => {
+      acc[profile.id] = {
+        id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        avatar_url: profile.avatar_url,
+      };
+      return acc;
+    }, {});
   }
 
-  const goalIds = filteredRows.map((goal) => goal.id);
-
+  const goalIds = rows.map((goal) => goal.id);
   const goalTasksMap = new Map<string, GoalTaskWithDetails[]>();
   const recognitionsMap = new Map<string, GoalRecognition[]>();
 
   if (goalIds.length > 0) {
-    const [{ data: goalTasksData, error: goalTasksError }, { data: rewardsData, error: rewardsError }] =
-      await Promise.all([
-        supabase
-          .from('goal_tasks')
-          .select(
-            `
-              id,
-              goal_id,
-              weight,
-              task:tasks(
-                id,
-                title,
-                status,
-                assigned_to,
-                completed_at,
-                priority
-              )
-            `,
-          )
-          .in('goal_id', goalIds),
-        supabase
-          .from('goal_rewards')
-          .select('id, goal_id, reward_type, reward_details, awarded_at, user_id, company_id')
-          .in('goal_id', goalIds)
-          .eq('company_id', companyId),
-      ]);
-
-    if (goalTasksError) {
-      console.warn('[useGoals] Failed to load goal task links', goalTasksError);
-    } else {
-      (goalTasksData ?? []).forEach((record) => {
-        const goalId = (record as { goal_id?: string }).goal_id;
+    try {
+      const taskLinks = await fetchGoalTasks(goalIds);
+      taskLinks.forEach((record, index) => {
+        const goalId = record.goal_id;
         if (!goalId) return;
         const existing = goalTasksMap.get(goalId) ?? [];
         const sanitized: GoalTaskWithDetails = {
-          id: (record as { id?: string }).id ?? `${goalId}-${existing.length}`,
-          weight: (record as { weight?: number | null }).weight ?? null,
-          task: (record as { task?: GoalTaskWithDetails['task'] }).task ?? null,
+          id: record.id ?? `${goalId}-${index}`,
+          weight: record.weight ?? null,
+          task: record.task ?? null,
         };
         existing.push(sanitized);
         goalTasksMap.set(goalId, existing);
       });
+    } catch (goalTasksError) {
+      console.warn('[useGoals] Failed to load goal task links', goalTasksError);
     }
 
-    const rewardList = rewardsError ? [] : (rewardsData ?? []);
-    let rewardUserIds: string[] = [];
-    if (rewardList.length > 0) {
-      const availableIds = rewardList
-        .map((reward) => reward?.user_id)
-        .filter((value): value is string => Boolean(value));
-      rewardUserIds = Array.from(new Set(availableIds));
+    let rewardList: Awaited<ReturnType<typeof fetchGoalRewards>> = [];
+    try {
+      rewardList = await fetchGoalRewards(goalIds, companyId);
+    } catch (rewardsError) {
+      console.warn('[useGoals] Failed to load goal rewards', rewardsError);
     }
+
+    const rewardUserIds = Array.from(
+      new Set(
+        rewardList
+          .map((reward) => reward.user_id)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    );
 
     let rewardUsers: Record<string, OwnerProfile> = {};
     if (rewardUserIds.length > 0) {
-      const { data: rewardProfiles, error: rewardProfileError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url, company_id')
-        .in('id', rewardUserIds)
-        .eq('company_id', companyId);
-
-      if (rewardProfileError) {
-        console.warn('[useGoals] Failed to load recognition recipients', rewardProfileError);
-      } else {
-        rewardUsers = (rewardProfiles ?? []).reduce<Record<string, OwnerProfile>>((acc, profile) => {
+      try {
+        const rewardProfiles = await fetchProfilesByIds(companyId, rewardUserIds);
+        rewardUsers = rewardProfiles.reduce<Record<string, OwnerProfile>>((acc, profile) => {
           acc[profile.id] = {
             id: profile.id,
             first_name: profile.first_name,
@@ -262,14 +211,16 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
           };
           return acc;
         }, {});
+      } catch (rewardProfileError) {
+        console.warn('[useGoals] Failed to load recognition recipients', rewardProfileError);
       }
     }
 
     rewardList.forEach((reward) => {
-      const goalId = reward?.goal_id;
+      const goalId = reward.goal_id;
       if (!goalId) return;
       const existing = recognitionsMap.get(goalId) ?? [];
-      const details = parseRecognitionDetailsValue(reward?.reward_details);
+      const details = parseRecognitionDetailsValue(reward.reward_details);
       const explicitXp =
         typeof details?.xp_awarded === 'number'
           ? details.xp_awarded
@@ -283,7 +234,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
             ? DEFAULT_RECOGNITION_XP
             : 0;
 
-      const normalizedUser = reward?.user_id ? rewardUsers[reward.user_id] ?? null : null;
+      const normalizedUser = reward.user_id ? rewardUsers[reward.user_id] ?? null : null;
 
       existing.push({
         id: reward.id,
@@ -299,7 +250,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
     });
   }
 
-  return filteredRows.map((goal) => {
+  return rows.map((goal) => {
     const ownerId = goal.owner_id ?? goal.created_by ?? null;
     const goalTasks = goalTasksMap.get(goal.id) ?? [];
     const recognitionList = recognitionsMap.get(goal.id) ?? [];
@@ -372,17 +323,7 @@ export function useGoals() {
         completed_at: input.status === 'completed' ? new Date().toISOString() : null,
       };
 
-      const { data, error } = await supabase
-        .from('goals')
-        .insert(payload)
-        .select('*')
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data as GoalRecord;
+      return insertGoalRow(payload);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
@@ -406,16 +347,7 @@ export function useGoals() {
       if (!companyId) {
         throw new Error('Missing company context');
       }
-      const { error } = await supabase
-        .from('goals')
-        .update(updates)
-        .eq('id', id)
-        .eq('company_id', companyId);
-
-      if (error) {
-        throw error;
-      }
-
+      await updateGoalRow(id, updates, companyId);
       return id;
     },
     onSuccess: () => {

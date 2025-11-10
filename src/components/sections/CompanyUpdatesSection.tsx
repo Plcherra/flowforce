@@ -34,7 +34,23 @@ export default function CompanyUpdatesSection() {
   };
 
   const handleView = (updateId: string) => {
-    markAsViewed(updateId);
+    void markAsViewed(updateId);
+  };
+
+  const handleLike = (updateId: string) => {
+    void likeUpdate(updateId);
+  };
+
+  const handleComment = (updateId: string, content: string) => {
+    void addComment(updateId, content);
+  };
+
+  const handleTogglePin = (updateId: string) => {
+    void togglePin(updateId);
+  };
+
+  const handleDelete = (updateId: string) => {
+    void deleteUpdate(updateId);
   };
 
   if (loading) {
@@ -108,16 +124,16 @@ export default function CompanyUpdatesSection() {
             <UpdatesTableView
               updates={updates}
               onEdit={handleEdit}
-              onDelete={deleteUpdate}
-              onTogglePin={togglePin}
+              onDelete={handleDelete}
+              onTogglePin={handleTogglePin}
               onAddNew={handleAddNew}
             />
           ) : (
             <UpdatesFeedView
               updates={updates}
               comments={comments}
-              onLike={likeUpdate}
-              onComment={addComment}
+              onLike={handleLike}
+              onComment={handleComment}
               onView={handleView}
             />
           )}

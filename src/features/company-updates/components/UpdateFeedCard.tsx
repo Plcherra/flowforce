@@ -46,17 +46,48 @@ export function UpdateFeedCard({
   onArchive,
   onDelete,
   canManage,
-  markAsViewed,
+  onView,
+  viewerHasViewed,
 }: UpdateFeedCardProps) {
   const engagement = useMemo(() => getEngagementSettings(update), [update]);
   const isLiked = Boolean(update.viewerHasLiked);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const viewTrackedRef = useRef(false);
 
   useEffect(() => {
-    markAsViewed(update.id);
-  }, [markAsViewed, update.id]);
+    if (viewerHasViewed) {
+      viewTrackedRef.current = true;
+      return;
+    }
+
+    if (!onView || viewTrackedRef.current) {
+      return;
+    }
+
+    const element = cardRef.current;
+    if (!element) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          onView(update.id);
+          viewTrackedRef.current = true;
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [onView, update.id, viewerHasViewed]);
 
   return (
-    <Card className={update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}>
+    <Card ref={cardRef} className={update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}>
       {update.backgroundStyle && (
         <div className="h-2 w-full" style={{ background: getBackgroundCss(update.backgroundStyle) }} />
       )}
@@ -157,7 +188,7 @@ export function UpdateFeedCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onLike(update)}
+                  onClick={() => onLike(update.id)}
                   className={`h-8 px-3 ${isLiked ? 'text-red-600 hover:text-red-700' : ''}`}
                 >
                   <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />

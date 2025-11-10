@@ -7,6 +7,8 @@ import type {
   CopilotActionPayload,
   CopilotEvaluationResult,
   CopilotQueueResponse,
+  CopilotSignal,
+  CopilotMetricSnapshot,
 } from "../../../src/server/copilot/CopilotDTO.ts";
 
 type SupabaseClient = ReturnType<typeof createClient>;
@@ -72,14 +74,17 @@ serve(async (req) => {
       })
       : [];
 
+    const metrics = sanitizeMetrics(body?.metrics);
+    const signals = sanitizeSignals(body?.signals, metrics);
+
     const context: CopilotContext = {
       companyId,
       source,
       timeframe: normalizeTimeframe(timeframe),
       actor,
       forecast: [],
-      metrics: [],
-      signals: [],
+      metrics,
+      signals,
       policyOverrides,
       metadata: {
         requestId,
@@ -87,7 +92,7 @@ serve(async (req) => {
       },
     };
 
-    const evaluation = await evaluateCopilotContext(context);
+    const evaluation = await evaluateCopilotContext(context, actor.userId);
     const candidateActions =
       requestedActions.length > 0 ? requestedActions : evaluation.recommendedActions ?? [];
 
@@ -266,21 +271,35 @@ function normalizeTimeframe(input?: CopilotContext["timeframe"]): CopilotContext
   };
 }
 
-async function evaluateCopilotContext(context: CopilotContext): Promise<CopilotEvaluationResult> {
+async function evaluateCopilotContext(
+  context: CopilotContext,
+  actorUserId?: string,
+): Promise<CopilotEvaluationResult> {
   const generatedAt = new Date().toISOString();
+  const metrics = context.metrics ?? [];
+  const normalizedSignals = context.signals && context.signals.length > 0
+    ? context.signals
+    : deriveSignalsFromMetrics(metrics);
+  const recommendedActions = deriveRecommendedActions(metrics, context, actorUserId);
+  const summary = buildSummary(normalizedSignals, context.timeframe);
 
   return {
-    context,
-    summary: `Baseline Copilot evaluation for ${context.timeframe.label ?? context.timeframe.end}`,
-    insights: context.signals ?? [],
-    recommendedActions: [],
+    context: {
+      ...context,
+      signals: normalizedSignals,
+    },
+    summary,
+    insights: normalizedSignals,
+    recommendedActions,
     skippedActions: [],
-    diagnostics: [
-      {
-        level: "info",
-        message: "CopilotService evaluation is using placeholder logic.",
-      },
-    ],
+    diagnostics: recommendedActions.length === 0
+      ? [
+        {
+          level: "info",
+          message: "No actionable recommendations were generated for this timeframe.",
+        },
+      ]
+      : [],
     generatedAt,
   };
 }
@@ -346,4 +365,201 @@ async function hashPayload(payload: unknown) {
   return Array.from(new Uint8Array(hash))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
+}
+
+function sanitizeMetrics(raw: unknown): CopilotMetricSnapshot[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const metric =
+        typeof (entry as Record<string, unknown>).metric === "string"
+          ? (entry as Record<string, unknown>).metric as string
+          : typeof (entry as Record<string, unknown>).label === "string"
+            ? (entry as Record<string, unknown>).label as string
+            : null;
+
+      if (!metric) {
+        return null;
+      }
+
+      const valueRaw = (entry as Record<string, unknown>).value;
+      const changeRaw = (entry as Record<string, unknown>).change;
+      const trendRaw = (entry as Record<string, unknown>).trend;
+      const unitRaw = (entry as Record<string, unknown>).unit;
+      const observedRaw = (entry as Record<string, unknown>).observedAt;
+
+      const value = typeof valueRaw === "number" ? valueRaw : Number(valueRaw ?? 0);
+      const change = typeof changeRaw === "number" ? changeRaw : Number(changeRaw ?? 0);
+      const trend = trendRaw === "up" || trendRaw === "down" || trendRaw === "flat"
+        ? trendRaw
+        : change > 0
+          ? "up"
+          : change < 0
+            ? "down"
+            : "flat";
+      const unit = typeof unitRaw === "string" ? unitRaw : undefined;
+      const observedAt = typeof observedRaw === "string" ? observedRaw : new Date().toISOString();
+      const metadata = typeof (entry as Record<string, unknown>).metadata === "object"
+        ? (entry as Record<string, unknown>).metadata as Record<string, unknown>
+        : undefined;
+
+      return {
+        metric,
+        value,
+        change,
+        trend,
+        unit,
+        observedAt,
+        metadata,
+      };
+    })
+    .filter((value): value is CopilotMetricSnapshot => Boolean(value));
+}
+
+function sanitizeSignals(raw: unknown, metrics: CopilotMetricSnapshot[]): CopilotSignal[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return deriveSignalsFromMetrics(metrics);
+  }
+
+  return raw
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const severityRaw = (entry as Record<string, unknown>).severity;
+      const severity: CopilotSignal["severity"] =
+        severityRaw === "critical" || severityRaw === "warning" || severityRaw === "info"
+          ? severityRaw
+          : "info";
+      const message =
+        typeof (entry as Record<string, unknown>).message === "string"
+          ? (entry as Record<string, unknown>).message as string
+          : "Operational signal detected";
+      const metric =
+        typeof (entry as Record<string, unknown>).metric === "string"
+          ? (entry as Record<string, unknown>).metric as string
+          : undefined;
+      const observedAt =
+        typeof (entry as Record<string, unknown>).observedAt === "string"
+          ? (entry as Record<string, unknown>).observedAt as string
+          : undefined;
+      const metadata = typeof (entry as Record<string, unknown>).metadata === "object"
+        ? (entry as Record<string, unknown>).metadata as Record<string, unknown>
+        : undefined;
+
+      return {
+        type: typeof (entry as Record<string, unknown>).type === "string"
+          ? (entry as Record<string, unknown>).type as string
+          : "kpi",
+        severity,
+        message,
+        metric,
+        observedAt,
+        metadata,
+      };
+    })
+    .filter((value): value is CopilotSignal => Boolean(value));
+}
+
+function deriveSignalsFromMetrics(metrics: CopilotMetricSnapshot[]): CopilotSignal[] {
+  return metrics
+    .filter((metric) => Math.abs(metric.change ?? 0) > 0)
+    .slice(0, 8)
+    .map((metric) => {
+      const severity = Math.abs(metric.change ?? 0) >= 10
+        ? "critical"
+        : Math.abs(metric.change ?? 0) >= 5
+          ? "warning"
+          : "info";
+
+      const direction = metric.change && metric.change < 0 ? "decreased" : "increased";
+      const amount = Math.abs(metric.change ?? 0).toFixed(1);
+
+      return {
+        type: "kpi",
+        severity,
+        message: `${metric.metric} ${direction} by ${amount}${metric.unit ?? ""}`,
+        metric: metric.metric,
+        observedAt: metric.observedAt,
+        metadata: {
+          delta: metric.change ?? 0,
+          value: metric.value,
+          unit: metric.unit,
+          confidence: severity === "critical" ? 0.9 : severity === "warning" ? 0.7 : 0.5,
+        },
+      };
+    });
+}
+
+function deriveRecommendedActions(
+  metrics: CopilotMetricSnapshot[],
+  context: CopilotContext,
+  actorUserId?: string,
+): CopilotActionPayload[] {
+  if (!actorUserId) {
+    return [];
+  }
+
+  return metrics
+    .filter((metric) => Math.abs(metric.change ?? 0) >= 1)
+    .slice(0, 5)
+    .map((metric, index) => {
+      const change = metric.change ?? 0;
+      const actionType = change < 0 ? "idea.action.correct" : "idea.action.amplify";
+      const confidence =
+        typeof metric.metadata?.confidence === "number"
+          ? (metric.metadata.confidence as number)
+          : change < 0
+            ? 0.6
+            : 0.55;
+      return {
+        companyId: context.companyId,
+        actorUserId,
+        source: context.source,
+        dedupeKey: `${metric.metric}-${index}-${metric.observedAt}`,
+        actionType,
+        payload: {
+          metric: metric.metric,
+          observedAt: metric.observedAt,
+          unit: metric.unit,
+          change,
+        },
+        evaluation: {
+          rationale: change < 0 ? "Metric trending downward" : "Metric trending upward",
+        },
+        metadata: {
+          origin: "copilot-service",
+        },
+        impacts: [
+          {
+            metric: metric.metric,
+            delta: change,
+            unit: metric.unit,
+            confidence,
+          },
+        ],
+        confidence,
+      };
+    });
+}
+
+function buildSummary(signals: CopilotSignal[], timeframe: CopilotContext["timeframe"]) {
+  if (signals.length === 0) {
+    return `No major KPI shifts detected for ${timeframe.label ?? timeframe.end}.`;
+  }
+
+  const highlights = signals
+    .slice(0, 2)
+    .map((signal) => signal.message)
+    .join("; ");
+
+  return `${signals.length} KPI shifts detected for ${timeframe.label ?? timeframe.end}: ${highlights}.`;
 }

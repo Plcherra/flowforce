@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
 import type { useIdeaAssessments } from '@/modules/operations/hooks/useIdeaAssessments';
+import { useToast } from '@/hooks/use-toast';
 
 interface AssessPanelProps {
   insights: IdeaKpiInsight[];
@@ -17,11 +18,22 @@ interface AssessPanelProps {
 export function AssessPanel({ insights, assessments, stageDescription, onRestart }: AssessPanelProps) {
   const [saving, setSaving] = useState(false);
   const hasAssessments = assessments.data.length > 0;
+  const { toast } = useToast();
 
   const handleSave = async () => {
     try {
       setSaving(true);
       await assessments.saveAssessment('Captured automatically via IDEA cycle.');
+      toast({
+        title: 'Assessment saved',
+        description: 'Results have been stored for this IDEA cycle.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Unable to save assessment',
+        description: (error as Error).message,
+      });
     } finally {
       setSaving(false);
     }

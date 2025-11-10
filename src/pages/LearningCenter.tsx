@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, RefreshCcw, Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,28 @@ import { RecommendationsPanel } from '@/components/learning/RecommendationsPanel
 import { AnalyticsOverview } from '@/components/learning/AnalyticsOverview';
 import { useLearningCenter } from '@/hooks/learning/useLearningCenter';
 
+type LearningTab = 'overview' | 'catalog' | 'analytics' | 'admin';
+
+const VALID_TABS: LearningTab[] = ['overview', 'catalog', 'analytics', 'admin'];
+
+const isLearningTab = (value: string): value is LearningTab => VALID_TABS.includes(value as LearningTab);
+
+const deriveTabFromSearch = (search: string): LearningTab | null => {
+  const params = new URLSearchParams(search);
+  const requested = params.get('tab');
+  if (requested && isLearningTab(requested)) {
+    return requested;
+  }
+  if (params.get('certification')) {
+    return 'catalog';
+  }
+  return null;
+};
+
 export default function LearningCenter() {
+  const location = useLocation();
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'catalog' | 'analytics' | 'admin'>('overview');
+  const [activeTab, setActiveTab] = useState<LearningTab>(() => deriveTabFromSearch(location.search) ?? 'overview');
 
   const {
     loading,
@@ -40,7 +60,36 @@ export default function LearningCenter() {
     handleModuleCompletion,
   } = useLearningCenter();
 
+  useEffect(() => {
+    const parsedTab = deriveTabFromSearch(location.search);
+    const nextTab =
+      parsedTab && !trainingAdmin && (parsedTab === 'analytics' || parsedTab === 'admin') ? 'overview' : parsedTab;
+
+    if (nextTab && nextTab !== activeTab) {
+      setActiveTab(nextTab);
+      return;
+    }
+
+    if (!trainingAdmin && (activeTab === 'analytics' || activeTab === 'admin')) {
+      setActiveTab('overview');
+    }
+  }, [location.search, activeTab, trainingAdmin]);
+
   const recommendedCourseIds = useMemo(() => new Set(recommendations.map((recommendation) => recommendation.courseId)), [recommendations]);
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const focusCertification = searchParams.get('certification');
+
+  const highlightedCourseIds = useMemo(() => {
+    const highlightSet = new Set<string>(recommendedCourseIds);
+    if (focusCertification) {
+      catalog.forEach((course) => {
+        if (course.certificationCode === focusCertification) {
+          highlightSet.add(course.id);
+        }
+      });
+    }
+    return highlightSet;
+  }, [recommendedCourseIds, catalog, focusCertification]);
 
   const personalStats = snapshot
     ? [
@@ -139,7 +188,7 @@ export default function LearningCenter() {
             enrollments={enrollments}
             onEnroll={handleEnroll}
             onShowProgress={() => setActiveTab('overview')}
-            highlightCourseIds={recommendedCourseIds}
+            highlightCourseIds={highlightedCourseIds}
           />
 
           <div className="grid gap-4 md:grid-cols-2">

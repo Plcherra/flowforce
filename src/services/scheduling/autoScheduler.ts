@@ -3,8 +3,8 @@ import type { Tables } from '@/integrations/supabase/public-types';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSchedule, type ShiftSlot, type EmployeeProfile, type AssignedShift, type GenerateScheduleResult } from '@/server/schedule/engine';
 import { PolicyEngine } from '@/server/copilot/policy-engine';
-import { getLocationRuleSet, listLocationRuleSets, type LocationRuleSet, type CopilotEmployeeSeed, type CoverageSlotTemplate } from '@/data/scheduling/locationRuleSets';
-import type { Area } from '@/server/copilot/rules-loader';
+import type { Area, Weekday } from '@/server/copilot/rules-loader';
+import type { LocationRuleSet, CopilotEmployeeSeed, CoverageSlotTemplate, ComplianceRules } from '@/data/scheduling/locationRuleSets';
 
 export type DraftWarningSeverity = 'hard' | 'soft';
 
@@ -68,6 +68,202 @@ export interface CopilotRequirementsPayload {
 interface SlotMeta {
   slot: ShiftSlot;
   template: CoverageSlotTemplate;
+}
+
+const WEEKDAY_LABELS: Weekday[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const DEFAULT_COMPLIANCE: ComplianceRules = {
+  maxHoursPerWeek: 40,
+  maxHoursPerWeekPartTime: 30,
+  minRestHours: 10,
+  maxConsecutiveDays: 6,
+  minorsLatestEnd: '21:00',
+  softTargets: {
+    coverageRatio: 0.9,
+    weekendCoverage: 0.85,
+  },
+};
+
+const DEFAULT_AVAILABILITY_RANGE = { start: '06:00', end: '22:00' };
+const DEFAULT_TIMEZONE = 'UTC';
+
+const normaliseTimeString = (value?: string | null) => {
+  if (!value) return '09:00';
+  return value.length >= 5 ? value.slice(0, 5) : value;
+};
+
+const resolveArea = (metadata: Record<string, unknown> | null | undefined, role?: string | null): Area => {
+  const metaAreaRaw = (metadata as { area?: string } | undefined)?.area;
+  const metaArea = typeof metaAreaRaw === 'string' ? metaAreaRaw.toUpperCase() : null;
+  if (metaArea === 'BOH' || metaArea === 'FOH') {
+    return metaArea;
+  }
+  const roleLabel = role?.toLowerCase() ?? '';
+  if (roleLabel.includes('cook') || roleLabel.includes('boh') || roleLabel.includes('kitchen')) {
+    return 'BOH';
+  }
+  return 'FOH';
+};
+
+const parseWeekdayKey = (value: string): number | null => {
+  const normalized = value.toLowerCase();
+  const map: Record<string, number> = {
+    sun: 0,
+    sunday: 0,
+    mon: 1,
+    monday: 1,
+    tue: 2,
+    tuesday: 2,
+    wed: 3,
+    wednesday: 3,
+    thu: 4,
+    thursday: 4,
+    fri: 5,
+    friday: 5,
+    sat: 6,
+    saturday: 6,
+  };
+  if (normalized in map) return map[normalized];
+  const numeric = Number.parseInt(normalized, 10);
+  if (!Number.isNaN(numeric) && numeric >= 0 && numeric <= 6) {
+    return numeric;
+  }
+  return null;
+};
+
+const buildAvailability = (raw: unknown): CopilotEmployeeSeed['availability'] => {
+  if (!raw || typeof raw !== 'object') {
+    return [
+      { weekday: 1, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 2, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 3, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 4, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 5, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+    ];
+  }
+
+  const entries: CopilotEmployeeSeed['availability'] = [];
+  Object.entries(raw as Record<string, unknown>).forEach(([key, value]) => {
+    const weekday = parseWeekdayKey(key);
+    if (weekday === null || !Array.isArray(value)) return;
+    const ranges = value
+      .map((range) => {
+        if (!range || typeof range !== 'object') return null;
+        const start = normaliseTimeString((range as { start?: string }).start);
+        const end = normaliseTimeString((range as { end?: string }).end);
+        return { start, end };
+      })
+      .filter((range): range is { start: string; end: string } => Boolean(range));
+    if (ranges.length === 0) return;
+    entries.push({ weekday, ranges });
+  });
+
+  if (entries.length === 0) {
+    return [
+      { weekday: 1, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 2, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 3, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 4, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+      { weekday: 5, ranges: [DEFAULT_AVAILABILITY_RANGE] },
+    ];
+  }
+
+  return entries;
+};
+
+async function buildRuleSetFromDatabase(companyId: string, locationId: string): Promise<LocationRuleSet> {
+  const templateQuery = supabase
+    .from('coverage_templates')
+    .select('id, name, role, location, day_of_week, start_time, end_time, required_count, metadata')
+    .eq('company_id', companyId)
+    .eq('location', locationId)
+    .order('day_of_week')
+    .order('start_time');
+
+  const employeeQuery = supabase
+    .from('employees')
+    .select('id, display_name, role, secondary_roles, home_store, weekly_max_hours, availability, metadata')
+    .eq('company_id', companyId);
+
+  const [{ data: templateRows, error: templateError }, { data: employeeRows, error: employeeError }] = await Promise.all([
+    templateQuery,
+    employeeQuery,
+  ]);
+
+  if (templateError) throw templateError;
+  if (employeeError) throw employeeError;
+
+  if (!templateRows || templateRows.length === 0) {
+    throw new Error(`No coverage templates configured for ${locationId}.`);
+  }
+
+  if (!employeeRows || employeeRows.length === 0) {
+    throw new Error('Add employees to Copilot before running the auto-scheduler.');
+  }
+
+  const coverageTemplates: Record<Weekday, CoverageSlotTemplate[]> = {
+    Mon: [],
+    Tue: [],
+    Wed: [],
+    Thu: [],
+    Fri: [],
+    Sat: [],
+    Sun: [],
+  };
+
+  let detectedTimezone: string | undefined;
+
+  templateRows.forEach((row) => {
+    const weekdayIndex = Number.isInteger(row.day_of_week) ? Number(row.day_of_week) : 0;
+    const weekday = WEEKDAY_LABELS[weekdayIndex] ?? 'Mon';
+    const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
+    const slot: CoverageSlotTemplate = {
+      area: resolveArea(metadata, row.role),
+      roleId: row.role,
+      roleName: row.name ?? row.role,
+      start: normaliseTimeString(row.start_time),
+      end: normaliseTimeString(row.end_time),
+      headcount: Number(row.required_count) || 1,
+      isCloser: Boolean((metadata as { isCloser?: boolean }).isCloser),
+      tags: Array.isArray((metadata as { tags?: string[] }).tags) ? (metadata as { tags?: string[] }).tags : [],
+    };
+    coverageTemplates[weekday].push(slot);
+    if (!detectedTimezone && typeof (metadata as { timezone?: string }).timezone === 'string') {
+      detectedTimezone = (metadata as { timezone?: string }).timezone;
+    }
+  });
+
+  const employeeSeeds: CopilotEmployeeSeed[] = employeeRows.map((row) => {
+    const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
+    const secondaryRoles = Array.isArray(row.secondary_roles) ? (row.secondary_roles as string[]) : [];
+    const metaDisplayName = (metadata as { display_name?: string }).display_name;
+    const metaLocations = (metadata as { locations?: string[] }).locations;
+    const preferredDays = (metadata as { preferred_days_off?: number[] }).preferred_days_off;
+    const metaIsTrainee = (metadata as { is_trainee?: boolean }).is_trainee;
+
+    return {
+      id: row.id,
+      name: row.display_name ?? metaDisplayName ?? 'Team member',
+      locationIds:
+        Array.isArray(metaLocations) && metaLocations.length > 0 ? metaLocations : [row.home_store ?? locationId],
+      area: resolveArea(metadata, row.role),
+      roles: [row.role, ...secondaryRoles],
+      qualificationIds: [row.role, ...secondaryRoles],
+      availability: buildAvailability(row.availability),
+      maxHoursWeek: row.weekly_max_hours ?? DEFAULT_COMPLIANCE.maxHoursPerWeek,
+      preferredDaysOff: Array.isArray(preferredDays) ? preferredDays : undefined,
+      isTrainee: Boolean(metaIsTrainee),
+    };
+  });
+
+  return {
+    id: locationId,
+    name: locationId,
+    timezone: detectedTimezone ?? DEFAULT_TIMEZONE,
+    coverageTemplates,
+    compliance: DEFAULT_COMPLIANCE,
+    employeeSeeds,
+  };
 }
 
 function normaliseWeekStart(value: Date | string, timezoneHint = 'America/New_York'): Date {
@@ -369,10 +565,7 @@ export async function runCopilotAutoSchedule(
   companyId: string,
   params: AutoScheduleParams,
 ): Promise<AutoScheduleResult> {
-  const ruleset = getLocationRuleSet(params.locationId);
-  if (!ruleset) {
-    throw new Error(`No rule set configured for ${params.locationId}`);
-  }
+  const ruleset = await buildRuleSetFromDatabase(companyId, params.locationId);
 
   const weekStart = normaliseWeekStart(params.weekStart, ruleset.timezone);
   const weekStartIso = formatISO(weekStart, { representation: 'complete' });
@@ -492,12 +685,57 @@ export async function runCopilotAutoSchedule(
   };
 }
 
-export function describeAvailableRuleSets() {
-  return listLocationRuleSets().map((ruleset) => ({
-    id: ruleset.id,
-    name: ruleset.name,
-    timezone: ruleset.timezone,
-    weeklyCoverageTemplate: Object.keys(ruleset.coverageTemplates).length,
-    employeeCount: ruleset.employeeSeeds.length,
+export async function describeAvailableRuleSets(companyId: string) {
+  const [{ data: templateRows, error: templateError }, { data: employeeRows, error: employeeError }] = await Promise.all([
+    supabase
+      .from('coverage_templates')
+      .select('location, metadata')
+      .eq('company_id', companyId),
+    supabase
+      .from('employees')
+      .select('home_store')
+      .eq('company_id', companyId),
+  ]);
+
+  if (templateError) throw templateError;
+  if (employeeError) throw employeeError;
+
+  const templateGroups = new Map<string, { count: number; timezone?: string }>();
+  (templateRows ?? []).forEach((row) => {
+    const location = (row as { location?: string }).location?.trim() || 'Default Location';
+    const metadata = (row as { metadata?: { timezone?: string } }).metadata ?? {};
+    const timezone =
+      typeof metadata?.timezone === 'string' && metadata.timezone.trim().length > 0 ? metadata.timezone : undefined;
+    const existing = templateGroups.get(location) ?? { count: 0, timezone };
+    templateGroups.set(location, {
+      count: existing.count + 1,
+      timezone: existing.timezone ?? timezone,
+    });
+  });
+
+  if (templateGroups.size === 0) {
+    return [
+      {
+        id: 'default',
+        name: 'Default Location',
+        timezone: 'UTC',
+        weeklyCoverageTemplate: 0,
+        employeeCount: employeeRows?.length ?? 0,
+      },
+    ];
+  }
+
+  const employeeCounts = new Map<string, number>();
+  (employeeRows ?? []).forEach((employee) => {
+    const home = (employee?.home_store as string | null) ?? 'Default Location';
+    employeeCounts.set(home, (employeeCounts.get(home) ?? 0) + 1);
+  });
+
+  return Array.from(templateGroups.entries()).map(([location, info]) => ({
+    id: location,
+    name: location,
+    timezone: info.timezone ?? 'UTC',
+    weeklyCoverageTemplate: info.count,
+    employeeCount: employeeCounts.get(location) ?? employeeRows?.length ?? 0,
   }));
 }

@@ -19,6 +19,25 @@ export const queryKeys = {
   vendorEvents: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
     ['vendor-events', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
   orgPrefs: (companyId?: string | null) => ['org-prefs', normalizeId(companyId)] as const,
+  calendarEventsCompany: (companyId?: string | null) =>
+    ['calendar-events', normalizeId(companyId)] as const,
+  calendarEventsList: (companyId?: string | null) =>
+    ['calendar-events', normalizeId(companyId), 'list'] as const,
+  calendarEventsRange: (
+    companyId?: string | null,
+    start?: DateArg,
+    end?: DateArg,
+    storeId?: string | null,
+  ) =>
+    [
+      'calendar-events',
+      normalizeId(companyId),
+      'range',
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+      normalizeId(storeId),
+    ] as const,
+  calendarEventsDisabled: ['calendar-events', 'disabled'] as const,
 };
 
 export type QueryKey = ReturnType<(typeof queryKeys)[keyof typeof queryKeys]>;

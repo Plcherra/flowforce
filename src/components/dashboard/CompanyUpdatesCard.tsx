@@ -78,7 +78,7 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
 
   const handleUpdateComplete = (formData: WizardFormData) => {
     // Convert WizardFormData to CompanyUpdate format
-    createUpdate({
+    void createUpdate({
       title: formData.title,
       body: formData.body,
       richContent: formData.richContent,

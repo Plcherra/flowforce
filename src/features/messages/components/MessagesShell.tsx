@@ -225,10 +225,10 @@ function PortalContent({ vm }: MessagesSubSectionProps) {
         <CreateAnnouncement open={vm.showCreateAnnouncement} onClose={() => vm.setShowCreateAnnouncement(false)} />
       )}
 
-      {vm.showVideoCall && vm.currentChannel && (
+      {vm.isVideoCallOpen && vm.currentChannel && vm.callType && (
         <VideoCallDialog
-          isOpen={vm.showVideoCall}
-          onClose={() => vm.setShowVideoCall(false)}
+          isOpen={vm.isVideoCallOpen}
+          onClose={vm.handleCloseVideoCall}
           channelName={vm.currentChannel.name}
           participants={[
             { id: '1', name: 'John Doe' },
@@ -239,13 +239,13 @@ function PortalContent({ vm }: MessagesSubSectionProps) {
         />
       )}
 
-      {vm.showThread && vm.threadMessage && (
+      {vm.isThreadOpen && vm.threadMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="h-[600px] w-full max-w-2xl rounded-lg bg-background shadow-xl">
             <ThreadedMessageView
               message={vm.threadMessage}
               allReplies={[]}
-              onClose={() => vm.setShowThread(false)}
+              onClose={vm.closeThread}
               onSendReply={(content, parentId) => {
                 logger.debug('Send thread reply:', content, 'to', parentId);
               }}

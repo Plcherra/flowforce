@@ -5,7 +5,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +26,7 @@ import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialo
 import { RoleManagerDialog } from '@/components/employees/RoleManagerDialog';
 import { PermissionManagerDialog } from '@/components/employees/PermissionManagerDialog';
 import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
+import { employeesRepository } from '@/repositories/employeesRepository';
 
 type Department = Tables<'departments'>;
 
@@ -132,13 +132,7 @@ export default function Employees() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('departments')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('name', { ascending: true });
-
-      if (error) throw error;
+      const data = await employeesRepository.fetchDepartmentsByCompany(companyId);
       setDepartments(data || []);
       setDepartmentError(null);
     } catch (unknownErr) {

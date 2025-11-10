@@ -34,7 +34,7 @@ interface RequirementConfig {
 
 interface RequirementDetail {
   key: 'tasks' | 'goals' | 'xp' | 'courses';
-  label: string;
+  labelKey: string;
   current: number;
   target: number;
   ratio: number;
@@ -82,11 +82,11 @@ const levelFromXp = (xp: number) => {
   return Math.max(level, 1);
 };
 
-const requirementLabels: Record<RequirementDetail['key'], string> = {
-  tasks: 'Tasks completed',
-  goals: 'Goals completed',
-  xp: 'XP earned',
-  courses: 'Courses completed',
+const requirementLabelKeys: Record<RequirementDetail['key'], string> = {
+  tasks: 'certifications.requirementLabels.tasks',
+  goals: 'certifications.requirementLabels.goals',
+  xp: 'certifications.requirementLabels.xp',
+  courses: 'certifications.requirementLabels.courses',
 };
 
 export function useCertifications() {
@@ -210,6 +210,7 @@ export function useCertifications() {
 
       const updates: TablesInsert<'certification_progress'>[] = [];
       const viewModels: CertificationViewModel[] = [];
+      const viewModelMap = new Map<string, CertificationViewModel>();
       const newlyEarnedRewards: Array<{
         catalog: CertificationCatalogRow;
         config: RequirementConfig;
@@ -225,7 +226,7 @@ export function useCertifications() {
         if (config.tasks?.completed && config.tasks.completed > 0) {
           requirementDetails.push({
             key: 'tasks',
-            label: requirementLabels.tasks,
+            labelKey: requirementLabelKeys.tasks,
             current: metricsSnapshot.completedTasks,
             target: config.tasks.completed,
             ratio: metricsSnapshot.completedTasks / config.tasks.completed,
@@ -235,7 +236,7 @@ export function useCertifications() {
         if (config.goals?.completed && config.goals.completed > 0) {
           requirementDetails.push({
             key: 'goals',
-            label: requirementLabels.goals,
+            labelKey: requirementLabelKeys.goals,
             current: metricsSnapshot.completedGoals,
             target: config.goals.completed,
             ratio: metricsSnapshot.completedGoals / config.goals.completed,
@@ -245,7 +246,7 @@ export function useCertifications() {
         if (config.xp?.amount && config.xp.amount > 0) {
           requirementDetails.push({
             key: 'xp',
-            label: requirementLabels.xp,
+            labelKey: requirementLabelKeys.xp,
             current: metricsSnapshot.totalXp,
             target: config.xp.amount,
             ratio: metricsSnapshot.totalXp / config.xp.amount,
@@ -260,7 +261,7 @@ export function useCertifications() {
 
           requirementDetails.push({
             key: 'courses',
-            label: requirementLabels.courses,
+            labelKey: requirementLabelKeys.courses,
             current: completedCount,
             target: requiredCodes.length,
             ratio: completedCount / requiredCodes.length,
@@ -271,7 +272,7 @@ export function useCertifications() {
         } else if (config.courses?.completed && config.courses.completed > 0) {
           requirementDetails.push({
             key: 'courses',
-            label: requirementLabels.courses,
+            labelKey: requirementLabelKeys.courses,
             current: metricsSnapshot.completedCourses,
             target: config.courses.completed,
             ratio: metricsSnapshot.completedCourses / config.courses.completed,
@@ -289,16 +290,26 @@ export function useCertifications() {
         const allComplete = requirementDetails.length > 0 && requirementDetails.every((detail) => detail.ratio >= 1);
         const someProgress = requirementDetails.some((detail) => detail.ratio > 0);
 
-        let status: CertificationStatus = 'available';
-        if (allComplete) {
-          status = 'earned';
-        } else if (someProgress) {
-          status = 'in_progress';
-        }
-
         const existingProgress = progressMap.get(catalog.code);
         const badgeCode = catalog.badge_code ?? null;
         const badgeAwarded = badgeCode ? earnedBadges.has(badgeCode) : false;
+        const expiresAt = existingProgress?.expires_at ?? null;
+        const hasExpired = Boolean(
+          (existingProgress?.status === 'expired' && !allComplete) ||
+            (expiresAt ? new Date(expiresAt).getTime() < Date.now() : false),
+        );
+
+        let status: CertificationStatus = hasExpired ? 'expired' : existingProgress?.status ?? 'available';
+
+        if (!hasExpired && allComplete) {
+          status = 'earned';
+        } else if (!hasExpired && someProgress) {
+          status = 'in_progress';
+        } else if (hasExpired) {
+          status = 'expired';
+        } else if (status !== 'earned' && status !== 'in_progress' && status !== 'available' && status !== 'expired') {
+          status = 'available';
+        }
         const pendingBadge = Boolean(badgeCode && status === 'earned' && !badgeAwarded);
 
         const breakdown = requirementDetails.map((detail) => ({
@@ -352,18 +363,21 @@ export function useCertifications() {
           });
         }
 
-        viewModels.push({
+        const viewModel: CertificationViewModel = {
           ...catalog,
           status,
           progressPercent,
           requirementDetails,
           achievedAt: upsertPayload.achieved_at ?? existingProgress?.achieved_at ?? null,
-          expiresAt: existingProgress?.expires_at ?? null,
+          expiresAt,
           badgeAwarded,
           pendingBadge,
           parsedConfig: config,
           lastEvaluatedAt: upsertPayload.last_evaluated_at,
-        });
+        };
+
+        viewModels.push(viewModel);
+        viewModelMap.set(catalog.code, viewModel);
       });
 
       if (updates.length > 0) {
@@ -402,6 +416,12 @@ export function useCertifications() {
                   onConflict: 'employee_id,badge_code',
                 },
               );
+              earnedBadges.add(badgeCode);
+              const updatedViewModel = viewModelMap.get(reward.catalog.code);
+              if (updatedViewModel) {
+                updatedViewModel.badgeAwarded = true;
+                updatedViewModel.pendingBadge = false;
+              }
             } catch (badgeError) {
               console.error('Failed to auto-award badge for certification', reward.catalog.code, badgeError);
             }
@@ -412,8 +432,9 @@ export function useCertifications() {
       setCertifications(viewModels);
     } catch (throwable) {
       console.error('Failed to load certifications', throwable);
-      setError('Failed to load certifications');
+      setError('certifications.errors.load');
       setCertifications([]);
+      setMetrics(null);
     } finally {
       setLoading(false);
     }

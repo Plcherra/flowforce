@@ -12,9 +12,10 @@ import { UpdateFeedCard } from '@/features/company-updates/components/UpdateFeed
 import { UpdateGridView } from '@/features/company-updates/components/UpdateGridView';
 import { UpdateListView } from '@/features/company-updates/components/UpdateListView';
 import { UpdatesEmptyState } from '@/features/company-updates/components/UpdatesEmptyState';
-import type { CompanyUpdate } from '@/types/companyUpdates';
-import type { UpdateComment } from '@/types/companyUpdates';
-import { LoadingSpinner } from '@/components/ui/loading-states';
+import type { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AlertTriangle } from 'lucide-react';
 
 type ViewMode = 'feed' | 'grid' | 'list';
 
@@ -32,7 +33,8 @@ export default function CompanyUpdates() {
   const {
     updates,
     loading,
-    comments,
+    error,
+    commentsByUpdate,
     likeUpdate,
     addComment,
     markAsViewed,
@@ -51,7 +53,7 @@ export default function CompanyUpdates() {
         const lowerSearch = searchTerm.toLowerCase();
         return (
           update.title.toLowerCase().includes(lowerSearch) ||
-          update.content.toLowerCase().includes(lowerSearch)
+          update.body.toLowerCase().includes(lowerSearch)
         );
       })
       .sort((a, b) => {
@@ -66,6 +68,14 @@ export default function CompanyUpdates() {
     [recognitionFeed]
   );
 
+  const isInitialLoading = loading && updates.length === 0;
+  const errorMessage = error
+    ? typeof error === 'string'
+      ? error
+      : (error as { message?: string }).message ?? 'Unable to load company updates.'
+    : null;
+  const hasSearch = Boolean(searchTerm.trim());
+
   const canCreateUpdate = useMemo(() => {
     if (can('systemSettings') || can('manageCompany')) {
       return true;
@@ -76,9 +86,9 @@ export default function CompanyUpdates() {
   }, [can, profile?.role]);
 
   const handleUpdateComplete = useCallback((formData: WizardFormData) => {
-    createUpdate({
+    void createUpdate({
       title: formData.title,
-      content: formData.content,
+      body: formData.body,
       richContent: formData.richContent,
       type: formData.type,
       priority: formData.priority,
@@ -89,17 +99,17 @@ export default function CompanyUpdates() {
     });
   }, [createUpdate]);
 
-  const handleLike = useCallback((update: CompanyUpdate) => {
-    likeUpdate(update.id);
+  const handleLike = useCallback((updateId: string) => {
+    likeUpdate(updateId);
   }, [likeUpdate]);
 
-  const handleCommentSubmit = useCallback((update: CompanyUpdate) => {
+  const handleCommentSubmit = useCallback(async (update: CompanyUpdate) => {
     const content = commentInputs[update.id];
     if (!content?.trim()) {
       return;
     }
 
-    addComment(update.id, content);
+    await addComment(update.id, content);
     setCommentInputs((prev) => ({ ...prev, [update.id]: '' }));
   }, [addComment, commentInputs]);
 
@@ -123,17 +133,9 @@ export default function CompanyUpdates() {
   }, [deleteUpdate, toast]);
 
   const getUpdateComments = useCallback(
-    (updateId: string): UpdateComment[] => comments.filter((comment) => comment.updateId === updateId),
-    [comments]
+    (updateId: string): UpdateComment[] => commentsByUpdate[updateId] ?? [],
+    [commentsByUpdate]
   );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner text="Loading updates..." />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,48 +149,152 @@ export default function CompanyUpdates() {
         onViewModeChange={setViewMode}
       />
 
+      {errorMessage && (
+        <div className="px-4 pt-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Unable to load updates</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {viewMode === 'feed' && (
         <div className="px-4 py-6 space-y-4">
           <RecognitionHighlights loading={recognitionLoading} highlights={recognitionHighlights} />
 
-          {filteredUpdates.map((update) => (
-            <UpdateFeedCard
-              key={update.id}
-              update={update}
-              comments={getUpdateComments(update.id)}
-              showComments={Boolean(visibleComments[update.id])}
-              commentValue={commentInputs[update.id] ?? ''}
-              onCommentChange={(id, value) => setCommentInputs((prev) => ({ ...prev, [id]: value }))}
-              onSubmitComment={handleCommentSubmit}
-              onToggleComments={handleToggleComments}
-              onLike={handleLike}
-              onArchive={handleArchive}
-              onDelete={handleDelete}
-              canManage={canCreateUpdate}
-              markAsViewed={markAsViewed}
-            />
-          ))}
+          {isInitialLoading ? (
+            <FeedSkeleton />
+          ) : (
+            <>
+              {filteredUpdates.map((update) => (
+                <UpdateFeedCard
+                  key={update.id}
+                  update={update}
+                  comments={getUpdateComments(update.id)}
+                  showComments={Boolean(visibleComments[update.id])}
+                  commentValue={commentInputs[update.id] ?? ''}
+                  onCommentChange={(id, value) => setCommentInputs((prev) => ({ ...prev, [id]: value }))}
+                  onSubmitComment={handleCommentSubmit}
+                  onToggleComments={handleToggleComments}
+                  onLike={handleLike}
+                  onArchive={handleArchive}
+                  onDelete={handleDelete}
+                  canManage={canCreateUpdate}
+                  onView={(id) => void markAsViewed(id)}
+                  viewerHasViewed={update.viewerHasViewed}
+                />
+              ))}
 
-          {filteredUpdates.length === 0 && (
-            <UpdatesEmptyState
-              hasSearch={Boolean(searchTerm)}
-              searchTerm={searchTerm}
-              canCreate={canCreateUpdate}
-              onCreate={() => setCreateWizardOpen(true)}
-            />
+              {filteredUpdates.length === 0 && (
+                <UpdatesEmptyState
+                  hasSearch={hasSearch}
+                  searchTerm={searchTerm}
+                  canCreate={canCreateUpdate}
+                  onCreate={() => setCreateWizardOpen(true)}
+                />
+              )}
+            </>
           )}
         </div>
       )}
 
-      {viewMode === 'grid' && <UpdateGridView updates={filteredUpdates} />}
+      {viewMode === 'grid' && (
+        <>
+          {isInitialLoading ? (
+            <GridSkeleton />
+          ) : filteredUpdates.length > 0 ? (
+            <UpdateGridView updates={filteredUpdates} />
+          ) : (
+            <div className="px-4 py-6">
+              <UpdatesEmptyState
+                hasSearch={hasSearch}
+                searchTerm={searchTerm}
+                canCreate={canCreateUpdate}
+                onCreate={() => setCreateWizardOpen(true)}
+              />
+            </div>
+          )}
+        </>
+      )}
 
-      {viewMode === 'list' && <UpdateListView updates={filteredUpdates} />}
+      {viewMode === 'list' && (
+        <>
+          {isInitialLoading ? (
+            <ListSkeleton />
+          ) : filteredUpdates.length > 0 ? (
+            <UpdateListView updates={filteredUpdates} />
+          ) : (
+            <div className="px-4 py-6">
+              <UpdatesEmptyState
+                hasSearch={hasSearch}
+                searchTerm={searchTerm}
+                canCreate={canCreateUpdate}
+                onCreate={() => setCreateWizardOpen(true)}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <CreateUpdateWizard
         open={createWizardOpen}
         onOpenChange={setCreateWizardOpen}
         onComplete={handleUpdateComplete}
       />
+    </div>
+  );
+}
+
+function FeedSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="rounded-lg border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-1/4" />
+            </div>
+          </div>
+          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GridSkeleton() {
+  return (
+    <div className="px-4 py-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="rounded-lg border bg-card p-4 space-y-3">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-5 w-4/5" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className="px-4 py-6">
+      <div className="overflow-hidden rounded-lg border divide-y divide-border">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="grid grid-cols-5 items-center gap-4 px-6 py-4">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

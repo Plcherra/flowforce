@@ -143,23 +143,13 @@ async function replaceEventParticipants(
   eventId: string,
   participants: TablesInsert<'event_participants'>[],
 ): Promise<void> {
-  const { error: deleteError } = await supabase
-    .from('event_participants')
-    .delete()
-    .eq('event_id', eventId)
-    .eq('company_id', companyId);
-
-  if (deleteError) {
-    throw deleteError;
-  }
-
-  if (participants.length === 0) {
-    return;
-  }
-
-  const { error: insertError } = await supabase.from('event_participants').insert(participants);
-  if (insertError) {
-    throw insertError;
+  const { error } = await supabase.rpc('replace_event_participants', {
+    p_company_id: companyId,
+    p_event_id: eventId,
+    p_participants: participants as unknown as Json,
+  });
+  if (error) {
+    throw error;
   }
 }
 
@@ -168,31 +158,13 @@ async function replaceEventShiftLinks(
   eventId: string,
   shiftIds: string[],
 ): Promise<void> {
-  const { error: deleteError } = await supabase
-    .from('event_shift_links')
-    .delete()
-    .eq('event_id', eventId)
-    .eq('company_id', companyId);
-
-  if (deleteError) {
-    throw deleteError;
-  }
-
-  if (shiftIds.length === 0) {
-    return;
-  }
-
-  const payload = shiftIds.map((shiftId) => ({
-    event_id: eventId,
-    shift_id: shiftId,
-    company_id: companyId,
-    store_id: null,
-    metadata: {},
-  })) satisfies TablesInsert<'event_shift_links'>[];
-
-  const { error: insertError } = await supabase.from('event_shift_links').insert(payload);
-  if (insertError) {
-    throw insertError;
+  const { error } = await supabase.rpc('replace_event_shift_links', {
+    p_company_id: companyId,
+    p_event_id: eventId,
+    p_shift_ids: shiftIds,
+  });
+  if (error) {
+    throw error;
   }
 }
 

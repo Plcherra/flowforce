@@ -1,4 +1,6 @@
 
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +44,18 @@ function formatRequirementValue(detail: CertificationViewModel['requirementDetai
 export default function Certifications() {
   const { t } = useTranslation();
   const { certifications, loading, error, refresh, metrics } = useCertifications();
+  const navigate = useNavigate();
+
+  const handleCertificationAction = useCallback(
+    (cert: CertificationViewModel) => {
+      const params = new URLSearchParams({
+        tab: 'catalog',
+        certification: cert.code,
+      });
+      navigate(`/app/learning-center?${params.toString()}`);
+    },
+    [navigate],
+  );
 
   const metricsCards = [
     {
@@ -111,7 +125,7 @@ export default function Certifications() {
 
       {error && (
         <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
+          {t(error, { defaultValue: error })}
         </div>
       )}
 
@@ -198,7 +212,7 @@ export default function Certifications() {
                       {cert.requirementDetails.map((detail) => (
                         <div key={detail.key} className="space-y-2">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="font-medium text-foreground">{detail.label}</span>
+                            <span className="font-medium text-foreground">{t(detail.labelKey)}</span>
                             <span className="text-muted-foreground">{formatRequirementValue(detail)}</span>
                           </div>
                           <Progress value={requirementPercent(detail.ratio)} />
@@ -226,7 +240,7 @@ export default function Certifications() {
                         </span>
                       )}
                     </div>
-                    <Button variant={cert.status === 'earned' ? 'outline' : 'default'}>
+                    <Button variant={cert.status === 'earned' ? 'outline' : 'default'} onClick={() => handleCertificationAction(cert)}>
                       {cert.status === 'earned' && <CheckCircle className="mr-2 h-4 w-4" />}
                       {actionLabel}
                     </Button>

@@ -53,17 +53,13 @@ export function useIdeaActions(companyId: string | undefined, cycleId: string | 
     setError(null);
 
     try {
-      let query = supabase
-        .from('idea_actions')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+      let query = supabase.from('idea_actions').select('*').eq('company_id', companyId);
 
       if (cycleId) {
         query = query.eq('cycle_id', cycleId);
       }
 
-      const { data, error: selectError } = await query;
+      const { data, error: selectError } = await query.order('created_at', { ascending: false });
 
       if (selectError) {
         throw selectError;
@@ -91,6 +87,9 @@ export function useIdeaActions(companyId: string | undefined, cycleId: string | 
     async ({ recommendationId, action, impact, autoExecute = false, metadata }: CreateActionInput) => {
       if (!companyId) {
         throw new Error('Missing company context');
+      }
+      if (!cycleId) {
+        throw new Error('Missing IDEA cycle. Wait for a cycle to start before queuing actions.');
       }
 
       const resultPayload = {

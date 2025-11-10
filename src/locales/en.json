@@ -343,6 +343,12 @@
     "pendingBadge": "Badge pending Copilot review",
     "badgeAwarded": "Badge awarded",
     "requirements": "Requirements",
+    "requirementLabels": {
+      "tasks": "Tasks completed",
+      "goals": "Goals completed",
+      "xp": "XP earned",
+      "courses": "Courses completed"
+    },
     "lastEvaluated": "Last evaluated",
     "requiredCourses": "Required courses ({{count}}): {{codes}}",
     "metrics": {
@@ -353,6 +359,9 @@
     },
     "emptyState": "No certifications available yet",
     "emptyDescription": "Once requirements are published you will see eligible certifications and progress here.",
+    "errors": {
+      "load": "We couldn't load certifications right now. Please try again."
+    },
     "customerServiceSpecialist": {
       "name": "Customer Service Specialist",
       "description": "Certified in advanced customer service techniques"

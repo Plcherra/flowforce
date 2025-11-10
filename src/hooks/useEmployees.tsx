@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { employeesRepository } from '@/repositories/employeesRepository';
 
 type ProfileRow = Tables<'profiles'>;
 
@@ -60,24 +60,13 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
           ? (authUser.user_metadata.company_id as string)
           : null;
 
-      const { data: currentProfile, error: currentProfileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', authUser.id)
-        .single();
-
-      if (currentProfileError) {
-        console.error('Error resolving current profile for employee fetch:', currentProfileError);
-        setError(`Failed to resolve company context: ${currentProfileError.message ?? 'unknown error'}`);
-        setEmployees([]);
-        return;
-      }
-
-      const companyId = currentProfile?.company_id ?? metadataCompanyId;
+      const currentProfileCompanyId = await employeesRepository.fetchProfileCompanyContext(authUser.id);
+      const companyId = currentProfileCompanyId ?? metadataCompanyId;
 
       if (!companyId) {
         setError('No company context available');
         setEmployees([]);
+        setLoading(false);
         return;
       }
 
@@ -85,14 +74,9 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
       let cachedEmployees = companyCacheRef.current.get(cacheKey);
 
       if (!cachedEmployees && !includeInactive) {
-        const { data: rosterCache } = await supabase
-          .from('hr_roster_cache')
-          .select('snapshot, synced_at')
-          .eq('company_id', companyId)
-          .maybeSingle();
-
-        if (rosterCache?.snapshot && Array.isArray(rosterCache.snapshot)) {
-          cachedEmployees = rosterCache.snapshot as Employee[];
+        const rosterSnapshot = await employeesRepository.fetchRosterSnapshot(companyId);
+        if (rosterSnapshot?.length) {
+          cachedEmployees = rosterSnapshot as Employee[];
           companyCacheRef.current.set(cacheKey, cachedEmployees);
         }
       }
@@ -101,77 +85,38 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
         setEmployees(cachedEmployees);
       }
 
-      let query = supabase
-        .from('profiles')
-        .select(`
-          *,
-          department:departments(
-            id,
-            name,
-            color
-          ),
-          position:positions(
-            id,
-            name,
-            role
-          )
-        `)
-        .eq('company_id', companyId)
-        .order('first_name', { ascending: true });
+      const employeeList = await employeesRepository.fetchCompanyEmployees({
+        companyId,
+        includeInactive,
+      });
 
-      if (!includeInactive) {
-        query = query.eq('employment_status', 'active');
-      }
-
-      const { data, error: fetchError } = await query;
-
-      if (fetchError) throw fetchError;
-
-      const employeeList = (data ?? []) as Employee[];
       if (employeeList.length === 0) {
         companyCacheRef.current.set(cacheKey, []);
         setEmployees([]);
+        setLoading(false);
         return;
       }
 
       const ids = employeeList.map((employee) => employee.id);
 
-      if (ids.length === 0) {
+      if (!ids.length) {
         companyCacheRef.current.set(cacheKey, []);
         setEmployees([]);
+        setLoading(false);
         return;
       }
 
       const lookback = dayjs().subtract(30, 'day').format('YYYY-MM-DD');
 
-      const [skillsResult, badgesResult, reportsResult, attendanceResult] = await Promise.all([
-        supabase
-          .from('skill_matrix')
-          .select('employee_id, role, level, xp')
-          .in('employee_id', ids),
-        supabase
-          .from('employee_badge')
-          .select('employee_id, badge_code')
-          .in('employee_id', ids),
-        supabase
-          .from('employee_report')
-          .select('employee_id, severity, date')
-          .in('employee_id', ids)
-          .gte('date', lookback),
-        supabase
-          .from('staff_performance')
-          .select('user_id, attendance_status, date')
-          .in('user_id', ids)
-          .gte('date', lookback),
+      const [skillsData, badgesData, reportsData, attendanceData] = await Promise.all([
+        employeesRepository.fetchSkillMatrixForEmployees(ids),
+        employeesRepository.fetchEmployeeBadges(ids),
+        employeesRepository.fetchEmployeeReports({ employeeIds: ids, since: lookback }),
+        employeesRepository.fetchStaffPerformance({ employeeIds: ids, since: lookback }),
       ]);
 
-      if (skillsResult.error) throw skillsResult.error;
-      if (badgesResult.error) throw badgesResult.error;
-      if (reportsResult.error) throw reportsResult.error;
-      if (attendanceResult.error) throw attendanceResult.error;
-
       const skillMap = new Map<string, { level: number; xp: number }>();
-      (skillsResult.data ?? []).forEach((row) => {
+      skillsData.forEach((row) => {
         const current = skillMap.get(row.employee_id);
         if (!current || row.xp > current.xp) {
           skillMap.set(row.employee_id, { level: row.level, xp: row.xp });
@@ -179,21 +124,22 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
       });
 
       const badgeMap = new Map<string, string[]>();
-      (badgesResult.data ?? []).forEach((row) => {
+      badgesData.forEach((row) => {
         const list = badgeMap.get(row.employee_id) ?? [];
         list.push(row.badge_code);
         badgeMap.set(row.employee_id, list);
       });
 
       const positiveReportMap = new Map<string, number>();
-      (reportsResult.data ?? []).forEach((row) => {
+      reportsData.forEach((row) => {
         if (row.severity >= 4) {
           positiveReportMap.set(row.employee_id, (positiveReportMap.get(row.employee_id) ?? 0) + 1);
         }
       });
 
       const attendanceMap = new Map<string, { noShows: number; lates: number }>();
-      (attendanceResult.data ?? []).forEach((row) => {
+      attendanceData.forEach((row) => {
+        if (!row.user_id) return;
         const entry = attendanceMap.get(row.user_id) ?? { noShows: 0, lates: 0 };
         if (row.attendance_status === 'absent') {
           entry.noShows += 1;
@@ -233,9 +179,9 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
 
       setEmployees(enriched);
       companyCacheRef.current.set(cacheKey, enriched);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-      const message = error instanceof Error ? error.message : 'Failed to fetch employees';
+    } catch (err) {
+      console.error('Error fetching employees:', err);
+      const message = err instanceof Error ? err.message : 'Failed to fetch employees';
       setError(message || 'Failed to fetch employees');
       setEmployees([]);
     } finally {

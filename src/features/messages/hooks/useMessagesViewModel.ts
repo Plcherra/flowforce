@@ -1,18 +1,65 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useMessages } from '@/hooks/messages/useMessages';
 import { useProfile } from '@/hooks/useProfile';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import type { MessageAttachment, ThreadMessage } from '@/types/messages';
+import type { Message, MessageAttachment, MessageChannel, ThreadMessage } from '@/types/messages';
 import { logger } from '@/utils/logger';
+import { useAvailabilityStatus } from './useAvailabilityStatus';
 
 type FilterType = 'all' | 'unread' | 'teams' | 'helpdesk';
 type CallType = 'video' | 'audio';
+type ProfileDetails = ReturnType<typeof useProfile>['profile'];
 
-export function useMessagesViewModel() {
+interface MessagesViewModelState {
+  isMobile: boolean;
+  loading: boolean;
+  channels: MessageChannel[];
+  messages: Message[];
+  filteredChannels: MessageChannel[];
+  currentChannel: MessageChannel | null;
+  currentChannelId: string | null;
+  setCurrentChannelId: Dispatch<SetStateAction<string | null>>;
+  showMobileSidebar: boolean;
+  setShowMobileSidebar: Dispatch<SetStateAction<boolean>>;
+  showCreateDialog: boolean;
+  setShowCreateDialog: Dispatch<SetStateAction<boolean>>;
+  showDirectMessageDialog: boolean;
+  setShowDirectMessageDialog: Dispatch<SetStateAction<boolean>>;
+  showChannelMembers: boolean;
+  setShowChannelMembers: Dispatch<SetStateAction<boolean>>;
+  showChannelSettings: boolean;
+  setShowChannelSettings: Dispatch<SetStateAction<boolean>>;
+  showMessageSearch: boolean;
+  setShowMessageSearch: Dispatch<SetStateAction<boolean>>;
+  showCreateAnnouncement: boolean;
+  setShowCreateAnnouncement: Dispatch<SetStateAction<boolean>>;
+  isVideoCallOpen: boolean;
+  callType: CallType | null;
+  handleStartVideoCall: (type: CallType) => void;
+  handleCloseVideoCall: () => void;
+  handleScheduleMessage: (content: string, scheduledFor: Date) => void;
+  handleSendMessage: (content: string, attachments: MessageAttachment[]) => Promise<void>;
+  threadMessage: ThreadMessage | null;
+  isThreadOpen: boolean;
+  closeThread: () => void;
+  setThreadMessage: Dispatch<SetStateAction<ThreadMessage | null>>;
+  handleThreadMessage: (message: ThreadMessage) => void;
+  sidebarWidth: number;
+  setSidebarWidth: Dispatch<SetStateAction<number>>;
+  activeFilter: FilterType;
+  setActiveFilter: (value: FilterType) => void;
+  query: string;
+  setQuery: Dispatch<SetStateAction<string>>;
+  available: boolean;
+  handleAvailabilityChange: (value: boolean) => Promise<void>;
+  canToggleAvailability: boolean;
+  profile: ProfileDetails;
+}
+
+export function useMessagesViewModel(): MessagesViewModelState {
   const {
     channels,
     messages,
@@ -38,14 +85,11 @@ export function useMessagesViewModel() {
   const [showChannelSettings, setShowChannelSettings] = useState(false);
   const [showMessageSearch, setShowMessageSearch] = useState(false);
   const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
-  const [showVideoCall, setShowVideoCall] = useState(false);
-  const [callType, setCallType] = useState<CallType>('video');
+  const [callType, setCallType] = useState<CallType | null>(null);
   const [threadMessage, setThreadMessage] = useState<ThreadMessage | null>(null);
-  const [showThread, setShowThread] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(300);
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [query, setQuery] = useState('');
-  const [available, setAvailable] = useState(false);
+  const { available, updateAvailability } = useAvailabilityStatus();
 
   const currentChannel = useMemo(
     () => channels.find((channel) => channel.id === currentChannelId) ?? null,
@@ -66,14 +110,21 @@ export function useMessagesViewModel() {
     }
   }, []);
 
+  const routeFilter = useMemo(
+    () => normalizeFilter(params.filter),
+    [params.filter, normalizeFilter],
+  );
+
+  const queryFilter = useMemo(
+    () => normalizeFilter(new URLSearchParams(location.search).get('filter')),
+    [location.search, normalizeFilter],
+  );
+
+  const activeFilter = routeFilter ?? queryFilter ?? 'all';
+
   useEffect(() => {
     const basePath = '/app/messages';
     const currentPath = location.pathname.replace(/\/+$/, '') || '/';
-
-    const routeFilter = normalizeFilter(params.filter);
-    const queryFilter = normalizeFilter(new URLSearchParams(location.search).get('filter'));
-    const nextFilter = routeFilter ?? queryFilter ?? 'all';
-    setActiveFilter(nextFilter);
 
     if (params.filter && !routeFilter) {
       if (currentPath !== basePath) {
@@ -88,21 +139,7 @@ export function useMessagesViewModel() {
         navigate(target, { replace: true });
       }
     }
-  }, [location.pathname, location.search, navigate, normalizeFilter, params.filter]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        const flag = (data.user?.user_metadata as Record<string, unknown>)?.availability;
-        if (typeof flag === 'boolean') {
-          setAvailable(flag);
-        }
-      } catch (error) {
-        logger.error?.('Failed to load availability flag', error);
-      }
-    })();
-  }, []);
+  }, [location.pathname, navigate, params.filter, routeFilter, queryFilter]);
 
   useEffect(() => {
     if (channels.length > 0 && !currentChannelId) {
@@ -139,7 +176,7 @@ export function useMessagesViewModel() {
     return ['supervisor', 'manager', 'admin', 'owner', 'company_admin'].includes(role);
   }, [profile?.role]);
 
-  const filteredChannels = useMemo(() => {
+  const filteredChannels = useMemo<MessageChannel[]>(() => {
     const uid = profile?.id;
     let list = channels.slice();
 
@@ -173,17 +210,15 @@ export function useMessagesViewModel() {
     return list;
   }, [channels, activeFilter, query, profile?.id]);
 
-  const handleAvailabilityChange = useCallback(async (value: boolean) => {
-    setAvailable(value);
-    try {
-      await supabase.auth.updateUser({ data: { availability: value } });
-    } catch (error) {
-      logger.error?.('Failed to update availability status', error);
-    }
-  }, []);
+  const handleAvailabilityChange = useCallback(
+    async (value: boolean): Promise<void> => {
+      await updateAvailability(value);
+    },
+    [updateAvailability],
+  );
 
   const handleSendMessage = useCallback(
-    async (content: string, attachments: MessageAttachment[]) => {
+    async (content: string, attachments: MessageAttachment[]): Promise<void> => {
       if (!currentChannelId) return;
       const { error } = await sendMessage(currentChannelId, content, {
         attachments,
@@ -202,19 +237,36 @@ export function useMessagesViewModel() {
     [currentChannelId, sendMessage, toast],
   );
 
-  const handleStartVideoCall = useCallback((type: CallType) => {
+  const handleStartVideoCall = useCallback((type: CallType): void => {
     setCallType(type);
-    setShowVideoCall(true);
   }, []);
 
-  const handleScheduleMessage = useCallback((content: string, scheduledFor: Date) => {
+  const handleCloseVideoCall = useCallback((): void => {
+    setCallType(null);
+  }, []);
+
+  const handleScheduleMessage = useCallback((content: string, scheduledFor: Date): void => {
     logger.debug('Scheduled message:', content, 'for', scheduledFor);
   }, []);
 
-  const handleThreadMessage = useCallback((message: ThreadMessage) => {
+  const handleThreadMessage = useCallback((message: ThreadMessage): void => {
     setThreadMessage(message);
-    setShowThread(true);
   }, []);
+
+  const closeThread = useCallback((): void => {
+    setThreadMessage(null);
+  }, []);
+
+  const navigateToFilter = useCallback(
+    (value: FilterType): void => {
+      const basePath = '/app/messages';
+      const target = value === 'all' ? basePath : `${basePath}/${value}`;
+      if (location.pathname !== target) {
+        navigate(target, { replace: true });
+      }
+    },
+    [location.pathname, navigate],
+  );
 
   return {
     isMobile,
@@ -239,28 +291,21 @@ export function useMessagesViewModel() {
     setShowMessageSearch,
     showCreateAnnouncement,
     setShowCreateAnnouncement,
-    showVideoCall,
-    setShowVideoCall,
+    isVideoCallOpen: callType !== null,
     callType,
     handleStartVideoCall,
+    handleCloseVideoCall,
     handleScheduleMessage,
     handleSendMessage,
     threadMessage,
-    showThread,
-    setShowThread,
+    isThreadOpen: Boolean(threadMessage),
+    closeThread,
     setThreadMessage,
     handleThreadMessage,
     sidebarWidth,
     setSidebarWidth,
     activeFilter,
-    setActiveFilter: (value: FilterType) => {
-      setActiveFilter(value);
-      const basePath = '/app/messages';
-      const target = value === 'all' ? basePath : `${basePath}/${value}`;
-      if (location.pathname !== target) {
-        navigate(target, { replace: true });
-      }
-    },
+    setActiveFilter: navigateToFilter,
     query,
     setQuery,
     available,

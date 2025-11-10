@@ -6,10 +6,3 @@ export function formatRangeAsPgDate(range: DateRange): string {
   const end = format(range.end, 'yyyy-MM-dd');
   return `[${start},${end})`;
 }
-
-export function coerceRangeBounds(range: DateRange): { start: string; end: string } {
-  return {
-    start: range.start.toISOString(),
-    end: range.end.toISOString(),
-  };
-}

@@ -10,6 +10,8 @@ import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
 import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
 import type { useIdeaDiagnostics } from '@/modules/operations/hooks/useIdeaDiagnostics';
 import type { useIdeaActions } from '@/modules/operations/hooks/useIdeaActions';
+import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExecutePanelProps {
   insights: IdeaKpiInsight[];
@@ -29,6 +31,7 @@ export function ExecutePanel({
   const { companyId, range, activeCycleId, setActiveCycleId } = useIdeaContext();
   const [creatingCycle, setCreatingCycle] = useState(false);
   const [cycleError, setCycleError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   const recommendations = diagnostics.data.recommendations;
   const hasRecommendations = recommendations.length > 0;
@@ -45,7 +48,7 @@ export function ExecutePanel({
         const payload = {
           company_id: companyId,
           stage: 'execute',
-          range: `[${range.start.toISOString()},${range.end.toISOString()})`,
+          range: formatRangeAsPgDate(range),
           insights,
           actions: recommendations,
           assessments: null,
@@ -66,7 +69,13 @@ export function ExecutePanel({
           actionsState.refresh();
         }
       } catch (error) {
-        setCycleError(error as Error);
+        const normalized = error as Error;
+        setCycleError(normalized);
+        toast({
+          variant: 'destructive',
+          title: 'Unable to start IDEA cycle',
+          description: normalized.message,
+        });
       } finally {
         setCreatingCycle(false);
       }
@@ -97,7 +106,18 @@ export function ExecutePanel({
     );
   }, [actionsState.data]);
 
+  const disableActionControls = !activeCycleId;
+
   const handleCreateAction = async (action: string, recommendationId: string) => {
+    if (!activeCycleId) {
+      toast({
+        variant: 'destructive',
+        title: 'Cycle not ready',
+        description: 'Please wait for the IDEA cycle to initialize before queuing actions.',
+      });
+      return;
+    }
+
     try {
       await actionsState.createAction({
         action,
@@ -105,25 +125,52 @@ export function ExecutePanel({
         impact: 'AI recommended',
       });
     } catch (error) {
-      setCycleError(error as Error);
+      const normalized = error as Error;
+      setCycleError(normalized);
+      toast({
+        variant: 'destructive',
+        title: 'Unable to queue action',
+        description: normalized.message,
+      });
     }
   };
 
   const handleExecuteAction = async (actionId: string) => {
+    if (!activeCycleId) {
+      toast({
+        variant: 'destructive',
+        title: 'Cycle not ready',
+        description: 'Create or resume the cycle before executing actions.',
+      });
+      return;
+    }
+
     try {
       await actionsState.execute({
         actionId,
         result: { executedAt: new Date().toISOString() },
       });
     } catch (error) {
-      setCycleError(error as Error);
+      const normalized = error as Error;
+      setCycleError(normalized);
+      toast({
+        variant: 'destructive',
+        title: 'Unable to execute action',
+        description: normalized.message,
+      });
     }
   };
 
   const handleCompleteStage = () => {
     if (activeCycleId) {
       onStageComplete(activeCycleId);
+      return;
     }
+
+    toast({
+      title: 'No cycle selected',
+      description: 'Start or resume a cycle to review assessment results.',
+    });
   };
 
   return (
@@ -193,7 +240,7 @@ export function ExecutePanel({
                       </Badge>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button size="sm" onClick={() => handleExecuteAction(action.id)}>
+                      <Button size="sm" onClick={() => handleExecuteAction(action.id)} disabled={disableActionControls}>
                         <Zap className="mr-2 h-4 w-4" />
                         Execute now
                       </Button>
@@ -228,12 +275,16 @@ export function ExecutePanel({
                         <Button
                           size="sm"
                           variant="outline"
-                          disabled={queued}
+                          disabled={queued || disableActionControls}
                           onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
                         >
                           Queue action
                         </Button>
-                        <Button size="sm" onClick={() => handleCreateAction(recommendation.action, recommendation.id)}>
+                        <Button
+                          size="sm"
+                          disabled={disableActionControls}
+                          onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
+                        >
                           <Zap className="mr-2 h-4 w-4" />
                           Execute now
                         </Button>

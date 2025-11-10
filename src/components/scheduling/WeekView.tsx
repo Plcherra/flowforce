@@ -14,11 +14,11 @@ interface WeekViewProps {
   selectedDate: Date;
   onSelectShift: (shiftId: string) => void;
   onSelectEvent?: (eventId: string | null) => void;
-  filters: SchedulingFilterState;
   isMobile?: boolean;
   overlayEvents?: CalendarEvent[];
   hideShiftActions?: boolean;
   selectedEventId?: string | null;
+  locationFilter?: string;
 }
 
 export function WeekView({
@@ -26,11 +26,11 @@ export function WeekView({
   selectedDate,
   onSelectShift,
   onSelectEvent,
-  filters: _filters,
   isMobile = false,
   overlayEvents = [],
   hideShiftActions = false,
   selectedEventId = null,
+  locationFilter,
 }: WeekViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
@@ -100,6 +100,11 @@ export function WeekView({
     // Mobile: Show simplified horizontal scrollable week view
   return (
     <div className="space-y-4">
+        {locationFilter && (
+          <p className="text-center text-xs text-muted-foreground">
+            Viewing shifts for {locationFilter}
+          </p>
+        )}
         {/* Mobile week header */}
         <div className="overflow-x-auto">
           <div className="flex space-x-2 pb-2" style={{ minWidth: '700px' }}>
@@ -136,13 +141,16 @@ export function WeekView({
         <div className="space-y-3">
           {weekDays.map((day) => {
             const dayShifts = getShiftsForDay(day);
-            if (dayShifts.length === 0) return null;
-            
             return (
               <div key={day.toISOString()} className="space-y-2">
                 <h3 className="text-sm font-medium text-gray-900">
                   {format(day, 'EEEE, MMM d')}
                 </h3>
+                {dayShifts.length === 0 && (
+                  <div className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+                    No shifts scheduled
+                  </div>
+                )}
                 {dayShifts.map((shift) => (
                   <div
                     key={shift.id}
@@ -200,6 +208,9 @@ export function WeekView({
 
   return (
     <div className="h-full">
+      {locationFilter && (
+        <p className="mb-3 text-sm text-muted-foreground">Filtered by {locationFilter}</p>
+      )}
       {/* Header with day names and coverage stats */}
       <div className="grid grid-cols-8 border-b">
         <div className="p-4 border-r bg-muted/30">
