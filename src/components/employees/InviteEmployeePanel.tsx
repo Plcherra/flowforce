@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRoles } from '@/hooks/useRoles';
+import { useToast } from '@/hooks/use-toast';
 
 type InviteForm = {
   first: string;
@@ -32,6 +32,7 @@ export function InviteEmployeePanel() {
   const [form, setForm] = useState<InviteForm>(defaultForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: roles = [], isLoading: rolesLoading } = useRoles();
+  const { toast } = useToast();
 
   const roleOptions = useMemo(() => {
     if (!roles.length) {
@@ -59,7 +60,11 @@ export function InviteEmployeePanel() {
     if (isSubmitting) return;
 
     if (!form.email) {
-      toast.error('Email address is required to send an invitation');
+      toast({
+        variant: 'destructive',
+        title: 'Email required',
+        description: 'Add an email address before sending an invitation.',
+      });
       return;
     }
 
@@ -79,11 +84,18 @@ export function InviteEmployeePanel() {
         throw error;
       }
 
-      toast.success('Invitation sent');
+      toast({
+        title: 'Invitation sent',
+        description: 'We emailed the invite and let the teammate know.',
+      });
       setForm(defaultForm);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to send invitation';
-      toast.error(message);
+      toast({
+        variant: 'destructive',
+        title: 'Unable to send invite',
+        description: message,
+      });
     } finally {
       setIsSubmitting(false);
     }

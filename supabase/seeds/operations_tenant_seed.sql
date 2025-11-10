@@ -10,6 +10,7 @@ truncate table public.profiles cascade;
 truncate table public.companies cascade;
 truncate table auth.identities cascade;
 truncate table auth.users cascade;
+truncate table public.kpi_insights cascade;
 
 -- Fixed identifiers for reproducibility
 select
@@ -183,6 +184,59 @@ select
   'vacation',
   now(),
   now()
+from temp_ids;
+
+-- KPI insights baseline
+insert into public.kpi_insights (company_id, metric, label, value, delta, trend, unit, recorded_at, metadata)
+select
+  company_id,
+  'attendance-rate',
+  'Attendance Rate',
+  93.4,
+  1.8,
+  'up',
+  '%',
+  now(),
+  jsonb_build_object('window_days', 14, 'absences', 2)
+from temp_ids;
+
+insert into public.kpi_insights (company_id, metric, label, value, delta, trend, unit, recorded_at, metadata)
+select
+  company_id,
+  'task-completion',
+  'Task Completion',
+  78.6,
+  4.2,
+  'up',
+  '%',
+  now(),
+  jsonb_build_object('window_days', 14, 'total_tasks', 48, 'completed_tasks', 38)
+from temp_ids;
+
+insert into public.kpi_insights (company_id, metric, label, value, delta, trend, unit, recorded_at, metadata)
+select
+  company_id,
+  'shift-coverage',
+  'Shift Coverage',
+  89.1,
+  -2.5,
+  'down',
+  '%',
+  now(),
+  jsonb_build_object('window_days', 14, 'required_headcount', 112, 'assignments', 100)
+from temp_ids;
+
+insert into public.kpi_insights (company_id, metric, label, value, delta, trend, unit, recorded_at, metadata)
+select
+  company_id,
+  'issue-resolution',
+  'Issue Resolution Time',
+  3.6,
+  -0.4,
+  'up',
+  'hrs',
+  now(),
+  jsonb_build_object('window_days', 14, 'resolved_tasks', 22)
 from temp_ids;
 
 -- Goal

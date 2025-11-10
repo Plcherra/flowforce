@@ -1,39 +1,25 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
-
-interface Reminder {
-  id: string;
-  user_id: string;
-  task_id?: string;
-  title: string;
-  description?: string;
-  remind_at: string;
-  type: string;
-  priority: string;
-  completed: boolean;
-  completed_at?: string;
-  created_at: string;
-  updated_at: string;
-  sound_enabled: boolean;
-  sound_type: string;
-  notification_methods: any; // Using any for now to handle JSON serialization
-  repeat_enabled: boolean;
-  repeat_interval?: string;
-  snooze_enabled: boolean;
-  auto_complete: boolean;
-  snooze_count: number;
-  last_triggered_at?: string;
-  next_reminder_at?: string;
-}
+import {
+  createReminderRecord,
+  deleteReminderRecord,
+  fetchRemindersForUser,
+  ReminderRecord,
+  updateReminderRecord,
+} from '@/repositories/remindersRepository';
 
 export function useReminders() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [reminders, setReminders] = useState<ReminderRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const invalidatePerformanceDataset = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ['performance-dataset'] });
+  }, [queryClient]);
 
   useEffect(() => {
     if (user) {
@@ -48,20 +34,8 @@ export function useReminders() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('reminders')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('remind_at', { ascending: true });
-
-      if (error) throw error;
-
-      setReminders((data || []).map(reminder => ({
-        ...reminder,
-        notification_methods: Array.isArray(reminder.notification_methods) 
-          ? reminder.notification_methods 
-          : JSON.parse(reminder.notification_methods as string || '["in_app"]')
-      })));
+      const data = await fetchRemindersForUser(user.id);
+      setReminders(data);
     } catch (error) {
       console.error('Error fetching reminders:', error);
     } finally {
@@ -69,36 +43,30 @@ export function useReminders() {
     }
   };
 
-  const createReminder = async (reminderData: Omit<Reminder, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'completed' | 'completed_at'>) => {
+  const createReminder = async (
+    reminderData: Omit<ReminderRecord, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'completed' | 'completed_at'>
+  ) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('reminders')
-        .insert({
-          ...reminderData,
-          user_id: user.id
-        });
-
-      if (error) throw error;
+      await createReminderRecord({
+        ...reminderData,
+        user_id: user.id,
+      });
 
       await fetchReminders();
+      await invalidatePerformanceDataset();
     } catch (error) {
       console.error('Error creating reminder:', error);
       throw error;
     }
   };
 
-  const updateReminder = async (id: string, updates: Partial<Reminder>) => {
+  const updateReminder = async (id: string, updates: Partial<ReminderRecord>) => {
     try {
-      const { error } = await supabase
-        .from('reminders')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await updateReminderRecord(id, updates);
       await fetchReminders();
+      await invalidatePerformanceDataset();
     } catch (error) {
       console.error('Error updating reminder:', error);
       throw error;
@@ -107,14 +75,9 @@ export function useReminders() {
 
   const deleteReminder = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('reminders')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await deleteReminderRecord(id);
       setReminders(prev => prev.filter(reminder => reminder.id !== id));
+      await invalidatePerformanceDataset();
       
       toast({
         title: 'Success',

@@ -31,6 +31,7 @@ import {
   YAxis,
   BarChart,
 } from 'recharts';
+import { Link } from 'react-router-dom';
 
 dayjs.extend(relativeTime);
 
@@ -65,6 +66,9 @@ export default function Leaderboard() {
 
   const { entries, analytics, departments, roles, challenges, loading, syncing, error, lastUpdated, refresh } =
     useLeaderboardData(period);
+  const handleManualRefresh = () => {
+    void refresh({ forceSync: true });
+  };
 
   const filteredEntries = useMemo(() => {
     return entries.filter((entry) => {
@@ -112,7 +116,7 @@ export default function Leaderboard() {
           <Badge variant="outline" className="text-xs">
             Updated {lastUpdatedLabel}
           </Badge>
-          <Button type="button" variant="outline" onClick={() => refresh()} disabled={loading || syncing}>
+          <Button type="button" variant="outline" onClick={handleManualRefresh} disabled={loading || syncing}>
             <RefreshCcw className={cn('mr-2 h-4 w-4', syncing ? 'animate-spin' : '')} />
             Refresh
           </Button>
@@ -183,6 +187,27 @@ export default function Leaderboard() {
           <Skeleton className="h-64 w-full" />
           <Skeleton className="h-96 w-full" />
         </div>
+      ) : entries.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+            <Sparkles className="h-10 w-10 text-primary" />
+            <div>
+              <CardTitle className="text-2xl">No leaderboard data yet</CardTitle>
+              <CardDescription className="mt-2 text-base">
+                Sync recent activity or assign your first task to start tracking XP, badges, and Copilot insights.
+              </CardDescription>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+              <Button onClick={handleManualRefresh} disabled={syncing}>
+                <RefreshCcw className={cn('mr-2 h-4 w-4', syncing ? 'animate-spin' : '')} />
+                Sync leaderboard
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/app/tasks">Assign your first task</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="space-y-6">
@@ -334,7 +359,7 @@ export default function Leaderboard() {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-9 w-9">
-                                  <AvatarImage src={entry.avatarUrl ?? undefined} />
+                                  <AvatarImage src={entry.avatarUrl ?? undefined} alt={entry.fullName} />
                                   <AvatarFallback>
                                     {entry.fullName
                                       .split(' ')

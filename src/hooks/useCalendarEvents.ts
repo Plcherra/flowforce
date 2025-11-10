@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
 import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/repositories/calendarEventsRepository';
+import { queryKeys } from '@/lib/queryKeys';
 
 type CalendarEventRow = CalendarEventRowWithRelations;
 
@@ -162,43 +164,42 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
   const { storeId = null, range, enabled = true } = params;
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
   const isoRange = useMemo(() => toIsoRange(range), [range]);
+  const normalizedStoreId = storeId ?? null;
+  const queryEnabled = Boolean(enabled && companyId && isoRange);
 
-  const refresh = useCallback(async () => {
-    if (!enabled || !companyId || !isoRange) {
-      setEvents([]);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
+  const eventsQuery = useQuery({
+    queryKey: queryEnabled && companyId && isoRange
+      ? queryKeys.calendarEventsRange(companyId, isoRange.start, isoRange.end, normalizedStoreId)
+      : queryKeys.calendarEventsDisabled,
+    queryFn: async () => {
+      if (!companyId || !isoRange) {
+        return [] as CalendarEvent[];
+      }
       const rows = await calendarEventsRepository.listCompanyEventsByRange({
         companyId,
         startIso: isoRange.start,
         endIso: isoRange.end,
-        storeId: storeId ?? null,
+        storeId: normalizedStoreId,
       });
-      setEvents(rows.map(mapRowToEvent));
-    } catch (err) {
-      console.error('Failed to load calendar events', err);
-      setEvents([]);
-      setError(err instanceof Error ? err.message : 'Unable to load events');
-    } finally {
-      setLoading(false);
-    }
-  }, [companyId, enabled, isoRange, storeId]);
+      return rows.map(mapRowToEvent);
+    },
+    enabled: queryEnabled,
+    staleTime: 30_000,
+  });
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  const events = eventsQuery.data ?? [];
+  const loading = queryEnabled ? eventsQuery.isLoading || eventsQuery.isFetching : false;
+  const error =
+    eventsQuery.error instanceof Error
+      ? eventsQuery.error.message
+      : eventsQuery.error
+        ? 'Unable to load events'
+        : null;
+
+  const refresh = useCallback(async () => {
+    await eventsQuery.refetch();
+  }, [eventsQuery]);
 
   return {
     events,

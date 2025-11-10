@@ -7,12 +7,16 @@ import { InventoryItem, InventoryItemInsert, InventoryItemUpdate } from './types
 export function useInventoryItems() {
   const { toast } = useToast();
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery<InventoryItem[]>({
     queryKey: ['inventory-items'],
     queryFn: () => InventoryService.listItems(),
   });
 
-  return { data, isLoading };
+  return { data, isLoading, error };
 }
 
 export function useCreateInventoryItem() {

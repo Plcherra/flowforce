@@ -71,3 +71,18 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## KPI Insights data refresh
+
+The Operations Intelligence page reads from the `kpi_insights` table. Two options exist to keep it populated:
+
+1. **Seed baseline metrics** – running the Supabase seed (`supabase db reset`) now also loads four starter KPI rows for the demo tenant via `supabase/seeds/operations_tenant_seed.sql`.
+2. **Backfill from live data** – use the new helper script to aggregate the latest schedules, tasks, and time-off data into `kpi_insights`:
+
+```sh
+SUPABASE_URL=<project-url> \
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
+npm run seed:kpi-insights
+```
+
+Optional: set `KPI_RANGE_DAYS` (defaults to 14) to change the rolling window. The script is idempotent and can be scheduled (e.g., nightly) to keep KPI cards fresh.

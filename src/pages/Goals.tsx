@@ -11,6 +11,7 @@ import { useGoalDialogs, type GoalDialogs, type GoalSuggestion } from '@/hooks/u
 import type { GoalFormValues } from '@/components/goals/CreateGoalModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from '@/hooks/useProfile';
 
 type GoalSuggestionResponse = {
   insights?: string;
@@ -107,6 +108,8 @@ export default function GoalsPage() {
 
   const dialogs = useGoalDialogs();
   const { toast } = useToast();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const [suggesting, setSuggesting] = useState(false);
 
   const saving = creating || updating;
@@ -173,6 +176,14 @@ export default function GoalsPage() {
     if (suggesting) {
       return;
     }
+    if (!companyId) {
+      toast({
+        title: 'Missing company context',
+        description: 'Switch to an active company to request AI goal suggestions.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setSuggesting(true);
     try {
       const prompt = buildGoalSuggestionPrompt(stats, goals);
@@ -181,6 +192,7 @@ export default function GoalsPage() {
           type: 'chat',
           query: prompt,
           context: 'goals_suggestion',
+          companyId,
         },
       });
 

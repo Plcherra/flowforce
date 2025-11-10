@@ -4,8 +4,8 @@ import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
-import { toast } from 'sonner';
 import type { TeamRole } from './useTeamManagement';
+import { useToast } from '@/hooks/use-toast';
 
 const SUPPORTED_PERMISSION_KEYS = [
   {
@@ -33,6 +33,7 @@ export function usePermissionFlags() {
   const { profile } = useProfile();
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const rolesQuery = useQuery({
     queryKey: ['permission-flags', companyId],
@@ -80,10 +81,17 @@ export function usePermissionFlags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['permission-flags'] });
-      toast.success('Permissions updated');
+      toast({
+        title: 'Permissions updated',
+        description: 'Role permissions saved successfully.',
+      });
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Failed to update permissions');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to update permissions',
+        description: error instanceof Error ? error.message : 'Please try again in a moment.',
+      });
     },
   });
 

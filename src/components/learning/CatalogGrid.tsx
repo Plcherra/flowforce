@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import type { LearningCatalogRecord, LearningEnrollment } from '@/types/learning';
 
@@ -61,17 +62,18 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
             onChange={(event) => setSearch(event.target.value)}
             className="md:w-64"
           />
-          <select
-            value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)}
-            className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category === 'all' ? 'All categories' : category}
-              </option>
-            ))}
-          </select>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="h-10 md:w-48">
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category === 'all' ? 'All categories' : category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         {onShowProgress && (
           <Button variant="outline" onClick={onShowProgress}>

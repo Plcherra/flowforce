@@ -45,7 +45,6 @@ interface MessagesViewModelState {
   threadMessage: ThreadMessage | null;
   isThreadOpen: boolean;
   closeThread: () => void;
-  setThreadMessage: Dispatch<SetStateAction<ThreadMessage | null>>;
   handleThreadMessage: (message: ThreadMessage) => void;
   sidebarWidth: number;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
@@ -300,7 +299,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
     threadMessage,
     isThreadOpen: Boolean(threadMessage),
     closeThread,
-    setThreadMessage,
     handleThreadMessage,
     sidebarWidth,
     setSidebarWidth,
@@ -315,4 +313,4 @@ export function useMessagesViewModel(): MessagesViewModelState {
   };
 }
 
-export type MessagesViewModel = ReturnType<typeof useMessagesViewModel>;
+export type MessagesViewModel = MessagesViewModelState;

@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { 
   Heart, 
   MessageCircle, 
@@ -32,7 +31,7 @@ export function UpdatesFeedView({
   comments, 
   onLike, 
   onComment, 
-  onView 
+  onView: _onView 
 }: UpdatesFeedViewProps) {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});

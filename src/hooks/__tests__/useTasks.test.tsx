@@ -1,18 +1,54 @@
 /* @vitest-environment jsdom */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { useTasks, TASK_STATUS_TRANSITIONS, type TaskWithRelations } from '@/hooks/useTasks';
 
-const { supabaseMock, syncGoalProgressMock } = vi.hoisted(() => ({
-  supabaseMock: {
-    from: vi.fn(),
-  },
+const {
+  fetchCompanyIdForUserMock,
+  fetchTasksByCompanyMock,
+  insertTaskMock,
+  updateTaskRowMock,
+  deleteTaskRowMock,
+  fetchTaskCommentsMock,
+  insertTaskCommentMock,
+  fetchTaskTimelineMock,
+  syncGoalProgressMock,
+} = vi.hoisted(() => ({
+  fetchCompanyIdForUserMock: vi.fn(),
+  fetchTasksByCompanyMock: vi.fn(),
+  insertTaskMock: vi.fn(),
+  updateTaskRowMock: vi.fn(),
+  deleteTaskRowMock: vi.fn(),
+  fetchTaskCommentsMock: vi.fn(),
+  insertTaskCommentMock: vi.fn(),
+  fetchTaskTimelineMock: vi.fn(),
   syncGoalProgressMock: vi.fn(),
 }));
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: supabaseMock,
+vi.mock('@/repositories/companyRepository', () => ({
+  fetchCompanyIdForUser: fetchCompanyIdForUserMock,
+}));
+
+vi.mock('@/repositories/tasksRepository', async () => {
+  const actual = await vi.importActual<typeof import('@/repositories/tasksRepository')>(
+    '@/repositories/tasksRepository'
+  );
+  return {
+    ...actual,
+    fetchTasksByCompany: fetchTasksByCompanyMock,
+    insertTask: insertTaskMock,
+    updateTaskRow: updateTaskRowMock,
+    deleteTaskRow: deleteTaskRowMock,
+    fetchTaskComments: fetchTaskCommentsMock,
+    insertTaskComment: insertTaskCommentMock,
+  };
+});
+
+vi.mock('@/repositories/taskActivitiesRepository', () => ({
+  fetchTaskTimeline: fetchTaskTimelineMock,
 }));
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -24,89 +60,6 @@ vi.mock('@/services/goals/goalProgressService', () => ({
 }));
 
 const companyId = 'company-123';
-
-type ProfileBuilder = {
-  select: ReturnType<typeof vi.fn>;
-  eq: ReturnType<typeof vi.fn>;
-  single: ReturnType<typeof vi.fn>;
-};
-
-const createProfileBuilder = () => {
-  const builder: ProfileBuilder = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    single: vi.fn(),
-  };
-
-  builder.select.mockReturnValue(builder);
-  builder.eq.mockReturnValue(builder);
-  builder.single.mockResolvedValue({ data: { company_id: companyId }, error: null });
-
-  return builder;
-};
-
-let tasksData: TaskWithRelations[] = [];
-
-const createTasksBuilder = () => {
-  const builder: any = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    order: vi.fn(),
-    update: vi.fn(),
-    insert: vi.fn(),
-    delete: vi.fn(),
-    _pendingUpdate: null as Partial<TaskWithRelations> | null,
-  };
-
-  builder.select.mockReturnValue(builder);
-
-  builder.eq.mockImplementation((column: string, value: unknown) => {
-    if (column === 'company_id') {
-      return builder;
-    }
-
-    if (column === 'id' && builder._pendingUpdate) {
-      const pending = builder._pendingUpdate;
-      builder._pendingUpdate = null;
-
-      return {
-        select: () => ({
-          single: () => {
-            const index = tasksData.findIndex((task) => task.id === value);
-            if (index !== -1) {
-              tasksData[index] = { ...tasksData[index], ...pending };
-              return Promise.resolve({ data: { ...tasksData[index] }, error: null });
-            }
-            return Promise.resolve({ data: null, error: null });
-          },
-        }),
-      };
-    }
-
-    return builder;
-  });
-
-  builder.order.mockImplementation(async () => ({ data: tasksData, error: null }));
-
-  builder.update.mockImplementation((payload: Partial<TaskWithRelations>) => {
-    builder._pendingUpdate = payload;
-    return {
-      eq: (column: string, value: string) => builder.eq(column, value),
-    };
-  });
-
-  builder.insert.mockReturnValue({
-    select: () => ({
-      single: () => Promise.resolve({ data: {}, error: null }),
-    }),
-  });
-
-  builder.delete.mockReturnValue({
-    eq: () => ({ error: null }),
-  });
-
-  return builder;
-};
 
 const makeTask = (overrides: Partial<TaskWithRelations> & { id: string }): TaskWithRelations => ({
   id: overrides.id,
@@ -140,14 +93,30 @@ const makeTask = (overrides: Partial<TaskWithRelations> & { id: string }): TaskW
 });
 
 describe('useTasks', () => {
+  const createWrapper = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    return ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+  };
+
   beforeEach(() => {
+    fetchCompanyIdForUserMock.mockReset();
+    fetchTasksByCompanyMock.mockReset();
+    insertTaskMock.mockReset();
+    updateTaskRowMock.mockReset();
+    deleteTaskRowMock.mockReset();
+    fetchTaskCommentsMock.mockReset();
+    insertTaskCommentMock.mockReset();
+    fetchTaskTimelineMock.mockReset();
     syncGoalProgressMock.mockReset();
-    supabaseMock.from.mockReset();
-    tasksData = [];
   });
 
   it('retains tasks even when related profile joins are null', async () => {
-    tasksData = [
+    const tasksData: TaskWithRelations[] = [
       makeTask({ id: 'task-without-profile', created_profile: null, assigned_profile: null }),
       makeTask({
         id: 'task-with-profile',
@@ -155,19 +124,16 @@ describe('useTasks', () => {
       }),
     ];
 
-    const profileBuilder = createProfileBuilder();
-    const tasksBuilder = createTasksBuilder();
+    fetchCompanyIdForUserMock.mockResolvedValue(companyId);
+    fetchTasksByCompanyMock.mockResolvedValue(tasksData);
 
-    supabaseMock.from.mockImplementation((table: string) => {
-      if (table === 'profiles') return profileBuilder;
-      if (table === 'tasks') return tasksBuilder;
-      throw new Error(`Unexpected table lookup: ${table}`);
+    const { result } = renderHook(() => useTasks(), {
+      wrapper: createWrapper(),
     });
 
-    const { result } = renderHook(() => useTasks());
-
     await waitFor(() => expect(result.current.tasks).toHaveLength(2));
-    expect(tasksBuilder.eq).toHaveBeenCalledWith('company_id', companyId);
+    expect(fetchCompanyIdForUserMock).toHaveBeenCalled();
+    expect(fetchTasksByCompanyMock).toHaveBeenCalledWith(companyId);
   });
 
   it('defines the expected workflow transitions', () => {

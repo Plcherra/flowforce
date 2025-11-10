@@ -22,6 +22,14 @@ export default function AIInsights() {
 
   const getRadarMetric = (label: string) => radar.find((metric) => metric.metric === label);
 
+  const summaryMetricToneClasses: Record<'purple' | 'green' | 'blue', string> = {
+    purple: 'border border-primary/20 bg-primary/5 text-primary dark:bg-primary/10 dark:text-primary-foreground',
+    green:
+      'border border-emerald-400/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/40 dark:bg-emerald-500/20 dark:text-emerald-200',
+    blue:
+      'border border-sky-400/30 bg-sky-500/10 text-sky-700 dark:border-sky-300/40 dark:bg-sky-500/20 dark:text-sky-200',
+  };
+
   const summaryMetrics = goalSummary
     ? [
         {
@@ -105,10 +113,10 @@ export default function AIInsights() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               <AIInsightsPanel type="dashboard" className="xl:col-span-1" />
 
-              <div className="grid grid-cols-1 gap-6 xl:col-span-2">
+              <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-2 xl:col-span-2">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -140,17 +148,11 @@ export default function AIInsights() {
                     ) : summaryMetrics.length ? (
                       <div className="space-y-4">
                         {summaryMetrics.map((metric) => {
-                          const toneClass =
-                            metric.tone === 'purple'
-                              ? 'bg-purple-50 border-purple-200 text-purple-700'
-                              : metric.tone === 'green'
-                                ? 'bg-green-50 border-green-200 text-green-700'
-                                : 'bg-blue-50 border-blue-200 text-blue-700';
-
+                          const toneClass = summaryMetricToneClasses[metric.tone];
                           return (
                             <div
                               key={metric.id}
-                              className={`flex items-center justify-between p-3 rounded-lg border ${toneClass}`}
+                              className={`flex items-center justify-between rounded-lg p-3 ${toneClass}`}
                             >
                               <div>
                                 <p className="text-sm font-medium">{metric.label}</p>
@@ -190,7 +192,7 @@ export default function AIInsights() {
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               <AIInsightsPanel type="scheduler" className="xl:col-span-1" />
 
               <Card className="xl:col-span-2">
@@ -223,7 +225,7 @@ export default function AIInsights() {
             </TabsContent>
 
           <TabsContent value="predictions" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               <AIInsightsPanel type="expenses" className="xl:col-span-1" />
 
               <Card className="xl:col-span-2">
@@ -294,7 +296,7 @@ export default function AIInsights() {
           </TabsContent>
 
           <TabsContent value="simulator" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               <AIInsightsPanel type="reports" className="xl:col-span-1" />
               <ScenarioSimulator className="xl:col-span-2" />
             </div>

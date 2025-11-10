@@ -1,24 +1,29 @@
 /* @vitest-environment jsdom */
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { TaskActivityFeed } from '../TaskActivityFeed';
 
-const { supabaseMock, channelMock } = vi.hoisted(() => {
-  const channel = {
-    on: vi.fn(),
-    subscribe: vi.fn(),
-  };
+const { supabaseMock, channelMock, fetchCompanyIdForUserMock, fetchTaskActivitiesForCompanyMock } = vi.hoisted(
+  () => {
+    const channel = {
+      on: vi.fn(),
+      subscribe: vi.fn(),
+    };
 
-  return {
-    supabaseMock: {
-      from: vi.fn(),
-      channel: vi.fn(() => channel),
-      removeChannel: vi.fn(),
-    },
-    channelMock: channel,
-  };
-});
+    return {
+      supabaseMock: {
+        channel: vi.fn(() => channel),
+        removeChannel: vi.fn(),
+      },
+      channelMock: channel,
+      fetchCompanyIdForUserMock: vi.fn(),
+      fetchTaskActivitiesForCompanyMock: vi.fn(),
+    };
+  }
+);
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: supabaseMock,
@@ -28,53 +33,37 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 'user-123' } }),
 }));
 
-type Builder = {
-  select: ReturnType<typeof vi.fn>;
-  eq: ReturnType<typeof vi.fn>;
-  order: ReturnType<typeof vi.fn>;
-  limit: ReturnType<typeof vi.fn>;
-};
+vi.mock('@/repositories/companyRepository', () => ({
+  fetchCompanyIdForUser: fetchCompanyIdForUserMock,
+}));
+
+vi.mock('@/repositories/taskActivitiesRepository', () => ({
+  fetchTaskActivitiesForCompany: fetchTaskActivitiesForCompanyMock,
+}));
 
 const companyId = 'company-123';
 
-const createProfileBuilder = () => {
-  const builder = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    single: vi.fn(),
-  };
-
-  builder.select.mockReturnValue(builder);
-  builder.eq.mockReturnValue(builder);
-  builder.single.mockResolvedValue({ data: { company_id: companyId }, error: null });
-
-  return builder;
-};
-
-const createActivitiesBuilder = (data: any[]): Builder => {
-  const builder: Builder = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    order: vi.fn(),
-    limit: vi.fn(),
-  };
-
-  builder.select.mockReturnValue(builder);
-  builder.eq.mockReturnValue(builder);
-  builder.order.mockReturnValue(builder);
-  builder.limit.mockResolvedValue({ data, error: null });
-
-  return builder;
-};
-
 describe('TaskActivityFeed', () => {
+  const renderWithClient = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <TaskActivityFeed />
+      </QueryClientProvider>
+    );
+  };
+
   beforeEach(() => {
-    supabaseMock.from.mockReset();
     supabaseMock.channel.mockClear();
     supabaseMock.removeChannel.mockReset();
     channelMock.on.mockReset();
     channelMock.on.mockReturnValue(channelMock as any);
     channelMock.subscribe.mockReturnValue({});
+    fetchCompanyIdForUserMock.mockReset();
+    fetchTaskActivitiesForCompanyMock.mockReset();
   });
 
   afterEach(() => {
@@ -82,8 +71,8 @@ describe('TaskActivityFeed', () => {
   });
 
   it('requests scoped activity data and subscribes to permitted tasks only', async () => {
-    const profileBuilder = createProfileBuilder();
-    const activities = [
+    fetchCompanyIdForUserMock.mockResolvedValue(companyId);
+    fetchTaskActivitiesForCompanyMock.mockResolvedValue([
       {
         id: 'activity-1',
         action_type: 'task_created',
@@ -98,23 +87,16 @@ describe('TaskActivityFeed', () => {
           last_name: 'Operator',
         },
       },
-    ];
+    ]);
 
-    const activitiesBuilder = createActivitiesBuilder(activities);
-
-    supabaseMock.from.mockImplementation((table: string) => {
-      if (table === 'profiles') return profileBuilder;
-      if (table === 'task_activities') return activitiesBuilder;
-      throw new Error(`Unexpected table requested: ${table}`);
-    });
-
-    render(<TaskActivityFeed />);
+    renderWithClient();
 
     await waitFor(() => {
       expect(screen.getByText('Recent Activity')).toBeInTheDocument();
     });
 
-    expect(activitiesBuilder.eq).toHaveBeenCalledWith('company_id', companyId);
+    expect(fetchCompanyIdForUserMock).toHaveBeenCalled();
+    expect(fetchTaskActivitiesForCompanyMock).toHaveBeenCalledWith(companyId);
 
     expect(channelMock.on).toHaveBeenCalledTimes(1);
     const [, params] = channelMock.on.mock.calls[0];

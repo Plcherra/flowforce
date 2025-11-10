@@ -59,7 +59,13 @@ export function MessagesSidebar({
           <h2 className="text-lg font-semibold">Channels</h2>
           <div className="flex items-center gap-2">
             {canShowAvailability && typeof onToggleAvailable === 'function' && (
-              <Button size="sm" variant={available ? 'default' : 'outline'} onClick={() => onToggleAvailable(!available)}>
+              <Button
+                size="sm"
+                variant={available ? 'default' : 'outline'}
+                onClick={() => {
+                  void onToggleAvailable(!available);
+                }}
+              >
                 {available ? 'Available' : 'Set as Away'}
               </Button>
             )}

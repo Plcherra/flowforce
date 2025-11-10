@@ -102,6 +102,7 @@ create table if not exists public.company_update_comments (
 );
 
 create index if not exists company_update_comments_update_idx on public.company_update_comments (update_id);
+create index if not exists company_update_comments_company_idx on public.company_update_comments (company_id);
 
 create trigger company_update_comments_set_updated_at
 before update on public.company_update_comments
@@ -175,6 +176,7 @@ create table if not exists public.company_update_reactions (
 );
 
 create index if not exists company_update_reactions_update_idx on public.company_update_reactions (update_id);
+create index if not exists company_update_reactions_company_idx on public.company_update_reactions (company_id);
 
 alter table public.company_update_reactions enable row level security;
 

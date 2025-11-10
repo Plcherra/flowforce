@@ -21,11 +21,9 @@ interface MessagesMainAreaProps {
   isMobile?: boolean;
   showMobileSidebar?: boolean;
   onToggleMobileSidebar?: () => void;
-  filter?: 'all' | 'unread' | 'teams' | 'helpdesk';
-  onChangeFilter?: (v: 'all' | 'unread' | 'teams' | 'helpdesk') => void;
   canShowAvailability?: boolean;
   available?: boolean;
-  onToggleAvailable?: (v: boolean) => void;
+  onToggleAvailable?: (v: boolean) => Promise<void> | void;
 }
 
 export function MessagesMainArea({
@@ -43,8 +41,6 @@ export function MessagesMainArea({
   isMobile = false,
   showMobileSidebar = false,
   onToggleMobileSidebar,
-  filter,
-  onChangeFilter,
   canShowAvailability,
   available,
   onToggleAvailable

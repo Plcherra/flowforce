@@ -6,7 +6,9 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
 );
 
-const departmentRowSchema: z.ZodType<Tables<'departments'>> = z
+type DepartmentRow = Tables<'departments'> & { color?: string | null };
+
+const departmentRowSchema: z.ZodType<DepartmentRow> = z
   .object({
     company_id: z.string().nullable(),
     created_at: z.string(),
@@ -14,6 +16,7 @@ const departmentRowSchema: z.ZodType<Tables<'departments'>> = z
     id: z.string(),
     manager_id: z.string().nullable(),
     name: z.string(),
+    color: z.string().nullable().optional(),
     type: z.string(),
     updated_at: z.string(),
   })
@@ -136,7 +139,7 @@ async function fetchProfileCompanyContext(userId: string): Promise<string | null
   return parsed.company_id ?? null;
 }
 
-async function fetchDepartmentsByCompany(companyId: string): Promise<Tables<'departments'>[]> {
+async function fetchDepartmentsByCompany(companyId: string): Promise<DepartmentRow[]> {
   const { data, error } = await supabase
     .from('departments')
     .select('*')

@@ -24,35 +24,26 @@ const currentResponses = vi.hoisted(() => ({
   forms: [] as FormsResponse,
 }));
 
-const supabaseMock = vi.hoisted(() => {
-  const createFormsBuilder = () => {
-    const builder: any = {};
-    builder.select = vi.fn(() => builder);
-    builder.order = vi.fn(() => builder);
-    builder.eq = vi.fn(() => builder);
-    builder.limit = vi.fn(() => Promise.resolve({ data: currentResponses.forms, error: null }));
-    return builder;
-  };
+const repositoryMocks = vi.hoisted(() => ({
+  fetchFormsWithRelations: vi.fn(async () => currentResponses.forms),
+  insertFormRow: vi.fn(),
+  updateFormRow: vi.fn(),
+  deleteFormRow: vi.fn(),
+  fetchFormFields: vi.fn(),
+  replaceFormFields: vi.fn(),
+  fetchFormSubmissions: vi.fn(),
+  insertFormSubmission: vi.fn(),
+}));
 
-  const builders: Record<string, any> = {};
-
-  return {
-    builders,
-    from: vi.fn((table: string) => {
-      if (table === 'forms') {
-        const builder = createFormsBuilder();
-        builders.forms = builder;
-        return builder;
-      }
-      throw new Error(`Unexpected table: ${table}`);
-    }),
-  };
-});
-
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: supabaseMock.from,
-  },
+vi.mock('@/repositories/formsRepository', () => ({
+  fetchFormsWithRelations: repositoryMocks.fetchFormsWithRelations,
+  insertFormRow: repositoryMocks.insertFormRow,
+  updateFormRow: repositoryMocks.updateFormRow,
+  deleteFormRow: repositoryMocks.deleteFormRow,
+  fetchFormFields: repositoryMocks.fetchFormFields,
+  replaceFormFields: repositoryMocks.replaceFormFields,
+  fetchFormSubmissions: repositoryMocks.fetchFormSubmissions,
+  insertFormSubmission: repositoryMocks.insertFormSubmission,
 }));
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -130,8 +121,11 @@ describe('useForms', () => {
       },
     ];
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    supabaseMock.from.mockClear();
-    supabaseMock.builders.forms = undefined;
+    Object.values(repositoryMocks).forEach((mockFn) => {
+      if ('mockClear' in mockFn && typeof mockFn.mockClear === 'function') {
+        mockFn.mockClear();
+      }
+    });
   });
 
   afterEach(() => {
@@ -152,9 +146,7 @@ describe('useForms', () => {
       JSON.stringify({ removed: 1, tenantCompanyId: 'company-123' }),
     );
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('forms');
-    expect(supabaseMock.builders.forms.select).toHaveBeenCalled();
-    expect(supabaseMock.builders.forms.eq).toHaveBeenCalledWith('profiles!forms_created_by_fkey.company_id', 'company-123');
+    expect(repositoryMocks.fetchFormsWithRelations).toHaveBeenCalledWith('company-123');
 
     queryClient.clear();
   });

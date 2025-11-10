@@ -31,7 +31,7 @@ import Forms from '../pages/Forms.tsx';
 const CompanyUpdates = lazy(() => import('../pages/CompanyUpdates.tsx'));
 const Analytics = lazy(() => import('../pages/Analytics.tsx'));
 const Reports = lazy(() => import('../pages/Reports.tsx'));
-const InventoryActions = lazy(() => import('../pages/InventoryActions.tsx'));
+const InventoryActions = lazy(() => import('../features/inventory/routes/Actions.tsx'));
 const InventoryCountExecution = lazy(() => import('../pages/InventoryCountExecution.tsx'));
 const ItemsSetup = lazy(() => import('../pages/ItemsSetup.tsx'));
 const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));

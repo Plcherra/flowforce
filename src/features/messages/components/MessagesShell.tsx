@@ -1,19 +1,19 @@
-import React from 'react';
-import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner';
-import { CreateAnnouncement } from '@/components/announcements/CreateAnnouncement';
-import { AnimatedChannelWizard } from '@/components/messages/AnimatedChannelWizard';
-import { ChannelMembers } from '@/components/messages/ChannelMembers';
-import { ChannelSettings } from '@/components/messages/ChannelSettings';
-import { DirectMessageDialog } from '@/components/messages/DirectMessageDialog';
-import { MessageSearch } from '@/components/messages/MessageSearch';
+import React, { Suspense, lazy, useMemo } from 'react';
 import { MessagesLayout } from '@/components/messages/MessagesLayout';
 import { MessagesMainArea } from '@/components/messages/MessagesMainArea';
 import { MessagesSidebar } from '@/components/messages/MessagesSidebar';
-import { ThreadedMessageView } from '@/components/messages/ThreadedMessageView';
-import { VideoCallDialog } from '@/components/messages/VideoCallDialog';
 import { Button } from '@/components/ui/button';
-import { logger } from '@/utils/logger';
 import type { MessagesViewModel } from '../hooks/useMessagesViewModel';
+
+const AnnouncementBanner = lazy(() => import('@/components/announcements/AnnouncementBanner'));
+const CreateAnnouncement = lazy(() => import('@/components/announcements/CreateAnnouncement'));
+const AnimatedChannelWizard = lazy(() => import('@/components/messages/AnimatedChannelWizard'));
+const ChannelMembers = lazy(() => import('@/components/messages/ChannelMembers'));
+const ChannelSettings = lazy(() => import('@/components/messages/ChannelSettings'));
+const DirectMessageDialog = lazy(() => import('@/components/messages/DirectMessageDialog'));
+const MessageSearch = lazy(() => import('@/components/messages/MessageSearch'));
+const ThreadedMessageView = lazy(() => import('@/components/messages/ThreadedMessageView'));
+const VideoCallDialog = lazy(() => import('@/components/messages/VideoCallDialog'));
 
 interface MessagesShellProps {
   viewModel: MessagesViewModel;
@@ -41,7 +41,9 @@ export function MessagesShell({ viewModel: vm }: MessagesShellProps) {
     <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-muted/20">
       <div className="border-b bg-card/80 backdrop-blur">
         <div className="mx-auto w-full max-w-7xl px-4 py-3">
-          <AnnouncementBanner />
+          <Suspense fallback={null}>
+            <AnnouncementBanner />
+          </Suspense>
         </div>
       </div>
 
@@ -125,8 +127,6 @@ function MobileLayout({ vm }: MessagesSubSectionProps) {
           isMobile={vm.isMobile}
           showMobileSidebar={vm.showMobileSidebar}
           onToggleMobileSidebar={() => vm.setShowMobileSidebar((prev) => !prev)}
-          filter={vm.activeFilter}
-          onChangeFilter={vm.setActiveFilter}
           canShowAvailability={vm.canToggleAvailability}
           available={vm.available}
           onToggleAvailable={vm.handleAvailabilityChange}
@@ -182,8 +182,6 @@ function DesktopLayout({ vm }: MessagesSubSectionProps) {
           isMobile={vm.isMobile}
           showMobileSidebar={vm.showMobileSidebar}
           onToggleMobileSidebar={() => vm.setShowMobileSidebar((prev) => !prev)}
-          filter={vm.activeFilter}
-          onChangeFilter={vm.setActiveFilter}
           canShowAvailability={vm.canToggleAvailability}
           available={vm.available}
           onToggleAvailable={vm.handleAvailabilityChange}
@@ -194,65 +192,71 @@ function DesktopLayout({ vm }: MessagesSubSectionProps) {
 }
 
 function PortalContent({ vm }: MessagesSubSectionProps) {
+  const videoCallParticipants = useMemo(
+    () => [
+      { id: '1', name: 'John Doe' },
+      { id: '2', name: 'Jane Smith' },
+      { id: '3', name: 'Mike Johnson' },
+    ],
+    [],
+  );
   return (
     <>
-      {vm.showCreateDialog && (
-        <AnimatedChannelWizard open={vm.showCreateDialog} onClose={() => vm.setShowCreateDialog(false)} />
-      )}
+      <Suspense fallback={null}>
+        {vm.showCreateDialog && (
+          <AnimatedChannelWizard open={vm.showCreateDialog} onClose={() => vm.setShowCreateDialog(false)} />
+        )}
 
-      {vm.showDirectMessageDialog && (
-        <DirectMessageDialog open={vm.showDirectMessageDialog} onClose={() => vm.setShowDirectMessageDialog(false)} />
-      )}
+        {vm.showDirectMessageDialog && (
+          <DirectMessageDialog open={vm.showDirectMessageDialog} onClose={() => vm.setShowDirectMessageDialog(false)} />
+        )}
 
-      {vm.showChannelMembers && vm.currentChannel && (
-        <ChannelMembers
-          open={vm.showChannelMembers}
-          onClose={() => vm.setShowChannelMembers(false)}
-          channelId={vm.currentChannel.id}
-          channelName={vm.currentChannel.name}
-        />
-      )}
+        {vm.showChannelMembers && vm.currentChannel && (
+          <ChannelMembers
+            open={vm.showChannelMembers}
+            onClose={() => vm.setShowChannelMembers(false)}
+            channelId={vm.currentChannel.id}
+            channelName={vm.currentChannel.name}
+          />
+        )}
 
-      {vm.showChannelSettings && vm.currentChannel && (
-        <ChannelSettings open={vm.showChannelSettings} onClose={() => vm.setShowChannelSettings(false)} channel={vm.currentChannel} />
-      )}
+        {vm.showChannelSettings && vm.currentChannel && (
+          <ChannelSettings open={vm.showChannelSettings} onClose={() => vm.setShowChannelSettings(false)} channel={vm.currentChannel} />
+        )}
 
-      {vm.showMessageSearch && (
-        <MessageSearch open={vm.showMessageSearch} onClose={() => vm.setShowMessageSearch(false)} />
-      )}
+        {vm.showMessageSearch && (
+          <MessageSearch open={vm.showMessageSearch} onClose={() => vm.setShowMessageSearch(false)} />
+        )}
 
-      {vm.showCreateAnnouncement && (
-        <CreateAnnouncement open={vm.showCreateAnnouncement} onClose={() => vm.setShowCreateAnnouncement(false)} />
-      )}
+        {vm.showCreateAnnouncement && (
+          <CreateAnnouncement open={vm.showCreateAnnouncement} onClose={() => vm.setShowCreateAnnouncement(false)} />
+        )}
 
-      {vm.isVideoCallOpen && vm.currentChannel && vm.callType && (
-        <VideoCallDialog
-          isOpen={vm.isVideoCallOpen}
-          onClose={vm.handleCloseVideoCall}
-          channelName={vm.currentChannel.name}
-          participants={[
-            { id: '1', name: 'John Doe' },
-            { id: '2', name: 'Jane Smith' },
-            { id: '3', name: 'Mike Johnson' },
-          ]}
-          callType={vm.callType}
-        />
-      )}
+        {vm.isVideoCallOpen && vm.currentChannel && vm.callType && (
+          <VideoCallDialog
+            isOpen={vm.isVideoCallOpen}
+            onClose={vm.handleCloseVideoCall}
+            channelName={vm.currentChannel.name}
+            participants={videoCallParticipants}
+            callType={vm.callType}
+          />
+        )}
 
-      {vm.isThreadOpen && vm.threadMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="h-[600px] w-full max-w-2xl rounded-lg bg-background shadow-xl">
-            <ThreadedMessageView
-              message={vm.threadMessage}
-              allReplies={[]}
-              onClose={vm.closeThread}
-              onSendReply={(content, parentId) => {
-                logger.debug('Send thread reply:', content, 'to', parentId);
-              }}
-            />
+        {vm.isThreadOpen && vm.threadMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="h-[600px] w-full max-w-2xl rounded-lg bg-background shadow-xl">
+              <ThreadedMessageView
+                message={vm.threadMessage}
+                allReplies={[]}
+                onClose={vm.closeThread}
+                onSendReply={() => {
+                  // no-op placeholder; a proper send reply handler will be wired by the messages feature.
+                }}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Suspense>
     </>
   );
 }

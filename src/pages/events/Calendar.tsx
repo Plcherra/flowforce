@@ -40,7 +40,6 @@ export default function EventsCalendarPage() {
   const [sessionDialogType, setSessionDialogType] = useState<'meeting' | 'event'>('event');
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
   const { events, loading, error } = useEvents();
-  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
 
   const upcoming = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -55,10 +54,6 @@ export default function EventsCalendarPage() {
       })
       .slice(0, 6);
   }, [events, search]);
-
-  const handleCalendarRefresh = () => {
-    setCalendarRefreshKey((prev) => prev + 1);
-  };
 
   return (
     <SchedulingProvider>
@@ -140,7 +135,7 @@ export default function EventsCalendarPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <SchedulingCalendar mode="events" refreshSignal={calendarRefreshKey} />
+                <SchedulingCalendar mode="events" />
               </CardContent>
             </Card>
           </div>
@@ -229,13 +224,8 @@ export default function EventsCalendarPage() {
           open={sessionDialogOpen}
           onOpenChange={setSessionDialogOpen}
           defaultType={sessionDialogType}
-          onCreated={handleCalendarRefresh}
         />
-        <CreateVendorVisitDialog
-          open={vendorDialogOpen}
-          onOpenChange={setVendorDialogOpen}
-          onCreated={handleCalendarRefresh}
-        />
+        <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
       </div>
     </SchedulingProvider>
   );

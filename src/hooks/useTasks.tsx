@@ -1,38 +1,27 @@
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+
 import { useAuth } from './useAuth';
-import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
 import { syncGoalProgress } from '@/services/goals/goalProgressService';
+export type { TaskWithRelations } from '@/repositories/tasksRepository';
 
-type TaskRow = Tables<'tasks'>;
-
-export type TaskWithRelations = TaskRow & {
-  assigned_profile?: {
-    first_name: string;
-    last_name: string;
-    company_id?: string | null;
-  } | null;
-  created_profile?: {
-    first_name: string;
-    last_name: string;
-    company_id?: string | null;
-  } | null;
-  department?: {
-    name: string;
-  } | null;
-  goal?: {
-    id: string;
-    title: string;
-    status: string;
-    progress: number;
-    target_completion_date: string | null;
-  } | null;
-};
-
-type TaskInsert = TablesInsert<'tasks'>;
-type TaskComment = Tables<'task_comments'>;
-type TaskActivity = Tables<'task_activities'>;
+import {
+  ensureGoalTaskLink,
+  fetchTaskComments,
+  fetchTasksByCompany,
+  insertTask,
+  insertTaskComment,
+  removeGoalTaskLink,
+  TaskCommentWithUser,
+  TaskInsert,
+  TaskRow,
+  TaskWithRelations,
+  updateTaskRow,
+  deleteTaskRow,
+} from '@/repositories/tasksRepository';
+import { fetchCompanyIdForUser } from '@/repositories/companyRepository';
+import { fetchTaskTimeline } from '@/repositories/taskActivitiesRepository';
 
 const STATUS_ALIASES: Record<string, TaskStatus> = {
   completed: 'done',
@@ -83,107 +72,40 @@ const capitalizeFallback = (value: string) => value.replace(/_/g, ' ').replace(/
 
 export function useTasks() {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<TaskWithRelations[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [tasksError, setTasksError] = useState<string | null>(null);
+
+  const tasksQuery = useQuery({
+    queryKey: ['tasks', user?.id],
+    enabled: Boolean(user?.id),
+    staleTime: 60_000,
+    queryFn: async () => {
+      if (!user) return [];
+      const companyId = await fetchCompanyIdForUser(user.id);
+      if (!companyId) {
+        throw new Error('No company context found for the current profile.');
+      }
+      return fetchTasksByCompany(companyId);
+    },
+  });
 
   useEffect(() => {
-    if (user) {
-      fetchTasks();
+    if (tasksQuery.error) {
+      setTasksError((tasksQuery.error as Error).message);
     } else {
-      setTasks([]);
-      setLoading(false);
-      setError(null);
+      setTasksError(null);
     }
-  }, [user]);
+  }, [tasksQuery.error]);
 
-  const fetchTasks = async () => {
-    if (!user) {
-      setTasks([]);
-      setLoading(false);
-      return;
+  const tasks = tasksQuery.data ?? [];
+  const loading = tasksQuery.isLoading;
+  const error = tasksError;
+
+  const invalidateTasks = () => {
+    if (user?.id) {
+      return queryClient.invalidateQueries({ queryKey: ['tasks', user.id] });
     }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      const companyId = profileData?.company_id ?? null;
-
-      if (!companyId) {
-        setTasks([]);
-        setLoading(false);
-        setError('No company context found for the current profile.');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
-          created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
-          department:departments(name),
-          goal:goals(id, title, status, progress, target_completion_date)
-        `)
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setTasks((data ?? []) as TaskWithRelations[]);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      setTasks([]);
-      setError(error instanceof Error ? error.message : 'Unexpected error loading tasks.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const ensureGoalTaskLink = async (goalId: string, taskId: string) => {
-    try {
-      const { error } = await supabase
-        .from('goal_tasks')
-        .upsert(
-          {
-            goal_id: goalId,
-            task_id: taskId,
-          },
-          { onConflict: 'goal_id,task_id' }
-        );
-
-      if (error) {
-        console.error('Error ensuring goal-task link:', error);
-      }
-    } catch (linkError) {
-      console.error('Unexpected error ensuring goal-task link:', linkError);
-    }
-  };
-
-  const removeGoalTaskLink = async (goalId: string, taskId: string) => {
-    try {
-      const { error } = await supabase
-        .from('goal_tasks')
-        .delete()
-        .eq('goal_id', goalId)
-        .eq('task_id', taskId);
-
-      if (error) {
-        console.error('Error removing goal-task link:', error);
-      }
-    } catch (linkError) {
-      console.error('Unexpected error removing goal-task link:', linkError);
-    }
+    return Promise.resolve();
   };
 
   const createTask = async (taskData: TaskInsert) => {
@@ -193,22 +115,14 @@ export function useTasks() {
         goal_id: taskData.goal_id ?? null,
       };
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert(normalizedTaskData)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const createdTask = data as TaskRow;
+      const createdTask = await insertTask(normalizedTaskData);
 
       if (createdTask.goal_id) {
         await ensureGoalTaskLink(createdTask.goal_id, createdTask.id);
         await syncGoalProgress(createdTask.goal_id);
       }
 
-      await fetchTasks(); // Refresh the list
+      await invalidateTasks();
       return { data: createdTask, error: null };
     } catch (error) {
       console.error('Error creating task:', error);
@@ -223,16 +137,7 @@ export function useTasks() {
     try {
       const previousTask = tasks.find((task) => task.id === id);
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const updatedTask = data as TaskRow;
+      const updatedTask = await updateTaskRow(id, updates);
 
       const previousGoalId = previousTask?.goal_id ?? null;
       const newGoalId = updatedTask.goal_id ?? null;
@@ -247,7 +152,7 @@ export function useTasks() {
         await syncGoalProgress(newGoalId);
       }
 
-      await fetchTasks(); // Refresh the list
+      await invalidateTasks();
       return { data: updatedTask, error: null };
     } catch (error) {
       console.error('Error updating task:', error);
@@ -260,18 +165,13 @@ export function useTasks() {
       const taskToDelete = tasks.find((task) => task.id === id);
       const goalId = taskToDelete?.goal_id ?? null;
 
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await deleteTaskRow(id);
 
       if (goalId) {
         await syncGoalProgress(goalId);
       }
 
-      await fetchTasks(); // Refresh the list
+      await invalidateTasks();
       return { error: null };
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -283,17 +183,7 @@ export function useTasks() {
     if (!user) return { data: null, error: 'User not authenticated' };
 
     try {
-      const { data, error } = await supabase
-        .from('task_comments')
-        .insert({
-          task_id: taskId,
-          user_id: user.id,
-          comment
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await insertTaskComment(taskId, user.id, comment);
       return { data, error: null };
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -303,17 +193,8 @@ export function useTasks() {
 
   const getTaskComments = async (taskId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('task_comments')
-        .select(`
-          *,
-          user:profiles(first_name, last_name)
-        `)
-        .eq('task_id', taskId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return { data: data || [], error: null };
+      const data = await fetchTaskComments(taskId);
+      return { data, error: null };
     } catch (error) {
       console.error('Error fetching comments:', error);
       return { data: [], error };
@@ -322,14 +203,8 @@ export function useTasks() {
 
   const getTaskTimeline = async (taskId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('task_activities')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return { data: (data as TaskActivity[]) || [], error: null };
+      const data = await fetchTaskTimeline(taskId);
+      return { data, error: null };
     } catch (error) {
       console.error('Error fetching task timeline:', error);
       return { data: [], error };
@@ -374,6 +249,6 @@ export function useTasks() {
     getTaskComments,
     getTaskTimeline,
     updateStatus,
-    refetchTasks: fetchTasks,
+    refetchTasks: () => tasksQuery.refetch(),
   };
 }

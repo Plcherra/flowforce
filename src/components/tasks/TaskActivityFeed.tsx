@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,28 +15,18 @@ import {
   Edit
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import type { Tables } from '@/integrations/supabase/public-types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
-type TaskActivity = Tables<'task_activities'>;
-type TaskActivityActor = {
-  first_name: string | null;
-  last_name: string | null;
-};
-type TaskActivityWithActor = TaskActivity & {
-  actor?: TaskActivityActor | null;
-};
+import { fetchTaskActivitiesForCompany } from '@/repositories/taskActivitiesRepository';
+import { fetchCompanyIdForUser } from '@/repositories/companyRepository';
+import { supabase } from '@/integrations/supabase/client';
+import type { TaskActivityWithActor } from '@/repositories/taskActivitiesRepository';
 
 export function TaskActivityFeed() {
   const { user } = useAuth();
-  const [activities, setActivities] = useState<TaskActivityWithActor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const subscriptionRef = useRef<RealtimeChannel | null>(null);
-  const isMountedRef = useRef(false);
 
   const cleanupSubscription = () => {
     if (subscriptionRef.current) {
@@ -44,117 +35,76 @@ export function TaskActivityFeed() {
     }
   };
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
+  useEffect(
+    () => () => {
       cleanupSubscription();
-    };
-  }, []);
+    },
+    []
+  );
+
+  const activitiesQuery = useQuery({
+    queryKey: ['task-activities', user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      if (!user) return [];
+      const companyId = await fetchCompanyIdForUser(user.id);
+      if (!companyId) {
+        throw new Error('No company context found for the current user.');
+      }
+      return fetchTaskActivitiesForCompany(companyId);
+    },
+    staleTime: 30_000,
+  });
 
   useEffect(() => {
     if (!user) {
       cleanupSubscription();
-      setActivities([]);
-      setLoading(false);
-      setError(null);
       return;
     }
 
-    initializeActivities(user.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+    let active = true;
+    let channel: RealtimeChannel | null = null;
 
-  const subscribeToActivities = (companyId: string) => {
-    cleanupSubscription();
-    if (!companyId) return;
+    const subscribe = async () => {
+      try {
+        const companyId = await fetchCompanyIdForUser(user.id);
+        if (!companyId || !active) return;
 
-    const channel = supabase
-      .channel(`task-activities-${companyId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'task_activities',
-          filter: `company_id=eq.${companyId}`,
-        },
-        () => {
-          fetchActivities(companyId);
-        }
-      )
-      .subscribe();
+        channel = supabase
+          .channel(`task-activities-${companyId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'task_activities',
+              filter: `company_id=eq.${companyId}`,
+            },
+            () => {
+              queryClient.invalidateQueries({ queryKey: ['task-activities', user.id] });
+            }
+          )
+          .subscribe();
 
-    subscriptionRef.current = channel;
-  };
-
-  const fetchActivities = async (companyId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('task_activities')
-        .select(
-          `
-            *,
-            actor:profiles!task_activities_user_id_fkey(first_name, last_name)
-          `
-        )
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      if (!isMountedRef.current) return;
-
-      setActivities((data ?? []) as TaskActivityWithActor[]);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching task activities:', error);
-      if (isMountedRef.current) {
-        setActivities([]);
-        setError(error instanceof Error ? error.message : 'Unable to load task activity.');
+        subscriptionRef.current = channel;
+      } catch (error) {
+        console.error('Error subscribing to task activities:', error);
       }
-    }
-  };
+    };
 
-  const initializeActivities = async (userId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', userId)
-        .single();
+    subscribe();
 
-      if (profileError) throw profileError;
-
-      const companyId = profileData?.company_id;
-
-      if (!companyId) {
-        if (isMountedRef.current) {
-          setActivities([]);
-          cleanupSubscription();
-          setError('No company context found for the current user.');
-        }
-        return;
+    return () => {
+      active = false;
+      if (channel) {
+        supabase.removeChannel(channel);
       }
+    };
+  }, [user?.id, queryClient]);
 
-      await fetchActivities(companyId);
-      subscribeToActivities(companyId);
-    } catch (error) {
-      console.error('Error initializing task activities:', error);
-      if (isMountedRef.current) {
-        setActivities([]);
-        setError(error instanceof Error ? error.message : 'Unable to load task activity.');
-        cleanupSubscription();
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
-    }
-  };
+  const activities = activitiesQuery.data ?? [];
+  const loading = activitiesQuery.isLoading;
+  const error = activitiesQuery.error ? (activitiesQuery.error as Error).message : null;
 
   const getActivityIcon = (actionType: string) => {
     switch (actionType) {

@@ -28,7 +28,6 @@ interface SchedulingCalendarProps {
   hideShiftActions?: boolean;
   externalDetails?: boolean;
   onShiftSelect?: (shiftId: string | null) => void;
-  refreshSignal?: number;
 }
 
 export function SchedulingCalendar({
@@ -37,7 +36,6 @@ export function SchedulingCalendar({
   hideShiftActions = false,
   externalDetails = false,
   onShiftSelect,
-  refreshSignal,
 }: SchedulingCalendarProps = {}) {
   const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
@@ -129,13 +127,6 @@ export function SchedulingCalendar({
       setSelectedEventId(null);
     }
   }, [overlayEvents, selectedEventId]);
-
-  useEffect(() => {
-    if (refreshSignal === undefined) {
-      return;
-    }
-    void refreshEvents();
-  }, [refreshSignal, refreshEvents]);
 
   const handleDateChange = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);

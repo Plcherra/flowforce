@@ -13,6 +13,7 @@
     "test": "vitest",
     "preview": "vite preview",
     "gen:section": "node scripts/generate-section.mjs",
+    "seed:kpi-insights": "node scripts/seedKpiInsights.mjs",
     "roster:sync": "node scripts/nightlyRosterSync.mjs",
     "typecheck": "tsc --noEmit"
   },

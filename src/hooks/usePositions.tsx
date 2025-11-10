@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Position {
   id: string;
@@ -37,6 +37,7 @@ export interface PositionAssignment {
 
 export function usePositions() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [positions, setPositions] = useState<Position[]>([]);
   const [assignments, setAssignments] = useState<PositionAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +73,11 @@ export function usePositions() {
       })));
     } catch (error) {
       console.error('Error fetching positions:', error);
-      toast.error('Failed to load positions');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to load positions',
+        description: 'Refresh and try again.',
+      });
     } finally {
       setLoading(false);
     }

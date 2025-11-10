@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Json, TablesInsert } from '@/integrations/supabase/public-types';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { calendarEventsRepository, type CalendarEventRow } from '@/repositories/calendarEventsRepository';
+import { queryKeys } from '@/lib/queryKeys';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -65,6 +67,46 @@ const sortEvents = (entries: AppEvent[]): AppEvent[] => {
     const bTime = Date.parse(b.start ?? b.created_at ?? '') || 0;
     return aTime - bTime;
   });
+};
+
+const buildStorageKey = (companyId?: string | null) =>
+  companyId ? `${STORAGE_KEY}__${companyId}` : STORAGE_KEY;
+
+const readStoredEvents = (key: string): AppEvent[] | undefined => {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as StoredEvent[];
+    const mapped = parsed.map((entry) => ({
+      ...entry,
+      persisted: entry.persisted ?? true,
+      source: entry.source ?? (entry.type === 'vendor' ? 'vendor' : 'calendar'),
+    }));
+    return sortEvents(mapped);
+  } catch (error) {
+    console.error('Failed to parse cached events', error);
+    return undefined;
+  }
+};
+
+const persistStoredEvents = (key: string, events: AppEvent[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const payload = events.map(({ persisted, source, ...rest }) => ({ ...rest, persisted, source }));
+    window.localStorage.setItem(key, JSON.stringify(payload));
+  } catch (error) {
+    console.error('Failed to persist events locally', error);
+  }
+};
+
+const removeStoredEvents = (key: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.error('Failed to clear cached events', error);
+  }
 };
 
 const normaliseAttendees = (value: unknown): EventAttendee[] => {
@@ -221,13 +263,13 @@ export function useEvents() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const storageKey = buildStorageKey(companyId);
+  const defaultStorageKey = buildStorageKey(null);
 
-  const [events, setEvents] = useState<AppEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const eventsRef = useRef<AppEvent[]>([]);
-  const initialisedRef = useRef(false);
+  const [localEvents, setLocalEvents] = useState<AppEvent[]>(() => readStoredEvents(defaultStorageKey) ?? []);
+  const offlineToastShownRef = useRef(false);
 
   const defaultColorByType = useMemo(() => DEFAULT_EVENT_COLORS, []);
 
@@ -247,325 +289,282 @@ export function useEvents() {
     [defaultColorByType],
   );
 
-  const mergeRemoteEvents = useCallback((remote: AppEvent[]) => {
-    setEvents((previous) => {
-      const remoteMap = new Map(remote.map((entry) => [entry.id, entry]));
-      const leftovers = previous.filter((entry) => !remoteMap.has(entry.id) || entry.persisted === false);
-      return sortEvents([...remote, ...leftovers]);
-    });
-  }, []);
+  const eventsQuery = useQuery({
+    queryKey: companyId ? queryKeys.calendarEventsList(companyId) : queryKeys.calendarEventsDisabled,
+    enabled: Boolean(companyId),
+    queryFn: async () => {
+      if (!companyId) return [] as AppEvent[];
+      const rows = await calendarEventsRepository.listCompanyEvents(companyId);
+      return rows.map(mapRowToEvent);
+    },
+    initialData: () => (companyId ? readStoredEvents(storageKey) : undefined),
+    staleTime: 30_000,
+  });
+
+  const events = companyId ? eventsQuery.data ?? [] : localEvents;
+  const loading = companyId ? eventsQuery.isLoading || eventsQuery.isFetching : false;
+  const error = companyId && eventsQuery.error ? parseError(eventsQuery.error) : null;
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        setEvents([]);
-      } else {
-        const parsed = JSON.parse(raw) as StoredEvent[];
-        const mapped = parsed.map((entry) => ({
-          ...entry,
-          persisted: entry.persisted ?? true,
-          source: entry.source ?? (entry.type === 'vendor' ? 'vendor' : 'calendar'),
-        }));
-        setEvents(sortEvents(mapped));
-      }
-    } catch (error) {
-      console.error('Failed to parse cached events', error);
-      setEvents([]);
-    } finally {
-      initialisedRef.current = true;
-      setLoading(false);
+    if (companyId && eventsQuery.data) {
+      persistStoredEvents(storageKey, eventsQuery.data);
     }
-  }, []);
-
-  useEffect(() => {
-    eventsRef.current = events;
-    try {
-      const serialised = JSON.stringify(events.map(({ persisted, source, ...rest }) => ({ ...rest, persisted, source })));
-      localStorage.setItem(STORAGE_KEY, serialised);
-    } catch (error) {
-      console.error('Failed to persist events locally', error);
-    }
-  }, [events]);
+  }, [companyId, eventsQuery.data, storageKey]);
 
   useEffect(() => {
     if (!companyId) {
-      return;
+      persistStoredEvents(defaultStorageKey, localEvents);
     }
+  }, [companyId, defaultStorageKey, localEvents]);
 
-    let cancelled = false;
-
-    const fetchRemote = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const rows = await calendarEventsRepository.listCompanyEvents(companyId);
-        const remote = rows.map(mapRowToEvent);
-        if (!cancelled) {
-          mergeRemoteEvents(remote);
-        }
-      } catch (error) {
-        console.warn('Unable to load calendar events from Supabase', error);
-        if (!cancelled) {
-          const message = parseError(error);
-          setError(message);
-          if (initialisedRef.current) {
-            toast({
-              title: 'Calendar offline',
-              description: 'Showing cached events while we reconnect.',
-              variant: 'default',
-            });
-          }
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+  useEffect(() => {
+    if (companyId && eventsQuery.error) {
+      if (!offlineToastShownRef.current) {
+        toast({
+          title: 'Calendar offline',
+          description: parseError(eventsQuery.error),
+          variant: 'default',
+        });
+        offlineToastShownRef.current = true;
       }
-    };
+    } else {
+      offlineToastShownRef.current = false;
+    }
+  }, [companyId, eventsQuery.error, toast]);
 
-    fetchRemote();
+  const invalidateCompanyEvents = useCallback(() => {
+    if (!companyId) return;
+    void queryClient.invalidateQueries({ queryKey: queryKeys.calendarEventsCompany(companyId) });
+  }, [companyId, queryClient]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [companyId, mergeRemoteEvents, toast]);
+  const updateLocalEvents = useCallback(
+    (updater: (previous: AppEvent[]) => AppEvent[]) => {
+      setLocalEvents((previous) => {
+        const next = updater(previous);
+        persistStoredEvents(defaultStorageKey, next);
+        return next;
+      });
+    },
+    [defaultStorageKey],
+  );
+
+  const createEventMutation = useMutation<AppEvent, Error, Omit<AppEvent, 'id'>>({
+    mutationFn: async (payload) => {
+      if (!companyId) throw new Error('Company context is not available');
+      const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
+      const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
+      const row = await calendarEventsRepository.insertEvent(insertPayload);
+      const persisted = mapRowToEvent(row);
+      await Promise.all([
+        syncEventParticipants(companyId, persisted.id, normalized.attendees),
+        syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
+      ]);
+      return persisted;
+    },
+    onSuccess: () => {
+      invalidateCompanyEvents();
+    },
+    onError: (mutationError) => {
+      toast({
+        title: 'Event not saved',
+        description: parseError(mutationError),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const createVendorVisitMutation = useMutation<AppEvent, Error, Omit<AppEvent, 'id' | 'type'>>({
+    mutationFn: async (payload) => {
+      if (!companyId) throw new Error('Company context is not available');
+      const normalized = withDefaults({ ...payload, type: 'vendor' });
+      const insertPayload = {
+        ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
+        event_type: 'vendor',
+      };
+      const row = await calendarEventsRepository.insertEvent(insertPayload);
+      const persisted = mapRowToEvent(row);
+      await Promise.all([
+        syncEventParticipants(companyId, persisted.id, normalized.attendees),
+        syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
+      ]);
+      return persisted;
+    },
+    onSuccess: () => {
+      invalidateCompanyEvents();
+    },
+    onError: (mutationError) => {
+      toast({
+        title: 'Vendor visit not saved',
+        description: parseError(mutationError),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateEventMutation = useMutation<AppEvent, Error, { id: string; updates: Partial<AppEvent> }>({
+    mutationFn: async ({ id, updates }) => {
+      if (!companyId) throw new Error('Company context is not available');
+      const row = await calendarEventsRepository.updateEvent(id, toUpdatePayload(updates));
+      if (!row) {
+        throw new Error('Event not found');
+      }
+      const persisted = mapRowToEvent(row);
+      if (updates.attendees !== undefined) {
+        await syncEventParticipants(companyId, id, persisted.attendees);
+      }
+      if (updates.related_shift_ids !== undefined) {
+        await syncEventShiftLinks(
+          companyId,
+          id,
+          updates.related_shift_ids ?? persisted.related_shift_ids ?? [],
+        );
+      }
+      return persisted;
+    },
+    onSuccess: () => {
+      invalidateCompanyEvents();
+    },
+    onError: (mutationError) => {
+      toast({
+        title: 'Update failed',
+        description: parseError(mutationError),
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteEventMutation = useMutation<void, Error, string>({
+    mutationFn: async (id) => {
+      if (!companyId) throw new Error('Company context is not available');
+      await calendarEventsRepository.deleteEvent(id);
+    },
+    onSuccess: () => {
+      invalidateCompanyEvents();
+    },
+    onError: (mutationError) => {
+      toast({
+        title: 'Delete failed',
+        description: parseError(mutationError),
+        variant: 'destructive',
+      });
+    },
+  });
 
   const createEvent = useCallback(
     async (payload: Omit<AppEvent, 'id'>) => {
-      const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
-      const optimistic: AppEvent = {
-        ...normalized,
-        id: makeId(),
-        persisted: false,
-        source: 'calendar',
-      };
-
-      setEvents((prev) => sortEvents([optimistic, ...prev]));
-
       if (!companyId) {
-        return optimistic;
+        const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
+        const localEvent: AppEvent = {
+          ...normalized,
+          id: makeId(),
+          persisted: false,
+          source: 'calendar',
+        };
+        updateLocalEvents((previous) => sortEvents([localEvent, ...previous]));
+        return localEvent;
       }
-
-      try {
-        const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
-        const row = await calendarEventsRepository.insertEvent(insertPayload);
-        const persisted = mapRowToEvent(row);
-        await Promise.all([
-          syncEventParticipants(companyId, persisted.id, normalized.attendees),
-          syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
-        ]);
-        setEvents((prev) =>
-          sortEvents(
-            prev.map((entry) => (entry.id === optimistic.id ? { ...persisted, source: 'calendar' } : entry)),
-          ),
-        );
-        return persisted;
-      } catch (error) {
-        console.error('Failed to save event', error);
-        setEvents((prev) => prev.filter((entry) => entry.id !== optimistic.id));
-        toast({
-          title: 'Event not saved',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-        throw error;
-      }
+      return createEventMutation.mutateAsync(payload);
     },
-    [companyId, toast, user?.id, withDefaults],
+    [companyId, createEventMutation, updateLocalEvents, withDefaults],
   );
 
   const createVendorVisit = useCallback(
     async (payload: Omit<AppEvent, 'id' | 'type'>) => {
-      const normalized = withDefaults({ ...payload, type: 'vendor' });
-      const optimistic: AppEvent = {
-        ...normalized,
-        id: makeId(),
-        persisted: false,
-        source: 'vendor',
-      };
-
-      setEvents((prev) => sortEvents([optimistic, ...prev]));
-
       if (!companyId) {
-        return optimistic;
-      }
-
-      try {
-        const insertPayload = {
-          ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
-          event_type: 'vendor',
+        const normalized = withDefaults({ ...payload, type: 'vendor' });
+        const localEvent: AppEvent = {
+          ...normalized,
+          id: makeId(),
+          persisted: false,
+          source: 'vendor',
         };
-        const row = await calendarEventsRepository.insertEvent(insertPayload);
-        const persisted = mapRowToEvent(row);
-        await Promise.all([
-          syncEventParticipants(companyId, persisted.id, normalized.attendees),
-          syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
-        ]);
-        setEvents((prev) =>
-          sortEvents(
-            prev.map((entry) => (entry.id === optimistic.id ? { ...persisted, source: 'vendor' } : entry)),
-          ),
-        );
-        return persisted;
-      } catch (error) {
-        console.error('Failed to save vendor visit', error);
-        setEvents((prev) => prev.filter((entry) => entry.id !== optimistic.id));
-        toast({
-          title: 'Vendor visit not saved',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-        throw error;
+        updateLocalEvents((previous) => sortEvents([localEvent, ...previous]));
+        return localEvent;
       }
+      return createVendorVisitMutation.mutateAsync(payload);
     },
-    [companyId, toast, user?.id, withDefaults],
+    [companyId, createVendorVisitMutation, updateLocalEvents, withDefaults],
   );
 
   const updateEvent = useCallback(
     async (id: string, updates: Partial<AppEvent>) => {
-      const previous = eventsRef.current;
-      const target = previous.find((entry) => entry.id === id);
-      if (!target) return;
-
-      const next = { ...target, ...updates };
-      setEvents((prev) => sortEvents(prev.map((entry) => (entry.id === id ? next : entry))));
-
-      if (!companyId || target.source === 'local') {
+      if (!companyId) {
+        updateLocalEvents((previous) =>
+          sortEvents(previous.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry))),
+        );
         return;
       }
-
-      try {
-        const row = await calendarEventsRepository.updateEvent(id, toUpdatePayload({ ...updates, type: target.type }));
-        if (row) {
-          const persisted = mapRowToEvent(row);
-          await Promise.all([
-            syncEventParticipants(companyId, id, persisted.attendees),
-            syncEventShiftLinks(companyId, id, persisted.related_shift_ids),
-          ]);
-          setEvents((prev) =>
-            sortEvents(prev.map((entry) => (entry.id === id ? { ...persisted, source: target.source } : entry))),
-          );
-        }
-      } catch (error) {
-        console.error('Failed to update event', error);
-        setEvents(previous);
-        toast({
-          title: 'Update failed',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-      }
+      await updateEventMutation.mutateAsync({ id, updates });
     },
-    [companyId, toast],
+    [companyId, updateEventMutation, updateLocalEvents],
   );
 
   const deleteEvent = useCallback(
     async (id: string) => {
-      const previous = eventsRef.current;
-      const target = previous.find((entry) => entry.id === id);
-      if (!target) return;
-
-      setEvents((prev) => prev.filter((entry) => entry.id !== id));
-
-      if (!companyId || target.source === 'local') {
+      if (!companyId) {
+        updateLocalEvents((previous) => previous.filter((entry) => entry.id !== id));
         return;
       }
-
-      try {
-        await calendarEventsRepository.deleteEvent(id);
-      } catch (error) {
-        console.error('Failed to delete event', error);
-        setEvents(previous);
-        toast({
-          title: 'Delete failed',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-      }
+      await deleteEventMutation.mutateAsync(id);
     },
-    [companyId, toast],
+    [companyId, deleteEventMutation, updateLocalEvents],
   );
 
   const clear = useCallback(() => {
-    setEvents([]);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.error('Failed to clear cached events', error);
+    if (companyId) {
+      queryClient.removeQueries({ queryKey: queryKeys.calendarEventsCompany(companyId) });
+      persistStoredEvents(storageKey, []);
+      removeStoredEvents(storageKey);
+    } else {
+      updateLocalEvents(() => []);
+      removeStoredEvents(defaultStorageKey);
     }
-  }, []);
+  }, [companyId, defaultStorageKey, queryClient, storageKey, updateLocalEvents]);
 
   const getEventsForShift = useCallback(
-    (shiftId: string) => eventsRef.current.filter((event) => (event.related_shift_ids ?? []).includes(shiftId)),
-    [],
+    (shiftId: string) => events.filter((event) => (event.related_shift_ids ?? []).includes(shiftId)),
+    [events],
   );
 
   const linkVisitToShifts = useCallback(
     async (eventId: string, shiftIds: string[]) => {
-      const previous = eventsRef.current;
-      const target = previous.find((entry) => entry.id === eventId);
-      if (!target) return;
-
-      const next = { ...target, related_shift_ids: shiftIds };
-      setEvents((prev) => sortEvents(prev.map((entry) => (entry.id === eventId ? next : entry))));
-
-      if (!companyId || target.source === 'local') {
+      if (!companyId) {
+        updateLocalEvents((previous) =>
+          sortEvents(
+            previous.map((entry) => (entry.id === eventId ? { ...entry, related_shift_ids: shiftIds } : entry)),
+          ),
+        );
         return;
       }
-
-      try {
-        await calendarEventsRepository.updateEvent(eventId, {
-          related_shift_ids: shiftIds,
-          updated_at: new Date().toISOString(),
-        });
-        await syncEventShiftLinks(companyId, eventId, shiftIds);
-      } catch (error) {
-        console.error('Failed to link event to shifts', error);
-        setEvents(previous);
-        toast({
-          title: 'Unable to link shifts',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-      }
+      await updateEventMutation.mutateAsync({ id: eventId, updates: { related_shift_ids: shiftIds } });
     },
-    [companyId, toast],
+    [companyId, updateEventMutation, updateLocalEvents],
   );
 
   const toggleChecklistItem = useCallback(
     async (eventId: string, itemId: string, done: boolean) => {
-      const previous = eventsRef.current;
-      const target = previous.find((entry) => entry.id === eventId);
+      if (!companyId) {
+        updateLocalEvents((previous) =>
+          sortEvents(
+            previous.map((entry) => {
+              if (entry.id !== eventId) return entry;
+              const checklist = (entry.checklist ?? []).map((item) =>
+                item.id === itemId ? { ...item, done } : item,
+              );
+              return { ...entry, checklist };
+            }),
+          ),
+        );
+        return;
+      }
+      const target = events.find((entry) => entry.id === eventId);
       if (!target) return;
-
       const checklist = (target.checklist ?? []).map((item) =>
         item.id === itemId ? { ...item, done } : item,
       );
-      const next = { ...target, checklist };
-
-      setEvents((prev) => sortEvents(prev.map((entry) => (entry.id === eventId ? next : entry))));
-
-      if (!companyId || target.source === 'local') {
-        return;
-      }
-
-      try {
-        await calendarEventsRepository.updateEvent(eventId, {
-          checklist,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.error('Failed to update checklist', error);
-        setEvents(previous);
-        toast({
-          title: 'Checklist update failed',
-          description: parseError(error),
-          variant: 'destructive',
-        });
-      }
+      await updateEventMutation.mutateAsync({ id: eventId, updates: { checklist } });
     },
-    [companyId, toast],
+    [companyId, events, updateEventMutation, updateLocalEvents],
   );
 
   return {

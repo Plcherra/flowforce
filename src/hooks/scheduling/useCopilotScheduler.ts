@@ -178,28 +178,35 @@ export function useCopilotScheduler({
       return;
     }
 
-    const payloads = state.draftShifts.map((shift) => ({
-      company_id: companyId,
-      dedupe_key: shift.dedupeKey,
-      coverage_template_id: shift.templateId,
-      employee_id: shift.employeeId,
-      schedule_date: shift.scheduleDate,
+    const timestamp = new Date().toISOString();
+    const schedulePayloads = state.draftShifts.map((shift) => ({
+      title: shift.role,
       start_time: shift.start,
       end_time: shift.end,
       location: shift.location,
       role: shift.role,
+      required_headcount: 1,
       status: 'draft',
-      drafted_by: actorUserId,
-      metadata: {
-        source: 'copilot',
-        generated_at: state.lastGeneratedAt,
-        auto_publish_candidate: true,
+      is_published: false,
+      company_id: companyId,
+      created_by: actorUserId,
+      notes: shift.employeeName ? `Drafted for ${shift.employeeName}` : 'Open shift',
+      requirements: {
+        copilot: {
+          runId: state.lastGeneratedAt ?? `manual-${timestamp}`,
+          generatedAt: state.lastGeneratedAt ?? timestamp,
+          locationId: shift.location,
+          slotId: shift.dedupeKey,
+          slotRole: shift.role,
+          weekStart: weekStart.toISOString(),
+          status: 'draft',
+        },
       },
     }));
 
-    const { error } = await supabase
-      .from('schedule_shifts')
-      .upsert(payloads, { onConflict: 'company_id,dedupe_key' })
+    const { data: inserted, error } = await supabase
+      .from('schedules')
+      .insert(schedulePayloads)
       .select('id');
 
     if (error) {
@@ -211,6 +218,32 @@ export function useCopilotScheduler({
       return;
     }
 
+    const assignmentRows =
+      inserted?.flatMap((row, index) => {
+        const shift = state.draftShifts[index];
+        if (!row?.id || !shift?.employeeId) return [];
+        return [
+          {
+            schedule_id: row.id,
+            user_id: shift.employeeId,
+            status: 'draft',
+            assigned_by: actorUserId,
+            assigned_at: timestamp,
+          },
+        ];
+      }) ?? [];
+
+    if (assignmentRows.length > 0) {
+      const { error: assignmentError } = await supabase.from('schedule_assignments').insert(assignmentRows);
+      if (assignmentError) {
+        toast({
+          title: 'Publish warning',
+          description: assignmentError.message ?? 'Shifts saved but assignments failed.',
+          variant: 'destructive',
+        });
+      }
+    }
+
     toast({
       title: 'Draft schedule saved',
       description: 'All Copilot-generated shifts have been stored as draft entries.',
@@ -219,7 +252,7 @@ export function useCopilotScheduler({
     if (typeof onPublished === 'function') {
       await onPublished();
     }
-  }, [actorUserId, companyId, onPublished, state.draftShifts, state.lastGeneratedAt, toast]);
+  }, [actorUserId, companyId, onPublished, state.draftShifts, state.lastGeneratedAt, toast, weekStart]);
 
   return {
     ...state,

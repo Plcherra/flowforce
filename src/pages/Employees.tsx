@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,16 +26,16 @@ import { TeamActionsBar } from '@/components/employees/TeamActionsBar';
 import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialog';
 import { RoleManagerDialog } from '@/components/employees/RoleManagerDialog';
 import { PermissionManagerDialog } from '@/components/employees/PermissionManagerDialog';
-import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
+import { useEmployees, type Employee as DirectoryEmployee, employeesQueryKey as employeesKeyFactory } from '@/hooks/useEmployees';
 import { employeesRepository } from '@/repositories/employeesRepository';
 
-type Department = Tables<'departments'>;
+type Department = Tables<'departments'> & { color?: string | null };
 
 export default function Employees() {
   const isMobile = useIsMobile();
   const { profile: currentUserProfile, loading: profileLoading } = useProfile();
   const companyId = currentUserProfile?.company_id ?? currentUserProfile?.companyId ?? null;
-  const { employees, loading, error: employeesError, refetchEmployees } = useEmployees({ includeInactive: true });
+  const { employees, loading, error: employeesError } = useEmployees({ includeInactive: true, companyId });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [departmentError, setDepartmentError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +59,7 @@ export default function Employees() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleManagerOpen, setRoleManagerOpen] = useState(false);
   const [permissionManagerOpen, setPermissionManagerOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   // Vendor hooks
   const {
@@ -145,6 +147,12 @@ export default function Employees() {
   useEffect(() => {
     fetchDepartments();
   }, [fetchDepartments]);
+
+  const invalidateEmployeeQueries = useCallback(() => {
+    if (!companyId) return;
+    queryClient.invalidateQueries({ queryKey: employeesKeyFactory(companyId, true), exact: false });
+    queryClient.invalidateQueries({ queryKey: employeesKeyFactory(companyId, false), exact: false });
+  }, [companyId, queryClient]);
 
   useEffect(() => {
     setPage(1);
@@ -694,14 +702,14 @@ export default function Employees() {
         <InviteEmployeeDialog
           open={inviteOpen}
           onOpenChange={handleInviteChange}
-          onSuccess={refetchEmployees}
+          onSuccess={invalidateEmployeeQueries}
         />
 
         <RoleManagerDialog
           open={roleManagerOpen}
           onOpenChange={setRoleManagerOpen}
           employees={employees}
-          onRoleUpdated={refetchEmployees}
+          onRoleUpdated={invalidateEmployeeQueries}
         />
 
         <PermissionManagerDialog

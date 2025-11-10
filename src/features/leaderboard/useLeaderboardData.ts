@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
@@ -214,15 +214,13 @@ export interface UseLeaderboardDataResult {
   roles: { role: string; count: number }[];
   challenges: LeaderboardChallenge[];
   lastUpdated: string | null;
-  refresh: () => Promise<void>;
+  refresh: (options?: { forceSync?: boolean }) => Promise<void>;
 }
 
 export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDataResult {
   const { profile, loading: profileLoading } = useProfile();
-  const {
-    employees,
-    loading: employeesLoading,
-  } = useEmployees();
+  const canMaintain = profile?.role ? MANAGER_ROLES.has(profile.role) : false;
+  const { employees } = useEmployees({ enabled: canMaintain });
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [analytics, setAnalytics] = useState<LeaderboardAnalytics>(defaultAnalytics);
   const [challenges, setChallenges] = useState<LeaderboardChallenge[]>([]);
@@ -234,37 +232,63 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
   const clearLeaderboardInsights = useLeaderboardInsightsStore((state) => state.clear);
 
   const companyId = profile?.companyId ?? null;
-  const canMaintain = profile?.role ? MANAGER_ROLES.has(profile.role) : false;
+  const employeesRef = useRef<Employee[]>([]);
+
+  useEffect(() => {
+    employeesRef.current = employees;
+  }, [employees]);
 
   const departments = useMemo(() => {
     const map = new Map<string | null, { id: string | null; name: string | null; count: number }>();
-    employees.forEach((employee) => {
-      const key = (employee as any).department_id ?? employee.department?.id ?? null;
-      const name = employee.department?.name ?? null;
-      if (!map.has(key)) {
-        map.set(key, { id: key, name, count: 0 });
-      }
-      map.get(key)!.count += 1;
-    });
+
+    if (employees.length > 0) {
+      employees.forEach((employee) => {
+        const key = (employee as any).department_id ?? employee.department?.id ?? null;
+        const name = employee.department?.name ?? null;
+        if (!map.has(key)) {
+          map.set(key, { id: key, name, count: 0 });
+        }
+        map.get(key)!.count += 1;
+      });
+    } else {
+      entries.forEach((entry) => {
+        const key = entry.department?.id ?? null;
+        const name = entry.department?.name ?? null;
+        if (!map.has(key)) {
+          map.set(key, { id: key, name, count: 0 });
+        }
+        map.get(key)!.count += 1;
+      });
+    }
+
     return Array.from(map.values()).sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
-  }, [employees]);
+  }, [employees, entries]);
 
   const roles = useMemo(() => {
     const map = new Map<string, number>();
-    employees.forEach((employee) => {
-      map.set(employee.role, (map.get(employee.role) ?? 0) + 1);
-    });
+    if (employees.length > 0) {
+      employees.forEach((employee) => {
+        map.set(employee.role, (map.get(employee.role) ?? 0) + 1);
+      });
+    } else {
+      entries.forEach((entry) => {
+        map.set(entry.role, (map.get(entry.role) ?? 0) + 1);
+      });
+    }
     return Array.from(map.entries())
       .map(([role, count]) => ({ role, count }))
       .sort((a, b) => b.count - a.count);
-  }, [employees]);
+  }, [employees, entries]);
 
-  const refresh = useCallback(async () => {
+  const fetchLeaderboardRows = useCallback(async () => {
     if (!companyId) {
       setEntries([]);
       setAnalytics(defaultAnalytics);
       setChallenges([]);
       setLastUpdated(null);
+      setError(null);
+      clearLeaderboardInsights();
+      setLoading(false);
       return;
     }
 
@@ -272,11 +296,6 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
     setError(null);
 
     try {
-      if (canMaintain && employees.length > 0) {
-        setSyncing(true);
-        await ensureLeaderboardSynced(companyId, employees, period);
-      }
-
       const { data, error: fetchError } = await supabase
         .from('gamification_leaderboard')
         .select(LEADERBOARD_SELECT)
@@ -289,20 +308,8 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
       }
 
       const rows = data ?? [];
-      if (rows.length === 0 && canMaintain && employees.length > 0) {
-        // No rows after fetch – force a sync and refetch once
-        await ensureLeaderboardSynced(companyId, employees, period);
-        const retry = await supabase
-          .from('gamification_leaderboard')
-          .select(LEADERBOARD_SELECT)
-          .eq('company_id', companyId)
-          .eq('period', period)
-          .order('xp_total', { ascending: false });
-        if (retry.error) throw retry.error;
-        rows.splice(0, rows.length, ...(retry.data ?? []));
-      }
-
-      const employeeMap = new Map(employees.map((employee) => [employee.id, employee]));
+      const employeeSnapshot = employeesRef.current;
+      const employeeMap = new Map(employeeSnapshot.map((employee) => [employee.id, employee]));
       const fallbackEmployeeMap = new Map<string, Employee>();
       const missingEmployeeIds = Array.from(
         new Set(rows.map((row) => row.employee_id).filter((id) => id && !employeeMap.has(id))),
@@ -405,25 +412,38 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
       clearLeaderboardInsights();
     } finally {
       setLoading(false);
-      setSyncing(false);
     }
-  }, [companyId, canMaintain, employees, period, setLeaderboardInsights, clearLeaderboardInsights]);
+  }, [companyId, period, setLeaderboardInsights, clearLeaderboardInsights]);
+
+  const refresh = useCallback(
+    async (options?: { forceSync?: boolean }) => {
+      const shouldSync = Boolean(options?.forceSync && canMaintain && companyId);
+      if (shouldSync && companyId) {
+        const roster = employeesRef.current;
+        if (roster.length > 0) {
+          try {
+            setSyncing(true);
+            await ensureLeaderboardSynced(companyId, roster, period);
+          } catch (err) {
+            console.error('[leaderboard] Manual sync failed', err);
+          } finally {
+            setSyncing(false);
+          }
+        }
+      }
+
+      await fetchLeaderboardRows();
+    },
+    [canMaintain, companyId, period, fetchLeaderboardRows],
+  );
 
   useEffect(() => {
-    if (profileLoading || employeesLoading) return;
-    if (!companyId) {
-      setEntries([]);
-      setAnalytics(defaultAnalytics);
-      setChallenges([]);
-      setLastUpdated(null);
-      clearLeaderboardInsights();
-      return;
-    }
-    refresh();
-  }, [companyId, period, profileLoading, employeesLoading, refresh, clearLeaderboardInsights]);
+    if (profileLoading) return;
+    void fetchLeaderboardRows();
+  }, [profileLoading, fetchLeaderboardRows]);
 
   return {
-    loading: loading || profileLoading || employeesLoading,
+    loading: loading || profileLoading,
     syncing,
     error,
     entries,

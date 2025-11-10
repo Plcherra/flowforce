@@ -105,7 +105,10 @@ export function DesignContentStep({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Type</Label>
-                  <Select value={formData.type} onValueChange={(value) => updateFormData({ type: value as any })}>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) => updateFormData({ type: value as WizardFormData['type'] })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -120,7 +123,12 @@ export function DesignContentStep({
 
                 <div className="space-y-2">
                   <Label>Priority</Label>
-                  <Select value={formData.priority} onValueChange={(value) => updateFormData({ priority: value as any })}>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(value) =>
+                      updateFormData({ priority: value as WizardFormData['priority'] })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -224,7 +232,11 @@ export function DesignContentStep({
                           key={pattern.id}
                           variant={formData.backgroundStyle.pattern === pattern.id ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => updateBackgroundStyle({ pattern: pattern.id as any })}
+                          onClick={() =>
+                            updateBackgroundStyle({
+                              pattern: pattern.id as WizardFormData['backgroundStyle']['pattern'],
+                            })
+                          }
                         >
                           {pattern.name}
                         </Button>

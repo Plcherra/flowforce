@@ -19,7 +19,7 @@ interface MessagesHeaderProps {
   onToggleMobileSidebar?: () => void;
   canShowAvailability?: boolean;
   available?: boolean;
-  onToggleAvailable?: (v: boolean) => void;
+  onToggleAvailable?: (v: boolean) => Promise<void> | void;
 }
 
 export function MessagesHeader({
@@ -140,7 +140,13 @@ export function MessagesHeader({
           {canShowAvailability && onToggleAvailable && (
             <div className="hidden md:flex items-center gap-1 ml-2">
               <Label htmlFor="avail-header" className="text-xs text-muted-foreground">Available</Label>
-              <Switch id="avail-header" checked={!!available} onCheckedChange={onToggleAvailable} />
+              <Switch
+                id="avail-header"
+                checked={!!available}
+                onCheckedChange={(value) => {
+                  void onToggleAvailable(value);
+                }}
+              />
             </div>
           )}
         </div>
@@ -148,4 +154,3 @@ export function MessagesHeader({
     </div>
   );
 }
-

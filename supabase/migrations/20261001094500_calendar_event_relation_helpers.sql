@@ -42,8 +42,8 @@ begin
 end;
 $$;
 
-gr ant execute on function public.replace_event_participants(uuid, uuid, jsonb) to authenticated;
-gr ant execute on function public.replace_event_participants(uuid, uuid, jsonb) to service_role;
+grant execute on function public.replace_event_participants(uuid, uuid, jsonb) to authenticated;
+grant execute on function public.replace_event_participants(uuid, uuid, jsonb) to service_role;
 
 create or replace function public.replace_event_shift_links(
   p_company_id uuid,
@@ -91,5 +91,5 @@ begin
 end;
 $$;
 
-gr ant execute on function public.replace_event_shift_links(uuid, uuid, text[]) to authenticated;
-gr ant execute on function public.replace_event_shift_links(uuid, uuid, text[]) to service_role;
+grant execute on function public.replace_event_shift_links(uuid, uuid, text[]) to authenticated;
+grant execute on function public.replace_event_shift_links(uuid, uuid, text[]) to service_role;

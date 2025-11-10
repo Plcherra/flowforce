@@ -6481,6 +6481,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      replace_event_participants: {
+        Args: { p_company_id: string; p_event_id: string; p_participants?: Json }
+        Returns: null
+      }
+      replace_event_shift_links: {
+        Args: { p_company_id: string; p_event_id: string; p_shift_ids?: string[] }
+        Returns: null
+      }
       register_company_v2: {
         Args: { p_locale?: string; p_name: string; p_timezone?: string }
         Returns: string

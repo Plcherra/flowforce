@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { useInvites } from '@/hooks/useInvites';
 import { useTeamManagement } from '@/hooks/useTeamManagement';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 type InviteEmployeeDialogProps = {
   open: boolean;
@@ -32,6 +32,7 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
   const [form, setForm] = useState<InviteFormState>(DEFAULT_FORM);
   const { sendInvite, isSending } = useInvites();
   const { roles, isLoading } = useTeamManagement();
+  const { toast } = useToast();
 
   const roleOptions = useMemo(() => {
     if (!roles.length) {
@@ -62,7 +63,11 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!form.email) {
-      toast.error('An email address is required.');
+      toast({
+        variant: 'destructive',
+        title: 'Email required',
+        description: 'Add an email address before sending an invitation.',
+      });
       return;
     }
     const result = await sendInvite({
@@ -73,14 +78,21 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
     });
 
     if (result.success) {
-      toast.success('Invitation sent');
+      toast({
+        title: 'Invitation sent',
+        description: 'We emailed the invite and let the teammate know.',
+      });
       onOpenChange(false);
       onSuccess?.();
       setForm(DEFAULT_FORM);
       return;
     }
 
-    toast.error(result.message);
+    toast({
+      variant: 'destructive',
+      title: 'Unable to send invite',
+      description: result.message,
+    });
   };
 
   return (

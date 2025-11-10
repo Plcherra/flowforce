@@ -106,9 +106,11 @@ export function UpdateFeedCard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-semibold text-sm truncate">{update.author.name}</h3>
-                <Badge variant="outline" className="text-xs shrink-0">
-                  {update.author.role}
-                </Badge>
+                {update.author.role && (
+                  <Badge variant="outline" className="text-xs shrink-0">
+                    {update.author.role}
+                  </Badge>
+                )}
                 {update.isPinned && <Pin className="h-3 w-3 text-primary shrink-0" />}
               </div>
               <div className="flex items-center gap-2 mt-1 flex-wrap">

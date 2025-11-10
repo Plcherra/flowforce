@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCalendarEvents } from '../useCalendarEvents';
 
@@ -127,16 +128,23 @@ describe('useCalendarEvents', () => {
   });
 
   it('filters events by company and range while combining shift links', async () => {
-    const { result } = renderHook(() =>
-      useCalendarEvents({
-        range: {
-          start: new Date('2024-01-01T00:00:00.000Z'),
-          end: new Date('2024-01-07T23:59:59.999Z'),
-        },
-      }),
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(
+      () =>
+        useCalendarEvents({
+          range: {
+            start: new Date('2024-01-01T00:00:00.000Z'),
+            end: new Date('2024-01-07T23:59:59.999Z'),
+          },
+        }),
+      { wrapper },
     );
 
     await waitFor(() => expect(result.current.events).toHaveLength(1));
+    queryClient.clear();
 
     expect(calendarEventsRepositoryMock.listCompanyEventsByRange).toHaveBeenCalledWith({
       companyId: 'company-1',

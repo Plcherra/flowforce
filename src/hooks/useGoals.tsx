@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +12,6 @@ import {
   insertGoalRow,
   updateGoalRow,
   updateGoalStatusRow,
-  type GoalRecord,
 } from '@/repositories/goalsRepository';
 import { fetchProfilesByIds } from '@/repositories/profileRepository';
 
@@ -281,6 +280,9 @@ export function useGoals() {
   const { toast } = useToast();
   const { profile } = useProfile();
   const queryClient = useQueryClient();
+  const invalidatePerformanceDataset = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ['performance-dataset'] });
+  }, [queryClient]);
 
   const windowCompanyId =
     typeof window !== 'undefined' && typeof (window as { activeCompanyId?: string }).activeCompanyId === 'string'
@@ -300,6 +302,8 @@ export function useGoals() {
     },
     enabled: Boolean(companyId),
     staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
     retry: 1,
   });
 
@@ -327,6 +331,7 @@ export function useGoals() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void invalidatePerformanceDataset();
       toast({
         title: 'Goal created',
         description: 'Your new goal has been added',
@@ -352,6 +357,7 @@ export function useGoals() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void invalidatePerformanceDataset();
       toast({
         title: 'Goal updated',
         description: 'Changes saved successfully',
@@ -372,20 +378,12 @@ export function useGoals() {
       if (!companyId) {
         throw new Error('Missing company context');
       }
-      const { error } = await supabase
-        .from('goals')
-        .delete()
-        .eq('id', id)
-        .eq('company_id', companyId);
-
-      if (error) {
-        throw error;
-      }
-
+      await deleteGoalRow(id, companyId);
       return id;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void invalidatePerformanceDataset();
       toast({
         title: 'Goal removed',
         description: 'The goal has been archived',
@@ -403,30 +401,17 @@ export function useGoals() {
 
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: GoalStatus }) => {
-      const updates: TablesUpdate<'goals'> = {
-        status,
-        progress: status === 'completed' ? 100 : undefined,
-        completed_at: status === 'completed' ? new Date().toISOString() : null,
-      };
-
       if (!companyId) {
         throw new Error('Missing company context');
       }
 
-      const { error } = await supabase
-        .from('goals')
-        .update(updates)
-        .eq('id', id)
-        .eq('company_id', companyId);
-
-      if (error) {
-        throw error;
-      }
+      await updateGoalStatusRow(id, status, companyId);
 
       return id;
     },
     onSuccess: (_id, variables) => {
       void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void invalidatePerformanceDataset();
       toast({
         title: 'Goal status updated',
         description: `Goal marked as ${variables.status}`,

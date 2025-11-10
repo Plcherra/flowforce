@@ -139,8 +139,15 @@ export default function AIChatAssistant({ context }: AIChatAssistantProps) {
         
         {!isMinimized && (
           <CardContent className="flex-1 flex flex-col gap-4 p-4">
-            <ScrollArea className="flex-1 pr-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 pr-4" aria-live="polite">
+              <div
+                className="space-y-4"
+                role="log"
+                aria-live="polite"
+                aria-relevant="additions"
+                aria-busy={isLoading ? 'true' : 'false'}
+                aria-label="FlowForce AI conversation"
+              >
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -197,6 +204,7 @@ export default function AIChatAssistant({ context }: AIChatAssistantProps) {
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me about your operations..."
                 disabled={isLoading}
+                aria-label="Ask FlowForce AI"
               />
               <Button
                 onClick={handleSendMessage}

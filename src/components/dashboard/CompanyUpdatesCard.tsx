@@ -2,17 +2,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Bell, 
-  Calendar, 
-  Clock, 
   ChevronRight, 
   Plus,
   Pin,
-  MessageSquare,
-  Users,
-  Building
+  MessageSquare
 } from 'lucide-react';
 import { useCan } from '@/hooks/useCan';
 import { formatDistanceToNow } from 'date-fns';
@@ -20,51 +15,6 @@ import { useNavigate } from 'react-router-dom';
 import CreateUpdateWizard from '../updates/CreateUpdateWizard';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { WizardFormData } from '../updates/CreateUpdateWizard';
-
-interface CompanyUpdate {
-  id: string;
-  title: string;
-  body: string;
-  type: 'announcement' | 'news' | 'event' | 'policy';
-  priority: 'low' | 'medium' | 'high';
-  author: {
-    name: string;
-    avatar?: string;
-    role: string;
-  };
-  createdAt: Date;
-  isPinned?: boolean;
-  category: string;
-  readBy?: string[];
-}
-const getTypeIcon = (type: CompanyUpdate['type']) => {
-  const iconMap = {
-    announcement: Bell,
-    news: MessageSquare,
-    event: Calendar,
-    policy: Building
-  };
-  return iconMap[type];
-};
-
-const getTypeColor = (type: CompanyUpdate['type']) => {
-  const colorMap = {
-    announcement: 'bg-blue-500/10 text-blue-600 border-blue-200',
-    news: 'bg-green-500/10 text-green-600 border-green-200',
-    event: 'bg-purple-500/10 text-purple-600 border-purple-200',
-    policy: 'bg-gray-500/10 text-gray-600 border-gray-200'
-  };
-  return colorMap[type];
-};
-
-const getPriorityColor = (priority: CompanyUpdate['priority']) => {
-  const colorMap = {
-    high: 'bg-red-500/10 text-red-600 border-red-200',
-    medium: 'bg-yellow-500/10 text-yellow-600 border-yellow-200',
-    low: 'bg-green-500/10 text-green-600 border-green-200'
-  };
-  return colorMap[priority];
-};
 
 interface CompanyUpdatesCardProps {
   className?: string;

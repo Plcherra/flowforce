@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,7 @@ import type { CustomSection, CustomSectionPage } from '@/hooks/useCustomSections
 export interface SectionComponentProps {
   section: CustomSection;
   page: CustomSectionPage;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface SectionComponentDefinition {

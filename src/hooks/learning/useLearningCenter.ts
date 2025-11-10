@@ -423,57 +423,6 @@ export function useLearningCenter() {
     [enrollments, catalog, profile?.userId, profile?.role, loadProgressData, loadData, markCourseComplete],
   );
 
-  const handleManualProgressUpdate = useCallback(
-    async (enrollmentId: string, progressPercent: number, hoursAdjustment = 0) => {
-      const enrollment = enrollments.find((item) => item.id === enrollmentId);
-      if (!enrollment) return;
-
-      try {
-        const updated = await updateEnrollmentProgress(
-          enrollment.id,
-          {
-            progressPercent,
-            hoursCompleted: Math.max(0, enrollment.hoursCompleted + hoursAdjustment),
-          },
-          {
-            recordedBy: profile?.userId ?? null,
-            timeSpentMinutes: Math.max(0, Math.round(hoursAdjustment * 60)),
-            metadata: { source: 'manual_adjustment' },
-          },
-        );
-
-        await recordProgressEvent(enrollment.id, {
-          eventType: 'checkpoint',
-          deltaProgress: progressPercent - enrollment.progressPercent,
-          deltaHours: hoursAdjustment,
-          note: 'Progress updated via admin override',
-          createdBy: profile?.userId,
-        });
-
-        setEnrollments((previous) =>
-          previous.map((entry) => (entry.id === updated.id ? updated : entry)),
-        );
-        await loadProgressData([updated]);
-
-        if (updated.status === 'completed') {
-          const course = catalog.find((item) => item.id === enrollment.courseId);
-          if (course) {
-            await markCourseComplete(enrollment.employeeId, course);
-            await loadData();
-          }
-        }
-      } catch (err) {
-        console.error('Failed to adjust progress', err);
-        toast({
-          title: 'Adjustment failed',
-          description: 'Could not apply the requested progress change.',
-          variant: 'destructive',
-        });
-      }
-    },
-    [enrollments, profile?.userId, loadProgressData, catalog, markCourseComplete, loadData],
-  );
-
   const courseById = useMemo(() => new Map(catalog.map((course) => [course.id, course])), [catalog]);
 
   const catalogByCategory = useMemo(() => {
@@ -563,7 +512,6 @@ export function useLearningCenter() {
     handleCreateCourse,
     handleEnroll,
     handleModuleCompletion,
-    handleManualProgressUpdate,
     getCourseWorkload,
   };
 }

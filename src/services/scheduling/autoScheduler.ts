@@ -86,6 +86,10 @@ const DEFAULT_COMPLIANCE: ComplianceRules = {
 
 const DEFAULT_AVAILABILITY_RANGE = { start: '06:00', end: '22:00' };
 const DEFAULT_TIMEZONE = 'UTC';
+const DEFAULT_AVAILABILITY: CopilotEmployeeSeed['availability'] = WEEKDAY_LABELS.map((_, index) => ({
+  weekday: index,
+  ranges: [DEFAULT_AVAILABILITY_RANGE],
+}));
 
 const normaliseTimeString = (value?: string | null) => {
   if (!value) return '09:00';
@@ -133,13 +137,7 @@ const parseWeekdayKey = (value: string): number | null => {
 
 const buildAvailability = (raw: unknown): CopilotEmployeeSeed['availability'] => {
   if (!raw || typeof raw !== 'object') {
-    return [
-      { weekday: 1, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 2, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 3, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 4, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 5, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-    ];
+    return DEFAULT_AVAILABILITY;
   }
 
   const entries: CopilotEmployeeSeed['availability'] = [];
@@ -159,13 +157,7 @@ const buildAvailability = (raw: unknown): CopilotEmployeeSeed['availability'] =>
   });
 
   if (entries.length === 0) {
-    return [
-      { weekday: 1, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 2, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 3, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 4, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-      { weekday: 5, ranges: [DEFAULT_AVAILABILITY_RANGE] },
-    ];
+    return DEFAULT_AVAILABILITY;
   }
 
   return entries;

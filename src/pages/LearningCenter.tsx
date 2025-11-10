@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/modules/system/components/EmptyState';
 import { CourseCreationWizard } from '@/components/learning/CourseCreationWizard';
 import { CatalogGrid } from '@/components/learning/CatalogGrid';
 import { EnrollmentProgress } from '@/components/learning/EnrollmentProgress';
@@ -90,6 +91,10 @@ export default function LearningCenter() {
     }
     return highlightSet;
   }, [recommendedCourseIds, catalog, focusCertification]);
+  const showCatalogSkeleton = loading && catalog.length === 0;
+  const showCatalogEmpty = !loading && catalog.length === 0;
+  const showAdminSkeleton = loading && metrics.length === 0;
+  const showAdminEmpty = !loading && metrics.length === 0;
 
   const personalStats = snapshot
     ? [
@@ -183,34 +188,79 @@ export default function LearningCenter() {
         </TabsContent>
 
         <TabsContent value="catalog" className="space-y-6">
-          <CatalogGrid
-            courses={catalog}
-            enrollments={enrollments}
-            onEnroll={handleEnroll}
-            onShowProgress={() => setActiveTab('overview')}
-            highlightCourseIds={highlightedCourseIds}
-          />
+          {showCatalogSkeleton && (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
+                <Skeleton className="h-10 w-full md:w-64" />
+                <Skeleton className="h-10 w-full md:w-48" />
+                <Skeleton className="h-10 w-full md:w-40" />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="shadow-sm">
+                    <CardHeader>
+                      <Skeleton className="h-6 w-40" />
+                      <Skeleton className="mt-2 h-4 w-32" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from(catalogByCategory.entries()).map(([category, courses]) => {
-              const averageXp = courses.length > 0 ? Math.round(courses.reduce((sum, item) => sum + item.xpReward, 0) / courses.length) : 0;
-              const totalModules = courses.reduce((sum, item) => sum + item.modules.length, 0);
+          {showCatalogEmpty && (
+            <EmptyState
+              title="No courses in the catalog"
+              description="Create your first course or ask an admin to publish training content."
+              action={
+                trainingAdmin ? (
+                  <Button onClick={() => setWizardOpen(true)}>Create course</Button>
+                ) : (
+                  <Button variant="outline" onClick={refresh}>
+                    Refresh
+                  </Button>
+                )
+              }
+            />
+          )}
 
-              return (
-                <Card key={category} className="border-dashed">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <Badge variant="outline">{category}</Badge>
-                      <span className="text-xs text-muted-foreground">{courses.length} courses</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Avg XP {averageXp} · {totalModules} modules total
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
+          {!showCatalogSkeleton && !showCatalogEmpty && (
+            <>
+              <CatalogGrid
+                courses={catalog}
+                enrollments={enrollments}
+                onEnroll={handleEnroll}
+                onShowProgress={() => setActiveTab('overview')}
+                highlightCourseIds={highlightedCourseIds}
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {Array.from(catalogByCategory.entries()).map(([category, courses]) => {
+                  const averageXp = courses.length > 0 ? Math.round(courses.reduce((sum, item) => sum + item.xpReward, 0) / courses.length) : 0;
+                  const totalModules = courses.reduce((sum, item) => sum + item.modules.length, 0);
+
+                  return (
+                    <Card key={category} className="border-dashed">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Badge variant="outline">{category}</Badge>
+                          <span className="text-xs text-muted-foreground">{courses.length} courses</span>
+                        </CardTitle>
+                        <CardDescription>
+                          Avg XP {averageXp} · {totalModules} modules total
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </TabsContent>
 
         {trainingAdmin && (
@@ -227,46 +277,85 @@ export default function LearningCenter() {
 
         {trainingAdmin && (
           <TabsContent value="admin" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Trophy className="h-5 w-5 text-primary" /> Course performance snapshot
-                </CardTitle>
-                <CardDescription>Roll-up metrics with completion rate, active learners, and XP impact.</CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-64">Course</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Active</TableHead>
-                      <TableHead>Completions</TableHead>
-                      <TableHead>Avg progress</TableHead>
-                      <TableHead>XP awarded</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {metrics.map((metric) => (
-                      <TableRow key={metric.courseId}>
-                        <TableCell className="font-medium">{courseById.get(metric.courseId)?.title ?? metric.title}</TableCell>
-                        <TableCell>{metric.category}</TableCell>
-                        <TableCell>
-                          <Badge variant={metric.completions > 0 ? 'default' : 'outline'}>
-                            {metric.completions > 0 ? 'Activated' : 'Pending'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{metric.activeLearners}</TableCell>
-                        <TableCell>{metric.completions}</TableCell>
-                        <TableCell>{metric.avgProgress ? `${metric.avgProgress.toFixed(0)}%` : '—'}</TableCell>
-                        <TableCell>{metric.totalXpAwarded ?? 0}</TableCell>
+            {showAdminSkeleton && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Skeleton className="h-6 w-56" />
+                  </CardTitle>
+                  <CardDescription>
+                    <Skeleton className="h-4 w-64" />
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="flex flex-col gap-3 rounded-md border p-4 md:flex-row md:items-center md:gap-6">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {showAdminEmpty && (
+              <EmptyState
+                title="No training metrics yet"
+                description="Metrics will appear once learners enroll and start completing courses."
+                action={
+                  <Button variant="outline" onClick={refresh}>
+                    Refresh
+                  </Button>
+                }
+              />
+            )}
+
+            {!showAdminSkeleton && !showAdminEmpty && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Trophy className="h-5 w-5 text-primary" /> Course performance snapshot
+                  </CardTitle>
+                  <CardDescription>Roll-up metrics with completion rate, active learners, and XP impact.</CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-64">Course</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Active</TableHead>
+                        <TableHead>Completions</TableHead>
+                        <TableHead>Avg progress</TableHead>
+                        <TableHead>XP awarded</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {metrics.map((metric) => (
+                        <TableRow key={metric.courseId}>
+                          <TableCell className="font-medium">{courseById.get(metric.courseId)?.title ?? metric.title}</TableCell>
+                          <TableCell>{metric.category}</TableCell>
+                          <TableCell>
+                            <Badge variant={metric.completions > 0 ? 'default' : 'outline'}>
+                              {metric.completions > 0 ? 'Activated' : 'Pending'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{metric.activeLearners}</TableCell>
+                          <TableCell>{metric.completions}</TableCell>
+                          <TableCell>{metric.avgProgress ? `${metric.avgProgress.toFixed(0)}%` : '—'}</TableCell>
+                          <TableCell>{metric.totalXpAwarded ?? 0}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         )}
       </Tabs>

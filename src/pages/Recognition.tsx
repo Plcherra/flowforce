@@ -14,6 +14,8 @@ import { useRecognitions } from '@/hooks/useRecognitions';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import type { LeaderboardPeriod } from '@/features/leaderboard/types';
+import { useLeaderboardData } from '@/features/leaderboard/useLeaderboardData';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import type { RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
 import { recognitionSourceMeta } from '@/lib/recognitionMeta';
@@ -56,19 +58,25 @@ type ManualRecognitionForm = {
   xpAwarded?: number | null;
 };
 
+interface ManualRecognitionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (form: ManualRecognitionForm) => Promise<void>;
+  submitting: boolean;
+  employees: { id: string; first_name: string; last_name: string; avatar_url?: string }[];
+  employeesLoading: boolean;
+  employeesError: string | null;
+}
+
 function ManualRecognitionDialog({
   open,
   onOpenChange,
   onSubmit,
   submitting,
   employees,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (form: ManualRecognitionForm) => Promise<void>;
-  submitting: boolean;
-  employees: { id: string; first_name: string; last_name: string; avatar_url?: string }[];
-}) {
+  employeesLoading,
+  employeesError,
+}: ManualRecognitionDialogProps) {
   const [form, setForm] = useState<ManualRecognitionForm>({
     userId: '',
     message: '',
@@ -88,7 +96,7 @@ function ManualRecognitionDialog({
   };
 
   const handleSubmit = async () => {
-    if (!form.userId || !form.message.trim()) {
+    if (!form.userId || !form.message.trim() || employees.length === 0 || employeesLoading) {
       return;
     }
     await onSubmit(form);
@@ -107,19 +115,37 @@ function ManualRecognitionDialog({
             <Label htmlFor="recognition-employee">Employee</Label>
             <Select
               value={form.userId}
+              disabled={employeesLoading || employees.length === 0}
               onValueChange={(value) => setForm((prev) => ({ ...prev, userId: value }))}
             >
               <SelectTrigger id="recognition-employee">
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
-                {employees.map((employee) => (
-                  <SelectItem key={employee.id} value={employee.id}>
-                    {employee.first_name} {employee.last_name}
+                {employees.length === 0 ? (
+                  <SelectItem value="__placeholder" disabled>
+                    {employeesLoading
+                      ? 'Loading team roster...'
+                      : employeesError
+                      ? 'Unable to load employees'
+                      : 'No active employees available'}
                   </SelectItem>
-                ))}
+                ) : (
+                  employees.map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.first_name} {employee.last_name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
+            {employeesLoading ? (
+              <p className="text-xs text-muted-foreground">Loading team roster...</p>
+            ) : employeesError ? (
+              <p className="text-xs text-destructive">Unable to load employees: {employeesError}</p>
+            ) : employees.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Add active employees to share recognition.</p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -174,7 +200,12 @@ function ManualRecognitionDialog({
           <Button variant="outline" onClick={resetAndClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!form.userId || !form.message.trim() || submitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={
+              !form.userId || !form.message.trim() || submitting || employeesLoading || employees.length === 0
+            }
+          >
             {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Give Recognition
           </Button>
@@ -272,8 +303,15 @@ function RecognitionCard({ record }: { record: RecognitionRecord }) {
 
 export default function Recognition() {
   const { recognitions, loading, syncing, error, createManualRecognition, syncAutomation } = useRecognitions();
-  const { employees } = useEmployees();
+  const { employees, loading: employeesLoading, error: employeesError } = useEmployees();
   const { toast } = useToast();
+  const leaderboardPeriod: LeaderboardPeriod = 'monthly';
+  const {
+    loading: leaderboardLoading,
+    syncing: leaderboardSyncing,
+    error: leaderboardError,
+    refresh: refreshLeaderboard,
+  } = useLeaderboardData(leaderboardPeriod);
 
   const [filter, setFilter] = useState<RecognitionFilterKey>('all');
   const [departmentFilter, setDepartmentFilter] = useState<'all' | string>('all');
@@ -297,33 +335,7 @@ export default function Recognition() {
   const leaderboardUpdatedLabel = leaderboardSyncedAt
     ? formatDistanceToNow(new Date(leaderboardSyncedAt), { addSuffix: true })
     : null;
-
-  const stats = useMemo(() => {
-    const recognitionByType: Record<RecognitionSourceType, number> = {
-      goal_milestone: 0,
-      goal_completion: 0,
-      task_completion: 0,
-      training_completion: 0,
-      onboarding_completion: 0,
-      manual: 0,
-    };
-
-    recognitions.forEach((record) => {
-      const type = record.reward_details?.source ?? 'manual';
-      recognitionByType[type] = (recognitionByType[type] ?? 0) + 1;
-    });
-
-    const trainingCount = recognitionByType.training_completion + recognitionByType.onboarding_completion;
-    const goalCount = recognitionByType.goal_milestone + recognitionByType.goal_completion;
-
-    return {
-      total: recognitions.length,
-      goals: goalCount,
-      tasks: recognitionByType.task_completion ?? 0,
-      training: trainingCount,
-      manual: recognitionByType.manual ?? 0,
-    };
-  }, [recognitions]);
+  const isLeaderboardLoading = leaderboardLoading || leaderboardSyncing;
 
   const departmentOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -389,6 +401,33 @@ export default function Recognition() {
     });
   }, [recognitions, filter, searchTerm, departmentFilter, departmentIdByUser, timelineFilter]);
 
+  const stats = useMemo(() => {
+    const recognitionByType: Record<RecognitionSourceType, number> = {
+      goal_milestone: 0,
+      goal_completion: 0,
+      task_completion: 0,
+      training_completion: 0,
+      onboarding_completion: 0,
+      manual: 0,
+    };
+
+    filteredRecognitions.forEach((record) => {
+      const type = record.reward_details?.source ?? 'manual';
+      recognitionByType[type] = (recognitionByType[type] ?? 0) + 1;
+    });
+
+    const trainingCount = recognitionByType.training_completion + recognitionByType.onboarding_completion;
+    const goalCount = recognitionByType.goal_milestone + recognitionByType.goal_completion;
+
+    return {
+      total: filteredRecognitions.length,
+      goals: goalCount,
+      tasks: recognitionByType.task_completion ?? 0,
+      training: trainingCount,
+      manual: recognitionByType.manual ?? 0,
+    };
+  }, [filteredRecognitions]);
+
   const handleCreateRecognition = async (form: ManualRecognitionForm) => {
     setCreating(true);
     try {
@@ -428,6 +467,18 @@ export default function Recognition() {
         description: 'We could not run the automation sync. Please try again later.',
         variant: 'destructive',
       });
+      return;
+    }
+
+    try {
+      await refreshLeaderboard();
+    } catch (err) {
+      console.error('Leaderboard refresh failed after automation', err);
+      toast({
+        title: 'Leaderboard refresh failed',
+        description: 'Recognition data refreshed but leaderboard insights are stale. Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -445,7 +496,7 @@ export default function Recognition() {
             {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Run Automation
           </Button>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)} disabled={employeesLoading}>
             <Plus className="mr-2 h-4 w-4" />
             Give Recognition
           </Button>
@@ -459,7 +510,7 @@ export default function Recognition() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">All-time recognitions</p>
+            <p className="text-xs text-muted-foreground mt-1">Matches current filters</p>
           </CardContent>
         </Card>
         <Card className="md:col-span-1">
@@ -468,7 +519,7 @@ export default function Recognition() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.goals}</div>
-            <p className="text-xs text-muted-foreground mt-1">Milestones & completions</p>
+            <p className="text-xs text-muted-foreground mt-1">Goals in current view</p>
           </CardContent>
         </Card>
         <Card className="md:col-span-1">
@@ -477,7 +528,7 @@ export default function Recognition() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.tasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">Completed critical tasks</p>
+            <p className="text-xs text-muted-foreground mt-1">Task kudos in view</p>
           </CardContent>
         </Card>
         <Card className="md:col-span-1">
@@ -486,7 +537,7 @@ export default function Recognition() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.training}</div>
-            <p className="text-xs text-muted-foreground mt-1">Learning & onboarding</p>
+            <p className="text-xs text-muted-foreground mt-1">Training in view</p>
           </CardContent>
         </Card>
         <Card className="md:col-span-1">
@@ -495,7 +546,7 @@ export default function Recognition() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.manual}</div>
-            <p className="text-xs text-muted-foreground mt-1">Team shout-outs</p>
+            <p className="text-xs text-muted-foreground mt-1">Manual shout-outs in view</p>
           </CardContent>
         </Card>
       </div>
@@ -510,13 +561,26 @@ export default function Recognition() {
             <CardDescription>Top employees by recognition-driven XP synced from the leaderboard.</CardDescription>
           </div>
           <Badge variant="outline" className="text-xs">
-            {leaderboardRecognitionLeaders.length > 0
+            {isLeaderboardLoading
+              ? 'Loading leaderboard...'
+              : leaderboardRecognitionLeaders.length > 0
               ? `Synced ${leaderboardUpdatedLabel ?? 'just now'}`
+              : leaderboardError
+              ? 'Unable to load leaderboard'
               : 'Awaiting leaderboard sync'}
           </Badge>
         </CardHeader>
         <CardContent className="space-y-3">
-          {leaderboardRecognitionLeaders.length === 0 ? (
+          {isLeaderboardLoading ? (
+            <div className="flex items-center justify-center gap-2 rounded-md border border-dashed py-6 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading leaderboard data...
+            </div>
+          ) : leaderboardError ? (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+              Unable to load leaderboard data. {leaderboardError}
+            </div>
+          ) : leaderboardRecognitionLeaders.length === 0 ? (
             <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
               Launch the leaderboard to capture recognition milestones and surface spotlighted teammates here.
             </div>
@@ -657,6 +721,8 @@ export default function Recognition() {
         onSubmit={handleCreateRecognition}
         submitting={creating}
         employees={employees}
+        employeesLoading={employeesLoading}
+        employeesError={employeesError}
       />
     </div>
   );

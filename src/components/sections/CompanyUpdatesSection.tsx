@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutGrid, List, Plus } from 'lucide-react';
 import { useCan } from '@/hooks/useCan';
 import { logger } from '@/utils/logger';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { UpdatesTableView } from './updates/UpdatesTableView';
 import { UpdatesFeedView } from './updates/UpdatesFeedView';
+import type { CompanyUpdate } from '@/types/companyUpdates';
 
 export default function CompanyUpdatesSection() {
   const { can } = useCan();
@@ -28,7 +28,7 @@ export default function CompanyUpdatesSection() {
     logger.debug('Add new update');
   };
 
-  const handleEdit = (update: any) => {
+  const handleEdit = (update: CompanyUpdate) => {
     // TODO: Open edit update dialog
     logger.debug('Edit update:', update);
   };
