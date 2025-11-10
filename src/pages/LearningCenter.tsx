@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, RefreshCcw, Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,12 +8,21 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState } from '@/modules/system/components/EmptyState';
-import { CourseCreationWizard } from '@/components/learning/CourseCreationWizard';
-import { CatalogGrid } from '@/components/learning/CatalogGrid';
-import { EnrollmentProgress } from '@/components/learning/EnrollmentProgress';
 import { RecommendationsPanel } from '@/components/learning/RecommendationsPanel';
-import { AnalyticsOverview } from '@/components/learning/AnalyticsOverview';
 import { useLearningCenter } from '@/hooks/learning/useLearningCenter';
+
+const CatalogGrid = lazy(() =>
+  import('@/components/learning/CatalogGrid').then((module) => ({ default: module.CatalogGrid })),
+);
+const EnrollmentProgress = lazy(() =>
+  import('@/components/learning/EnrollmentProgress').then((module) => ({ default: module.EnrollmentProgress })),
+);
+const AnalyticsOverview = lazy(() =>
+  import('@/components/learning/AnalyticsOverview').then((module) => ({ default: module.AnalyticsOverview })),
+);
+const CourseCreationWizard = lazy(() =>
+  import('@/components/learning/CourseCreationWizard').then((module) => ({ default: module.CourseCreationWizard })),
+);
 
 type LearningTab = 'overview' | 'catalog' | 'analytics' | 'admin';
 
@@ -32,6 +41,72 @@ const deriveTabFromSearch = (search: string): LearningTab | null => {
   }
   return null;
 };
+
+const CatalogGridSkeleton = () => (
+  <div className="space-y-4">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
+      <Skeleton className="h-10 w-full md:w-64" />
+      <Skeleton className="h-10 w-full md:w-48" />
+      <Skeleton className="h-10 w-full md:w-40" />
+    </div>
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Card key={index} className="shadow-sm">
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="mt-2 h-4 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+const EnrollmentProgressSkeleton = () => (
+  <div className="space-y-4">
+    {Array.from({ length: 2 }).map((_, index) => (
+      <Card key={index} className="shadow-sm">
+        <CardHeader>
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="mt-2 h-4 w-32" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-24 w-full" />
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const AnalyticsOverviewSkeleton = () => (
+  <div className="space-y-4">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Card key={index}>
+          <CardHeader>
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-32" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-20" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+    <Card className="h-64">
+      <CardContent className="h-full">
+        <Skeleton className="h-full w-full" />
+      </CardContent>
+    </Card>
+  </div>
+);
 
 export default function LearningCenter() {
   const location = useLocation();
@@ -54,11 +129,14 @@ export default function LearningCenter() {
     recommendations,
     progressByEnrollment,
     progressSnapshotsByEnrollment,
+    progressEventCursors,
+    progressSnapshotCursors,
     trainingInsights,
     refresh,
     handleCreateCourse,
     handleEnroll,
     handleModuleCompletion,
+    loadMoreProgress,
   } = useLearningCenter();
 
   useEffect(() => {
@@ -186,40 +264,22 @@ export default function LearningCenter() {
 
           <RecommendationsPanel recommendations={recommendations} courseById={courseById} onEnroll={handleEnroll} />
 
-          <EnrollmentProgress
-            enrollments={enrollments}
-            courses={courseById}
-            progressEvents={progressByEnrollment}
-            progressSnapshots={progressSnapshotsByEnrollment}
-            onCompleteNextModule={handleModuleCompletion}
-          />
+          <Suspense fallback={<EnrollmentProgressSkeleton />}>
+            <EnrollmentProgress
+              enrollments={enrollments}
+              courses={courseById}
+              progressEvents={progressByEnrollment}
+              progressSnapshots={progressSnapshotsByEnrollment}
+              progressEventCursors={progressEventCursors}
+              progressSnapshotCursors={progressSnapshotCursors}
+              onCompleteNextModule={handleModuleCompletion}
+              onLoadMoreProgress={loadMoreProgress}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="catalog" className="space-y-6">
-          {showCatalogSkeleton && (
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
-                <Skeleton className="h-10 w-full md:w-64" />
-                <Skeleton className="h-10 w-full md:w-48" />
-                <Skeleton className="h-10 w-full md:w-40" />
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <Card key={index} className="shadow-sm">
-                    <CardHeader>
-                      <Skeleton className="h-6 w-40" />
-                      <Skeleton className="mt-2 h-4 w-32" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-10 w-full" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {showCatalogSkeleton && <CatalogGridSkeleton />}
 
           {showCatalogEmpty && (
             <EmptyState
@@ -239,13 +299,15 @@ export default function LearningCenter() {
 
           {!showCatalogSkeleton && !showCatalogEmpty && (
             <>
-              <CatalogGrid
-                courses={catalog}
-                enrollments={enrollments}
-                onEnroll={handleEnroll}
-                onShowProgress={handleShowProgress}
-                highlightCourseIds={highlightedCourseIds}
-              />
+              <Suspense fallback={<CatalogGridSkeleton />}>
+                <CatalogGrid
+                  courses={catalog}
+                  enrollments={enrollments}
+                  onEnroll={handleEnroll}
+                  onShowProgress={handleShowProgress}
+                  highlightCourseIds={highlightedCourseIds}
+                />
+              </Suspense>
 
               <div className="grid gap-4 md:grid-cols-2">
                 {Array.from(catalogByCategory.entries()).map(([category, courses]) => {
@@ -273,13 +335,15 @@ export default function LearningCenter() {
 
         {trainingAdmin && (
           <TabsContent value="analytics" className="space-y-6">
-            <AnalyticsOverview
-              metrics={metrics}
-              totals={totalMetrics}
-              adminEnrollments={adminEnrollments}
-              courseById={courseById}
-              trainingInsights={trainingInsights ?? undefined}
-            />
+            <Suspense fallback={<AnalyticsOverviewSkeleton />}>
+              <AnalyticsOverview
+                metrics={metrics}
+                totals={totalMetrics}
+                adminEnrollments={adminEnrollments}
+                courseById={courseById}
+                trainingInsights={trainingInsights ?? undefined}
+              />
+            </Suspense>
           </TabsContent>
         )}
 
@@ -368,7 +432,9 @@ export default function LearningCenter() {
         )}
       </Tabs>
 
-      <CourseCreationWizard open={wizardOpen} onOpenChange={handleWizardOpenChange} onCreate={handleCreateCourse} loading={saving} />
+      <Suspense fallback={null}>
+        <CourseCreationWizard open={wizardOpen} onOpenChange={handleWizardOpenChange} onCreate={handleCreateCourse} loading={saving} />
+      </Suspense>
     </div>
   );
 }

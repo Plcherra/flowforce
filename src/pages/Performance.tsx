@@ -164,11 +164,14 @@ export default function Performance() {
   } = useLeaderboardData(leaderboardPeriod);
   const [activeTab, setActiveTab] = useState<PerformanceTab>('overview');
   const goalsTabRef = useRef<HTMLButtonElement | null>(null);
-  const handleTabChange = useCallback((value: string) => {
-    if (isPerformanceTab(value)) {
-      setActiveTab(value);
-    }
-  }, []);
+  const handleTabChange = useCallback(
+    (value: string) => {
+      if (isPerformanceTab(value) && value !== activeTab) {
+        setActiveTab(value);
+      }
+    },
+    [activeTab],
+  );
   const handleSelectGoalsTab = useCallback(() => {
     setActiveTab('goals');
     goalsTabRef.current?.focus();

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import { recordInventoryCountScan } from '@/features/inventory/repositories/countsRepository';
 import type { InventoryCountLine } from '@/features/inventory/hooks/types';
 import { Barcode, Trash } from 'lucide-react';
 
@@ -90,7 +90,7 @@ export function MarketManCountingInterface({
     }
 
     try {
-      await InventoryService.recordCountScan(countId, scannedCode, {
+      await recordInventoryCountScan(countId, scannedCode, {
         itemId: line.item_id,
         scanType: 'barcode',
       });

@@ -39,6 +39,12 @@ type SkillSnapshot = {
 };
 
 type TrainingInsights = Awaited<ReturnType<typeof analyzeTrainingProgress>>;
+type ProgressQueryData = {
+  eventsMap: Record<string, LearningProgressEvent[]>;
+  snapshotsMap: Record<string, LearningProgressSnapshot[]>;
+  eventCursors: Record<string, string | null>;
+  snapshotCursors: Record<string, string | null>;
+};
 
 const TRAINING_ADMIN_ROLES = new Set(['manager', 'admin', 'company_admin', 'owner']);
 const PROGRESS_EVENT_LIMIT = 25;
@@ -124,7 +130,12 @@ export function useLearningCenter() {
     staleTime: 300_000,
   });
 
-  const progressQuery = useQuery({
+  const progressQueryKey = useMemo(
+    () => learningKeys.progress(companyKey, profileKey, enrollmentIdsKey),
+    [companyKey, profileKey, enrollmentIdsKey],
+  );
+
+  const progressQuery = useQuery<ProgressQueryData>({
     queryKey: learningKeys.progress(companyKey, profileKey, enrollmentIdsKey),
     enabled: Boolean(companyId && profileId && enrollmentList.length > 0),
     placeholderData: keepPreviousData,
@@ -132,12 +143,28 @@ export function useLearningCenter() {
     queryFn: async () => {
       const entries = await Promise.all(
         enrollmentList.map(async (enrollment) => {
-          const page = await fetchProgressHistoryPage({
-            enrollmentId: enrollment.id,
-            eventLimit: PROGRESS_EVENT_LIMIT,
-            snapshotLimit: PROGRESS_SNAPSHOT_LIMIT,
-          });
-          return { enrollmentId: enrollment.id, ...page };
+          try {
+            const page = await fetchProgressHistoryPage({
+              enrollmentId: enrollment.id,
+              eventLimit: PROGRESS_EVENT_LIMIT,
+              snapshotLimit: PROGRESS_SNAPSHOT_LIMIT,
+            });
+            return { enrollmentId: enrollment.id, ...page };
+          } catch (err) {
+            console.error('Failed to load progress history', err);
+            toast({
+              title: 'Progress unavailable',
+              description: 'Some progress history could not be loaded. Please try refreshing.',
+              variant: 'destructive',
+            });
+            return {
+              enrollmentId: enrollment.id,
+              events: [],
+              snapshots: [],
+              eventCursor: null,
+              snapshotCursor: null,
+            };
+          }
         }),
       );
 
@@ -414,15 +441,56 @@ export function useLearningCenter() {
       enrollmentId: string,
       options: { eventCursor?: string | null; snapshotCursor?: string | null } = {},
     ) => {
-      return fetchProgressHistoryPage({
-        enrollmentId,
-        eventCursor: options.eventCursor ?? progressEventCursors[enrollmentId] ?? undefined,
-        snapshotCursor: options.snapshotCursor ?? progressSnapshotCursors[enrollmentId] ?? undefined,
-        eventLimit: PROGRESS_EVENT_LIMIT,
-        snapshotLimit: PROGRESS_SNAPSHOT_LIMIT,
-      });
+      try {
+        const page = await fetchProgressHistoryPage({
+          enrollmentId,
+          eventCursor: options.eventCursor ?? progressEventCursors[enrollmentId] ?? undefined,
+          snapshotCursor: options.snapshotCursor ?? progressSnapshotCursors[enrollmentId] ?? undefined,
+          eventLimit: PROGRESS_EVENT_LIMIT,
+          snapshotLimit: PROGRESS_SNAPSHOT_LIMIT,
+        });
+
+        queryClient.setQueryData<ProgressQueryData | undefined>(progressQueryKey, (previous) => {
+          const base: ProgressQueryData =
+            previous ?? {
+              eventsMap: {},
+              snapshotsMap: {},
+              eventCursors: {},
+              snapshotCursors: {},
+            };
+
+          const currentEvents = base.eventsMap[enrollmentId] ?? [];
+          const currentSnapshots = base.snapshotsMap[enrollmentId] ?? [];
+
+          return {
+            eventsMap: {
+              ...base.eventsMap,
+              [enrollmentId]: [...currentEvents, ...page.events],
+            },
+            snapshotsMap: {
+              ...base.snapshotsMap,
+              [enrollmentId]: [...currentSnapshots, ...page.snapshots],
+            },
+            eventCursors: {
+              ...base.eventCursors,
+              [enrollmentId]: page.eventCursor ?? null,
+            },
+            snapshotCursors: {
+              ...base.snapshotCursors,
+              [enrollmentId]: page.snapshotCursor ?? null,
+            },
+          };
+        });
+      } catch (error) {
+        console.error('Failed to paginate progress history', error);
+        toast({
+          title: 'Unable to load more progress',
+          description: 'Please check your connection and try again.',
+          variant: 'destructive',
+        });
+      }
     },
-    [progressEventCursors, progressSnapshotCursors],
+    [progressEventCursors, progressSnapshotCursors, queryClient, progressQueryKey],
   );
 
   const getCourseWorkload = useCallback(

@@ -1,11 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import {
+  createPurchaseOrder,
+  getPurchaseOrder,
+  listPurchaseOrders,
+  listVendorInvoices,
+  linkSupplierIntegration,
+  receivePurchaseOrder,
+  recordVendorInvoice,
+  updatePurchaseOrder,
+  type CreatePurchaseOrderInput,
+  type ReceivePurchaseOrderInput,
+  type RecordVendorInvoiceInput,
+  type SupplierIntegrationInput,
+  type UpdatePurchaseOrderInput,
+} from '@/features/inventory/repositories/purchasingRepository';
 import { useToast } from '@/hooks/use-toast';
 
 export function usePurchaseOrders() {
   const { data, isLoading } = useQuery({
     queryKey: ['purchase-orders'],
-    queryFn: () => InventoryService.listPurchases(),
+    queryFn: () => listPurchaseOrders(),
   });
 
   return { data, isLoading };
@@ -14,7 +28,7 @@ export function usePurchaseOrders() {
 export function usePurchaseOrder(poId?: string) {
   const { data, isLoading } = useQuery({
     queryKey: ['purchase-orders', poId],
-    queryFn: () => InventoryService.getPurchaseOrder(poId!),
+    queryFn: () => getPurchaseOrder(poId!),
     enabled: Boolean(poId),
   });
 
@@ -26,8 +40,7 @@ export function useCreatePurchaseOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: Parameters<typeof InventoryService.createPurchaseOrder>[0]) =>
-      InventoryService.createPurchaseOrder(payload),
+    mutationFn: (payload: CreatePurchaseOrderInput) => createPurchaseOrder(payload),
     onSuccess: (po) => {
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
       toast({
@@ -50,13 +63,7 @@ export function useUpdatePurchaseOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      updates,
-    }: {
-      id: string;
-      updates: Parameters<typeof InventoryService.updatePurchaseOrder>[1];
-    }) => InventoryService.updatePurchaseOrder(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: UpdatePurchaseOrderInput }) => updatePurchaseOrder(id, updates),
     onSuccess: (po) => {
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
       if (po?.id) {
@@ -82,13 +89,8 @@ export function useReceivePurchaseOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string;
-      payload: Parameters<typeof InventoryService.receivePurchaseOrder>[1];
-    }) => InventoryService.receivePurchaseOrder(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: ReceivePurchaseOrderInput }) =>
+      receivePurchaseOrder(id, payload),
     onSuccess: (po) => {
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
       if (po?.id) {
@@ -116,8 +118,7 @@ export function useRecordVendorInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: Parameters<typeof InventoryService.recordVendorInvoice>[0]) =>
-      InventoryService.recordVendorInvoice(payload),
+    mutationFn: (payload: RecordVendorInvoiceInput) => recordVendorInvoice(payload),
     onSuccess: (_result, payload) => {
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
       if (payload?.invoiceNumber) {
@@ -141,7 +142,7 @@ export function useRecordVendorInvoice() {
 export function useVendorInvoices(poNumber?: string) {
   const { data, isLoading } = useQuery({
     queryKey: ['vendor-invoices', poNumber],
-    queryFn: () => InventoryService.listVendorInvoices(poNumber),
+    queryFn: () => listVendorInvoices(poNumber),
     enabled: true,
   });
 
@@ -153,13 +154,8 @@ export function useSupplierIntegrationLink() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      supplierId,
-      integration,
-    }: {
-      supplierId: string;
-      integration: Parameters<typeof InventoryService.linkSupplierIntegration>[1];
-    }) => InventoryService.linkSupplierIntegration(supplierId, integration),
+    mutationFn: ({ supplierId, integration }: { supplierId: string; integration: SupplierIntegrationInput }) =>
+      linkSupplierIntegration(supplierId, integration),
     onSuccess: (supplier) => {
       queryClient.invalidateQueries({ queryKey: ['inventory-suppliers'] });
       if (supplier?.id) {

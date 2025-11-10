@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Factory, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useInventoryItems, useInventoryLocations, useCreateWaste } from '@/hooks/useInventory';
@@ -15,154 +16,130 @@ import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
 import { ProductionEventForm } from '@/components/inventory/ProductionEventForm';
 import { ProductionEventList } from '@/components/inventory/ProductionEventList';
-
-const wasteTypes = [
-  { value: 'spoilage', label: 'Spoilage' },
-  { value: 'prep_error', label: 'Prep Error' }, 
-  { value: 'accident', label: 'Accident' },
-  { value: 'theft', label: 'Theft' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'damaged', label: 'Damaged' },
-  { value: 'other', label: 'Other' }
-];
+import { useInventoryFormState } from '@/features/inventory/hooks/useInventoryForm';
+import {
+  wasteTypes,
+  type WasteTypeValue,
+  submitWasteForm,
+  processAdjustmentForm,
+} from './inventoryActionsHelpers';
 
 export default function InventoryActionsPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('production');
-  
   // Fetch real data
-  const { data: items = [], isLoading: itemsLoading } = useInventoryItems();
-  const { data: locations = [], isLoading: locationsLoading } = useInventoryLocations();
+  const {
+    data: items = [],
+    isLoading: itemsLoading,
+    error: itemsError,
+  } = useInventoryItems();
+  const {
+    data: locations = [],
+    isLoading: locationsLoading,
+    error: locationsError,
+  } = useInventoryLocations();
   const createWaste = useCreateWaste();
   const isReferenceDataLoading = itemsLoading || locationsLoading;
-  const itemOptions = useMemo(() => items.map((item) => ({ id: item.id, label: `${item.name} (${item.unit?.name || 'units'})` })), [items]);
-  const locationOptions = useMemo(
-    () => locations.map((location) => ({ id: location.id, label: location.name })),
-    [locations],
-  );
-  const wasteFormDisabled = createWaste.isPending || isReferenceDataLoading;
-  const adjustmentFormDisabled = isReferenceDataLoading;
-  
-  // Form state for waste
-  const [wasteForm, setWasteForm] = useState({
+
+  const {
+    values: wasteForm,
+    errors: wasteErrors,
+    setField: setWasteField,
+    setErrors: setWasteErrors,
+    reset: resetWasteForm,
+    showValidationToast,
+  } = useInventoryFormState({
     item_id: '',
     location_id: '',
     quantity: '',
-    waste_type: '',
-    reason: ''
+    waste_type: '' as WasteTypeValue | '',
+    reason: '',
   });
-  const [wasteErrors, setWasteErrors] = useState<Record<string, string>>({});
+  type WasteFormState = typeof wasteForm;
 
-  const [adjustmentForm, setAdjustmentForm] = useState({
+  const {
+    values: adjustmentForm,
+    errors: adjustmentErrors,
+    setField: setAdjustmentField,
+    setErrors: setAdjustmentErrors,
+    reset: resetAdjustmentForm,
+  } = useInventoryFormState({
     item_id: '',
     location_id: '',
     adjustment_type: '',
     quantity: '',
     reason: '',
   });
-  const [adjustmentErrors, setAdjustmentErrors] = useState<Record<string, string>>({});
+  type AdjustmentFormState = typeof adjustmentForm;
 
-  const setWasteField = (field: keyof typeof wasteForm, value: string) => {
-    setWasteForm((prev) => ({ ...prev, [field]: value }));
-    setWasteErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  };
+  const itemOptions = useMemo(
+    () => items.map((item) => ({ id: item.id, label: `${item.name} (${item.unit?.name || 'units'})` })),
+    [items],
+  );
+  const locationOptions = useMemo(
+    () => locations.map((location) => ({ id: location.id, label: location.name })),
+    [locations],
+  );
+  const wasteFormDisabled = createWaste.isPending || isReferenceDataLoading;
+  const adjustmentFormDisabled = isReferenceDataLoading;
 
-  const setAdjustmentField = (field: keyof typeof adjustmentForm, value: string) => {
-    setAdjustmentForm((prev) => ({ ...prev, [field]: value }));
-    setAdjustmentErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  };
+  const buildSelectHandler = useCallback(
+    <Form extends Record<string, string>>(setter: (field: keyof Form, value: string) => void, field: keyof Form) =>
+      (value: string) => setter(field, value),
+    [],
+  );
 
-  const handleWasteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const nextErrors: Record<string, string> = {};
+  const handleWasteSelect = useMemo(
+    () => ({
+      item: buildSelectHandler<WasteFormState>(setWasteField, 'item_id'),
+      location: buildSelectHandler<WasteFormState>(setWasteField, 'location_id'),
+      type: buildSelectHandler<WasteFormState>(setWasteField, 'waste_type'),
+    }),
+    [buildSelectHandler, setWasteField],
+  );
 
-    if (!wasteForm.item_id) nextErrors.item_id = 'Select an item to log waste.';
-    if (!wasteForm.quantity || Number(wasteForm.quantity) <= 0) nextErrors.quantity = 'Quantity must be greater than zero.';
-    if (!wasteForm.waste_type) nextErrors.waste_type = 'Choose the type of waste.';
+  const handleAdjustmentSelect = useMemo(
+    () => ({
+      item: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'item_id'),
+      location: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'location_id'),
+      type: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'adjustment_type'),
+    }),
+    [buildSelectHandler, setAdjustmentField],
+  );
 
-    if (Object.keys(nextErrors).length) {
-      setWasteErrors(nextErrors);
-      toast({
-        title: 'Missing information',
-        description: 'Please review the highlighted fields.',
-        variant: 'destructive',
+  const handleWasteSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      await submitWasteForm({
+        form: wasteForm,
+        items,
+        setErrors: setWasteErrors,
+        showValidationToast,
+        resetForm: resetWasteForm,
+        mutateWaste: createWaste.mutateAsync,
       });
-      return;
-    }
+    },
+    [createWaste.mutateAsync, items, resetWasteForm, setWasteErrors, showValidationToast, wasteForm],
+  );
 
-    const selectedItem = items.find((item) => item.id === wasteForm.item_id);
-    const quantityValue = Number(wasteForm.quantity);
-
-    try {
-      await createWaste.mutateAsync({
-        item_id: wasteForm.item_id,
-        location_id: wasteForm.location_id || undefined,
-        quantity: quantityValue,
-        unit_id: selectedItem?.unit_id,
-        waste_type: wasteForm.waste_type as any,
-        reason: wasteForm.reason || undefined,
-        cost_impact:
-          selectedItem?.cost_per_unit && Number.isFinite(quantityValue)
-            ? quantityValue * selectedItem.cost_per_unit
-            : undefined,
+  const handleAdjustmentSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const result = processAdjustmentForm({
+        form: adjustmentForm,
+        setErrors: setAdjustmentErrors,
+        showValidationToast,
       });
 
-      setWasteForm({
-        item_id: '',
-        location_id: '',
-        quantity: '',
-        waste_type: '',
-        reason: '',
-      });
-      setWasteErrors({});
-    } catch (error) {
-      // handled by mutation toast
-    }
-  };
-
-  const handleAdjustmentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const nextErrors: Record<string, string> = {};
-    if (!adjustmentForm.item_id) nextErrors.item_id = 'Select an item to adjust.';
-    if (!adjustmentForm.location_id) nextErrors.location_id = 'Select a location.';
-    if (!adjustmentForm.adjustment_type) nextErrors.adjustment_type = 'Choose an adjustment type.';
-    if (!adjustmentForm.quantity || Number(adjustmentForm.quantity) <= 0)
-      nextErrors.quantity = 'Quantity must be greater than zero.';
-    if (!adjustmentForm.reason) nextErrors.reason = 'Provide a brief reason.';
-
-    if (Object.keys(nextErrors).length) {
-      setAdjustmentErrors(nextErrors);
-      toast({
-        title: 'Missing information',
-        description: 'Please review the highlighted fields.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    toast({
-      title: 'Adjustment recorded',
-      description: 'Inventory adjustment has been applied.',
-    });
-    setAdjustmentForm({
-      item_id: '',
-      location_id: '',
-      adjustment_type: '',
-      quantity: '',
-      reason: '',
-    });
-    setAdjustmentErrors({});
-  };
+      if (result === 'success') {
+        toast({
+          title: 'Adjustment recorded',
+          description: 'Inventory adjustment has been applied.',
+        });
+        resetAdjustmentForm();
+      }
+    },
+    [adjustmentForm, resetAdjustmentForm, setAdjustmentErrors, showValidationToast, toast],
+  );
 
   const renderFormSkeleton = (
     <div className="space-y-4" aria-live="polite">
@@ -179,6 +156,10 @@ export default function InventoryActionsPage() {
     </div>
   );
 
+  const loadError = itemsError ?? locationsError;
+  const showEmptyState =
+    !isReferenceDataLoading && !loadError && (items.length === 0 || locations.length === 0);
+
   return (
     <InventoryLayout>
       <IfCan permission="inventory.view">
@@ -191,7 +172,23 @@ export default function InventoryActionsPage() {
             </p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {loadError && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to load inventory data</AlertTitle>
+              <AlertDescription>{loadError.message ?? 'Please refresh and try again.'}</AlertDescription>
+            </Alert>
+          )}
+
+          {showEmptyState && (
+            <Alert>
+              <AlertTitle>Inventory setup required</AlertTitle>
+              <AlertDescription>
+                Add at least one inventory item and location to log waste or adjustments.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Tabs defaultValue="production" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 gap-2 md:grid-cols-4">
               <TabsTrigger value="production" className="flex items-center justify-center gap-2 text-sm sm:text-base">
                 <Factory className="h-4 w-4 text-primary" />
@@ -260,7 +257,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="waste-item">Item *</Label>
                           <Select
                             value={wasteForm.item_id}
-                            onValueChange={(value) => setWasteField('item_id', value)}
+                            onValueChange={handleWasteSelect.item}
                             disabled={wasteFormDisabled || !itemOptions.length}
                             required
                           >
@@ -290,7 +287,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="waste-location">Location</Label>
                           <Select
                             value={wasteForm.location_id}
-                            onValueChange={(value) => setWasteField('location_id', value)}
+                            onValueChange={handleWasteSelect.location}
                             disabled={wasteFormDisabled || !locationOptions.length}
                           >
                             <SelectTrigger>
@@ -336,7 +333,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="waste-type">Waste Type *</Label>
                           <Select
                             value={wasteForm.waste_type}
-                            onValueChange={(value) => setWasteField('waste_type', value)}
+                            onValueChange={handleWasteSelect.type}
                             disabled={wasteFormDisabled}
                             required
                           >
@@ -375,13 +372,7 @@ export default function InventoryActionsPage() {
                           variant="outline"
                           className="flex-1"
                           onClick={() => {
-                            setWasteForm({
-                              item_id: '',
-                              location_id: '',
-                              quantity: '',
-                              waste_type: '',
-                              reason: '',
-                            });
+                            resetWasteForm();
                             setWasteErrors({});
                           }}
                           disabled={wasteFormDisabled}
@@ -531,7 +522,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="adj-item">Item *</Label>
                           <Select
                             value={adjustmentForm.item_id}
-                            onValueChange={(value) => setAdjustmentField('item_id', value)}
+                            onValueChange={handleAdjustmentSelect.item}
                             disabled={adjustmentFormDisabled || !itemOptions.length}
                             required
                           >
@@ -561,7 +552,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="adj-location">Location *</Label>
                           <Select
                             value={adjustmentForm.location_id}
-                            onValueChange={(value) => setAdjustmentField('location_id', value)}
+                            onValueChange={handleAdjustmentSelect.location}
                             disabled={adjustmentFormDisabled || !locationOptions.length}
                             required
                           >
@@ -591,7 +582,7 @@ export default function InventoryActionsPage() {
                           <Label htmlFor="adj-type">Adjustment Type *</Label>
                           <Select
                             value={adjustmentForm.adjustment_type}
-                            onValueChange={(value) => setAdjustmentField('adjustment_type', value)}
+                            onValueChange={handleAdjustmentSelect.type}
                             disabled={adjustmentFormDisabled}
                             required
                           >
@@ -610,7 +601,7 @@ export default function InventoryActionsPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="adj-quantity">Quantity *</Label>
-                          <Input
+                        <Input
                             id="adj-quantity"
                             type="number"
                             step="0.1"
@@ -631,7 +622,7 @@ export default function InventoryActionsPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="adj-reason">Reason *</Label>
-                        <Textarea
+                      <Textarea
                           id="adj-reason"
                           placeholder="Describe the reason for adjustment..."
                           rows={3}
@@ -652,13 +643,7 @@ export default function InventoryActionsPage() {
                           variant="outline"
                           className="flex-1"
                           onClick={() => {
-                            setAdjustmentForm({
-                              item_id: '',
-                              location_id: '',
-                              adjustment_type: '',
-                              quantity: '',
-                              reason: '',
-                            });
+                            resetAdjustmentForm();
                             setAdjustmentErrors({});
                           }}
                           disabled={adjustmentFormDisabled}

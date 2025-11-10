@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import {
+  addInventoryItemToCount,
+  addInventoryItemsToCount,
+  approveInventoryCount as approveCountRepository,
+  completeInventoryCount as completeCountRepository,
+  createInventoryCount,
+  deleteInventoryCount,
+  listInventoryCountEvents,
+  listInventoryCountLines,
+  listInventoryCounts,
+  rejectInventoryCount as rejectCountRepository,
+  removeInventoryItemFromCount,
+  submitInventoryCount as submitCountRepository,
+  updateInventoryCount,
+  updateInventoryCountLine,
+} from '@/features/inventory/repositories/countsRepository';
+import type { CreateInventoryCountInput } from '@/features/inventory/repositories/countsRepository';
 import type { InventoryCount, InventoryCountLine } from './types';
-
-type CreateCountInput = Parameters<typeof InventoryService.createCount>[0];
 
 export function useInventoryCounts() {
   const [counts, setCounts] = useState<InventoryCount[]>([]);
@@ -13,7 +27,7 @@ export function useInventoryCounts() {
   const fetchCounts = async () => {
     setLoading(true);
     try {
-      const data = await InventoryService.listCounts();
+      const data = await listInventoryCounts();
       setCounts(data);
     } catch (error) {
       console.error('Error fetching counts:', error);
@@ -27,9 +41,9 @@ export function useInventoryCounts() {
     }
   };
 
-  const createCount = async (countData: CreateCountInput) => {
+  const createCount = async (countData: CreateInventoryCountInput) => {
     try {
-      const created = await InventoryService.createCount(countData);
+      const created = await createInventoryCount(countData);
 
       toast({
         title: "Success",
@@ -51,7 +65,7 @@ export function useInventoryCounts() {
 
   const updateCount = async (countId: string, updates: Partial<InventoryCount>) => {
     try {
-      await InventoryService.updateCount(countId, updates);
+      await updateInventoryCount(countId, updates);
 
       toast({
         title: "Success",
@@ -72,7 +86,7 @@ export function useInventoryCounts() {
 
   const completeCount = async (countId: string) => {
     try {
-      await InventoryService.completeCount(countId);
+      await completeCountRepository(countId);
 
       toast({
         title: "Success",
@@ -93,7 +107,7 @@ export function useInventoryCounts() {
 
   const deleteCount = async (countId: string) => {
     try {
-      await InventoryService.deleteCount(countId);
+      await deleteInventoryCount(countId);
 
       toast({
         title: "Success",
@@ -114,7 +128,7 @@ export function useInventoryCounts() {
 
   const submitCountForReview = async (countId: string) => {
     try {
-      await InventoryService.submitCountForReview(countId);
+      await submitCountRepository(countId);
       toast({
         title: "Submitted",
         description: "Count sent for supervisor review",
@@ -133,7 +147,7 @@ export function useInventoryCounts() {
 
   const approveCount = async (countId: string, notes?: string) => {
     try {
-      await InventoryService.approveCount(countId, { notes });
+      await approveCountRepository(countId, { notes });
       toast({
         title: "Approved",
         description: "Inventory count approved",
@@ -152,7 +166,7 @@ export function useInventoryCounts() {
 
   const rejectCount = async (countId: string, notes?: string) => {
     try {
-      await InventoryService.rejectCount(countId, { notes });
+      await rejectCountRepository(countId, { notes });
       toast({
         title: "Sent back",
         description: "Count requires additional review",
@@ -201,7 +215,7 @@ export function useInventoryCountLines(countId?: string) {
 
     setLoading(true);
     try {
-      const data = await InventoryService.getCountLines(countId);
+      const data = await listInventoryCountLines(countId);
       setCountLines(data);
     } catch (error) {
       console.error('Error fetching count lines:', error);
@@ -219,7 +233,7 @@ export function useInventoryCountLines(countId?: string) {
     if (!countId || items.length === 0) return;
 
     try {
-      await InventoryService.addItemsToCount(countId, items);
+      await addInventoryItemsToCount(countId, items);
       toast({
         title: "Success",
         description: items.length > 1 ? "Items added to count" : "Item added to count",
@@ -237,12 +251,13 @@ export function useInventoryCountLines(countId?: string) {
   };
 
   const addItemToCount = async (itemId: string, expectedQuantity: number = 0) => {
-    return addItemsToCount([{ id: itemId, expectedQuantity }]);
+    if (!countId) return;
+    return addInventoryItemToCount(countId, itemId, expectedQuantity);
   };
 
   const updateCountLine = async (lineId: string, updates: Partial<InventoryCountLine>) => {
     try {
-      await InventoryService.updateCountLine(lineId, updates);
+      await updateInventoryCountLine(lineId, updates);
 
       fetchCountLines();
     } catch (error) {
@@ -258,7 +273,7 @@ export function useInventoryCountLines(countId?: string) {
 
   const removeItemFromCount = async (lineId: string) => {
     try {
-      await InventoryService.removeItemFromCount(lineId);
+      await removeInventoryItemFromCount(lineId);
 
       toast({
         title: "Success",

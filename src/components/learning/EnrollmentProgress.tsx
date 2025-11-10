@@ -1,5 +1,5 @@
-import { Fragment } from 'react';
-import { Activity, CheckSquare, Clock, GraduationCap, LineChart } from 'lucide-react';
+import { Fragment, useState } from 'react';
+import { Activity, CheckSquare, Clock, GraduationCap, LineChart, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,24 @@ interface EnrollmentProgressProps {
   courses: Map<string, LearningCatalogRecord>;
   progressEvents: Record<string, LearningProgressEvent[]>;
   progressSnapshots: Record<string, LearningProgressSnapshot[]>;
+  progressEventCursors: Record<string, string | null>;
+  progressSnapshotCursors: Record<string, string | null>;
   onCompleteNextModule: (enrollmentId: string, moduleIndex: number) => void;
+  onLoadMoreProgress: (enrollmentId: string) => Promise<void>;
 }
 
-export function EnrollmentProgress({ enrollments, courses, progressEvents, progressSnapshots, onCompleteNextModule }: EnrollmentProgressProps) {
+export function EnrollmentProgress({
+  enrollments,
+  courses,
+  progressEvents,
+  progressSnapshots,
+  progressEventCursors,
+  progressSnapshotCursors,
+  onCompleteNextModule,
+  onLoadMoreProgress,
+}: EnrollmentProgressProps) {
+  const [loadingMoreIds, setLoadingMoreIds] = useState<Record<string, boolean>>({});
+
   if (enrollments.length === 0) {
     return (
       <Card className="border-dashed">
@@ -45,6 +59,18 @@ export function EnrollmentProgress({ enrollments, courses, progressEvents, progr
         const nextModule = course.modules[nextModuleIndex];
         const events = progressEvents[enrollment.id] ?? [];
         const snapshots = progressSnapshots[enrollment.id] ?? [];
+        const hasMoreHistory = Boolean(progressEventCursors[enrollment.id] || progressSnapshotCursors[enrollment.id]);
+        const loadingMore = loadingMoreIds[enrollment.id];
+
+        const handleLoadMore = async () => {
+          if (loadingMore) return;
+          setLoadingMoreIds((previous) => ({ ...previous, [enrollment.id]: true }));
+          try {
+            await onLoadMoreProgress(enrollment.id);
+          } finally {
+            setLoadingMoreIds((previous) => ({ ...previous, [enrollment.id]: false }));
+          }
+        };
 
         return (
           <Card key={enrollment.id} className="shadow-sm">
@@ -120,7 +146,7 @@ export function EnrollmentProgress({ enrollments, courses, progressEvents, progr
                 <div className="space-y-2">
                   <p className="text-sm font-semibold">Progress checkpoints</p>
                   <div className="space-y-2">
-                    {snapshots.slice(0, 3).map((snapshot) => (
+                    {snapshots.map((snapshot) => (
                       <div key={snapshot.id} className="rounded-md border p-3 text-xs">
                         <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
                           <div className="space-y-1">
@@ -138,6 +164,21 @@ export function EnrollmentProgress({ enrollments, courses, progressEvents, progr
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {hasMoreHistory && (
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" onClick={() => void handleLoadMore()} disabled={loadingMore}>
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading
+                      </>
+                    ) : (
+                      'Load more history'
+                    )}
+                  </Button>
                 </div>
               )}
             </CardContent>

@@ -12,7 +12,7 @@ import { MarketManCountingInterface } from '@/components/inventory/MarketManCoun
 import { ItemSelector } from '@/components/inventory/ItemSelector';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import { listInventoryCountEvents } from '@/features/inventory/repositories/countsRepository';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -131,7 +131,7 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
     if (!countId) return;
     setLoadingEvents(true);
     try {
-      const data = await InventoryService.listCountEvents(countId);
+      const data = await listInventoryCountEvents(countId);
       setEvents(data);
     } catch (error) {
       console.error('Error loading count events:', error);

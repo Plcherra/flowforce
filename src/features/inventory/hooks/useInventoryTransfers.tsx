@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import {
+  createInventoryTransfer,
+  listInventoryTransfers,
+  updateInventoryTransferStatus,
+} from '@/features/inventory/repositories/transfersRepository';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import type {
@@ -41,7 +45,7 @@ export function useInventoryTransfers() {
       if (!companyId) {
         throw new Error('Company context is required to list inventory transfers.');
       }
-      return InventoryService.listTransfers(companyId);
+      return listInventoryTransfers(companyId);
     },
     enabled: Boolean(companyId) && !loading,
   });
@@ -69,7 +73,7 @@ export function useCreateInventoryTransfer() {
         throw new Error('At least one item is required for a transfer.');
       }
 
-      return InventoryService.createTransfer({
+      return createInventoryTransfer({
         ...payload,
         company_id: companyId,
         requested_by: requestedBy,
@@ -108,7 +112,7 @@ export function useUpdateInventoryTransferStatus() {
 
       const actorId = profile.userId ?? profile.id;
 
-      return InventoryService.updateTransferStatus(id, {
+      return updateInventoryTransferStatus(id, {
         actor_id: actorId,
         status,
         status_note,

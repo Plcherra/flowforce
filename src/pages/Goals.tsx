@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { GoalHeader } from '@/features/goals/components/GoalHeader';
 import { GoalList } from '@/features/goals/components/GoalList';
 import { GoalModal } from '@/features/goals/components/GoalModal';
 import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
-import { useGoals, type Goal, type UseGoalsReturn } from '@/hooks/useGoals';
+import { useGoals, type Goal, type GoalStatus, type UseGoalsReturn } from '@/hooks/useGoals';
 import { useGoalDialogs, type GoalDialogs } from '@/hooks/useGoalDialogs';
 import type { GoalFormValues } from '@/features/goals/components/CreateGoalModal';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,8 @@ export default function GoalsPage() {
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const { suggesting, requestSuggestion } = useGoalSuggestion(companyId);
+  const canSuggestGoals = Boolean(companyId);
+  const goalSuggestion = useGoalSuggestion(companyId);
   const { handleCreate, handleUpdate, handleToggleStatus, deleteGoalById } = useGoalActions({
     createGoal,
     updateGoal,
@@ -44,7 +45,17 @@ export default function GoalsPage() {
 
   const saving = creating || updating;
 
-  const handleDelete = async (goal: Goal) => {
+  const handleDelete = useCallback(
+    async (goal: Goal) => {
+      const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
+      if (!confirmed) {
+        return;
+      }
+
+      await deleteGoalById(goal.id);
+    },
+    [deleteGoalById],
+  );
     const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
     if (!confirmed) {
       return;
@@ -53,9 +64,9 @@ export default function GoalsPage() {
     await deleteGoalById(goal.id);
   };
 
-  const handleSuggestGoal = async () => {
+  const handleSuggestGoal = useCallback(async () => {
     try {
-      const suggestion = await requestSuggestion(stats, goals);
+      const suggestion = await (goalSuggestion?.requestSuggestion?.(stats, goals) ?? Promise.reject(new Error('Goal suggestions unavailable')));
       dialogs.open(null, { suggestion });
     } catch (suggestionError) {
       const message =
@@ -66,7 +77,7 @@ export default function GoalsPage() {
         variant: 'destructive',
       });
     }
-  };
+  }, [dialogs, goalSuggestion, goals, stats, toast]);
 
   return (
     <ErrorBoundary
@@ -96,6 +107,7 @@ export default function GoalsPage() {
         state={goalsState}
         dialogs={dialogs}
         suggesting={suggesting}
+        canSuggest={canSuggestGoals}
         onSuggestGoal={handleSuggestGoal}
         onToggleStatus={handleToggleStatus}
         onDelete={handleDelete}
@@ -111,6 +123,7 @@ interface GoalsContentProps {
   state: UseGoalsReturn;
   dialogs: GoalDialogs;
   suggesting: boolean;
+  canSuggest: boolean;
   onSuggestGoal: () => void;
   onToggleStatus: (goal: Goal, status: GoalStatus) => Promise<void>;
   onDelete: (goal: Goal) => Promise<void>;
@@ -123,6 +136,7 @@ function GoalsContent({
   state,
   dialogs,
   suggesting,
+  canSuggest,
   onSuggestGoal,
   onToggleStatus,
   onDelete,
@@ -164,7 +178,7 @@ function GoalsContent({
         isLoadingStats={initialLoading}
         onSuggestGoal={onSuggestGoal}
         suggesting={suggesting}
-        canSuggest={Boolean(companyId)}
+        canSuggest={canSuggest}
       />
 
       {goals.length > 0 || initialLoading ? (

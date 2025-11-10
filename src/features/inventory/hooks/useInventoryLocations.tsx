@@ -8,11 +8,17 @@ export function useInventoryLocations() {
   const { profile, loading } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
-  return useQuery<InventoryLocation[]>({
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery<InventoryLocation[], Error>({
     queryKey: ['inventory-locations', companyId ?? 'unknown'],
     enabled: Boolean(companyId) && !loading,
     queryFn: () => InventoryService.listLocations({ companyId: companyId ?? undefined }),
   });
+
+  return { data, isLoading, error };
 }
 
 export function useCreateInventoryLocation() {
