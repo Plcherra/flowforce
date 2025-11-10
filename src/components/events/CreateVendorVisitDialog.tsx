@@ -5,13 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { type EventAttendee } from '@/hooks/useEvents';
+import { useEvents, type EventAttendee } from '@/hooks/useEvents';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { Schedule } from '@/types/common';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { createEvent as createCalendarEvent, upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
@@ -22,8 +20,8 @@ interface CreateVendorVisitDialogProps {
 export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: CreateVendorVisitDialogProps) {
   const { shifts } = useScheduling();
   const { toast } = useToast();
-  const { user } = useAuth();
   const { profile } = useProfile();
+  const { createVendorVisit } = useEvents();
 
   const [title, setTitle] = useState('Vendor Visit');
   const [vendorName, setVendorName] = useState('');
@@ -122,33 +120,20 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
       .map(([id]) => id);
 
     try {
-      const visit = await createCalendarEvent({
-        payload: {
-          title,
-          description: description || null,
-          location,
-          type: 'vendor',
-          start: startIso,
-          end: endIso,
-          relatedShiftIds: linkedShiftIds,
-          attendees: buildAttendees(linkedShiftIds),
-          checklist: [
-            { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
-            { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
-          ],
-          vendor: { name: vendorName, service_type: serviceType },
-        },
-        companyId,
-        createdBy: user?.id ?? null,
+      const visit = await createVendorVisit({
+        title,
+        description: description || undefined,
+        location: location || undefined,
+        start: startIso.toISOString(),
+        end: endIso.toISOString(),
+        related_shift_ids: linkedShiftIds,
+        attendees: buildAttendees(linkedShiftIds),
+        checklist: [
+          { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
+          { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
+        ],
+        vendor: { name: vendorName, service_type: serviceType },
       });
-
-      if (linkedShiftIds.length > 0) {
-        await upsertEventShiftLinks({
-          eventId: visit.id,
-          shiftIds: linkedShiftIds,
-          companyId,
-        });
-      }
 
       if (visit.id) {
         onCreated?.(visit.id);

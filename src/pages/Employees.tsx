@@ -1,8 +1,8 @@
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,12 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, Mail, Phone, Building2, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
-import { useInventorySuppliers, useCreateSupplier, InventorySupplier } from '@/hooks/useInventory';
+import { useInventorySuppliers, useCreateSupplier } from '@/hooks/useInventory';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { EmployeeDrawer, type EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
@@ -26,26 +26,26 @@ import { TeamActionsBar } from '@/components/employees/TeamActionsBar';
 import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialog';
 import { RoleManagerDialog } from '@/components/employees/RoleManagerDialog';
 import { PermissionManagerDialog } from '@/components/employees/PermissionManagerDialog';
+import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
 
-type Profile = Tables<'profiles'>;
 type Department = Tables<'departments'>;
 
 export default function Employees() {
   const isMobile = useIsMobile();
-  const { profile: currentUserProfile } = useProfile();
-  const [employees, setEmployees] = useState<Profile[]>([]);
+  const { profile: currentUserProfile, loading: profileLoading } = useProfile();
+  const companyId = currentUserProfile?.company_id ?? currentUserProfile?.companyId ?? null;
+  const { employees, loading, error: employeesError, refetchEmployees } = useEmployees({ includeInactive: true });
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [departmentError, setDepartmentError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'managers' | 'inactive' | 'vendors'>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [showAddVendorDialog, setShowAddVendorDialog] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Profile | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<DirectoryEmployee | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<EmployeeDrawerTab>('profile');
-  const [error, setError] = useState<string | null>(null);
   const [vendorForm, setVendorForm] = useState({
     name: '',
     contact_name: '',
@@ -60,13 +60,12 @@ export default function Employees() {
   const [permissionManagerOpen, setPermissionManagerOpen] = useState(false);
 
   // Vendor hooks
-  const { data: vendors, isLoading: vendorsLoading } = useInventorySuppliers();
+  const {
+    data: vendors = [],
+    isLoading: vendorsLoading,
+    error: vendorsError
+  } = useInventorySuppliers(companyId);
   const createVendor = useCreateSupplier();
-
-  useEffect(() => {
-    fetchEmployees();
-    fetchDepartments();
-  }, []);
 
   useEffect(() => {
     const inviteParam = searchParams.get('invite');
@@ -98,7 +97,7 @@ export default function Employees() {
     }
   };
 
-  const openEmployeeDrawer = (employee: Profile) => {
+  const openEmployeeDrawer = (employee: DirectoryEmployee) => {
     setSelectedEmployee(employee);
     setDrawerTab('profile');
     setDrawerOpen(true);
@@ -123,77 +122,86 @@ export default function Employees() {
     }
   };
 
-  const fetchEmployees = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('first_name');
-
-      if (error) throw error;
-      setEmployees(data || []);
-    } catch (unknownErr) {
-      console.error('Error fetching employees:', unknownErr);
-      console.info('Team directory fallback: showing empty state while Supabase data is unavailable.');
-      setError('We couldn’t load your team directory data. Check your Supabase tables and try refreshing the page.');
-      setEmployees([]);
-    } finally {
-      setLoading(false);
+  const fetchDepartments = useCallback(async () => {
+    if (!companyId) {
+      if (!profileLoading) {
+        setDepartmentError('Department filters need an active company assignment. Ask an admin to link your profile and refresh.');
+      }
+      setDepartments([]);
+      return;
     }
-  };
 
-  const fetchDepartments = async () => {
     try {
       const { data, error } = await supabase
         .from('departments')
-        .select('*');
+        .select('*')
+        .eq('company_id', companyId)
+        .order('name', { ascending: true });
 
       if (error) throw error;
       setDepartments(data || []);
+      setDepartmentError(null);
     } catch (unknownErr) {
       console.error('Error fetching departments:', unknownErr);
-      setError((prev) => prev ?? 'Department filters are unavailable right now. Once Supabase is back online, refresh to restore filters.');
+      setDepartmentError('Department filters are unavailable right now. Once Supabase is back online, refresh to restore filters.');
       setDepartments([]);
     }
-  };
+  }, [companyId, profileLoading]);
 
-  const getDepartmentName = (departmentId: string | null) => {
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, searchTerm, departmentFilter]);
+
+  const getDepartmentName = (departmentId: string | null, directName?: string | null) => {
+    if (directName) return directName;
     if (!departmentId) return 'Unassigned';
     const dept = departments.find(d => d.id === departmentId);
     return dept?.name || 'Unknown Department';
   };
 
   const filteredEmployees = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    let list = employees.filter(employee =>
-      `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(term) ||
-      employee.email.toLowerCase().includes(term) ||
-      (employee.employee_id?.toLowerCase().includes(term) ?? false)
-    );
+    const term = searchTerm.trim().toLowerCase();
+    const baseList = employees ?? [];
+
+    let list = baseList.filter((employee) => {
+      const fullName = `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim().toLowerCase();
+      const email = employee.email?.toLowerCase() ?? '';
+      const employeeId = employee.employee_id?.toLowerCase() ?? '';
+
+      if (!term) return true;
+      return fullName.includes(term) || email.includes(term) || employeeId.includes(term);
+    });
 
     if (activeTab === 'managers') {
-      list = list.filter(e => ['manager', 'admin'].includes(e.role));
+      list = list.filter((employee) => {
+        const role = employee.role?.toLowerCase() ?? '';
+        return role === 'manager' || role === 'admin';
+      });
     } else if (activeTab === 'inactive') {
-      list = list.filter(e => e.employment_status !== 'active');
+      list = list.filter((employee) => (employee.employment_status ?? '').toLowerCase() !== 'active');
     }
 
     if (departmentFilter !== 'all') {
-      list = list.filter(e => e.department_id === departmentFilter);
+      list = list.filter((employee) => employee.department_id === departmentFilter);
     }
+
     return list;
   }, [employees, searchTerm, activeTab, departmentFilter]);
 
   // Filtered vendors for vendors tab
   const filteredVendors = useMemo(() => {
     if (activeTab !== 'vendors') return [];
-    const term = searchTerm.toLowerCase();
-    return vendors?.filter(vendor =>
-      vendor.name.toLowerCase().includes(term) ||
-      vendor.contact_name?.toLowerCase().includes(term) ||
-      vendor.email?.toLowerCase().includes(term)
-    ) || [];
+    const term = searchTerm.trim().toLowerCase();
+    return (vendors ?? []).filter((vendor) => {
+      if (!term) return true;
+      const contact = vendor.contact_name?.toLowerCase() ?? '';
+      const email = vendor.email?.toLowerCase() ?? '';
+      return vendor.name.toLowerCase().includes(term) || contact.includes(term) || email.includes(term);
+    });
   }, [vendors, searchTerm, activeTab]);
 
   const paginatedEmployees = useMemo(() => {
@@ -206,9 +214,76 @@ export default function Employees() {
     return filteredVendors.slice(start, start + pageSize);
   }, [filteredVendors, page, pageSize]);
 
-  const totalPages = activeTab === 'vendors' 
-    ? Math.max(1, Math.ceil(filteredVendors.length / pageSize))
-    : Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
+  const activeEmployeesCount = useMemo(
+    () => employees.filter((employee) => (employee.employment_status ?? '').toLowerCase() === 'active').length,
+    [employees],
+  );
+  const inactiveEmployeesCount = useMemo(
+    () => employees.filter((employee) => (employee.employment_status ?? '').toLowerCase() !== 'active').length,
+    [employees],
+  );
+  const leaderCount = useMemo(
+    () =>
+      employees.filter((employee) => {
+        const role = employee.role?.toLowerCase() ?? '';
+        return role === 'manager' || role === 'admin';
+      }).length,
+    [employees],
+  );
+
+  const totalRecords = activeTab === 'vendors' ? filteredVendors.length : filteredEmployees.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const hasResults = totalRecords > 0;
+  const displayRangeStart = hasResults ? (page - 1) * pageSize + 1 : 0;
+  const displayRangeEnd = hasResults ? Math.min(page * pageSize, totalRecords) : 0;
+  const combinedError = employeesError ?? departmentError;
+  const vendorErrorMessage = useMemo(() => {
+    if (!companyId && !profileLoading) {
+      return 'Connect your profile to a company to see vendor records.';
+    }
+    if (!vendorsError) return null;
+    if (vendorsError instanceof Error) return vendorsError.message;
+    if (typeof vendorsError === 'string') return vendorsError;
+    return 'We couldn’t load vendor data. Try refreshing once Supabase is back online.';
+  }, [companyId, profileLoading, vendorsError]);
+  const isVendorSectionLoading = vendorsLoading || (profileLoading && !companyId);
+
+  useEffect(() => {
+    setPage((current) => (current > totalPages ? totalPages : current));
+  }, [totalPages]);
+
+  const paginationSequence = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    const sequence: Array<number | 'start-ellipsis' | 'end-ellipsis'> = [1];
+    let start = Math.max(2, page - 1);
+    let end = Math.min(totalPages - 1, page + 1);
+
+    if (page <= 3) {
+      start = 2;
+      end = 4;
+    } else if (page >= totalPages - 2) {
+      start = totalPages - 3;
+      end = totalPages - 1;
+    }
+
+    if (start > 2) {
+      sequence.push('start-ellipsis');
+    }
+
+    for (let current = start; current <= end; current += 1) {
+      sequence.push(current);
+    }
+
+    if (end < totalPages - 1) {
+      sequence.push('end-ellipsis');
+    }
+
+    sequence.push(totalPages);
+    return sequence;
+  }, [page, totalPages]);
 
   const currentRole = currentUserProfile?.role?.toLowerCase() ?? '';
   const isAdmin = ['owner', 'admin', 'manager'].includes(currentRole);
@@ -316,13 +391,13 @@ export default function Employees() {
           </div>
         </div>
 
-        {error && (
+        {combinedError && (
           <Alert variant="destructive" className="border-destructive/40 bg-destructive/5">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
               <div className="space-y-1">
                 <AlertTitle>Live data unavailable</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{combinedError}</AlertDescription>
               </div>
             </div>
           </Alert>
@@ -336,8 +411,8 @@ export default function Employees() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <TabsList>
                   <TabsTrigger value="all">All ({employees.length})</TabsTrigger>
-                  <TabsTrigger value="managers">Leads ({employees.filter(e => ['manager','admin'].includes(e.role)).length})</TabsTrigger>
-                  <TabsTrigger value="inactive">Inactive ({employees.filter(e => e.employment_status !== 'active').length})</TabsTrigger>
+                  <TabsTrigger value="managers">Leads ({leaderCount})</TabsTrigger>
+                  <TabsTrigger value="inactive">Inactive ({inactiveEmployeesCount})</TabsTrigger>
                   <TabsTrigger value="vendors">Vendors</TabsTrigger>
                 </TabsList>
 
@@ -347,12 +422,12 @@ export default function Employees() {
                     <Input
                       placeholder="Search name, email, or ID"
                       value={searchTerm}
-                      onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
 
-                  <Select value={departmentFilter} onValueChange={(v) => { setDepartmentFilter(v); setPage(1); }}>
+                  <Select value={departmentFilter} onValueChange={(v) => setDepartmentFilter(v)}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Department" />
                     </SelectTrigger>
@@ -369,8 +444,17 @@ export default function Employees() {
               {/* Content for different tabs */}
               <TabsContent value={activeTab}>
                 {activeTab === 'vendors' ? (
-                  // Vendors table
-                  vendorsLoading ? (
+                  vendorErrorMessage ? (
+                    <Alert variant="destructive" className="border-destructive/40 bg-destructive/5">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
+                        <div className="space-y-1">
+                          <AlertTitle>Vendor data unavailable</AlertTitle>
+                          <AlertDescription>{vendorErrorMessage}</AlertDescription>
+                        </div>
+                      </div>
+                    </Alert>
+                  ) : isVendorSectionLoading ? (
                     <div className="space-y-2">
                       {[...Array(6)].map((_, i) => (
                         <div key={i} className="h-10 w-full bg-muted/40 rounded animate-pulse" />
@@ -385,7 +469,6 @@ export default function Employees() {
                             <TableHead className="hidden md:table-cell">Contact</TableHead>
                             <TableHead className="hidden md:table-cell">Email</TableHead>
                             <TableHead className="hidden md:table-cell">Phone</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -423,15 +506,10 @@ export default function Employees() {
                                   <span>{vendor.phone || '—'}</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="icon" aria-label="More">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
-                        {filteredVendors.length === 0 && !vendorsLoading && (
+                        {filteredVendors.length === 0 && !isVendorSectionLoading && (
                           <TableCaption>No vendors match your filters.</TableCaption>
                         )}
                       </Table>
@@ -487,7 +565,7 @@ export default function Employees() {
                             <TableCell className="hidden md:table-cell">
                               <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                                <span>{getDepartmentName(employee.department_id)}</span>
+                                <span>{getDepartmentName(employee.department_id ?? null, employee.department?.name ?? null)}</span>
                               </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
@@ -522,10 +600,10 @@ export default function Employees() {
             </Tabs>
 
             {/* Pagination controls */}
-            {((activeTab === 'vendors' ? filteredVendors.length : filteredEmployees.length) > 0) && (
+            {hasResults && (
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm text-muted-foreground">
-                  Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, activeTab === 'vendors' ? filteredVendors.length : filteredEmployees.length)} of {activeTab === 'vendors' ? filteredVendors.length : filteredEmployees.length}
+                  Showing {displayRangeStart}–{displayRangeEnd} of {totalRecords}
                 </div>
                 <div className="flex items-center gap-2">
                   <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
@@ -541,28 +619,33 @@ export default function Employees() {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious 
-                          onClick={() => setPage(p => Math.max(1, p - 1))}
-                          className="cursor-pointer"
+                          onClick={() => page > 1 && setPage((p) => Math.max(1, p - 1))}
+                          className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          aria-disabled={page === 1}
                         />
                       </PaginationItem>
-                      {Array.from({ length: totalPages }).slice(0, 5).map((_, i) => {
-                        const idx = i + 1; // simple first-5 pager
-                        return (
-                          <PaginationItem key={idx}>
-                            <PaginationLink 
-                              isActive={idx === page} 
-                              onClick={() => setPage(idx)}
+                      {paginationSequence.map((item, index) =>
+                        typeof item === 'number' ? (
+                          <PaginationItem key={item}>
+                            <PaginationLink
+                              isActive={item === page}
+                              onClick={() => setPage(item)}
                               className="cursor-pointer"
                             >
-                              {idx}
+                              {item}
                             </PaginationLink>
                           </PaginationItem>
-                        );
-                      })}
+                        ) : (
+                          <PaginationItem key={`${item}-${index}`}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        ),
+                      )}
                       <PaginationItem>
                         <PaginationNext 
-                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                          className="cursor-pointer"
+                          onClick={() => page < totalPages && setPage((p) => Math.min(totalPages, p + 1))}
+                          className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          aria-disabled={page === totalPages}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -586,13 +669,13 @@ export default function Employees() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-green-600">
-                  {employees.filter(e => e.employment_status === 'active').length}
+                  {activeEmployeesCount}
                 </div>
                 <div className="text-sm text-gray-600">Active</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-orange-600">
-                  {employees.filter(e => ['manager','admin'].includes(e.role)).length}
+                  {leaderCount}
                 </div>
                 <div className="text-sm text-gray-600">Leads</div>
               </div>
@@ -617,14 +700,14 @@ export default function Employees() {
         <InviteEmployeeDialog
           open={inviteOpen}
           onOpenChange={handleInviteChange}
-          onSuccess={fetchEmployees}
+          onSuccess={refetchEmployees}
         />
 
         <RoleManagerDialog
           open={roleManagerOpen}
           onOpenChange={setRoleManagerOpen}
           employees={employees}
-          onRoleUpdated={fetchEmployees}
+          onRoleUpdated={refetchEmployees}
         />
 
         <PermissionManagerDialog
@@ -637,7 +720,7 @@ export default function Employees() {
 }
 
 // Helpers
-function exportCSV(data: Profile[]) {
+function exportCSV(data: DirectoryEmployee[]) {
   const headers = [
     'First Name', 'Last Name', 'Email', 'Role', 'Status', 'Department ID', 'Employee ID', 'Hire Date'
   ];

@@ -23,7 +23,7 @@ export function UpdateGridView({ updates }: UpdateGridViewProps) {
               {update.isPinned && <Pin className="h-3 w-3 text-primary" />}
             </div>
             <h3 className="font-semibold text-sm mb-1 line-clamp-2">{update.title}</h3>
-            <p className="text-xs text-muted-foreground line-clamp-3">{update.content}</p>
+            <p className="text-xs text-muted-foreground line-clamp-3">{update.body}</p>
           </CardContent>
         </Card>
       ))}

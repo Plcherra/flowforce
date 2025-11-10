@@ -31,7 +31,6 @@ vi.mock('@/hooks/useAuth', () => ({
 type Builder = {
   select: ReturnType<typeof vi.fn>;
   eq: ReturnType<typeof vi.fn>;
-  or: ReturnType<typeof vi.fn>;
   order: ReturnType<typeof vi.fn>;
   limit: ReturnType<typeof vi.fn>;
 };
@@ -56,14 +55,12 @@ const createActivitiesBuilder = (data: any[]): Builder => {
   const builder: Builder = {
     select: vi.fn(),
     eq: vi.fn(),
-    or: vi.fn(),
     order: vi.fn(),
     limit: vi.fn(),
   };
 
   builder.select.mockReturnValue(builder);
   builder.eq.mockReturnValue(builder);
-  builder.or.mockReturnValue(builder);
   builder.order.mockReturnValue(builder);
   builder.limit.mockResolvedValue({ data, error: null });
 
@@ -95,11 +92,10 @@ describe('TaskActivityFeed', () => {
         metadata: null,
         task_id: 'task-allowed',
         user_id: 'actor-1',
-        tasks: {
-          id: 'task-allowed',
-          company_id: companyId,
-          assigned_to: 'user-123',
-          created_by: 'actor-1',
+        company_id: companyId,
+        actor: {
+          first_name: 'Jane',
+          last_name: 'Operator',
         },
       },
     ];
@@ -118,13 +114,12 @@ describe('TaskActivityFeed', () => {
       expect(screen.getByText('Recent Activity')).toBeInTheDocument();
     });
 
-    expect(activitiesBuilder.eq).toHaveBeenCalledWith('tasks.company_id', companyId);
-    expect(activitiesBuilder.or).toHaveBeenCalledWith('tasks.assigned_to.eq.user-123,tasks.created_by.eq.user-123');
+    expect(activitiesBuilder.eq).toHaveBeenCalledWith('company_id', companyId);
 
     expect(channelMock.on).toHaveBeenCalledTimes(1);
     const [, params] = channelMock.on.mock.calls[0];
     expect(params).toMatchObject({
-      filter: 'task_id=in.("task-allowed")',
+      filter: `company_id=eq.${companyId}`,
       table: 'task_activities',
       event: 'INSERT',
     });

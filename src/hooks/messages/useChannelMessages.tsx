@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../useAuth';
 import type { Message } from '@/types/messages';
+import { supabase } from '@/integrations/supabase/client';
+import { messagesRepository } from '@/repositories/messagesRepository';
 
 export function useChannelMessages(channelId: string | null) {
   const { user } = useAuth();
@@ -10,32 +11,11 @@ export function useChannelMessages(channelId: string | null) {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchMessages = useCallback(async (targetChannelId: string) => {
+    if (!user?.id) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          sender_profile:profiles!sender_id(first_name, last_name, avatar_url),
-          reply_to_message:messages!reply_to_id(
-            content,
-            sender_profile:profiles!sender_id(first_name, last_name)
-          )
-        `)
-        .eq('channel_id', targetChannelId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      
-      const transformedMessages = (data ?? []).map((message) => ({
-        ...message,
-        reply_to_message:
-          Array.isArray(message.reply_to_message) && message.reply_to_message.length > 0
-            ? message.reply_to_message[0]
-            : null,
-      }));
-
-      setMessages(transformedMessages);
+      const data = await messagesRepository.listMessages(targetChannelId, user.id);
+      setMessages(data);
       setError(null);
     } catch (error) {
       const issue = error instanceof Error ? error : new Error('Error fetching messages');
@@ -44,7 +24,7 @@ export function useChannelMessages(channelId: string | null) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   const subscribeToChannelMessages = useCallback(
     (targetChannelId: string) => {
@@ -72,7 +52,7 @@ export function useChannelMessages(channelId: string | null) {
   );
 
   useEffect(() => {
-    if (!channelId) {
+    if (!channelId || !user?.id) {
       setMessages([]);
       setError(null);
       return;

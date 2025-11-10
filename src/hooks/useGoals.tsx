@@ -8,7 +8,7 @@ import type { RecognitionDetails } from '@/types/recognition';
 
 const DEFAULT_RECOGNITION_XP = 110;
 
-export type GoalStatus = 'active' | 'completed' | 'draft';
+export type GoalStatus = 'active' | 'completed' | 'draft' | 'cancelled';
 
 export type GoalRow = Tables<'goals'>;
 
@@ -58,6 +58,7 @@ export interface GoalStats {
   active: number;
   completed: number;
   drafts: number;
+  cancelled: number;
   averageProgress: number;
 }
 
@@ -517,6 +518,7 @@ export function useGoals() {
         active: 0,
         completed: 0,
         drafts: 0,
+        cancelled: 0,
         averageProgress: 0,
       };
     }
@@ -525,6 +527,7 @@ export function useGoals() {
     const active = list.filter((goal) => goal.status === 'active').length;
     const completed = list.filter((goal) => goal.status === 'completed').length;
     const drafts = list.filter((goal) => goal.status === 'draft').length;
+    const cancelled = list.filter((goal) => goal.status === 'cancelled').length;
     const averageProgress = Math.round(
       list.reduce((sum, goal) => sum + (goal.progress ?? 0), 0) / total,
     );
@@ -534,6 +537,7 @@ export function useGoals() {
       active,
       completed,
       drafts,
+      cancelled,
       averageProgress,
     };
   }, [goalsQuery.data]);

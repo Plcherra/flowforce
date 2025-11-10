@@ -2,16 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import type { Tables } from '@/integrations/supabase/public-types';
 
-export interface Employee {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar_url?: string;
-  role: string;
-  employment_status: string;
-  department_id?: string | null;
+type ProfileRow = Tables<'profiles'>;
+
+export type Employee = ProfileRow & {
   department?: {
     id: string;
     name: string;
@@ -21,7 +16,7 @@ export interface Employee {
     id: string;
     name: string;
     role: string;
-  };
+  } | null;
   skillLevel?: number;
   skillXp?: number;
   badges?: string[];
@@ -29,9 +24,17 @@ export interface Employee {
   positiveReportCount?: number;
   lateCount?: number;
   noShowCount?: number;
-}
+};
 
-export function useEmployees() {
+type UseEmployeesOptions = {
+  includeInactive?: boolean;
+};
+
+const cacheKeyForCompany = (companyId: string, includeInactive: boolean) =>
+  `${companyId}:${includeInactive ? 'all' : 'active'}`;
+
+export function useEmployees(options: UseEmployeesOptions = {}) {
+  const { includeInactive = false } = options;
   const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,9 +81,10 @@ export function useEmployees() {
         return;
       }
 
-      let cachedEmployees = companyCacheRef.current.get(companyId);
+      const cacheKey = cacheKeyForCompany(companyId, includeInactive);
+      let cachedEmployees = companyCacheRef.current.get(cacheKey);
 
-      if (!cachedEmployees) {
+      if (!cachedEmployees && !includeInactive) {
         const { data: rosterCache } = await supabase
           .from('hr_roster_cache')
           .select('snapshot, synced_at')
@@ -89,7 +93,7 @@ export function useEmployees() {
 
         if (rosterCache?.snapshot && Array.isArray(rosterCache.snapshot)) {
           cachedEmployees = rosterCache.snapshot as Employee[];
-          companyCacheRef.current.set(companyId, cachedEmployees);
+          companyCacheRef.current.set(cacheKey, cachedEmployees);
         }
       }
 
@@ -97,17 +101,10 @@ export function useEmployees() {
         setEmployees(cachedEmployees);
       }
 
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('profiles')
         .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          avatar_url,
-          role,
-          employment_status,
-          department_id,
+          *,
           department:departments(
             id,
             name,
@@ -119,15 +116,20 @@ export function useEmployees() {
             role
           )
         `)
-        .eq('employment_status', 'active')
         .eq('company_id', companyId)
         .order('first_name', { ascending: true });
 
+      if (!includeInactive) {
+        query = query.eq('employment_status', 'active');
+      }
+
+      const { data, error: fetchError } = await query;
+
       if (fetchError) throw fetchError;
 
-      const employeeList = data ?? [];
+      const employeeList = (data ?? []) as Employee[];
       if (employeeList.length === 0) {
-        companyCacheRef.current.set(companyId, []);
+        companyCacheRef.current.set(cacheKey, []);
         setEmployees([]);
         return;
       }
@@ -135,7 +137,7 @@ export function useEmployees() {
       const ids = employeeList.map((employee) => employee.id);
 
       if (ids.length === 0) {
-        companyCacheRef.current.set(companyId, []);
+        companyCacheRef.current.set(cacheKey, []);
         setEmployees([]);
         return;
       }
@@ -230,7 +232,7 @@ export function useEmployees() {
       });
 
       setEmployees(enriched);
-      companyCacheRef.current.set(companyId, enriched);
+      companyCacheRef.current.set(cacheKey, enriched);
     } catch (error) {
       console.error('Error fetching employees:', error);
       const message = error instanceof Error ? error.message : 'Failed to fetch employees';
@@ -239,7 +241,7 @@ export function useEmployees() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, includeInactive]);
 
   useEffect(() => {
     if (user) {

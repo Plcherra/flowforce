@@ -19,6 +19,7 @@ const statusStyles: Record<GoalStatus, string> = {
   active: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
   completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
   draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  cancelled: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200',
 };
 
 export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardProps) {
@@ -39,7 +40,14 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
       ? `${goal.owner.first_name?.[0] ?? ''}${goal.owner.last_name?.[0] ?? ''}`.trim().toUpperCase()
       : 'NA';
 
-  const nextStatus: GoalStatus = goal.status === 'completed' ? 'active' : 'completed';
+  const isCompleted = goal.status === 'completed';
+  const isCancelled = goal.status === 'cancelled';
+  const nextStatus: GoalStatus = isCompleted || isCancelled ? 'active' : 'completed';
+  const primaryActionLabel = isCancelled
+    ? 'Restore'
+    : isCompleted
+      ? 'Mark Active'
+      : 'Mark Complete';
 
   return (
     <Card className="border border-border/60 bg-background/60 shadow-sm transition hover:shadow-lg">
@@ -173,7 +181,7 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
         <div className="flex gap-2">
           <Button variant="default" size="sm" onClick={() => onToggleStatus(goal, nextStatus)}>
             <CheckCircle2 className="mr-2 h-4 w-4" />
-            Mark {nextStatus === 'completed' ? 'Complete' : 'Active'}
+            {primaryActionLabel}
           </Button>
           <Button variant="outline" size="sm" onClick={() => onEdit(goal)}>
             <PencilLine className="mr-2 h-4 w-4" />

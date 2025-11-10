@@ -177,6 +177,11 @@ export function useForms() {
   const forms = formsQuery.data ?? [];
   const isInitialLoading = formsQuery.isLoading || (formsQuery.isFetching && !formsQuery.data);
   const loading = user ? isInitialLoading : false;
+  const formsError = (formsQuery.error as Error | null) ?? null;
+
+  const refetchForms = useCallback(async () => {
+    await queryClient.refetchQueries({ queryKey: formsQueryKey });
+  }, [queryClient, formsQueryKey]);
 
   const createForm = async (formData: {
     title: string;
@@ -423,6 +428,8 @@ export function useForms() {
     loading,
     isInitialLoading,
     isFetching: formsQuery.isFetching,
+    isError: formsQuery.isError,
+    error: formsError,
     createForm,
     updateForm,
     deleteForm,
@@ -430,8 +437,6 @@ export function useForms() {
     saveFormFields,
     getFormSubmissions,
     submitForm,
-    refetchForms: async () => {
-      await queryClient.invalidateQueries({ queryKey: formsQueryKey });
-    },
+    refetchForms,
   };
 }

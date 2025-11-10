@@ -3,6 +3,7 @@ import { differenceInMilliseconds } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
+import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
 
 export interface IdeaAssessmentMetric {
   metric: string;
@@ -24,7 +25,8 @@ interface IdeaAssessmentState {
 async function fetchKpiSnapshot(companyId: string, range: { start: string; end: string }) {
   const { data, error } = await supabase.rpc('get_kpi_summary', {
     company_id: companyId,
-    range,
+    range_start: range.start,
+    range_end: range.end,
   });
 
   if (error) {
@@ -148,21 +150,33 @@ export function useIdeaAssessments(
       throw new Error('Missing company context');
     }
 
-      const payload = {
-        company_id: companyId,
-        stage: 'assess',
-        range: `[${normalizedRange.start},${normalizedRange.end})`,
-        insights: latestInsights,
-        actions: metrics,
-        assessments: {
-          metrics,
-          notes: notes ?? null,
-        },
+      const assessmentsPayload = {
+        metrics,
+        notes: notes ?? null,
       };
 
       const targetMutation = cycleId
-        ? supabase.from('idea_cycles').update(payload).eq('id', cycleId).select().single()
-        : supabase.from('idea_cycles').insert(payload).select().single();
+        ? supabase
+            .from('idea_cycles')
+            .update({
+              stage: 'assess',
+              assessments: assessmentsPayload,
+            })
+            .eq('id', cycleId)
+            .select()
+            .single()
+        : supabase
+            .from('idea_cycles')
+            .insert({
+              company_id: companyId,
+              stage: 'assess',
+              range: formatRangeAsPgDate(range),
+              insights: latestInsights,
+              actions: null,
+              assessments: assessmentsPayload,
+            })
+            .select()
+            .single();
 
       const { error: mutationError } = await targetMutation;
 
@@ -170,7 +184,7 @@ export function useIdeaAssessments(
         throw mutationError;
       }
     },
-    [companyId, cycleId, latestInsights, metrics, normalizedRange.end, normalizedRange.start],
+    [companyId, cycleId, latestInsights, metrics, range, normalizedRange.end, normalizedRange.start],
   );
 
   return {

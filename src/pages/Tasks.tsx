@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,8 @@ import { TaskActivityFeed } from '@/components/tasks/TaskActivityFeed';
 import { RemindersPanel } from '@/components/reminders/RemindersPanel';
 import { format, differenceInDays } from 'date-fns';
 import { getTaskStatusBadgeClass, getTaskStatusLabel } from '@/constants/taskStatus';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
 const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
@@ -57,12 +59,15 @@ const normalizePriority = (priority: string | null | undefined): KnownTaskPriori
 
 export default function Tasks() {
   const isMobile = useIsMobile();
-  const { tasks, loading } = useTasks();
+  const { tasks, loading, error } = useTasks();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null);
   const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriorityFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!selectedTask) return;
@@ -273,6 +278,51 @@ export default function Tasks() {
     setSearchTerm('');
   };
 
+  const clearHighlightTimeout = () => {
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+  };
+
+  const handleTaskNavigate = useCallback(
+    (taskId: string) => {
+      const nextTask = tasks.find((task) => task.id === taskId);
+
+      if (!nextTask) {
+        toast({
+          title: 'Task not available',
+          description: 'Refresh to load the latest tasks before opening notifications.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setSelectedTask(nextTask);
+      setHighlightedTaskId(taskId);
+
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`task-card-${taskId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+
+      clearHighlightTimeout();
+      highlightTimeoutRef.current = setTimeout(() => {
+        setHighlightedTaskId((current) => (current === taskId ? null : current));
+      }, 2500);
+    },
+    [tasks, toast]
+  );
+
+  useEffect(
+    () => () => {
+      clearHighlightTimeout();
+    },
+    []
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -291,13 +341,20 @@ export default function Tasks() {
           </p>
         </div>
         <div className={isMobile ? 'flex items-center justify-between' : 'flex items-center gap-3'}>
-          <TaskNotifications />
+          <TaskNotifications onTaskNavigate={handleTaskNavigate} />
           <Button onClick={() => setShowCreateDialog(true)} size={isMobile ? "sm" : "default"}>
             <Plus className="mr-2 h-4 w-4" />
             {isMobile ? 'New' : 'Create Task'}
           </Button>
         </div>
       </div>
+
+      {!loading && error && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load tasks</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {metrics.map((metric) => (
@@ -414,8 +471,12 @@ export default function Tasks() {
               return (
                 <Card
                   key={task.id}
-                  className="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  id={`task-card-${task.id}`}
+                  data-highlighted={highlightedTaskId === task.id}
                   onClick={() => setSelectedTask(task)}
+                  className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                    highlightedTaskId === task.id ? 'ring-2 ring-primary' : ''
+                  }`}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-4">

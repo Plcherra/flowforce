@@ -18,21 +18,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type TaskActivity = Tables<'task_activities'>;
-type TaskActivityWithTask = TaskActivity & {
-  tasks: {
-    id: string;
-    company_id: string | null;
-    assigned_to: string | null;
-    created_by: string;
-  };
+type TaskActivityActor = {
+  first_name: string | null;
+  last_name: string | null;
+};
+type TaskActivityWithActor = TaskActivity & {
+  actor?: TaskActivityActor | null;
 };
 
 export function TaskActivityFeed() {
   const { user } = useAuth();
-  const [activities, setActivities] = useState<TaskActivity[]>([]);
+  const [activities, setActivities] = useState<TaskActivityWithActor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const subscriptionRef = useRef<RealtimeChannel | null>(null);
   const isMountedRef = useRef(false);
 
@@ -56,33 +57,30 @@ export function TaskActivityFeed() {
       cleanupSubscription();
       setActivities([]);
       setLoading(false);
+      setError(null);
       return;
     }
 
-    setLoading(true);
-    fetchActivities(user.id);
+    initializeActivities(user.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const subscribeToActivities = (taskIds: string[], userId: string) => {
+  const subscribeToActivities = (companyId: string) => {
     cleanupSubscription();
-    if (taskIds.length === 0) return;
-
-    const formattedIds = taskIds.map((id) => `"${id.replace(/"/g, '""')}"`).join(',');
-    const filter = `task_id=in.(${formattedIds})`;
+    if (!companyId) return;
 
     const channel = supabase
-      .channel(`task-activities-${userId}`)
+      .channel(`task-activities-${companyId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'task_activities',
-          filter,
+          filter: `company_id=eq.${companyId}`,
         },
         () => {
-          fetchActivities(userId);
+          fetchActivities(companyId);
         }
       )
       .subscribe();
@@ -90,7 +88,38 @@ export function TaskActivityFeed() {
     subscriptionRef.current = channel;
   };
 
-  const fetchActivities = async (userId: string) => {
+  const fetchActivities = async (companyId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('task_activities')
+        .select(
+          `
+            *,
+            actor:profiles!task_activities_user_id_fkey(first_name, last_name)
+          `
+        )
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      if (!isMountedRef.current) return;
+
+      setActivities((data ?? []) as TaskActivityWithActor[]);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching task activities:', error);
+      if (isMountedRef.current) {
+        setActivities([]);
+        setError(error instanceof Error ? error.message : 'Unable to load task activity.');
+      }
+    }
+  };
+
+  const initializeActivities = async (userId: string) => {
+    setLoading(true);
+    setError(null);
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -106,42 +135,18 @@ export function TaskActivityFeed() {
         if (isMountedRef.current) {
           setActivities([]);
           cleanupSubscription();
+          setError('No company context found for the current user.');
         }
         return;
       }
 
-      const { data, error } = await supabase
-        .from('task_activities')
-        .select(`
-          *,
-          tasks:tasks!inner(id, company_id, assigned_to, created_by)
-        `)
-        .eq('tasks.company_id', companyId)
-        .or(`tasks.assigned_to.eq.${userId},tasks.created_by.eq.${userId}`)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      if (!isMountedRef.current) return;
-
-      const typed = (data ?? []) as TaskActivityWithTask[];
-      const allowedTaskIds = Array.from(
-        new Set(
-          typed
-            .map((row) => row.task_id)
-            .filter((value): value is string => Boolean(value))
-        )
-      );
-
-      const sanitized = typed.map(({ tasks, ...rest }) => rest as TaskActivity);
-
-      setActivities(sanitized);
-      subscribeToActivities(allowedTaskIds, userId);
+      await fetchActivities(companyId);
+      subscribeToActivities(companyId);
     } catch (error) {
-      console.error('Error fetching task activities:', error);
+      console.error('Error initializing task activities:', error);
       if (isMountedRef.current) {
         setActivities([]);
+        setError(error instanceof Error ? error.message : 'Unable to load task activity.');
         cleanupSubscription();
       }
     } finally {
@@ -193,6 +198,16 @@ export function TaskActivityFeed() {
     }
   };
 
+  const getActorMeta = (activity: TaskActivityWithActor) => {
+    const first = activity.actor?.first_name ?? '';
+    const last = activity.actor?.last_name ?? '';
+    const name = `${first} ${last}`.trim() || 'Task activity';
+    const initialsCandidate = `${first.charAt(0)}${last.charAt(0)}`.trim().toUpperCase();
+    const initials = initialsCandidate || name.charAt(0).toUpperCase() || 'T';
+
+    return { name, initials };
+  };
+
   if (loading) {
     return (
       <Card>
@@ -220,8 +235,22 @@ export function TaskActivityFeed() {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
+        {error && (
+          <div className="p-4">
+            <Alert variant="destructive">
+              <AlertTitle>Activity feed unavailable</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </div>
+        )}
         <ScrollArea className="h-96">
-          {activities.length === 0 ? (
+          {error ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Clock className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">We’re trying to reconnect to your activity feed.</p>
+              <p className="text-xs text-muted-foreground">Updates will resume automatically.</p>
+            </div>
+          ) : activities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Clock className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">No recent activity</p>
@@ -229,53 +258,56 @@ export function TaskActivityFeed() {
             </div>
           ) : (
             <div className="space-y-0">
-              {activities.map((activity, index) => (
-                <div
-                  key={activity.id}
-                  className={`p-4 border-l-2 ${getActivityColor(activity.action_type)} ${
-                    index !== activities.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 mt-1">
-                      {getActivityIcon(activity.action_type)}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">U</AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium">
-                          User Activity
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
-                        </span>
+              {activities.map((activity, index) => {
+                const { name: actorName, initials } = getActorMeta(activity);
+                return (
+                  <div
+                    key={activity.id}
+                    className={`p-4 border-l-2 ${getActivityColor(activity.action_type)} ${
+                      index !== activities.length - 1 ? 'border-b border-gray-100' : ''
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 mt-1">
+                        {getActivityIcon(activity.action_type)}
                       </div>
                       
-                      <p className="text-sm text-gray-900 mb-2">
-                        {activity.description}
-                      </p>
-                      
-                      {activity.metadata && typeof activity.metadata === 'object' && activity.metadata !== null && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          {(activity.metadata as any).old_value && (activity.metadata as any).new_value && (
-                            <span>
-                              Changed from "{(activity.metadata as any).old_value}" to "{(activity.metadata as any).new_value}"
-                            </span>
-                          )}
-                          {(activity.metadata as any).task_title && (
-                            <Badge variant="outline" className="text-xs ml-2">
-                              {(activity.metadata as any).task_title}
-                            </Badge>
-                          )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">
+                            {actorName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                          </span>
                         </div>
-                      )}
+                        
+                        <p className="text-sm text-gray-900 mb-2">
+                          {activity.description}
+                        </p>
+                        
+                        {activity.metadata && typeof activity.metadata === 'object' && activity.metadata !== null && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {(activity.metadata as any).old_value && (activity.metadata as any).new_value && (
+                              <span>
+                                Changed from "{(activity.metadata as any).old_value}" to "{(activity.metadata as any).new_value}"
+                              </span>
+                            )}
+                            {(activity.metadata as any).task_title && (
+                              <Badge variant="outline" className="text-xs ml-2">
+                                {(activity.metadata as any).task_title}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>

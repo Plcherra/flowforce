@@ -58,7 +58,7 @@ export function CompanyUpdatePreview({
       </div>
       <CardContent className={cn('space-y-4', isMobile ? 'px-4 py-4' : 'px-6 py-5')}>
         <p className="text-sm text-muted-foreground line-clamp-4">
-          {data.content || 'Use the fields on the left to start writing your announcement.'}
+          {data.body || 'Use the fields on the left to start writing your announcement.'}
         </p>
 
         {showMeta && (

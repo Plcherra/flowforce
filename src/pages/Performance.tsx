@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { RefreshCw, Target, BarChart3, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -20,11 +20,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { syncCopilotReviewAutomation } from '@/services/performance/performanceAutomation';
+import { useLeaderboardData } from '@/features/leaderboard/useLeaderboardData';
+import type { LeaderboardPeriod } from '@/features/leaderboard/types';
 
 interface MetricTileProps {
   label: string;
   value: ReactNode;
 }
+
+type PerformanceTab = 'overview' | 'goals' | 'reviews';
 
 function MetricTile({ label, value }: MetricTileProps) {
   return (
@@ -92,7 +96,10 @@ export default function Performance() {
   const { profile } = useProfile();
   const { toast } = useToast();
   const { employees, goals, reviews, goalReviews = [], loading, error, refetch } = usePerformanceOverview();
-  const { recognitions, loading: recognitionLoading } = useRecognitions();
+  const { recognitions, loading: recognitionLoading, error: recognitionError } = useRecognitions();
+  const leaderboardPeriod: LeaderboardPeriod = 'monthly';
+  const { loading: leaderboardLoading, error: leaderboardError } = useLeaderboardData(leaderboardPeriod);
+  const [activeTab, setActiveTab] = useState<PerformanceTab>('overview');
 
   const isLoading = loading;
   const recentReviews = reviews.slice(0, 20);
@@ -168,7 +175,7 @@ export default function Performance() {
             )}
             Run Co-Pilot Sync
           </Button>
-          <Button>
+          <Button onClick={() => setActiveTab('goals')}>
             <Target className="mr-2 h-4 w-4" />
             Set Goals
           </Button>
@@ -182,7 +189,11 @@ export default function Performance() {
         </Alert>
       )}
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as PerformanceTab)}
+        className="space-y-6"
+      >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="goals">Goals & Objectives</TabsTrigger>
@@ -206,7 +217,17 @@ export default function Performance() {
               </Badge>
             </CardHeader>
             <CardContent className="space-y-3">
-              {leaderboardInsights.length === 0 ? (
+              {leaderboardLoading ? (
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading leaderboard insights…</span>
+                </div>
+              ) : leaderboardError ? (
+                <Alert variant="destructive">
+                  <AlertTitle>Unable to load leaderboard insights</AlertTitle>
+                  <AlertDescription>{leaderboardError}</AlertDescription>
+                </Alert>
+              ) : leaderboardInsights.length === 0 ? (
                 <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
                   Open the leaderboard to activate XP tracking and feed performance highlights directly into this view.
                 </div>
@@ -267,7 +288,15 @@ export default function Performance() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {unifiedReviews.length === 0 ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <LoadingSpinner />
+                </div>
+              ) : error ? (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  Unable to load review snapshots right now. Please try again after refreshing the page.
+                </div>
+              ) : unifiedReviews.length === 0 ? (
                 <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
                   No performance reviews have been synced yet. Create entries in the performance reviews table to see goal summaries and AI insights here.
                 </div>
@@ -366,50 +395,60 @@ export default function Performance() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Loading recognition activity…</span>
                 </div>
-              ) : topRecognitions.length === 0 ? (
-                <div className="text-sm text-muted-foreground">
-                  No recognitions yet. Encourage teams to complete goals, tasks, or training to see activity here.
-                </div>
               ) : (
-                topRecognitions.map((recognition) => {
-                  const details = recognition.reward_details;
-                  const source = details?.source ?? 'manual';
-                  const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
-                  const Icon = meta.icon;
-                  const recipientName = recognition.recipient
-                    ? `${recognition.recipient.first_name ?? ''} ${recognition.recipient.last_name ?? ''}`.trim()
-                    : 'Team Member';
-                  const awardedDistance = recognition.awarded_at
-                    ? formatDistanceToNow(new Date(recognition.awarded_at), { addSuffix: true })
-                    : 'just now';
-
-                  return (
-                    <div key={recognition.id} className="flex flex-col gap-2 rounded-lg border p-3 md:flex-row md:items-center md:justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className={cn('rounded-full p-2 bg-muted', meta.color)}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-medium">{recipientName}</span>
-                            <Badge variant="outline" className={meta.badgeColor}>
-                              {meta.label}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">{awardedDistance}</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {details?.message ?? 'Great work acknowledged by the team.'}
-                          </p>
-                        </div>
-                      </div>
-                      {details?.xp_awarded ? (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
-                          +{details.xp_awarded} XP
-                        </Badge>
-                      ) : null}
+                <>
+                  {recognitionError ? (
+                    <Alert variant="destructive">
+                      <AlertTitle>Unable to load recognition activity</AlertTitle>
+                      <AlertDescription>{recognitionError}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {topRecognitions.length === 0 && !recognitionError ? (
+                    <div className="text-sm text-muted-foreground">
+                      No recognitions yet. Encourage teams to complete goals, tasks, or training to see activity here.
                     </div>
-                  );
-                })
+                  ) : (
+                    topRecognitions.map((recognition) => {
+                      const details = recognition.reward_details;
+                      const source = details?.source ?? 'manual';
+                      const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
+                      const Icon = meta.icon;
+                      const recipientName = recognition.recipient
+                        ? `${recognition.recipient.first_name ?? ''} ${recognition.recipient.last_name ?? ''}`.trim()
+                        : 'Team Member';
+                      const awardedDistance = recognition.awarded_at
+                        ? formatDistanceToNow(new Date(recognition.awarded_at), { addSuffix: true })
+                        : 'just now';
+
+                      return (
+                        <div key={recognition.id} className="flex flex-col gap-2 rounded-lg border p-3 md:flex-row md:items-center md:justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={cn('rounded-full p-2 bg-muted', meta.color)}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium">{recipientName}</span>
+                                <Badge variant="outline" className={meta.badgeColor}>
+                                  {meta.label}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{awardedDistance}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {details?.message ?? 'Great work acknowledged by the team.'}
+                              </p>
+                            </div>
+                          </div>
+                          {details?.xp_awarded ? (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
+                              +{details.xp_awarded} XP
+                            </Badge>
+                          ) : null}
+                        </div>
+                      );
+                    })
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -417,6 +456,10 @@ export default function Performance() {
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <LoadingSpinner />
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Unable to load performance summaries. Please try again after refreshing.</p>
             </div>
           ) : employees.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
@@ -483,6 +526,10 @@ export default function Performance() {
                 <div className="flex items-center justify-center py-12">
                   <LoadingSpinner />
                 </div>
+              ) : error ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Unable to load goals data at the moment. Please try again.</p>
+                </div>
               ) : goals.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Target className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -544,6 +591,10 @@ export default function Performance() {
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <LoadingSpinner />
+                </div>
+              ) : error ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Unable to load performance reviews at the moment. Please try again.</p>
                 </div>
               ) : recentReviews.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">

@@ -5,10 +5,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { Bell, BellRing, Trash2, Check, Clock, AlertCircle, CheckCircle, Calendar, MessageSquare } from 'lucide-react';
+import { Bell, BellRing, Trash2, Check, Clock, AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { logger } from '@/utils/logger';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function NotificationsPanel() {
   const { 
@@ -17,7 +18,8 @@ export function NotificationsPanel() {
     loading, 
     markAsRead, 
     markAllAsRead, 
-    deleteNotification 
+    deleteNotification,
+    error,
   } = useTaskNotifications();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -120,6 +122,14 @@ export function NotificationsPanel() {
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-80">
+              {error && (
+                <div className="px-4">
+                  <Alert variant="destructive">
+                    <AlertTitle>Notifications unavailable</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
               {loading ? (
                 <div className="flex items-center justify-center p-6">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>

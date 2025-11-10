@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -26,11 +26,12 @@ interface UpdateFeedCardProps {
   onCommentChange: (updateId: string, value: string) => void;
   onSubmitComment: (update: CompanyUpdate) => void;
   onToggleComments: (update: CompanyUpdate) => void;
-  onLike: (update: CompanyUpdate) => void;
+  onLike: (updateId: string) => void;
   onArchive: (updateId: string) => void;
   onDelete: (updateId: string) => void;
   canManage: boolean;
-  markAsViewed: (updateId: string) => void;
+  onView?: (updateId: string) => void;
+  viewerHasViewed?: boolean;
 }
 
 export function UpdateFeedCard({
@@ -127,7 +128,7 @@ export function UpdateFeedCard({
                 dangerouslySetInnerHTML={{ __html: update.richContent }}
               />
             ) : (
-              <p className="text-foreground leading-relaxed text-sm">{update.content}</p>
+              <p className="text-foreground leading-relaxed text-sm">{update.body}</p>
             )}
           </div>
 

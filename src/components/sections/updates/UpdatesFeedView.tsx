@@ -155,7 +155,7 @@ export function UpdatesFeedView({
                       dangerouslySetInnerHTML={{ __html: update.richContent }}
                     />
                   ) : (
-                    <p className="text-foreground leading-relaxed">{update.content}</p>
+                    <p className="text-foreground leading-relaxed">{update.body}</p>
                   )}
                 </div>
 

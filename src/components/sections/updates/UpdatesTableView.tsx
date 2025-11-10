@@ -88,7 +88,7 @@ export function UpdatesTableView({
 
   const filteredUpdates = updates.filter(update => {
     const matchesSearch = update.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         update.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         update.body.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          update.author.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesTab = activeTab === 'all' || update.status === activeTab;
@@ -193,7 +193,7 @@ export function UpdatesTableView({
                         <div>
                           <div className="font-medium">{update.title}</div>
                           <div className="text-sm text-muted-foreground truncate max-w-[300px]">
-                            {update.content}
+                            {update.body}
                           </div>
                         </div>
                       </div>

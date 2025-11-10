@@ -14,7 +14,7 @@ const Dashboard = lazy(() => import('../pages/Dashboard.tsx'));
 const CompanyRegistration = lazy(() => import('../pages/CompanyRegistration.tsx'));
 
 // Lazy load all other pages
-const Messages = lazy(() => import('../pages/MessagesPage.tsx'));
+const Messages = lazy(() => import('../pages/Messages.tsx'));
 const EventsHub = lazy(() => import('../pages/events/EventsHub.tsx'));
 const Employees = lazy(() => import('../pages/Employees.tsx'));
 const PositionManagement = lazy(() => import('../pages/PositionManagement.tsx'));

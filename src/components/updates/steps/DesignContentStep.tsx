@@ -134,17 +134,17 @@ export function DesignContentStep({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
+                <Label htmlFor="body">Content *</Label>
                 <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => updateFormData({ content: e.target.value })}
+                  id="body"
+                  value={formData.body}
+                  onChange={(e) => updateFormData({ body: e.target.value })}
                   placeholder="Write your update content here..."
                   rows={8}
                   className="resize-none"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{formData.content.length}/1000 characters</span>
+                  <span>{formData.body.length}/1000 characters</span>
                   <Button variant="outline" size="sm" className="h-6">
                     <Sparkles className="mr-1 h-3 w-3" />
                     AI Enhance
@@ -312,7 +312,7 @@ export function DesignContentStep({
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <div className="flex justify-between">
                 <span>Characters remaining</span>
-                <span>{Math.max(0, 1000 - formData.content.length)}</span>
+                <span>{Math.max(0, 1000 - formData.body.length)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Priority</span>

@@ -21,9 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useEvents, type EventAttendee } from '@/hooks/useEvents';
-import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { createEvent as createCalendarEvent, upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
 import type { Schedule } from '@/types/common';
 
 type SessionType = 'meeting' | 'event';
@@ -40,8 +38,7 @@ type SelectionRecord = Record<string, boolean>;
 export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting', onCreated }: CreateEventDialogProps) {
   const { toast } = useToast();
   const { shifts, teamMembers: roster, loading: schedulingLoading } = useScheduling();
-  const { events } = useEvents();
-  const { user } = useAuth();
+  const { events, createEvent } = useEvents();
   const { profile } = useProfile();
 
   const [sessionType, setSessionType] = useState<SessionType>(defaultType);
@@ -223,28 +220,16 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     const attendees = buildAttendeesFromSelections(selectedParticipantIds, selectedShiftList);
 
     try {
-      const created = await createCalendarEvent({
-        payload: {
-          title: title.trim(),
-          description: description.trim() || null,
-          location: location.trim() || null,
-          type: sessionType,
-          start: startIso,
-          end: endIso,
-          attendees,
-          relatedShiftIds: selectedShiftList,
-        },
-        companyId,
-        createdBy: user?.id ?? null,
+      const created = await createEvent({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        location: location.trim() || undefined,
+        type: sessionType,
+        start: startIso.toISOString(),
+        end: endIso.toISOString(),
+        attendees,
+        related_shift_ids: selectedShiftList,
       });
-
-      if (selectedShiftList.length > 0) {
-        await upsertEventShiftLinks({
-          eventId: created.id,
-          shiftIds: selectedShiftList,
-          companyId,
-        });
-      }
 
       if (created?.id) {
         onCreated?.(created.id);

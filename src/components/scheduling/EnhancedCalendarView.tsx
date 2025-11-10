@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Calendar, 
   Grid3X3, 
@@ -17,24 +16,36 @@ import { WeekView } from './WeekView';
 import { DragDropScheduleCalendar } from './DragDropScheduleCalendar';
 import { ShiftDetailsPanel } from './ShiftDetailsPanel';
 import { useScheduling } from '@/contexts/SchedulingContext';
-import { format, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns';
+import { format, addWeeks, addMonths, subMonths, subWeeks, startOfWeek } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 type CalendarViewMode = 'month' | 'week' | 'staff';
 
-export function EnhancedCalendarView() {
-  const { shifts, loading } = useScheduling();
+interface EnhancedCalendarViewProps {
+  locationFilter?: string;
+}
+
+export function EnhancedCalendarView({ locationFilter }: EnhancedCalendarViewProps) {
+  const { shifts, loading, setWeekReference, weekRange } = useScheduling();
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewMode>('month');
-  const [filters, setFilters] = useState({
-    positions: [],
-    users: [],
-    status: 'all',
-    departments: []
-  });
+
+  useEffect(() => {
+    if (!weekRange) return;
+    const selectedWeekStart = startOfWeek(selectedDate);
+    if (selectedWeekStart.getTime() !== weekRange.start.getTime()) {
+      setWeekReference(selectedDate);
+    }
+  }, [selectedDate, setWeekReference, weekRange]);
+
+  const filteredShifts = useMemo(() => {
+    if (!locationFilter) return shifts;
+    const normalized = locationFilter.toLowerCase();
+    return shifts.filter((shift) => (shift.location ?? '').toLowerCase().includes(normalized));
+  }, [locationFilter, shifts]);
 
   const navigateDate = (direction: 'prev' | 'next') => {
     let newDate = new Date(selectedDate);
@@ -74,6 +85,8 @@ export function EnhancedCalendarView() {
     week: { icon: Grid3X3, label: 'Week' },
     staff: { icon: Users, label: 'Staff Grid' }
   };
+
+  const noShiftsAvailable = !loading && filteredShifts.length === 0;
 
   return (
     <div className="space-y-6">
@@ -140,7 +153,9 @@ export function EnhancedCalendarView() {
           {/* Stats bar */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
             <div className="flex items-center gap-2">
-              <Badge variant="outline">{shifts.length} shifts</Badge>
+              <Badge variant="outline">
+                {loading ? 'Loading shifts…' : `${filteredShifts.length} shifts`}
+              </Badge>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
@@ -172,33 +187,42 @@ export function EnhancedCalendarView() {
             </div>
           ) : (
             <>
-              {currentView === 'month' && (
-                <MonthView
-                  schedules={shifts}
-                  selectedDate={selectedDate}
-                  onSelectShift={setSelectedShift}
-                  filters={filters}
-                  isMobile={isMobile}
-                />
-              )}
-              
-              {currentView === 'week' && (
-                <div className="p-4">
-                  <DragDropScheduleCalendar
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                  />
+              {noShiftsAvailable ? (
+                <div className="flex h-96 items-center justify-center px-4 text-center text-sm text-muted-foreground">
+                  No shifts match the current filters for this week.
                 </div>
-              )}
-              
-              {currentView === 'staff' && (
-                <WeekView
-                  schedules={shifts}
-                  selectedDate={selectedDate}
-                  onSelectShift={setSelectedShift}
-                  filters={filters}
-                  isMobile={isMobile}
-                />
+              ) : (
+                <>
+                  {currentView === 'month' && (
+                    <MonthView
+                      schedules={filteredShifts}
+                      selectedDate={selectedDate}
+                      onSelectShift={setSelectedShift}
+                      isMobile={isMobile}
+                      locationFilter={locationFilter}
+                    />
+                  )}
+                  
+                  {currentView === 'week' && (
+                    <div className="p-4">
+                      <DragDropScheduleCalendar
+                        selectedDate={selectedDate}
+                        onDateChange={setSelectedDate}
+                        locationFilter={locationFilter}
+                      />
+                    </div>
+                  )}
+                  
+                  {currentView === 'staff' && (
+                    <WeekView
+                      schedules={filteredShifts}
+                      selectedDate={selectedDate}
+                      onSelectShift={setSelectedShift}
+                      isMobile={isMobile}
+                      locationFilter={locationFilter}
+                    />
+                  )}
+                </>
               )}
             </>
           )}

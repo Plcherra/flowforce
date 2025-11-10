@@ -5,7 +5,7 @@ import { WIZARD_STEPS } from './steps';
 
 const DEFAULT_FORM_DATA: WizardFormData = {
   title: '',
-  content: '',
+  body: '',
   type: 'announcement',
   priority: 'medium',
   backgroundStyle: {
@@ -37,7 +37,7 @@ const DEFAULT_FORM_DATA: WizardFormData = {
 
 const STEP_VALIDATORS: Record<WizardStepId, (data: WizardFormData) => boolean> = {
   template: () => true,
-  design: (data) => Boolean(data.title.trim() && data.content.trim()),
+  design: (data) => Boolean(data.title.trim() && data.body.trim()),
   recipients: (data) =>
     data.recipients.type === 'all' || (Array.isArray(data.recipients.targets) && data.recipients.targets.length > 0),
   publish: (data) => {

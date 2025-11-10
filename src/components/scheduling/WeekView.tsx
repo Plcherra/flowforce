@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Clock } from 'lucide-react';
 import type { ShiftWithAssignments, AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { SchedulingFilterState } from './SchedulingFilters';
 import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
 import { getShiftColor, calculateCoverageStats } from '@/utils/schedulingUtils';

@@ -11,6 +11,7 @@ import { useScheduling } from '@/contexts/SchedulingContext';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const INITIAL_FILTERS: SchedulingFilterState = {
   positions: [],
@@ -27,6 +28,7 @@ interface SchedulingCalendarProps {
   hideShiftActions?: boolean;
   externalDetails?: boolean;
   onShiftSelect?: (shiftId: string | null) => void;
+  refreshSignal?: number;
 }
 
 export function SchedulingCalendar({
@@ -35,8 +37,9 @@ export function SchedulingCalendar({
   hideShiftActions = false,
   externalDetails = false,
   onShiftSelect,
+  refreshSignal,
 }: SchedulingCalendarProps = {}) {
-  const { shifts, loading } = useScheduling();
+  const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<ViewType>(isMobile ? 'day' : 'week');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -61,6 +64,7 @@ export function SchedulingCalendar({
     events: overlayEvents,
     loading: eventsLoading,
     refresh: refreshEvents,
+    error: eventsError,
   } = useCalendarEvents({ range: eventRange });
 
   const filteredShifts = useMemo<ShiftWithAssignments[]>(() => {
@@ -111,6 +115,7 @@ export function SchedulingCalendar({
     [overlayEvents, selectedEventId],
   );
   const combinedLoading = loading || eventsLoading;
+  const combinedError = schedulingError || eventsError;
 
   useEffect(() => {
     if (selectedShift && !filteredShifts.some((shift) => shift.id === selectedShift)) {
@@ -124,6 +129,13 @@ export function SchedulingCalendar({
       setSelectedEventId(null);
     }
   }, [overlayEvents, selectedEventId]);
+
+  useEffect(() => {
+    if (refreshSignal === undefined) {
+      return;
+    }
+    void refreshEvents();
+  }, [refreshSignal, refreshEvents]);
 
   const handleDateChange = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
@@ -154,6 +166,13 @@ export function SchedulingCalendar({
 
   return (
     <div className="space-y-6">
+      {combinedError && (
+        <Alert variant="destructive">
+          <AlertTitle>Calendar data may be stale</AlertTitle>
+          <AlertDescription>{combinedError}</AlertDescription>
+        </Alert>
+      )}
+
       <ScheduleHeader 
         mode={mode}
         onPrevDate={() => handleDateChange('prev')}

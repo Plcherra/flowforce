@@ -1,13 +1,93 @@
 import { useState } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { GoalHeader } from '@/components/goals/GoalHeader';
 import { GoalList } from '@/components/goals/GoalList';
 import { GoalModal } from '@/components/goals/GoalModal';
 import { GoalEmptyState } from '@/components/goals/GoalEmptyState';
-import { useGoals, type Goal, type GoalStatus, type UseGoalsReturn } from '@/hooks/useGoals';
-import { useGoalDialogs, type GoalDialogs } from '@/hooks/useGoalDialogs';
+import { useGoals, type Goal, type GoalStatus, type GoalStats, type UseGoalsReturn } from '@/hooks/useGoals';
+import { useGoalDialogs, type GoalDialogs, type GoalSuggestion } from '@/hooks/useGoalDialogs';
 import type { GoalFormValues } from '@/components/goals/CreateGoalModal';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+type GoalSuggestionResponse = {
+  insights?: string;
+};
+
+function buildGoalSuggestionPrompt(stats: GoalStats, goals: Goal[]) {
+  const sampleGoals = goals.slice(0, 3).map((goal) => ({
+    title: goal.title ?? 'Untitled goal',
+    status: goal.status,
+    progress: goal.progress ?? 0,
+    dueDate: goal.target_completion_date,
+  }));
+
+  const metrics = {
+    total: stats.total,
+    active: stats.active,
+    completed: stats.completed,
+    drafts: stats.drafts,
+    cancelled: stats.cancelled,
+    averageProgress: stats.averageProgress,
+  };
+
+  return [
+    'You are FlowForce Copilot. Suggest one measurable operations goal for the next 60 days.',
+    'Respond with JSON only, using the exact shape {"title": "...", "description": "..."} and no other text.',
+    'Title should be under 90 characters. Description should be 2 concise sentences.',
+    `Current metrics: ${JSON.stringify(metrics)}.`,
+    `Recent goals: ${JSON.stringify(sampleGoals)}.`,
+    'Focus on high-impact goals that drive progress and can be owned by a manager.',
+  ].join(' ');
+}
+
+function parseGoalSuggestionPayload(raw: string | null | undefined): GoalSuggestion | null {
+  if (!raw) return null;
+  const source = raw.trim();
+  const fencedMatch = source.match(/```json([\s\S]*?)```/i);
+  const segment = fencedMatch ? fencedMatch[1].trim() : source;
+  const jsonCandidate = (() => {
+    try {
+      return JSON.parse(segment);
+    } catch {
+      const start = segment.indexOf('{');
+      const end = segment.lastIndexOf('}');
+      if (start !== -1 && end !== -1 && end > start) {
+        const sliced = segment.slice(start, end + 1);
+        try {
+          return JSON.parse(sliced);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+  })();
+
+  if (!jsonCandidate || typeof jsonCandidate !== 'object') {
+    return null;
+  }
+
+  const title =
+    typeof (jsonCandidate as { title?: unknown }).title === 'string'
+      ? (jsonCandidate as { title?: string }).title?.trim() ?? ''
+      : '';
+  const description =
+    typeof (jsonCandidate as { description?: unknown }).description === 'string'
+      ? (jsonCandidate as { description?: string }).description?.trim() ?? ''
+      : '';
+
+  if (!title) {
+    return null;
+  }
+
+  return {
+    title,
+    description: description || 'Outline how this goal will be measured and rewarded.',
+  };
+}
 
 export default function GoalsPage() {
   const goalsState = useGoals();
@@ -90,13 +170,29 @@ export default function GoalsPage() {
   };
 
   const handleSuggestGoal = async () => {
+    if (suggesting) {
+      return;
+    }
     setSuggesting(true);
     try {
-      const suggestion = {
-        title: 'Improve onboarding completion rate',
-        description:
-          'Launch a cross-functional initiative to boost onboarding completion to 95% by end of quarter with improved training paths and regular checkpoints.',
-      };
+      const prompt = buildGoalSuggestionPrompt(stats, goals);
+      const { data, error } = await supabase.functions.invoke<GoalSuggestionResponse>('ai-insights', {
+        body: {
+          type: 'chat',
+          query: prompt,
+          context: 'goals_suggestion',
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const suggestion = parseGoalSuggestionPayload(data?.insights);
+      if (!suggestion) {
+        throw new Error('No structured suggestion returned');
+      }
+
       dialogs.open(null, { suggestion });
     } catch (suggestionError) {
       const message =
@@ -117,17 +213,21 @@ export default function GoalsPage() {
         void goalsState.refetch();
       }}
       fallbackRender={({ error: boundaryError, resetErrorBoundary }) => (
-        <div className="p-8 text-center">
-          <h2 className="text-red-600 font-semibold">Error loading goals</h2>
-          <p>{boundaryError.message}</p>
-          <button
+        <div className="space-y-4 p-6">
+          <Alert variant="destructive">
+            <AlertTitle>Error loading goals</AlertTitle>
+            <AlertDescription>
+              {boundaryError.message ?? 'Please try again shortly.'}
+            </AlertDescription>
+          </Alert>
+          <Button
+            variant="outline"
             onClick={() => {
               resetErrorBoundary();
             }}
-            className="mt-4 rounded bg-indigo-600 px-3 py-1 text-white"
           >
             Retry
-          </button>
+          </Button>
         </div>
       )}
     >
@@ -170,13 +270,28 @@ function GoalsContent({
   saving,
 }: GoalsContentProps) {
   const { goals, stats, isLoading, isFetching, error, refetch } = state;
+  const initialLoading = isLoading && goals.length === 0;
+  const blockingError = error && goals.length === 0;
 
-  if (error && goals.length === 0) {
-    throw error;
-  }
-
-  if (isLoading && goals.length === 0) {
-    return <div className="p-8 text-center text-muted-foreground">Loading goals...</div>;
+  if (blockingError) {
+    return (
+      <main className="space-y-4 p-6">
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load goals</AlertTitle>
+          <AlertDescription>
+            {error?.message ?? 'We could not load your goals. Please retry.'}
+          </AlertDescription>
+        </Alert>
+        <Button
+          variant="outline"
+          onClick={() => {
+            void refetch();
+          }}
+        >
+          Retry
+        </Button>
+      </main>
+    );
   }
 
   return (
@@ -185,12 +300,12 @@ function GoalsContent({
         dialogs={dialogs}
         count={goals.length}
         stats={stats}
-        isLoadingStats={isLoading && goals.length === 0}
+        isLoadingStats={initialLoading}
         onSuggestGoal={onSuggestGoal}
         suggesting={suggesting}
       />
 
-      {goals.length > 0 ? (
+      {goals.length > 0 || initialLoading ? (
         <GoalList
           data={goals}
           dialogs={dialogs}

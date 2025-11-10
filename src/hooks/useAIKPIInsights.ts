@@ -79,9 +79,16 @@ export function useAIKPIInsights(companyId?: string | null, range?: RangeInput) 
         throw new Error('Missing date range');
       }
 
+      const rpcPayload =
+        typeof cleanRange === 'string'
+          ? { range_start: cleanRange, range_end: null }
+          : cleanRange
+            ? { range_start: cleanRange.start, range_end: cleanRange.end }
+            : {};
+
       const { data, error } = await supabase.rpc('get_ai_kpi_insights', {
         company_id: cleanCompanyId,
-        date_range: cleanRange,
+        ...rpcPayload,
       });
 
       if (error) {

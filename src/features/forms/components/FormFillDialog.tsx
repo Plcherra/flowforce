@@ -24,21 +24,21 @@ import {
   FormFieldType,
   MediaConfig,
 } from '@/types/forms';
-import { LocationField } from './fields/LocationField';
-import { ImageUploadField } from './fields/ImageUploadField';
-import { VideoUploadField } from './fields/VideoUploadField';
-import { AudioRecordingField } from './fields/AudioRecordingField';
-import { FileUploadField } from './fields/FileUploadField';
-import { FormulaField } from './fields/FormulaField';
-import { NumberSliderField } from './fields/NumberSliderField';
-import { YesNoField } from './fields/YesNoField';
-import { DescriptionField } from './fields/DescriptionField';
-import { SignatureField } from './fields/SignatureField';
-import { RatingField } from './fields/RatingField';
-import { ScannerField } from './fields/ScannerField';
-import { TaskField } from './fields/TaskField';
-import { ImageSelectionField } from './fields/ImageSelectionField';
-import { orderFormFields } from './utils/orderFormFields';
+import { LocationField } from '@/components/forms/fields/LocationField';
+import { ImageUploadField } from '@/components/forms/fields/ImageUploadField';
+import { VideoUploadField } from '@/components/forms/fields/VideoUploadField';
+import { AudioRecordingField } from '@/components/forms/fields/AudioRecordingField';
+import { FileUploadField } from '@/components/forms/fields/FileUploadField';
+import { FormulaField } from '@/components/forms/fields/FormulaField';
+import { NumberSliderField } from '@/components/forms/fields/NumberSliderField';
+import { YesNoField } from '@/components/forms/fields/YesNoField';
+import { DescriptionField } from '@/components/forms/fields/DescriptionField';
+import { SignatureField } from '@/components/forms/fields/SignatureField';
+import { RatingField } from '@/components/forms/fields/RatingField';
+import { ScannerField } from '@/components/forms/fields/ScannerField';
+import { TaskField } from '@/components/forms/fields/TaskField';
+import { ImageSelectionField } from '@/components/forms/fields/ImageSelectionField';
+import { orderFormFields } from '@/components/forms/utils/orderFormFields';
 
 type FormFieldDataLocal = Tables<'form_fields'>;
 

@@ -1,17 +1,88 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import AIInsightsPanel from '@/components/ai/AIInsightsPanel';
 import AIChatAssistant from '@/components/ai/AIChatAssistant';
 import PerformanceRadarChart from '@/components/ai/PerformanceRadarChart';
 import ScenarioSimulator from '@/components/ai/ScenarioSimulator';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
 import { usePerformanceOverview } from '@/hooks/usePerformanceOverview';
-import { Brain, TrendingUp, Users, Target } from 'lucide-react';
+import { Brain, Users } from 'lucide-react';
 import AIQuickActions from '@/components/ai/AIQuickActions';
 import EngagementOverview from '@/components/company-updates/EngagementOverview';
 
 export default function AIInsights() {
-  const { radar, loading } = usePerformanceOverview();
+  const { radar, loading, error: performanceError, dataset } = usePerformanceOverview();
+
+  const goalSummary = dataset?.goalSummary;
+  const goalReviews = dataset?.goalReviews ?? [];
+  const summaryLoading = loading && !dataset;
+  const predictionsLoading = loading && !dataset;
+
+  const getRadarMetric = (label: string) => radar.find((metric) => metric.metric === label);
+
+  const summaryMetrics = goalSummary
+    ? [
+        {
+          id: 'goal-progress',
+          label: 'Average Goal Progress',
+          value: `${goalSummary.averageProgress ?? 0}%`,
+          context: `${goalSummary.active ?? 0} active · ${goalSummary.completed ?? 0} completed`,
+          tone: 'purple',
+        },
+        {
+          id: 'performance-score',
+          label: 'Performance Score',
+          value: `${getRadarMetric('Performance Score')?.actual ?? 0}%`,
+          context: `Target ${getRadarMetric('Performance Score')?.target ?? 0}%`,
+          tone: 'blue',
+        },
+        {
+          id: 'review-health',
+          label: 'Review Health',
+          value: `${getRadarMetric('Review Health')?.actual ?? 0}%`,
+          context: `${dataset?.employees.length ?? 0} employees tracked`,
+          tone: 'green',
+        },
+      ]
+    : [];
+
+  const predictionRows = goalReviews.slice(0, 4).map((review) => {
+    const progress = review.goalProgress ?? 0;
+    const status = (review.goalStatus ?? 'active').toString();
+    const confidence = review.score != null ? Math.round((review.score / 5) * 100) : null;
+    let forecast = 'Stabilise trajectory over the next quarter';
+    if (progress >= 90) {
+      forecast = 'On track to complete early';
+    } else if (progress >= 70) {
+      forecast = 'Maintain focus to stay on target';
+    } else if (progress >= 50) {
+      forecast = 'Add support to avoid delays';
+    } else {
+      forecast = 'At risk — escalate coaching plan';
+    }
+
+    const trendClass =
+      progress >= 80
+        ? 'text-emerald-600'
+        : progress >= 60
+          ? 'text-blue-600'
+          : progress >= 40
+            ? 'text-amber-600'
+            : 'text-red-500';
+
+    return {
+      id: review.reviewId,
+      metric: review.goalTitle ?? 'Goal',
+      status,
+      progress,
+      forecast,
+      confidence,
+      trendClass,
+      reviewDate: review.reviewDate,
+    };
+  });
 
   return (
     <div>
@@ -45,33 +116,56 @@ export default function AIInsights() {
                       AI Analytics Summary
                     </CardTitle>
                     <CardDescription>
-                      Key insights and recommendations from your data
+                      Key signals from performance, goals, and review health
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center">
-                          <TrendingUp className="h-4 w-4 text-blue-600 mr-2" />
-                          <span className="text-sm font-medium">Productivity Trend</span>
-                        </div>
-                        <span className="text-sm text-blue-600 font-semibold">+12% this week</span>
+                    {summaryLoading ? (
+                      <div className="space-y-4">
+                        {Array.from({ length: 3 }).map((_, index) => (
+                          <div key={`summary-skeleton-${index}`} className="flex items-center justify-between p-3 rounded-lg border">
+                            <div className="space-y-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-3 w-48" />
+                            </div>
+                            <Skeleton className="h-5 w-16" />
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 text-green-600 mr-2" />
-                          <span className="text-sm font-medium">Team Efficiency</span>
-                        </div>
-                        <span className="text-sm text-green-600 font-semibold">Above average</span>
+                    ) : performanceError ? (
+                      <Alert variant="destructive">
+                        <AlertTitle>Unable to load performance summary</AlertTitle>
+                        <AlertDescription>{performanceError}</AlertDescription>
+                      </Alert>
+                    ) : summaryMetrics.length ? (
+                      <div className="space-y-4">
+                        {summaryMetrics.map((metric) => {
+                          const toneClass =
+                            metric.tone === 'purple'
+                              ? 'bg-purple-50 border-purple-200 text-purple-700'
+                              : metric.tone === 'green'
+                                ? 'bg-green-50 border-green-200 text-green-700'
+                                : 'bg-blue-50 border-blue-200 text-blue-700';
+
+                          return (
+                            <div
+                              key={metric.id}
+                              className={`flex items-center justify-between p-3 rounded-lg border ${toneClass}`}
+                            >
+                              <div>
+                                <p className="text-sm font-medium">{metric.label}</p>
+                                <p className="text-xs opacity-75">{metric.context}</p>
+                              </div>
+                              <span className="text-lg font-semibold">{metric.value}</span>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                        <div className="flex items-center">
-                          <Target className="h-4 w-4 text-purple-600 mr-2" />
-                          <span className="text-sm font-medium">Goal Achievement</span>
-                        </div>
-                        <span className="text-sm text-purple-600 font-semibold">85% complete</span>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        Connect your performance workspace to unlock live AI analytics.
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -106,18 +200,27 @@ export default function AIInsights() {
                     Detailed performance metrics and team analysis
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="flex items-center justify-center py-10">
-                      <LoadingSpinner />
-                    </div>
-                  ) : (
-                    <PerformanceRadarChart data={radar.length ? radar : undefined} />
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex items-center justify-center py-10">
+                        <LoadingSpinner />
+                      </div>
+                    ) : performanceError ? (
+                      <Alert variant="destructive">
+                        <AlertTitle>Unable to load performance analytics</AlertTitle>
+                        <AlertDescription>{performanceError}</AlertDescription>
+                      </Alert>
+                    ) : radar.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">
+                        Connect your performance data to visualize radar trends.
+                      </div>
+                    ) : (
+                      <PerformanceRadarChart data={radar} />
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
           <TabsContent value="predictions" className="space-y-6">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -132,41 +235,59 @@ export default function AIInsights() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-sm text-muted-foreground">
-                    Use the forecast table below to understand how workforce efficiency, cost, and goal
-                    attainment are projected to change over the next quarter.
+                    Forecasts generated from the latest goal reviews and AI scoring data.
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-muted-foreground">
-                          <th className="py-2 pr-4 font-medium">Metric</th>
-                          <th className="py-2 pr-4 font-medium">Current Trend</th>
-                          <th className="py-2 pr-4 font-medium">90-Day Forecast</th>
-                          <th className="py-2 font-medium">Confidence</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-t">
-                          <td className="py-3 pr-4">Labor Spend</td>
-                          <td className="py-3 pr-4 text-red-500">+3.5%</td>
-                          <td className="py-3 pr-4">Normalize by week 8</td>
-                          <td className="py-3 text-muted-foreground">82%</td>
-                        </tr>
-                        <tr className="border-t">
-                          <td className="py-3 pr-4">Schedule Efficiency</td>
-                          <td className="py-3 pr-4 text-emerald-600">+5.2%</td>
-                          <td className="py-3 pr-4">Sustain growth with minor adjustments</td>
-                          <td className="py-3 text-muted-foreground">88%</td>
-                        </tr>
-                        <tr className="border-t">
-                          <td className="py-3 pr-4">Goal Achievement</td>
-                          <td className="py-3 pr-4 text-blue-600">85% complete</td>
-                          <td className="py-3 pr-4">On track for 94% completion</td>
-                          <td className="py-3 text-muted-foreground">90%</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                  {predictionsLoading ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 3 }).map((_, index) => (
+                        <div key={`prediction-skeleton-${index}`} className="rounded-md border p-3">
+                          <Skeleton className="h-4 w-48" />
+                          <Skeleton className="mt-2 h-3 w-64" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : performanceError ? (
+                    <Alert variant="destructive">
+                      <AlertTitle>Unable to build predictions</AlertTitle>
+                      <AlertDescription>{performanceError}</AlertDescription>
+                    </Alert>
+                  ) : predictionRows.length ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-muted-foreground">
+                            <th className="py-2 pr-4 font-medium">Metric</th>
+                            <th className="py-2 pr-4 font-medium">Current Trend</th>
+                            <th className="py-2 pr-4 font-medium">90-Day Forecast</th>
+                            <th className="py-2 font-medium">Confidence</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {predictionRows.map((row) => (
+                            <tr key={row.id} className="border-t">
+                              <td className="py-3 pr-4">
+                                <div className="font-medium text-foreground">{row.metric}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Reviewed {row.reviewDate ? new Date(row.reviewDate).toLocaleDateString() : 'Recently'}
+                                </div>
+                              </td>
+                              <td className={`py-3 pr-4 font-semibold ${row.trendClass}`}>
+                                {row.progress}% · {row.status}
+                              </td>
+                              <td className="py-3 pr-4 text-foreground">{row.forecast}</td>
+                              <td className="py-3 text-muted-foreground">
+                                {row.confidence != null ? `${row.confidence}%` : '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      Publish goal reviews to unlock AI forecasts.
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

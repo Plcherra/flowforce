@@ -24,7 +24,7 @@ import { WizardFormData } from '../updates/CreateUpdateWizard';
 interface CompanyUpdate {
   id: string;
   title: string;
-  content: string;
+  body: string;
   type: 'announcement' | 'news' | 'event' | 'policy';
   priority: 'low' | 'medium' | 'high';
   author: {
@@ -80,7 +80,7 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
     // Convert WizardFormData to CompanyUpdate format
     createUpdate({
       title: formData.title,
-      content: formData.content,
+      body: formData.body,
       richContent: formData.richContent,
       type: formData.type,
       priority: formData.priority,
@@ -140,7 +140,7 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
                   <Pin className="h-4 w-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm truncate">{update.title}</h4>
-                    <p className="text-xs text-muted-foreground truncate">{update.content}</p>
+                    <p className="text-xs text-muted-foreground truncate">{update.body}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">{update.type}</Badge>
                       <span className="text-xs text-muted-foreground">
@@ -156,7 +156,7 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
                 <div key={update.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50">
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm truncate">{update.title}</h4>
-                    <p className="text-xs text-muted-foreground truncate">{update.content}</p>
+                    <p className="text-xs text-muted-foreground truncate">{update.body}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">{update.type}</Badge>
                       <span className="text-xs text-muted-foreground">

@@ -7,6 +7,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import type { MessageChannel } from '@/types/messages';
 import { Input } from '@/components/ui/input';
 import { MessageFilterBar } from '@/components/MessageFilterBar';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 interface MessagesSidebarProps {
   channels: MessageChannel[];
@@ -91,12 +93,18 @@ export function MessagesSidebar({
 
         <div className="flex flex-wrap items-center gap-2">
           {typeof onQueryChange === 'function' && typeof query === 'string' && (
-            <Input
-              className="min-w-[160px] flex-1"
-              placeholder="Search channels..."
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-            />
+            <div className="flex-1">
+              <Label htmlFor="messages-sidebar-search" className="sr-only">
+                Search channels
+              </Label>
+              <Input
+                id="messages-sidebar-search"
+                className="min-w-[160px] flex-1"
+                placeholder="Search channels"
+                value={query}
+                onChange={(event) => onQueryChange(event.target.value)}
+              />
+            </div>
           )}
           <Button size="sm" variant="outline" onClick={onShowMessageSearch}>
             <Search className="h-4 w-4" />
@@ -117,12 +125,18 @@ export function MessagesSidebar({
           ) : (
             <div className="space-y-1">
               {channels.map((channel) => (
-                <div
+                <button
                   key={channel.id}
-                  className={`flex cursor-pointer items-center space-x-3 rounded-lg p-3 transition-colors hover:bg-primary/5 ${
-                    currentChannelId === channel.id ? 'border border-primary/40 bg-primary/5 shadow-sm' : ''
-                  }`}
+                  type="button"
+                  className={cn(
+                    'flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    currentChannelId === channel.id
+                      ? 'border-primary/40 bg-primary/5 shadow-sm'
+                      : 'hover:bg-primary/5'
+                  )}
                   onClick={() => onChannelSelect(channel.id)}
+                  aria-pressed={currentChannelId === channel.id}
+                  aria-label={`Open ${channel.name} channel`}
                 >
                   <div className="text-muted-foreground">
                     {getChannelIcon(channel.type, channel.is_private || false)}
@@ -142,7 +156,7 @@ export function MessagesSidebar({
                       {channel.unread_count}
                     </Badge>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           )}

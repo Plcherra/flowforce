@@ -39,7 +39,7 @@ export function TemplateSelectionStep({ formData, updateFormData }: TemplateSele
         template,
         type: template.type,
         title: template.defaultTitle || formData.title,
-        content: template.defaultContent || formData.content,
+        body: template.defaultContent || formData.body,
         backgroundStyle: template.backgroundStyle
       });
     } else {
@@ -48,7 +48,7 @@ export function TemplateSelectionStep({ formData, updateFormData }: TemplateSele
         template: undefined,
         type: 'announcement',
         title: '',
-        content: '',
+        body: '',
         backgroundStyle: { type: 'solid', primary: '#3b82f6' }
       });
     }

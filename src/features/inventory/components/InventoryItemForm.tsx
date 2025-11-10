@@ -102,10 +102,11 @@ export default function InventoryItemForm({ children, editItem, open: controlled
 
   const { toast } = useToast();
   const { profile } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const { data: categories } = useInventoryCategories();
   const { data: units } = useInventoryUnits();
   const { data: locations } = useInventoryLocations();
-  const { data: suppliers } = useInventorySuppliers();
+  const { data: suppliers } = useInventorySuppliers(companyId);
   const { symbol: currencySymbol } = useCurrency();
   const { units: existingItemUnits } = useItemUnits(editItem?.id);
   const createItem = useCreateInventoryItem();

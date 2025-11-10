@@ -250,9 +250,11 @@ const extractInvoiceNumber = (notes?: string | null, description?: string | null
 };
 
 export default function InventoryPurchasingPage() {
+  const { profile } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const { data: purchaseOrders = [], isLoading: ordersLoading } = usePurchaseOrders();
   const { data: inventoryItems = [], isLoading: itemsLoading } = useInventoryItems();
-  const { data: suppliers = [], isLoading: suppliersLoading } = useInventorySuppliers();
+  const { data: suppliers = [], isLoading: suppliersLoading } = useInventorySuppliers(companyId);
   const { data: vendorInvoiceData = [], isLoading: invoicesLoading } = useVendorInvoices();
 
   const createOrder = useCreatePurchaseOrder();
@@ -262,7 +264,6 @@ export default function InventoryPurchasingPage() {
   const linkIntegration = useSupplierIntegrationLink();
 
   const { toast } = useToast();
-  const { profile } = useProfile();
   const vendorInvoices = useMemo<VendorInvoiceRecord[]>(
     () => (vendorInvoiceData as VendorInvoiceRecord[]) ?? [],
     [vendorInvoiceData]

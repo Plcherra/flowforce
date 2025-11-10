@@ -18,7 +18,7 @@ export interface WizardStepMeta {
 export interface WizardFormData {
   template?: UpdateTemplate;
   title: string;
-  content: string;
+  body: string;
   richContent?: string;
   type: 'announcement' | 'news' | 'event' | 'policy';
   priority: 'high' | 'medium' | 'low';

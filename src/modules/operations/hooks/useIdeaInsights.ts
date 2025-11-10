@@ -54,9 +54,9 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
 
   const fetchInsights = useCallback(async () => {
     if (!companyId) {
-      setLoading(false);
-      setError(new Error('Missing company context'));
       setInsights([]);
+      setLoading(false);
+      setError(null);
       return;
     }
 
@@ -66,7 +66,8 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
     try {
       const { data, error: rpcError } = await supabase.rpc('get_kpi_summary', {
         company_id: companyId,
-        range: normalizedRange,
+        range_start: normalizedRange.start,
+        range_end: normalizedRange.end,
       });
 
       if (rpcError) {

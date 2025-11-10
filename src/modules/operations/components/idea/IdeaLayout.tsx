@@ -29,7 +29,7 @@ export function IdeaLayout() {
     refresh: refreshInsights,
   } = useIdeaInsights(companyId, range);
 
-  const diagnostics = useIdeaDiagnostics(companyId, insights);
+  const diagnostics = useIdeaDiagnostics(companyId, insights, range);
   const actionsState = useIdeaActions(companyId, activeCycleId);
   const assessments = useIdeaAssessments(companyId, range, activeCycleId, insights, stage === 'assess');
 

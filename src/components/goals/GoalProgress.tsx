@@ -1,16 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Target, CheckCircle2, Rocket, ClipboardList } from 'lucide-react';
+import { Target, CheckCircle2, Rocket, ClipboardList, Ban } from 'lucide-react';
+import type { GoalStats } from '@/hooks/useGoals';
 
 interface GoalProgressProps {
-  totals: {
-    total: number;
-    active: number;
-    completed: number;
-    drafts: number;
-    averageProgress: number;
-  };
+  totals: GoalStats;
   isLoading?: boolean;
 }
 
@@ -39,11 +34,17 @@ const metricConfig = [
     icon: Target,
     accent: 'bg-slate-100 text-slate-700 dark:bg-slate-900/40 dark:text-slate-300',
   },
+  {
+    key: 'cancelled' as const,
+    title: 'Cancelled',
+    icon: Ban,
+    accent: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200',
+  },
 ];
 
 export function GoalProgress({ totals, isLoading }: GoalProgressProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
       {metricConfig.map(({ key, title, icon: Icon, accent }) => (
         <Card key={key} className="border border-border/60 bg-background/80 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

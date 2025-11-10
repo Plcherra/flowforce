@@ -85,6 +85,7 @@ export function useTasks() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<TaskWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -92,6 +93,7 @@ export function useTasks() {
     } else {
       setTasks([]);
       setLoading(false);
+      setError(null);
     }
   }, [user]);
 
@@ -103,6 +105,7 @@ export function useTasks() {
     }
 
     setLoading(true);
+    setError(null);
 
     try {
       const { data: profileData, error: profileError } = await supabase
@@ -118,6 +121,7 @@ export function useTasks() {
       if (!companyId) {
         setTasks([]);
         setLoading(false);
+        setError('No company context found for the current profile.');
         return;
       }
 
@@ -136,9 +140,11 @@ export function useTasks() {
       if (error) throw error;
 
       setTasks((data ?? []) as TaskWithRelations[]);
+      setError(null);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       setTasks([]);
+      setError(error instanceof Error ? error.message : 'Unexpected error loading tasks.');
     } finally {
       setLoading(false);
     }
@@ -360,6 +366,7 @@ export function useTasks() {
   return {
     tasks,
     loading,
+    error,
     createTask,
     updateTask,
     deleteTask,

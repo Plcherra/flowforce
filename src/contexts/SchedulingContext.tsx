@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -58,6 +58,7 @@ interface SchedulingContextType {
   refetchAll: () => Promise<void>;
   weekRange: { start: Date; end: Date };
   mutations: SchedulingMutations;
+  setWeekReference: (date: Date) => void;
 }
 
 type AIRecommendation = {
@@ -77,6 +78,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const fallbackActionNoticeShownRef = useRef(false);
+  const [referenceDate, setReferenceDate] = useState(() => startOfWeek(new Date()));
 
   const showReadOnlyNotice = useCallback(() => {
     if (fallbackActionNoticeShownRef.current) return;
@@ -90,9 +92,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const companyId = profile?.companyId ?? null;
 
   const weekRange = useMemo(() => {
-    const start = startOfWeek(new Date());
+    const start = startOfWeek(referenceDate);
     const end = endOfWeek(start);
     return { start, end };
+  }, [referenceDate]);
+
+  const setWeekReference = useCallback((date: Date) => {
+    setReferenceDate((prev) => {
+      const next = startOfWeek(date);
+      return prev.getTime() === next.getTime() ? prev : next;
+    });
   }, []);
 
   const {
@@ -763,6 +772,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     refetchAll,
     weekRange,
     mutations,
+    setWeekReference,
   };
 
   return <SchedulingContext.Provider value={value}>{children}</SchedulingContext.Provider>;

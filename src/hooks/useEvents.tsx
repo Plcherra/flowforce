@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Json } from '@/integrations/supabase/public-types';
+import type { Json, TablesInsert } from '@/integrations/supabase/public-types';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
+import { calendarEventsRepository, type CalendarEventRow } from '@/repositories/calendarEventsRepository';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 const STORAGE_KEY = 'cf_events_v1';
-const CALENDAR_TABLE = 'calendar_events';
 const DEFAULT_EVENT_COLORS: Record<'meeting' | 'event' | 'vendor', string> = {
   meeting: '#0ea5e9',
   event: '#6366f1',
@@ -58,26 +57,6 @@ export type AppEvent = {
 type StoredEvent = Omit<AppEvent, 'persisted' | 'source'> & {
   persisted?: boolean;
   source?: EventSource;
-};
-
-type CalendarEventRow = {
-  id: string;
-  company_id: string | null;
-  created_by: string | null;
-  title: string | null;
-  description: string | null;
-  location: string | null;
-  event_type: string | null;
-  color: string | null;
-  start_time: string;
-  end_time: string | null;
-  attendees: Json | null;
-  related_shift_ids: string[] | null;
-  checklist: Json | null;
-  vendor: Json | null;
-  metadata: Json | null;
-  created_at: string;
-  updated_at: string;
 };
 
 const sortEvents = (entries: AppEvent[]): AppEvent[] => {
@@ -153,14 +132,9 @@ const syncEventParticipants = async (
 ) => {
   if (!companyId) return;
   try {
-    await supabase
-      .from('event_participants')
-      .delete()
-      .eq('event_id', eventId)
-      .eq('company_id', companyId);
-
     const entries = (attendees ?? []).filter((attendee) => !!attendee?.id);
     if (entries.length === 0) {
+      await calendarEventsRepository.replaceEventParticipants(companyId, eventId, []);
       return;
     }
 
@@ -174,9 +148,9 @@ const syncEventParticipants = async (
       avatar_url: attendee.avatar_url ?? null,
       response_status: 'invited',
       metadata: { source_attendee_id: attendee.id },
-    }));
+    })) satisfies TablesInsert<'event_participants'>[];
 
-    await supabase.from('event_participants').insert(payload);
+    await calendarEventsRepository.replaceEventParticipants(companyId, eventId, payload);
   } catch (error) {
     console.warn('Failed to sync event participants', error);
   }
@@ -189,26 +163,8 @@ const syncEventShiftLinks = async (
 ) => {
   if (!companyId) return;
   try {
-    await supabase
-      .from('event_shift_links')
-      .delete()
-      .eq('event_id', eventId)
-      .eq('company_id', companyId);
-
     const uniqueShiftIds = Array.from(new Set((shiftIds ?? []).filter(Boolean)));
-    if (uniqueShiftIds.length === 0) {
-      return;
-    }
-
-    const payload = uniqueShiftIds.map((shiftId) => ({
-      event_id: eventId,
-      shift_id: shiftId,
-      company_id: companyId,
-      store_id: null,
-      metadata: {},
-    }));
-
-    await supabase.from('event_shift_links').insert(payload);
+    await calendarEventsRepository.replaceEventShiftLinks(companyId, eventId, uniqueShiftIds);
   } catch (error) {
     console.warn('Failed to sync event shift links', error);
   }
@@ -269,6 +225,7 @@ export function useEvents() {
 
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const eventsRef = useRef<AppEvent[]>([]);
   const initialisedRef = useRef(false);
 
@@ -340,29 +297,25 @@ export function useEvents() {
 
     const fetchRemote = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const response = await supabase
-          .from<CalendarEventRow>(CALENDAR_TABLE as never)
-          .select('*')
-          .eq('company_id', companyId)
-          .order('start_time', { ascending: true });
-
-        if (response.error) {
-          throw response.error;
-        }
-
-        const remote = (response.data ?? []).map(mapRowToEvent);
+        const rows = await calendarEventsRepository.listCompanyEvents(companyId);
+        const remote = rows.map(mapRowToEvent);
         if (!cancelled) {
           mergeRemoteEvents(remote);
         }
       } catch (error) {
         console.warn('Unable to load calendar events from Supabase', error);
-        if (!cancelled && initialisedRef.current) {
-          toast({
-            title: 'Calendar offline',
-            description: 'Showing cached events while we reconnect.',
-            variant: 'default',
-          });
+        if (!cancelled) {
+          const message = parseError(error);
+          setError(message);
+          if (initialisedRef.current) {
+            toast({
+              title: 'Calendar offline',
+              description: 'Showing cached events while we reconnect.',
+              variant: 'default',
+            });
+          }
         }
       } finally {
         if (!cancelled) {
@@ -396,15 +349,8 @@ export function useEvents() {
 
       try {
         const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
-        const response = await supabase
-          .from<CalendarEventRow>(CALENDAR_TABLE as never)
-          .insert(insertPayload)
-          .select()
-          .single();
-
-        if (response.error) throw response.error;
-
-        const persisted = mapRowToEvent(response.data);
+        const row = await calendarEventsRepository.insertEvent(insertPayload);
+        const persisted = mapRowToEvent(row);
         await Promise.all([
           syncEventParticipants(companyId, persisted.id, normalized.attendees),
           syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
@@ -450,15 +396,8 @@ export function useEvents() {
           ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
           event_type: 'vendor',
         };
-        const response = await supabase
-          .from<CalendarEventRow>(CALENDAR_TABLE as never)
-          .insert(insertPayload)
-          .select()
-          .single();
-
-        if (response.error) throw response.error;
-
-        const persisted = mapRowToEvent(response.data);
+        const row = await calendarEventsRepository.insertEvent(insertPayload);
+        const persisted = mapRowToEvent(row);
         await Promise.all([
           syncEventParticipants(companyId, persisted.id, normalized.attendees),
           syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
@@ -497,16 +436,9 @@ export function useEvents() {
       }
 
       try {
-        const response = await supabase
-          .from<CalendarEventRow>(CALENDAR_TABLE as never)
-          .update(toUpdatePayload({ ...updates, type: target.type }))
-          .eq('id', id)
-          .select()
-          .maybeSingle();
-
-        if (response?.error) throw response.error;
-        if (response?.data) {
-          const persisted = mapRowToEvent(response.data);
+        const row = await calendarEventsRepository.updateEvent(id, toUpdatePayload({ ...updates, type: target.type }));
+        if (row) {
+          const persisted = mapRowToEvent(row);
           await Promise.all([
             syncEventParticipants(companyId, id, persisted.attendees),
             syncEventShiftLinks(companyId, id, persisted.related_shift_ids),
@@ -541,8 +473,7 @@ export function useEvents() {
       }
 
       try {
-        const response = await supabase.from(CALENDAR_TABLE as never).delete().eq('id', id);
-        if (response.error) throw response.error;
+        await calendarEventsRepository.deleteEvent(id);
       } catch (error) {
         console.error('Failed to delete event', error);
         setEvents(previous);
@@ -584,11 +515,10 @@ export function useEvents() {
       }
 
       try {
-        const response = await supabase
-          .from(CALENDAR_TABLE as never)
-          .update({ related_shift_ids: shiftIds, updated_at: new Date().toISOString() })
-          .eq('id', eventId);
-        if (response.error) throw response.error;
+        await calendarEventsRepository.updateEvent(eventId, {
+          related_shift_ids: shiftIds,
+          updated_at: new Date().toISOString(),
+        });
         await syncEventShiftLinks(companyId, eventId, shiftIds);
       } catch (error) {
         console.error('Failed to link event to shifts', error);
@@ -621,11 +551,10 @@ export function useEvents() {
       }
 
       try {
-        const response = await supabase
-          .from(CALENDAR_TABLE as never)
-          .update({ checklist, updated_at: new Date().toISOString() })
-          .eq('id', eventId);
-        if (response.error) throw response.error;
+        await calendarEventsRepository.updateEvent(eventId, {
+          checklist,
+          updated_at: new Date().toISOString(),
+        });
       } catch (error) {
         console.error('Failed to update checklist', error);
         setEvents(previous);
@@ -642,6 +571,7 @@ export function useEvents() {
   return {
     events,
     loading,
+    error,
     createEvent,
     createVendorVisit,
     updateEvent,

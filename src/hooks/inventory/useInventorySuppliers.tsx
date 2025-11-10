@@ -3,13 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { InventorySupplier } from './types';
 
-export function useInventorySuppliers() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['inventory-suppliers'],
+export function useInventorySuppliers(companyId?: string | null) {
+  const query = useQuery({
+    queryKey: ['inventory-suppliers', companyId],
+    enabled: Boolean(companyId),
     queryFn: async () => {
+      if (!companyId) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('inv_suppliers')
         .select('*')
+        .eq('company_id', companyId)
         .eq('is_active', true)
         .order('name');
 
@@ -18,7 +24,11 @@ export function useInventorySuppliers() {
     },
   });
 
-  return { data, isLoading };
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+  };
 }
 
 export function useCreateSupplier() {

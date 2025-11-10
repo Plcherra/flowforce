@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sparkles, RefreshCw, Brain, TrendingUp, Settings } from 'lucide-react';
+import { Sparkles, RefreshCw, Brain, TrendingUp, Settings, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +41,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   } = useClosedLoopState({ rangeDays: type === 'dashboard' ? 14 : 7, aiType: type });
   const closedLoopLoadingState = closedLoopLoading && !closedLoopState;
   const closedLoopErrorInstance = closedLoopErrorFlag ? closedLoopError : null;
+  const containerClass = cn('space-y-4', className);
 
   const handleClosedLoopRefresh = useCallback(() => {
     void refetchClosedLoop();
@@ -172,7 +173,41 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
 
   // Only show AI insights if user has permission - but do this AFTER all hooks
   if (!can('viewAIInsights')) {
-    return null;
+    return (
+      <div className={containerClass}>
+        <Card className="h-full border-dashed">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              AI Insights restricted
+            </CardTitle>
+            <CardDescription>
+              Request access from an admin to view AI recommendations and closed-loop analytics.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
+            <p>Your current role is missing the `viewAIInsights` permission.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => navigate('/settings/permissions')}>
+                View permissions
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  toast({
+                    title: 'Access requested',
+                    description: 'We let your workspace admins know you need AI insights.',
+                  })
+                }
+              >
+                Notify admin
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const showActionsFeed = actionsFeedEnabled && (type === 'reports' || type === 'dashboard');
@@ -333,8 +368,6 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
       </CardContent>
     </Card>
   );
-
-  const containerClass = cn('space-y-4', className);
 
   if (!showActionsFeed) {
     return (

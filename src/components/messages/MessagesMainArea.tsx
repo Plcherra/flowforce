@@ -51,7 +51,7 @@ export function MessagesMainArea({
 }: MessagesMainAreaProps) {
   if (!channel) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex flex-1 items-center justify-center text-center">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">Welcome to Messages</h3>
           <p className="text-muted-foreground mb-4">
@@ -67,7 +67,7 @@ export function MessagesMainArea({
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex flex-1 min-h-0 flex-col">
       <MessagesHeader
         channel={channel}
         isChannelAdmin={isChannelAdmin}

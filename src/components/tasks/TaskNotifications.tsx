@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Bell, BellRing, CheckCircle, Clock, AlertTriangle, User, Calendar, Flag } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, BellRing, CheckCircle, Clock, AlertTriangle, User, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,15 +9,21 @@ import { Separator } from '@/components/ui/separator';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import { logger } from '@/utils/logger';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-export function TaskNotifications() {
+type TaskNotificationsProps = {
+  onTaskNavigate?: (taskId: string) => void;
+};
+
+export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
   const { 
     notifications, 
     unreadCount, 
     loading, 
     markAsRead, 
     markAllAsRead, 
-    deleteNotification 
+    deleteNotification,
+    error,
   } = useTaskNotifications();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -81,8 +87,12 @@ export function TaskNotifications() {
     }
     // Navigate to task or perform action based on notification type
     if (notification.task_id) {
-      // You could implement navigation to the specific task here
-      logger.debug('Navigate to task:', notification.task_id);
+      if (onTaskNavigate) {
+        onTaskNavigate(notification.task_id);
+        setIsOpen(false);
+      } else {
+        logger.debug('Navigate to task:', notification.task_id);
+      }
     }
   };
 
@@ -130,6 +140,14 @@ export function TaskNotifications() {
           
           <ScrollArea className="h-80">
             <CardContent className="p-0">
+              {error && (
+                <div className="p-4 pt-0">
+                  <Alert variant="destructive">
+                    <AlertTitle>Notifications unavailable</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>

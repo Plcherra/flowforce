@@ -10,7 +10,7 @@ import { GoalCard } from '@/components/goals/GoalCard';
 import type { Goal, GoalStatus } from '@/hooks/useGoals';
 import type { GoalDialogs } from '@/hooks/useGoalDialogs';
 
-const FILTERS = ['all', 'active', 'completed', 'draft'] as const;
+const FILTERS = ['all', 'active', 'completed', 'draft', 'cancelled'] as const;
 type GoalFilter = (typeof FILTERS)[number];
 
 interface GoalListProps {

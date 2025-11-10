@@ -11,12 +11,14 @@ export function useTaskNotifications() {
   const [notifications, setNotifications] = useState<TaskNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       setNotifications([]);
       setUnreadCount(0);
       setLoading(false);
+      setError(null);
       return;
     }
 
@@ -45,6 +47,7 @@ export function useTaskNotifications() {
     if (!user) return;
 
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('task_notifications')
         .select('*')
@@ -56,8 +59,10 @@ export function useTaskNotifications() {
 
       setNotifications(data || []);
       setUnreadCount((data || []).filter(n => !n.read_at).length);
+      setError(null);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setError(error instanceof Error ? error.message : 'Unexpected error loading notifications.');
     } finally {
       setLoading(false);
     }
@@ -204,6 +209,7 @@ export function useTaskNotifications() {
       }
     } catch (error) {
       console.error('Error checking due tasks:', error);
+      setError((error as Error)?.message ?? 'Unable to check due tasks.');
     }
   };
 
@@ -216,6 +222,7 @@ export function useTaskNotifications() {
       if (error) throw error;
     } catch (error) {
       console.error('Error creating notification:', error);
+      setError((error as Error)?.message ?? 'Unable to create notification.');
     }
   };
 
@@ -229,6 +236,7 @@ export function useTaskNotifications() {
       if (error) throw error;
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      setError((error as Error)?.message ?? 'Unable to update notification.');
     }
   };
 
@@ -250,6 +258,7 @@ export function useTaskNotifications() {
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+      setError((error as Error)?.message ?? 'Unable to update notifications.');
     }
   };
 
@@ -269,6 +278,7 @@ export function useTaskNotifications() {
       });
     } catch (error) {
       console.error('Error deleting notification:', error);
+      setError((error as Error)?.message ?? 'Unable to delete notification.');
     }
   };
 
@@ -336,6 +346,7 @@ export function useTaskNotifications() {
     notifications,
     unreadCount,
     loading,
+    error,
     markAsRead,
     markAllAsRead,
     deleteNotification,

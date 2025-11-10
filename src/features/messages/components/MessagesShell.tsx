@@ -88,7 +88,7 @@ function MobileLayout({ vm }: MessagesSubSectionProps) {
         />
       )}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-80 transform bg-card transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-80 max-w-[90vw] sm:w-72 transform bg-card transition-transform duration-300 ease-in-out ${
           vm.showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

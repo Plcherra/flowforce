@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../useAuth';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
+import { supabase } from '@/integrations/supabase/client';
+import { messagesRepository } from '@/repositories/messagesRepository';
 
 export function useMessageChannels() {
   const { user } = useAuth();
@@ -14,17 +15,7 @@ export function useMessageChannels() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('message_channels')
-        .select(`
-          *,
-          created_profile:profiles!created_by(first_name, last_name),
-          department:departments(name),
-          channel_members(user_id, role, last_read_at)
-        `)
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await messagesRepository.listChannels(user.id);
       setChannels(data ?? []);
       setError(null);
     } catch (error) {
@@ -86,37 +77,14 @@ export function useMessageChannels() {
       }
 
       try {
-        const { data: channel, error: channelError } = await supabase
-          .from('message_channels')
-          .insert({
-            name: channelData.name,
-            description: channelData.description,
-            type: channelData.type,
-            department_id: channelData.department_id,
-            created_by: user.id,
-            is_private: channelData.is_private || false,
-          })
-          .select()
-          .single();
-
-        if (channelError) throw channelError;
-
-        await supabase.from('channel_members').insert({
-          channel_id: channel.id,
-          user_id: user.id,
-          role: 'admin',
-        });
-
-        if (channelData.member_ids && channelData.member_ids.length > 0) {
-          const memberInserts = channelData.member_ids.map((userId) => ({
-            channel_id: channel.id,
-            user_id: userId,
-            role: 'member',
-          }));
-
-          await supabase.from('channel_members').insert(memberInserts);
-        }
-
+        const channel = await messagesRepository.createChannel(channelData, user.id);
+        const uniqueMembers = Array.from(
+          new Set([user.id, ...(channelData.member_ids ?? [])]),
+        ).map((memberId) => ({
+          user_id: memberId,
+          role: memberId === user.id ? 'admin' : 'member',
+        }));
+        await messagesRepository.addChannelMembers(channel.id, uniqueMembers);
         await fetchChannels();
         setError(null);
         return { data: channel, error: null };
@@ -138,13 +106,7 @@ export function useMessageChannels() {
       }
 
       try {
-        const { error } = await supabase.from('channel_members').insert({
-          channel_id: channelId,
-          user_id: user.id,
-          role: 'member',
-        });
-
-        if (error) throw error;
+        await messagesRepository.addChannelMembers(channelId, [{ user_id: user.id, role: 'member' }]);
         await fetchChannels();
         setError(null);
         return { error: null };
@@ -162,11 +124,7 @@ export function useMessageChannels() {
       if (!user) return;
 
       try {
-        await supabase
-          .from('channel_members')
-          .update({ last_read_at: new Date().toISOString() })
-          .eq('channel_id', channelId)
-          .eq('user_id', user.id);
+        await messagesRepository.updateLastRead(channelId, user.id);
       } catch (error) {
         const issue = error instanceof Error ? error : new Error('Error updating last read');
         console.error(issue);

@@ -5615,6 +5615,7 @@ export type Database = {
       }
       task_activities: {
         Row: {
+          company_id: string
           action_type: string
           created_at: string
           description: string
@@ -5624,6 +5625,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id: string
           action_type: string
           created_at?: string
           description: string
@@ -5633,6 +5635,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string
           action_type?: string
           created_at?: string
           description?: string
@@ -5642,6 +5645,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "task_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "task_activities_task_id_fkey"
             columns: ["task_id"]

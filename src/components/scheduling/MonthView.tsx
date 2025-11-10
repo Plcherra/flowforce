@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { SchedulingFilterState } from './SchedulingFilters';
 import type { CalendarEvent } from '@/hooks/useCalendarEvents';
 import { useMemo, useState } from 'react';
 import { ShiftWizardDialog } from './ShiftWizardDialog';
@@ -14,11 +13,11 @@ interface MonthViewProps {
   selectedDate: Date;
   onSelectShift: (shiftId: string) => void;
   onSelectEvent?: (eventId: string | null) => void;
-  filters: SchedulingFilterState;
   isMobile?: boolean;
   hideShiftActions?: boolean;
   overlayEvents?: CalendarEvent[];
   selectedEventId?: string | null;
+  locationFilter?: string;
 }
 
 export function MonthView({
@@ -26,11 +25,11 @@ export function MonthView({
   selectedDate,
   onSelectShift,
   onSelectEvent,
-  filters: _filters,
   isMobile = false,
   hideShiftActions = false,
   overlayEvents = [],
   selectedEventId = null,
+  locationFilter,
 }: MonthViewProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
@@ -64,6 +63,11 @@ export function MonthView({
   if (isMobile) {
     return (
       <div className="p-2">
+        {locationFilter && (
+          <p className="mb-2 text-center text-[11px] text-muted-foreground">
+            Showing shifts for {locationFilter}
+          </p>
+        )}
         {/* Mobile Calendar Grid - Smaller cells */}
         <div className="grid grid-cols-7 gap-1">
           {/* Day Headers */}
@@ -122,6 +126,9 @@ export function MonthView({
                       +{dayShifts.length - 2}
                     </div>
                   )}
+                  {dayEvents.length === 0 && dayShifts.length === 0 && (
+                    <p className="text-[10px] text-muted-foreground">No shifts</p>
+                  )}
                 </div>
               </div>
             );
@@ -133,6 +140,9 @@ export function MonthView({
 
   return (
     <div className="p-4">
+      {locationFilter && (
+        <p className="mb-3 text-sm text-muted-foreground">Filtered by {locationFilter}</p>
+      )}
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1">
         {/* Day Headers */}
@@ -205,6 +215,9 @@ export function MonthView({
                   <div className="text-xs text-gray-500">
                     +{dayShifts.length - 3} more
                   </div>
+                )}
+                {dayEvents.length === 0 && dayShifts.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No shifts scheduled</p>
                 )}
               </div>
 

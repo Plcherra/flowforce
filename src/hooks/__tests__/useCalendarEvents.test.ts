@@ -54,48 +54,12 @@ const responses = vi.hoisted(() => ({
   calendarEvents: [] as CalendarEventRow[],
 }));
 
-const supabaseMock = vi.hoisted(() => {
-  const builders: Array<{
-    select: ReturnType<typeof vi.fn>;
-    eq: ReturnType<typeof vi.fn>;
-    gte: ReturnType<typeof vi.fn>;
-    lte: ReturnType<typeof vi.fn>;
-    order: ReturnType<typeof vi.fn>;
-  }> = [];
+const calendarEventsRepositoryMock = vi.hoisted(() => ({
+  listCompanyEventsByRange: vi.fn(),
+}));
 
-  const makeBuilder = () => {
-    const result = Promise.resolve({ data: responses.calendarEvents, error: null });
-    const builder: any = {};
-    builder.select = vi.fn(() => builder);
-    builder.eq = vi.fn(() => builder);
-    builder.gte = vi.fn(() => builder);
-    builder.lte = vi.fn(() => builder);
-    builder.order = vi.fn(() => builder);
-    builder.then = result.then.bind(result);
-    builder.catch = result.catch.bind(result);
-    builder.finally = result.finally.bind(result);
-    builders.push(builder);
-    return builder;
-  };
-
-  return {
-    builders,
-    reset: () => {
-      builders.length = 0;
-    },
-    from: vi.fn((table: string) => {
-      if (table !== 'calendar_events') {
-        throw new Error(`Unexpected table: ${table}`);
-      }
-      return makeBuilder();
-    }),
-  };
-});
-
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: supabaseMock.from,
-  },
+vi.mock('@/repositories/calendarEventsRepository', () => ({
+  calendarEventsRepository: calendarEventsRepositoryMock,
 }));
 
 vi.mock('@/hooks/useProfile', () => ({
@@ -108,7 +72,6 @@ vi.mock('@/hooks/useProfile', () => ({
 
 describe('useCalendarEvents', () => {
   beforeEach(() => {
-    supabaseMock.reset();
     responses.calendarEvents = [
       {
         id: 'event-1',
@@ -160,6 +123,7 @@ describe('useCalendarEvents', () => {
         ],
       },
     ];
+    calendarEventsRepositoryMock.listCompanyEventsByRange.mockResolvedValue(responses.calendarEvents);
   });
 
   it('filters events by company and range while combining shift links', async () => {
@@ -174,11 +138,12 @@ describe('useCalendarEvents', () => {
 
     await waitFor(() => expect(result.current.events).toHaveLength(1));
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('calendar_events');
-    const builder = supabaseMock.builders[0];
-    expect(builder.eq).toHaveBeenCalledWith('company_id', 'company-1');
-    expect(builder.gte).toHaveBeenCalledWith('start_time', '2024-01-01T00:00:00.000Z');
-    expect(builder.lte).toHaveBeenCalledWith('start_time', '2024-01-07T23:59:59.999Z');
+    expect(calendarEventsRepositoryMock.listCompanyEventsByRange).toHaveBeenCalledWith({
+      companyId: 'company-1',
+      startIso: '2024-01-01T00:00:00.000Z',
+      endIso: '2024-01-07T23:59:59.999Z',
+      storeId: null,
+    });
 
     expect(result.current.events).toHaveLength(1);
     const event = result.current.events[0];

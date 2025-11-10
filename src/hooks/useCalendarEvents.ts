@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
+import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/repositories/calendarEventsRepository';
 
-type CalendarEventRow = Tables<'calendar_events'> & {
-  event_participants?: Tables<'event_participants'>[] | null;
-  event_shift_links?: Tables<'event_shift_links'>[] | null;
-};
+type CalendarEventRow = CalendarEventRowWithRelations;
 
 type CalendarRange = {
   start: Date | string;
@@ -183,24 +180,12 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
     setError(null);
 
     try {
-      let query = supabase
-        .from('calendar_events')
-        .select('*, event_participants(*), event_shift_links(*)')
-        .eq('company_id', companyId)
-        .gte('start_time', isoRange.start)
-        .lte('start_time', isoRange.end)
-        .order('start_time', { ascending: true });
-
-      if (storeId) {
-        query = query.eq('store_id', storeId);
-      }
-
-      const response = await query;
-      if (response.error) {
-        throw response.error;
-      }
-
-      const rows = (response.data ?? []) as CalendarEventRow[];
+      const rows = await calendarEventsRepository.listCompanyEventsByRange({
+        companyId,
+        startIso: isoRange.start,
+        endIso: isoRange.end,
+        storeId: storeId ?? null,
+      });
       setEvents(rows.map(mapRowToEvent));
     } catch (err) {
       console.error('Failed to load calendar events', err);
@@ -268,17 +253,8 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
     metadata: payload.metadata ?? {},
   };
 
-  const response = await supabase
-    .from('calendar_events')
-    .insert(insertPayload)
-    .select('*, event_participants(*), event_shift_links(*)')
-    .single();
-
-  if (response.error) {
-    throw response.error;
-  }
-
-  return mapRowToEvent(response.data as CalendarEventRow);
+  const row = await calendarEventsRepository.insertEvent(insertPayload);
+  return mapRowToEvent(row as CalendarEventRow);
 };
 
 export const upsertEventShiftLinks = async ({
@@ -291,24 +267,7 @@ export const upsertEventShiftLinks = async ({
   companyId: string | null;
 }) => {
   if (!eventId || !companyId) return;
-
-  await supabase.from('event_shift_links').delete().eq('event_id', eventId);
-
-  if (shiftIds.length === 0) return;
-
-  const payload = shiftIds.map((shiftId) => ({
-    event_id: eventId,
-    shift_id: shiftId,
-    company_id: companyId,
-  }));
-
-  const { error } = await supabase
-    .from('event_shift_links')
-    .upsert(payload, { onConflict: 'event_id,shift_id' });
-
-  if (error) {
-    throw error;
-  }
+  await calendarEventsRepository.replaceEventShiftLinks(companyId, eventId, shiftIds);
 };
 
 export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {

@@ -14,7 +14,7 @@ type CompanyUpdateRow = {
   id: string;
   title: string;
   body: string | null;
-  likes: number | null;
+  likes_count: number | null;
   comments_count: number | null;
   views_count: number | null;
   company_id: string | null;
@@ -25,7 +25,7 @@ Deno.serve(async () => {
 
   const { data: updates, error } = await supabase
     .from('company_updates')
-    .select('id, title, body, likes, comments_count, views_count, company_id, updated_at')
+    .select('id, title, body, likes_count, comments_count, views_count, company_id, updated_at')
     .eq('status', 'published')
     .gte('updated_at', since);
 
@@ -39,7 +39,7 @@ Deno.serve(async () => {
   }
 
   for (const update of updates as CompanyUpdateRow[]) {
-    const likes = update.likes ?? 0;
+    const likes = update.likes_count ?? 0;
     const comments = update.comments_count ?? 0;
     const views = update.views_count ?? 0;
     const engagementScore = (likes * 2 + comments * 3 + views * 0.5) / 10;

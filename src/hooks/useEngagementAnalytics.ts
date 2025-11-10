@@ -24,7 +24,7 @@ type RawEngagementRow = {
   title: string;
   body: string | null;
   company_id: string | null;
-  likes: number | null;
+  likes_count: number | null;
   comments_count: number | null;
   views_count: number | null;
   company_update_engagement: null | {
@@ -51,7 +51,7 @@ const transformRow = (row: RawEngagementRow): EngagementUpdate => {
     ? row.company_update_engagement[0]
     : row.company_update_engagement ?? null;
 
-  const likes = row.likes ?? engagementData?.likes_count ?? 0;
+  const likes = row.likes_count ?? engagementData?.likes_count ?? 0;
   const comments = row.comments_count ?? engagementData?.comments_count ?? 0;
   const views = row.views_count ?? engagementData?.views_count ?? 0;
 
@@ -85,7 +85,7 @@ export function useEngagementAnalytics() {
           title,
           body,
           company_id,
-          likes,
+          likes_count,
           comments_count,
           views_count,
           company_update_engagement (

@@ -1,33 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Users, MoreVertical, UserPlus, Crown, Shield, User as UserIcon } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { messagesRepository, type ChannelMemberDetail } from '@/repositories/messagesRepository';
 
 const AvatarPlaceholder = ({ name }: { name: string }) => (
   <AvatarFallback className="bg-muted text-muted-foreground">
     {name.slice(0, 2).toUpperCase() || 'UN'}
   </AvatarFallback>
 );
-
-interface ChannelMember {
-  id?: string | null;
-  user_id: string;
-  role: string;
-  joined_at: string;
-  user_profile?: {
-    first_name?: string | null;
-    last_name?: string | null;
-    email?: string | null;
-    avatar_url?: string | null;
-  } | null;
-}
 
 interface ChannelMembersProps {
   open: boolean;
@@ -40,37 +37,16 @@ interface ChannelMembersProps {
 export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin = false }: ChannelMembersProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [members, setMembers] = useState<ChannelMember[]>([]);
+  const [members, setMembers] = useState<ChannelMemberDetail[]>([]);
   const [loading, setLoading] = useState(false);
+  const [memberPendingRemoval, setMemberPendingRemoval] = useState<{ id: string; name: string } | null>(null);
 
-  useEffect(() => {
-    if (open && channelId) {
-      fetchMembers();
-    }
-  }, [open, channelId]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
+    if (!user?.id || !channelId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('channel_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          joined_at,
-          user_profile:profiles!channel_members_user_id_fkey(
-            first_name,
-            last_name,
-            email,
-            avatar_url
-          )
-        `)
-        .eq('channel_id', channelId)
-        .order('joined_at', { ascending: true });
-
-      if (error) throw error;
-      setMembers(data || []);
+      const data = await messagesRepository.listChannelMembers(channelId, user.id);
+      setMembers(data);
     } catch (error) {
       console.error('Error fetching members:', error);
       toast({
@@ -81,16 +57,17 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
     } finally {
       setLoading(false);
     }
-  };
+  }, [channelId, toast, user?.id]);
+
+  useEffect(() => {
+    if (open && channelId) {
+      fetchMembers();
+    }
+  }, [fetchMembers, open, channelId]);
 
   const updateMemberRole = async (memberId: string, newRole: string) => {
     try {
-      const { error } = await supabase
-        .from('channel_members')
-        .update({ role: newRole })
-        .eq('id', memberId);
-
-      if (error) throw error;
+      await messagesRepository.updateMemberRole(memberId, newRole);
 
       toast({
         title: 'Success',
@@ -108,22 +85,23 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
     }
   };
 
-  const removeMember = async (memberId: string, memberName: string) => {
-    if (!confirm(`Remove ${memberName} from this channel?`)) return;
+  const requestMemberRemoval = (memberId?: string, memberName?: string) => {
+    if (!memberId) return;
+    setMemberPendingRemoval({ id: memberId, name: memberName ?? 'this member' });
+  };
+
+  const handleConfirmRemoval = async () => {
+    if (!memberPendingRemoval) return;
 
     try {
-      const { error } = await supabase
-        .from('channel_members')
-        .delete()
-        .eq('id', memberId);
-
-      if (error) throw error;
+      await messagesRepository.removeMember(memberPendingRemoval.id);
 
       toast({
         title: 'Success',
-        description: `${memberName} has been removed from the channel`,
+        description: `${memberPendingRemoval.name} has been removed from the channel`,
       });
 
+      setMemberPendingRemoval(null);
       fetchMembers(); // Refresh the list
     } catch (error) {
       console.error('Error removing member:', error);
@@ -157,7 +135,7 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
     }
   };
 
-  const canManageMember = (member: ChannelMember) => {
+  const canManageMember = (member: ChannelMemberDetail) => {
     return isAdmin && member.user_id !== user?.id;
   };
 
@@ -261,7 +239,7 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
-                            onClick={() => removeMember(member.id!, displayName)}
+                            onClick={() => requestMemberRemoval(member.id, displayName)}
                             className="text-destructive"
                           >
                             Remove
@@ -288,6 +266,22 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
           )}
         </div>
       </DialogContent>
+      <AlertDialog open={Boolean(memberPendingRemoval)} onOpenChange={(open) => !open && setMemberPendingRemoval(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`This will remove ${memberPendingRemoval?.name ?? 'this member'} from #${channelName}. They will lose access to the channel history.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleConfirmRemoval}>
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

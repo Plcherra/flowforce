@@ -16,6 +16,7 @@ import { SchedulingProvider } from '@/contexts/SchedulingContext';
 import { useEvents } from '@/hooks/useEvents';
 import { CreateEventDialog } from '@/components/events/CreateEventDialog';
 import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formatRange = (startIso: string, endIso?: string) => {
   const start = new Date(startIso);
@@ -38,7 +39,8 @@ export default function EventsCalendarPage() {
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [sessionDialogType, setSessionDialogType] = useState<'meeting' | 'event'>('event');
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
-  const { events, loading } = useEvents();
+  const { events, loading, error } = useEvents();
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
 
   const upcoming = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -54,9 +56,14 @@ export default function EventsCalendarPage() {
       .slice(0, 6);
   }, [events, search]);
 
+  const handleCalendarRefresh = () => {
+    setCalendarRefreshKey((prev) => prev + 1);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-10 border-b border-border bg-card">
+    <SchedulingProvider>
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-0 z-10 border-b border-border bg-card">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -122,7 +129,7 @@ export default function EventsCalendarPage() {
         </div>
       </div>
 
-      <div className="px-4 py-6">
+        <div className="px-4 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card>
@@ -133,9 +140,7 @@ export default function EventsCalendarPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <SchedulingProvider>
-                  <SchedulingCalendar mode="events" />
-                </SchedulingProvider>
+                <SchedulingCalendar mode="events" refreshSignal={calendarRefreshKey} />
               </CardContent>
             </Card>
           </div>
@@ -146,6 +151,12 @@ export default function EventsCalendarPage() {
                 <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 p-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Showing cached data</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading upcoming events…</p>
                 ) : upcoming.length === 0 ? (
@@ -190,12 +201,22 @@ export default function EventsCalendarPage() {
                     setSessionDialogOpen(true);
                   }}
                 >
-                  Create recurring event
+                  Create event
                 </Button>
-                <Button variant="ghost" className="w-full justify-start">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  disabled
+                  title="Google Calendar import is coming soon."
+                >
                   Import from Google Calendar
                 </Button>
-                <Button variant="ghost" className="w-full justify-start">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  disabled
+                  title="Exporting calendars will be available soon."
+                >
                   Export calendar
                 </Button>
               </CardContent>
@@ -204,12 +225,18 @@ export default function EventsCalendarPage() {
         </div>
       </div>
 
-      <CreateEventDialog
-        open={sessionDialogOpen}
-        onOpenChange={setSessionDialogOpen}
-        defaultType={sessionDialogType}
-      />
-      <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
-    </div>
+        <CreateEventDialog
+          open={sessionDialogOpen}
+          onOpenChange={setSessionDialogOpen}
+          defaultType={sessionDialogType}
+          onCreated={handleCalendarRefresh}
+        />
+        <CreateVendorVisitDialog
+          open={vendorDialogOpen}
+          onOpenChange={setVendorDialogOpen}
+          onCreated={handleCalendarRefresh}
+        />
+      </div>
+    </SchedulingProvider>
   );
 }

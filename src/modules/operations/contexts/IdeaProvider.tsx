@@ -14,6 +14,8 @@ export interface IdeaContextValue {
   companyId: string | undefined;
   activeCycleId: string | null;
   setActiveCycleId: (cycleId: string | null) => void;
+  loading: boolean;
+  ready: boolean;
 }
 
 export const IdeaContext = createContext<IdeaContextValue | null>(null);
@@ -30,8 +32,8 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
     end: defaultEnd,
   });
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-  const { company } = useCompany();
-  const { profile } = useProfile();
+  const { company, loading: companyLoading } = useCompany();
+  const { profile, loading: profileLoading } = useProfile();
 
   const normalizeCompanyId = (value: string | null | undefined) => {
     if (typeof value !== 'string') {
@@ -47,6 +49,8 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
     normalizeCompanyId(import.meta.env.VITE_DEFAULT_COMPANY_ID);
 
   const resolvedCompanyId = normalizeCompanyId(company?.id) ?? fallbackCompanyId;
+  const loading = companyLoading || profileLoading;
+  const ready = Boolean(resolvedCompanyId) && !loading;
 
   const value = useMemo<IdeaContextValue>(
     () => ({
@@ -57,8 +61,10 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
       companyId: resolvedCompanyId,
       activeCycleId,
       setActiveCycleId,
+      loading,
+      ready,
     }),
-    [activeCycleId, range, resolvedCompanyId, stage],
+    [activeCycleId, range, resolvedCompanyId, stage, loading, ready],
   );
 
   return <IdeaContext.Provider value={value}>{children}</IdeaContext.Provider>;
