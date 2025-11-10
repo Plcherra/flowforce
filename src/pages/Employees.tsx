@@ -1,7 +1,6 @@
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,21 +14,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Mail, Phone, Building2, MoreHorizontal, Truck, AlertTriangle } from 'lucide-react';
+import { Search, Mail, Phone, Building2, MoreHorizontal, Truck, AlertTriangle, Users } from 'lucide-react';
 import { useInventorySuppliers, useCreateSupplier } from '@/hooks/useInventory';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Tables } from '@/integrations/supabase/public-types';
-import { EmployeeDrawer, type EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
+import type { EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
 import { TeamActionsBar } from '@/components/employees/TeamActionsBar';
 import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialog';
-import { RoleManagerDialog } from '@/components/employees/RoleManagerDialog';
-import { PermissionManagerDialog } from '@/components/employees/PermissionManagerDialog';
-import { useEmployees, type Employee as DirectoryEmployee, employeesQueryKey as employeesKeyFactory } from '@/hooks/useEmployees';
+import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
 import { employeesRepository } from '@/repositories/employeesRepository';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useEmployeesCacheInvalidation } from '@/features/employees/hooks/useEmployeesCacheInvalidation';
+import { useVendorForm, type VendorFormValues } from '@/features/inventory/hooks/useVendorForm';
 
 type Department = Tables<'departments'> & { color?: string | null };
+type EmployeesTab = 'all' | 'managers' | 'inactive' | 'vendors';
 
 export default function Employees() {
   const isMobile = useIsMobile();
@@ -39,7 +39,7 @@ export default function Employees() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [departmentError, setDepartmentError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'managers' | 'inactive' | 'vendors'>('all');
+  const [activeTab, setActiveTab] = useState<EmployeesTab>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -47,19 +47,12 @@ export default function Employees() {
   const [selectedEmployee, setSelectedEmployee] = useState<DirectoryEmployee | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<EmployeeDrawerTab>('profile');
-  const [vendorForm, setVendorForm] = useState({
-    name: '',
-    contact_name: '',
-    email: '',
-    phone: '',
-    address: '',
-    notes: ''
-  });
   const [searchParams, setSearchParams] = useSearchParams();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [roleManagerOpen, setRoleManagerOpen] = useState(false);
   const [permissionManagerOpen, setPermissionManagerOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const { form: vendorForm, reset: resetVendorForm } = useVendorForm();
+  const invalidateEmployeeQueries = useEmployeesCacheInvalidation(companyId);
 
   // Vendor hooks
   const {
@@ -106,21 +99,23 @@ export default function Employees() {
     clearInviteParam();
   };
 
-  const handleCreateVendor = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateVendor = async (values: VendorFormValues): Promise<void> => {
     try {
-      await createVendor.mutateAsync(vendorForm);
-      setShowAddVendorDialog(false);
-      setVendorForm({
-        name: '',
-        contact_name: '',
-        email: '',
-        phone: '',
-        address: '',
-        notes: ''
+      await createVendor.mutateAsync({
+        name: values.name.trim(),
+        contact_name: values.contact_name?.trim() || undefined,
+        email: values.email?.trim() || undefined,
+        phone: values.phone?.trim() || undefined,
+        address: values.address?.trim() || undefined,
+        notes: values.notes?.trim() || undefined,
       });
+      setShowAddVendorDialog(false);
+      resetVendorForm();
     } catch (error) {
       console.error('Error creating vendor:', error);
+      vendorForm.setError('root', {
+        message: error instanceof Error ? error.message : 'Unable to create vendor. Please try again.',
+      });
     }
   };
 
@@ -148,24 +143,28 @@ export default function Employees() {
     fetchDepartments();
   }, [fetchDepartments]);
 
-  const invalidateEmployeeQueries = useCallback(() => {
-    if (!companyId) return;
-    queryClient.invalidateQueries({ queryKey: employeesKeyFactory(companyId, true), exact: false });
-    queryClient.invalidateQueries({ queryKey: employeesKeyFactory(companyId, false), exact: false });
-  }, [companyId, queryClient]);
-
   useEffect(() => {
-    setPage(1);
+    setPage((prev) => (prev === 1 ? prev : 1));
   }, [activeTab, searchTerm, departmentFilter]);
 
-  const getDepartmentName = (departmentId: string | null, directName?: string | null) => {
-    if (directName) return directName;
-    if (!departmentId) return 'Unassigned';
-    const dept = departments.find(d => d.id === departmentId);
-    return dept?.name || 'Unknown Department';
-  };
+  const departmentNameMap = useMemo<Map<string, string>>(() => {
+    const map = new Map<string, string>();
+    departments.forEach((dept) => {
+      map.set(dept.id, dept.name);
+    });
+    return map;
+  }, [departments]);
 
-  const filteredEmployees = useMemo(() => {
+  const getDepartmentName = useCallback(
+    (departmentId: string | null, directName?: string | null) => {
+      if (directName) return directName;
+      if (!departmentId) return 'Unassigned';
+      return departmentNameMap.get(departmentId) ?? 'Unknown Department';
+    },
+    [departmentNameMap],
+  );
+
+  const filteredEmployees = useMemo<DirectoryEmployee[]>(() => {
     const term = searchTerm.trim().toLowerCase();
     const baseList = employees ?? [];
 
@@ -206,7 +205,7 @@ export default function Employees() {
     });
   }, [vendors, searchTerm, activeTab]);
 
-  const paginatedEmployees = useMemo(() => {
+  const paginatedEmployees = useMemo<DirectoryEmployee[]>(() => {
     const start = (page - 1) * pageSize;
     return filteredEmployees.slice(start, start + pageSize);
   }, [filteredEmployees, page, pageSize]);
@@ -239,6 +238,8 @@ export default function Employees() {
   const displayRangeStart = hasResults ? (page - 1) * pageSize + 1 : 0;
   const displayRangeEnd = hasResults ? Math.min(page * pageSize, totalRecords) : 0;
   const combinedError = employeesError ?? departmentError;
+  const isFirstPage = page === 1;
+  const isLastPage = page === totalPages;
   const vendorErrorMessage = useMemo(() => {
     if (!companyId && !profileLoading) {
       return 'Connect your profile to a company to see vendor records.';
@@ -249,12 +250,13 @@ export default function Employees() {
     return 'We couldn’t load vendor data. Try refreshing once Supabase is back online.';
   }, [companyId, profileLoading, vendorsError]);
   const isVendorSectionLoading = vendorsLoading || (profileLoading && !companyId);
+  const showEmptyState = !loading && !combinedError && employees.length === 0;
 
   useEffect(() => {
     setPage((current) => (current > totalPages ? totalPages : current));
   }, [totalPages]);
 
-  const paginationSequence = useMemo(() => {
+  const paginationSequence = useMemo<Array<number | 'start-ellipsis' | 'end-ellipsis'>>(() => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, index) => index + 1);
     }
@@ -287,6 +289,38 @@ export default function Employees() {
     return sequence;
   }, [page, totalPages]);
 
+  const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  }, []);
+
+  const handleDepartmentFilterChange = useCallback((value: string): void => {
+    setDepartmentFilter(value);
+  }, []);
+
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value as EmployeesTab);
+  }, []);
+
+  const handlePageSizeChange = useCallback((value: string) => {
+    setPageSize(Number(value));
+    setPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((value: number): void => {
+    setPage((prev) => {
+      if (value === prev) return prev;
+      return Math.max(1, Math.min(totalPages, value));
+    });
+  }, [totalPages]);
+
+  const handlePreviousPage = useCallback(() => {
+    setPage((prev) => Math.max(1, prev - 1));
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setPage((prev) => Math.min(totalPages, prev + 1));
+  }, [totalPages]);
+
   const currentRole = currentUserProfile?.role?.toLowerCase() ?? '';
   const isAdmin = ['owner', 'admin', 'manager'].includes(currentRole);
   const canManageEmployees = ['admin', 'manager'].includes(currentRole);
@@ -304,7 +338,15 @@ export default function Employees() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {canManageEmployees && activeTab === 'vendors' && (
-              <Dialog open={showAddVendorDialog} onOpenChange={setShowAddVendorDialog}>
+              <Dialog
+                open={showAddVendorDialog}
+                onOpenChange={(open) => {
+                  setShowAddVendorDialog(open);
+                  if (!open) {
+                    resetVendorForm();
+                  }
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size={isMobile ? 'sm' : 'default'}>
                     <Truck className="mr-2 h-4 w-4" />
@@ -315,70 +357,108 @@ export default function Employees() {
                   <DialogHeader>
                     <DialogTitle>Add New Vendor</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateVendor} className="space-y-4">
-                    <div>
-                      <Label htmlFor="vendor-name">Company Name *</Label>
-                      <Input
-                        id="vendor-name"
-                        value={vendorForm.name}
-                        onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
-                        required
+                  <Form {...vendorForm}>
+                    <form onSubmit={vendorForm.handleSubmit(handleCreateVendor)} className="space-y-4">
+                      <FormField
+                        control={vendorForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Company Name *</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Acme Supplies" autoComplete="organization" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    <div>
-                      <Label htmlFor="contact-name">Contact Name</Label>
-                      <Input
-                        id="contact-name"
-                        value={vendorForm.contact_name}
-                        onChange={(e) => setVendorForm({ ...vendorForm, contact_name: e.target.value })}
+                      <FormField
+                        control={vendorForm.control}
+                        name="contact_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Contact Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Jordan Smith" autoComplete="name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="vendor-email">Email</Label>
-                        <Input
-                          id="vendor-email"
-                          type="email"
-                          value={vendorForm.email}
-                          onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormField
+                          control={vendorForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="email" placeholder="orders@example.com" autoComplete="email" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={vendorForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="+1 (555) 123-4567" autoComplete="tel" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="vendor-phone">Phone</Label>
-                        <Input
-                          id="vendor-phone"
-                          value={vendorForm.phone}
-                          onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
-                        />
+                      <FormField
+                        control={vendorForm.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                              <Textarea {...field} rows={2} placeholder="123 Main St, Springfield" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={vendorForm.control}
+                        name="notes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Notes</FormLabel>
+                            <FormControl>
+                              <Textarea {...field} rows={2} placeholder="Preferred delivery window, payment terms, etc." />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {vendorForm.formState.errors.root?.message && (
+                        <p className="text-sm text-destructive">{vendorForm.formState.errors.root.message}</p>
+                      )}
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowAddVendorDialog(false);
+                            resetVendorForm();
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={createVendor.isPending}>
+                          {createVendor.isPending ? 'Adding...' : 'Add Vendor'}
+                        </Button>
                       </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="vendor-address">Address</Label>
-                      <Textarea
-                        id="vendor-address"
-                        value={vendorForm.address}
-                        onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="vendor-notes">Notes</Label>
-                      <Textarea
-                        id="vendor-notes"
-                        value={vendorForm.notes}
-                        onChange={(e) => setVendorForm({ ...vendorForm, notes: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setShowAddVendorDialog(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={createVendor.isPending}>
-                        {createVendor.isPending ? 'Adding...' : 'Add Vendor'}
-                      </Button>
-                    </div>
-                  </form>
+                    </form>
+                  </Form>
                 </DialogContent>
               </Dialog>
             )}
@@ -405,11 +485,32 @@ export default function Employees() {
           </Alert>
         )}
 
+        {showEmptyState && (
+          <Card data-testid="employees-empty-state" className="border-dashed border-muted-foreground/30 bg-muted/10">
+            <CardContent className="flex flex-col gap-4 py-6 text-center sm:flex-row sm:text-left sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary sm:mx-0">
+                  <Users className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">No team members yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Invite your first teammate to unlock the full directory experience.
+                  </p>
+                </div>
+              </div>
+              <Button onClick={() => handleInviteChange(true)} className="self-center sm:self-auto">
+                Invite teammates
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Toolbar */}
         <Card>
           <CardContent className="pt-6 space-y-4">
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <TabsList>
                   <TabsTrigger value="all">All ({employees.length})</TabsTrigger>
@@ -424,12 +525,12 @@ export default function Employees() {
                     <Input
                       placeholder="Search name, email, or ID"
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={handleSearchChange}
                       className="pl-10"
                     />
                   </div>
 
-                  <Select value={departmentFilter} onValueChange={(v) => setDepartmentFilter(v)}>
+                  <Select value={departmentFilter} onValueChange={handleDepartmentFilterChange}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Department" />
                     </SelectTrigger>
@@ -608,7 +709,7 @@ export default function Employees() {
                   Showing {displayRangeStart}–{displayRangeEnd} of {totalRecords}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
                     <SelectTrigger className="w-[110px]"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {[10, 20, 50].map((s) => (
@@ -621,9 +722,9 @@ export default function Employees() {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious 
-                          onClick={() => page > 1 && setPage((p) => Math.max(1, p - 1))}
-                          className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          aria-disabled={page === 1}
+                          onClick={handlePreviousPage}
+                          className={isFirstPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          aria-disabled={isFirstPage}
                         />
                       </PaginationItem>
                       {paginationSequence.map((item, index) =>
@@ -631,7 +732,7 @@ export default function Employees() {
                           <PaginationItem key={item}>
                             <PaginationLink
                               isActive={item === page}
-                              onClick={() => setPage(item)}
+                              onClick={() => handlePageChange(item)}
                               className="cursor-pointer"
                             >
                               {item}
@@ -645,9 +746,9 @@ export default function Employees() {
                       )}
                       <PaginationItem>
                         <PaginationNext 
-                          onClick={() => page < totalPages && setPage((p) => Math.min(totalPages, p + 1))}
-                          className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                          aria-disabled={page === totalPages}
+                          onClick={handleNextPage}
+                          className={isLastPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          aria-disabled={isLastPage}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -692,12 +793,14 @@ export default function Employees() {
         </Card>
 
         {/* Employee Drawer */}
-        <EmployeeDrawer
-          employee={selectedEmployee}
-          open={drawerOpen}
-          initialTab={drawerTab}
-          onOpenChange={handleDrawerChange}
-        />
+        <Suspense fallback={null}>
+          <EmployeeDrawer
+            employee={selectedEmployee}
+            open={drawerOpen}
+            initialTab={drawerTab}
+            onOpenChange={handleDrawerChange}
+          />
+        </Suspense>
 
         <InviteEmployeeDialog
           open={inviteOpen}
@@ -705,17 +808,21 @@ export default function Employees() {
           onSuccess={invalidateEmployeeQueries}
         />
 
-        <RoleManagerDialog
-          open={roleManagerOpen}
-          onOpenChange={setRoleManagerOpen}
-          employees={employees}
-          onRoleUpdated={invalidateEmployeeQueries}
-        />
+        <Suspense fallback={null}>
+          <RoleManagerDialog
+            open={roleManagerOpen}
+            onOpenChange={setRoleManagerOpen}
+            employees={employees}
+            onRoleUpdated={invalidateEmployeeQueries}
+          />
+        </Suspense>
 
-        <PermissionManagerDialog
-          open={permissionManagerOpen}
-          onOpenChange={setPermissionManagerOpen}
-        />
+        <Suspense fallback={null}>
+          <PermissionManagerDialog
+            open={permissionManagerOpen}
+            onOpenChange={setPermissionManagerOpen}
+          />
+        </Suspense>
       </div>
     </div>
   );
@@ -745,3 +852,16 @@ function exportCSV(data: DirectoryEmployee[]) {
   link.click();
   URL.revokeObjectURL(link.href);
 }
+const EmployeeDrawer = lazy(async () =>
+  import('@/components/employees/EmployeeDrawer').then((module) => ({ default: module.EmployeeDrawer })),
+);
+
+const RoleManagerDialog = lazy(async () => {
+  const module = await import('@/components/employees/RoleManagerDialog');
+  return { default: module.RoleManagerDialog };
+});
+
+const PermissionManagerDialog = lazy(async () => {
+  const module = await import('@/components/employees/PermissionManagerDialog');
+  return { default: module.PermissionManagerDialog };
+});

@@ -41,8 +41,8 @@ export default function CompanyUpdatesSection() {
     void likeUpdate(updateId);
   };
 
-  const handleComment = (updateId: string, content: string) => {
-    void addComment(updateId, content);
+  const handleComment = async (updateId: string, content: string) => {
+    await addComment(updateId, content);
   };
 
   const handleTogglePin = (updateId: string) => {
@@ -135,6 +135,7 @@ export default function CompanyUpdatesSection() {
               onLike={handleLike}
               onComment={handleComment}
               onView={handleView}
+              loading={loading}
             />
           )}
         </div>

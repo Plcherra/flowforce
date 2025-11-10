@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,13 +17,16 @@ import {
 } from 'lucide-react';
 import { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
 import { formatDistanceToNow } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCommentForm } from '@/features/company-updates/hooks/useCommentForm';
 
 interface UpdatesFeedViewProps {
   updates: CompanyUpdate[];
   comments: UpdateComment[];
   onLike?: (updateId: string) => void;
-  onComment?: (updateId: string, content: string) => void;
+  onComment?: (updateId: string, content: string) => Promise<void> | void;
   onView?: (updateId: string) => void;
+  loading?: boolean;
 }
 
 export function UpdatesFeedView({ 
@@ -31,11 +34,55 @@ export function UpdatesFeedView({
   comments, 
   onLike, 
   onComment, 
-  onView: _onView 
+  onView,
+  loading = false,
 }: UpdatesFeedViewProps) {
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const {
+    values: commentInputs,
+    errors: commentErrors,
+    handleChange: handleCommentInputChange,
+    clearComment,
+    setError: setCommentError,
+  } = useCommentForm();
   const [showComments, setShowComments] = useState<Record<string, boolean>>({});
-  const [likedUpdates, setLikedUpdates] = useState<Set<string>>(new Set());
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (!onView) {
+      return;
+    }
+
+    const observers: IntersectionObserver[] = [];
+
+    updates.forEach((update) => {
+      if (update.viewerHasViewed) {
+        return;
+      }
+
+      const node = cardRefs.current[update.id];
+      if (!node) {
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          const entry = entries[0];
+          if (entry?.isIntersecting) {
+            onView(update.id);
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.35 },
+      );
+
+      observer.observe(node);
+      observers.push(observer);
+    });
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [updates, onView]);
 
   const getUpdateIcon = (type: CompanyUpdate['type']) => {
     switch (type) {
@@ -68,21 +115,21 @@ export function UpdatesFeedView({
   };
 
   const handleLike = (updateId: string) => {
-    const newLikedUpdates = new Set(likedUpdates);
-    if (likedUpdates.has(updateId)) {
-      newLikedUpdates.delete(updateId);
-    } else {
-      newLikedUpdates.add(updateId);
-    }
-    setLikedUpdates(newLikedUpdates);
     onLike?.(updateId);
   };
 
-  const handleComment = (updateId: string) => {
+  const handleComment = async (updateId: string) => {
     const content = commentInputs[updateId];
-    if (content?.trim()) {
-      onComment?.(updateId, content);
-      setCommentInputs(prev => ({ ...prev, [updateId]: '' }));
+    if (!content?.trim()) {
+      return;
+    }
+
+    try {
+      await Promise.resolve(onComment?.(updateId, content));
+      clearComment(updateId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to post comment.';
+      setCommentError(updateId, message);
     }
   };
 
@@ -96,21 +143,35 @@ export function UpdatesFeedView({
 
   // Sort updates by pinned first, then by publish date
   const sortedUpdates = [...updates]
-    .filter(update => update.status === 'published')
+    .filter((update) => update.status === 'published')
     .sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
     });
 
+  if (loading) {
+    return <UpdatesFeedSkeleton />;
+  }
+
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl space-y-6">
       {sortedUpdates.map((update) => {
         const updateComments = getUpdateComments(update.id);
-        const isLiked = likedUpdates.has(update.id);
+        const isLiked = Boolean(update.viewerHasLiked);
         
         return (
-          <Card key={update.id} className={`${update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}>
+          <Card
+            key={update.id}
+            ref={(el) => {
+              if (el) {
+                cardRefs.current[update.id] = el;
+              } else {
+                delete cardRefs.current[update.id];
+              }
+            }}
+            className={`${update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
@@ -123,9 +184,11 @@ export function UpdatesFeedView({
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <h3 className="font-semibold">{update.author.name}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {update.author.role}
-                      </Badge>
+                      {update.author.role && (
+                        <Badge variant="outline" className="text-xs">
+                          {update.author.role}
+                        </Badge>
+                      )}
                       {update.isPinned && (
                         <Pin className="h-4 w-4 text-primary" />
                       )}
@@ -206,25 +269,30 @@ export function UpdatesFeedView({
                         <AvatarFallback>You</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 space-y-2">
-                        <Textarea
-                          placeholder="Write a comment..."
-                          value={commentInputs[update.id] || ''}
-                          onChange={(e) => setCommentInputs(prev => ({ 
-                            ...prev, 
-                            [update.id]: e.target.value 
-                          }))}
-                          className="min-h-[60px] resize-none"
-                        />
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            onClick={() => handleComment(update.id)}
-                            disabled={!commentInputs[update.id]?.trim()}
-                          >
-                            Comment
-                          </Button>
-                        </div>
-                      </div>
+                <Textarea
+                  placeholder="Write a comment..."
+                  value={commentInputs[update.id] || ''}
+                  onChange={(e) =>
+                    handleCommentInputChange(update.id, e.target.value)
+                  }
+                  className="min-h-[60px] resize-none"
+                  aria-invalid={Boolean(commentErrors[update.id])}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() => handleComment(update.id)}
+                    disabled={!commentInputs[update.id]?.trim()}
+                  >
+                    Comment
+                  </Button>
+                </div>
+                {commentErrors[update.id] && (
+                  <p className="text-xs text-destructive" role="alert">
+                    {commentErrors[update.id]}
+                  </p>
+                )}
+              </div>
                     </div>
 
                     {/* Existing Comments */}
@@ -276,6 +344,31 @@ export function UpdatesFeedView({
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function UpdatesFeedSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {Array.from({ length: 3 }).map((_, idx) => (
+        <Card key={idx} className="border bg-card shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/4" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-5 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

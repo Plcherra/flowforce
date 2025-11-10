@@ -14,6 +14,7 @@ interface CompanyUpdatesHeaderProps {
   onSearchChange: (value: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (value: ViewMode) => void;
+  wizardOpen?: boolean;
 }
 
 export function CompanyUpdatesHeader({
@@ -24,6 +25,7 @@ export function CompanyUpdatesHeader({
   onSearchChange,
   viewMode,
   onViewModeChange,
+  wizardOpen = false,
 }: CompanyUpdatesHeaderProps) {
   return (
     <div className="bg-card border-b border-border sticky top-0 z-10">
@@ -43,6 +45,8 @@ export function CompanyUpdatesHeader({
               size={isMobile ? 'sm' : 'default'}
               className="shrink-0"
               onClick={onCreate}
+              aria-expanded={wizardOpen}
+              aria-controls="company-updates-wizard"
             >
               <Plus className="h-4 w-4 mr-1" />
               {isMobile ? '' : 'New Update'}

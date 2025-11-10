@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getIdeaInsights } from '../data/ideaRepository';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 
 export interface DateRange {
@@ -24,11 +25,6 @@ interface IdeaInsightsState {
 }
 
 export function useIdeaInsights(companyId: string | undefined, range: DateRange): IdeaInsightsState {
-  const [insights, setInsights] = useState<IdeaKpiInsight[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
-
   const normalizedRange = useMemo(
     () => ({
       start: range.start.toISOString(),
@@ -36,81 +32,60 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
     }),
     [range.start, range.end],
   );
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['idea-insights', companyId, normalizedRange.start, normalizedRange.end],
+    [companyId, normalizedRange.end, normalizedRange.start],
+  );
 
-  const mapRecordsToInsights = useCallback((records: any): IdeaKpiInsight[] => {
-    if (!Array.isArray(records)) {
-      return [];
-    }
-
-    return records.map((item: any, index: number) => ({
-      id: item.id ?? `kpi-${index}`,
-      label: item.label ?? item.metric ?? 'Metric',
-      value: Number(item.value ?? 0),
-      delta: typeof item.delta === 'number' ? item.delta : item.delta ? Number(item.delta) : null,
-      trend: item.trend === 'up' || item.trend === 'down' || item.trend === 'flat' ? item.trend : undefined,
-      unit: item.unit ?? null,
-    }));
-  }, []);
-
-  const fetchInsights = useCallback(async () => {
-    if (!companyId) {
-      setInsights([]);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: rpcError } = await supabase.rpc('get_kpi_summary', {
-        company_id: companyId,
-        range_start: normalizedRange.start,
-        range_end: normalizedRange.end,
-      });
-
-      if (rpcError) {
-        throw rpcError;
-      }
-
-      setInsights(mapRecordsToInsights(data));
-    } catch (caughtError) {
-      const error = caughtError as Error;
-      const message = error?.message ?? '';
-
-      if (message.includes('function public.get_kpi_summary')) {
-        if (import.meta.env.DEV) {
-          console.warn(
-            '[useIdeaInsights] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary.',
-            message,
-          );
+  const query = useQuery<IdeaKpiInsight[]>({
+    queryKey,
+    enabled: Boolean(companyId),
+    staleTime: 60_000,
+    retry: 1,
+    queryFn: async () => {
+      if (!companyId) return [];
+      try {
+        const records = await getIdeaInsights(companyId, {
+          start: new Date(normalizedRange.start),
+          end: new Date(normalizedRange.end),
+        });
+        return mapRecordsToInsights(records);
+      } catch (error) {
+        const message = (error as Error)?.message ?? '';
+        if (message.includes('function public.get_kpi_summary')) {
+          if (import.meta.env.DEV) {
+            console.warn(
+              '[useIdeaInsights] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary.',
+              message,
+            );
+          }
+          return mapRecordsToInsights(MOCK_IDEA_KPI_SUMMARY);
         }
-        setError(null);
-        setInsights(mapRecordsToInsights(MOCK_IDEA_KPI_SUMMARY));
-        return;
+        throw error;
       }
-
-      setError(error);
-      setInsights([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [companyId, mapRecordsToInsights, normalizedRange]);
-
-  useEffect(() => {
-    fetchInsights();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchInsights, refreshToken]);
+    },
+  });
 
   const refresh = useCallback(() => {
-    setRefreshToken((token) => token + 1);
-  }, []);
+    queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   return {
-    data: insights,
-    loading,
-    error,
+    data: query.data ?? [],
+    loading: query.isPending,
+    error: (query.error as Error) ?? null,
     refresh,
   };
 }
+
+const mapRecordsToInsights = (records: any[]): IdeaKpiInsight[] => {
+  return records.map((item: any, index: number) => ({
+    id: item.id ?? `kpi-${index}`,
+    label: item.label ?? item.metric ?? 'Metric',
+    value: Number(item.value ?? 0),
+    delta: typeof item.delta === 'number' ? item.delta : item.delta ? Number(item.delta) : null,
+    trend: item.trend === 'up' || item.trend === 'down' || item.trend === 'flat' ? item.trend : undefined,
+    unit: item.unit ?? null,
+  }));
+};

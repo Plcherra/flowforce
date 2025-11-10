@@ -1,77 +1,17 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import type { CompanyUpdate, UpdateComment, CreateCompanyUpdateInput } from '@/types/companyUpdates';
+import { companyUpdatesRepository, type CompanyUpdateRow, type ReactionRow, type CommentRow } from '@/repositories/companyUpdatesRepository';
 
 const DEFAULT_PAGE_SIZE = 25;
 
 type UseCompanyUpdateOptions = {
   page?: number;
   pageSize?: number;
-};
-
-type CompanyUpdateRow = {
-  id: string;
-  company_id: string;
-  title: string;
-  body: string;
-  rich_content: string | null;
-  update_type: CompanyUpdate['type'];
-  priority: CompanyUpdate['priority'];
-  status: CompanyUpdate['status'];
-  background_style: unknown;
-  recipients: unknown;
-  publishing_settings: unknown;
-  assigned_employees: string[] | null;
-  author_id: string | null;
-  author_name: string | null;
-  author_role: string | null;
-  author_avatar: string | null;
-  publish_date: string | null;
-  scheduled_date: string | null;
-  is_pinned: boolean;
-  likes_count: number;
-  comments_count: number;
-  views_count: number;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-  author_profile?: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    avatar_url: string | null;
-    role: string | null;
-  } | null;
-  company_update_engagement?: Array<{
-    engagement_score: number | null;
-    ai_summary: string | null;
-    last_analyzed: string | null;
-  }>;
-};
-
-type CommentRow = {
-  id: string;
-  update_id: string;
-  company_id: string;
-  author_id: string;
-  content: string;
-  likes_count: number | null;
-  created_at: string;
-  updated_at: string;
-  author?: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    avatar_url: string | null;
-  } | null;
-};
-
-type ReactionRow = {
-  update_id: string;
-  reaction_type: 'like' | 'view';
+  status?: CompanyUpdate['status'] | CompanyUpdate['status'][];
+  searchTerm?: string;
 };
 
 const getFullName = (first?: string | null, last?: string | null) =>
@@ -149,46 +89,25 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
 
   const page = options?.page ?? 1;
   const pageSize = options?.pageSize ?? DEFAULT_PAGE_SIZE;
+  const statusFilter = options?.status;
+  const searchTerm = options?.searchTerm?.trim() ?? '';
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const updatesQuery = useQuery({
-    queryKey: ['company-updates', companyId, page, pageSize],
+    queryKey: ['company-updates', companyId, page, pageSize, statusFilter ?? 'all', searchTerm.toLowerCase()],
     enabled: Boolean(companyId),
     queryFn: async () => {
       if (!companyId) {
-        return { records: [], total: 0 };
+        return { records: [] as CompanyUpdateRow[], total: 0 };
       }
 
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, error, count } = await supabase
-        .from('company_updates')
-        .select(
-          `
-            *,
-            author_profile:profiles!company_updates_author_id_fkey (id, first_name, last_name, avatar_url, role),
-            company_update_engagement (
-              engagement_score,
-              ai_summary,
-              last_analyzed
-            )
-          `,
-          { count: 'exact' },
-        )
-        .eq('company_id', companyId)
-        .order('is_pinned', { ascending: false })
-        .order('publish_date', { ascending: false })
-        .range(from, to);
-
-      if (error) {
-        throw error;
-      }
-
-      return {
-        records: (data as CompanyUpdateRow[]) ?? [],
-        total: count ?? 0,
-      };
+      return companyUpdatesRepository.listUpdates({
+        companyId,
+        page,
+        pageSize,
+        statusFilter,
+        searchTerm,
+      });
     },
   });
 
@@ -205,18 +124,11 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
         return [] as ReactionRow[];
       }
 
-      const { data, error } = await supabase
-        .from('company_update_reactions')
-        .select('update_id, reaction_type')
-        .eq('company_id', companyId)
-        .eq('user_id', user.id)
-        .in('update_id', updateIds);
-
-      if (error) {
-        throw error;
-      }
-
-      return (data as ReactionRow[]) ?? [];
+      return companyUpdatesRepository.listReactions({
+        companyId,
+        userId: user.id,
+        updateIds,
+      });
     },
   });
 
@@ -228,23 +140,10 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
         return [] as CommentRow[];
       }
 
-      const { data, error } = await supabase
-        .from('company_update_comments')
-        .select(
-          `
-            *,
-            author:profiles!company_update_comments_author_id_fkey (id, first_name, last_name, avatar_url)
-          `,
-        )
-        .eq('company_id', companyId)
-        .in('update_id', updateIds)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      return (data as CommentRow[]) ?? [];
+      return companyUpdatesRepository.listComments({
+        companyId,
+        updateIds,
+      });
     },
   });
 
@@ -323,31 +222,29 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
         getFullName(profile?.first_name ?? profile?.firstName, profile?.last_name ?? profile?.lastName) ||
         'Company Updates';
 
-      const { error } = await supabase.from('company_updates').insert({
-        company_id: companyId,
-        title: input.title,
-        body: input.body,
-        rich_content: input.richContent ?? null,
-        update_type: input.type,
-        priority: input.priority,
-        status,
-        background_style: input.backgroundStyle ?? null,
-        recipients: input.recipients ?? null,
-        publishing_settings: input.publishingSettings ?? null,
-        assigned_employees: input.assignedEmployees ?? null,
-        author_id: user.id,
-        author_name: authorName,
-        author_role: profile?.role ?? null,
-        author_avatar: profile?.avatar_url ?? null,
-        publish_date: publishDate,
-        scheduled_date: scheduledDateIso,
-        is_pinned: input.isPinned ?? false,
-        created_by: user.id,
+      await companyUpdatesRepository.createUpdate({
+        companyId,
+        payload: {
+          title: input.title,
+          body: input.body,
+          rich_content: input.richContent ?? null,
+          update_type: input.type,
+          priority: input.priority,
+          status,
+          background_style: input.backgroundStyle ?? null,
+          recipients: input.recipients ?? null,
+          publishing_settings: input.publishingSettings ?? null,
+          assigned_employees: input.assignedEmployees ?? null,
+          author_id: user.id,
+          author_name: authorName,
+          author_role: profile?.role ?? null,
+          author_avatar: profile?.avatar_url ?? null,
+          publish_date: publishDate,
+          scheduled_date: scheduledDateIso,
+          is_pinned: input.isPinned ?? false,
+          created_by: user.id,
+        },
       });
-
-      if (error) {
-        throw error;
-      }
 
       invalidateFeed();
     },
@@ -357,12 +254,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
   const archiveUpdate = useCallback(
     async (updateId: string) => {
       if (!companyId) return;
-      const { error } = await supabase
-        .from('company_updates')
-        .update({ status: 'archived' })
-        .eq('company_id', companyId)
-        .eq('id', updateId);
-      if (error) throw error;
+      await companyUpdatesRepository.updateStatus({ companyId, updateId, status: 'archived' });
       invalidateFeed();
     },
     [companyId, invalidateFeed],
@@ -371,8 +263,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
   const deleteUpdate = useCallback(
     async (updateId: string) => {
       if (!companyId) return;
-      const { error } = await supabase.from('company_updates').delete().eq('company_id', companyId).eq('id', updateId);
-      if (error) throw error;
+      await companyUpdatesRepository.deleteUpdate({ companyId, updateId });
       invalidateFeed();
     },
     [companyId, invalidateFeed],
@@ -383,12 +274,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
       if (!companyId) return;
       const current = updates.find((update) => update.id === updateId);
       const nextValue = current ? !current.isPinned : true;
-      const { error } = await supabase
-        .from('company_updates')
-        .update({ is_pinned: nextValue })
-        .eq('company_id', companyId)
-        .eq('id', updateId);
-      if (error) throw error;
+      await companyUpdatesRepository.togglePin({ companyId, updateId, isPinned: nextValue });
       invalidateFeed();
     },
     [companyId, updates, invalidateFeed],
@@ -403,22 +289,19 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
       const hasLiked = viewerLikes.has(updateId);
 
       if (hasLiked) {
-        const { error } = await supabase
-          .from('company_update_reactions')
-          .delete()
-          .eq('company_id', companyId)
-          .eq('update_id', updateId)
-          .eq('user_id', user.id)
-          .eq('reaction_type', 'like');
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('company_update_reactions').insert({
-          company_id: companyId,
-          update_id: updateId,
-          user_id: user.id,
-          reaction_type: 'like',
+        await companyUpdatesRepository.deleteReaction({
+          companyId,
+          updateId,
+          userId: user.id,
+          reactionType: 'like',
         });
-        if (error) throw error;
+      } else {
+        await companyUpdatesRepository.upsertReaction({
+          companyId,
+          updateId,
+          userId: user.id,
+          reactionType: 'like',
+        });
       }
 
       invalidateFeed();
@@ -428,27 +311,14 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
 
   const markAsViewed = useCallback(
     async (updateId: string) => {
-      if (!companyId || !user?.id) return;
-      if (viewerViews.has(updateId)) {
-        return;
-      }
+      if (!companyId || !user?.id || viewerViews.has(updateId)) return;
 
-      const { error } = await supabase
-        .from('company_update_reactions')
-        .upsert(
-          {
-            company_id: companyId,
-            update_id: updateId,
-            user_id: user.id,
-            reaction_type: 'view',
-          },
-          {
-            onConflict: 'update_id,user_id,reaction_type',
-            ignoreDuplicates: true,
-          },
-        );
-
-      if (error) throw error;
+      await companyUpdatesRepository.upsertReaction({
+        companyId,
+        updateId,
+        userId: user.id,
+        reactionType: 'view',
+      });
       invalidateFeed();
     },
     [companyId, user?.id, viewerViews, invalidateFeed],
@@ -460,14 +330,12 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
         throw new Error('You must be signed in to comment.');
       }
 
-      const { error } = await supabase.from('company_update_comments').insert({
-        company_id: companyId,
-        update_id: updateId,
-        author_id: user.id,
+      await companyUpdatesRepository.createComment({
+        companyId,
+        updateId,
+        userId: user.id,
         content,
       });
-
-      if (error) throw error;
       invalidateFeed();
     },
     [companyId, user?.id, invalidateFeed],

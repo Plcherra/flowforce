@@ -46,6 +46,9 @@ interface MessagesViewModelState {
   isThreadOpen: boolean;
   closeThread: () => void;
   handleThreadMessage: (message: ThreadMessage) => void;
+  handleDeleteChannel: (channelId: string) => Promise<void>;
+  handleChannelUpdated: () => Promise<void>;
+  handleDeleteMessage: (messageId: string) => Promise<void>;
   sidebarWidth: number;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   activeFilter: FilterType;
@@ -67,6 +70,10 @@ export function useMessagesViewModel(): MessagesViewModelState {
     setCurrentChannelId,
     sendMessage,
     updateLastRead,
+    deleteChannel,
+    deleteMessage,
+    refetchChannels,
+    refetchMessages,
     error: messagesError,
     clearError: clearMessagesError,
   } = useMessages();
@@ -256,6 +263,53 @@ export function useMessagesViewModel(): MessagesViewModelState {
     setThreadMessage(null);
   }, []);
 
+  const handleDeleteChannel = useCallback(
+    async (channelId: string): Promise<void> => {
+      const result = await deleteChannel(channelId);
+      if (result.error) {
+        toast({
+          title: 'Unable to delete channel',
+          description: result.error.message ?? 'Please try again shortly.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: 'Channel deleted',
+        description: 'The channel was removed successfully.',
+      });
+      if (currentChannelId === channelId) {
+        setCurrentChannelId(null);
+      }
+      await refetchChannels();
+    },
+    [currentChannelId, deleteChannel, refetchChannels, setCurrentChannelId, toast],
+  );
+
+  const handleChannelUpdated = useCallback(async () => {
+    await refetchChannels();
+  }, [refetchChannels]);
+
+  const handleDeleteMessage = useCallback(
+    async (messageId: string): Promise<void> => {
+      const { error } = await deleteMessage(messageId);
+      if (error) {
+        toast({
+          title: 'Unable to delete message',
+          description: error instanceof Error ? error.message : 'Please try again shortly.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: 'Message deleted',
+        description: 'Your message was removed.',
+      });
+      await refetchMessages();
+    },
+    [deleteMessage, refetchMessages, toast],
+  );
+
   const navigateToFilter = useCallback(
     (value: FilterType): void => {
       const basePath = '/app/messages';
@@ -310,6 +364,9 @@ export function useMessagesViewModel(): MessagesViewModelState {
     handleAvailabilityChange,
     canToggleAvailability,
     profile,
+    handleDeleteChannel,
+    handleChannelUpdated,
+    handleDeleteMessage,
   };
 }
 

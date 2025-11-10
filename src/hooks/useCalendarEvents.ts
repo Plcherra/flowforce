@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
-import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/repositories/calendarEventsRepository';
+import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/features/calendar/repositories/calendarEventsRepository';
 import { queryKeys } from '@/lib/queryKeys';
 
 type CalendarEventRow = CalendarEventRowWithRelations;

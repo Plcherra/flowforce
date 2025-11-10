@@ -1,5 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
 import { useIdeaInsights } from '../useIdeaInsights';
 import { useIdeaDiagnostics } from '../useIdeaDiagnostics';
 import { useIdeaActions } from '../useIdeaActions';
@@ -54,7 +56,9 @@ describe('IDEA hooks', () => {
     });
     fromMock.mockImplementation(() => ({}));
 
-    const { result } = renderHook(() => useIdeaInsights('company-1', range));
+    const { result } = renderHook(() => useIdeaInsights('company-1', range), {
+      wrapper: createQueryWrapper(),
+    });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toHaveLength(1);
@@ -89,7 +93,9 @@ describe('IDEA hooks', () => {
     global.fetch = fetchMock;
 
     const insights = [{ id: 'labor', label: 'Labor %', value: 28, delta: 3, trend: 'up' as const }];
-    const { result } = renderHook(() => useIdeaDiagnostics('company-1', insights, range));
+    const { result } = renderHook(() => useIdeaDiagnostics('company-1', insights, range), {
+      wrapper: createQueryWrapper(),
+    });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data.causes[0].summary).toContain('labor');
@@ -116,7 +122,9 @@ describe('IDEA hooks', () => {
       return {};
     });
 
-    const { result } = renderHook(() => useIdeaActions('company-1', 'cycle-1'));
+    const { result } = renderHook(() => useIdeaActions('company-1', 'cycle-1'), {
+      wrapper: createQueryWrapper(),
+    });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toEqual([]);
@@ -171,8 +179,9 @@ describe('IDEA hooks', () => {
       trend: 'up' as const,
     }));
 
-    const { result } = renderHook(() =>
-      useIdeaAssessments('company-1', range, 'cycle-1', insights, true),
+    const { result } = renderHook(
+      () => useIdeaAssessments('company-1', range, 'cycle-1', insights, true),
+      { wrapper: createQueryWrapper() },
     );
 
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -221,7 +230,9 @@ describe('IDEA hooks', () => {
       return {};
     });
 
-    const insightsHook = renderHook(() => useIdeaInsights('company-99', range));
+    const insightsHook = renderHook(() => useIdeaInsights('company-99', range), {
+      wrapper: createQueryWrapper(),
+    });
     await waitFor(() => expect(insightsHook.result.current.loading).toBe(false));
     expect(insightsHook.result.current.data).toHaveLength(1);
 
@@ -249,7 +260,10 @@ describe('IDEA hooks', () => {
 
     const diagnosticsHook = renderHook(
       ({ data }) => useIdeaDiagnostics('company-99', data, range),
-      { initialProps: { data: [] as ReturnType<typeof useIdeaInsights>['data'] } },
+      {
+        initialProps: { data: [] as ReturnType<typeof useIdeaInsights>['data'] },
+        wrapper: createQueryWrapper(),
+      },
     );
 
     diagnosticsHook.rerender({ data: insightsHook.result.current.data });
@@ -266,7 +280,9 @@ describe('IDEA hooks', () => {
       assessments: null,
     });
 
-    const actionsHook = renderHook(() => useIdeaActions('company-99', 'cycle-1'));
+    const actionsHook = renderHook(() => useIdeaActions('company-99', 'cycle-1'), {
+      wrapper: createQueryWrapper(),
+    });
     await waitFor(() => expect(actionsHook.result.current.loading).toBe(false));
 
     await act(async () => {
@@ -284,8 +300,9 @@ describe('IDEA hooks', () => {
 
     await waitFor(() => expect(actionsHook.result.current.data[0].status).toBe('executed'));
 
-    const assessmentsHook = renderHook(() =>
-      useIdeaAssessments('company-99', range, 'cycle-1', insightsHook.result.current.data, true),
+    const assessmentsHook = renderHook(
+      () => useIdeaAssessments('company-99', range, 'cycle-1', insightsHook.result.current.data, true),
+      { wrapper: createQueryWrapper() },
     );
 
     await waitFor(() => expect(assessmentsHook.result.current.loading).toBe(false));
@@ -302,6 +319,24 @@ describe('IDEA hooks', () => {
 
 function buildPassthroughActionsMock() {
   return createIdeaActionsMock([]);
+}
+
+function createQueryWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  };
 }
 
 function createIdeaActionsMock(store: any[]) {

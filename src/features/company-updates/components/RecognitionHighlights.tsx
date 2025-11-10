@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { recognitionSourceMeta } from '@/lib/recognitionMeta';
 import type { RecognitionRecord } from '@/types/recognition';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface RecognitionHighlightsProps {
   loading: boolean;
@@ -22,9 +22,25 @@ export function RecognitionHighlights({ loading, highlights }: RecognitionHighli
 
   if (loading) {
     return (
-      <Card className="flex items-center gap-3 p-4 border-primary/20 bg-primary/5">
-        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-        <span className="text-sm text-primary">Gathering recognition highlights…</span>
+      <Card className="border-primary/20 bg-muted/40">
+        <CardHeader className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-48 animate-pulse" />
+            <Skeleton className="h-4 w-20 animate-pulse" />
+          </div>
+          <Skeleton className="h-3 w-2/3 animate-pulse" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="flex items-start gap-3">
+              <Skeleton className="h-10 w-10 rounded-full animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3 animate-pulse" />
+                <Skeleton className="h-3 w-3/4 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
       </Card>
     );
   }

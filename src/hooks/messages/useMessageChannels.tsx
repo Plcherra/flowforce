@@ -136,6 +136,28 @@ export function useMessageChannels() {
 
   const clearError = useCallback(() => setError(null), []);
 
+  const deleteChannel = useCallback(
+    async (channelId: string) => {
+      if (!user) {
+        const issue = new Error('User not authenticated');
+        setError(issue);
+        return { error: issue };
+      }
+
+      try {
+        await messagesRepository.deleteChannel(channelId, user.id);
+        await fetchChannels();
+        setError(null);
+        return { error: null };
+      } catch (error) {
+        const issue = error instanceof Error ? error : new Error('Failed to delete channel');
+        setError(issue);
+        return { error: issue };
+      }
+    },
+    [fetchChannels, user],
+  );
+
   return {
     channels,
     loading,
@@ -143,6 +165,7 @@ export function useMessageChannels() {
     joinChannel,
     updateLastRead,
     refetchChannels: fetchChannels,
+    deleteChannel,
     error,
     clearError,
   };

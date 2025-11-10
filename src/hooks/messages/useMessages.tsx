@@ -13,6 +13,7 @@ export function useMessages() {
     joinChannel,
     updateLastRead,
     refetchChannels,
+    deleteChannel,
     error: channelsError,
     clearError: clearChannelsError,
   } = useMessageChannels();
@@ -27,7 +28,8 @@ export function useMessages() {
 
   const {
     sendMessage,
-    searchMessages
+    searchMessages,
+    deleteMessage,
   } = useMessageOperations();
 
   const clearError = useCallback(() => {
@@ -50,11 +52,13 @@ export function useMessages() {
     joinChannel,
     updateLastRead,
     refetchChannels,
+    deleteChannel,
     
     // Message operations
     sendMessage,
     searchMessages,
     refetchMessages,
+    deleteMessage,
 
     // Error state
     error: channelsError ?? messagesError ?? null,

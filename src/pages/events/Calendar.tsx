@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,14 +9,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CalendarDays, Plus, Search, Video, Wrench } from 'lucide-react';
+import { CalendarDays, CloudDownload, CloudUpload, Plus, Search, Video, Wrench } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
-import { SchedulingProvider } from '@/contexts/SchedulingContext';
+import { SchedulingProvider, useScheduling } from '@/contexts/SchedulingContext';
 import { useEvents } from '@/hooks/useEvents';
-import { CreateEventDialog } from '@/components/events/CreateEventDialog';
-import { CreateVendorVisitDialog } from '@/components/events/CreateVendorVisitDialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const SchedulingCalendarLazy = lazy(() =>
+  import('@/components/scheduling/SchedulingCalendar').then((module) => ({ default: module.SchedulingCalendar })),
+);
+const CreateEventDialogLazy = lazy(() =>
+  import('@/components/events/CreateEventDialog').then((module) => ({ default: module.CreateEventDialog })),
+);
+const CreateVendorVisitDialogLazy = lazy(() =>
+  import('@/components/events/CreateVendorVisitDialog').then((module) => ({
+    default: module.CreateVendorVisitDialog,
+  })),
+);
 
 const formatRange = (startIso: string, endIso?: string) => {
   const start = new Date(startIso);
@@ -34,12 +44,21 @@ const formatRange = (startIso: string, endIso?: string) => {
 };
 
 export default function EventsCalendarPage() {
+  return (
+    <SchedulingProvider>
+      <EventsCalendarContent />
+    </SchedulingProvider>
+  );
+}
+
+function EventsCalendarContent() {
   const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [sessionDialogType, setSessionDialogType] = useState<'meeting' | 'event'>('event');
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
   const { events, loading, error } = useEvents();
+  const { loading: schedulingLoading, error: schedulingError } = useScheduling();
 
   const upcoming = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -55,10 +74,25 @@ export default function EventsCalendarPage() {
       .slice(0, 6);
   }, [events, search]);
 
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  }, []);
+
+  const handleOpenSessionDialog = useCallback((type: 'meeting' | 'event') => {
+    setSessionDialogType(type);
+    setSessionDialogOpen(true);
+  }, []);
+
+  const handleToggleSessionDialog = useCallback((open: boolean) => {
+    setSessionDialogOpen(open);
+  }, []);
+
+  const handleOpenVendorDialog = useCallback(() => setVendorDialogOpen(true), []);
+  const handleToggleVendorDialog = useCallback((open: boolean) => setVendorDialogOpen(open), []);
+
   return (
-    <SchedulingProvider>
-      <div className="min-h-screen bg-background">
-        <div className="sticky top-0 z-10 border-b border-border bg-card">
+    <div className="min-h-screen bg-background">
+      <div className="sticky top-0 z-10 border-b border-border bg-card">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -79,7 +113,8 @@ export default function EventsCalendarPage() {
                 <Input
                   placeholder="Search events..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={handleSearchChange}
+                  aria-label="Search events"
                   className="w-64 pl-10"
                 />
               </div>
@@ -92,27 +127,19 @@ export default function EventsCalendarPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuItem
-                    onClick={() => {
-                      setSessionDialogType('meeting');
-                      setSessionDialogOpen(true);
-                    }}
+                    onClick={() => handleOpenSessionDialog('meeting')}
                   >
                     <Video className="mr-2 h-4 w-4" />
                     Meeting
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => {
-                      setSessionDialogType('event');
-                      setSessionDialogOpen(true);
-                    }}
+                    onClick={() => handleOpenSessionDialog('event')}
                   >
                     <CalendarDays className="mr-2 h-4 w-4" />
                     Event
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => {
-                      setVendorDialogOpen(true);
-                    }}
+                    onClick={handleOpenVendorDialog}
                   >
                     <Wrench className="mr-2 h-4 w-4" />
                     Vendor visit
@@ -124,7 +151,7 @@ export default function EventsCalendarPage() {
         </div>
       </div>
 
-        <div className="px-4 py-6">
+      <div className="px-4 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card>
@@ -135,7 +162,21 @@ export default function EventsCalendarPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-4">
-                <SchedulingCalendar mode="events" />
+                {schedulingError ? (
+                  <div className="space-y-3">
+                    <Alert variant="destructive" data-testid="scheduling-error-alert">
+                      <AlertTitle>Calendar data unavailable</AlertTitle>
+                      <AlertDescription>{schedulingError}</AlertDescription>
+                    </Alert>
+                    <Skeleton className="h-[540px] w-full rounded-md" data-testid="calendar-skeleton" />
+                  </div>
+                ) : schedulingLoading ? (
+                  <Skeleton className="h-[540px] w-full rounded-md" data-testid="calendar-skeleton" />
+                ) : (
+                  <Suspense fallback={<Skeleton className="h-[540px] w-full rounded-md" data-testid="calendar-skeleton" />}>
+                    <SchedulingCalendarLazy mode="events" />
+                  </Suspense>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -147,13 +188,21 @@ export default function EventsCalendarPage() {
               </CardHeader>
               <CardContent className="space-y-3 p-4">
                 {error && (
-                  <Alert variant="destructive">
+                  <Alert variant="destructive" data-testid="events-error-alert">
                     <AlertTitle>Showing cached data</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
                 {loading ? (
-                  <p className="text-sm text-muted-foreground">Loading upcoming events…</p>
+                  <div className="space-y-3" data-testid="upcoming-skeleton">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="rounded-md border border-border p-3">
+                        <Skeleton className="mb-2 h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="mt-3 h-3 w-full" />
+                      </div>
+                    ))}
+                  </div>
                 ) : upcoming.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No upcoming events match your filters.</p>
                 ) : (
@@ -184,34 +233,34 @@ export default function EventsCalendarPage() {
             </Card>
 
             <Card>
-              <CardHeader className="px-4 py-3">
+              <CardHeader className="px-4 py-3 sm:px-6">
                 <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 p-4">
+              <CardContent className="space-y-3 p-4 sm:p-6">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    setSessionDialogType('event');
-                    setSessionDialogOpen(true);
-                  }}
+                  className="w-full justify-start gap-2"
+                  onClick={() => handleOpenSessionDialog('event')}
                 >
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
                   Create event
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start gap-2"
                   disabled
                   title="Google Calendar import is coming soon."
                 >
+                  <CloudUpload className="h-4 w-4 text-muted-foreground" />
                   Import from Google Calendar
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start gap-2"
                   disabled
                   title="Exporting calendars will be available soon."
                 >
+                  <CloudDownload className="h-4 w-4 text-muted-foreground" />
                   Export calendar
                 </Button>
               </CardContent>
@@ -220,13 +269,18 @@ export default function EventsCalendarPage() {
         </div>
       </div>
 
-        <CreateEventDialog
+      <Suspense fallback={null}>
+        <CreateEventDialogLazy
           open={sessionDialogOpen}
-          onOpenChange={setSessionDialogOpen}
+          onOpenChange={handleToggleSessionDialog}
           defaultType={sessionDialogType}
         />
-        <CreateVendorVisitDialog open={vendorDialogOpen} onOpenChange={setVendorDialogOpen} />
-      </div>
-    </SchedulingProvider>
+      </Suspense>
+      <Suspense fallback={null}>
+        <CreateVendorVisitDialogLazy open={vendorDialogOpen} onOpenChange={handleToggleVendorDialog} />
+      </Suspense>
+    </div>
   );
 }
+
+export { EventsCalendarContent };

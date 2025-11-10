@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useCallback } from 'react';
 import { differenceInMilliseconds } from 'date-fns';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
@@ -51,6 +52,49 @@ async function fetchKpiSnapshot(companyId: string, range: { start: string; end: 
   return Array.isArray(data) ? data : [];
 }
 
+async function persistAssessment(options: {
+  companyId: string;
+  cycleId: string | null;
+  metrics: IdeaAssessmentMetric[];
+  latestInsights: IdeaKpiInsight[];
+  rangeLabel: string;
+  notes?: string;
+}) {
+  const assessmentsPayload = {
+    metrics: options.metrics,
+    notes: options.notes ?? null,
+  };
+
+  const targetMutation = options.cycleId
+    ? supabase
+        .from('idea_cycles')
+        .update({
+          stage: 'assess',
+          assessments: assessmentsPayload,
+        })
+        .eq('id', options.cycleId)
+        .select()
+        .single()
+    : supabase
+        .from('idea_cycles')
+        .insert({
+          company_id: options.companyId,
+          stage: 'assess',
+          range: options.rangeLabel,
+          insights: options.latestInsights,
+          actions: null,
+          assessments: assessmentsPayload,
+        })
+        .select()
+        .single();
+
+  const { error } = await targetMutation;
+
+  if (error) {
+    throw error;
+  }
+}
+
 export function useIdeaAssessments(
   companyId: string | undefined,
   range: DateRange,
@@ -58,11 +102,6 @@ export function useIdeaAssessments(
   latestInsights: IdeaKpiInsight[],
   enabled: boolean,
 ): IdeaAssessmentState {
-  const [metrics, setMetrics] = useState<IdeaAssessmentMetric[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
-
   const normalizedRange = useMemo(() => {
     const start = range.start.toISOString();
     const end = range.end.toISOString();
@@ -79,21 +118,22 @@ export function useIdeaAssessments(
     };
   }, [range.end, range.start]);
 
-  const loadAssessments = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['idea-assessments', companyId, normalizedRange.start, normalizedRange.end, cycleId ?? 'none'],
+    [companyId, cycleId, normalizedRange.end, normalizedRange.start],
+  );
 
-    if (!companyId) {
-      setError(new Error('Missing company context'));
-      setMetrics([]);
-      return;
-    }
+  const metricsQuery = useQuery<IdeaAssessmentMetric[]>({
+    queryKey,
+    enabled: enabled && Boolean(companyId),
+    staleTime: 30_000,
+    retry: 1,
+    queryFn: async () => {
+      if (!companyId) {
+        throw new Error('Missing company context');
+      }
 
-    setLoading(true);
-    setError(null);
-
-    try {
       const [beforeSnapshot, afterSnapshot] = await Promise.all([
         fetchKpiSnapshot(companyId, previousRange),
         fetchKpiSnapshot(companyId, normalizedRange),
@@ -109,7 +149,7 @@ export function useIdeaAssessments(
         ]),
       );
 
-      const nextMetrics: IdeaAssessmentMetric[] = (afterSnapshot as any[]).map((item, index) => {
+      return (afterSnapshot as any[]).map((item, index) => {
         const id = item.id ?? item.metric ?? item.label ?? `metric-${index}`;
         const before = beforeMap.get(id) ?? { value: 0, unit: item.unit ?? null };
         const after = Number(item.value ?? 0);
@@ -125,73 +165,36 @@ export function useIdeaAssessments(
           unit: item.unit ?? before.unit ?? null,
         };
       });
-
-      setMetrics(nextMetrics);
-    } catch (caughtError) {
-      setError(caughtError as Error);
-      setMetrics([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [companyId, enabled, normalizedRange, previousRange]);
-
-  useEffect(() => {
-    loadAssessments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadAssessments, refreshToken]);
+    },
+  });
 
   const refresh = useCallback(() => {
-    setRefreshToken((token) => token + 1);
-  }, []);
+    queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
-  const saveAssessment = useCallback(
-    async (notes?: string) => {
-    if (!companyId) {
-      throw new Error('Missing company context');
-    }
-
-      const assessmentsPayload = {
-        metrics,
-        notes: notes ?? null,
-      };
-
-      const targetMutation = cycleId
-        ? supabase
-            .from('idea_cycles')
-            .update({
-              stage: 'assess',
-              assessments: assessmentsPayload,
-            })
-            .eq('id', cycleId)
-            .select()
-            .single()
-        : supabase
-            .from('idea_cycles')
-            .insert({
-              company_id: companyId,
-              stage: 'assess',
-              range: formatRangeAsPgDate(range),
-              insights: latestInsights,
-              actions: null,
-              assessments: assessmentsPayload,
-            })
-            .select()
-            .single();
-
-      const { error: mutationError } = await targetMutation;
-
-      if (mutationError) {
-        throw mutationError;
+  const saveMutation = useMutation({
+    mutationFn: async (notes?: string) => {
+      if (!companyId) {
+        throw new Error('Missing company context');
       }
+
+      return persistAssessment({
+        companyId,
+        cycleId,
+        metrics: metricsQuery.data ?? [],
+        latestInsights,
+        rangeLabel: formatRangeAsPgDate(range),
+        notes,
+      });
     },
-    [companyId, cycleId, latestInsights, metrics, range],
-  );
+    onSuccess: refresh,
+  });
 
   return {
-    data: metrics,
-    loading,
-    error,
+    data: metricsQuery.data ?? [],
+    loading: metricsQuery.isLoading || saveMutation.isPending,
+    error: (metricsQuery.error as Error) ?? null,
     refresh,
-    saveAssessment,
+    saveAssessment: saveMutation.mutateAsync,
   };
 }

@@ -6,9 +6,10 @@ interface UpdatesEmptyStateProps {
   searchTerm: string;
   canCreate: boolean;
   onCreate: () => void;
+  wizardOpen?: boolean;
 }
 
-export function UpdatesEmptyState({ hasSearch, searchTerm, canCreate, onCreate }: UpdatesEmptyStateProps) {
+export function UpdatesEmptyState({ hasSearch, searchTerm, canCreate, onCreate, wizardOpen = false }: UpdatesEmptyStateProps) {
   return (
     <div className="text-center py-12">
       <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -23,7 +24,7 @@ export function UpdatesEmptyState({ hasSearch, searchTerm, canCreate, onCreate }
           : 'Company updates and announcements will appear here.'}
       </p>
       {!hasSearch && canCreate && (
-        <Button className="mt-6" onClick={onCreate}>
+        <Button className="mt-6" onClick={onCreate} aria-expanded={wizardOpen} aria-controls="company-updates-wizard">
           Create your first update
         </Button>
       )}

@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IdeaKpiInsight, DateRange } from './useIdeaInsights';
 import { useProfile } from '@/hooks/useProfile';
+import { runIdeaDiagnostics } from '../data/ideaRepository';
 
 interface IdeaDiagnosticsResult {
   causes: Array<{ id: string; summary: string; confidence: number }>;
@@ -32,16 +34,9 @@ export function useIdeaDiagnostics(
   insights: IdeaKpiInsight[],
   range: DateRange,
 ): IdeaDiagnosticsState {
-  const [result, setResult] = useState<IdeaDiagnosticsResult>({
-    causes: [],
-    recommendations: [],
-  });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
   const { profile } = useProfile();
-
   const actorUserId = profile?.userId ?? profile?.id ?? null;
+  const queryClient = useQueryClient();
 
   const metricsPayload = useMemo(() => {
     const observedAt = range.end.toISOString();
@@ -82,113 +77,91 @@ export function useIdeaDiagnostics(
       });
   }, [metricsPayload]);
 
-  const runDiagnostics = useCallback(async () => {
-    if (!companyId) {
-      setError(new Error('Missing company context'));
-      setResult({ causes: [], recommendations: [] });
-      return;
-    }
+  const metricsFingerprint = useMemo(() => JSON.stringify(metricsPayload), [metricsPayload]);
+  const queryKey = useMemo(
+    () => [
+      'idea-diagnostics',
+      companyId,
+      actorUserId,
+      range.start.toISOString(),
+      range.end.toISOString(),
+      metricsFingerprint,
+    ],
+    [actorUserId, companyId, metricsFingerprint, range.end, range.start],
+  );
 
-    if (!actorUserId) {
-      setError(new Error('Missing actor context'));
-      setResult({ causes: [], recommendations: [] });
-      return;
-    }
-
-    if (metricsPayload.length === 0) {
-      setResult({ causes: [], recommendations: [] });
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/functions/v1/copilot-service', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          companyId,
-          actorUserId,
-          source: 'system',
-          mode: 'preview',
-          timeframe: {
-            start: range.start.toISOString(),
-            end: range.end.toISOString(),
-            label: 'idea_cycle',
-          },
-          metrics: metricsPayload,
-          signals: signalsPayload,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Diagnostics request failed (${response.status})`);
+  const query = useQuery<IdeaDiagnosticsResult>({
+    queryKey,
+    enabled: Boolean(companyId && actorUserId && metricsPayload.length > 0),
+    staleTime: 60_000,
+    retry: 1,
+    queryFn: async () => {
+      if (!companyId) {
+        throw new Error('Missing company context');
+      }
+      if (!actorUserId) {
+        throw new Error('Missing actor context');
+      }
+      if (metricsPayload.length === 0) {
+        return { causes: [], recommendations: [] };
       }
 
-      const body = await response.json();
-      const evaluation = body?.evaluation ?? {};
-      const causes = Array.isArray(evaluation?.insights)
-        ? evaluation.insights.map((insight: any, index: number) => ({
-            id: insight.id ?? insight.metric ?? `cause-${index}`,
-            summary: insight.message ?? insight.metric ?? 'Operational insight',
-            confidence:
-              typeof insight?.metadata?.confidence === 'number'
-                ? insight.metadata.confidence
-                : severityConfidence[insight.severity as keyof typeof severityConfidence] ?? 0.5,
-          }))
-        : [];
+      const diagnostics = await runIdeaDiagnostics({
+        endpoint: '/functions/v1/copilot-service',
+        companyId,
+        actorUserId,
+        timeframe: {
+          start: range.start.toISOString(),
+          end: range.end.toISOString(),
+          label: 'idea_cycle',
+        },
+        metrics: metricsPayload,
+        signals: signalsPayload,
+      });
 
-      const recommendations = Array.isArray(evaluation?.recommendedActions)
-        ? evaluation.recommendedActions.map((item: any, index: number) => {
-            const impactSummary = Array.isArray(item?.impacts) && item.impacts.length > 0
-              ? item.impacts
-                  .map(
-                    (impact: any) =>
-                      `${impact.metric ?? 'Metric'} ${impact.delta ?? 0}${impact.unit ?? ''}`,
-                  )
-                  .join('; ')
-              : item?.evaluation?.reason ?? item?.notes?.join(' ') ?? 'Impact pending validation.';
+      const causes = (diagnostics.insights ?? diagnostics.legacyCauses ?? []).map((insight, index) => ({
+        id: insight.id ?? insight.metric ?? `cause-${index}`,
+        summary: insight.message ?? insight.metric ?? (insight as any)?.summary ?? 'Operational insight',
+        confidence:
+          typeof insight?.metadata?.confidence === 'number'
+            ? (insight.metadata.confidence as number)
+            : severityConfidence[
+                (insight.severity as keyof typeof severityConfidence) ?? ('info' as const)
+              ] ?? 0.5,
+      }));
 
-            return {
-              id: item?.dedupeKey ?? item?.id ?? `recommendation-${index}`,
-              action: item?.actionType ?? item?.metadata?.title ?? 'Suggested action',
-              impact: impactSummary,
-              confidence: typeof item?.confidence === 'number' ? item.confidence : 0.5,
-            };
-          })
-        : [];
+      const recommendationsSource = diagnostics.recommendedActions ?? diagnostics.legacyRecommendations ?? [];
+      const recommendations = recommendationsSource.map((item, index) => {
+        const impactSummary =
+          Array.isArray(item?.impacts) && item.impacts.length > 0
+            ? item.impacts
+                .map((impact: any) => `${impact.metric ?? 'Metric'} ${impact.delta ?? 0}${impact.unit ?? ''}`)
+                .join('; ')
+            : item?.evaluation?.reason ?? item?.notes?.join(' ') ?? item?.impact ?? 'Impact pending validation.';
 
-      setResult({ causes, recommendations });
-    } catch (caughtError) {
-      setError(caughtError as Error);
-      setResult({ causes: [], recommendations: [] });
-    } finally {
-      setLoading(false);
-    }
-  }, [actorUserId, companyId, metricsPayload, range.end, range.start, signalsPayload]);
+        return {
+          id: item?.dedupeKey ?? item?.id ?? `recommendation-${index}`,
+          action: item?.actionType ?? item?.metadata?.title ?? item?.action ?? 'Suggested action',
+          impact: impactSummary,
+          confidence: typeof item?.confidence === 'number' ? item.confidence : 0.5,
+        };
+      });
 
-  useEffect(() => {
-    if (metricsPayload.length === 0) {
-      setResult({ causes: [], recommendations: [] });
-      return;
-    }
-
-    runDiagnostics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runDiagnostics, refreshToken]);
+      return { causes, recommendations };
+    },
+  });
 
   const refresh = useCallback(() => {
-    setRefreshToken((token) => token + 1);
-  }, []);
+    queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
+
+  const fallback: IdeaDiagnosticsResult = { causes: [], recommendations: [] };
 
   return {
-    ...result,
-    data: result,
-    loading,
-    error,
+    ...(query.data ?? fallback),
+    data: query.data ?? fallback,
+    loading: query.isPending,
+    error: (query.error as Error) ?? null,
     refresh,
   };
 }

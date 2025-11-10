@@ -2,8 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { MessagesHeader } from './MessagesHeader';
-import { MessagesList } from './MessagesList';
-import { MessageInput } from './MessageInput';
+import { MessagesList } from '../conversations/MessagesList';
+import { MessageInput } from '../conversations/MessageInput';
 import type { MessageChannel, Message, ThreadMessage, MessageAttachment } from '@/types/messages';
 
 interface MessagesMainAreaProps {
@@ -24,6 +24,8 @@ interface MessagesMainAreaProps {
   canShowAvailability?: boolean;
   available?: boolean;
   onToggleAvailable?: (v: boolean) => Promise<void> | void;
+  currentUserId: string | null;
+  onDeleteMessage: (messageId: string) => Promise<void>;
 }
 
 export function MessagesMainArea({
@@ -43,7 +45,9 @@ export function MessagesMainArea({
   onToggleMobileSidebar,
   canShowAvailability,
   available,
-  onToggleAvailable
+  onToggleAvailable,
+  currentUserId,
+  onDeleteMessage,
 }: MessagesMainAreaProps) {
   if (!channel) {
     return (
@@ -83,6 +87,8 @@ export function MessagesMainArea({
         messages={messages}
         loading={messagesLoading}
         onThreadMessage={onThreadMessage}
+        currentUserId={currentUserId}
+        onDeleteMessage={onDeleteMessage}
       />
 
       <MessageInput

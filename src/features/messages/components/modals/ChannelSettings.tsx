@@ -9,6 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings, Hash, Users, Lock, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Channel {
   id: string;
@@ -23,10 +33,11 @@ interface ChannelSettingsProps {
   open: boolean;
   onClose: () => void;
   channel: Channel | null;
-  onChannelUpdated?: () => void;
+  onChannelUpdated?: () => Promise<void> | void;
+  onDeleteChannel?: (channelId: string) => Promise<void>;
 }
 
-export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: ChannelSettingsProps) {
+export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDeleteChannel }: ChannelSettingsProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -70,7 +81,7 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: Ch
         description: 'Channel settings updated successfully',
       });
 
-      onChannelUpdated?.();
+      await onChannelUpdated?.();
       onClose();
     } catch (error) {
       console.error('Error updating channel:', error);
@@ -84,27 +95,15 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: Ch
     }
   };
 
-  const deleteChannel = async () => {
-    if (!channel) return;
-    
-    const confirmMessage = `Are you sure you want to delete #${channel.name}? This action cannot be undone.`;
-    if (!confirm(confirmMessage)) return;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteChannel = async () => {
+    if (!channel || !onDeleteChannel) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('message_channels')
-        .delete()
-        .eq('id', channel.id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Channel deleted successfully',
-      });
-
-      onChannelUpdated?.();
+      await onDeleteChannel(channel.id);
+      await onChannelUpdated?.();
       onClose();
     } catch (error) {
       console.error('Error deleting channel:', error);
@@ -115,6 +114,7 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: Ch
       });
     } finally {
       setLoading(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -215,11 +215,11 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: Ch
           </div>
 
           <div className="flex justify-between space-x-2 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="destructive" 
-              onClick={deleteChannel}
-              disabled={loading}
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={loading || !onDeleteChannel}
               size="sm"
             >
               Delete Channel
@@ -236,6 +236,26 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated }: Ch
           </div>
         </form>
       </DialogContent>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete channel</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete #{channel?.name}. All messages in this channel will be removed and this action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={loading}
+              onClick={handleDeleteChannel}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

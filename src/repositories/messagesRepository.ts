@@ -37,7 +37,7 @@ const MessageChannelSchema = z
     is_private: z.boolean().nullable().optional(),
     channel_members: z.array(ChannelMemberSchema).default([]),
     created_profile: ProfileSchema.omit({ avatar_url: true }).optional(),
-    department: DepartmentSchema.optional(),
+    department: DepartmentSchema.nullable().optional(),
   })
   .passthrough();
 
@@ -289,6 +289,16 @@ async function insertMessage(
   return normalized as Message;
 }
 
+async function deleteMessage(messageId: string, senderId: string) {
+  const { error } = await supabase
+    .from('messages')
+    .delete()
+    .eq('id', messageId)
+    .eq('sender_id', senderId);
+
+  if (error) throw error;
+}
+
 async function searchMessages(
   query: string,
   userId: string,
@@ -364,6 +374,18 @@ async function removeMember(memberId: string) {
   if (error) throw error;
 }
 
+async function deleteChannel(channelId: string, userId: string) {
+  await ensureChannelMembership(channelId, userId);
+  const { error: messagesError } = await supabase.from('messages').delete().eq('channel_id', channelId);
+  if (messagesError) throw messagesError;
+
+  const { error: membersError } = await supabase.from('channel_members').delete().eq('channel_id', channelId);
+  if (membersError) throw membersError;
+
+  const { error } = await supabase.from('message_channels').delete().eq('id', channelId);
+  if (error) throw error;
+}
+
 export const messagesRepository = {
   listChannels,
   createChannel,
@@ -375,4 +397,6 @@ export const messagesRepository = {
   listChannelMembers,
   updateMemberRole,
   removeMember,
+  deleteMessage,
+  deleteChannel,
 };

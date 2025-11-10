@@ -315,6 +315,7 @@ function GoalsContent({
         isLoadingStats={initialLoading}
         onSuggestGoal={onSuggestGoal}
         suggesting={suggesting}
+        canSuggest={Boolean(companyId)}
       />
 
       {goals.length > 0 || initialLoading ? (

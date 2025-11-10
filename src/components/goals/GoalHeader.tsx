@@ -11,6 +11,7 @@ interface GoalHeaderProps {
   isLoadingStats: boolean;
   onSuggestGoal: () => void;
   suggesting: boolean;
+  canSuggest: boolean;
 }
 
 export function GoalHeader({
@@ -20,6 +21,7 @@ export function GoalHeader({
   isLoadingStats,
   onSuggestGoal,
   suggesting,
+  canSuggest,
 }: GoalHeaderProps) {
   return (
     <header className="space-y-6">
@@ -33,7 +35,7 @@ export function GoalHeader({
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={onSuggestGoal} disabled={suggesting}>
+          <Button variant="outline" onClick={onSuggestGoal} disabled={suggesting || !canSuggest}>
             <Sparkles className="mr-2 h-4 w-4" />
             {suggesting ? 'Generating…' : 'Suggest a goal'}
           </Button>

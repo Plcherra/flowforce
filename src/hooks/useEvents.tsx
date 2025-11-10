@@ -4,7 +4,7 @@ import type { Json, TablesInsert } from '@/integrations/supabase/public-types';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
-import { calendarEventsRepository, type CalendarEventRow } from '@/repositories/calendarEventsRepository';
+import { calendarEventsRepository, type CalendarEventRow } from '@/features/calendar/repositories/calendarEventsRepository';
 import { queryKeys } from '@/lib/queryKeys';
 
 function makeId() {
@@ -255,6 +255,10 @@ const toUpdatePayload = (updates: Partial<AppEvent>) => {
 
 const parseError = (error: unknown): string => {
   if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string') return message;
+  }
   if (typeof error === 'string') return error;
   return 'An unexpected error occurred.';
 };
@@ -299,6 +303,7 @@ export function useEvents() {
     },
     initialData: () => (companyId ? readStoredEvents(storageKey) : undefined),
     staleTime: 30_000,
+    retry: 1,
   });
 
   const events = companyId ? eventsQuery.data ?? [] : localEvents;
@@ -318,7 +323,7 @@ export function useEvents() {
   }, [companyId, defaultStorageKey, localEvents]);
 
   useEffect(() => {
-    if (companyId && eventsQuery.error) {
+    if (companyId && eventsQuery.isError && eventsQuery.error) {
       if (!offlineToastShownRef.current) {
         toast({
           title: 'Calendar offline',
@@ -327,10 +332,10 @@ export function useEvents() {
         });
         offlineToastShownRef.current = true;
       }
-    } else {
+    } else if (!eventsQuery.isFetching) {
       offlineToastShownRef.current = false;
     }
-  }, [companyId, eventsQuery.error, toast]);
+  }, [companyId, eventsQuery.error, eventsQuery.isError, eventsQuery.isFetching, toast]);
 
   const invalidateCompanyEvents = useCallback(() => {
     if (!companyId) return;
@@ -463,7 +468,11 @@ export function useEvents() {
         updateLocalEvents((previous) => sortEvents([localEvent, ...previous]));
         return localEvent;
       }
-      return createEventMutation.mutateAsync(payload);
+      try {
+        return await createEventMutation.mutateAsync(payload);
+      } catch (mutationError) {
+        throw new Error(parseError(mutationError));
+      }
     },
     [companyId, createEventMutation, updateLocalEvents, withDefaults],
   );
@@ -481,7 +490,11 @@ export function useEvents() {
         updateLocalEvents((previous) => sortEvents([localEvent, ...previous]));
         return localEvent;
       }
-      return createVendorVisitMutation.mutateAsync(payload);
+      try {
+        return await createVendorVisitMutation.mutateAsync(payload);
+      } catch (mutationError) {
+        throw new Error(parseError(mutationError));
+      }
     },
     [companyId, createVendorVisitMutation, updateLocalEvents, withDefaults],
   );

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCan } from '@/hooks/useCan';
 import { useProfile } from '@/hooks/useProfile';
@@ -15,7 +15,20 @@ import { UpdatesEmptyState } from '@/features/company-updates/components/Updates
 import type { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertTriangle } from 'lucide-react';
+import { useCommentForm } from '@/features/company-updates/hooks/useCommentForm';
+
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 
 type ViewMode = 'feed' | 'grid' | 'list';
 
@@ -26,42 +39,33 @@ export default function CompanyUpdates() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('feed');
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const {
+    values: commentInputs,
+    errors: commentErrors,
+    handleChange: handleCommentInputChange,
+    clearComment,
+    setError: setCommentError,
+  } = useCommentForm();
   const [visibleComments, setVisibleComments] = useState<Record<string, boolean>>({});
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const {
     updates,
     loading,
     error,
     commentsByUpdate,
+    pagination,
     likeUpdate,
     addComment,
     markAsViewed,
     createUpdate,
     archiveUpdate,
     deleteUpdate,
-  } = useCompanyUpdates();
+  } = useCompanyUpdates({ page, pageSize, status: 'published', searchTerm });
 
   const { recognitions: recognitionFeed, loading: recognitionLoading } = useRecognitions();
-
-  const filteredUpdates = useMemo(() => {
-    return updates
-      .filter((update) => update.status === 'published')
-      .filter((update) => {
-        if (!searchTerm.trim()) return true;
-        const lowerSearch = searchTerm.toLowerCase();
-        return (
-          update.title.toLowerCase().includes(lowerSearch) ||
-          update.body.toLowerCase().includes(lowerSearch)
-        );
-      })
-      .sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
-      });
-  }, [searchTerm, updates]);
 
   const recognitionHighlights = useMemo(
     () => recognitionFeed.slice(0, 3),
@@ -75,6 +79,18 @@ export default function CompanyUpdates() {
       : (error as { message?: string }).message ?? 'Unable to load company updates.'
     : null;
   const hasSearch = Boolean(searchTerm.trim());
+  const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
+  const showPagination = totalPages > 1;
+
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize, searchTerm, viewMode]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages || 1);
+    }
+  }, [page, totalPages]);
 
   const canCreateUpdate = useMemo(() => {
     if (can('systemSettings') || can('manageCompany')) {
@@ -84,6 +100,17 @@ export default function CompanyUpdates() {
     const role = (profile?.role || '').toLowerCase();
     return ['owner', 'company_admin', 'admin', 'manager'].includes(role);
   }, [can, profile?.role]);
+
+  const handlePageChange = useCallback((nextPage: number) => {
+    setPage(nextPage);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handlePageSizeChange = useCallback((nextSize: number) => {
+    setPageSize(nextSize);
+  }, []);
 
   const handleUpdateComplete = useCallback((formData: WizardFormData) => {
     void createUpdate({
@@ -103,15 +130,42 @@ export default function CompanyUpdates() {
     likeUpdate(updateId);
   }, [likeUpdate]);
 
-  const handleCommentSubmit = useCallback(async (update: CompanyUpdate) => {
-    const content = commentInputs[update.id];
-    if (!content?.trim()) {
-      return;
-    }
+  const handleMarkAsViewed = useCallback(
+    (updateId: string) => {
+      void markAsViewed(updateId);
+    },
+    [markAsViewed],
+  );
 
-    await addComment(update.id, content);
-    setCommentInputs((prev) => ({ ...prev, [update.id]: '' }));
-  }, [addComment, commentInputs]);
+  const handleCommentChange = useCallback(
+    (id: string, value: string) => {
+      handleCommentInputChange(id, value);
+    },
+    [handleCommentInputChange],
+  );
+
+  const handleCommentSubmit = useCallback(
+    async (update: CompanyUpdate) => {
+      const content = commentInputs[update.id];
+      if (!content?.trim()) {
+        return;
+      }
+
+      try {
+        await addComment(update.id, content);
+        clearComment(update.id);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to post comment.';
+        setCommentError(update.id, message);
+        toast({
+          title: 'Unable to post comment',
+          description: message,
+          variant: 'destructive',
+        });
+      }
+    },
+    [addComment, commentInputs, clearComment, setCommentError, toast],
+  );
 
   const handleToggleComments = useCallback((update: CompanyUpdate) => {
     setVisibleComments((prev) => ({ ...prev, [update.id]: !prev[update.id] }));
@@ -147,6 +201,7 @@ export default function CompanyUpdates() {
         onSearchChange={setSearchTerm}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        wizardOpen={createWizardOpen}
       />
 
       {errorMessage && (
@@ -167,31 +222,33 @@ export default function CompanyUpdates() {
             <FeedSkeleton />
           ) : (
             <>
-              {filteredUpdates.map((update) => (
+              {updates.map((update) => (
                 <UpdateFeedCard
                   key={update.id}
                   update={update}
                   comments={getUpdateComments(update.id)}
                   showComments={Boolean(visibleComments[update.id])}
                   commentValue={commentInputs[update.id] ?? ''}
-                  onCommentChange={(id, value) => setCommentInputs((prev) => ({ ...prev, [id]: value }))}
+                  onCommentChange={handleCommentChange}
                   onSubmitComment={handleCommentSubmit}
                   onToggleComments={handleToggleComments}
                   onLike={handleLike}
                   onArchive={handleArchive}
                   onDelete={handleDelete}
                   canManage={canCreateUpdate}
-                  onView={(id) => void markAsViewed(id)}
+                  onView={handleMarkAsViewed}
                   viewerHasViewed={update.viewerHasViewed}
+                  commentError={commentErrors[update.id]}
                 />
               ))}
 
-              {filteredUpdates.length === 0 && (
+              {updates.length === 0 && (
                 <UpdatesEmptyState
                   hasSearch={hasSearch}
                   searchTerm={searchTerm}
                   canCreate={canCreateUpdate}
                   onCreate={() => setCreateWizardOpen(true)}
+                  wizardOpen={createWizardOpen}
                 />
               )}
             </>
@@ -203,8 +260,8 @@ export default function CompanyUpdates() {
         <>
           {isInitialLoading ? (
             <GridSkeleton />
-          ) : filteredUpdates.length > 0 ? (
-            <UpdateGridView updates={filteredUpdates} />
+          ) : updates.length > 0 ? (
+            <UpdateGridView updates={updates} />
           ) : (
             <div className="px-4 py-6">
               <UpdatesEmptyState
@@ -212,6 +269,7 @@ export default function CompanyUpdates() {
                 searchTerm={searchTerm}
                 canCreate={canCreateUpdate}
                 onCreate={() => setCreateWizardOpen(true)}
+                wizardOpen={createWizardOpen}
               />
             </div>
           )}
@@ -222,8 +280,8 @@ export default function CompanyUpdates() {
         <>
           {isInitialLoading ? (
             <ListSkeleton />
-          ) : filteredUpdates.length > 0 ? (
-            <UpdateListView updates={filteredUpdates} />
+          ) : updates.length > 0 ? (
+            <UpdateListView updates={updates} />
           ) : (
             <div className="px-4 py-6">
               <UpdatesEmptyState
@@ -231,24 +289,41 @@ export default function CompanyUpdates() {
                 searchTerm={searchTerm}
                 canCreate={canCreateUpdate}
                 onCreate={() => setCreateWizardOpen(true)}
+                wizardOpen={createWizardOpen}
               />
             </div>
           )}
         </>
       )}
 
-      <CreateUpdateWizard
-        open={createWizardOpen}
-        onOpenChange={setCreateWizardOpen}
-        onComplete={handleUpdateComplete}
-      />
+      {showPagination && !isInitialLoading && (
+        <div className="px-4 pb-6">
+          <UpdatesPagination
+            page={page}
+            totalPages={totalPages}
+            total={pagination.total ?? 0}
+            pageSize={pageSize}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        </div>
+      )}
+
+      <div id="company-updates-wizard">
+        <CreateUpdateWizard
+          open={createWizardOpen}
+          onOpenChange={setCreateWizardOpen}
+          onComplete={handleUpdateComplete}
+        />
+      </div>
     </div>
   );
 }
 
 function FeedSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-pulse">
       {Array.from({ length: 3 }).map((_, index) => (
         <div key={index} className="rounded-lg border bg-card p-4 space-y-4">
           <div className="flex items-center gap-3">
@@ -269,7 +344,7 @@ function FeedSkeleton() {
 
 function GridSkeleton() {
   return (
-    <div className="px-4 py-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div className="px-4 py-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-pulse">
       {Array.from({ length: 6 }).map((_, index) => (
         <div key={index} className="rounded-lg border bg-card p-4 space-y-3">
           <Skeleton className="h-4 w-1/4" />
@@ -283,7 +358,7 @@ function GridSkeleton() {
 
 function ListSkeleton() {
   return (
-    <div className="px-4 py-6">
+    <div className="px-4 py-6 animate-pulse">
       <div className="overflow-hidden rounded-lg border divide-y divide-border">
         {Array.from({ length: 5 }).map((_, index) => (
           <div key={index} className="grid grid-cols-5 items-center gap-4 px-6 py-4">
@@ -297,4 +372,107 @@ function ListSkeleton() {
       </div>
     </div>
   );
+}
+
+type UpdatesPaginationProps = {
+  page: number;
+  totalPages: number;
+  total: number;
+  pageSize: number;
+  pageSizeOptions: readonly number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+};
+
+function UpdatesPagination({
+  page,
+  totalPages,
+  total,
+  pageSize,
+  pageSizeOptions,
+  onPageChange,
+  onPageSizeChange,
+}: UpdatesPaginationProps) {
+  const pageNumbers = getPaginationSequence(page, totalPages);
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = total === 0 ? 0 : Math.min(page * pageSize, total);
+
+  return (
+    <div className="rounded-lg border bg-card px-4 py-4 shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing {from === 0 ? 0 : from}-{to} of {total} updates
+        </p>
+
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+          <div className="flex items-center gap-2 text-sm">
+            <span>Per page</span>
+            <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+              <SelectTrigger className="h-8 w-[90px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Pagination className="ml-auto w-auto">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => onPageChange(Math.max(1, page - 1))}
+                  aria-disabled={page === 1}
+                  className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+              {pageNumbers.map((value, index) =>
+                value === 'ellipsis' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={value}>
+                    <PaginationLink
+                      isActive={value === page}
+                      onClick={() => onPageChange(value)}
+                    >
+                      {value}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                  aria-disabled={page === totalPages}
+                  className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getPaginationSequence(current: number, total: number): Array<number | 'ellipsis'> {
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  if (current <= 3) {
+    return [1, 2, 3, 'ellipsis', total];
+  }
+
+  if (current >= total - 2) {
+    return [1, 'ellipsis', total - 2, total - 1, total];
+  }
+
+  return [1, 'ellipsis', current - 1, current, current + 1, 'ellipsis', total];
 }

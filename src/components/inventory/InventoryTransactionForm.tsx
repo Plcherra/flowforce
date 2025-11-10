@@ -109,6 +109,9 @@ export default function InventoryTransactionForm() {
           ? suggestedUnitPrice
           : undefined;
 
+      // The legacy inventory_transactions table still references inventory_items.
+      // Confirm the selected inv_item is synced before attempting the insert
+      // so we can surface a friendly validation error instead of an FK failure.
       const { data: legacyItem, error: legacyError } = await supabase
         .from('inventory_items')
         .select('id')
@@ -185,7 +188,7 @@ export default function InventoryTransactionForm() {
           {itemsError && (
             <Alert variant="destructive">
               <AlertTitle>Unable to load inventory items</AlertTitle>
-              <AlertDescription>{itemsError.message || 'Please refresh and try again.'}</AlertDescription>
+              <AlertDescription>{itemsError?.message || 'Please refresh and try again.'}</AlertDescription>
             </Alert>
           )}
           {!itemsLoading && noItemsAvailable && (

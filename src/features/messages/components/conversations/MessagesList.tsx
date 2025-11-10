@@ -1,21 +1,35 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Trash2 } from 'lucide-react';
 import { MessageReactions } from './MessageReactions';
 import { format } from 'date-fns';
 import type { Message, ThreadMessage } from '@/types/messages';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface MessagesListProps {
   messages: Message[];
   loading: boolean;
   onThreadMessage: (message: ThreadMessage) => void;
+  currentUserId: string | null;
+  onDeleteMessage: (messageId: string) => Promise<void>;
 }
 
-export function MessagesList({ messages, loading, onThreadMessage }: MessagesListProps) {
+export function MessagesList({ messages, loading, onThreadMessage, currentUserId, onDeleteMessage }: MessagesListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messagePendingDelete, setMessagePendingDelete] = useState<Message | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,9 +125,19 @@ export function MessagesList({ messages, loading, onThreadMessage }: MessagesLis
                           replyCount: 0,
                         });
                       }}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    {message.sender_id === currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Delete message"
+                        onClick={() => setMessagePendingDelete(message)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
 
                   {/* Message Reactions */}
@@ -124,6 +148,35 @@ export function MessagesList({ messages, loading, onThreadMessage }: MessagesLis
           })
         )}
         <div ref={messagesEndRef} />
+        <AlertDialog open={Boolean(messagePendingDelete)} onOpenChange={(open) => !open && setMessagePendingDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete message</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete your message. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleting}
+                onClick={async () => {
+                  if (!messagePendingDelete) return;
+                  setDeleting(true);
+                  try {
+                    await onDeleteMessage(messagePendingDelete.id);
+                  } finally {
+                    setDeleting(false);
+                    setMessagePendingDelete(null);
+                  }
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </ScrollArea>
   );

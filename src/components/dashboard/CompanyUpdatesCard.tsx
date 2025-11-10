@@ -60,6 +60,8 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
                 variant="outline" 
                 size="sm"
                 onClick={() => setCreateWizardOpen(true)}
+                aria-expanded={createWizardOpen}
+                aria-controls="company-updates-dashboard-wizard"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Update
@@ -130,11 +132,13 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
         </CardContent>
       </Card>
 
-      <CreateUpdateWizard
-        open={createWizardOpen}
-        onOpenChange={setCreateWizardOpen}
-        onComplete={handleUpdateComplete}
-      />
+      <div id="company-updates-dashboard-wizard">
+        <CreateUpdateWizard
+          open={createWizardOpen}
+          onOpenChange={setCreateWizardOpen}
+          onComplete={handleUpdateComplete}
+        />
+      </div>
     </>
   );
 }

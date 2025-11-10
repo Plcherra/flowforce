@@ -169,11 +169,18 @@ export function usePositions() {
       };
       
       setPositions(prev => [...prev, mappedData]);
-      toast.success('Position created successfully');
+      toast({
+        title: 'Position created',
+        description: `${mappedData.name} is now available for assignments.`,
+      });
       return { data, error: null };
     } catch (error) {
       console.error('Error creating position:', error);
-      toast.error('Failed to create position');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to create position',
+        description: 'Check the form fields and try again.',
+      });
       return { data: null, error };
     }
   };
@@ -204,11 +211,18 @@ export function usePositions() {
       };
       
       setPositions(prev => prev.map(p => p.id === id ? { ...p, ...mappedData } : p));
-      toast.success('Position updated successfully');
+      toast({
+        title: 'Position updated',
+        description: `${mappedData.name} has been refreshed.`,
+      });
       return { data, error: null };
     } catch (error) {
       console.error('Error updating position:', error);
-      toast.error('Failed to update position');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to update position',
+        description: 'Please try again.',
+      });
       return { data: null, error };
     }
   };
@@ -223,11 +237,18 @@ export function usePositions() {
       if (error) throw error;
       
       setPositions(prev => prev.filter(p => p.id !== id));
-      toast.success('Position deleted successfully');
+      toast({
+        title: 'Position archived',
+        description: 'It will no longer appear in new assignments.',
+      });
       return { error: null };
     } catch (error) {
       console.error('Error deleting position:', error);
-      toast.error('Failed to delete position');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to delete position',
+        description: 'Please try again.',
+      });
       return { error };
     }
   };
@@ -262,11 +283,18 @@ export function usePositions() {
       if (error) throw error;
       
       setAssignments(prev => [...prev, data as any]);
-      toast.success('User assigned to position');
+      toast({
+        title: 'User assigned',
+        description: 'The teammate now holds this position.',
+      });
       return { data, error: null };
     } catch (error) {
       console.error('Error assigning user to position:', error);
-      toast.error('Failed to assign user to position');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to assign user',
+        description: 'Please try again.',
+      });
       return { data: null, error };
     }
   };
@@ -282,11 +310,18 @@ export function usePositions() {
       if (error) throw error;
       
       setAssignments(prev => prev.filter(a => !(a.user_id === userId && a.position_id === positionId)));
-      toast.success('User removed from position');
+      toast({
+        title: 'User removed',
+        description: 'The teammate no longer holds this position.',
+      });
       return { error: null };
     } catch (error) {
       console.error('Error removing user from position:', error);
-      toast.error('Failed to remove user from position');
+      toast({
+        variant: 'destructive',
+        title: 'Unable to remove user',
+        description: 'Please try again.',
+      });
       return { error };
     }
   };

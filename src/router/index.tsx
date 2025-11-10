@@ -14,8 +14,9 @@ const Dashboard = lazy(() => import('../pages/Dashboard.tsx'));
 const CompanyRegistration = lazy(() => import('../pages/CompanyRegistration.tsx'));
 
 // Lazy load all other pages
-const Messages = lazy(() => import('../pages/Messages.tsx'));
+import Messages from '../pages/Messages.tsx';
 const EventsHub = lazy(() => import('../pages/events/EventsHub.tsx'));
+const EventsCalendar = lazy(() => import('../pages/events/Calendar.tsx'));
 const Employees = lazy(() => import('../pages/Employees.tsx'));
 const PositionManagement = lazy(() => import('../pages/PositionManagement.tsx'));
 const Goals = lazy(() => import('../pages/Goals.tsx'));
@@ -122,6 +123,10 @@ export const router = createBrowserRouter([
           {
             path: "calendar",
             element: <EventsHub />,
+          },
+          {
+            path: "events/calendar",
+            element: <EventsCalendar />,
           },
           {
             path: "meetings",

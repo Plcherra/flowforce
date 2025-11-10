@@ -11,7 +11,7 @@ export function useInventoryItems() {
     data,
     isLoading,
     error,
-  } = useQuery<InventoryItem[]>({
+  } = useQuery<InventoryItem[], Error>({
     queryKey: ['inventory-items'],
     queryFn: () => InventoryService.listItems(),
   });

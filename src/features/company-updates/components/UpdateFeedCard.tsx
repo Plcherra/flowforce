@@ -32,6 +32,7 @@ interface UpdateFeedCardProps {
   canManage: boolean;
   onView?: (updateId: string) => void;
   viewerHasViewed?: boolean;
+  commentError?: string | null;
 }
 
 export function UpdateFeedCard({
@@ -48,6 +49,7 @@ export function UpdateFeedCard({
   canManage,
   onView,
   viewerHasViewed,
+  commentError,
 }: UpdateFeedCardProps) {
   const engagement = useMemo(() => getEngagementSettings(update), [update]);
   const isLiked = Boolean(update.viewerHasLiked);
@@ -219,6 +221,7 @@ export function UpdateFeedCard({
                   value={commentValue}
                   onChange={(event) => onCommentChange(update.id, event.target.value)}
                   className="min-h-[60px] resize-none text-sm"
+                  aria-invalid={Boolean(commentError)}
                 />
                 <div className="flex justify-end">
                   <Button
@@ -230,6 +233,11 @@ export function UpdateFeedCard({
                     <span className="text-xs">Post</span>
                   </Button>
                 </div>
+                {commentError && (
+                  <p className="text-xs text-destructive" role="alert">
+                    {commentError}
+                  </p>
+                )}
               </div>
 
               {comments.map((comment) => (

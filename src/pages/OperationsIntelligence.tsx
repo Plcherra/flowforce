@@ -1,6 +1,8 @@
 import { IdeaProvider, useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
 import IdeaLayout from '@/modules/operations/components/idea/IdeaLayout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect, useRef } from 'react';
 
 export default function OperationsIntelligence() {
   return (
@@ -11,7 +13,20 @@ export default function OperationsIntelligence() {
 }
 
 function IdeaRouteContent() {
-  const { ready, loading } = useIdeaContext();
+  const { ready, loading, companyId } = useIdeaContext();
+  const { toast } = useToast();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (!loading && !companyId && !notifiedRef.current) {
+      notifiedRef.current = true;
+      toast({
+        variant: 'destructive',
+        title: 'Company context missing',
+        description: 'Connect your profile to a company to activate Operations Intelligence.',
+      });
+    }
+  }, [companyId, loading, toast]);
 
   if (!ready) {
     return (
