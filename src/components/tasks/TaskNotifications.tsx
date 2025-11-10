@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { useTaskNotifications } from '@/hooks/useTaskNotifications';
+import { useTaskNotifications } from '@/features/tasks';
+import { NotificationListSkeleton } from '@/components/loading/TaskSkeletons';
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import { logger } from '@/utils/logger';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
 
 type TaskNotificationsProps = {
   onTaskNavigate?: (taskId: string) => void;
@@ -105,6 +105,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           size="sm"
           className="relative"
           aria-label={unreadCount > 0 ? `${unreadCount} unread task notifications` : 'Open task notifications'}
+          data-testid="task-notifications-trigger"
         >
           {unreadCount > 0 ? (
             <BellRing className="h-4 w-4" />
@@ -155,15 +156,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                 </div>
               )}
               {loading ? (
-                <div className="space-y-4 p-4" role="status" aria-live="polite">
-                  {[0, 1, 2].map((item) => (
-                    <div key={item} className="space-y-2">
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
-                  ))}
-                </div>
+                <NotificationListSkeleton />
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Bell className="h-8 w-8 text-muted-foreground mb-2" />
@@ -171,11 +164,12 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                   <p className="text-xs text-muted-foreground">You'll see task updates here</p>
                 </div>
               ) : (
-                <div className="space-y-0">
+                <div className="space-y-0" data-testid="task-notifications-list">
                   {notifications.map((notification, index) => (
                     <div key={notification.id}>
                       <button
                         type="button"
+                        data-testid={`task-notification-item-${notification.id}`}
                         onClick={() => handleNotificationClick(notification)}
                         className={`w-full text-left p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                           !notification.read_at

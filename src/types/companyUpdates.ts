@@ -1,4 +1,7 @@
 import type { BackgroundStyle, PublishingSettings, UpdateRecipient } from '@/types/updateTemplates';
+import type { Tables } from '@/integrations/supabase/public-types';
+
+export type CompanyUpdateRow = Tables<'company_updates'>;
 
 export type CompanyUpdateType = 'announcement' | 'news' | 'event' | 'policy';
 export type CompanyUpdatePriority = 'high' | 'medium' | 'low';
@@ -40,6 +43,10 @@ export interface CompanyUpdate {
     lastAnalyzed?: string | null;
   } | null;
 }
+
+export type CompanyUpdateCardView = CompanyUpdate & {
+  showActions?: boolean;
+};
 
 export interface UpdateComment {
   id: string;

@@ -4,7 +4,7 @@ import { Hash, Users, Lock, MoreVertical, Settings, Phone, Video, Clock, Menu, X
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MessageScheduler } from './MessageScheduler';
+import { MessageScheduler } from '@/components/messages/MessageScheduler';
 import type { MessageChannel } from '@/types/messages';
 
 interface MessagesHeaderProps {

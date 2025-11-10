@@ -1,6 +1,11 @@
 import { addDays, differenceInHours, differenceInMinutes, format, formatISO, isBefore, startOfWeek } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/public-types';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  insertSchedules,
+  insertScheduleAssignments,
+  deleteCopilotDrafts,
+} from '@/repositories/schedulingRepository';
+import { listCompanyEmployees, listCoverageTemplates, listCoverageLocations } from '@/repositories/copilotRepository';
 import { generateSchedule, type ShiftSlot, type EmployeeProfile, type AssignedShift, type GenerateScheduleResult } from '@/server/schedule/engine';
 import { PolicyEngine } from '@/server/copilot/policy-engine';
 import type { Area, Weekday } from '@/server/copilot/rules-loader';
@@ -44,7 +49,6 @@ export interface AutoScheduleResult {
 
 type ScheduleInsert = Tables<'schedules'>['Insert'];
 type ScheduleAssignmentInsert = Tables<'schedule_assignments'>['Insert'];
-type ScheduleMinimalRow = Pick<Tables<'schedules'>['Row'], 'id' | 'requirements' | 'start_time'>;
 
 export interface CopilotScheduleMetadata {
   runId: string;
@@ -164,32 +168,13 @@ const buildAvailability = (raw: unknown): CopilotEmployeeSeed['availability'] =>
 };
 
 async function buildRuleSetFromDatabase(companyId: string, locationId: string): Promise<LocationRuleSet> {
-  const templateQuery = supabase
-    .from('coverage_templates')
-    .select('id, name, role, location, day_of_week, start_time, end_time, required_count, metadata')
-    .eq('company_id', companyId)
-    .eq('location', locationId)
-    .order('day_of_week')
-    .order('start_time');
-
-  const employeeQuery = supabase
-    .from('employees')
-    .select('id, display_name, role, secondary_roles, home_store, weekly_max_hours, availability, metadata')
-    .eq('company_id', companyId);
-
-  const [{ data: templateRows, error: templateError }, { data: employeeRows, error: employeeError }] = await Promise.all([
-    templateQuery,
-    employeeQuery,
-  ]);
-
-  if (templateError) throw templateError;
-  if (employeeError) throw employeeError;
-
-  if (!templateRows || templateRows.length === 0) {
+  const templateRows = await listCoverageTemplates(companyId, locationId);
+  if (templateRows.length === 0) {
     throw new Error(`No coverage templates configured for ${locationId}.`);
   }
 
-  if (!employeeRows || employeeRows.length === 0) {
+  const employeeRows = await listCompanyEmployees(companyId);
+  if (employeeRows.length === 0) {
     throw new Error('Add employees to Copilot before running the auto-scheduler.');
   }
 
@@ -205,7 +190,12 @@ async function buildRuleSetFromDatabase(companyId: string, locationId: string): 
 
   let detectedTimezone: string | undefined;
 
-  templateRows.forEach((row) => {
+  templateRows
+    .sort((a, b) => {
+      if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+      return a.start_time.localeCompare(b.start_time);
+    })
+    .forEach((row) => {
     const weekdayIndex = Number.isInteger(row.day_of_week) ? Number(row.day_of_week) : 0;
     const weekday = WEEKDAY_LABELS[weekdayIndex] ?? 'Mon';
     const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
@@ -484,51 +474,18 @@ function convertEngineWarnings(engineResult: GenerateScheduleResult): CopilotDra
 }
 
 async function deletePreviousDrafts(
+  companyId: string,
   ruleset: LocationRuleSet,
   weekStartIso: string,
   weekEndIso: string,
 ): Promise<void> {
-  const { data: existing, error } = await supabase
-    .from('schedules')
-    .select('id, requirements')
-    .eq('location', ruleset.name)
-    .eq('is_published', false)
-    .gte('start_time', weekStartIso)
-    .lt('start_time', weekEndIso);
-
-  if (error) {
-    throw error;
-  }
-
-  const draftIds = ((existing as ScheduleMinimalRow[] | null) ?? [])
-    .filter((row) => {
-      const requirements = row.requirements as CopilotRequirementsPayload | null;
-      const copilot = requirements?.copilot;
-      return copilot?.locationId === ruleset.id && copilot?.weekStart === weekStartIso;
-    })
-    .map((row) => row.id);
-
-  if (draftIds.length === 0) {
-    return;
-  }
-
-  const { error: deleteAssignmentsError } = await supabase
-    .from('schedule_assignments')
-    .delete()
-    .in('schedule_id', draftIds);
-
-  if (deleteAssignmentsError) {
-    throw deleteAssignmentsError;
-  }
-
-  const { error: deleteSchedulesError } = await supabase
-    .from('schedules')
-    .delete()
-    .in('id', draftIds);
-
-  if (deleteSchedulesError) {
-    throw deleteSchedulesError;
-  }
+  await deleteCopilotDrafts({
+    companyId,
+    locationName: ruleset.name,
+    locationId: ruleset.id,
+    weekStartIso,
+    weekEndIso,
+  });
 }
 
 function buildSummary(slots: ShiftSlot[], assignments: AssignedShift[], warnings: CopilotDraftWarning[]): AutoScheduleSummary {
@@ -569,7 +526,7 @@ export async function runCopilotAutoSchedule(
   }
 
   if (params.overwriteExisting !== false) {
-    await deletePreviousDrafts(ruleset, weekStartIso, weekEndIso);
+    await deletePreviousDrafts(companyId, ruleset, weekStartIso, weekEndIso);
   }
 
   const { slots, meta } = buildShiftSlots(ruleset, weekStart);
@@ -632,17 +589,10 @@ export async function runCopilotAutoSchedule(
     } as ScheduleInsert;
   });
 
-  const { data: insertedSchedules, error: insertError } = await supabase
-    .from('schedules')
-    .insert(schedulePayloads)
-    .select('id, requirements, start_time');
-
-  if (insertError) {
-    throw insertError;
-  }
+  const insertedSchedules = await insertSchedules(schedulePayloads);
 
   const assignmentRows: ScheduleAssignmentInsert[] = [];
-  ((insertedSchedules as ScheduleMinimalRow[] | null) ?? []).forEach((row) => {
+  insertedSchedules.forEach((row) => {
     const requirements = row.requirements as CopilotRequirementsPayload | null;
     const slotId = requirements?.copilot?.slotId;
     if (!slotId) return;
@@ -658,12 +608,7 @@ export async function runCopilotAutoSchedule(
   });
 
   if (assignmentRows.length > 0) {
-    const { error: assignmentInsertError } = await supabase
-      .from('schedule_assignments')
-      .insert(assignmentRows);
-    if (assignmentInsertError) {
-      throw assignmentInsertError;
-    }
+    await insertScheduleAssignments(assignmentRows);
   }
 
   return {
@@ -673,61 +618,36 @@ export async function runCopilotAutoSchedule(
     weekStart: weekStartIso,
     summary,
     warnings,
-    schedulesCreated: ((insertedSchedules as ScheduleMinimalRow[] | null) ?? []).map((row) => row.id),
+    schedulesCreated: insertedSchedules.map((row) => row.id),
   };
 }
 
 export async function describeAvailableRuleSets(companyId: string) {
-  const [{ data: templateRows, error: templateError }, { data: employeeRows, error: employeeError }] = await Promise.all([
-    supabase
-      .from('coverage_templates')
-      .select('location, metadata')
-      .eq('company_id', companyId),
-    supabase
-      .from('employees')
-      .select('home_store')
-      .eq('company_id', companyId),
-  ]);
+  const [locations, employees] = await Promise.all([listCoverageLocations(companyId), listCompanyEmployees(companyId)]);
 
-  if (templateError) throw templateError;
-  if (employeeError) throw employeeError;
-
-  const templateGroups = new Map<string, { count: number; timezone?: string }>();
-  (templateRows ?? []).forEach((row) => {
-    const location = (row as { location?: string }).location?.trim() || 'Default Location';
-    const metadata = (row as { metadata?: { timezone?: string } }).metadata ?? {};
-    const timezone =
-      typeof metadata?.timezone === 'string' && metadata.timezone.trim().length > 0 ? metadata.timezone : undefined;
-    const existing = templateGroups.get(location) ?? { count: 0, timezone };
-    templateGroups.set(location, {
-      count: existing.count + 1,
-      timezone: existing.timezone ?? timezone,
-    });
-  });
-
-  if (templateGroups.size === 0) {
+  if (locations.length === 0) {
     return [
       {
         id: 'default',
         name: 'Default Location',
         timezone: 'UTC',
         weeklyCoverageTemplate: 0,
-        employeeCount: employeeRows?.length ?? 0,
+        employeeCount: employees.length,
       },
     ];
   }
 
   const employeeCounts = new Map<string, number>();
-  (employeeRows ?? []).forEach((employee) => {
-    const home = (employee?.home_store as string | null) ?? 'Default Location';
+  employees.forEach((employee) => {
+    const home = employee.home_store ?? 'Default Location';
     employeeCounts.set(home, (employeeCounts.get(home) ?? 0) + 1);
   });
 
-  return Array.from(templateGroups.entries()).map(([location, info]) => ({
-    id: location,
-    name: location,
-    timezone: info.timezone ?? 'UTC',
-    weeklyCoverageTemplate: info.count,
-    employeeCount: employeeCounts.get(location) ?? employeeRows?.length ?? 0,
+  return locations.map((location) => ({
+    id: location.id,
+    name: location.id,
+    timezone: location.timezone ?? 'UTC',
+    weeklyCoverageTemplate: location.templateCount,
+    employeeCount: employeeCounts.get(location.id) ?? employees.length,
   }));
 }

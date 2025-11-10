@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserSelector } from './UserSelector';
+import { UserSelector } from '@/components/messages/UserSelector';
 import { useMessageChannels } from '@/hooks/messages/useMessageChannels';
 import { useToast } from '@/hooks/use-toast';
 

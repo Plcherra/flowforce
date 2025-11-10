@@ -9,7 +9,7 @@ import {
 import { useTasks } from './useTasks';
 import { useGoals } from './useGoals';
 import { useReminders } from './useReminders';
-import { useTaskNotifications } from './useTaskNotifications';
+import { useTaskNotifications } from '@/features/tasks';
 import { useProfile } from './useProfile';
 import { useSchedulingConsolidated } from './scheduling/useSchedulingConsolidated';
 import { useExpenses, type Expense } from './useExpenses';

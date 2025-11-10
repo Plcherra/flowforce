@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import { InventoryItem, InventoryItemInsert, InventoryItemUpdate } from './types';
 
 export function useInventoryItems() {

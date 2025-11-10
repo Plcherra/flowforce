@@ -1,9 +1,8 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import type { TablesInsert } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
-import type { RecognitionDetails } from '@/types/recognition';
 import {
   deleteGoalRow,
   fetchGoalRewards,
@@ -12,95 +11,39 @@ import {
   insertGoalRow,
   updateGoalRow,
   updateGoalStatusRow,
-} from '@/repositories/goalsRepository';
-import { fetchProfilesByIds } from '@/repositories/profileRepository';
+} from '@/features/goals/repositories/goalsRepository';
+import { fetchProfilesByIds } from '@/features/goals/repositories/profileRepository';
 import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
+import {
+  buildOwnerMap,
+  buildRecognitionMap,
+  groupGoalTasks,
+  parseRecognitionDetailsValue,
+} from '@/features/goals/utils/goalEnrichers';
+import type {
+  CreateGoalInput,
+  Goal,
+  GoalRecognition,
+  GoalStats,
+  GoalStatus,
+  GoalTaskWithDetails,
+  OwnerProfile,
+  UpdateGoalInput,
+} from '@/features/goals/types';
+export type {
+  Goal,
+  GoalStats,
+  GoalStatus,
+  GoalTaskWithDetails,
+  GoalRecognition,
+  OwnerProfile,
+  CreateGoalInput,
+  UpdateGoalInput,
+} from '@/features/goals/types';
 
 const DEFAULT_RECOGNITION_XP = 110;
 
-export type GoalStatus = 'active' | 'completed' | 'draft' | 'cancelled';
-
-export type GoalRow = Tables<'goals'>;
-
-type OwnerProfile = {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-};
-
-type GoalTaskWithDetails = {
-  id: string;
-  weight: number | null;
-  task: {
-    id: string;
-    title: string | null;
-    status: string | null;
-    assigned_to: string | null;
-    completed_at: string | null;
-    priority: string | null;
-  } | null;
-};
-
-type GoalRecognition = {
-  id: string;
-  rewardType: string;
-  awardedAt: string;
-  xpAwarded: number;
-  message: string | null;
-  user: OwnerProfile | null;
-  userId: string | null;
-};
-
-export type Goal = GoalRow & {
-  owner?: OwnerProfile | null;
-  tasks: GoalTaskWithDetails[];
-  recognitions: GoalRecognition[];
-  xpSummary: {
-    totalXp: number;
-    rewardCount: number;
-  };
-  rewardSummary: string;
-};
-
-export interface GoalStats {
-  total: number;
-  active: number;
-  completed: number;
-  drafts: number;
-  cancelled: number;
-  averageProgress: number;
-}
-
-export interface CreateGoalInput {
-  title: string;
-  description?: string | null;
-  status?: GoalStatus;
-  target_completion_date?: string | null;
-  priority?: string | null;
-  progress?: number;
-  reward_type?: string | null;
-  reward_details?: Record<string, unknown> | null;
-}
-
-export type UpdateGoalInput = TablesUpdate<'goals'>;
-
 const goalsQueryKey = (companyId: string | null) => ['goals', companyId] as const;
-
-function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
-  if (!raw) return null;
-  if (typeof raw === 'string') {
-    try {
-      return JSON.parse(raw) as RecognitionDetails;
-    } catch {
-      return null;
-    }
-  }
-  if (typeof raw === 'object') {
-    return raw as RecognitionDetails;
-  }
-  return null;
-}
 
 async function fetchGoals(companyId: string): Promise<Goal[]> {
   const rows = await fetchGoalsByCompany(companyId);
@@ -116,36 +59,17 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
   let owners: Record<string, OwnerProfile> = {};
   if (ownerIds.length > 0) {
     const ownerProfiles = await fetchProfilesByIds(companyId, ownerIds);
-    owners = ownerProfiles.reduce<Record<string, OwnerProfile>>((acc, profile) => {
-      acc[profile.id] = {
-        id: profile.id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        avatar_url: profile.avatar_url,
-      };
-      return acc;
-    }, {});
+    owners = buildOwnerMap(ownerProfiles);
   }
 
   const goalIds = rows.map((goal) => goal.id);
-  const goalTasksMap = new Map<string, GoalTaskWithDetails[]>();
-  const recognitionsMap = new Map<string, GoalRecognition[]>();
+  let goalTasksMap = new Map<string, GoalTaskWithDetails[]>();
+  let recognitionsMap = new Map<string, GoalRecognition[]>();
 
   if (goalIds.length > 0) {
     try {
       const taskLinks = await fetchGoalTasks(goalIds);
-      taskLinks.forEach((record, index) => {
-        const goalId = record.goal_id;
-        if (!goalId) return;
-        const existing = goalTasksMap.get(goalId) ?? [];
-        const sanitized: GoalTaskWithDetails = {
-          id: record.id ?? `${goalId}-${index}`,
-          weight: record.weight ?? null,
-          task: record.task ?? null,
-        };
-        existing.push(sanitized);
-        goalTasksMap.set(goalId, existing);
-      });
+      goalTasksMap = groupGoalTasks(taskLinks);
     } catch (goalTasksError) {
       console.warn('[useGoals] Failed to load goal task links', goalTasksError);
     }
@@ -169,51 +93,16 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
     if (rewardUserIds.length > 0) {
       try {
         const rewardProfiles = await fetchProfilesByIds(companyId, rewardUserIds);
-        rewardUsers = rewardProfiles.reduce<Record<string, OwnerProfile>>((acc, profile) => {
-          acc[profile.id] = {
-            id: profile.id,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            avatar_url: profile.avatar_url,
-          };
-          return acc;
-        }, {});
+        rewardUsers = buildOwnerMap(rewardProfiles);
       } catch (rewardProfileError) {
         console.warn('[useGoals] Failed to load recognition recipients', rewardProfileError);
       }
     }
 
-    rewardList.forEach((reward) => {
-      const goalId = reward.goal_id;
-      if (!goalId) return;
-      const existing = recognitionsMap.get(goalId) ?? [];
-      const details = parseRecognitionDetailsValue(reward.reward_details);
-      const explicitXp =
-        typeof details?.xp_awarded === 'number'
-          ? details.xp_awarded
-          : details && typeof (details as Record<string, unknown>)?.xp === 'number'
-            ? ((details as Record<string, unknown>).xp as number)
-            : null;
-      const xp =
-        explicitXp != null
-          ? explicitXp
-          : reward.reward_type === 'recognition'
-            ? DEFAULT_RECOGNITION_XP
-            : 0;
-
-      const normalizedUser = reward.user_id ? rewardUsers[reward.user_id] ?? null : null;
-
-      existing.push({
-        id: reward.id,
-        rewardType: reward.reward_type,
-        awardedAt: reward.awarded_at,
-        xpAwarded: Math.max(xp ?? DEFAULT_RECOGNITION_XP, 0),
-        message: details?.message ?? null,
-        user: normalizedUser,
-        userId: reward.user_id ?? null,
-      });
-
-      recognitionsMap.set(goalId, existing);
+    recognitionsMap = buildRecognitionMap({
+      rewards: rewardList,
+      rewardUsers,
+      defaultXp: DEFAULT_RECOGNITION_XP,
     });
   }
 

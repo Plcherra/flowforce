@@ -8,7 +8,7 @@ export type ViewMode = 'feed' | 'grid' | 'list';
 export function useCompanyUpdateFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialState = useMemo(() => {
+  const readInitialState = () => {
     const fromStorage = (() => {
       if (typeof window === 'undefined') {
         return null;
@@ -27,7 +27,9 @@ export function useCompanyUpdateFilters() {
       pageSize: Number(searchParams.get('pageSize') ?? fromStorage?.pageSize ?? 10),
       viewMode: (searchParams.get('view') as ViewMode) ?? fromStorage?.viewMode ?? 'feed',
     };
-  }, []);
+  };
+
+  const initialState = useMemo(readInitialState, [searchParams]);
 
   const [searchTerm, setSearchTerm] = useState(initialState.searchTerm);
   const [page, setPage] = useState(initialState.page);

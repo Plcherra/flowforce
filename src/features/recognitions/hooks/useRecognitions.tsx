@@ -22,13 +22,12 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
 
   const companyId = profile?.companyId ?? null;
   const requestedLookback = options?.lookbackDays;
-  const resolvedLookbackDays =
+  const lookbackKey =
     requestedLookback === null
-      ? undefined
+      ? 'all'
       : typeof requestedLookback === 'number'
         ? requestedLookback
         : DEFAULT_LOOKBACK_DAYS;
-  const lookbackKey = requestedLookback === null ? 'all' : resolvedLookbackDays;
 
   const queryKey = useMemo(
     () => [RECOGNITIONS_QUERY_KEY, companyId, lookbackKey],
@@ -44,7 +43,7 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
       }
       return recognitionRepository.fetchRecognitionRecords({
         companyId,
-        lookbackDays: resolvedLookbackDays,
+        lookbackDays: requestedLookback,
       });
     },
     staleTime: 60_000,

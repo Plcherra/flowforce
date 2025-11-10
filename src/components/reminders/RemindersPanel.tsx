@@ -8,6 +8,7 @@ import { format, formatDistanceToNow, isToday, isTomorrow, isPast } from 'date-f
 import { useReminders } from '@/hooks/useReminders';
 import { CreateReminderDialog } from './CreateReminderDialog';
 import { useToast } from '@/hooks/use-toast';
+import { ReminderListSkeleton } from '@/components/loading/TaskSkeletons';
 
 export function RemindersPanel() {
   const { reminders, loading, deleteReminder, markAsCompleted, snoozeReminder, triggerReminder } = useReminders();
@@ -91,7 +92,7 @@ export function RemindersPanel() {
   const overdueReminders = getOverdueReminders();
 
   return (
-    <Card>
+    <Card data-testid="reminders-panel">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center">
@@ -111,9 +112,7 @@ export function RemindersPanel() {
       <CardContent>
         <ScrollArea className="h-64">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            </div>
+            <ReminderListSkeleton />
           ) : (
             <div className="space-y-3">
               {/* Overdue Reminders */}

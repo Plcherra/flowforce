@@ -1,11 +1,11 @@
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CardLoadingSkeleton } from '@/components/ui/loading-states';
+import { CardLoadingSkeleton, StatsLoadingSkeleton } from '@/components/ui/loading-states';
 import { useCertifications, type CertificationViewModel } from '@/hooks/useCertifications';
 import { useTranslation } from 'react-i18next';
 import {
@@ -57,32 +57,35 @@ export default function Certifications() {
     [navigate],
   );
 
-  const metricsCards = [
-    {
-      key: 'tasks',
-      label: t('certifications.metrics.completedTasks'),
-      value: metrics?.completedTasks ?? 0,
-      icon: CheckCircle,
-    },
-    {
-      key: 'goals',
-      label: t('certifications.metrics.completedGoals'),
-      value: metrics?.completedGoals ?? 0,
-      icon: Target,
-    },
-    {
-      key: 'xp',
-      label: t('certifications.metrics.xpEarned'),
-      value: metrics ? numberFormatter.format(metrics.totalXp) : '0',
-      icon: Zap,
-    },
-    {
-      key: 'courses',
-      label: t('certifications.metrics.coursesCompleted'),
-      value: metrics?.completedCourses ?? 0,
-      icon: BookOpen,
-    },
-  ];
+  const metricsCards = useMemo(
+    () => [
+      {
+        key: 'tasks',
+        label: t('certifications.metrics.completedTasks'),
+        value: metrics?.completedTasks ?? 0,
+        icon: CheckCircle,
+      },
+      {
+        key: 'goals',
+        label: t('certifications.metrics.completedGoals'),
+        value: metrics?.completedGoals ?? 0,
+        icon: Target,
+      },
+      {
+        key: 'xp',
+        label: t('certifications.metrics.xpEarned'),
+        value: metrics ? numberFormatter.format(metrics.totalXp) : '0',
+        icon: Zap,
+      },
+      {
+        key: 'courses',
+        label: t('certifications.metrics.coursesCompleted'),
+        value: metrics?.completedCourses ?? 0,
+        icon: BookOpen,
+      },
+    ],
+    [metrics, t],
+  );
 
   const showSkeleton = loading && certifications.length === 0;
 
@@ -90,8 +93,8 @@ export default function Certifications() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('certifications.title')}</h1>
-          <p className="text-gray-600 mt-1">{t('certifications.description')}</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('certifications.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('certifications.description')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -107,20 +110,24 @@ export default function Certifications() {
         </div>
       </div>
 
-      {metrics && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metricsCards.map(({ key, label, value, icon: Icon }) => (
-            <Card key={key} className="border-primary/10 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      {loading ? (
+        <StatsLoadingSkeleton />
+      ) : (
+        metrics && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {metricsCards.map(({ key, label, value, icon: Icon }) => (
+              <Card key={key} data-testid={`certifications-metric-${key}`} className="border-primary/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       )}
 
       {error && (
@@ -161,7 +168,7 @@ export default function Certifications() {
                   : t('common.startCertification');
 
             return (
-              <Card key={cert.code} className="border-primary/10 shadow-sm">
+              <Card key={cert.code} data-testid={`certifications-card-${cert.code}`} className="border-primary/10 shadow-sm">
                 <CardHeader>
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>

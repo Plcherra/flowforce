@@ -1,6 +1,5 @@
-import { messagesRepository } from '@/repositories/messagesRepository';
 import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { messagesRepository } from '@/repositories/messagesRepository';
 import type { CreateChannelData, MessageChannel } from '@/types/messages';
 
 export async function updateChannel(channelId: string, payload: Partial<Pick<MessageChannel, 'name' | 'description' | 'type' | 'is_private'>>) {

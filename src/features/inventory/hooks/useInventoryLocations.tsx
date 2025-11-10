@@ -1,32 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
-
-export interface InventoryLocation {
-  id: string;
-  name: string;
-  location_type: string;
-  temperature_controlled?: boolean;
-  is_active: boolean;
-  company_id: string;
-  created_at: string;
-  updated_at: string;
-}
+import { InventoryService } from '@/features/inventory/services/inventoryService';
+import type { InventoryLocation } from '@/features/inventory/hooks/types';
 
 export function useInventoryLocations() {
-  return useQuery({
-    queryKey: ['inventory-locations'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inv_locations')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
+  const { profile, loading } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
-      if (error) throw error;
-      return data as InventoryLocation[];
-    },
+  return useQuery<InventoryLocation[]>({
+    queryKey: ['inventory-locations', companyId ?? 'unknown'],
+    enabled: Boolean(companyId) && !loading,
+    queryFn: () => InventoryService.listLocations({ companyId: companyId ?? undefined }),
   });
 }
 
@@ -37,21 +22,15 @@ export function useCreateInventoryLocation() {
 
   return useMutation({
     mutationFn: async (locationData: { name: string; location_type: string; temperature_controlled?: boolean }) => {
-      if (!profile?.company_id) {
+      const companyId = profile?.companyId ?? profile?.company_id;
+      if (!companyId) {
         throw new Error('Company information not found. Please ensure you are logged in.');
       }
 
-      const { data, error } = await supabase
-        .from('inv_locations')
-        .insert({
-          ...locationData,
-          company_id: profile.company_id
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      return InventoryService.createLocation({
+        ...locationData,
+        companyId,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-locations'] });
@@ -78,12 +57,7 @@ export function useDeleteInventoryLocation() {
 
   return useMutation({
     mutationFn: async (locationId: string) => {
-      const { error } = await supabase
-        .from('inv_locations')
-        .delete()
-        .eq('id', locationId);
-
-      if (error) throw error;
+      await InventoryService.deleteLocation(locationId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-locations'] });

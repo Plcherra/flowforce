@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 
 // Re-export interfaces for compatibility
 export interface InventoryWaste {

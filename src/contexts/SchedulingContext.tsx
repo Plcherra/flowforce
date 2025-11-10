@@ -52,6 +52,7 @@ interface SchedulingContextType {
   unavailability: UnavailabilityWithUser[];
   vendorEvents: VendorEventWithMetadata[];
   teamMembers: ProfileSummary[];
+  availableLocations: string[];
   loading: boolean;
   error: string | null;
   isFallbackData: boolean;
@@ -759,6 +760,18 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     ],
   );
 
+  const availableLocations = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          shifts
+            .map((shift) => shift.location?.trim())
+            .filter((location): location is string => Boolean(location && location.length)),
+        ),
+      ),
+    [shifts],
+  );
+
   const value: SchedulingContextType = {
     shifts,
     assignments,
@@ -766,6 +779,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     unavailability,
     vendorEvents,
     teamMembers,
+    availableLocations,
     loading,
     error,
     isFallbackData: isUsingFallbackData,

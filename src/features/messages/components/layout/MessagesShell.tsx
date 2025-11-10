@@ -1,12 +1,6 @@
 import React, { useMemo } from 'react';
-import { MessagesLayout } from '@/features/messages/components/layout/MessagesLayout';
-import { MessagesMainArea } from '@/features/messages/components/layout/MessagesMainArea';
-import { MessagesSidebar } from '@/features/messages/components/layout/MessagesSidebar';
-import { AnimatedChannelWizard } from '@/features/messages/components/modals/AnimatedChannelWizard';
-import { ChannelMembers } from '@/features/messages/components/modals/ChannelMembers';
-import { ChannelSettings } from '@/features/messages/components/modals/ChannelSettings';
-import { DirectMessageDialog } from '@/features/messages/components/modals/DirectMessageDialog';
-import { MessageSearch } from '@/features/messages/components/modals/MessageSearch';
+import { MessagesLayout, MessagesMainArea, MessagesSidebar } from '@/features/messages/components/layout';
+import { AnimatedChannelWizard, ChannelMembers, ChannelSettings, DirectMessageDialog, MessageSearch } from '@/features/messages/components/modals';
 import { ThreadedMessageView } from '@/components/messages/ThreadedMessageView';
 import { VideoCallDialog } from '@/components/messages/VideoCallDialog';
 import { Button } from '@/components/ui/button';

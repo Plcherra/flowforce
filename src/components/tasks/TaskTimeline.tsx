@@ -1,8 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
 import { getTaskStatusLabel } from '@/constants/taskStatus';
 import {
   Calendar,
@@ -15,8 +13,8 @@ import {
   User,
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
-
-type TaskActivity = Tables<'task_activities'>;
+import { useTaskTimeline, type TaskActivity } from '@/features/tasks/hooks';
+import { TimelineSkeleton } from '@/components/loading/TaskSkeletons';
 
 interface TaskTimelineProps {
   taskId: string | null;
@@ -76,65 +74,8 @@ const formatMetadata = (activity: TaskActivity) => {
 };
 
 export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
-  const [activities, setActivities] = useState<TaskActivity[]>([]);
-  const [loading, setLoading] = useState(false);
-
+  const { activities, loading } = useTaskTimeline(taskId, open);
   const hasTimeline = activities.length > 0;
-
-  useEffect(() => {
-    if (!taskId || !open) {
-      setActivities([]);
-      return;
-    }
-
-    let isMounted = true;
-
-    const fetchActivities = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('task_activities')
-          .select('*')
-          .eq('task_id', taskId)
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        if (isMounted) {
-          setActivities(data ?? []);
-        }
-      } catch (error) {
-        console.error('Error fetching task timeline:', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchActivities();
-
-    const channel = supabase
-      .channel(`task-timeline-${taskId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'task_activities',
-          filter: `task_id=eq.${taskId}`,
-        },
-        (payload) => {
-          const newEntry = payload.new as TaskActivity;
-          setActivities((prev) => [...prev, newEntry].sort((a, b) => a.created_at.localeCompare(b.created_at)));
-        }
-      )
-      .subscribe();
-
-    return () => {
-      isMounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, [taskId, open]);
 
   const timelineItems = useMemo(() => {
     return activities.map((activity) => ({
@@ -159,9 +100,7 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
       <div className="border rounded-md bg-muted/40">
         <ScrollArea className="max-h-72">
           {loading ? (
-            <div className="flex items-center justify-center py-6">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
-            </div>
+            <TimelineSkeleton />
           ) : !hasTimeline ? (
             <div className="py-6 px-4 text-sm text-muted-foreground">
               Activity will appear here as you work on this task.

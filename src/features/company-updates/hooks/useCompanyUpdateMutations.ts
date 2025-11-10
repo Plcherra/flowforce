@@ -7,7 +7,12 @@ import type { CreateCompanyUpdateInput } from '@/types/companyUpdates';
 const UPDATES_QUERY_KEY = 'company-updates';
 const COMMENTS_QUERY_KEY = 'company-update-comments';
 
-type UpdatesQueryData = { records: CompanyUpdateRow[]; total: number } | undefined;
+type CachedUpdateRow = CompanyUpdateRow & {
+  viewerHasLiked?: boolean;
+  viewerHasViewed?: boolean;
+};
+
+type UpdatesQueryData = { records: CachedUpdateRow[]; total: number } | undefined;
 
 type ToggleLikeVariables = {
   updateId: string;
@@ -225,15 +230,46 @@ export function useCompanyUpdateMutations() {
     onSettled: invalidateUpdates,
   });
 
+  const ensureCompany = () => {
+    if (!companyId) {
+      throw new Error('Missing company context.');
+    }
+  };
+
+  const ensureUser = () => {
+    if (!companyId || !profile?.id) {
+      throw new Error('Missing user context.');
+    }
+  };
+
   return {
-    createUpdate: createUpdateMutation.mutateAsync,
-    archiveUpdate: archiveMutation.mutateAsync,
-    deleteUpdate: deleteMutation.mutateAsync,
-    togglePin: ({ updateId, isPinned }: { updateId: string; isPinned: boolean }) =>
-      togglePinMutation.mutateAsync({ updateId, isPinned }),
-    toggleLike: ({ updateId, currentlyLiked }: ToggleLikeVariables) =>
-      likeMutation.mutateAsync({ updateId, currentlyLiked }),
-    markAsViewed: ({ updateId }: MarkViewedVariables) => markViewedMutation.mutate({ updateId }),
-    addComment: ({ updateId, content }: CommentVariables) => commentMutation.mutateAsync({ updateId, content }),
+    createUpdate: (input: CreateCompanyUpdateInput) => {
+      ensureCompany();
+      return createUpdateMutation.mutateAsync(input);
+    },
+    archiveUpdate: (updateId: string) => {
+      ensureCompany();
+      return archiveMutation.mutateAsync(updateId);
+    },
+    deleteUpdate: (updateId: string) => {
+      ensureCompany();
+      return deleteMutation.mutateAsync(updateId);
+    },
+    togglePin: ({ updateId, isPinned }: { updateId: string; isPinned: boolean }) => {
+      ensureCompany();
+      return togglePinMutation.mutateAsync({ updateId, isPinned });
+    },
+    toggleLike: ({ updateId, currentlyLiked }: ToggleLikeVariables) => {
+      ensureUser();
+      return likeMutation.mutateAsync({ updateId, currentlyLiked });
+    },
+    markAsViewed: ({ updateId }: MarkViewedVariables) => {
+      ensureCompany();
+      markViewedMutation.mutate({ updateId });
+    },
+    addComment: ({ updateId, content }: CommentVariables) => {
+      ensureUser();
+      return commentMutation.mutateAsync({ updateId, content });
+    },
   };
 }

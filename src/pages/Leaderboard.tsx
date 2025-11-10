@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import {
   Award,
   BarChart3,
@@ -17,40 +15,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLeaderboardData } from '@/features/leaderboard/useLeaderboardData';
+import {
+  formatDepartmentName,
+  leaderboardPeriodDescriptions,
+  leaderboardPeriodOptions,
+  useLeaderboardFilters,
+} from '@/features/leaderboard/hooks/useLeaderboardFilters';
 import type { LeaderboardBadgeTier, LeaderboardPeriod } from '@/features/leaderboard/types';
 import { cn } from '@/lib/utils';
-import {
-  Bar,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-  BarChart,
-} from 'recharts';
 import { Link } from 'react-router-dom';
-
-dayjs.extend(relativeTime);
-
-const periodOptions: { label: string; value: LeaderboardPeriod }[] = [
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
-  { label: 'All-Time', value: 'all_time' },
-];
-
-const periodDescriptions: Record<LeaderboardPeriod, string> = {
-  weekly: 'Performance from the current week',
-  monthly: 'Momentum across the current month',
-  all_time: 'Lifetime performance and achievements',
-};
-
-function formatDepartmentName(name: string | null | undefined) {
-  if (!name || name.trim().length === 0) return 'Unnamed department';
-  return name;
-}
 
 const badgeColors: Record<LeaderboardBadgeTier, string> = {
   Bronze: 'bg-amber-900/10 text-amber-900 border-amber-900/30',
@@ -59,51 +36,41 @@ const badgeColors: Record<LeaderboardBadgeTier, string> = {
   Platinum: 'bg-indigo-100 text-indigo-700 border-indigo-300',
 };
 
+const LeaderboardXpChart = lazy(() => import('@/features/leaderboard/components/LeaderboardXpChart'));
+
 export default function Leaderboard() {
   const [period, setPeriod] = useState<LeaderboardPeriod>('monthly');
-  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
 
   const { entries, analytics, departments, roles, challenges, loading, syncing, error, lastUpdated, refresh } =
     useLeaderboardData(period);
-  const handleManualRefresh = () => {
-    void refresh({ forceSync: true });
-  };
-
-  const filteredEntries = useMemo(() => {
-    return entries.filter((entry) => {
-      const departmentMatches =
-        departmentFilter === 'all' ||
-        (departmentFilter === 'none' && !entry.department?.id) ||
-        entry.department?.id === departmentFilter;
-      const roleMatches = roleFilter === 'all' || entry.role === roleFilter;
-      return departmentMatches && roleMatches;
-    });
-  }, [entries, departmentFilter, roleFilter]);
-
-  const xpSourceData = useMemo(
-    () => [
-      { name: 'Tasks', value: analytics.xpBySource.tasks },
-      { name: 'Goals', value: analytics.xpBySource.goals },
-      { name: 'Recognitions', value: analytics.xpBySource.recognitions },
-      { name: 'Training', value: analytics.xpBySource.training },
-    ],
-    [analytics.xpBySource],
-  );
-
-  const badgeDistribution = useMemo(() => {
-    const total = analytics.participantCount || 1;
-    return Object.entries(analytics.badgeTierDistribution).map(([tier, count]) => ({
-      tier,
-      count,
-      percent: Math.round((count / total) * 100),
-    }));
-  }, [analytics.badgeTierDistribution, analytics.participantCount]);
-
-  const lastUpdatedLabel = lastUpdated ? dayjs(lastUpdated).fromNow() : 'not synced';
+  const updatePeriod = useCallback((next: LeaderboardPeriod) => {
+    setPeriod(next);
+  }, []);
+  const {
+    departmentFilter,
+    roleFilter,
+    filteredEntries,
+    xpSourceData,
+    badgeDistribution,
+    lastUpdatedLabel,
+    filterStatusMessage,
+    handleManualRefresh,
+    handlePeriodChange,
+    handleDepartmentChange,
+    handleRoleChange,
+  } = useLeaderboardFilters({
+    period,
+    onPeriodChange: updatePeriod,
+    refresh,
+    entries,
+    analytics,
+    departments,
+    roles,
+    lastUpdated,
+  });
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Gamification Leaderboard</h1>
@@ -126,59 +93,75 @@ export default function Leaderboard() {
       <Card>
         <CardContent className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-3">
-            <ToggleGroup
-              type="single"
-              value={period}
-              onValueChange={(value) => {
-                if (value) setPeriod(value as LeaderboardPeriod);
-              }}
-            >
-              {periodOptions.map((option) => (
+            <ToggleGroup aria-label="Leaderboard period" type="single" value={period} onValueChange={handlePeriodChange}>
+              {leaderboardPeriodOptions.map((option) => (
                 <ToggleGroupItem key={option.value} value={option.value} className="text-xs font-medium uppercase">
                   {option.label}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-            <span className="text-sm text-muted-foreground">{periodDescriptions[period]}</span>
+            <span className="text-sm text-muted-foreground">{leaderboardPeriodDescriptions[period]}</span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All departments</SelectItem>
-                <SelectItem value="none">No department</SelectItem>
-                {departments
-                  .filter((department) => department.id)
-                  .map((department) => (
-                    <SelectItem key={department.id} value={department.id!}>
-                      {formatDepartmentName(department.name)}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="department-filter" className="text-xs font-medium text-muted-foreground">
+                Department filter
+              </Label>
+              <Select value={departmentFilter} onValueChange={handleDepartmentChange}>
+                <SelectTrigger id="department-filter" className="w-[200px]">
+                  <SelectValue placeholder="Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All departments</SelectItem>
+                  <SelectItem value="none">No department</SelectItem>
+                  {departments
+                    .filter((department) => department.id)
+                    .map((department) => (
+                      <SelectItem key={department.id} value={department.id!}>
+                        {formatDepartmentName(department.name)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="role-filter" className="text-xs font-medium text-muted-foreground">
+                Role filter
+              </Label>
+              <Select value={roleFilter} onValueChange={handleRoleChange}>
+                <SelectTrigger id="role-filter" className="w-[180px]">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All roles</SelectItem>
+                  {roles.map(({ role }) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
                     </SelectItem>
                   ))}
-              </SelectContent>
-            </Select>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All roles</SelectItem>
-                {roles.map(({ role }) => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+          <p role="status" aria-live="polite" className="sr-only">
+            {filterStatusMessage}
+          </p>
         </CardContent>
       </Card>
 
       {error && (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-destructive">Unable to load leaderboard</CardTitle>
+              <CardDescription className="text-destructive">{error}</CardDescription>
+            </div>
+            <Button variant="destructive" onClick={handleManualRefresh} disabled={loading || syncing}>
+              <RefreshCcw className={cn('mr-2 h-4 w-4', syncing ? 'animate-spin' : '')} />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {loading ? (
@@ -304,18 +287,9 @@ export default function Leaderboard() {
                 </div>
               </CardHeader>
               <CardContent className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={xpSourceData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} />
-                    <YAxis stroke="#888888" fontSize={12} />
-                    <RechartsTooltip
-                      cursor={{ fill: 'rgba(148, 163, 184, 0.08)' }}
-                      formatter={(value: number) => [`${value} XP`, 'XP']}
-                    />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<Skeleton className="h-[260px] w-full" />}>
+                  <LeaderboardXpChart data={xpSourceData} />
+                </Suspense>
               </CardContent>
             </Card>
 
@@ -333,7 +307,7 @@ export default function Leaderboard() {
                 </Badge>
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="max-h-[520px]">
+                <ScrollArea className="max-h-[60vh] lg:max-h-[520px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -359,7 +333,7 @@ export default function Leaderboard() {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-9 w-9">
-                                  <AvatarImage src={entry.avatarUrl ?? undefined} alt={entry.fullName} />
+                                  <AvatarImage src={entry.avatarUrl ?? undefined} alt={entry.fullName} loading="lazy" />
                                   <AvatarFallback>
                                     {entry.fullName
                                       .split(' ')

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
+import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useEmployees } from '@/features/employees/hooks/useEmployees';
 import { useEvents } from '@/hooks/useEvents';
@@ -27,7 +28,8 @@ export interface SectionComponentDefinition {
 }
 
 function UpdatesFeedComponent() {
-  const { updates, loading, likeUpdate } = useCompanyUpdates();
+  const { updates, loading } = useCompanyUpdates();
+  const { toggleLike } = useCompanyUpdateMutations();
   const displayed = useMemo(() => updates.slice(0, 5), [updates]);
 
   if (loading) {
@@ -67,7 +69,7 @@ function UpdatesFeedComponent() {
               {update.body?.slice(0, 180) || 'No content provided yet.'}
             </p>
             <div className="flex items-center gap-3">
-              <Button size="sm" variant="outline" onClick={() => void likeUpdate(update.id)}>
+              <Button size="sm" variant="outline" onClick={() => void toggleLike({ updateId: update.id, currentlyLiked: update.viewerHasLiked })}>
                 👍 {update.likes ?? 0}
               </Button>
               <span className="text-xs text-muted-foreground">

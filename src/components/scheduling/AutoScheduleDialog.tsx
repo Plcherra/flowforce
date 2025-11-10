@@ -30,6 +30,7 @@ export function AutoScheduleDialog({ open, onOpenChange, defaultLocationId, comp
   >([]);
   const [rulesLoading, setRulesLoading] = useState(false);
   const [rulesError, setRulesError] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string>(defaultLocationId ?? '');
   const defaultWeekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 1 }), []);
   const [weekStart, setWeekStart] = useState<string>(format(defaultWeekStart, 'yyyy-MM-dd'));
@@ -60,15 +61,23 @@ export function AutoScheduleDialog({ open, onOpenChange, defaultLocationId, comp
     if (locationId) return;
     if (defaultLocationId) {
       setLocationId(defaultLocationId);
+      setSelectionError(null);
       return;
     }
     if (ruleSets[0]?.id) {
       setLocationId(ruleSets[0].id);
+      setSelectionError(null);
     }
   }, [defaultLocationId, locationId, ruleSets]);
 
   const handleRun = async () => {
     if (!locationId || !weekStart) return;
+    const locationAllowed = ruleSets.some((rule) => rule.id === locationId);
+    if (!locationAllowed) {
+      setSelectionError('Select a valid location from your coverage templates.');
+      return;
+    }
+    setSelectionError(null);
     const parsed = new Date(weekStart);
     await autoScheduleWeek({ locationId, weekStart: parsed });
   };
@@ -91,7 +100,10 @@ export function AutoScheduleDialog({ open, onOpenChange, defaultLocationId, comp
               <Label htmlFor="location">Location</Label>
               <Select
                 value={locationId}
-                onValueChange={setLocationId}
+                onValueChange={(value) => {
+                  setSelectionError(null);
+                  setLocationId(value);
+                }}
                 disabled={rulesLoading || ruleSets.length === 0}
               >
                 <SelectTrigger id="location">
@@ -111,12 +123,12 @@ export function AutoScheduleDialog({ open, onOpenChange, defaultLocationId, comp
                   )}
                 </SelectContent>
               </Select>
-              {rulesError && (
+              {(rulesError || selectionError) && (
                 <p className="text-xs text-destructive">
-                  {rulesError}
+                  {rulesError ?? selectionError}
                 </p>
               )}
-              {selectedRuleSet && !rulesError && (
+              {selectedRuleSet && !rulesError && !selectionError && (
                 <p className="text-xs text-muted-foreground">
                   {selectedRuleSet.employeeCount} active profiles • Templates: {selectedRuleSet.weeklyCoverageTemplate}
                 </p>

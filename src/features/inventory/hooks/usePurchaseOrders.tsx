@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import { useToast } from '@/hooks/use-toast';
 
 export function usePurchaseOrders() {

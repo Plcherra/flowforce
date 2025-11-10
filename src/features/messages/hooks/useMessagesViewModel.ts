@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import type { Message, MessageAttachment, MessageChannel, ThreadMessage } from '@/types/messages';
 import { logger } from '@/utils/logger';
 import { useAvailabilityStatus } from './useAvailabilityStatus';
+import { useChannelActions } from './useChannelActions';
+import { useMessageActions } from './useMessageActions';
 
 type FilterType = 'all' | 'unread' | 'teams' | 'helpdesk';
 type CallType = 'video' | 'audio';
@@ -68,10 +70,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
     loading,
     currentChannelId,
     setCurrentChannelId,
-    sendMessage,
-    updateLastRead,
-    deleteChannel,
-    deleteMessage,
     refetchChannels,
     refetchMessages,
     error: messagesError,
@@ -83,6 +81,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ filter?: string }>();
+  const { deleteChannel: deleteChannelAction, updateLastRead: updateLastReadAction } = useChannelActions();
+  const { sendMessage: sendMessageAction, deleteMessage: deleteMessageAction } = useMessageActions();
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -161,9 +161,9 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
   useEffect(() => {
     if (currentChannelId) {
-      updateLastRead(currentChannelId);
+      updateLastReadAction(currentChannelId);
     }
-  }, [currentChannelId, updateLastRead]);
+  }, [currentChannelId, updateLastReadAction]);
 
   useEffect(() => {
     if (!messagesError) return;
@@ -226,21 +226,11 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const handleSendMessage = useCallback(
     async (content: string, attachments: MessageAttachment[]): Promise<void> => {
       if (!currentChannelId) return;
-      const { error } = await sendMessage(currentChannelId, content, {
+      await sendMessageAction(currentChannelId, content, {
         attachments,
       });
-
-      if (error) {
-        logger.error?.('Failed to send message', error);
-        toast({
-          title: 'Unable to send message',
-          description: 'Please try again in a moment.',
-          variant: 'destructive',
-        });
-        throw error;
-      }
     },
-    [currentChannelId, sendMessage, toast],
+    [currentChannelId, sendMessageAction],
   );
 
   const handleStartVideoCall = useCallback((type: CallType): void => {
@@ -265,25 +255,17 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
   const handleDeleteChannel = useCallback(
     async (channelId: string): Promise<void> => {
-      const result = await deleteChannel(channelId);
-      if (result.error) {
-        toast({
-          title: 'Unable to delete channel',
-          description: result.error.message ?? 'Please try again shortly.',
-          variant: 'destructive',
-        });
-        return;
+      try {
+        await deleteChannelAction(channelId);
+        if (currentChannelId === channelId) {
+          setCurrentChannelId(null);
+        }
+        await refetchChannels();
+      } catch {
+        // toast handled inside action
       }
-      toast({
-        title: 'Channel deleted',
-        description: 'The channel was removed successfully.',
-      });
-      if (currentChannelId === channelId) {
-        setCurrentChannelId(null);
-      }
-      await refetchChannels();
     },
-    [currentChannelId, deleteChannel, refetchChannels, setCurrentChannelId, toast],
+    [currentChannelId, deleteChannelAction, refetchChannels, setCurrentChannelId],
   );
 
   const handleChannelUpdated = useCallback(async () => {
@@ -292,22 +274,14 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
   const handleDeleteMessage = useCallback(
     async (messageId: string): Promise<void> => {
-      const { error } = await deleteMessage(messageId);
-      if (error) {
-        toast({
-          title: 'Unable to delete message',
-          description: error instanceof Error ? error.message : 'Please try again shortly.',
-          variant: 'destructive',
-        });
-        return;
+      try {
+        await deleteMessageAction(messageId);
+        await refetchMessages();
+      } catch {
+        // toast handled inside action
       }
-      toast({
-        title: 'Message deleted',
-        description: 'Your message was removed.',
-      });
-      await refetchMessages();
     },
-    [deleteMessage, refetchMessages, toast],
+    [deleteMessageAction, refetchMessages],
   );
 
   const navigateToFilter = useCallback(

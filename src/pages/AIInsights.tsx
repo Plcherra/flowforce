@@ -1,16 +1,26 @@
+import { lazy, Suspense, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import AIInsightsPanel from '@/components/ai/AIInsightsPanel';
-import AIChatAssistant from '@/components/ai/AIChatAssistant';
-import PerformanceRadarChart from '@/components/ai/PerformanceRadarChart';
-import ScenarioSimulator from '@/components/ai/ScenarioSimulator';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
 import { usePerformanceOverview } from '@/hooks/usePerformanceOverview';
 import { Brain, Users } from 'lucide-react';
-import AIQuickActions from '@/components/ai/AIQuickActions';
-import EngagementOverview from '@/components/company-updates/EngagementOverview';
+
+const AIInsightsPanel = lazy(() => import('@/components/ai/AIInsightsPanel'));
+const AIChatAssistant = lazy(() => import('@/components/ai/AIChatAssistant'));
+const PerformanceRadarChart = lazy(() => import('@/components/ai/PerformanceRadarChart'));
+const ScenarioSimulator = lazy(() => import('@/components/ai/ScenarioSimulator'));
+const AIQuickActions = lazy(() => import('@/components/ai/AIQuickActions'));
+const EngagementOverview = lazy(() => import('@/components/company-updates/EngagementOverview'));
+
+const PanelFallback = () => (
+  <Card className="h-full">
+    <CardContent className="flex h-48 items-center justify-center">
+      <LoadingSpinner />
+    </CardContent>
+  </Card>
+);
 
 export default function AIInsights() {
   const { radar, loading, error: performanceError, dataset } = usePerformanceOverview();
@@ -19,8 +29,7 @@ export default function AIInsights() {
   const goalReviews = dataset?.goalReviews ?? [];
   const summaryLoading = loading && !dataset;
   const predictionsLoading = loading && !dataset;
-
-  const getRadarMetric = (label: string) => radar.find((metric) => metric.metric === label);
+  const employeesCount = dataset?.employees.length ?? 0;
 
   const summaryMetricToneClasses: Record<'purple' | 'green' | 'blue', string> = {
     purple: 'border border-primary/20 bg-primary/5 text-primary dark:bg-primary/10 dark:text-primary-foreground',
@@ -30,34 +39,40 @@ export default function AIInsights() {
       'border border-sky-400/30 bg-sky-500/10 text-sky-700 dark:border-sky-300/40 dark:bg-sky-500/20 dark:text-sky-200',
   };
 
-  const summaryMetrics = goalSummary
-    ? [
-        {
-          id: 'goal-progress',
-          label: 'Average Goal Progress',
-          value: `${goalSummary.averageProgress ?? 0}%`,
-          context: `${goalSummary.active ?? 0} active · ${goalSummary.completed ?? 0} completed`,
-          tone: 'purple',
-        },
-        {
-          id: 'performance-score',
-          label: 'Performance Score',
-          value: `${getRadarMetric('Performance Score')?.actual ?? 0}%`,
-          context: `Target ${getRadarMetric('Performance Score')?.target ?? 0}%`,
-          tone: 'blue',
-        },
-        {
-          id: 'review-health',
-          label: 'Review Health',
-          value: `${getRadarMetric('Review Health')?.actual ?? 0}%`,
-          context: `${dataset?.employees.length ?? 0} employees tracked`,
-          tone: 'green',
-        },
-      ]
-    : [];
+  const summaryMetrics = useMemo(() => {
+    if (!goalSummary) return [];
 
-  const predictionRows = goalReviews.slice(0, 4).map((review) => {
-    const progress = review.goalProgress ?? 0;
+    const performanceMetric = radar.find((metric) => metric.metric === 'Performance Score');
+    const reviewMetric = radar.find((metric) => metric.metric === 'Review Health');
+
+    return [
+      {
+        id: 'goal-progress',
+        label: 'Average Goal Progress',
+        value: `${goalSummary.averageProgress ?? 0}%`,
+        context: `${goalSummary.active ?? 0} active · ${goalSummary.completed ?? 0} completed`,
+        tone: 'purple' as const,
+      },
+      {
+        id: 'performance-score',
+        label: 'Performance Score',
+        value: `${performanceMetric?.actual ?? 0}%`,
+        context: `Target ${performanceMetric?.target ?? 0}%`,
+        tone: 'blue' as const,
+      },
+      {
+        id: 'review-health',
+        label: 'Review Health',
+        value: `${reviewMetric?.actual ?? 0}%`,
+        context: `${employeesCount} employees tracked`,
+        tone: 'green' as const,
+      },
+    ];
+  }, [goalSummary, radar, employeesCount]);
+
+  const predictionRows = useMemo(() => {
+    return goalReviews.slice(0, 4).map((review) => {
+      const progress = review.goalProgress ?? 0;
     const status = (review.goalStatus ?? 'active').toString();
     const confidence = review.score != null ? Math.round((review.score / 5) * 100) : null;
     let forecast = 'Stabilise trajectory over the next quarter';
@@ -80,17 +95,18 @@ export default function AIInsights() {
             ? 'text-amber-600'
             : 'text-red-500';
 
-    return {
-      id: review.reviewId,
-      metric: review.goalTitle ?? 'Goal',
-      status,
-      progress,
-      forecast,
-      confidence,
-      trendClass,
-      reviewDate: review.reviewDate,
-    };
-  });
+      return {
+        id: review.reviewId,
+        metric: review.goalTitle ?? 'Goal',
+        status,
+        progress,
+        forecast,
+        confidence,
+        trendClass,
+        reviewDate: review.reviewDate,
+      };
+    });
+  }, [goalReviews]);
 
   return (
     <div>
@@ -114,7 +130,9 @@ export default function AIInsights() {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-              <AIInsightsPanel type="dashboard" className="xl:col-span-1" />
+              <Suspense fallback={<PanelFallback />}>
+                <AIInsightsPanel type="dashboard" className="xl:col-span-1" />
+              </Suspense>
 
               <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-2 xl:col-span-2">
                 <Card>
@@ -171,7 +189,9 @@ export default function AIInsights() {
                   </CardContent>
                 </Card>
 
-                <AIQuickActions />
+                <Suspense fallback={<PanelFallback />}>
+                  <AIQuickActions />
+                </Suspense>
 
                 <Card>
                   <CardHeader>
@@ -184,7 +204,9 @@ export default function AIInsights() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <EngagementOverview />
+                    <Suspense fallback={<div className="flex h-32 items-center justify-center"><LoadingSpinner /></div>}>
+                      <EngagementOverview />
+                    </Suspense>
                   </CardContent>
                 </Card>
               </div>
@@ -193,7 +215,9 @@ export default function AIInsights() {
 
           <TabsContent value="performance" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-              <AIInsightsPanel type="scheduler" className="xl:col-span-1" />
+              <Suspense fallback={<PanelFallback />}>
+                <AIInsightsPanel type="scheduler" className="xl:col-span-1" />
+              </Suspense>
 
               <Card className="xl:col-span-2">
                 <CardHeader>
@@ -217,7 +241,9 @@ export default function AIInsights() {
                         Connect your performance data to visualize radar trends.
                       </div>
                     ) : (
-                      <PerformanceRadarChart data={radar} />
+                      <Suspense fallback={<div className="flex items-center justify-center py-10"><LoadingSpinner /></div>}>
+                        <PerformanceRadarChart data={radar} />
+                      </Suspense>
                     )}
                   </CardContent>
                 </Card>
@@ -226,7 +252,9 @@ export default function AIInsights() {
 
           <TabsContent value="predictions" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-              <AIInsightsPanel type="expenses" className="xl:col-span-1" />
+              <Suspense fallback={<PanelFallback />}>
+                <AIInsightsPanel type="expenses" className="xl:col-span-1" />
+              </Suspense>
 
               <Card className="xl:col-span-2">
                 <CardHeader>
@@ -297,8 +325,12 @@ export default function AIInsights() {
 
           <TabsContent value="simulator" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-              <AIInsightsPanel type="reports" className="xl:col-span-1" />
-              <ScenarioSimulator className="xl:col-span-2" />
+              <Suspense fallback={<PanelFallback />}>
+                <AIInsightsPanel type="reports" className="xl:col-span-1" />
+              </Suspense>
+              <Suspense fallback={<PanelFallback />}>
+                <ScenarioSimulator className="xl:col-span-2" />
+              </Suspense>
             </div>
           </TabsContent>
 
@@ -306,7 +338,9 @@ export default function AIInsights() {
       </div>
 
       {/* AI Chat Assistant */}
-      <AIChatAssistant context="insights" />
+      <Suspense fallback={null}>
+        <AIChatAssistant context="insights" />
+      </Suspense>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Bell, BellRing, Trash2, Check, Clock, AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
-import { useTaskNotifications } from '@/hooks/useTaskNotifications';
+import { useTaskNotifications } from '@/features/tasks';
 import { formatDistanceToNow } from 'date-fns';
 import { logger } from '@/utils/logger';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

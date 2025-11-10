@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { PostgrestError } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import ForecastAPI from '@/services/analytics/ForecastAPI';
@@ -26,6 +25,9 @@ import {
   type CopilotSchedulerState,
   type UseCopilotSchedulerOptions,
 } from '@/hooks/scheduling/copilotSchedulerState';
+import { listCompanyEmployees, listCoverageTemplates } from '@/repositories/copilotRepository';
+import { insertSchedules, insertScheduleAssignments } from '@/repositories/schedulingRepository';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useCopilotScheduler({
   weekStart,
@@ -53,26 +55,18 @@ export function useCopilotScheduler({
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const employeeQuery = supabase.from('employees').select('*').eq('company_id', companyId).order('role');
-      const templateQuery = supabase
-        .from('coverage_templates')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('day_of_week')
-        .order('start_time');
+      const [employeeRows, templateRows] = await Promise.all([
+        listCompanyEmployees(companyId),
+        listCoverageTemplates(companyId, location ?? undefined),
+      ]);
 
-      if (location) {
-        templateQuery.eq('location', location);
-      }
-
-      const [{ data: employeeRows, error: employeeError }, { data: templateRows, error: templateError }] =
-        await Promise.all([employeeQuery, templateQuery]);
-
-      if (employeeError) throw employeeError;
-      if (templateError) throw templateError;
-
-      const employees = (employeeRows ?? []).map(mapEmployeeRow);
-      const templates = (templateRows ?? []).map(mapCoverageTemplateRow);
+      const employees = employeeRows.map(mapEmployeeRow);
+      const templates = templateRows
+        .sort((a, b) => {
+          if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+          return a.start_time.localeCompare(b.start_time);
+        })
+        .map(mapCoverageTemplateRow);
 
       const forecastMap = new Map(
         forecastApi
@@ -204,19 +198,7 @@ export function useCopilotScheduler({
       },
     }));
 
-    const { data: inserted, error } = await supabase
-      .from('schedules')
-      .insert(schedulePayloads)
-      .select('id');
-
-    if (error) {
-      toast({
-        title: 'Publish failed',
-        description: error.message ?? 'Unable to persist draft schedule.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const inserted = await insertSchedules(schedulePayloads);
 
     const assignmentRows =
       inserted?.flatMap((row, index) => {
@@ -234,14 +216,7 @@ export function useCopilotScheduler({
       }) ?? [];
 
     if (assignmentRows.length > 0) {
-      const { error: assignmentError } = await supabase.from('schedule_assignments').insert(assignmentRows);
-      if (assignmentError) {
-        toast({
-          title: 'Publish warning',
-          description: assignmentError.message ?? 'Shifts saved but assignments failed.',
-          variant: 'destructive',
-        });
-      }
+      await insertScheduleAssignments(assignmentRows);
     }
 
     toast({

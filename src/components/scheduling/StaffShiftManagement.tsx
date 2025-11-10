@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,59 +19,42 @@ import {
   Plus
 } from 'lucide-react';
 import { ShiftSwap, TimeOffRequest } from '@/types/scheduling-unified';
-import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { PersonalAvailabilityPanel } from './availability/PersonalAvailabilityPanel';
 import { TeamAvailabilityPanel } from './availability/TeamAvailabilityPanel';
+import { useProfile } from '@/hooks/useProfile';
+import {
+  fetchShiftSwaps,
+  fetchTimeOffRequests,
+  updateShiftSwapStatus,
+  updateTimeOffStatus,
+} from '@/repositories/shiftSwapsRepository';
 
 export function StaffShiftManagement() {
   const { toast } = useToast();
-  const [shiftSwaps, setShiftSwaps] = useState<ShiftSwap[]>([]);
-  const [timeOffRequests, setTimeOffRequests] = useState<TimeOffRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? null;
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadData = useCallback(async () => {
-    try {
-      // Load shift swaps
-      const { data: swaps } = await supabase
-        .from('shift_swaps')
-        .select(`
-          *,
-          requesting_user:profiles!shift_swaps_requesting_user_id_fkey(first_name, last_name, avatar_url),
-          target_user:profiles!shift_swaps_target_user_id_fkey(first_name, last_name, avatar_url),
-          schedule:schedules(title, start_time, end_time, role)
-        `)
-        .order('created_at', { ascending: false });
+  const shiftSwapsQuery = useQuery({
+    queryKey: ['shift-swaps', companyId],
+    enabled: Boolean(companyId),
+    queryFn: () => fetchShiftSwaps({ companyId: companyId!, limit: 50 }),
+  });
 
-      // Load time off requests  
-      const { data: timeOff } = await supabase
-        .from('time_off_requests')
-        .select(`
-          *,
-          user:profiles(first_name, last_name, avatar_url)
-        `)
-        .order('created_at', { ascending: false });
+  const timeOffQuery = useQuery({
+    queryKey: ['timeoff-requests', companyId],
+    enabled: Boolean(companyId),
+    queryFn: () => fetchTimeOffRequests({ companyId: companyId!, limit: 50 }),
+  });
 
-      setShiftSwaps((swaps ?? []) as unknown as ShiftSwap[]);
-      setTimeOffRequests((timeOff ?? []) as unknown as TimeOffRequest[]);
-    } catch {
-      toast({
-        title: "Error loading data",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
+  const shiftSwaps = (shiftSwapsQuery.data ?? []) as unknown as ShiftSwap[];
+  const timeOffRequests = (timeOffQuery.data ?? []) as unknown as TimeOffRequest[];
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
+  const loading = shiftSwapsQuery.isLoading || timeOffQuery.isLoading;
 
   const filteredShiftSwaps = useMemo(() => {
     if (!normalizedSearch) return shiftSwaps;
@@ -117,53 +101,45 @@ export function StaffShiftManagement() {
   };
 
   const handleSwapAction = async (swapId: string, action: 'approve' | 'reject') => {
+    if (!companyId) return;
     try {
-      const { error } = await supabase
-        .from('shift_swaps')
-        .update({ 
-          status: action === 'approve' ? 'approved' : 'rejected',
-          approved_at: new Date().toISOString()
-        })
-        .eq('id', swapId);
-
-      if (error) throw error;
-
-      await loadData();
+      await updateShiftSwapStatus({
+        swapId,
+        status: action === 'approve' ? 'approved' : 'rejected',
+        actorId: profile?.id,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['shift-swaps', companyId] });
       toast({
         title: `Shift swap ${action}d`,
-        description: "Staff have been notified of the decision",
+        description: 'Staff have been notified of the decision',
       });
     } catch {
       toast({
-        title: "Error processing request",
-        description: "Please try again",
-        variant: "destructive",
+        title: 'Error processing request',
+        description: 'Please try again',
+        variant: 'destructive',
       });
     }
   };
 
   const handleTimeOffAction = async (requestId: string, action: 'approve' | 'reject') => {
+    if (!companyId) return;
     try {
-      const { error } = await supabase
-        .from('time_off_requests')
-        .update({ 
-          status: action === 'approve' ? 'approved' : 'denied',
-          approved_at: action === 'approve' ? new Date().toISOString() : null
-        })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      await loadData();
+      await updateTimeOffStatus({
+        requestId,
+        action,
+        actorId: profile?.id,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['timeoff-requests', companyId] });
       toast({
         title: `Time off request ${action === 'approve' ? 'approved' : 'denied'}`,
-        description: "Employee has been notified",
+        description: 'Employee has been notified',
       });
     } catch {
       toast({
-        title: "Error processing request",
-        description: "Please try again",
-        variant: "destructive",
+        title: 'Error processing request',
+        description: 'Please try again',
+        variant: 'destructive',
       });
     }
   };
@@ -184,6 +160,26 @@ export function StaffShiftManagement() {
       default: return <AlertCircle className="h-4 w-4 text-yellow-500" />;
     }
   };
+
+  if (!companyId) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-muted-foreground">
+          Connect your company profile to manage shift swaps and time off requests.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (shiftSwapsQuery.isError || timeOffQuery.isError) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-muted-foreground">
+          Unable to load staff requests right now. Please try again in a moment.
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading) {
     return (

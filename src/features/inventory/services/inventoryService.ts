@@ -4,7 +4,6 @@ import { notifyTransferCreated, notifyTransferStatusChange } from '@/notificatio
 import type {
   InventoryItem,
   InventoryItemInsert,
-  InventoryItemUnit,
   InventoryItemUpdate,
   InventoryRecipeLine,
   InventoryCount,
@@ -21,8 +20,38 @@ import type {
   ProductionMaterialUsage,
   ProductionApproval,
 } from '@/features/inventory/hooks/types';
-import { buildUnitMetaIndex, collectUnits, convertQuantity } from '@/utils/inventoryUnits';
 import { calculateProductionMaterials } from '@/lib/inventory/production';
+import {
+  listInventoryItems,
+  createInventoryItem,
+  updateInventoryItem,
+  deleteInventoryItem,
+} from '../repositories/itemsRepository';
+import {
+  addInventoryItemToCount,
+  addInventoryItemsToCount,
+  approveInventoryCount,
+  completeInventoryCount,
+  createInventoryCount,
+  deleteInventoryCount,
+  getInventoryCount,
+  listInventoryCountEvents,
+  listInventoryCountLines,
+  listInventoryCountScans,
+  listInventoryCounts,
+  recordInventoryCountScan,
+  rejectInventoryCount,
+  removeInventoryItemFromCount,
+  submitInventoryCount,
+  updateInventoryCount,
+  updateInventoryCountLine,
+} from '../repositories/countsRepository';
+import {
+  listInventoryLocations,
+  createInventoryLocation,
+  deleteInventoryLocation,
+  type CreateInventoryLocationInput,
+} from '../repositories/locationsRepository';
 
 type CreateInventoryCountInput = {
   type: string;
@@ -37,22 +66,6 @@ type CreateInventoryCountInput = {
 
 type ReviewActionInput = {
   notes?: string;
-};
-
-type ScopedCountItem = {
-  item: Pick<
-    InventoryItem,
-    | 'id'
-    | 'name'
-    | 'category'
-    | 'sku'
-    | 'default_location_id'
-    | 'unit_id'
-    | 'unit'
-    | 'unit_quantity'
-  >;
-  expectedQuantity: number;
-  units: InventoryItemUnit[];
 };
 
 type PurchaseOrderItemInput = {
@@ -99,6 +112,10 @@ type RecordVendorInvoicePayload = {
   paymentMethod?: string;
   attachments?: Record<string, unknown>[];
   status?: string;
+};
+
+type CreateLocationPayload = Omit<CreateInventoryLocationInput, 'companyId'> & {
+  companyId?: string;
 };
 
 type CountLocationRow = {
@@ -204,210 +221,51 @@ export class InventoryService {
   
   // Items Management
   static async listItems(options: { companyId?: string; supabaseClient?: SupabaseClient } = {}) {
-    const { companyId, supabaseClient } = options;
-    const client = supabaseClient ?? supabase;
-    const activeCompanyId = companyId ?? (await resolveActiveCompanyId(client));
-
-    if (!activeCompanyId) {
-      console.warn('[inventory] listItems called without an active company context');
-      return [];
-    }
-
-    const { data: baseItems, error } = await client
-      .from('inv_items')
-      .select(`
-        *,
-        unit:inv_units!unit_id(*),
-        recipe_yield_unit:inv_units!recipe_yield_unit_id(*),
-        location:inv_locations!default_location_id(*),
-        preferred_supplier:inv_suppliers!preferred_supplier_id(*),
-        category_details:inventory_categories!category_id(*)
-      `)
-      .eq('is_active', true)
-      .eq('company_id', activeCompanyId)
-      .order('name');
-
-    if (error) throw error;
-
-    const items = (baseItems || []) as InventoryItem[];
-    if (items.length === 0) {
-      return [];
-    }
-
-    const itemIds = items.map((item) => item.id);
-
-    const [unitsResult, recipeResult] = await Promise.all([
-      client
-        .from('inv_item_units')
-        .select(
-          `
-            *,
-            unit:inv_units(*)
-          `
-        )
-        .in('item_id', itemIds)
-        .order('unit_level', { ascending: true }),
-      client
-        .from('inv_recipes')
-        .select(
-          `
-            *,
-            unit:inv_units(*),
-            ingredient:inv_items(
-              *,
-              unit:inv_units(*)
-            )
-          `
-        )
-        .in('item_id', itemIds),
-    ]);
-
-    if (unitsResult.error) throw unitsResult.error;
-    if (recipeResult.error) throw recipeResult.error;
-
-    const unitsByItem = (unitsResult.data || []).reduce<Record<string, InventoryItemUnit[]>>((acc, unit) => {
-      if (!acc[unit.item_id]) {
-        acc[unit.item_id] = [];
-      }
-      acc[unit.item_id].push(unit as unknown as InventoryItemUnit);
-      return acc;
-    }, {});
-
-    const recipesByItem = (recipeResult.data || []).reduce<Record<string, InventoryRecipeLine[]>>((acc, recipe) => {
-      if (!acc[recipe.item_id]) {
-        acc[recipe.item_id] = [];
-      }
-      acc[recipe.item_id].push(recipe as unknown as InventoryRecipeLine);
-      return acc;
-    }, {});
-
-    const unitCollection = collectUnits([
-      items.map((item) => item.unit),
-      items.map((item) => item.recipe_yield_unit),
-      (unitsResult.data || []).map((u) => u.unit as InventoryUnit),
-      (recipeResult.data || []).map((line) => line.unit as InventoryUnit),
-      (recipeResult.data || []).map((line) => line.ingredient?.unit as InventoryUnit | undefined),
-    ]);
-
-    const unitMeta = buildUnitMetaIndex(unitCollection);
-
-    return items.map((item) => {
-      const itemUnits = unitsByItem[item.id] || [];
-      const recipeLines = recipesByItem[item.id] || [];
-      const recipeCost = InventoryService.calculateRecipeCost(item, recipeLines, unitMeta);
-
-      return {
-        ...item,
-        units: itemUnits,
-        recipes: recipeLines.length
-          ? [
-              {
-                id: `recipe-${item.id}`,
-                item_id: item.id,
-                lines: recipeLines,
-                total_cost: recipeCost.totalCost,
-                cost_per_unit: recipeCost.costPerUnit,
-                yield_quantity:
-                  item.recipe_yield_quantity ||
-                  recipeLines[0]?.yield_amount ||
-                  1,
-                yield_unit_id:
-                  item.recipe_yield_unit_id ||
-                  recipeLines[0]?.unit_id ||
-                  item.unit_id,
-              },
-            ]
-          : [],
-        recipe_cost_per_unit: recipeCost.costPerUnit || undefined,
-        calculated_cost_per_unit: recipeCost.costPerUnit || item.cost_per_unit || undefined,
-      } as InventoryItem;
+    const client = options.supabaseClient ?? supabase;
+    return listInventoryItems({
+      companyId: options.companyId,
+      supabaseClient: client,
+      resolveCompanyId: () => resolveActiveCompanyId(client),
     });
   }
 
-  private static calculateRecipeCost(
-    item: InventoryItem,
-    lines: InventoryRecipeLine[],
-    unitMeta: ReturnType<typeof buildUnitMetaIndex>
-  ) {
-    if (!lines.length) {
-      return {
-        totalCost: 0,
-        costPerUnit: item.cost_per_unit || 0,
-      };
+  static createItem(item: InventoryItemInsert) {
+    return createInventoryItem(item);
+  }
+
+  static updateItem(id: string, updates: InventoryItemUpdate) {
+    return updateInventoryItem(id, updates);
+  }
+
+  static deleteItem(id: string) {
+    return deleteInventoryItem(id);
+  }
+
+  static async listLocations(options: { companyId?: string; supabaseClient?: SupabaseClient } = {}) {
+    const client = options.supabaseClient ?? supabase;
+    return listInventoryLocations({
+      companyId: options.companyId,
+      supabaseClient: client,
+      resolveCompanyId: () => resolveActiveCompanyId(client),
+    });
+  }
+
+  static async createLocation(payload: CreateLocationPayload) {
+    const companyId = payload.companyId ?? (await resolveActiveCompanyId());
+    if (!companyId) {
+      throw new Error('Company information missing. Unable to create location.');
     }
 
-    const totalCost = lines.reduce((sum, line) => {
-      const ingredient = line.ingredient as InventoryItem | undefined;
-      if (!ingredient) return sum;
-
-      const ingredientCost = ingredient.cost_per_unit || 0;
-      if (!ingredientCost) return sum;
-
-      const lineQuantity = Number(line.quantity_needed) || 0;
-      if (!Number.isFinite(lineQuantity) || lineQuantity <= 0) {
-        return sum;
-      }
-
-      const ingredientUnitId = ingredient.unit_id || ingredient.unit?.id || null;
-
-      const normalizedQuantity = convertQuantity(
-        unitMeta,
-        lineQuantity,
-        line.unit_id,
-        ingredientUnitId
-      );
-
-      const lineCost = normalizedQuantity * ingredientCost;
-      return Number.isFinite(lineCost) ? sum + lineCost : sum;
-    }, 0);
-
-    const yieldQuantity =
-      item.recipe_yield_quantity ||
-      lines[0]?.yield_amount ||
-      item.unit_quantity ||
-      1;
-
-    const normalizedYield =
-      yieldQuantity && Number.isFinite(yieldQuantity) && yieldQuantity > 0
-        ? yieldQuantity
-        : 1;
-
-    return {
-      totalCost,
-      costPerUnit: totalCost / normalizedYield,
-    };
+    return createInventoryLocation({
+      name: payload.name,
+      location_type: payload.location_type,
+      temperature_controlled: payload.temperature_controlled,
+      companyId,
+    });
   }
 
-  static async createItem(item: InventoryItemInsert) {
-    const { data, error } = await supabase
-      .from('inv_items')
-      .insert(item)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as InventoryItem;
-  }
-
-  static async updateItem(id: string, updates: InventoryItemUpdate) {
-    const { data, error } = await supabase
-      .from('inv_items')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as InventoryItem;
-  }
-
-  static async deleteItem(id: string) {
-    const { error } = await supabase
-      .from('inv_items')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+  static deleteLocation(id: string) {
+    return deleteInventoryLocation(id);
   }
 
   // Dashboard & Analytics
@@ -519,131 +377,19 @@ export class InventoryService {
 
   // Inventory Counts
   static async listCounts() {
-    const { data, error } = await supabase
-      .from('inv_counts')
-      .select(`
-        *,
-        locations:inv_count_locations (
-          location:inv_locations (
-            id,
-            name,
-            location_type
-          )
-        )
-      `)
-      .order('count_date', { ascending: false })
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const counts = (data || []) as CountWithLocations[];
-    return counts.map((count) => ({
-      ...count,
-      locations: (count.locations || [])
-        .map((entry) => entry?.location)
-        .filter(Boolean),
-    })) as InventoryCount[];
+    return listInventoryCounts();
   }
 
   static async getCount(countId: string) {
-    const { data, error } = await supabase
-      .from('inv_counts')
-      .select(`
-        *,
-        locations:inv_count_locations (
-          location:inv_locations (
-            id,
-            name,
-            location_type
-          )
-        )
-      `)
-      .eq('id', countId)
-      .single();
-
-    if (error) throw error;
-    if (!data) return null;
-
-    const countWithLocations = data as CountWithLocations;
-    return {
-      ...countWithLocations,
-      locations: (countWithLocations.locations || [])
-        .map((entry) => entry?.location)
-        .filter(Boolean),
-    } as InventoryCount;
+    return getInventoryCount(countId);
   }
 
   static async createCount(countData: CreateInventoryCountInput) {
-    const userId = await this.getCurrentUserId();
-    if (!userId) {
-      throw new Error('Unable to create count without authenticated user');
-    }
-
-    const countDate = countData.scheduleDate
-      ? new Date(countData.scheduleDate).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0];
-
-    const { data: createdCount, error } = await supabase
-      .from('inv_counts')
-      .insert({
-        count_type: countData.type,
-        count_period: countData.period,
-        count_date: countDate,
-        location_id: countData.locations[0] || null,
-        notes: countData.notes,
-        description: countData.description,
-        status: 'planned',
-        review_status: 'pending',
-        counted_by: userId,
-      })
-      .select(
-        `
-          *,
-          locations:inv_count_locations (
-            location:inv_locations (
-              id,
-              name,
-              location_type
-            )
-          )
-        `
-      )
-      .single();
-
-    if (error) throw error;
-
-    const countId = createdCount.id as string;
-
-    if (countData.locations.length > 0) {
-      const locationPayload = countData.locations.map((locationId) => ({
-        count_id: countId,
-        location_id: locationId,
-      }));
-
-      const { error: locationError } = await supabase
-        .from('inv_count_locations')
-        .upsert(locationPayload, { onConflict: 'count_id,location_id' });
-
-      if (locationError) throw locationError;
-    }
-
-    const scopedItems = await this.resolveCountScopeItems(countData);
-    if (scopedItems.length > 0) {
-      await this.bootstrapCountLines(countId, scopedItems);
-    }
-
-    await this.logCountEvent(countId, 'created', {
-      type: countData.type,
-      period: countData.period,
-      location_count: countData.locations.length,
-      item_count: scopedItems.length,
-    });
-
-    return this.getCount(countId);
+    return createInventoryCount(countData);
   }
 
   static async saveCount(countData: CreateInventoryCountInput) {
-    return this.createCount(countData);
+    return createInventoryCount(countData);
   }
 
   static async updateCount(
@@ -651,148 +397,35 @@ export class InventoryService {
     updates: Partial<InventoryCount>,
     options?: { eventType?: string; payload?: Record<string, unknown> }
   ) {
-    if (!updates || Object.keys(updates).length === 0) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from('inv_counts')
-      .update(updates)
-      .eq('id', countId);
-
-    if (error) throw error;
-
-    if (options?.eventType) {
-      await this.logCountEvent(countId, options.eventType, options.payload);
-    }
+    await updateInventoryCount(countId, updates, options);
   }
 
   static async submitCountForReview(countId: string) {
-    const timestamp = new Date().toISOString();
-
-    const { error } = await supabase
-      .from('inv_counts')
-      .update({
-        status: 'awaiting_review',
-        review_status: 'under_review',
-        submitted_at: timestamp,
-      })
-      .eq('id', countId);
-
-    if (error) throw error;
-
-    await this.logCountEvent(countId, 'submitted', { submitted_at: timestamp });
+    await submitInventoryCount(countId);
   }
 
   static async approveCount(countId: string, input: ReviewActionInput = {}) {
-    const reviewerId = await this.getCurrentUserId();
-    const timestamp = new Date().toISOString();
-
-    const { error } = await supabase
-      .from('inv_counts')
-      .update({
-        status: 'approved',
-        review_status: 'approved',
-        reviewed_by: reviewerId,
-        reviewed_at: timestamp,
-        review_notes: input.notes ?? null,
-      })
-      .eq('id', countId);
-
-    if (error) throw error;
-
-    await this.logCountEvent(countId, 'approved', {
-      reviewed_at: timestamp,
-      notes: input.notes,
-    });
+    await approveInventoryCount(countId, input);
   }
 
   static async rejectCount(countId: string, input: ReviewActionInput = {}) {
-    const reviewerId = await this.getCurrentUserId();
-    const timestamp = new Date().toISOString();
-
-    const { error } = await supabase
-      .from('inv_counts')
-      .update({
-        status: 'in_progress',
-        review_status: 'rejected',
-        reviewed_by: reviewerId,
-        reviewed_at: timestamp,
-        review_notes: input.notes ?? null,
-      })
-      .eq('id', countId);
-
-    if (error) throw error;
-
-    await this.logCountEvent(countId, 'rejected', {
-      reviewed_at: timestamp,
-      notes: input.notes,
-    });
+    await rejectInventoryCount(countId, input);
   }
 
   static async completeCount(countId: string) {
-    const timestamp = new Date().toISOString();
-
-    const { error } = await supabase
-      .from('inv_counts')
-      .update({
-        status: 'awaiting_review',
-        review_status: 'under_review',
-        completed_at: timestamp,
-        submitted_at: timestamp,
-      })
-      .eq('id', countId);
-
-    if (error) throw error;
-
-    await this.logCountEvent(countId, 'submitted', { completed_at: timestamp });
+    await completeInventoryCount(countId);
   }
 
   static async deleteCount(countId: string) {
-    // First delete all related count lines
-    const { error: linesError } = await supabase
-      .from('inv_count_lines')
-      .delete()
-      .eq('count_id', countId);
-
-    if (linesError) throw linesError;
-
-    // Then delete the count itself
-    const { error } = await supabase
-      .from('inv_counts')
-      .delete()
-      .eq('id', countId);
-
-    if (error) throw error;
+    await deleteInventoryCount(countId);
   }
 
   static async listCountEvents(countId: string) {
-    const { data, error } = await supabase
-      .from('inv_count_events')
-      .select(`
-        *,
-        actor:profiles (
-          id,
-          first_name,
-          last_name
-        )
-      `)
-      .eq('count_id', countId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    return listInventoryCountEvents(countId);
   }
 
   static async listCountScans(countId: string) {
-    const { data, error } = await supabase
-      .from('inv_count_scans')
-      .select('*')
-      .eq('count_id', countId)
-      .order('scanned_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    return listInventoryCountScans(countId);
   }
 
   static async recordCountScan(
@@ -800,335 +433,33 @@ export class InventoryService {
     scannedCode: string,
     options: { itemId?: string; scanType?: 'barcode' | 'qr_code'; metadata?: Record<string, unknown> } = {}
   ) {
-    const userId = await this.getCurrentUserId();
-
-    const { error } = await supabase
-      .from('inv_count_scans')
-      .insert({
-        count_id: countId,
-        item_id: options.itemId ?? null,
-        scanned_code: scannedCode,
-        scan_type: options.scanType ?? 'barcode',
-        scanned_by: userId,
-        metadata: options.metadata ?? {},
-      });
-
-    if (error) throw error;
-
-    await this.logCountEvent(countId, 'note_added', {
-      action: 'barcode_scanned',
-      scanned_code: scannedCode,
-      item_id: options.itemId,
-      scan_type: options.scanType ?? 'barcode',
-    });
+    await recordInventoryCountScan(countId, scannedCode, options);
   }
 
   // Count Lines Management
   static async getCountLines(countId: string) {
-    const { data, error } = await supabase
-      .from('inv_count_lines')
-      .select(`
-        *,
-        item:inv_items (
-          id,
-          name,
-          sku,
-          category
-        ),
-        unit:inv_units (
-          id,
-          name,
-          abbreviation
-        )
-      `)
-      .eq('count_id', countId)
-      .order('item_id', { ascending: true })
-      .order('unit_level', { ascending: true });
-
-    if (error) throw error;
-    return (data || []) as InventoryCountLine[];
+    return listInventoryCountLines(countId);
   }
 
   static async addItemToCount(countId: string, itemId: string, expectedQuantity: number = 0) {
-    await this.addItemsToCount(countId, [{ id: itemId, expectedQuantity }]);
+    await addInventoryItemToCount(countId, itemId, expectedQuantity);
   }
 
   static async addItemsToCount(
     countId: string,
     items: Array<{ id: string; expectedQuantity?: number }>
   ) {
-    if (!items.length) return;
-
-    const scopedItems = await this.buildScopedItemsForIds(items);
-    if (scopedItems.length === 0) {
-      return;
-    }
-
-    await this.bootstrapCountLines(countId, scopedItems);
-
-    await this.logCountEvent(countId, 'note_added', {
-      action: 'items_added',
-      item_ids: scopedItems.map((entry) => entry.item.id),
-    });
+    await addInventoryItemsToCount(countId, items);
   }
 
   static async updateCountLine(lineId: string, updates: Partial<InventoryCountLine>) {
-    const payload: Partial<InventoryCountLine> & { counted_at?: string } = { ...updates };
-
-    if (updates.counted_quantity !== undefined) {
-      payload.counted_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from('inv_count_lines')
-      .update(payload)
-      .eq('id', lineId)
-      .select('count_id, item_id, unit_id, counted_quantity')
-      .single();
-
-    if (error) throw error;
-
-    if (updates.counted_quantity !== undefined && data) {
-      await this.logCountEvent(data.count_id, 'item_counted', {
-        item_id: data.item_id,
-        unit_id: data.unit_id,
-        counted_quantity: updates.counted_quantity,
-      });
-    }
+    await updateInventoryCountLine(lineId, updates);
   }
 
   static async removeItemFromCount(lineId: string) {
-    const { data, error } = await supabase
-      .from('inv_count_lines')
-      .delete()
-      .eq('id', lineId)
-      .select('count_id, item_id, unit_id')
-      .single();
-
-    if (error) throw error;
-
-    if (data) {
-      await this.logCountEvent(data.count_id, 'note_added', {
-        action: 'item_removed',
-        item_id: data.item_id,
-        unit_id: data.unit_id,
-      });
-    }
+    await removeInventoryItemFromCount(lineId);
   }
 
-  private static async resolveCountScopeItems(
-    countData: CreateInventoryCountInput
-  ): Promise<ScopedCountItem[]> {
-    if (countData.items && countData.items.length > 0) {
-      return this.buildScopedItemsForIds(
-        countData.items.map((item) => ({
-          id: item.id,
-          expectedQuantity: item.expectedQuantity ?? 0,
-        }))
-      );
-    }
-
-    let itemQuery = supabase
-      .from('inv_items')
-      .select(`
-        id,
-        name,
-        category,
-        sku,
-        default_location_id,
-        unit_id,
-        unit:inv_units(*)
-      `)
-      .eq('is_active', true);
-
-    if (countData.locations.length > 0) {
-      itemQuery = itemQuery.in('default_location_id', countData.locations);
-    }
-
-    if (countData.categories && countData.categories.length > 0) {
-      itemQuery = itemQuery.in('category', countData.categories);
-    }
-
-    const { data, error } = await itemQuery;
-    if (error) throw error;
-
-    const items = (data || []) as ScopedCountItem['item'][];
-    const scoped = items.map((item) => ({
-      item,
-      expectedQuantity: 0,
-    }));
-
-    return this.attachUnitsToItems(scoped);
-  }
-
-  private static async buildScopedItemsForIds(
-    entries: Array<{ id: string; expectedQuantity?: number }>
-  ): Promise<ScopedCountItem[]> {
-    if (!entries.length) {
-      return [];
-    }
-
-    const itemIds = entries.map((entry) => entry.id);
-    const expectedMap = new Map(entries.map((entry) => [entry.id, entry.expectedQuantity ?? 0]));
-
-    const { data, error } = await supabase
-      .from('inv_items')
-      .select(`
-        id,
-        name,
-        category,
-        sku,
-        default_location_id,
-        unit_id,
-        unit:inv_units(*)
-      `)
-      .in('id', itemIds)
-      .eq('is_active', true);
-
-    if (error) throw error;
-
-    const items = (data || []) as ScopedCountItem['item'][];
-    const scoped = items.map((item) => ({
-      item,
-      expectedQuantity: expectedMap.get(item.id) ?? 0,
-    }));
-
-    return this.attachUnitsToItems(scoped);
-  }
-
-  private static async attachUnitsToItems(
-    items: Array<{ item: ScopedCountItem['item']; expectedQuantity: number }>
-  ): Promise<ScopedCountItem[]> {
-    if (!items.length) {
-      return [];
-    }
-
-    const itemIds = items.map(({ item }) => item.id);
-
-    const { data: unitsData, error } = await supabase
-      .from('inv_item_units')
-      .select(`
-        *,
-        unit:inv_units(*)
-      `)
-      .in('item_id', itemIds)
-      .order('unit_level', { ascending: true });
-
-    if (error) throw error;
-
-    const unitsByItem = items.reduce<Record<string, InventoryItemUnit[]>>((acc, entry) => {
-      acc[entry.item.id] = [];
-      return acc;
-    }, {});
-
-    (unitsData || []).forEach((unit) => {
-      const typed = unit as unknown as InventoryItemUnit;
-      if (typed.is_countable === false) {
-        return;
-      }
-      const bucket = unitsByItem[typed.item_id] || [];
-      bucket.push(typed);
-      unitsByItem[typed.item_id] = bucket;
-    });
-
-    return items.map(({ item, expectedQuantity }) => ({
-      item,
-      expectedQuantity,
-      units: (unitsByItem[item.id] || []).sort(
-        (a, b) => (a.unit_level ?? 0) - (b.unit_level ?? 0)
-      ),
-    }));
-  }
-
-  private static async bootstrapCountLines(countId: string, scopedItems: ScopedCountItem[]) {
-    if (!scopedItems.length) {
-      return;
-    }
-
-    const { data: existingLines, error: existingError } = await supabase
-      .from('inv_count_lines')
-      .select('item_id, unit_id')
-      .eq('count_id', countId);
-
-    if (existingError) throw existingError;
-
-    const existingKeys = new Set<string>(
-      (existingLines || []).map((line) => `${line.item_id}-${line.unit_id ?? 'base'}`)
-    );
-
-    const payload: Array<Record<string, unknown>> = [];
-
-    scopedItems.forEach(({ item, expectedQuantity, units }) => {
-      const fallbackUnitId = item.unit?.id || item.unit_id;
-      const candidateUnits =
-        units.length > 0
-          ? units
-          : [
-              {
-                item_id: item.id,
-                unit_id: fallbackUnitId,
-                unit_level: 1,
-                conversion_factor: 1,
-              } as InventoryItemUnit,
-            ];
-
-      candidateUnits.forEach((unit) => {
-        const resolvedUnitId = unit.unit_id || unit.unit?.id || fallbackUnitId;
-        const key = `${item.id}-${resolvedUnitId ?? 'base'}`;
-
-        if (existingKeys.has(key)) {
-          return;
-        }
-
-        existingKeys.add(key);
-
-        payload.push({
-          count_id: countId,
-          item_id: item.id,
-          expected_quantity: expectedQuantity,
-          counted_quantity: 0,
-          unit_id: resolvedUnitId,
-          unit_level: unit.unit_level ?? 1,
-          conversion_factor: unit.conversion_factor ?? 1,
-          notes: null,
-          notes_per_unit: {},
-        });
-      });
-    });
-
-    if (!payload.length) {
-      return;
-    }
-
-    const chunkSize = 100;
-    for (let index = 0; index < payload.length; index += chunkSize) {
-      const chunk = payload.slice(index, index + chunkSize);
-      const { error } = await supabase.from('inv_count_lines').insert(chunk);
-      if (error) throw error;
-    }
-  }
-
-  private static async getCurrentUserId() {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.id ?? null;
-  }
-
-  private static async logCountEvent(
-    countId: string,
-    eventType: string,
-    payload: Record<string, unknown> = {}
-  ) {
-    const actorId = await this.getCurrentUserId();
-
-    const { error } = await supabase.from('inv_count_events').insert({
-      count_id: countId,
-      event_type: eventType,
-      actor_id: actorId,
-      payload,
-    });
-
-    if (error) throw error;
-  }
 
   // Adjustments
   static async getAdjustments() {

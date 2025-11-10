@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { formatDistanceToNow, subDays } from 'date-fns';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import { Loader2, RefreshCw, Sparkles, Filter, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ListLoadingSkeleton } from '@/components/ui/loading-states';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { useRecognitions } from '@/hooks/useRecognitions';
 import { useEmployees } from '@/features/employees/hooks/useEmployees';
 import { useToast } from '@/hooks/use-toast';
@@ -19,8 +22,11 @@ import { useLeaderboardData } from '@/features/leaderboard/useLeaderboardData';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import type { RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
 import { recognitionSourceMeta } from '@/lib/recognitionMeta';
-
-type RecognitionFilterKey = 'all' | 'goals' | 'tasks' | 'training' | 'manual';
+import {
+  useRecognitionFiltering,
+  type RecognitionFilterKey,
+  type RecognitionTimelineFilter,
+} from '@/features/recognitions/hooks/useRecognitionFiltering';
 
 const FILTER_CONFIG: Array<{ key: RecognitionFilterKey; label: string; sources?: RecognitionSourceType[] }> = [
   { key: 'all', label: 'All' },
@@ -30,7 +36,7 @@ const FILTER_CONFIG: Array<{ key: RecognitionFilterKey; label: string; sources?:
   { key: 'manual', label: 'Manual', sources: ['manual'] },
 ];
 
-const TIMELINE_OPTIONS: Array<{ value: '30' | '90' | '365' | 'all'; label: string }> = [
+const TIMELINE_OPTIONS: Array<{ value: RecognitionTimelineFilter; label: string }> = [
   { value: '30', label: 'Last 30 days' },
   { value: '90', label: 'Last 90 days' },
   { value: '365', label: 'Last 12 months' },
@@ -83,19 +89,23 @@ function ManualRecognitionDialog({
     source: 'manual',
     xpAwarded: null,
   });
+  const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setForm({ userId: '', message: '', source: 'manual', xpAwarded: null });
+      setShowErrors(false);
     }
   }, [open]);
 
   const resetAndClose = () => {
     onOpenChange(false);
     setForm({ userId: '', message: '', source: 'manual', xpAwarded: null });
+    setShowErrors(false);
   };
 
   const handleSubmit = async () => {
+    setShowErrors(true);
     if (!form.userId || !form.message.trim() || employees.length === 0 || employeesLoading) {
       return;
     }
@@ -103,14 +113,30 @@ function ManualRecognitionDialog({
     resetAndClose();
   };
 
+  const userIdError = showErrors && !form.userId ? 'Select a teammate to recognize.' : null;
+  const messageError = showErrors && !form.message.trim() ? 'Add a brief recognition message.' : null;
+
+  const employeeStatusMessage = useMemo(() => {
+    if (employeesLoading) return 'Loading team roster...';
+    if (employeesError) return `Unable to load employees: ${employeesError}`;
+    if (employees.length === 0) return 'Add active employees to share recognition.';
+    return null;
+  }, [employeesLoading, employeesError, employees.length]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle>Give Recognition</DialogTitle>
-          <DialogDescription>Celebrate a teammate&apos;s contribution with a recognition highlight.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSubmit();
+          }}
+          className="space-y-4 py-2"
+        >
+          <DialogHeader>
+            <DialogTitle>Give Recognition</DialogTitle>
+            <DialogDescription>Celebrate a teammate&apos;s contribution with a recognition highlight.</DialogDescription>
+          </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="recognition-employee">Employee</Label>
             <Select
@@ -118,17 +144,17 @@ function ManualRecognitionDialog({
               disabled={employeesLoading || employees.length === 0}
               onValueChange={(value) => setForm((prev) => ({ ...prev, userId: value }))}
             >
-              <SelectTrigger id="recognition-employee">
+              <SelectTrigger
+                id="recognition-employee"
+                aria-invalid={Boolean(userIdError)}
+                aria-describedby={userIdError ? 'recognition-employee-error' : undefined}
+              >
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
                 {employees.length === 0 ? (
                   <SelectItem value="__placeholder" disabled>
-                    {employeesLoading
-                      ? 'Loading team roster...'
-                      : employeesError
-                      ? 'Unable to load employees'
-                      : 'No active employees available'}
+                    {employeeStatusMessage ?? 'No active employees available'}
                   </SelectItem>
                 ) : (
                   employees.map((employee) => (
@@ -139,12 +165,15 @@ function ManualRecognitionDialog({
                 )}
               </SelectContent>
             </Select>
-            {employeesLoading ? (
-              <p className="text-xs text-muted-foreground">Loading team roster...</p>
-            ) : employeesError ? (
-              <p className="text-xs text-destructive">Unable to load employees: {employeesError}</p>
-            ) : employees.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Add active employees to share recognition.</p>
+            {userIdError ? (
+              <p className="text-xs text-destructive" id="recognition-employee-error" role="alert">
+                {userIdError}
+              </p>
+            ) : null}
+            {employeeStatusMessage ? (
+              <p className="text-xs text-muted-foreground" role="status">
+                {employeeStatusMessage}
+              </p>
             ) : null}
           </div>
 
@@ -176,7 +205,14 @@ function ManualRecognitionDialog({
               onChange={(event) => setForm((prev) => ({ ...prev, message: event.target.value }))}
               placeholder="Highlight the achievement and its impact..."
               rows={4}
+              aria-invalid={Boolean(messageError)}
+              aria-describedby={messageError ? 'recognition-message-error' : undefined}
             />
+            {messageError ? (
+              <p className="text-xs text-destructive" id="recognition-message-error" role="alert">
+                {messageError}
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -195,27 +231,26 @@ function ManualRecognitionDialog({
               placeholder="e.g. 100"
             />
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={resetAndClose}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              !form.userId || !form.message.trim() || submitting || employeesLoading || employees.length === 0
-            }
-          >
-            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Give Recognition
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetAndClose} type="button">
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              aria-disabled={submitting || employeesLoading || employees.length === 0}
+              disabled={submitting || employeesLoading || employees.length === 0}
+            >
+              {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Give Recognition
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
 }
 
-function RecognitionCard({ record }: { record: RecognitionRecord }) {
+const RecognitionCard = memo(function RecognitionCard({ record }: { record: RecognitionRecord }) {
   const details = record.reward_details;
   const source = details?.source ?? 'manual';
   const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
@@ -299,12 +334,23 @@ function RecognitionCard({ record }: { record: RecognitionRecord }) {
       </CardContent>
     </Card>
   );
-}
+});
+RecognitionCard.displayName = 'RecognitionCard';
 
 export default function Recognition() {
-  const { recognitions, loading, syncing, error, createManualRecognition, syncAutomation } = useRecognitions();
-  const { employees, loading: employeesLoading, error: employeesError } = useEmployees();
   const { toast } = useToast();
+  const [filter, setFilter] = useState<RecognitionFilterKey>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<'all' | string>('all');
+  const [timelineFilter, setTimelineFilter] = useState<RecognitionTimelineFilter>('30');
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const timelineLookback = timelineFilter === 'all' ? null : Number(timelineFilter);
+  const { recognitions, loading, syncing, error, createManualRecognition, syncAutomation } = useRecognitions({
+    lookbackDays: timelineLookback,
+  });
+  const { employees, loading: employeesLoading, error: employeesError } = useEmployees();
   const leaderboardPeriod: LeaderboardPeriod = 'monthly';
   const {
     loading: leaderboardLoading,
@@ -313,16 +359,22 @@ export default function Recognition() {
     refresh: refreshLeaderboard,
   } = useLeaderboardData(leaderboardPeriod);
 
-  const [filter, setFilter] = useState<RecognitionFilterKey>('all');
-  const [departmentFilter, setDepartmentFilter] = useState<'all' | string>('all');
-  const [timelineFilter, setTimelineFilter] = useState<'30' | '90' | '365' | 'all'>('30');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
   const { insights: leaderboardInsights, lastUpdated: leaderboardSyncedAt } = useLeaderboardInsightsStore((state) => ({
     insights: state.insights,
     lastUpdated: state.lastUpdated,
   }));
+  const sourceFilter = useMemo(
+    () => FILTER_CONFIG.find((entry) => entry.key === filter),
+    [filter],
+  );
+  const { departmentOptions, filteredRecognitions, stats } = useRecognitionFiltering({
+    recognitions,
+    employees,
+    departmentFilter,
+    searchTerm: deferredSearchTerm,
+    timelineFilter,
+    sourceFilter: sourceFilter?.sources,
+  });
   const leaderboardRecognitionLeaders = useMemo(
     () =>
       leaderboardInsights
@@ -337,99 +389,20 @@ export default function Recognition() {
     : null;
   const isLeaderboardLoading = leaderboardLoading || leaderboardSyncing;
 
-  const departmentOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    employees.forEach((employee) => {
-      if (employee.department?.id) {
-        map.set(employee.department.id, employee.department.name ?? 'Unnamed department');
-      }
-    });
-    return Array.from(map.entries());
-  }, [employees]);
+  const statCardConfig = useMemo(
+    () => [
+      { title: 'Total Highlights', value: stats.total, helper: 'Matches current filters' },
+      { title: 'Goal Wins', value: stats.goals, helper: 'Goals in current view' },
+      { title: 'Task Heroes', value: stats.tasks, helper: 'Task kudos in view' },
+      { title: 'Training Achieved', value: stats.training, helper: 'Training in view' },
+      { title: 'Manual Kudos', value: stats.manual, helper: 'Manual shout-outs in view' },
+    ],
+    [stats],
+  );
 
-  const departmentIdByUser = useMemo(() => {
-    const map = new Map<string, string | null>();
-    employees.forEach((employee) => {
-      map.set(employee.id, employee.department_id ?? null);
-    });
-    return map;
-  }, [employees]);
-
-  const filteredRecognitions = useMemo(() => {
-    const lowered = searchTerm.toLowerCase();
-    const sourceFilter = FILTER_CONFIG.find((entry) => entry.key === filter);
-    const timelineDays = timelineFilter === 'all' ? null : Number(timelineFilter);
-    const timelineCutoff = timelineDays ? subDays(new Date(), timelineDays) : null;
-
-    return recognitions.filter((record) => {
-      const details = record.reward_details;
-      const source = details?.source ?? 'manual';
-
-      if (sourceFilter?.sources && !sourceFilter.sources.includes(source)) {
-        return false;
-      }
-
-      if (departmentFilter !== 'all') {
-        const departmentId = departmentIdByUser.get(record.user_id) ?? null;
-        if (departmentId !== departmentFilter) {
-          return false;
-        }
-      }
-
-      if (timelineCutoff && record.awarded_at) {
-        const awardedAt = new Date(record.awarded_at);
-        if (Number.isNaN(awardedAt.getTime()) || awardedAt < timelineCutoff) {
-          return false;
-        }
-      }
-
-      if (!lowered) return true;
-
-      const recipientName = `${record.recipient?.first_name ?? ''} ${record.recipient?.last_name ?? ''}`.toLowerCase();
-      const creatorName = `${record.creator?.first_name ?? ''} ${record.creator?.last_name ?? ''}`.toLowerCase();
-      const goalTitle = record.goal?.title?.toLowerCase() ?? '';
-      const message = details?.message?.toLowerCase() ?? '';
-      const trainingTitle = record.training?.module?.title?.toLowerCase() ?? '';
-
-      return (
-        recipientName.includes(lowered) ||
-        creatorName.includes(lowered) ||
-        goalTitle.includes(lowered) ||
-        trainingTitle.includes(lowered) ||
-        message.includes(lowered)
-      );
-    });
-  }, [recognitions, filter, searchTerm, departmentFilter, departmentIdByUser, timelineFilter]);
-
-  const stats = useMemo(() => {
-    const recognitionByType: Record<RecognitionSourceType, number> = {
-      goal_milestone: 0,
-      goal_completion: 0,
-      task_completion: 0,
-      training_completion: 0,
-      onboarding_completion: 0,
-      manual: 0,
-    };
-
-    filteredRecognitions.forEach((record) => {
-      const type = record.reward_details?.source ?? 'manual';
-      recognitionByType[type] = (recognitionByType[type] ?? 0) + 1;
-    });
-
-    const trainingCount = recognitionByType.training_completion + recognitionByType.onboarding_completion;
-    const goalCount = recognitionByType.goal_milestone + recognitionByType.goal_completion;
-
-    return {
-      total: filteredRecognitions.length,
-      goals: goalCount,
-      tasks: recognitionByType.task_completion ?? 0,
-      training: trainingCount,
-      manual: recognitionByType.manual ?? 0,
-    };
-  }, [filteredRecognitions]);
-
-  const handleCreateRecognition = async (form: ManualRecognitionForm) => {
-    setCreating(true);
+  const handleCreateRecognition = useCallback(
+    async (form: ManualRecognitionForm) => {
+      setCreating(true);
     try {
       await createManualRecognition({
         userId: form.userId,
@@ -441,27 +414,27 @@ export default function Recognition() {
         title: 'Recognition shared',
         description: 'Your recognition has been published to the feed.',
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast({
         title: 'Unable to post recognition',
         description: 'Please try again or contact your administrator.',
         variant: 'destructive',
       });
-    } finally {
-      setCreating(false);
-    }
-  };
+      } finally {
+        setCreating(false);
+      }
+    },
+    [createManualRecognition, toast],
+  );
 
-  const handleSyncAutomation = async () => {
+  const handleSyncAutomation = useCallback(async () => {
     try {
       await syncAutomation();
       toast({
         title: 'Automation complete',
         description: 'Training completions and goal milestones have been synced.',
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast({
         title: 'Automation failed',
         description: 'We could not run the automation sync. Please try again later.',
@@ -472,83 +445,53 @@ export default function Recognition() {
 
     try {
       await refreshLeaderboard();
-    } catch (err) {
-      console.error('Leaderboard refresh failed after automation', err);
+    } catch {
       toast({
         title: 'Leaderboard refresh failed',
         description: 'Recognition data refreshed but leaderboard insights are stale. Please try again.',
         variant: 'destructive',
       });
     }
-  };
+  }, [refreshLeaderboard, syncAutomation, toast]);
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Recognition & Achievements</h1>
-          <p className="text-gray-600 mt-1">
-            Celebrate accomplishments across goals, tasks, and learning milestones.
-          </p>
+          <h1 className="text-3xl font-bold text-foreground">Recognition & Achievements</h1>
+          <p className="mt-1 text-muted-foreground">Celebrate accomplishments across goals, tasks, and learning milestones.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={handleSyncAutomation} disabled={syncing}>
+          <Button variant="outline" onClick={handleSyncAutomation} disabled={syncing} aria-busy={syncing}>
             {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Run Automation
           </Button>
-          <Button onClick={() => setDialogOpen(true)} disabled={employeesLoading}>
+          <Button onClick={() => setDialogOpen(true)} disabled={employeesLoading} aria-disabled={employeesLoading}>
             <Plus className="mr-2 h-4 w-4" />
             Give Recognition
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-5">
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Highlights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">Matches current filters</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Goal Wins</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.goals}</div>
-            <p className="text-xs text-muted-foreground mt-1">Goals in current view</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Task Heroes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.tasks}</div>
-            <p className="text-xs text-muted-foreground mt-1">Task kudos in view</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Training Achieved</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.training}</div>
-            <p className="text-xs text-muted-foreground mt-1">Training in view</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Manual Kudos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats.manual}</div>
-            <p className="text-xs text-muted-foreground mt-1">Manual shout-outs in view</p>
-          </CardContent>
-        </Card>
+      {employeesError ? (
+        <Alert variant="destructive">
+          <AlertTitle>Employee directory unavailable</AlertTitle>
+          <AlertDescription>
+            {employeesError}. Recognition filters and manual shout-outs may be limited until the roster loads.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {statCardConfig.map((card) => (
+          <DashboardStatCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            loading={loading}
+            footer={<p className="text-xs text-muted-foreground">{card.helper}</p>}
+          />
+        ))}
       </div>
 
       <Card>
@@ -654,10 +597,11 @@ export default function Recognition() {
               placeholder="Search recognitions..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
+              aria-label="Search recognitions"
             />
           </div>
           <Select value={timelineFilter} onValueChange={(value) => setTimelineFilter(value as typeof timelineFilter)}>
-            <SelectTrigger className="md:w-44">
+            <SelectTrigger className="md:w-44" aria-label="Filter by timeline">
               <SelectValue placeholder="Timeline" />
             </SelectTrigger>
             <SelectContent>
@@ -669,7 +613,7 @@ export default function Recognition() {
             </SelectContent>
           </Select>
           <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-            <SelectTrigger className="md:w-48">
+            <SelectTrigger className="md:w-48" aria-label="Filter by department">
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
@@ -685,9 +629,7 @@ export default function Recognition() {
       </div>
       <div className="mt-6 space-y-4">
         {loading ? (
-          <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <ListLoadingSkeleton count={4} />
         ) : filteredRecognitions.length === 0 ? (
           <Card className="p-10 text-center">
             <Sparkles className="mx-auto h-10 w-10 text-muted-foreground" />

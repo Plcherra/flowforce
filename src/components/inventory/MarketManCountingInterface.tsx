@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import type { InventoryCountLine } from '@/features/inventory/hooks/types';
 import { Barcode, Trash } from 'lucide-react';
 

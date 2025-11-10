@@ -23,7 +23,7 @@ vi.mock('@/hooks/useReminders', () => ({
   useReminders: () => useRemindersMock(),
 }));
 
-vi.mock('@/hooks/useTaskNotifications', () => ({
+vi.mock('@/features/tasks', () => ({
   useTaskNotifications: () => useTaskNotificationsMock(),
 }));
 

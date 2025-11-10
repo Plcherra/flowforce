@@ -24,6 +24,7 @@ const mockLeaderboardState: {
 
 let performanceOverviewMockValue: any;
 let recognitionsMockValue: any;
+let leaderboardDataMockValue: any;
 
 vi.mock('@/hooks/usePerformanceOverview.tsx', () => ({
   __esModule: true,
@@ -33,6 +34,11 @@ vi.mock('@/hooks/usePerformanceOverview.tsx', () => ({
 vi.mock('@/hooks/useRecognitions.tsx', () => ({
   __esModule: true,
   useRecognitions: () => recognitionsMockValue,
+}));
+
+vi.mock('@/features/leaderboard/useLeaderboardData.ts', () => ({
+  __esModule: true,
+  useLeaderboardData: () => leaderboardDataMockValue,
 }));
 
 vi.mock('@/hooks/useAuth.tsx', () => ({
@@ -187,6 +193,11 @@ describe('Performance page rendering', () => {
       syncAutomation: vi.fn(),
       createManualRecognition: vi.fn(),
     };
+    leaderboardDataMockValue = {
+      loading: false,
+      error: null,
+      refresh: vi.fn(),
+    };
   });
 
   afterEach(() => {
@@ -234,5 +245,44 @@ describe('Performance page rendering', () => {
     expect(await screen.findByText('Current Goals')).toBeInTheDocument();
     expect(await screen.findByText('Improve Efficiency')).toBeInTheDocument();
     expect(await screen.findByText('70%')).toBeInTheDocument();
+  });
+
+  it('offers retry when leaderboard insights fail', () => {
+    leaderboardDataMockValue.error = 'Leaderboard unavailable';
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Performance />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('Unable to load leaderboard insights')).toBeInTheDocument();
+    const retryButton = screen.getByRole('button', { name: /Retry leaderboard sync/i });
+    fireEvent.click(retryButton);
+    expect(leaderboardDataMockValue.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows retrying recognition fetch failures', () => {
+    const recognitionRetry = vi.fn();
+    recognitionsMockValue = {
+      recognitions: [],
+      loading: false,
+      syncing: false,
+      error: 'Recognitions failed',
+      refresh: recognitionRetry,
+      syncAutomation: vi.fn(),
+      createManualRecognition: vi.fn(),
+    };
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Performance />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('Unable to load recognition activity')).toBeInTheDocument();
+    const retryButton = screen.getByRole('button', { name: /Retry recognitions/i });
+    fireEvent.click(retryButton);
+    expect(recognitionRetry).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,4 +1,6 @@
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 let learningClient = supabase;
 
@@ -31,88 +33,124 @@ const TABLE_ENROLLMENTS = 'learning_enrollments';
 const TABLE_PROGRESS = 'learning_progress_events';
 const TABLE_PROGRESS_SNAPSHOTS = 'learning_progress';
 const VIEW_METRICS = 'learning_course_metrics';
+const DEFAULT_EVENT_LIMIT = 50;
+const DEFAULT_SNAPSHOT_LIMIT = 25;
 
-type CourseRow = {
-  id: string;
-  slug: string;
-  title: string;
-  description: string | null;
-  category: string;
-  company_id: string | null;
-  level_requirement: number;
-  xp_reward: number;
-  estimated_hours: string | number | null;
-  delivery_mode: string;
-  target_roles: string[] | null;
-  featured: boolean | null;
-  certification_code: string | null;
-  certification_id: string | null;
-  role_unlock: string[] | null;
-  auto_schedule_eligible: boolean | null;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-};
+const nullableNumericLike = z.union([z.number(), z.string()]).nullable();
 
-type ModuleRow = {
-  id: string;
-  course_id: string;
-  company_id: string | null;
-  title: string;
-  description: string | null;
-  content: string | null;
-  order_index: number;
-  estimated_minutes: number | null;
-  xp_award: number | null;
-  created_at: string;
-};
+const courseRowSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  category: z.string(),
+  company_id: z.string().nullable(),
+  level_requirement: z.number(),
+  xp_reward: z.number(),
+  estimated_hours: nullableNumericLike.optional(),
+  delivery_mode: z.string(),
+  target_roles: z.array(z.string()).nullable(),
+  featured: z.boolean().nullable(),
+  certification_code: z.string().nullable(),
+  certification_id: z.string().nullable(),
+  role_unlock: z.array(z.string()).nullable(),
+  auto_schedule_eligible: z.boolean().nullable(),
+  created_by: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
 
-type EnrollmentRow = {
-  id: string;
-  course_id: string;
-  employee_id: string;
-  company_id: string | null;
-  status: string;
-  progress_percent: string | number | null;
-  hours_completed: string | number | null;
-  current_module: number | null;
-  level: number | null;
-  started_at: string;
-  completed_at: string | null;
-  last_activity_at: string;
-  created_at: string;
-  updated_at: string;
-};
+type CourseRow = z.infer<typeof courseRowSchema>;
 
-type ProgressRow = {
-  id: string;
-  enrollment_id: string;
-  module_id: string | null;
-  event_type: string;
-  delta_progress: string | number | null;
-  delta_hours: string | number | null;
-  note: string | null;
-  created_by: string | null;
-  created_at: string;
-};
+const moduleRowSchema = z.object({
+  id: z.string(),
+  course_id: z.string(),
+  company_id: z.string().nullable(),
+  title: z.string(),
+  description: z.string().nullable(),
+  content: z.string().nullable(),
+  order_index: z.number(),
+  estimated_minutes: nullableNumericLike.optional(),
+  xp_award: nullableNumericLike.optional(),
+  created_at: z.string(),
+});
 
-type ProgressSnapshotRow = Tables<'learning_progress'>;
+type ModuleRow = z.infer<typeof moduleRowSchema>;
 
-type MetricsRow = {
-  course_id: string;
-  title: string;
-  category: string;
-  company_id: string | null;
-  xp_reward: number | null;
-  estimated_hours: string | number | null;
-  active_learners: number | null;
-  completions: number | null;
-  avg_progress: string | number | null;
-  total_hours_completed: string | number | null;
-  total_xp_awarded: string | number | null;
-};
+const enrollmentRowSchema = z.object({
+  id: z.string(),
+  course_id: z.string(),
+  employee_id: z.string(),
+  company_id: z.string().nullable(),
+  status: z.string(),
+  progress_percent: nullableNumericLike.optional(),
+  hours_completed: nullableNumericLike.optional(),
+  current_module: z.number().nullable(),
+  level: z.number().nullable(),
+  started_at: z.string(),
+  completed_at: z.string().nullable(),
+  last_activity_at: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+type EnrollmentRow = z.infer<typeof enrollmentRowSchema>;
+
+const progressRowSchema = z.object({
+  id: z.string(),
+  enrollment_id: z.string(),
+  module_id: z.string().nullable(),
+  event_type: z.string(),
+  delta_progress: nullableNumericLike.optional(),
+  delta_hours: nullableNumericLike.optional(),
+  note: z.string().nullable(),
+  created_by: z.string().nullable(),
+  created_at: z.string(),
+});
+
+type ProgressRow = z.infer<typeof progressRowSchema>;
+
+const progressSnapshotRowSchema = z.object({
+  id: z.string(),
+  enrollment_id: z.string(),
+  module_id: z.string().nullable(),
+  progress_percent: z.number(),
+  time_spent_minutes: z.number(),
+  quiz_score: z.number().nullable(),
+  ai_recommendation: z.string().nullable(),
+  recorded_at: z.string(),
+  recorded_by: z.string().nullable(),
+  metadata: z.unknown().nullable(),
+});
+
+type ProgressSnapshotRow = z.infer<typeof progressSnapshotRowSchema>;
+
+const metricsRowSchema = z.object({
+  course_id: z.string(),
+  title: z.string(),
+  category: z.string(),
+  company_id: z.string().nullable(),
+  xp_reward: z.number().nullable(),
+  estimated_hours: nullableNumericLike.optional(),
+  active_learners: z.number().nullable(),
+  completions: z.number().nullable(),
+  avg_progress: nullableNumericLike.optional(),
+  total_hours_completed: nullableNumericLike.optional(),
+  total_xp_awarded: nullableNumericLike.optional(),
+});
+
+type MetricsRow = z.infer<typeof metricsRowSchema>;
 
 const fromTable = <Row>(table: string) => learningClient.from<Row>(table as any);
+
+const parseWithSchema = <Schema extends z.ZodTypeAny>(schema: Schema, payload: unknown, context: string) => {
+  const result = schema.safeParse(payload);
+  if (!result.success) {
+    console.error(`[learning] Invalid payload for ${context}`, result.error.flatten());
+    throw new Error(`Learning data for ${context} is malformed.`);
+  }
+  return result.data;
+};
 
 const toNumber = (value: string | number | null | undefined, fallback = 0): number => {
   if (value == null) return fallback;
@@ -245,6 +283,20 @@ const mapMetrics = (row: MetricsRow): LearningCourseMetrics => ({
   totalXpAwarded: row.total_xp_awarded != null ? toNumber(row.total_xp_awarded) : null,
 });
 
+const progressHistoryResponseSchema = z.object({
+  events: z.array(progressRowSchema),
+  eventCursor: z.string().nullable(),
+  snapshots: z.array(progressSnapshotRowSchema),
+  snapshotCursor: z.string().nullable(),
+});
+
+export type ProgressHistoryPage = {
+  events: LearningProgressEvent[];
+  eventCursor: string | null;
+  snapshots: LearningProgressSnapshot[];
+  snapshotCursor: string | null;
+};
+
 function buildSlug(title: string) {
   const baseSlug = slugify(title);
   return baseSlug || `course-${Date.now()}`;
@@ -271,8 +323,12 @@ export async function fetchLearningCatalog(companyId: string): Promise<LearningC
   if (courseError) throw courseError;
   if (moduleError) throw moduleError;
 
+  const courseRows = parseWithSchema(courseRowSchema.array(), courseData ?? [], TABLE_COURSES);
+  const moduleRows = parseWithSchema(moduleRowSchema.array(), moduleData ?? [], TABLE_MODULES);
+  const metricsRows = parseWithSchema(metricsRowSchema.array(), metricsData ?? [], VIEW_METRICS);
+
   const modulesByCourse = new Map<string, LearningModule[]>();
-  (moduleData ?? []).forEach((row) => {
+  moduleRows.forEach((row) => {
     const mapped = mapModule(row);
     const collection = modulesByCourse.get(mapped.courseId) ?? [];
     collection.push(mapped);
@@ -280,12 +336,12 @@ export async function fetchLearningCatalog(companyId: string): Promise<LearningC
   });
 
   const metricsByCourse = new Map<string, LearningCourseMetrics>();
-  (metricsData ?? []).forEach((row) => {
+  metricsRows.forEach((row) => {
     const mapped = mapMetrics(row);
     metricsByCourse.set(mapped.courseId, mapped);
   });
 
-  return (courseData ?? []).map((row) => {
+  return courseRows.map((row) => {
     const course = mapCourse(row);
     return {
       ...course,
@@ -327,6 +383,7 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
   if (insertCourseError) {
     throw insertCourseError;
   }
+  const courseRecord = parseWithSchema(courseRowSchema, courseRow, TABLE_COURSES);
 
   const serializeModuleContent = (module: CourseModuleInput) => {
     if (typeof module.content === 'string') {
@@ -342,7 +399,7 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
   };
 
   const modulesPayload = payload.modules.map((module, index) => ({
-    course_id: courseRow.id,
+    course_id: courseRecord.id,
     company_id: companyId,
     title: module.title,
     description: module.description ?? null,
@@ -356,12 +413,12 @@ export async function createLearningCourse(payload: CourseCreationPayload, creat
     const { error: moduleError } = await fromTable(TABLE_MODULES).insert(modulesPayload);
     if (moduleError) {
       // Attempt cleanup so admins don't see orphan course without modules
-      await fromTable(TABLE_COURSES).delete().eq('id', courseRow.id);
+      await fromTable(TABLE_COURSES).delete().eq('id', courseRecord.id);
       throw moduleError;
     }
   }
 
-  return mapCourse(courseRow);
+  return mapCourse(courseRecord);
 }
 
 export async function enrollInCourse(courseId: string, employeeId: string, companyId: string) {
@@ -387,7 +444,8 @@ export async function enrollInCourse(courseId: string, employeeId: string, compa
     .single();
 
   if (error) throw error;
-  return mapEnrollment(data);
+  const row = parseWithSchema(enrollmentRowSchema, data, TABLE_ENROLLMENTS);
+  return mapEnrollment(row);
 }
 
 export async function fetchEnrollments(employeeId: string, companyId: string): Promise<LearningEnrollment[]> {
@@ -402,7 +460,8 @@ export async function fetchEnrollments(employeeId: string, companyId: string): P
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map(mapEnrollment);
+  const rows = parseWithSchema(enrollmentRowSchema.array(), data ?? [], TABLE_ENROLLMENTS);
+  return rows.map(mapEnrollment);
 }
 
 export async function fetchCourseEnrollments(courseId: string, companyId: string): Promise<LearningEnrollment[]> {
@@ -417,7 +476,8 @@ export async function fetchCourseEnrollments(courseId: string, companyId: string
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map(mapEnrollment);
+  const rows = parseWithSchema(enrollmentRowSchema.array(), data ?? [], TABLE_ENROLLMENTS);
+  return rows.map(mapEnrollment);
 }
 
 export async function recordProgressEvent(
@@ -445,7 +505,8 @@ export async function recordProgressEvent(
     .single();
 
   if (error) throw error;
-  return mapProgressEvent(data);
+  const row = parseWithSchema(progressRowSchema, data, TABLE_PROGRESS);
+  return mapProgressEvent(row);
 }
 
 export async function updateEnrollmentProgress(
@@ -476,6 +537,7 @@ export async function updateEnrollmentProgress(
     .single();
 
   if (error) throw error;
+  const row = parseWithSchema(enrollmentRowSchema, data, TABLE_ENROLLMENTS);
 
   const snapshotPayload: TablesInsert<'learning_progress'> = {
     enrollment_id: enrollmentId,
@@ -496,28 +558,76 @@ export async function updateEnrollmentProgress(
     console.warn('[learning] unable to persist progress snapshot', snapshotError);
   }
 
-  return mapEnrollment(data);
+  return mapEnrollment(row);
 }
 
-export async function fetchProgressEvents(enrollmentId: string): Promise<LearningProgressEvent[]> {
-  const { data, error } = await fromTable<ProgressRow>(TABLE_PROGRESS)
+export async function fetchProgressEvents(
+  enrollmentId: string,
+  options: { limit?: number } = {},
+): Promise<LearningProgressEvent[]> {
+  let query = fromTable<ProgressRow>(TABLE_PROGRESS)
     .select('*')
     .eq('enrollment_id', enrollmentId)
     .order('created_at', { ascending: false });
 
+  query = query.limit(options.limit ?? DEFAULT_EVENT_LIMIT);
+
+  const { data, error } = await query;
+
   if (error) throw error;
-  return (data ?? []).map(mapProgressEvent);
+  const rows = parseWithSchema(progressRowSchema.array(), data ?? [], TABLE_PROGRESS);
+  return rows.map(mapProgressEvent);
 }
 
-export async function fetchProgressSnapshots(enrollmentId: string) {
-  const { data, error } = await supabase
+export async function fetchProgressSnapshots(enrollmentId: string, options: { limit?: number } = {}) {
+  let query = supabase
     .from(TABLE_PROGRESS_SNAPSHOTS as any)
     .select('*')
     .eq('enrollment_id', enrollmentId)
     .order('recorded_at', { ascending: false });
 
+  query = query.limit(options.limit ?? DEFAULT_SNAPSHOT_LIMIT);
+
+  const { data, error } = await query;
+
   if (error) throw error;
-  return (data ?? []).map(mapProgressSnapshot);
+  const rows = parseWithSchema(progressSnapshotRowSchema.array(), data ?? [], TABLE_PROGRESS_SNAPSHOTS);
+  return rows.map(mapProgressSnapshot);
+}
+
+export async function fetchProgressHistoryPage(params: {
+  enrollmentId: string;
+  eventCursor?: string | null;
+  snapshotCursor?: string | null;
+  eventLimit?: number;
+  snapshotLimit?: number;
+}): Promise<ProgressHistoryPage> {
+  const { data, error } = await supabase.functions.invoke('learning-progress-history', {
+    body: {
+      enrollmentId: params.enrollmentId,
+      eventCursor: params.eventCursor ?? undefined,
+      snapshotCursor: params.snapshotCursor ?? undefined,
+      eventLimit: params.eventLimit,
+      snapshotLimit: params.snapshotLimit,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message ?? 'Unable to load progress history.');
+  }
+
+  const parsed = progressHistoryResponseSchema.safeParse(data);
+  if (!parsed.success) {
+    console.error('[learning] Invalid progress history payload', parsed.error.flatten());
+    throw new Error('Malformed progress history response.');
+  }
+
+  return {
+    events: parsed.data.events.map(mapProgressEvent),
+    snapshots: parsed.data.snapshots.map(mapProgressSnapshot),
+    eventCursor: parsed.data.eventCursor,
+    snapshotCursor: parsed.data.snapshotCursor,
+  };
 }
 
 export async function fetchCourseMetrics(companyId: string): Promise<LearningCourseMetrics[]> {
@@ -529,7 +639,8 @@ export async function fetchCourseMetrics(companyId: string): Promise<LearningCou
     .select('*')
     .eq('company_id', companyId);
   if (error) throw error;
-  return (data ?? []).map(mapMetrics);
+  const rows = parseWithSchema(metricsRowSchema.array(), data ?? [], VIEW_METRICS);
+  return rows.map(mapMetrics);
 }
 
 export function buildPersonalSnapshot(enrollments: LearningEnrollment[], courses: LearningCourse[]): PersonalLearningSnapshot {
@@ -614,6 +725,70 @@ export async function ensureCourseCompletionRewards(
         reason: `Completed ${course.title}`,
       });
     }
+  }
+}
+
+export async function recordCourseCompletionMetadata(
+  course: LearningCatalogRecord,
+  options: { companyId: string; employeeId: string; awardingProfileId?: string | null },
+) {
+  if (!options.companyId) {
+    throw new Error('Company context is required to record course completion metadata.');
+  }
+
+  const { data: completionRow, error: completionLookupError } = await learningClient
+    .from('learning_completions')
+    .select('id')
+    .eq('employee_id', options.employeeId)
+    .eq('course_id', course.id)
+    .eq('company_id', options.companyId)
+    .maybeSingle();
+
+  if (completionLookupError) throw completionLookupError;
+
+  if (!completionRow) {
+    const { error: completionInsertError } = await learningClient.from('learning_completions').insert({
+      employee_id: options.employeeId,
+      company_id: options.companyId,
+      course_id: course.id,
+      xp_earned: course.xpReward ?? 0,
+      passed: true,
+      certification_awarded: course.certificationId ?? null,
+    });
+
+    if (completionInsertError) throw completionInsertError;
+  }
+
+  if (course.certificationId) {
+    const { error: certificationError } = await learningClient
+      .from('employee_certifications')
+      .upsert(
+        {
+          employee_id: options.employeeId,
+          certification_id: course.certificationId,
+          awarded_by: options.awardingProfileId ?? null,
+        },
+        { onConflict: 'employee_id,certification_id' },
+      );
+
+    if (certificationError) throw certificationError;
+  }
+
+  const profileUpdates: Record<string, unknown> = {};
+  if (course.roleUnlock && course.roleUnlock.length > 0) {
+    profileUpdates.role = course.roleUnlock[0];
+  }
+  if (course.autoScheduleEligible) {
+    profileUpdates.eligible_for_schedule = true;
+  }
+
+  if (Object.keys(profileUpdates).length > 0) {
+    const { error: profileError } = await learningClient
+      .from('profiles')
+      .update(profileUpdates)
+      .eq('id', options.employeeId);
+
+    if (profileError) throw profileError;
   }
 }
 

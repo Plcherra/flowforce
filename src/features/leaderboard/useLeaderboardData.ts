@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useEmployees, type Employee } from '@/features/employees/hooks/useEmployees';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import { ensureLeaderboardSynced } from './syncLeaderboard';
+import { fetchLeaderboardProfiles, fetchLeaderboardRows, type LeaderboardRowRecord } from './leaderboardRepository';
 import type {
   LeaderboardAnalytics,
   LeaderboardBadgeTier,
@@ -28,45 +29,6 @@ const defaultAnalytics: LeaderboardAnalytics = {
   },
 };
 
-const LEADERBOARD_SELECT = `
-    employee_id,
-    department_id,
-    role,
-    period,
-    period_start,
-    xp_total,
-    xp_tasks,
-    xp_goals,
-    xp_recognitions,
-    xp_training,
-    badge_tier,
-    badge_codes,
-    achievements,
-    insights,
-    challenges,
-    updated_at,
-    last_synced_at,
-    department:departments!gamification_leaderboard_department_id_fkey(
-      id,
-      name
-    ),
-    employee:profiles(
-      id,
-      first_name,
-      last_name,
-      email,
-      avatar_url,
-      role,
-      department:departments(
-        id,
-        name
-      ),
-      position:positions(
-        name
-      )
-    )
-  `;
-
 function normaliseTier(tier: string | null | undefined): LeaderboardBadgeTier {
   if (tier === 'Platinum' || tier === 'Gold' || tier === 'Silver') return tier;
   return 'Bronze';
@@ -78,7 +40,7 @@ function toStringArray(value: unknown): string[] {
 }
 
 export function mapToLeaderboardEntry(
-  row: any,
+  row: LeaderboardRowRecord,
   rank: number,
   employee: Employee | undefined,
 ): LeaderboardEntry | null {
@@ -217,19 +179,17 @@ export interface UseLeaderboardDataResult {
   refresh: (options?: { forceSync?: boolean }) => Promise<void>;
 }
 
+const leaderboardQueryKey = (companyId: string | null, period: LeaderboardPeriod) =>
+  ['leaderboard', companyId ?? 'unknown', period] as const;
+
 export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDataResult {
   const { profile, loading: profileLoading } = useProfile();
   const canMaintain = profile?.role ? MANAGER_ROLES.has(profile.role) : false;
   const { employees } = useEmployees({ enabled: canMaintain });
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [analytics, setAnalytics] = useState<LeaderboardAnalytics>(defaultAnalytics);
-  const [challenges, setChallenges] = useState<LeaderboardChallenge[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [manualSyncing, setManualSyncing] = useState(false);
   const setLeaderboardInsights = useLeaderboardInsightsStore((state) => state.setInsights);
   const clearLeaderboardInsights = useLeaderboardInsightsStore((state) => state.clear);
+  const queryClient = useQueryClient();
 
   const companyId = profile?.companyId ?? null;
   const employeesRef = useRef<Employee[]>([]);
@@ -237,6 +197,98 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
   useEffect(() => {
     employeesRef.current = employees;
   }, [employees]);
+
+  const leaderboardQuery = useQuery({
+    queryKey: leaderboardQueryKey(companyId, period),
+    enabled: Boolean(companyId),
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      if (!companyId) {
+        return { entries: [] as LeaderboardEntry[], lastUpdated: null as string | null };
+      }
+
+      const rows = await fetchLeaderboardRows({ companyId, period });
+      const employeeSnapshot = employeesRef.current;
+      const employeeMap = new Map(employeeSnapshot.map((employee) => [employee.id, employee]));
+      const fallbackEmployeeMap = new Map<string, Employee>();
+      const missingEmployeeIds = Array.from(
+        new Set(rows.map((row) => row.employee_id).filter((id) => id && !employeeMap.has(id))),
+      );
+
+      if (missingEmployeeIds.length > 0) {
+        const fallbackProfiles = await fetchLeaderboardProfiles({ companyId, ids: missingEmployeeIds });
+        fallbackProfiles.forEach((profile) => {
+          const fallbackEmployee: Employee = {
+            id: profile.id,
+            first_name: profile.first_name ?? '',
+            last_name: profile.last_name ?? '',
+            email: profile.email ?? profile.id,
+            avatar_url: profile.avatar_url ?? undefined,
+            role: profile.role ?? 'employee',
+            employment_status: profile.employment_status ?? 'active',
+            department_id: profile.department_id ?? null,
+            department: profile.department ?? null,
+            position: profile.position ?? undefined,
+            skillLevel: undefined,
+            skillXp: undefined,
+            badges: [],
+            reliability: undefined,
+            positiveReportCount: undefined,
+            lateCount: undefined,
+            noShowCount: undefined,
+          };
+
+          fallbackEmployeeMap.set(profile.id, fallbackEmployee);
+        });
+      }
+
+      const enriched: LeaderboardEntry[] = [];
+
+      rows.forEach((row, index) => {
+        const employee = employeeMap.get(row.employee_id) ?? fallbackEmployeeMap.get(row.employee_id);
+        const entry = mapToLeaderboardEntry(row, index, employee);
+        if (entry) {
+          enriched.push(entry);
+        }
+      });
+
+      return {
+        entries: enriched,
+        lastUpdated: rows[0]?.last_synced_at ?? rows[0]?.updated_at ?? null,
+      };
+    },
+  });
+
+  const rawEntries = companyId ? leaderboardQuery.data?.entries ?? [] : [];
+  const entries = rawEntries;
+  const analytics = useMemo(() => computeAnalytics(entries), [entries]);
+  const challenges = useMemo(() => entries.flatMap((entry) => entry.challenges), [entries]);
+  const lastUpdated = companyId ? leaderboardQuery.data?.lastUpdated ?? null : null;
+  const error = leaderboardQuery.error ? 'Unable to load leaderboard data at the moment.' : null;
+
+  useEffect(() => {
+    if (!companyId) {
+      clearLeaderboardInsights();
+      return;
+    }
+
+    if (entries.length > 0) {
+      const insightPayload = entries.slice(0, 5).map((entry) => ({
+        employeeId: entry.employeeId,
+        name: entry.fullName,
+        role: entry.role,
+        badgeTier: entry.badgeTier,
+        xp: entry.xp.total,
+        period: entry.period,
+        periodStart: entry.periodStart,
+        achievements: entry.achievements.map((achievement) => achievement.label),
+        recognitionCount: entry.recognitionCount,
+      }));
+      setLeaderboardInsights(insightPayload, lastUpdated ?? dayjs().toISOString());
+    } else {
+      clearLeaderboardInsights();
+    }
+  }, [entries, lastUpdated, setLeaderboardInsights, clearLeaderboardInsights, companyId]);
 
   const departments = useMemo(() => {
     const map = new Map<string | null, { id: string | null; name: string | null; count: number }>();
@@ -280,170 +332,38 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
       .sort((a, b) => b.count - a.count);
   }, [employees, entries]);
 
-  const fetchLeaderboardRows = useCallback(async () => {
-    if (!companyId) {
-      setEntries([]);
-      setAnalytics(defaultAnalytics);
-      setChallenges([]);
-      setLastUpdated(null);
-      setError(null);
-      clearLeaderboardInsights();
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('gamification_leaderboard')
-        .select(LEADERBOARD_SELECT)
-        .eq('company_id', companyId)
-        .eq('period', period)
-        .order('xp_total', { ascending: false });
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      const rows = data ?? [];
-      const employeeSnapshot = employeesRef.current;
-      const employeeMap = new Map(employeeSnapshot.map((employee) => [employee.id, employee]));
-      const fallbackEmployeeMap = new Map<string, Employee>();
-      const missingEmployeeIds = Array.from(
-        new Set(rows.map((row) => row.employee_id).filter((id) => id && !employeeMap.has(id))),
-      );
-
-      if (missingEmployeeIds.length > 0) {
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            first_name,
-            last_name,
-            email,
-            avatar_url,
-            role,
-            employment_status,
-            department_id,
-            department:departments(
-              id,
-              name,
-              color
-            ),
-            position:positions(
-              id,
-              name,
-              role
-            )
-          `)
-          .eq('company_id', companyId)
-          .in('id', missingEmployeeIds);
-
-        if (fallbackError) {
-          console.warn('[leaderboard] Fallback employee fetch failed', fallbackError);
-        } else {
-          (fallbackData ?? []).forEach((profile: any) => {
-            const fallbackEmployee: Employee = {
-              id: profile.id,
-              first_name: profile.first_name ?? '',
-              last_name: profile.last_name ?? '',
-              email: profile.email ?? profile.id,
-              avatar_url: profile.avatar_url ?? undefined,
-              role: profile.role ?? 'employee',
-              employment_status: profile.employment_status ?? 'active',
-              department_id: profile.department_id ?? null,
-              department: profile.department ?? null,
-              position: profile.position ?? undefined,
-              skillLevel: undefined,
-              skillXp: undefined,
-              badges: [],
-              reliability: undefined,
-              positiveReportCount: undefined,
-              lateCount: undefined,
-              noShowCount: undefined,
-            };
-
-            fallbackEmployeeMap.set(profile.id, fallbackEmployee);
-          });
-        }
-      }
-
-      const enriched: LeaderboardEntry[] = [];
-
-      rows.forEach((row, index) => {
-        const employee = employeeMap.get(row.employee_id) ?? fallbackEmployeeMap.get(row.employee_id);
-        const entry = mapToLeaderboardEntry(row, index, employee);
-        if (entry) {
-          enriched.push(entry);
-        }
-      });
-
-      setEntries(enriched);
-      setAnalytics(computeAnalytics(enriched));
-      setChallenges(enriched.flatMap((entry) => entry.challenges));
-      const updatedTimestamp = rows[0]?.last_synced_at ?? rows[0]?.updated_at ?? null;
-      setLastUpdated(updatedTimestamp);
-
-      if (enriched.length > 0) {
-        const insightPayload = enriched.slice(0, 5).map((entry) => ({
-          employeeId: entry.employeeId,
-          name: entry.fullName,
-          role: entry.role,
-          badgeTier: entry.badgeTier,
-          xp: entry.xp.total,
-          period: entry.period,
-          periodStart: entry.periodStart,
-          achievements: entry.achievements.map((achievement) => achievement.label),
-          recognitionCount: entry.recognitionCount,
-        }));
-        setLeaderboardInsights(insightPayload, updatedTimestamp ?? dayjs().toISOString());
-      } else {
-        clearLeaderboardInsights();
-      }
-    } catch (err) {
-      console.error('[leaderboard] Failed to load leaderboard data', err);
-      setError('Unable to load leaderboard data at the moment.');
-      setEntries([]);
-      setAnalytics(defaultAnalytics);
-      setChallenges([]);
-      setLastUpdated(null);
-      clearLeaderboardInsights();
-    } finally {
-      setLoading(false);
-    }
-  }, [companyId, period, setLeaderboardInsights, clearLeaderboardInsights]);
-
   const refresh = useCallback(
     async (options?: { forceSync?: boolean }) => {
-      const shouldSync = Boolean(options?.forceSync && canMaintain && companyId);
-      if (shouldSync && companyId) {
+      if (!companyId) {
+        clearLeaderboardInsights();
+        return;
+      }
+
+      const shouldSync = Boolean(options?.forceSync && canMaintain);
+      if (shouldSync) {
         const roster = employeesRef.current;
         if (roster.length > 0) {
           try {
-            setSyncing(true);
+            setManualSyncing(true);
             await ensureLeaderboardSynced(companyId, roster, period);
           } catch (err) {
             console.error('[leaderboard] Manual sync failed', err);
           } finally {
-            setSyncing(false);
+            setManualSyncing(false);
           }
         }
       }
 
-      await fetchLeaderboardRows();
+      await queryClient.invalidateQueries({ queryKey: leaderboardQueryKey(companyId, period) });
     },
-    [canMaintain, companyId, period, fetchLeaderboardRows],
+    [companyId, canMaintain, period, queryClient, clearLeaderboardInsights],
   );
 
-  useEffect(() => {
-    if (profileLoading) return;
-    void fetchLeaderboardRows();
-  }, [profileLoading, fetchLeaderboardRows]);
+  const loading = profileLoading || leaderboardQuery.isPending;
+  const syncing = manualSyncing || leaderboardQuery.isFetching;
 
   return {
-    loading: loading || profileLoading,
+    loading,
     syncing,
     error,
     entries,

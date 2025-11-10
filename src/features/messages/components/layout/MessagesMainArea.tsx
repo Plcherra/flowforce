@@ -2,8 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { MessagesHeader } from './MessagesHeader';
-import { MessagesList } from '../conversations/MessagesList';
-import { MessageInput } from '../conversations/MessageInput';
+import { MessagesList, MessageInput } from '@/features/messages/components/conversations';
 import type { MessageChannel, Message, ThreadMessage, MessageAttachment } from '@/types/messages';
 
 interface MessagesMainAreaProps {

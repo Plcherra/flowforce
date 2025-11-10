@@ -104,6 +104,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     loading,
     refetchAll,
     isFallbackData,
+    availableLocations,
   } = useScheduling();
 
   useEffect(() => {
@@ -143,8 +144,14 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
   };
   const lastApiError = schedulingError ?? 'none';
 
+  const sanitizedLocationFilter = useMemo(() => {
+    if (!locationFilter) return undefined;
+    const normalized = locationFilter.toLowerCase().trim();
+    return availableLocations.some((loc) => loc.toLowerCase() === normalized) ? locationFilter : undefined;
+  }, [availableLocations, locationFilter]);
+
   const hoursSummary = useMemo(() => {
-    const filterValue = locationFilter?.toLowerCase().trim() ?? null;
+    const filterValue = sanitizedLocationFilter?.toLowerCase().trim() ?? null;
     const filteredShifts = filterValue
       ? shifts.filter((shift) => {
           const locationName = (shift.location ?? '').toLowerCase();
@@ -206,7 +213,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
       partialCount,
       unfilledCount,
     };
-  }, [assignments, locationFilter, shifts]);
+  }, [assignments, sanitizedLocationFilter, shifts]);
 
   const coveragePercentages = useMemo(() => {
     const total = hoursSummary.shiftCount || 1;
@@ -245,8 +252,8 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
       .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime());
   }, [hoursSummary.dailyHours]);
 
-  const appliedFilterLabel = locationFilter
-    ? `Filtered by: ${locationFilter}`
+  const appliedFilterLabel = sanitizedLocationFilter
+    ? `Filtered by: ${sanitizedLocationFilter}`
     : 'All scheduled locations';
 
   const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
@@ -520,9 +527,9 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                   </CardContent>
                 </Card>
 
-                <EnhancedCalendarView locationFilter={locationFilter} />
+                <EnhancedCalendarView locationFilter={sanitizedLocationFilter} />
               </div>
-              <CopilotSchedulerSidebar locationFilter={locationFilter} />
+              <CopilotSchedulerSidebar locationFilter={sanitizedLocationFilter} />
             </div>
           </TabsContent>
 
@@ -649,7 +656,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
       <AutoScheduleDialog
         open={showAutoScheduler}
         onOpenChange={setShowAutoScheduler}
-        defaultLocationId={locationFilter ?? undefined}
+        defaultLocationId={sanitizedLocationFilter ?? undefined}
         companyId={profile?.companyId ?? undefined}
       />
     </div>

@@ -1,8 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import CreateFormDialog from '@/components/forms/CreateFormDialog';
-import FormBuilderDialog from '@/components/forms/FormBuilderDialog';
-import FormFillDialog from '@/components/forms/FormFillDialog';
 import FormsSection from '@/components/forms/FormsSection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +12,23 @@ import type { FormWithMeta } from '@/hooks/useForms';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { PageAsyncWrapper } from '@/components/ui/async-wrapper';
 
+const CreateFormDialog = lazy(() => import('@/components/forms/CreateFormDialog'));
+const FormBuilderDialog = lazy(() => import('@/components/forms/FormBuilderDialog'));
+const FormFillDialog = lazy(() => import('@/components/forms/FormFillDialog'));
+
 type StatusFilter = 'all' | 'published' | 'draft' | 'archived';
+
+type BuilderFallback = {
+  title?: string | null;
+  description?: string | null;
+} | null;
+
+type FormSectionConfig = {
+  key: 'my' | 'team' | 'archived';
+  title: string;
+  forms: FormWithMeta[];
+  emptyMessage: string;
+};
 
 const matchesQuery = (form: FormWithMeta, query: string) => {
   if (!query) return true;
@@ -35,16 +48,14 @@ export default function Forms() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
-  const [builderPrefill, setBuilderPrefill] = useState<{ title?: string | null; description?: string | null } | null>(
-    null,
-  );
+  const [builderFallback, setBuilderFallback] = useState<BuilderFallback>(null);
   const [fillFormId, setFillFormId] = useState<string | null>(null);
 
   const canCreateForms = canUse('createForms');
   const statusTabs: StatusFilter[] = ['all', 'published', 'draft', 'archived'];
   const isRefreshing = isFetching && !isInitialLoading;
 
-  const sections = useMemo(() => {
+  const sections = useMemo<FormSectionConfig[]>(() => {
     const trimmedQuery = query.trim();
     if (statusFilter === 'archived') {
       const archivedForms = forms.filter(
@@ -106,40 +117,36 @@ export default function Forms() {
   }, [forms, statusFilter, query, user?.id, canCreateForms]);
 
   const builderForm = builderFormId ? forms.find((form) => form.id === builderFormId) : null;
-  const builderInitialTitle = builderForm?.title ?? builderPrefill?.title ?? 'New Form';
-  const builderInitialDescription = builderForm?.description ?? builderPrefill?.description ?? '';
-  const handleRetry = () => {
+  const builderInitialTitle = builderForm?.title ?? builderFallback?.title ?? 'New Form';
+  const builderInitialDescription = builderForm?.description ?? builderFallback?.description ?? '';
+
+  const handleRetry = useCallback(() => {
     void refetchForms();
-  };
+  }, [refetchForms]);
 
-  useEffect(() => {
-    if (!builderFormId) return;
-    const matchingForm = forms.find((form) => form.id === builderFormId);
-    if (matchingForm) {
-      setBuilderPrefill({
-        title: matchingForm.title ?? null,
-        description: matchingForm.description ?? null,
-      });
-    }
-  }, [builderFormId, forms]);
+  const handleOpenBuilder = useCallback(
+    (formId: string) => {
+      if (!canCreateForms) return;
+      setBuilderFallback(null);
+      setBuilderFormId(formId);
+    },
+    [canCreateForms],
+  );
 
-  const handleOpenBuilder = (formId: string) => {
-    if (!canCreateForms) return;
-    const matchingForm = forms.find((form) => form.id === formId);
-    setBuilderPrefill(
-      matchingForm
-        ? {
-            title: matchingForm.title ?? null,
-            description: matchingForm.description ?? null,
-          }
-        : null,
-    );
-    setBuilderFormId(formId);
-  };
-
-  const handleOpenFill = (formId: string) => {
+  const handleOpenFill = useCallback((formId: string) => {
     setFillFormId(formId);
-  };
+  }, []);
+
+  const handleFillDialogChange = useCallback((open: boolean) => {
+    if (!open) {
+      setFillFormId(null);
+    }
+  }, []);
+
+  const handleFillSubmitted = useCallback(() => {
+    setFillFormId(null);
+    void refetchForms();
+  }, [refetchForms]);
 
   return (
     <PageAsyncWrapper
@@ -217,70 +224,69 @@ export default function Forms() {
           ))}
         </Tabs>
 
-        <ErrorBoundary
-          fallback={
-            <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-              Unable to open the form creation dialog.
-            </div>
-          }
-        >
-          <CreateFormDialog
-            open={createDialogOpen}
-            onOpenChange={setCreateDialogOpen}
-            onFormCreated={(formId) => {
-              setCreateDialogOpen(false);
-              setBuilderPrefill({ title: 'New Form', description: '' });
-              setBuilderFormId(formId);
-              void refetchForms();
-            }}
-          />
-        </ErrorBoundary>
-
-        {builderFormId && canCreateForms && (
+        <Suspense fallback={null}>
           <ErrorBoundary
             fallback={
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                Unable to open the form builder. Please refresh and try again.
+                Unable to open the form creation dialog.
               </div>
             }
           >
-            <FormBuilderDialog
-              open
-              onOpenChange={(open) => {
-                if (!open) {
-                  setBuilderFormId(null);
-                  setBuilderPrefill(null);
-                  void refetchForms();
-                }
-              }}
-              formId={builderFormId}
-              initialTitle={builderInitialTitle}
-              initialDescription={builderInitialDescription}
-            />
-          </ErrorBoundary>
-        )}
-        {fillFormId && (
-          <ErrorBoundary
-            fallback={
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                Unable to load the form fill experience.
-              </div>
-            }
-          >
-            <FormFillDialog
-              open
-              onOpenChange={(open) => {
-                if (!open) {
-                  setFillFormId(null);
-                }
-              }}
-              formId={fillFormId}
-              onSubmitted={() => {
-                setFillFormId(null);
+            <CreateFormDialog
+              open={createDialogOpen}
+              onOpenChange={setCreateDialogOpen}
+              onFormCreated={(formId) => {
+                setCreateDialogOpen(false);
+                setBuilderFallback({ title: 'New Form', description: '' });
+                setBuilderFormId(formId);
                 void refetchForms();
               }}
             />
           </ErrorBoundary>
+        </Suspense>
+
+        {builderFormId && canCreateForms && (
+          <Suspense fallback={null}>
+            <ErrorBoundary
+              fallback={
+                <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                  Unable to open the form builder. Please refresh and try again.
+                </div>
+              }
+            >
+              <FormBuilderDialog
+                open
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setBuilderFormId(null);
+                    setBuilderFallback(null);
+                    void refetchForms();
+                  }
+                }}
+                formId={builderFormId}
+                initialTitle={builderInitialTitle}
+                initialDescription={builderInitialDescription}
+              />
+            </ErrorBoundary>
+          </Suspense>
+        )}
+        {fillFormId && (
+          <Suspense fallback={null}>
+            <ErrorBoundary
+              fallback={
+                <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                  Unable to load the form fill experience.
+                </div>
+              }
+            >
+              <FormFillDialog
+                open
+                onOpenChange={handleFillDialogChange}
+                formId={fillFormId}
+                onSubmitted={handleFillSubmitted}
+              />
+            </ErrorBoundary>
+          </Suspense>
         )}
       </div>
     </PageAsyncWrapper>

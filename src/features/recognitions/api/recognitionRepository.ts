@@ -9,9 +9,22 @@ type GoalRow = Tables<'goals'>;
 type GoalMilestoneRow = Tables<'goal_milestones'>;
 type GoalTaskRow = Tables<'goal_tasks'>;
 type RecognitionRow = Tables<'recognitions'>;
-type AwardRuleRow = Tables<'recognition_award_rules'>;
 type TaskRow = Tables<'tasks'>;
 type ProfileRow = Tables<'profiles'>;
+
+type TrainingCompletionEventRow = {
+  assignment_id: string;
+  completed_at: string | null;
+  employee_id: string;
+  module_id: string | null;
+  module_title: string | null;
+  xp_reward: number | null;
+  company_id: string;
+};
+
+type GoalMilestoneWithGoal = GoalMilestoneRow & { goal: GoalRow | null };
+type GoalTaskWithRelations = GoalTaskRow & { goal: GoalRow | null; task: TaskRow | null };
+type GoalParticipantRow = { goal_id: string; user_id: string; role: string | null };
 
 export type ManualRecognitionInput = {
   userId: string;
@@ -143,7 +156,7 @@ function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
 
 async function fetchRecognitionRows(companyId: string, lookbackDays?: number, limit?: number) {
   const query = supabase
-    .from('recognitions' as any)
+    .from<RecognitionRow>('recognitions')
     .select('*')
     .eq('company_id', companyId)
     .order('awarded_at', { ascending: false });
@@ -221,7 +234,7 @@ async function fetchTasksByIds(ids: string[]) {
 async function fetchAssignmentsByIds(ids: string[], companyId: string) {
   if (ids.length === 0) return new Map<string, TrainingAssignment>();
   const { data, error } = await supabase
-    .from('training_assignments' as any)
+    .from('training_assignments')
     .select(
       'id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward, category, level, company_id), employee:profiles(id, first_name, last_name, avatar_url, position_id)',
     )
@@ -246,7 +259,7 @@ async function fetchAssignmentsByIds(ids: string[], companyId: string) {
         completed_at: assignment.completed_at ?? null,
         due_date: null,
         assigned_by: null,
-        assigned_at: '',
+        assigned_at: new Date().toISOString(),
         notes: null,
         module: assignment.module
           ? ({
@@ -281,14 +294,20 @@ async function fetchAssignmentsByIds(ids: string[], companyId: string) {
 
 export async function fetchRecognitionRecords({
   companyId,
-  lookbackDays = DEFAULT_LOOKBACK_DAYS,
+  lookbackDays,
   limit = MAX_RECOGNITION_RESULTS,
 }: {
   companyId: string;
-  lookbackDays?: number;
+  lookbackDays?: number | null;
   limit?: number;
 }): Promise<RecognitionRecord[]> {
-  const rewards = await fetchRecognitionRows(companyId, lookbackDays, limit);
+  const effectiveLookback =
+    typeof lookbackDays === 'number'
+      ? lookbackDays
+      : lookbackDays === null
+        ? undefined
+        : DEFAULT_LOOKBACK_DAYS;
+  const rewards = await fetchRecognitionRows(companyId, effectiveLookback, limit);
   if (rewards.length === 0) {
     return [];
   }
@@ -397,7 +416,7 @@ export async function fetchExistingRecognitionRows(companyId: string) {
 
 async function seedDefaultTrainingModules(companyId: string, actorId: string) {
   const { data: existingModules, error } = await supabase
-    .from('training_modules' as any)
+    .from('training_modules')
     .select('id')
     .eq('company_id', companyId)
     .limit(1);
@@ -437,7 +456,7 @@ async function seedDefaultTrainingModules(companyId: string, actorId: string) {
     created_by: actorId,
   }));
 
-  const { error: insertError } = await supabase.from('training_modules' as any).insert(modulesToInsert);
+  const { error: insertError } = await supabase.from('training_modules').insert(modulesToInsert);
   if (insertError) {
     throw new Error(insertError.message ?? 'Failed to seed training modules');
   }
@@ -448,7 +467,7 @@ async function ensureNewHireAssignments(companyId: string, actorId: string) {
   const hireDateThreshold = formatISO(thirtyDaysAgo, { representation: 'date' });
 
   const [{ data: modules, error: modulesError }, { data: newHires, error: newHiresError }] = await Promise.all([
-    supabase.from('training_modules' as any).select('*').eq('company_id', companyId).eq('is_mandatory', true),
+    supabase.from('training_modules').select('*').eq('company_id', companyId).eq('is_mandatory', true),
     supabase
       .from('profiles')
       .select('id, first_name, last_name, hire_date')
@@ -467,7 +486,7 @@ async function ensureNewHireAssignments(companyId: string, actorId: string) {
   const moduleIds = modules.map((module: TrainingModule) => module.id);
 
   const { data: existingAssignments, error } = await supabase
-    .from('training_assignments' as any)
+    .from('training_assignments')
     .select('module_id, employee_id')
     .in('employee_id', newHireIds)
     .in('module_id', moduleIds);
@@ -503,18 +522,19 @@ async function ensureNewHireAssignments(companyId: string, actorId: string) {
     return;
   }
 
-  const { error: insertError } = await supabase.from('training_assignments' as any).insert(assignmentsToInsert);
+  const { error: insertError } = await supabase.from('training_assignments').insert(assignmentsToInsert);
   if (insertError) throw new Error(insertError.message ?? 'Failed to auto-assign training modules');
 }
 
 async function generateTrainingRecognitions(companyId: string, actorId: string, existing: RecognitionRow[]) {
   const { data: completions, error } = await supabase
-    .from('v_training_completion_events' as any)
+    .from<TrainingCompletionEventRow>('v_training_completion_events')
     .select('assignment_id, completed_at, employee_id, module_id, module_title, xp_reward, company_id')
     .eq('company_id', companyId);
 
   if (error) throw new Error(error.message ?? 'Failed to fetch training completion events');
-  if (!completions || completions.length === 0) return;
+  const completionRows: TrainingCompletionEventRow[] = completions ?? [];
+  if (completionRows.length === 0) return;
 
   const existingTrainingRecognitions = new Set<string>();
   existing.forEach((reward) => {
@@ -526,14 +546,14 @@ async function generateTrainingRecognitions(companyId: string, actorId: string, 
 
   const assignmentsToFetch = new Set<string>();
   const employeesToFetch = new Set<string>();
-  completions.forEach((completion: any) => {
+  completionRows.forEach((completion) => {
     assignmentsToFetch.add(completion.assignment_id);
     employeesToFetch.add(completion.employee_id);
   });
 
   const [{ data: assignments }, { data: employees }] = await Promise.all([
     supabase
-      .from('training_assignments' as any)
+      .from('training_assignments')
       .select(
         'id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward), employee:profiles(id, first_name, last_name, avatar_url)',
       )
@@ -551,7 +571,7 @@ async function generateTrainingRecognitions(companyId: string, actorId: string, 
 
   const newRecognitionsPayload: TablesInsert<'goal_rewards'>[] = [];
 
-  for (const completion of completions as any[]) {
+  for (const completion of completionRows) {
     if (existingTrainingRecognitions.has(completion.assignment_id)) {
       continue;
     }
@@ -603,7 +623,8 @@ async function generateMilestoneRecognitions(companyId: string, actorId: string,
   if (error) throw new Error(error.message ?? 'Failed to fetch goal milestones');
   if (!milestones || milestones.length === 0) return;
 
-  const filteredMilestones = milestones.filter((milestone: any) => milestone.goal?.company_id === companyId);
+  const milestoneRows = milestones as GoalMilestoneWithGoal[];
+  const filteredMilestones = milestoneRows.filter((milestone) => milestone.goal?.company_id === companyId);
   if (filteredMilestones.length === 0) return;
 
   const milestoneParticipants = await supabase
@@ -616,7 +637,8 @@ async function generateMilestoneRecognitions(companyId: string, actorId: string,
   }
 
   const participantsByGoal = new Map<string, { user_id: string; role: string }[]>();
-  (milestoneParticipants.data ?? []).forEach((participant) => {
+  const participantRows: GoalParticipantRow[] = (milestoneParticipants.data ?? []) as GoalParticipantRow[];
+  participantRows.forEach((participant) => {
     const items = participantsByGoal.get(participant.goal_id) ?? [];
     items.push(participant);
     participantsByGoal.set(participant.goal_id, items);
@@ -632,7 +654,7 @@ async function generateMilestoneRecognitions(companyId: string, actorId: string,
 
   const newRecognitionsPayload: TablesInsert<'goal_rewards'>[] = [];
 
-  for (const milestone of filteredMilestones as any[]) {
+  for (const milestone of filteredMilestones) {
     const participants = participantsByGoal.get(milestone.goal_id) ?? [];
     const recognitionsTargets =
       participants.length > 0 ? participants : [{ user_id: milestone.goal.created_by, role: 'owner' }];
@@ -681,7 +703,8 @@ async function generateTaskRecognitions(companyId: string, actorId: string, exis
   if (error) throw new Error(error.message ?? 'Failed to fetch goal tasks');
   if (!goalTasks || goalTasks.length === 0) return;
 
-  const filteredTasks = goalTasks.filter((task: GoalTaskRow & { goal: GoalRow }) => task.goal?.company_id === companyId);
+  const taskRows = goalTasks as GoalTaskWithRelations[];
+  const filteredTasks = taskRows.filter((task) => task.goal?.company_id === companyId);
   if (filteredTasks.length === 0) return;
 
   const existingTaskKey = new Set<string>();
@@ -694,7 +717,7 @@ async function generateTaskRecognitions(companyId: string, actorId: string, exis
 
   const newRecognitionsPayload: TablesInsert<'goal_rewards'>[] = [];
 
-  for (const goalTask of filteredTasks as any[]) {
+  for (const goalTask of filteredTasks) {
     const assignee = goalTask.task?.assigned_to;
     if (!assignee) continue;
     const key = `${goalTask.task_id}:${assignee}`;

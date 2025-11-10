@@ -295,14 +295,54 @@ export async function deleteVendorEventRecord(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function bulkInsertShifts(payloads: TablesInsert<'schedules'>[]): Promise<void> {
-  if (!payloads.length) return;
-  const { error } = await supabase.from('schedules').insert(payloads);
+export async function insertSchedules(payloads: TablesInsert<'schedules'>[]): Promise<Tables<'schedules'>[]> {
+  if (!payloads.length) return [];
+  const { data, error } = await supabase.from('schedules').insert(payloads).select('*');
   if (error) throw error;
+  return z.array(scheduleRowSchema).parse(data ?? []);
 }
 
 export async function insertScheduleAssignments(payloads: TablesInsert<'schedule_assignments'>[]): Promise<void> {
   if (!payloads.length) return;
   const { error } = await supabase.from('schedule_assignments').insert(payloads);
   if (error) throw error;
+}
+
+export async function deleteCopilotDrafts(params: {
+  companyId: string;
+  locationName: string;
+  locationId: string;
+  weekStartIso: string;
+  weekEndIso: string;
+}): Promise<void> {
+  const { companyId, locationName, locationId, weekStartIso, weekEndIso } = params;
+  const { data, error } = await supabase
+    .from('schedules')
+    .select('id, requirements')
+    .eq('company_id', companyId)
+    .eq('location', locationName)
+    .eq('is_published', false)
+    .gte('start_time', weekStartIso)
+    .lt('start_time', weekEndIso);
+  if (error) throw error;
+
+  const draftIds =
+    data
+      ?.filter((row) => {
+        const requirements = row.requirements as { copilot?: { locationId?: string; weekStart?: string } } | null;
+        const copilot = requirements?.copilot;
+        return copilot?.locationId === locationId && copilot?.weekStart === weekStartIso;
+      })
+      .map((row) => row.id) ?? [];
+
+  if (!draftIds.length) return;
+
+  const { error: deleteAssignments } = await supabase
+    .from('schedule_assignments')
+    .delete()
+    .in('schedule_id', draftIds);
+  if (deleteAssignments) throw deleteAssignments;
+
+  const { error: deleteSchedules } = await supabase.from('schedules').delete().in('id', draftIds);
+  if (deleteSchedules) throw deleteSchedules;
 }

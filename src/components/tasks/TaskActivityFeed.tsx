@@ -18,7 +18,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ActivityFeedSkeleton } from '@/components/loading/TaskSkeletons';
 import { fetchTaskActivitiesForCompany } from '@/repositories/taskActivitiesRepository';
 import { fetchCompanyIdForUser } from '@/repositories/companyRepository';
 import { supabase } from '@/integrations/supabase/client';
@@ -169,15 +169,7 @@ export function TaskActivityFeed() {
           </CardTitle>
           <CardDescription>Latest updates and changes across all tasks</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {[0, 1, 2].map((item) => (
-            <div key={item} className="space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-          ))}
-        </CardContent>
+        <ActivityFeedSkeleton />
       </Card>
     );
   }

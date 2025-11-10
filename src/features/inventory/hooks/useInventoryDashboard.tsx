@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 
 export interface DashboardStats {
   totalItems: number;

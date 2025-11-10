@@ -1,6 +1,6 @@
+import { useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useCallback } from 'react';
 import type { MessageAttachment } from '@/types/messages';
 import { sendMessage as sendMessageService, deleteMessage as deleteMessageService } from '@/features/messages/api/messageService';
 
@@ -18,19 +18,37 @@ export function useMessageActions() {
   const sendMessage = useCallback(
     async (channelId: string, content: string, options: { replyToId?: string; attachments?: MessageAttachment[] } = {}) => {
       const userId = ensureUser();
-      return sendMessageService(channelId, userId, content, options);
+      try {
+        return await sendMessageService(channelId, userId, content, options);
+      } catch (error) {
+        toast({
+          title: 'Unable to send message',
+          description: error instanceof Error ? error.message : 'Please try again shortly.',
+          variant: 'destructive',
+        });
+        throw error;
+      }
     },
-    [ensureUser],
+    [ensureUser, toast],
   );
 
   const deleteMessage = useCallback(
     async (messageId: string) => {
       const userId = ensureUser();
-      await deleteMessageService(messageId, userId);
-      toast({
-        title: 'Message deleted',
-        description: 'Your message was removed.',
-      });
+      try {
+        await deleteMessageService(messageId, userId);
+        toast({
+          title: 'Message deleted',
+          description: 'Your message was removed.',
+        });
+      } catch (error) {
+        toast({
+          title: 'Unable to delete message',
+          description: error instanceof Error ? error.message : 'Please try again shortly.',
+          variant: 'destructive',
+        });
+        throw error;
+      }
     },
     [ensureUser, toast],
   );

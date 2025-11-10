@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, RefreshCcw, Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -96,6 +96,14 @@ export default function LearningCenter() {
   const showAdminSkeleton = loading && metrics.length === 0;
   const showAdminEmpty = !loading && metrics.length === 0;
 
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab((previous) => (isLearningTab(value) ? value : previous));
+  }, []);
+
+  const handleShowProgress = useCallback(() => setActiveTab('overview'), []);
+  const handleOpenWizard = useCallback(() => setWizardOpen(true), []);
+  const handleWizardOpenChange = useCallback((open: boolean) => setWizardOpen(open), []);
+
   const personalStats = snapshot
     ? [
         {
@@ -131,7 +139,7 @@ export default function LearningCenter() {
             Sync
           </Button>
           {trainingAdmin && (
-            <Button onClick={() => setWizardOpen(true)}>
+            <Button onClick={handleOpenWizard}>
               <Plus className="mr-2 h-4 w-4" />
               New course
             </Button>
@@ -145,7 +153,7 @@ export default function LearningCenter() {
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="flex w-full flex-wrap justify-start gap-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="catalog">Catalog</TabsTrigger>
@@ -235,7 +243,7 @@ export default function LearningCenter() {
                 courses={catalog}
                 enrollments={enrollments}
                 onEnroll={handleEnroll}
-                onShowProgress={() => setActiveTab('overview')}
+                onShowProgress={handleShowProgress}
                 highlightCourseIds={highlightedCourseIds}
               />
 
@@ -360,7 +368,7 @@ export default function LearningCenter() {
         )}
       </Tabs>
 
-      <CourseCreationWizard open={wizardOpen} onOpenChange={setWizardOpen} onCreate={handleCreateCourse} loading={saving} />
+      <CourseCreationWizard open={wizardOpen} onOpenChange={handleWizardOpenChange} onCreate={handleCreateCourse} loading={saving} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,16 +9,40 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, User, Flag, MessageSquare, Search, Target } from 'lucide-react';
 import { useTasks, type TaskWithRelations, normalizeTaskStatus, labelFor } from '@/hooks/useTasks';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { TaskDetailsDialog } from '@/components/tasks/TaskDetailsDialog';
 import { TaskNotifications } from '@/components/tasks/TaskNotifications';
-import { TaskActivityFeed } from '@/components/tasks/TaskActivityFeed';
-import { RemindersPanel } from '@/components/reminders/RemindersPanel';
 import { format, differenceInDays } from 'date-fns';
 import { getTaskStatusBadgeClass, getTaskStatusLabel } from '@/constants/taskStatus';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import {
+  TaskPageSkeleton,
+  ActivityFeedSkeleton,
+  ReminderListSkeleton,
+} from '@/components/loading/TaskSkeletons';
+import { useTaskFilters, useTaskSelection, type SelectionHandlers } from '@/features/tasks';
+
+const CreateTaskDialog = lazy(() =>
+  import('@/components/tasks/CreateTaskDialog').then((module) => ({
+    default: module.CreateTaskDialog,
+  }))
+);
+
+const TaskDetailsDialog = lazy(() =>
+  import('@/components/tasks/TaskDetailsDialog').then((module) => ({
+    default: module.TaskDetailsDialog,
+  }))
+);
+
+const TaskActivityFeed = lazy(() =>
+  import('@/components/tasks/TaskActivityFeed').then((module) => ({
+    default: module.TaskActivityFeed,
+  }))
+);
+
+const RemindersPanel = lazy(() =>
+  import('@/components/reminders/RemindersPanel').then((module) => ({
+    default: module.RemindersPanel,
+  }))
+);
 
 const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
@@ -44,6 +68,20 @@ const PRIORITY_LABELS: Record<KnownTaskPriority, string> = {
   low: 'Low',
 };
 
+type DueBadge = {
+  label: string;
+  className: string;
+} | null;
+
+type MetricTone = 'neutral' | 'alert';
+
+interface TaskMetric {
+  label: string;
+  value: number;
+  helper: string;
+  tone: MetricTone;
+}
+
 const normalizeStatus = (status: string | null | undefined): KnownTaskStatus | 'other' => {
   const normalized = normalizeTaskStatus(status);
   if (normalized && KNOWN_STATUSES.includes(normalized as KnownTaskStatus)) {
@@ -61,34 +99,30 @@ const normalizePriority = (priority: string | null | undefined): KnownTaskPriori
 
 export default function Tasks() {
   const isMobile = useIsMobile();
-  const { tasks, loading, error } = useTasks();
+  const { tasks, loading, error, refetchTasks } = useTasks();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null);
-  const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>('all');
-  const [priorityFilter, setPriorityFilter] = useState<TaskPriorityFilter>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
-  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!selectedTask) return;
-
-    const updated = tasks.find((item) => item.id === selectedTask.id);
-
-    if (!updated) {
-      setSelectedTask(null);
-      return;
-    }
-
-    if (updated !== selectedTask) {
-      setSelectedTask(updated);
-    }
-  }, [tasks, selectedTask]);
+  const {
+    statusFilter,
+    setStatusFilter,
+    priorityFilter,
+    setPriorityFilter,
+    searchTerm,
+    setSearchTerm,
+    filtersActive,
+    resetFilters,
+  } = useTaskFilters<TaskStatusFilter, TaskPriorityFilter>();
+  const {
+    selectedTask,
+    highlightedTaskId,
+    openTask,
+    closeTask,
+    handleNotificationNavigate,
+    getSelectionHandlers,
+  } = useTaskSelection<TaskWithRelations>(tasks);
 
   const now = new Date();
 
-  const getPriorityColor = (priority: string | null | undefined) => {
+  const getPriorityColor = (priority: string | null | undefined): string => {
     switch (priority) {
       case 'urgent': return 'bg-red-500';
       case 'high': return 'bg-orange-500';
@@ -98,7 +132,7 @@ export default function Tasks() {
     }
   };
 
-  const dueBadgeFor = (task: TaskWithRelations) => {
+  const dueBadgeFor = (task: TaskWithRelations): DueBadge => {
     if (!task?.due_date) return null;
 
     const dueDate = new Date(task.due_date);
@@ -133,12 +167,12 @@ export default function Tasks() {
     };
   };
 
-  const tasksByStatus = useMemo(() => {
-    return tasks.reduce<Record<string, number>>((acc, task) => {
+  const tasksByStatus = useMemo<Record<KnownTaskStatus | 'other', number>>(() => {
+    return tasks.reduce<Record<KnownTaskStatus | 'other', number>>((acc, task) => {
       const key = normalizeStatus(task.status);
       acc[key] = (acc[key] ?? 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<KnownTaskStatus | 'other', number>);
   }, [tasks]);
 
   const otherStatusCount = useMemo(
@@ -171,7 +205,6 @@ export default function Tasks() {
   );
 
   const totalTasks = tasks.length;
-  const filtersActive = statusFilter !== 'all' || priorityFilter !== 'all' || searchTerm.trim().length > 0;
 
   const statusTabs = useMemo(() => {
     const tabs: Array<{ value: TaskStatusFilter; label: string; count: number }> = [
@@ -247,94 +280,47 @@ export default function Tasks() {
     });
   }, [tasks, statusFilter, priorityFilter, searchTerm]);
 
-  const metrics = [
-    {
-      label: 'Total Tasks',
-      value: totalTasks,
-      helper: 'Everything you have access to',
-      tone: 'neutral' as const,
-    },
-    {
-      label: 'Active',
-      value: activeCount,
-      helper: 'Todo · In progress · Review',
-      tone: 'neutral' as const,
-    },
-    {
-      label: 'Due Soon',
-      value: dueSoonCount,
-      helper: 'Next 7 days',
-      tone: 'neutral' as const,
-    },
-    {
-      label: 'Overdue',
-      value: overdueCount,
-      helper: overdueCount ? 'Needs attention' : 'On track',
-      tone: overdueCount ? 'alert' : 'neutral',
-    },
-  ];
-
-  const handleResetFilters = () => {
-    setStatusFilter('all');
-    setPriorityFilter('all');
-    setSearchTerm('');
-  };
-
-  const clearHighlightTimeout = () => {
-    if (highlightTimeoutRef.current) {
-      clearTimeout(highlightTimeoutRef.current);
-      highlightTimeoutRef.current = null;
-    }
-  };
-
-  const handleTaskNavigate = useCallback(
-    (taskId: string) => {
-      const nextTask = tasks.find((task) => task.id === taskId);
-
-      if (!nextTask) {
-        toast({
-          title: 'Task not available',
-          description: 'Refresh to load the latest tasks before opening notifications.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      setSelectedTask(nextTask);
-      setHighlightedTaskId(taskId);
-
-      requestAnimationFrame(() => {
-        const element = document.getElementById(`task-card-${taskId}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      });
-
-      clearHighlightTimeout();
-      highlightTimeoutRef.current = setTimeout(() => {
-        setHighlightedTaskId((current) => (current === taskId ? null : current));
-      }, 2500);
-    },
-    [tasks, toast]
+  const metrics: TaskMetric[] = useMemo(
+    () => [
+      {
+        label: 'Total Tasks',
+        value: totalTasks,
+        helper: 'Everything you have access to',
+        tone: 'neutral',
+      },
+      {
+        label: 'Active',
+        value: activeCount,
+        helper: 'Todo · In progress · Review',
+        tone: 'neutral',
+      },
+      {
+        label: 'Due Soon',
+        value: dueSoonCount,
+        helper: 'Next 7 days',
+        tone: 'neutral',
+      },
+      {
+        label: 'Overdue',
+        value: overdueCount,
+        helper: overdueCount ? 'Needs attention' : 'On track',
+        tone: overdueCount ? 'alert' : 'neutral',
+      },
+    ],
+    [totalTasks, activeCount, dueSoonCount, overdueCount]
   );
 
-  useEffect(
-    () => () => {
-      clearHighlightTimeout();
-    },
-    []
-  );
+  const handleResetFilters = resetFilters;
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <TaskPageSkeleton isMobile={isMobile} />;
   }
 
   return (
-    <div className={isMobile ? 'space-y-4 px-4 pb-6' : 'space-y-6 max-w-7xl mx-auto px-6 pb-10'}>
+    <div
+      data-testid="tasks-page"
+      className={isMobile ? 'space-y-4 px-4 pb-6' : 'space-y-6 max-w-7xl mx-auto px-6 pb-10'}
+    >
       <div className={isMobile ? 'flex flex-col space-y-3' : 'flex items-center justify-between gap-6'}>
         <div className="space-y-1">
           <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`}>Tasks</h1>
@@ -343,8 +329,12 @@ export default function Tasks() {
           </p>
         </div>
         <div className={isMobile ? 'flex items-center justify-between' : 'flex items-center gap-3'}>
-          <TaskNotifications onTaskNavigate={handleTaskNavigate} />
-          <Button onClick={() => setShowCreateDialog(true)} size={isMobile ? "sm" : "default"}>
+          <TaskNotifications onTaskNavigate={handleNotificationNavigate} />
+          <Button
+            data-testid="tasks-create-button"
+            onClick={() => setShowCreateDialog(true)}
+            size={isMobile ? "sm" : "default"}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {isMobile ? 'New' : 'Create Task'}
           </Button>
@@ -352,9 +342,17 @@ export default function Tasks() {
       </div>
 
       {!loading && error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" data-testid="tasks-error" className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <AlertTitle>Unable to load tasks</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => refetchTasks()}
+            data-testid="tasks-retry-button"
+          >
+            Retry
+          </Button>
         </Alert>
       )}
 
@@ -385,8 +383,13 @@ export default function Tasks() {
             <div className={isMobile ? 'space-y-3' : 'flex items-center gap-3'}>
               <div className={isMobile ? 'w-full' : 'w-64'}>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Label htmlFor="tasks-search" className="sr-only">
+                    Search tasks
+                  </Label>
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
+                    id="tasks-search"
+                    data-testid="tasks-search-input"
                     placeholder="Search tasks"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
@@ -396,7 +399,11 @@ export default function Tasks() {
               </div>
 
               <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as TaskPriorityFilter)}>
-                <SelectTrigger className={isMobile ? 'w-full' : 'w-48'}>
+                <SelectTrigger
+                  className={isMobile ? 'w-full' : 'w-48'}
+                  data-testid="tasks-priority-filter"
+                  aria-label="Filter tasks by priority"
+                >
                   <SelectValue placeholder="Filter by priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -439,11 +446,11 @@ export default function Tasks() {
 
       <div className={isMobile ? 'space-y-4' : 'grid grid-cols-1 gap-6 lg:grid-cols-3'}>
         <div className={isMobile ? 'space-y-3' : 'space-y-4 lg:col-span-2'}>
-          {tasks.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No tasks yet</h3>
+        {tasks.length === 0 ? (
+          <Card data-testid="tasks-empty-state">
+            <CardContent className="flex flex-col items-center justify-center rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No tasks yet</h3>
                 <p className="text-muted-foreground text-center mb-4">
                   Create your first task to get started with project management.
                 </p>
@@ -453,9 +460,9 @@ export default function Tasks() {
                 </Button>
               </CardContent>
             </Card>
-          ) : filteredTasks.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
+        ) : filteredTasks.length === 0 ? (
+          <Card data-testid="tasks-no-results">
+            <CardContent className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
                 <Search className="h-10 w-10 text-muted-foreground" />
                 <h3 className="text-lg font-semibold">No tasks match your filters</h3>
                 <p className="max-w-sm text-sm text-muted-foreground">
@@ -466,20 +473,23 @@ export default function Tasks() {
                 </Button>
               </CardContent>
             </Card>
-          ) : (
-            filteredTasks.map((task) => {
+        ) : (
+          <div data-testid="tasks-list" className="space-y-4">
+            {filteredTasks.map((task) => {
               const dueBadge = dueBadgeFor(task);
+              const selectionHandlers: SelectionHandlers = getSelectionHandlers(task.id);
 
               return (
                 <Card
                   key={task.id}
                   id={`task-card-${task.id}`}
+                  data-testid={`task-card-${task.id}`}
                   data-highlighted={highlightedTaskId === task.id}
                   role="button"
                   tabIndex={0}
                   aria-label={`Open task ${task.title}`}
-                  onClick={() => setSelectedTask(task)}
-                  onKeyDown={handleTaskKeyDown(task)}
+                  onClick={selectionHandlers.onClick}
+                  onKeyDown={selectionHandlers.onKeyDown}
                   className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     highlightedTaskId === task.id ? 'ring-2 ring-primary' : ''
                   }`}
@@ -547,14 +557,19 @@ export default function Tasks() {
                   </CardContent>
                 </Card>
               );
-            })
-          )}
+            })}
+          </div>
+        )}
         </div>
         
         {!isMobile && (
           <div className="space-y-6 lg:sticky lg:top-24">
-            <RemindersPanel />
-            <TaskActivityFeed />
+            <Suspense fallback={<ReminderListSkeleton />}>
+              <RemindersPanel />
+            </Suspense>
+            <Suspense fallback={<ActivityFeedSkeleton />}>
+              <TaskActivityFeed />
+            </Suspense>
           </div>
         )}
       </div>
@@ -562,23 +577,33 @@ export default function Tasks() {
       {/* Mobile-only panels */}
       {isMobile && (
         <div className="space-y-4">
-          <RemindersPanel />
-          <TaskActivityFeed />
+          <Suspense fallback={<ReminderListSkeleton />}>
+            <RemindersPanel />
+          </Suspense>
+          <Suspense fallback={<ActivityFeedSkeleton />}>
+            <TaskActivityFeed />
+          </Suspense>
         </div>
       )}
 
-      <CreateTaskDialog 
-        open={showCreateDialog} 
-        onClose={() => setShowCreateDialog(false)} 
-      />
+      <Suspense fallback={null}>
+        {showCreateDialog && (
+          <CreateTaskDialog 
+            open={showCreateDialog} 
+            onClose={() => setShowCreateDialog(false)} 
+          />
+        )}
+      </Suspense>
       
       {selectedTask && (
-        <TaskDetailsDialog 
-          task={selectedTask}
-          open={!!selectedTask}
-          onClose={() => setSelectedTask(null)}
-          onTaskUpdate={(updatedTask) => setSelectedTask(updatedTask)}
-        />
+        <Suspense fallback={null}>
+          <TaskDetailsDialog 
+            task={selectedTask}
+            open={!!selectedTask}
+            onClose={closeTask}
+            onTaskUpdate={(updatedTask) => openTask(updatedTask.id)}
+          />
+        </Suspense>
       )}
     </div>
   );

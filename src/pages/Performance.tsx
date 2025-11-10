@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { RefreshCw, Target, BarChart3, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -29,6 +29,10 @@ interface MetricTileProps {
 }
 
 type PerformanceTab = 'overview' | 'goals' | 'reviews';
+
+function isPerformanceTab(value: string): value is PerformanceTab {
+  return value === 'overview' || value === 'goals' || value === 'reviews';
+}
 
 function MetricTile({ label, value }: MetricTileProps) {
   return (
@@ -151,13 +155,33 @@ export default function Performance() {
   const { profile } = useProfile();
   const { toast } = useToast();
   const { employees, goals, reviews, goalReviews = [], loading, error, refetch } = usePerformanceOverview();
-  const { recognitions, loading: recognitionLoading, error: recognitionError } = useRecognitions();
+  const { recognitions, loading: recognitionLoading, error: recognitionError, refresh: refreshRecognitions } = useRecognitions();
   const leaderboardPeriod: LeaderboardPeriod = 'monthly';
-  const { loading: leaderboardLoading, error: leaderboardError } = useLeaderboardData(leaderboardPeriod);
+  const {
+    loading: leaderboardLoading,
+    error: leaderboardError,
+    refresh: refreshLeaderboard,
+  } = useLeaderboardData(leaderboardPeriod);
   const [activeTab, setActiveTab] = useState<PerformanceTab>('overview');
   const goalsTabRef = useRef<HTMLButtonElement | null>(null);
-
-  const isLoading = loading;
+  const handleTabChange = useCallback((value: string) => {
+    if (isPerformanceTab(value)) {
+      setActiveTab(value);
+    }
+  }, []);
+  const handleSelectGoalsTab = useCallback(() => {
+    setActiveTab('goals');
+    goalsTabRef.current?.focus();
+  }, []);
+  const handleRetryLeaderboard = useCallback(() => {
+    refreshLeaderboard?.();
+  }, [refreshLeaderboard]);
+  const handleRetryRecognitions = useCallback(() => {
+    refreshRecognitions?.();
+  }, [refreshRecognitions]);
+  const handleRefetchPerformance = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
   const recentReviews = reviews.slice(0, 20);
   const unifiedReviews = goalReviews.slice(0, 10);
   const topRecognitions = useMemo(() => recognitions.slice(0, 5), [recognitions]);
@@ -168,6 +192,86 @@ export default function Performance() {
   const leaderboardUpdatedLabel = leaderboardSyncedAt
     ? formatDistanceToNow(new Date(leaderboardSyncedAt), { addSuffix: true })
     : null;
+  const leaderboardEntries = useMemo(
+    () =>
+      leaderboardInsights.map((insight) => (
+        <div key={insight.employeeId} className="rounded-md border p-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-semibold">{insight.name}</span>
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                  {toTitleCase(insight.role)}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className={cn('text-[10px] uppercase tracking-wide', leaderboardTierBadge[insight.badgeTier] ?? '')}
+                >
+                  {insight.badgeTier}
+                </Badge>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {insight.achievements.length > 0 ? (
+                  insight.achievements.map((achievement) => (
+                    <Badge key={`${insight.employeeId}-${achievement}`} variant="secondary" className="text-[10px]">
+                      {achievement}
+                    </Badge>
+                  ))
+                ) : (
+                  <span>No recent achievements tracked</span>
+                )}
+              </div>
+            </div>
+            <div className="text-left md:text-right">
+              <div className="text-sm font-semibold">{insight.xp} XP</div>
+              <div className="text-xs text-muted-foreground">{insight.recognitionCount} recognitions</div>
+            </div>
+          </div>
+        </div>
+      )),
+    [leaderboardInsights],
+  );
+  const recognitionEntries = useMemo(
+    () =>
+      topRecognitions.map((recognition) => {
+        const details = recognition.reward_details;
+        const source = details?.source ?? 'manual';
+        const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
+        const Icon = meta.icon;
+        const recipientName = recognition.recipient
+          ? `${recognition.recipient.first_name ?? ''} ${recognition.recipient.last_name ?? ''}`.trim()
+          : 'Team Member';
+        const awardedDistance = recognition.awarded_at
+          ? formatDistanceToNow(new Date(recognition.awarded_at), { addSuffix: true })
+          : 'just now';
+
+        return (
+          <div key={recognition.id} className="flex flex-col gap-2 rounded-lg border p-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-3">
+              <div className={cn('rounded-full p-2 bg-muted', meta.color)}>
+                <Icon className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{recipientName}</span>
+                  <Badge variant="outline" className={meta.badgeColor}>
+                    {meta.label}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">{awardedDistance}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{details?.message ?? 'Great work acknowledged by the team.'}</p>
+              </div>
+            </div>
+            {details?.xp_awarded ? (
+              <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
+                +{details.xp_awarded} XP
+              </Badge>
+            ) : null}
+          </div>
+        );
+      }),
+    [topRecognitions],
+  );
 
   const automationMutation = useMutation({
     mutationFn: async () => {
@@ -215,7 +319,7 @@ export default function Performance() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={refetch} disabled={isLoading}>
+          <Button variant="outline" onClick={refetch} disabled={loading}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
@@ -233,10 +337,7 @@ export default function Performance() {
           </Button>
           <Button
             type="button"
-            onClick={() => {
-              setActiveTab('goals');
-              goalsTabRef.current?.focus();
-            }}
+            onClick={handleSelectGoalsTab}
             aria-controls="performance-tab-goals"
             aria-pressed={activeTab === 'goals'}
           >
@@ -248,16 +349,19 @@ export default function Performance() {
 
       {error && (
         <Alert variant="destructive" role="status" aria-live="polite">
-          <AlertTitle>Unable to load performance data</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <AlertTitle>Unable to load performance data</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </div>
+            <Button size="sm" variant="outline" onClick={handleRefetchPerformance}>
+              Retry data load
+            </Button>
+          </div>
         </Alert>
       )}
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as PerformanceTab)}
-        className="space-y-6"
-      >
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="goals" ref={goalsTabRef}>
@@ -287,58 +391,22 @@ export default function Performance() {
                 <SectionSkeleton count={3} />
               ) : leaderboardError ? (
                 <Alert variant="destructive" role="status" aria-live="polite">
-                  <AlertTitle>Unable to load leaderboard insights</AlertTitle>
-                  <AlertDescription>{leaderboardError}</AlertDescription>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <AlertTitle>Unable to load leaderboard insights</AlertTitle>
+                      <AlertDescription>{leaderboardError}</AlertDescription>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={handleRetryLeaderboard}>
+                      Retry leaderboard sync
+                    </Button>
+                  </div>
                 </Alert>
               ) : leaderboardInsights.length === 0 ? (
                 <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
                   Open the leaderboard to activate XP tracking and feed performance highlights directly into this view.
                 </div>
               ) : (
-                leaderboardInsights.map((insight) => (
-                  <div key={insight.employeeId} className="rounded-md border p-3">
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2 text-sm">
-                          <span className="font-semibold">{insight.name}</span>
-                          <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
-                            {toTitleCase(insight.role)}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              'text-[10px] uppercase tracking-wide',
-                              leaderboardTierBadge[insight.badgeTier] ?? '',
-                            )}
-                          >
-                            {insight.badgeTier}
-                          </Badge>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          {insight.achievements.length > 0 ? (
-                            insight.achievements.map((achievement) => (
-                              <Badge
-                                key={`${insight.employeeId}-${achievement}`}
-                                variant="secondary"
-                                className="text-[10px]"
-                              >
-                                {achievement}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span>No recent achievements tracked</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-left md:text-right">
-                        <div className="text-sm font-semibold">{insight.xp} XP</div>
-                        <div className="text-xs text-muted-foreground">
-                          {insight.recognitionCount} recognitions
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                leaderboardEntries
               )}
             </CardContent>
           </Card>
@@ -351,11 +419,14 @@ export default function Performance() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isLoading ? (
+              {loading ? (
                 <SectionSkeleton count={2} />
               ) : error ? (
-                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground" role="status" aria-live="polite">
-                  Unable to load review snapshots right now. Please try again after refreshing the page.
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground space-y-3" role="status" aria-live="polite">
+                  <p>Unable to load review snapshots right now. Please try again after refreshing the page.</p>
+                  <Button size="sm" variant="outline" onClick={handleRefetchPerformance}>
+                    Retry data load
+                  </Button>
                 </div>
               ) : unifiedReviews.length === 0 ? (
                 <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
@@ -457,8 +528,15 @@ export default function Performance() {
                 <>
                   {recognitionError ? (
                     <Alert variant="destructive" role="status" aria-live="polite">
-                      <AlertTitle>Unable to load recognition activity</AlertTitle>
-                      <AlertDescription>{recognitionError}</AlertDescription>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <AlertTitle>Unable to load recognition activity</AlertTitle>
+                          <AlertDescription>{recognitionError}</AlertDescription>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={handleRetryRecognitions}>
+                          Retry recognitions
+                        </Button>
+                      </div>
                     </Alert>
                   ) : null}
                   {topRecognitions.length === 0 && !recognitionError ? (
@@ -466,56 +544,21 @@ export default function Performance() {
                       No recognitions yet. Encourage teams to complete goals, tasks, or training to see activity here.
                     </div>
                   ) : (
-                    topRecognitions.map((recognition) => {
-                      const details = recognition.reward_details;
-                      const source = details?.source ?? 'manual';
-                      const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
-                      const Icon = meta.icon;
-                      const recipientName = recognition.recipient
-                        ? `${recognition.recipient.first_name ?? ''} ${recognition.recipient.last_name ?? ''}`.trim()
-                        : 'Team Member';
-                      const awardedDistance = recognition.awarded_at
-                        ? formatDistanceToNow(new Date(recognition.awarded_at), { addSuffix: true })
-                        : 'just now';
-
-                      return (
-                        <div key={recognition.id} className="flex flex-col gap-2 rounded-lg border p-3 md:flex-row md:items-center md:justify-between">
-                          <div className="flex items-start gap-3">
-                            <div className={cn('rounded-full p-2 bg-muted', meta.color)}>
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-medium">{recipientName}</span>
-                                <Badge variant="outline" className={meta.badgeColor}>
-                                  {meta.label}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">{awardedDistance}</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {details?.message ?? 'Great work acknowledged by the team.'}
-                              </p>
-                            </div>
-                          </div>
-                          {details?.xp_awarded ? (
-                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-200">
-                              +{details.xp_awarded} XP
-                            </Badge>
-                          ) : null}
-                        </div>
-                      );
-                    })
+                    recognitionEntries
                   )}
                 </>
               )}
             </CardContent>
           </Card>
 
-          {isLoading ? (
+          {loading ? (
             <EmployeeCardSkeleton count={3} />
           ) : error ? (
-            <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
+            <div className="text-center py-12 text-muted-foreground space-y-3" role="status" aria-live="polite">
               <p>Unable to load performance summaries. Please try again after refreshing.</p>
+              <Button size="sm" variant="outline" onClick={handleRefetchPerformance}>
+                Retry data load
+              </Button>
             </div>
           ) : employees.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
@@ -535,7 +578,7 @@ export default function Performance() {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-4">
                         <Avatar>
-                          <AvatarImage src={employee.avatarUrl ?? undefined} alt={employee.fullName} />
+                          <AvatarImage src={employee.avatarUrl ?? undefined} alt={employee.fullName} loading="lazy" />
                           <AvatarFallback>{getInitials(employee.fullName)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -578,11 +621,14 @@ export default function Performance() {
               <CardDescription>Track progress on active objectives</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {loading ? (
                 <SectionSkeleton count={3} />
               ) : error ? (
-                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
+                <div className="text-center py-12 text-muted-foreground space-y-3" role="status" aria-live="polite">
                   <p>Unable to load goals data at the moment. Please try again.</p>
+                  <Button size="sm" variant="outline" onClick={handleRefetchPerformance}>
+                    Retry data load
+                  </Button>
                 </div>
               ) : goals.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
@@ -642,11 +688,14 @@ export default function Performance() {
               <CardDescription>Most recent feedback shared with your team</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {loading ? (
                 <SectionSkeleton count={4} />
               ) : error ? (
-                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
+                <div className="text-center py-12 text-muted-foreground space-y-3" role="status" aria-live="polite">
                   <p>Unable to load performance reviews at the moment. Please try again.</p>
+                  <Button size="sm" variant="outline" onClick={handleRefetchPerformance}>
+                    Retry data load
+                  </Button>
                 </div>
               ) : recentReviews.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">

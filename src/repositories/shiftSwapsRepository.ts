@@ -78,7 +78,6 @@ export async function fetchShiftSwaps(params: {
       `,
     )
     .order('created_at', { ascending: false })
-    .limit(limit)
     .range(offset, offset + limit - 1);
 
   query = query.eq('schedule.company_id', companyId);
@@ -104,7 +103,6 @@ export async function fetchTimeOffRequests(params: {
     )
     .eq('user.company_id', companyId)
     .order('created_at', { ascending: false })
-    .limit(limit)
     .range(offset, offset + limit - 1);
 
   if (error) throw error;

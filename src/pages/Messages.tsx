@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { MessagesShell } from '@/features/messages/components/layout/MessagesShell';
+import { MessagesShell } from '@/features/messages/components/layout';
 import { useMessagesViewModel } from '@/features/messages/hooks/useMessagesViewModel';
 
 export default function Messages() {

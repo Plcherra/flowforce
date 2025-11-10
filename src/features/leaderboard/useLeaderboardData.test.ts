@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { mapToLeaderboardEntry } from './useLeaderboardData';
+import type { LeaderboardRowRecord } from './leaderboardRepository';
 import type { Employee } from '@/features/employees/hooks/useEmployees';
 
 describe('mapToLeaderboardEntry', () => {
   it('builds leaderboard entry from Supabase row when employee cache misses', () => {
-    const row: any = {
+    const row: LeaderboardRowRecord = {
       employee_id: 'emp-123',
       department_id: 'dept-row',
       role: 'lead',
@@ -38,6 +39,10 @@ describe('mapToLeaderboardEntry', () => {
       ],
       updated_at: '2025-01-05T00:00:00Z',
       last_synced_at: '2025-01-05T00:00:00Z',
+      department: {
+        id: 'dept-row',
+        name: 'Engineering',
+      },
       employee: {
         id: 'emp-123',
         first_name: 'Ada',
@@ -45,13 +50,15 @@ describe('mapToLeaderboardEntry', () => {
         email: 'ada@example.com',
         avatar_url: 'https://example.com/avatar.png',
         role: 'developer',
-        department: {
-          id: 'dept-123',
-          name: 'Engineering',
-        },
         position: {
           name: 'Engineer',
+          role: 'engineering',
         },
+        department: {
+          id: 'dept-row',
+          name: 'Engineering',
+        },
+        reliability: null,
       },
     };
 
@@ -74,7 +81,7 @@ describe('mapToLeaderboardEntry', () => {
   });
 
   it('prioritises cached employee metadata when available', () => {
-    const row: any = {
+    const row: LeaderboardRowRecord = {
       employee_id: 'emp-456',
       department_id: null,
       role: 'admin',
@@ -90,8 +97,10 @@ describe('mapToLeaderboardEntry', () => {
       achievements: [],
       insights: [],
       challenges: [],
+      department: null,
       updated_at: null,
       last_synced_at: '2025-01-06T00:00:00Z',
+      employee: null,
     };
 
     const employee: Employee = {

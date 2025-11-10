@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import type { ReactNode } from 'react';
-import Employees from '../Employees';
+import { TeamDirectory } from '@/features/employees/components/TeamDirectory';
 import type { Employee } from '@/features/employees/hooks/useEmployees';
 
 vi.mock('react-router-dom', () => ({
@@ -102,7 +102,7 @@ describe('Employees page', () => {
   });
 
   it('renders empty state when there are no employees', () => {
-    render(<Employees />);
+    render(<TeamDirectory />);
     expect(screen.getByTestId('employees-empty-state')).toBeInTheDocument();
     expect(screen.getByText(/No team members yet/i)).toBeInTheDocument();
   });
@@ -132,7 +132,7 @@ describe('Employees page', () => {
       error: null,
     });
 
-    render(<Employees />);
+    render(<TeamDirectory />);
     expect(screen.queryByTestId('employees-empty-state')).not.toBeInTheDocument();
     expect(screen.getByText(/Alice Anderson/)).toBeInTheDocument();
   });

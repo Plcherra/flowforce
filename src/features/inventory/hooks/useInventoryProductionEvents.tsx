@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import type { ProductionEvent, ProductionEventInput } from './types';
 
 const productionEventsQueryKey = ['inventory-production-events'];

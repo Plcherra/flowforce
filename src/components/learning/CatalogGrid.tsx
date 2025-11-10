@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { BookMarked, Clock, Layers, Sparkles, Target, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import type { LearningCatalogRecord, LearningEnrollment } from '@/types/learning';
@@ -19,6 +20,8 @@ interface CatalogGridProps {
 export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, highlightCourseIds }: CatalogGridProps) {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const searchInputId = useId();
+  const categorySelectId = useId();
 
   const enrollmentsByCourse = useMemo(() => {
     const map = new Map<string, LearningEnrollment>();
@@ -56,14 +59,22 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+          <Label htmlFor={searchInputId} className="sr-only">
+            Search courses
+          </Label>
           <Input
+            id={searchInputId}
             placeholder="Search courses"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="md:w-64"
+            aria-label="Search courses"
           />
+          <Label htmlFor={categorySelectId} className="sr-only">
+            Filter by category
+          </Label>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="h-10 md:w-48">
+            <SelectTrigger id={categorySelectId} className="h-10 md:w-48" aria-label="Filter by category">
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>

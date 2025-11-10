@@ -5,6 +5,10 @@ export async function getAvailabilityMetadata() {
   return (data.user?.user_metadata ?? {}) as Record<string, unknown>;
 }
 
+export async function getAvailability() {
+  return getAvailabilityMetadata();
+}
+
 export async function updateAvailabilityFlag(value: boolean) {
   await supabase.auth.updateUser({ data: { availability: value } });
 }

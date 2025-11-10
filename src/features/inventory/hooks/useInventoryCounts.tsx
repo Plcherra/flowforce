@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import type { InventoryCount, InventoryCountLine } from './types';
 
 type CreateCountInput = Parameters<typeof InventoryService.createCount>[0];

@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import CreateUpdateWizard from '../updates/CreateUpdateWizard';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { WizardFormData } from '../updates/CreateUpdateWizard';
+import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 
 interface CompanyUpdatesCardProps {
   className?: string;
@@ -24,7 +25,8 @@ export default function CompanyUpdatesCard({ className }: CompanyUpdatesCardProp
   const { can } = useCan();
   const navigate = useNavigate();
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
-  const { updates, createUpdate } = useCompanyUpdates();
+  const { updates } = useCompanyUpdates({ page: 1, pageSize: 3, status: 'published' });
+  const { createUpdate } = useCompanyUpdateMutations();
 
   const handleUpdateComplete = (formData: WizardFormData) => {
     // Convert WizardFormData to CompanyUpdate format

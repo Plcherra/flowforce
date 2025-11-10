@@ -12,7 +12,7 @@ import { MarketManCountingInterface } from '@/components/inventory/MarketManCoun
 import { ItemSelector } from '@/components/inventory/ItemSelector';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 
 const getStatusColor = (status: string) => {
   switch (status) {

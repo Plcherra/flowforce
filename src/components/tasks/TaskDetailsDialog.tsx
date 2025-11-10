@@ -45,18 +45,11 @@ import {
   getTaskStatusLabel,
   TASK_STATUS_FLOW,
 } from '@/constants/taskStatus';
-import type { Tables } from '@/integrations/supabase/public-types';
 import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
+import { useTaskComments, type TaskCommentWithUser } from '@/features/tasks/hooks';
+import { CommentsSkeleton } from '@/components/loading/TaskSkeletons';
 
 type ButtonVariant = 'default' | 'secondary' | 'outline';
-type TaskCommentRow = Tables<'task_comments'>;
-type TaskCommentWithUser = TaskCommentRow & {
-  user?: {
-    first_name: string;
-    last_name: string;
-  } | null;
-};
-
 interface TaskDetailsDialogProps {
   task: TaskWithRelations | null;
   open: boolean;
@@ -113,7 +106,7 @@ export function TaskDetailsDialog({
   onClose,
   onTaskUpdate,
 }: TaskDetailsDialogProps) {
-  const { addComment, getTaskComments, updateStatus, updateTask } = useTasks();
+  const { updateStatus, updateTask } = useTasks();
   const { toast } = useToast();
   const {
     assignees,
@@ -122,15 +115,18 @@ export function TaskDetailsDialog({
   } = useTaskFormOptions(open);
 
   const [currentTask, setCurrentTask] = useState<TaskWithRelations | null>(task);
-  const [comments, setComments] = useState<TaskCommentWithUser[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [addingComment, setAddingComment] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<WorkflowStatus | null>(null);
   const [assignmentValue, setAssignmentValue] = useState('none');
   const [goalValue, setGoalValue] = useState('none');
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
   const [updatingGoal, setUpdatingGoal] = useState(false);
+  const {
+    comments,
+    loadingComments,
+    addingComment,
+    submitComment,
+  } = useTaskComments(currentTask, open);
 
   useEffect(() => {
     setCurrentTask(task);
@@ -146,31 +142,6 @@ export function TaskDetailsDialog({
     setAssignmentValue(currentTask.assigned_to ?? 'none');
     setGoalValue(currentTask.goal_id ?? 'none');
   }, [currentTask?.id, currentTask?.assigned_to, currentTask?.goal_id]);
-
-  useEffect(() => {
-    if (open && task?.id) {
-      fetchComments(task.id);
-    } else if (!open) {
-      setComments([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, task?.id]);
-
-  const fetchComments = async (taskId: string) => {
-    setLoadingComments(true);
-    try {
-      const { data, error } = await getTaskComments(taskId);
-      if (error) {
-        console.error('Error fetching comments:', error);
-      } else {
-        setComments((data as TaskCommentWithUser[]) ?? []);
-      }
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-    } finally {
-      setLoadingComments(false);
-    }
-  };
 
   const handleAssigneeChange = async (value: string) => {
     if (!currentTask) return;
@@ -295,32 +266,19 @@ export function TaskDetailsDialog({
   const handleAddComment = async () => {
     if (!currentTask || !newComment.trim()) return;
 
-    setAddingComment(true);
-    try {
-      const { error } = await addComment(currentTask.id, newComment);
-      if (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to add comment. Please try again.',
-          variant: 'destructive',
-        });
-      } else {
-        setNewComment('');
-        await fetchComments(currentTask.id);
-        toast({
-          title: 'Comment added',
-          description: 'Your comment was posted successfully.',
-        });
-      }
-    } catch (error) {
-      console.error('Error adding comment:', error);
+    const result = await submitComment(newComment);
+    if (result.success) {
+      setNewComment('');
+      toast({
+        title: 'Comment added',
+        description: 'Your comment was posted successfully.',
+      });
+    } else {
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred.',
+        description: result.error?.message ?? 'Failed to add comment. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setAddingComment(false);
     }
   };
 
@@ -638,9 +596,7 @@ export function TaskDetailsDialog({
 
             <div className="space-y-3">
               {loadingComments ? (
-                <div className="py-4 text-center">
-                  <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-primary" />
-                </div>
+                <CommentsSkeleton />
               ) : comments.length === 0 ? (
                 <div className="py-6 text-center text-sm text-muted-foreground">
                   No comments yet. Be the first to add one.

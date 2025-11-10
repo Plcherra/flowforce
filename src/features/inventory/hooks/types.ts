@@ -187,6 +187,17 @@ export interface PurchaseOrder {
   purchase_order_items?: PurchaseOrderItem[];
 }
 
+export interface InventoryLocation {
+  id: string;
+  name: string;
+  location_type: string;
+  temperature_controlled?: boolean | null;
+  is_active: boolean;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface InventoryCount {
   id: string;
   count_date: string;

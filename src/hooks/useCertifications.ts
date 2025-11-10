@@ -140,7 +140,9 @@ async function evaluateCertifications(employeeId: string): Promise<Certification
     const context = await fetchCertificationContext(employeeId);
     return await buildCertificationEvaluation(employeeId, context);
   } catch (error) {
-    console.error('Failed to load certifications', error);
+    if (import.meta.env.DEV) {
+      console.error('Failed to load certifications', error);
+    }
     throw new Error('certifications.errors.load');
   }
 }

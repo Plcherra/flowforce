@@ -155,8 +155,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
           setShowReminderDialog(true);
         }
         
-        onClose();
-        resetForm();
+        handleDialogChange(false);
       }
     } catch (error) {
       console.error('Error creating task:', error);

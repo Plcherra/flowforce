@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { useTaskNotifications } from '@/hooks/useTaskNotifications';
+import { useTaskNotifications } from '@/features/tasks';
 
 const {
   supabaseMock,

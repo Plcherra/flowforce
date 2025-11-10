@@ -6,16 +6,29 @@ interface TrainingInsightSummary {
   suggestions: string;
 }
 
-export async function analyzeTrainingProgress(companyId: string): Promise<TrainingInsightSummary> {
+const DEFAULT_LOOKBACK_DAYS = 180;
+const DEFAULT_RECORD_LIMIT = 500;
+
+export async function analyzeTrainingProgress(
+  companyId: string,
+  options: { lookbackDays?: number; limit?: number } = {},
+): Promise<TrainingInsightSummary> {
   if (!companyId) {
     throw new Error('Company context is required to analyze training progress.');
   }
+
+  const lookbackDays = options.lookbackDays ?? DEFAULT_LOOKBACK_DAYS;
+  const limit = options.limit ?? DEFAULT_RECORD_LIMIT;
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - lookbackDays);
 
   const { data, error } = await supabase
     .from('learning_completions')
     .select('xp_earned, passed, completed_at')
     .eq('company_id', companyId)
-    .order('completed_at', { ascending: false });
+    .gte('completed_at', cutoffDate.toISOString())
+    .order('completed_at', { ascending: false })
+    .limit(limit);
 
   if (error) {
     throw error;

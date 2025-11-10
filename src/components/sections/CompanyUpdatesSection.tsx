@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LayoutGrid, List, Plus } from 'lucide-react';
 import { useCan } from '@/hooks/useCan';
 import { logger } from '@/utils/logger';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
+import { useCompanyUpdateComments } from '@/features/company-updates/hooks/useCompanyUpdateComments';
+import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 import { UpdatesTableView } from './updates/UpdatesTableView';
 import { UpdatesFeedView } from './updates/UpdatesFeedView';
 import type { CompanyUpdate } from '@/types/companyUpdates';
@@ -12,16 +14,13 @@ import type { CompanyUpdate } from '@/types/companyUpdates';
 export default function CompanyUpdatesSection() {
   const { can } = useCan();
   const [viewMode, setViewMode] = useState<'table' | 'feed'>('table');
-  const { 
-    updates, 
-    loading, 
-    comments, 
-    likeUpdate, 
-    addComment, 
-    markAsViewed, 
-    togglePin, 
-    deleteUpdate 
-  } = useCompanyUpdates();
+  const { updates, loading } = useCompanyUpdates();
+  const { commentsByUpdate } = useCompanyUpdateComments(updates.map((update) => update.id));
+  const comments = useMemo(
+    () => Object.values(commentsByUpdate).flat(),
+    [commentsByUpdate],
+  );
+  const { toggleLike, addComment, markAsViewed, togglePin, deleteUpdate } = useCompanyUpdateMutations();
 
   const handleAddNew = () => {
     // TODO: Open create update dialog
@@ -34,19 +33,22 @@ export default function CompanyUpdatesSection() {
   };
 
   const handleView = (updateId: string) => {
-    void markAsViewed(updateId);
+    markAsViewed({ updateId });
   };
 
   const handleLike = (updateId: string) => {
-    void likeUpdate(updateId);
+    const update = updates.find((item) => item.id === updateId);
+    if (!update) return;
+    void toggleLike({ updateId, currentlyLiked: update.viewerHasLiked });
   };
 
   const handleComment = async (updateId: string, content: string) => {
-    await addComment(updateId, content);
+    await addComment({ updateId, content });
   };
 
   const handleTogglePin = (updateId: string) => {
-    void togglePin(updateId);
+    const update = updates.find((item) => item.id === updateId);
+    void togglePin({ updateId, isPinned: update ? !update.isPinned : true });
   };
 
   const handleDelete = (updateId: string) => {

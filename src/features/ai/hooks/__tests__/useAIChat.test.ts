@@ -5,7 +5,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { useAIChat } from '@/features/ai/hooks/useAIChat';
 
-const invokeMock = vi.fn();
+const { invokeMock } = vi.hoisted(() => ({
+  invokeMock: vi.fn(),
+}));
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {

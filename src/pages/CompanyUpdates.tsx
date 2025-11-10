@@ -35,8 +35,6 @@ import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useC
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const CreateUpdateWizard = lazy(() => import('@/components/updates/CreateUpdateWizard'));
 
-type ViewMode = 'feed' | 'grid' | 'list';
-
 export default function CompanyUpdates() {
   const isMobile = useIsMobile();
   const { can } = useCan();
@@ -87,7 +85,6 @@ export default function CompanyUpdates() {
     createUpdate,
     archiveUpdate,
     deleteUpdate,
-    togglePin,
     toggleLike,
     markAsViewed,
     addComment,
@@ -101,13 +98,13 @@ export default function CompanyUpdates() {
 
   useEffect(() => {
     setPage(1);
-  }, [pageSize, searchTerm, viewMode]);
+  }, [pageSize, searchTerm, viewMode, setPage]);
 
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages || 1);
     }
-  }, [page, totalPages]);
+  }, [page, totalPages, setPage]);
 
   const canCreateUpdate = useMemo(() => {
     if (can('systemSettings') || can('manageCompany')) {

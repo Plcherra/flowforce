@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
-import { InventoryService } from '@/services/inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 import { CookbookService, type CookbookRecipe } from '@/services/cookbook';
 import type { InventoryItem, InventoryUnit } from './inventory/types';
 import type { InventoryWaste } from '@/features/inventory/hooks/useInventoryWaste';
