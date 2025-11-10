@@ -4,8 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { InventoryItem, InventoryItemUnit } from '@/hooks/inventory/types';
-import { CountData } from '@/hooks/inventory/useCountingStats';
+import { InventoryItem, InventoryItemUnit } from '@/features/inventory/hooks/types';
+import { CountData } from '@/features/inventory/hooks/useCountingStats';
 
 interface CountingTableProps {
   items: InventoryItem[];

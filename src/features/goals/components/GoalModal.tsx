@@ -1,4 +1,4 @@
-import { CreateGoalModal, type GoalFormValues } from '@/components/goals/CreateGoalModal';
+import { CreateGoalModal, type GoalFormValues } from '@/features/goals/components/CreateGoalModal';
 import type { Goal } from '@/hooks/useGoals';
 import type { GoalDialogs } from '@/hooks/useGoalDialogs';
 

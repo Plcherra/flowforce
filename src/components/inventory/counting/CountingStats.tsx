@@ -1,6 +1,6 @@
 import { CheckCircle2, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { TimerStats, EditStats } from '@/hooks/inventory/useCountingTimer';
+import { TimerStats, EditStats } from '@/features/inventory/hooks/useCountingTimer';
 
 interface CountingStatsProps {
   itemsCompleted: number;

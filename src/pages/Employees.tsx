@@ -22,7 +22,7 @@ import type { Tables } from '@/integrations/supabase/public-types';
 import type { EmployeeDrawerTab } from '@/components/employees/EmployeeDrawer';
 import { TeamActionsBar } from '@/components/employees/TeamActionsBar';
 import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialog';
-import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
+import { useEmployees, type Employee as DirectoryEmployee } from '@/features/employees/hooks/useEmployees';
 import { employeesRepository } from '@/repositories/employeesRepository';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useEmployeesCacheInvalidation } from '@/features/employees/hooks/useEmployeesCacheInvalidation';
@@ -238,6 +238,16 @@ export default function Employees() {
   const displayRangeStart = hasResults ? (page - 1) * pageSize + 1 : 0;
   const displayRangeEnd = hasResults ? Math.min(page * pageSize, totalRecords) : 0;
   const combinedError = employeesError ?? departmentError;
+  const combinedErrorMessage = useMemo(() => {
+    if (!combinedError) return null;
+    if (typeof combinedError === 'string') return combinedError;
+    if (combinedError instanceof Error) return combinedError.message;
+    try {
+      return JSON.stringify(combinedError);
+    } catch {
+      return 'We couldn’t load your team directory data. Please try again.';
+    }
+  }, [combinedError]);
   const isFirstPage = page === 1;
   const isLastPage = page === totalPages;
   const vendorErrorMessage = useMemo(() => {
@@ -473,13 +483,13 @@ export default function Employees() {
           </div>
         </div>
 
-        {combinedError && (
+        {combinedErrorMessage && (
           <Alert variant="destructive" className="border-destructive/40 bg-destructive/5">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
               <div className="space-y-1">
                 <AlertTitle>Live data unavailable</AlertTitle>
-                <AlertDescription>{combinedError}</AlertDescription>
+                <AlertDescription>{combinedErrorMessage}</AlertDescription>
               </div>
             </div>
           </Alert>

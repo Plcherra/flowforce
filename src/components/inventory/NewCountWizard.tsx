@@ -11,9 +11,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Calculator, MapPin, Package, CheckCircle2, CalendarIcon, Clock } from 'lucide-react';
-import { useInventoryCounts } from '@/hooks/inventory/useInventoryCounts';
-import { useInventoryCategories } from '@/hooks/inventory/useInventoryCategories';
-import { useInventoryLocations } from '@/hooks/inventory/useInventoryLocations';
+import { useInventoryCounts } from '@/features/inventory/hooks/useInventoryCounts';
+import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryCategories';
+import { useInventoryLocations } from '@/features/inventory/hooks/useInventoryLocations';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 

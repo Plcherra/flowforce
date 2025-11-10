@@ -18,6 +18,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { fetchTaskActivitiesForCompany } from '@/repositories/taskActivitiesRepository';
 import { fetchCompanyIdForUser } from '@/repositories/companyRepository';
 import { supabase } from '@/integrations/supabase/client';
@@ -130,21 +131,21 @@ export function TaskActivityFeed() {
   const getActivityColor = (actionType: string) => {
     switch (actionType) {
       case 'task_created':
-        return 'bg-blue-50 border-l-blue-500';
+        return 'bg-blue-50 border-l-blue-500 dark:bg-blue-500/10';
       case 'task_assigned':
-        return 'bg-green-50 border-l-green-500';
+        return 'bg-green-50 border-l-green-500 dark:bg-green-500/10';
       case 'task_status_changed':
-        return 'bg-purple-50 border-l-purple-500';
+        return 'bg-purple-50 border-l-purple-500 dark:bg-purple-500/10';
       case 'task_completed':
-        return 'bg-green-50 border-l-green-600';
+        return 'bg-green-50 border-l-green-600 dark:bg-green-500/10';
       case 'task_commented':
-        return 'bg-indigo-50 border-l-indigo-500';
+        return 'bg-indigo-50 border-l-indigo-500 dark:bg-indigo-500/10';
       case 'task_updated':
-        return 'bg-orange-50 border-l-orange-500';
+        return 'bg-orange-50 border-l-orange-500 dark:bg-orange-500/10';
       case 'task_due_changed':
-        return 'bg-red-50 border-l-red-500';
+        return 'bg-red-50 border-l-red-500 dark:bg-red-500/10';
       default:
-        return 'bg-gray-50 border-l-gray-500';
+        return 'bg-gray-50 border-l-gray-500 dark:bg-slate-800/40';
     }
   };
 
@@ -162,12 +163,20 @@ export function TaskActivityFeed() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <Clock className="h-5 w-5 mr-2" />
+            Recent Activity
+          </CardTitle>
+          <CardDescription>Latest updates and changes across all tasks</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          </div>
+        <CardContent className="space-y-4">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
         </CardContent>
       </Card>
     );
@@ -214,7 +223,7 @@ export function TaskActivityFeed() {
                   <div
                     key={activity.id}
                     className={`p-4 border-l-2 ${getActivityColor(activity.action_type)} ${
-                      index !== activities.length - 1 ? 'border-b border-gray-100' : ''
+                      index !== activities.length - 1 ? 'border-b border-gray-100 dark:border-slate-800' : ''
                     }`}
                   >
                     <div className="flex items-start space-x-3">

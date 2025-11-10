@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { InventoryService } from '@/services/inventory';
 import { CookbookService, type CookbookRecipe } from '@/services/cookbook';
 import type { InventoryItem, InventoryUnit } from './inventory/types';
-import type { InventoryWaste } from '@/hooks/inventory/useInventoryWaste';
+import type { InventoryWaste } from '@/features/inventory/hooks/useInventoryWaste';
 import { useToast } from './use-toast';
 
 export type UOM =

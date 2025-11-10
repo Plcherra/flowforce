@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { getAvailability, updateAvailabilityFlag } from '@/features/messages/api/userStatusService';
 
 interface AvailabilityStatus {
   available: boolean;
@@ -23,15 +22,17 @@ export function useAvailabilityStatus(): AvailabilityStatus {
     isMountedRef.current = true;
     (async () => {
       try {
-        const { data } = await supabase.auth.getUser();
-        const metadataResult = AvailabilityMetadataSchema.safeParse(data.user?.user_metadata ?? {});
-        const availabilityFlag = metadataResult.success ? metadataResult.data.availability : undefined;
+        const metadata = await getAvailability();
+        const parseResult = AvailabilityMetadataSchema.safeParse(metadata);
+        const availabilityFlag = parseResult.success ? parseResult.data.availability : undefined;
         if (typeof availabilityFlag === 'boolean' && isMountedRef.current) {
           setAvailable(availabilityFlag);
           previousValueRef.current = availabilityFlag;
         }
       } catch (error) {
-        logger.error?.('Failed to load availability flag', error);
+        if (import.meta.env.DEV) {
+          console.error('Failed to load availability flag', error);
+        }
       } finally {
         if (isMountedRef.current) {
           setLoading(false);
@@ -48,9 +49,11 @@ export function useAvailabilityStatus(): AvailabilityStatus {
     previousValueRef.current = available;
     setAvailable(value);
     try {
-      await supabase.auth.updateUser({ data: { availability: value } });
+      await updateAvailabilityFlag(value);
     } catch (error) {
-      logger.error?.('Failed to update availability status', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to update availability status', error);
+      }
       if (isMountedRef.current) {
         setAvailable(previousValueRef.current);
       }

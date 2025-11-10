@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Package, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
-import { useInventoryItems } from '@/hooks/inventory/useInventoryItems';
-import { useInventoryTransactions } from '@/hooks/inventory/useInventoryTransactions';
+import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
+import { useInventoryTransactions } from '@/features/inventory/hooks/useInventoryTransactions';
 import InventoryItemForm from '@/components/inventory/InventoryItemForm';
 import InventoryTransactionForm from '@/components/inventory/InventoryTransactionForm';
 import { useCan } from '@/hooks/useCan';

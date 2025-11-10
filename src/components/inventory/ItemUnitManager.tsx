@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Package, Trash2, Edit } from 'lucide-react';
-import { useItemUnits, useCreateItemUnit, useUpdateItemUnit, formatUnitDisplay } from '@/hooks/inventory/useItemUnits';
-import { useInventoryUnits } from '@/hooks/inventory/useInventoryUnits';
+import { useItemUnits, useCreateItemUnit, useUpdateItemUnit, formatUnitDisplay } from '@/features/inventory/hooks/useItemUnits';
+import { useInventoryUnits } from '@/features/inventory/hooks/useInventoryUnits';
 
 interface ItemUnitManagerProps {
   itemId: string;

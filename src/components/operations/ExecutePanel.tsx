@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { CheckCircle2, ClipboardList, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,52 +36,48 @@ export function ExecutePanel({
   const recommendations = diagnostics.data.recommendations;
   const hasRecommendations = recommendations.length > 0;
 
-  useEffect(() => {
-    if (!companyId || creatingCycle) return;
-    if (activeCycleId) return;
-    if (!hasRecommendations) return;
+  const createCycle = useCallback(async () => {
+    if (!companyId || creatingCycle || activeCycleId || !hasRecommendations) {
+      return;
+    }
 
-    const createCycle = async () => {
-      setCreatingCycle(true);
-      setCycleError(null);
-      try {
-        const payload = {
-          company_id: companyId,
-          stage: 'execute',
-          range: formatRangeAsPgDate(range),
-          insights,
-          actions: recommendations,
-          assessments: null,
-        };
+    setCreatingCycle(true);
+    setCycleError(null);
+    try {
+      const payload = {
+        company_id: companyId,
+        stage: 'execute',
+        range: formatRangeAsPgDate(range),
+        insights,
+        actions: recommendations,
+        assessments: null,
+      };
 
-        const { data, error } = await supabase
-          .from('idea_cycles')
-          .insert(payload)
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('idea_cycles')
+        .insert(payload)
+        .select()
+        .single();
 
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setActiveCycleId(data.id);
-          actionsState.refresh();
-        }
-      } catch (error) {
-        const normalized = error as Error;
-        setCycleError(normalized);
-        toast({
-          variant: 'destructive',
-          title: 'Unable to start IDEA cycle',
-          description: normalized.message,
-        });
-      } finally {
-        setCreatingCycle(false);
+      if (error) {
+        throw error;
       }
-    };
 
-    void createCycle();
+      if (data) {
+        setActiveCycleId(data.id);
+        actionsState.refresh();
+      }
+    } catch (error) {
+      const normalized = error as Error;
+      setCycleError(normalized);
+      toast({
+        variant: 'destructive',
+        title: 'Unable to start IDEA cycle',
+        description: normalized.message,
+      });
+    } finally {
+      setCreatingCycle(false);
+    }
   }, [
     actionsState,
     activeCycleId,
@@ -89,11 +85,15 @@ export function ExecutePanel({
     creatingCycle,
     hasRecommendations,
     insights,
-    range.end,
-    range.start,
+    range,
     recommendations,
     setActiveCycleId,
+    toast,
   ]);
+
+  useEffect(() => {
+    void createCycle();
+  }, [createCycle]);
 
   const pendingActions = actionsState.data.filter((action) => action.status !== 'executed');
   const executedActions = actionsState.data.filter((action) => action.status === 'executed');
@@ -108,10 +108,11 @@ export function ExecutePanel({
 
   const disableActionControls = !activeCycleId;
 
-  const handleCreateAction = async (action: string, recommendationId: string) => {
-    if (!activeCycleId) {
-      toast({
-        variant: 'destructive',
+  const handleCreateAction = useCallback(
+    async (action: string, recommendationId: string) => {
+      if (!activeCycleId) {
+        toast({
+          variant: 'destructive',
         title: 'Cycle not ready',
         description: 'Please wait for the IDEA cycle to initialize before queuing actions.',
       });
@@ -133,12 +134,13 @@ export function ExecutePanel({
         description: normalized.message,
       });
     }
-  };
+  }, [activeCycleId, actionsState, toast]);
 
-  const handleExecuteAction = async (actionId: string) => {
-    if (!activeCycleId) {
-      toast({
-        variant: 'destructive',
+  const handleExecuteAction = useCallback(
+    async (actionId: string) => {
+      if (!activeCycleId) {
+        toast({
+          variant: 'destructive',
         title: 'Cycle not ready',
         description: 'Create or resume the cycle before executing actions.',
       });
@@ -159,7 +161,17 @@ export function ExecutePanel({
         description: normalized.message,
       });
     }
-  };
+  }, [activeCycleId, actionsState, toast]);
+
+  const queueActionHandler = useCallback(
+    (action: string, recommendationId: string) => () => handleCreateAction(action, recommendationId),
+    [handleCreateAction],
+  );
+
+  const executeActionHandler = useCallback(
+    (actionId: string) => () => handleExecuteAction(actionId),
+    [handleExecuteAction],
+  );
 
   const handleCompleteStage = () => {
     if (activeCycleId) {
@@ -175,19 +187,24 @@ export function ExecutePanel({
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm">
+      <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <ClipboardList className="h-4 w-4 text-violet-500" />
+          <ClipboardList className="h-4 w-4 text-violet-500" aria-hidden="true" />
           Execute
         </div>
         <h2 className="text-xl font-semibold text-foreground">Launch improvement playbooks</h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleCompleteStage} disabled={!activeCycleId}>
-            <CheckCircle2 className="mr-2 h-4 w-4" />
+            <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
             Review results
           </Button>
         </div>
+        {!activeCycleId ? (
+          <p className="text-sm text-muted-foreground">
+            Run diagnostics and start a cycle before reviewing or executing actions.
+          </p>
+        ) : null}
       </header>
 
       {cycleError ? (
@@ -213,7 +230,7 @@ export function ExecutePanel({
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <Card className="border-border/60 bg-background/70 shadow-sm">
+          <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground">
                 Pending queue
@@ -240,8 +257,8 @@ export function ExecutePanel({
                       </Badge>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button size="sm" onClick={() => handleExecuteAction(action.id)} disabled={disableActionControls}>
-                        <Zap className="mr-2 h-4 w-4" />
+                      <Button size="sm" onClick={executeActionHandler(action.id)} disabled={disableActionControls}>
+                        <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
                         Execute now
                       </Button>
                     </div>
@@ -251,7 +268,7 @@ export function ExecutePanel({
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-background/70 shadow-sm">
+          <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Recommended plays</CardTitle>
               <CardDescription>Queue AI recommendations for execution.</CardDescription>
@@ -276,16 +293,12 @@ export function ExecutePanel({
                           size="sm"
                           variant="outline"
                           disabled={queued || disableActionControls}
-                          onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
+                          onClick={queueActionHandler(recommendation.action, recommendation.id)}
                         >
                           Queue action
                         </Button>
-                        <Button
-                          size="sm"
-                          disabled={disableActionControls}
-                          onClick={() => handleCreateAction(recommendation.action, recommendation.id)}
-                        >
-                          <Zap className="mr-2 h-4 w-4" />
+                        <Button size="sm" disabled={disableActionControls} onClick={queueActionHandler(recommendation.action, recommendation.id)}>
+                          <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
                           Execute now
                         </Button>
                       </div>
@@ -293,11 +306,16 @@ export function ExecutePanel({
                   );
                 })
               )}
+              {disableActionControls ? (
+                <p className="text-sm text-muted-foreground">
+                  Queueing actions is available once a cycle is active.
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
           {executedActions.length > 0 ? (
-            <Card className="lg:col-span-2 border-border/60 bg-background/70 shadow-sm">
+            <Card className="lg:col-span-2 border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Executed plays</CardTitle>
                 <CardDescription>Completed actions with recorded outcomes.</CardDescription>

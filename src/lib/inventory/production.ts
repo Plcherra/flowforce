@@ -1,4 +1,4 @@
-import type { InventoryItem, InventoryUnit } from '@/hooks/inventory/types';
+import type { InventoryItem, InventoryUnit } from '@/features/inventory/hooks/types';
 
 type UnitLookup = Record<string, InventoryUnit>;
 

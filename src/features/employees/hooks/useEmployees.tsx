@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { useAuth } from './useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { employeesRepository, type EmployeeProfileRow } from '@/repositories/employeesRepository';
 

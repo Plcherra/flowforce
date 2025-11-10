@@ -14,6 +14,7 @@ import {
   updateGoalStatusRow,
 } from '@/repositories/goalsRepository';
 import { fetchProfilesByIds } from '@/repositories/profileRepository';
+import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
 
 const DEFAULT_RECOGNITION_XP = 110;
 
@@ -86,11 +87,6 @@ export type UpdateGoalInput = TablesUpdate<'goals'>;
 
 const goalsQueryKey = (companyId: string | null) => ['goals', companyId] as const;
 
-type RewardDetailsNormalized = {
-  xp: number | null;
-  summary: string;
-};
-
 function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
   if (!raw) return null;
   if (typeof raw === 'string') {
@@ -104,34 +100,6 @@ function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
     return raw as RecognitionDetails;
   }
   return null;
-}
-
-function parseRewardDetails(raw: unknown): RewardDetailsNormalized {
-  if (!raw) {
-    return { xp: null, summary: '' };
-  }
-
-  if (typeof raw === 'string') {
-    try {
-      const parsed = JSON.parse(raw) as { xp?: number | null; summary?: string | null };
-      return {
-        xp: typeof parsed.xp === 'number' ? parsed.xp : null,
-        summary: parsed.summary ?? '',
-      };
-    } catch {
-      return { xp: null, summary: raw };
-    }
-  }
-
-  if (typeof raw === 'object') {
-    const obj = raw as Record<string, unknown>;
-    return {
-      xp: typeof obj.xp === 'number' ? obj.xp : null,
-      summary: typeof obj.summary === 'string' ? obj.summary : '',
-    };
-  }
-
-  return { xp: null, summary: '' };
 }
 
 async function fetchGoals(companyId: string): Promise<Goal[]> {

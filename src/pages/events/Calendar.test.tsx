@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventsCalendarContent } from './Calendar';
+import { EventsCalendarContent } from '@/features/calendar/components/EventsCalendarContent';
 
 const mockUseEvents = vi.fn();
 const mockUseScheduling = vi.fn();
@@ -29,6 +29,7 @@ describe('EventsCalendarContent', () => {
       events: [],
       loading: false,
       error: null,
+      errorCode: null,
     });
     mockUseScheduling.mockReturnValue({
       loading: false,
@@ -73,11 +74,12 @@ describe('EventsCalendarContent', () => {
       events: [],
       loading: false,
       error: 'Network error',
+      errorCode: '500',
     });
 
     render(<EventsCalendarContent />);
 
-    expect(screen.getByTestId('events-error-alert')).toHaveTextContent('Network error');
+    expect(screen.getByTestId('events-network-banner')).toHaveTextContent('Network error');
   });
 
   it('shows scheduling error fallback when scheduling data fails', () => {
@@ -88,7 +90,7 @@ describe('EventsCalendarContent', () => {
 
     render(<EventsCalendarContent />);
 
-    expect(screen.getByTestId('scheduling-error-alert')).toHaveTextContent('Scheduling offline');
+    expect(screen.getByTestId('scheduling-network-banner')).toHaveTextContent('Scheduling offline');
     expect(screen.getByTestId('calendar-skeleton')).toBeInTheDocument();
   });
 });

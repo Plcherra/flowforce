@@ -2,93 +2,17 @@ import { useState } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { GoalHeader } from '@/components/goals/GoalHeader';
-import { GoalList } from '@/components/goals/GoalList';
-import { GoalModal } from '@/components/goals/GoalModal';
-import { GoalEmptyState } from '@/components/goals/GoalEmptyState';
-import { useGoals, type Goal, type GoalStatus, type GoalStats, type UseGoalsReturn } from '@/hooks/useGoals';
-import { useGoalDialogs, type GoalDialogs, type GoalSuggestion } from '@/hooks/useGoalDialogs';
-import type { GoalFormValues } from '@/components/goals/CreateGoalModal';
+import { GoalHeader } from '@/features/goals/components/GoalHeader';
+import { GoalList } from '@/features/goals/components/GoalList';
+import { GoalModal } from '@/features/goals/components/GoalModal';
+import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
+import { useGoals, type Goal, type UseGoalsReturn } from '@/hooks/useGoals';
+import { useGoalDialogs, type GoalDialogs } from '@/hooks/useGoalDialogs';
+import type { GoalFormValues } from '@/features/goals/components/CreateGoalModal';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
-
-type GoalSuggestionResponse = {
-  insights?: string;
-};
-
-function buildGoalSuggestionPrompt(stats: GoalStats, goals: Goal[]) {
-  const sampleGoals = goals.slice(0, 3).map((goal) => ({
-    title: goal.title ?? 'Untitled goal',
-    status: goal.status,
-    progress: goal.progress ?? 0,
-    dueDate: goal.target_completion_date,
-  }));
-
-  const metrics = {
-    total: stats.total,
-    active: stats.active,
-    completed: stats.completed,
-    drafts: stats.drafts,
-    cancelled: stats.cancelled,
-    averageProgress: stats.averageProgress,
-  };
-
-  return [
-    'You are FlowForce Copilot. Suggest one measurable operations goal for the next 60 days.',
-    'Respond with JSON only, using the exact shape {"title": "...", "description": "..."} and no other text.',
-    'Title should be under 90 characters. Description should be 2 concise sentences.',
-    `Current metrics: ${JSON.stringify(metrics)}.`,
-    `Recent goals: ${JSON.stringify(sampleGoals)}.`,
-    'Focus on high-impact goals that drive progress and can be owned by a manager.',
-  ].join(' ');
-}
-
-function parseGoalSuggestionPayload(raw: string | null | undefined): GoalSuggestion | null {
-  if (!raw) return null;
-  const source = raw.trim();
-  const fencedMatch = source.match(/```json([\s\S]*?)```/i);
-  const segment = fencedMatch ? fencedMatch[1].trim() : source;
-  const jsonCandidate = (() => {
-    try {
-      return JSON.parse(segment);
-    } catch {
-      const start = segment.indexOf('{');
-      const end = segment.lastIndexOf('}');
-      if (start !== -1 && end !== -1 && end > start) {
-        const sliced = segment.slice(start, end + 1);
-        try {
-          return JSON.parse(sliced);
-        } catch {
-          return null;
-        }
-      }
-      return null;
-    }
-  })();
-
-  if (!jsonCandidate || typeof jsonCandidate !== 'object') {
-    return null;
-  }
-
-  const title =
-    typeof (jsonCandidate as { title?: unknown }).title === 'string'
-      ? (jsonCandidate as { title?: string }).title?.trim() ?? ''
-      : '';
-  const description =
-    typeof (jsonCandidate as { description?: unknown }).description === 'string'
-      ? (jsonCandidate as { description?: string }).description?.trim() ?? ''
-      : '';
-
-  if (!title) {
-    return null;
-  }
-
-  return {
-    title,
-    description: description || 'Outline how this goal will be measured and rewarded.',
-  };
-}
+import { useGoalActions } from '@/features/goals/hooks/useGoalActions';
+import { useGoalSuggestion } from '@/features/goals/hooks/useGoalSuggestion';
 
 export default function GoalsPage() {
   const goalsState = useGoals();
@@ -110,54 +34,15 @@ export default function GoalsPage() {
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const [suggesting, setSuggesting] = useState(false);
+  const { suggesting, requestSuggestion } = useGoalSuggestion(companyId);
+  const { handleCreate, handleUpdate, handleToggleStatus, deleteGoalById } = useGoalActions({
+    createGoal,
+    updateGoal,
+    deleteGoal,
+    toggleStatus,
+  });
 
   const saving = creating || updating;
-
-  const buildRewardDetails = (values: GoalFormValues) => {
-    const summary = values.rewardSummary?.trim() ?? '';
-    const xp = values.xpValue != null && !Number.isNaN(values.xpValue) ? values.xpValue : null;
-    if (!summary && xp == null) {
-      return null;
-    }
-    const payload: Record<string, unknown> = {};
-    if (summary) {
-      payload.summary = summary;
-    }
-    if (xp != null) {
-      payload.xp = xp;
-    }
-    return payload;
-  };
-
-  const handleCreate = async (values: GoalFormValues) => {
-    await createGoal({
-      title: values.title,
-      description: values.description ?? null,
-      status: values.status,
-      target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
-      priority: values.priority,
-      progress: values.progress,
-      reward_type: values.rewardType,
-      reward_details: buildRewardDetails(values),
-    });
-  };
-
-  const handleUpdate = async (goal: Goal, values: GoalFormValues) => {
-    await updateGoal({
-      id: goal.id,
-      updates: {
-        title: values.title,
-        description: values.description ?? null,
-        status: values.status,
-        priority: values.priority,
-        target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
-        progress: values.progress,
-        reward_type: values.rewardType,
-        reward_details: buildRewardDetails(values),
-      },
-    });
-  };
 
   const handleDelete = async (goal: Goal) => {
     const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
@@ -165,46 +50,12 @@ export default function GoalsPage() {
       return;
     }
 
-    await deleteGoal(goal.id);
-  };
-
-  const handleToggleStatus = async (goal: Goal, status: GoalStatus) => {
-    await toggleStatus({ id: goal.id, status });
+    await deleteGoalById(goal.id);
   };
 
   const handleSuggestGoal = async () => {
-    if (suggesting) {
-      return;
-    }
-    if (!companyId) {
-      toast({
-        title: 'Missing company context',
-        description: 'Switch to an active company to request AI goal suggestions.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setSuggesting(true);
     try {
-      const prompt = buildGoalSuggestionPrompt(stats, goals);
-      const { data, error } = await supabase.functions.invoke<GoalSuggestionResponse>('ai-insights', {
-        body: {
-          type: 'chat',
-          query: prompt,
-          context: 'goals_suggestion',
-          companyId,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      const suggestion = parseGoalSuggestionPayload(data?.insights);
-      if (!suggestion) {
-        throw new Error('No structured suggestion returned');
-      }
-
+      const suggestion = await requestSuggestion(stats, goals);
       dialogs.open(null, { suggestion });
     } catch (suggestionError) {
       const message =
@@ -214,8 +65,6 @@ export default function GoalsPage() {
         description: message,
         variant: 'destructive',
       });
-    } finally {
-      setSuggesting(false);
     }
   };
 

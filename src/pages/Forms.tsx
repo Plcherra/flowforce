@@ -6,6 +6,7 @@ import FormFillDialog from '@/components/forms/FormFillDialog';
 import FormsSection from '@/components/forms/FormsSection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useCan } from '@/hooks/useCan';
@@ -155,14 +156,21 @@ export default function Forms() {
             <p className="text-sm text-muted-foreground">Create and manage data collection forms</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search forms..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                className="pl-9"
-              />
+            <div className="w-full max-w-xs space-y-1">
+              <Label htmlFor="forms-search" className="sr-only">
+                Search forms
+              </Label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="forms-search"
+                  placeholder="Search forms..."
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="pl-9"
+                  aria-label="Search forms"
+                />
+              </div>
             </div>
             {canCreateForms && (
               <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
@@ -174,7 +182,7 @@ export default function Forms() {
         </div>
 
         <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
-          <TabsList className="w-full max-w-2xl justify-start">
+          <TabsList className="flex w-full gap-2 overflow-x-auto px-1 sm:max-w-2xl sm:justify-start">
             <TabsTrigger value="all">All forms</TabsTrigger>
             <TabsTrigger value="published">Published</TabsTrigger>
             <TabsTrigger value="draft">Drafts</TabsTrigger>

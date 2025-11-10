@@ -1,15 +1,18 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MessageCircle, Send, Minimize2, Maximize2, X, Bot, User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useAIChat } from '@/features/ai/hooks/useAIChat';
+
+type MessageRole = 'user' | 'assistant';
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: MessageRole;
   content: string;
   timestamp: Date;
 }
@@ -19,8 +22,8 @@ interface AIChatAssistantProps {
 }
 
 export default function AIChatAssistant({ context }: AIChatAssistantProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -29,71 +32,72 @@ export default function AIChatAssistant({ context }: AIChatAssistantProps) {
       timestamp: new Date(),
     },
   ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToBottom = () => {
+  const { sendChatMessage } = useAIChat({ context });
+  const appendMessage = useCallback((message: Message) => {
+    setMessages((prev) => [...prev, message]);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+  const handleSendMessage = useCallback(async (): Promise<void> => {
+    const trimmedInput = inputValue.trim();
+    if (!trimmedInput || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue,
+      content: trimmedInput,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    appendMessage(userMessage);
     setInputValue('');
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-insights', {
-        body: { 
-          type: 'chat', 
-          context: context || 'general',
-          query: inputValue 
-        }
-      });
-
-      if (error) throw error;
-
+      const insights = await sendChatMessage(trimmedInput);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.insights,
+        content: insights,
         timestamp: new Date(),
       };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      appendMessage(assistantMessage);
     } catch (error) {
       console.error('Failed to get AI response:', error);
-      const errorMessage: Message = {
+      setErrorMessage('Unable to contact FlowForce AI right now. Showing the last known response instead.');
+      appendMessage({
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: 'Sorry, I encountered an error processing your request. Please try again.',
         timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [appendMessage, inputValue, isLoading, sendChatMessage]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  const handleKeyPress = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        void handleSendMessage();
+      }
+    },
+    [handleSendMessage],
+  );
 
   if (!isOpen) {
     return (
@@ -196,6 +200,13 @@ export default function AIChatAssistant({ context }: AIChatAssistantProps) {
               </div>
               <div ref={messagesEndRef} />
             </ScrollArea>
+
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>AI assistant unavailable</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
 
             <div className="flex gap-2">
               <Input

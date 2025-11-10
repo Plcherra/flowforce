@@ -7,10 +7,13 @@ import { useIdeaDiagnostics } from '../../hooks/useIdeaDiagnostics';
 import { useIdeaActions } from '../../hooks/useIdeaActions';
 import { useIdeaAssessments } from '../../hooks/useIdeaAssessments';
 import IDEAHeader from '@/components/operations/IDEAHeader';
-import IdentifyPanel from '@/components/operations/IdentifyPanel';
-import DiagnosePanel from '@/components/operations/DiagnosePanel';
-import ExecutePanel from '@/components/operations/ExecutePanel';
-import AssessPanel from '@/components/operations/AssessPanel';
+import { Suspense, lazy, useMemo } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const IdentifyPanel = lazy(() => import('@/components/operations/IdentifyPanel'));
+const DiagnosePanel = lazy(() => import('@/components/operations/DiagnosePanel'));
+const ExecutePanel = lazy(() => import('@/components/operations/ExecutePanel'));
+const AssessPanel = lazy(() => import('@/components/operations/AssessPanel'));
 
 const STAGES: { id: IdeaStage; label: string; description: string }[] = [
   { id: 'identify', label: 'Identify', description: 'Surface operational signals and KPI shifts.' },
@@ -58,50 +61,62 @@ export function IdeaLayout() {
           </Alert>
         ) : null}
 
-        <TabsContent value="identify" className="mt-0">
-          <IdentifyPanel
-            insights={insights}
-            loading={insightsLoading}
-            stageDescription={STAGES[0].description}
-            onDiagnose={() => setStage('diagnose')}
-          />
-        </TabsContent>
+        <Suspense fallback={<PanelFallback />}>
+          <TabsContent value="identify" className="mt-0">
+            <IdentifyPanel
+              insights={insights}
+              loading={insightsLoading}
+              stageDescription={STAGES[0].description}
+              onDiagnose={() => setStage('diagnose')}
+            />
+          </TabsContent>
 
-        <TabsContent value="diagnose" className="mt-0">
-          <DiagnosePanel
-            insights={insights}
-            diagnostics={diagnostics}
-            stageDescription={STAGES[1].description}
-            onRecommend={() => setStage('execute')}
-          />
-        </TabsContent>
+          <TabsContent value="diagnose" className="mt-0">
+            <DiagnosePanel
+              insights={insights}
+              diagnostics={diagnostics}
+              stageDescription={STAGES[1].description}
+              onRecommend={() => setStage('execute')}
+            />
+          </TabsContent>
 
-        <TabsContent value="execute" className="mt-0">
-          <ExecutePanel
-            diagnostics={diagnostics}
-            actionsState={actionsState}
-            stageDescription={STAGES[2].description}
-            insights={insights}
-            onStageComplete={(cycleId) => {
-              setActiveCycleId(cycleId);
-              setStage('assess');
-            }}
-          />
-        </TabsContent>
+          <TabsContent value="execute" className="mt-0">
+            <ExecutePanel
+              diagnostics={diagnostics}
+              actionsState={actionsState}
+              stageDescription={STAGES[2].description}
+              insights={insights}
+              onStageComplete={(cycleId) => {
+                setActiveCycleId(cycleId);
+                setStage('assess');
+              }}
+            />
+          </TabsContent>
 
-        <TabsContent value="assess" className="mt-0">
-          <AssessPanel
-            insights={insights}
-            assessments={assessments}
-            stageDescription={STAGES[3].description}
-            onRestart={() => {
-              setActiveCycleId(null);
-              setStage('identify');
-            }}
-          />
-        </TabsContent>
+          <TabsContent value="assess" className="mt-0">
+            <AssessPanel
+              insights={insights}
+              assessments={assessments}
+              stageDescription={STAGES[3].description}
+              onRestart={() => {
+                setActiveCycleId(null);
+                setStage('identify');
+              }}
+            />
+          </TabsContent>
+        </Suspense>
       </div>
     </Tabs>
+  );
+}
+
+function PanelFallback() {
+  return (
+    <div className="space-y-4">
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+    </div>
   );
 }
 

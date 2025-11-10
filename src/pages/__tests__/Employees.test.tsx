@@ -3,7 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import type { ReactNode } from 'react';
 import Employees from '../Employees';
-import type { Employee } from '@/hooks/useEmployees';
+import type { Employee } from '@/features/employees/hooks/useEmployees';
 
 vi.mock('react-router-dom', () => ({
   useSearchParams: () => [new URLSearchParams(), vi.fn()],
@@ -41,7 +41,7 @@ vi.mock('@/components/employees/TeamActionsBar', () => ({
 }));
 
 const mockUseEmployees = vi.fn();
-vi.mock('@/hooks/useEmployees', () => ({
+vi.mock('@/features/employees/hooks/useEmployees', () => ({
   useEmployees: (...args: unknown[]) => mockUseEmployees(...args),
 }));
 

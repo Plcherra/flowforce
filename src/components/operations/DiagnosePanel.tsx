@@ -26,16 +26,16 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm">
+      <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Stethoscope className="h-4 w-4 text-sky-500" />
+          <Stethoscope className="h-4 w-4 text-sky-500" aria-hidden="true" />
           Diagnose
         </div>
         <h2 className="text-xl font-semibold text-foreground">Investigate root causes</h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div>
           <Button onClick={onRecommend} disabled={diagnostics.loading}>
-            <Target className="mr-2 h-4 w-4" />
+            <Target className="mr-2 h-4 w-4" aria-hidden="true" />
             Recommend actions
           </Button>
         </div>
@@ -65,7 +65,7 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <Card className="border-border/60 bg-background/70 shadow-sm">
+          <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Top anomalies</CardTitle>
               <CardDescription>KPIs with the largest deviations.</CardDescription>
@@ -87,7 +87,7 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-background/70 shadow-sm">
+          <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI intelligence</CardTitle>
               <CardDescription>Probable causes and narratives.</CardDescription>
@@ -108,20 +108,14 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
             </CardContent>
           </Card>
 
-          <Card className="border-border/60 bg-background/70 shadow-sm">
+          <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI KPI insights</CardTitle>
               <CardDescription>Signals surfaced by GPT co-pilot.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {aiInsightsQuery.isLoading ? (
-                Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3">
-                    <Skeleton className="h-3 w-32" />
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                ))
+                <AiInsightsSkeleton />
               ) : aiInsightsQuery.isError ? (
                 <p className="text-sm text-muted-foreground">
                   Unable to load AI KPI insights right now. Try again after refreshing.
@@ -150,6 +144,20 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
         </div>
       )}
     </section>
+  );
+}
+
+function AiInsightsSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3 dark:border-border/30 dark:bg-muted/10">
+          <Skeleton className="h-3 w-32" />
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+      ))}
+    </div>
   );
 }
 

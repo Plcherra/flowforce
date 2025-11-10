@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle } from 'lucide-react';
-import type { LowStockItem } from '@/hooks/inventory/useInventoryDashboard';
+import type { LowStockItem } from '@/features/inventory/hooks/useInventoryDashboard';
 
 interface LowStockAlertProps {
   items: LowStockItem[];

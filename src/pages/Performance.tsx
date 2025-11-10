@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { RefreshCw, Target, BarChart3, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import LoadingSpinner from '@/components/resources/LoadingSpinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePerformanceOverview } from '@/hooks/usePerformanceOverview';
 import { useRecognitions } from '@/hooks/useRecognitions';
 import { recognitionSourceMeta } from '@/lib/recognitionMeta';
@@ -35,6 +35,61 @@ function MetricTile({ label, value }: MetricTileProps) {
     <div className="text-center p-4 border rounded-lg">
       <div className="text-2xl font-bold text-blue-600">{value}</div>
       <div className="text-sm text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+interface SectionSkeletonProps {
+  count?: number;
+  withAvatar?: boolean;
+}
+
+function SectionSkeleton({ count = 3, withAvatar = false }: SectionSkeletonProps) {
+  return (
+    <div className="space-y-3" aria-hidden="true">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="rounded-lg border p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            {withAvatar && <Skeleton className="h-10 w-10 rounded-full" />}
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+            <Skeleton className="h-4 w-16" />
+          </div>
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-5/6" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmployeeCardSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="space-y-4" aria-hidden="true">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="rounded-lg border p-4 space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+            <Skeleton className="h-6 w-16" />
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, metricIndex) => (
+              <div key={metricIndex} className="space-y-2 rounded-md border p-3">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-5 w-2/3" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -100,6 +155,7 @@ export default function Performance() {
   const leaderboardPeriod: LeaderboardPeriod = 'monthly';
   const { loading: leaderboardLoading, error: leaderboardError } = useLeaderboardData(leaderboardPeriod);
   const [activeTab, setActiveTab] = useState<PerformanceTab>('overview');
+  const goalsTabRef = useRef<HTMLButtonElement | null>(null);
 
   const isLoading = loading;
   const recentReviews = reviews.slice(0, 20);
@@ -153,8 +209,8 @@ export default function Performance() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Performance Management</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Performance Management</h1>
+          <p className="text-muted-foreground mt-1">
             Track employee achievements, stay current on goals, and review feedback in one place.
           </p>
         </div>
@@ -175,7 +231,15 @@ export default function Performance() {
             )}
             Run Co-Pilot Sync
           </Button>
-          <Button onClick={() => setActiveTab('goals')}>
+          <Button
+            type="button"
+            onClick={() => {
+              setActiveTab('goals');
+              goalsTabRef.current?.focus();
+            }}
+            aria-controls="performance-tab-goals"
+            aria-pressed={activeTab === 'goals'}
+          >
             <Target className="mr-2 h-4 w-4" />
             Set Goals
           </Button>
@@ -183,7 +247,7 @@ export default function Performance() {
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" role="status" aria-live="polite">
           <AlertTitle>Unable to load performance data</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -196,7 +260,9 @@ export default function Performance() {
       >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="goals">Goals & Objectives</TabsTrigger>
+          <TabsTrigger value="goals" ref={goalsTabRef}>
+            Goals & Objectives
+          </TabsTrigger>
           <TabsTrigger value="reviews">Performance Reviews</TabsTrigger>
         </TabsList>
 
@@ -218,12 +284,9 @@ export default function Performance() {
             </CardHeader>
             <CardContent className="space-y-3">
               {leaderboardLoading ? (
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Loading leaderboard insights…</span>
-                </div>
+                <SectionSkeleton count={3} />
               ) : leaderboardError ? (
-                <Alert variant="destructive">
+                <Alert variant="destructive" role="status" aria-live="polite">
                   <AlertTitle>Unable to load leaderboard insights</AlertTitle>
                   <AlertDescription>{leaderboardError}</AlertDescription>
                 </Alert>
@@ -289,11 +352,9 @@ export default function Performance() {
             </CardHeader>
             <CardContent className="space-y-4">
               {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <LoadingSpinner />
-                </div>
+                <SectionSkeleton count={2} />
               ) : error ? (
-                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground" role="status" aria-live="polite">
                   Unable to load review snapshots right now. Please try again after refreshing the page.
                 </div>
               ) : unifiedReviews.length === 0 ? (
@@ -391,14 +452,11 @@ export default function Performance() {
             </CardHeader>
             <CardContent className="space-y-4">
               {recognitionLoading ? (
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Loading recognition activity…</span>
-                </div>
+                <SectionSkeleton count={3} withAvatar />
               ) : (
                 <>
                   {recognitionError ? (
-                    <Alert variant="destructive">
+                    <Alert variant="destructive" role="status" aria-live="polite">
                       <AlertTitle>Unable to load recognition activity</AlertTitle>
                       <AlertDescription>{recognitionError}</AlertDescription>
                     </Alert>
@@ -454,18 +512,16 @@ export default function Performance() {
           </Card>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <LoadingSpinner />
-            </div>
+            <EmployeeCardSkeleton count={3} />
           ) : error ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
               <p>Unable to load performance summaries. Please try again after refreshing.</p>
             </div>
           ) : employees.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <Target className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No performance records yet</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+              <Target className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No performance records yet</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
                 Once employees start logging goals and reviews, their performance summaries will appear here.
               </p>
             </div>
@@ -515,7 +571,7 @@ export default function Performance() {
           )}
         </TabsContent>
 
-        <TabsContent value="goals" className="space-y-6">
+        <TabsContent value="goals" className="space-y-6" id="performance-tab-goals">
           <Card>
             <CardHeader>
               <CardTitle>Current Goals</CardTitle>
@@ -523,16 +579,14 @@ export default function Performance() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <LoadingSpinner />
-                </div>
+                <SectionSkeleton count={3} />
               ) : error ? (
-                <div className="text-center py-12 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
                   <p>Unable to load goals data at the moment. Please try again.</p>
                 </div>
               ) : goals.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <Target className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <Target className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p>No goals data available. Create or assign a goal to get started.</p>
                 </div>
               ) : (
@@ -589,18 +643,16 @@ export default function Performance() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <LoadingSpinner />
-                </div>
+                <SectionSkeleton count={4} />
               ) : error ? (
-                <div className="text-center py-12 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground" role="status" aria-live="polite">
                   <p>Unable to load performance reviews at the moment. Please try again.</p>
                 </div>
               ) : recentReviews.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <BarChart3 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No performance reviews logged</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                  <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">No performance reviews logged</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
                     Performance feedback will appear here as soon as managers submit reviews.
                   </p>
                 </div>

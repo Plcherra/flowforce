@@ -18,7 +18,7 @@ import { useEmployeePerformance } from '@/hooks/useAnalytics';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
-import { CreateGoalModal, type GoalFormValues } from '@/components/goals/CreateGoalModal';
+import { CreateGoalModal, type GoalFormValues } from '@/features/goals/components/CreateGoalModal';
 
 type TaskRecord = ReturnType<typeof useTasks>['tasks'][number];
 type GoalRecord = ReturnType<typeof useGoals>['goals'][number];

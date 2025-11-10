@@ -9,8 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useInventoryProductionEvents } from '@/hooks/inventory/useInventoryProductionEvents';
-import type { ProductionEvent, ProductionMaterialUsage } from '@/hooks/inventory/types';
+import { useInventoryProductionEvents } from '@/features/inventory/hooks/useInventoryProductionEvents';
+import type { ProductionEvent, ProductionMaterialUsage } from '@/features/inventory/hooks/types';
 import { AlertCircle } from 'lucide-react';
 
 const currencyFormatter = new Intl.NumberFormat(undefined, {

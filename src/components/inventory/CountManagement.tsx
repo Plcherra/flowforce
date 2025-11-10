@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, CheckCircle, Clock, AlertCircle, Edit, Trash, Play } from 'lucide-react';
-import { useInventoryCounts } from '@/hooks/inventory/useInventoryCounts';
+import { useInventoryCounts } from '@/features/inventory/hooks/useInventoryCounts';
 import { useToast } from '@/hooks/use-toast';
 
 interface Count {

@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { InventoryItem, InventoryRecipeLine, InventoryUnit } from '@/hooks/inventory/types';
+import type { InventoryItem, InventoryRecipeLine, InventoryUnit } from '@/features/inventory/hooks/types';
 import { InventoryService } from './inventory';
 
 export interface RecipeNutrition {

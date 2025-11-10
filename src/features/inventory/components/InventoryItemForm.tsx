@@ -8,14 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateInventoryItem, useUpdateInventoryItem } from '@/hooks/useInventory';
 import { useInventoryCategories, useCreateInventoryCategory, useDeleteInventoryCategory } from '@/hooks/useInventory';
 import { useInventoryUnits, useInventoryLocations, useCreateInventoryLocation, useDeleteInventoryLocation, useInventorySuppliers, useCreateSupplier } from '@/hooks/useInventory';
-import { useCreateItemUnit, useItemUnits, useUpdateItemUnit, useDeleteItemUnit } from '@/hooks/inventory/useItemUnits';
+import { useCreateItemUnit, useItemUnits, useUpdateItemUnit, useDeleteItemUnit } from '@/features/inventory/hooks/useItemUnits';
 import { useProfile } from '@/hooks/useProfile';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ClickableLabel from './ClickableLabel';
-import type { InventoryItem } from '@/hooks/inventory/types';
+import type { InventoryItem } from '@/features/inventory/hooks/types';
 
 interface UnitLevel {
   id?: string;

@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { InventoryService } from '@/services/inventory';
-import type { InventoryCountLine } from '@/hooks/inventory/types';
+import type { InventoryCountLine } from '@/features/inventory/hooks/types';
 import { Barcode, Trash } from 'lucide-react';
 
 interface MarketManCountingInterfaceProps {

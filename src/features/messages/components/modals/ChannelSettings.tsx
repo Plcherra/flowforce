@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Settings, Hash, Users, Lock, Globe } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useChannelActions } from '@/features/messages/hooks/useChannelActions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +39,7 @@ interface ChannelSettingsProps {
 
 export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDeleteChannel }: ChannelSettingsProps) {
   const { toast } = useToast();
+  const { updateChannel: updateChannelSettings } = useChannelActions();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -64,17 +65,12 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('message_channels')
-        .update({
-          name: formData.name.trim(),
-          description: formData.description.trim() || null,
-          type: formData.type,
-          is_private: formData.is_private
-        })
-        .eq('id', channel.id);
-
-      if (error) throw error;
+      await updateChannelSettings(channel.id, {
+        name: formData.name,
+        description: formData.description,
+        type: formData.type,
+        is_private: formData.is_private,
+      });
 
       toast({
         title: 'Success',

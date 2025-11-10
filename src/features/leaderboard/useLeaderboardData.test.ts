@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mapToLeaderboardEntry } from './useLeaderboardData';
-import type { Employee } from '@/hooks/useEmployees';
+import type { Employee } from '@/features/employees/hooks/useEmployees';
 
 describe('mapToLeaderboardEntry', () => {
   it('builds leaderboard entry from Supabase row when employee cache misses', () => {

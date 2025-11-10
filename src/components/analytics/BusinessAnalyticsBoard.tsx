@@ -231,7 +231,7 @@ export function BusinessAnalyticsBoard({ companyId, onContextChange, className }
               <CardContent className="space-y-4 text-sm text-muted-foreground">
                 <div>
                   <div className="font-medium text-foreground">Scheduling</div>
-                  <div>Coverage {percent(breakdown?.scheduling.coverageRate * 100 ?? 0, 0)}</div>
+                    <div>Coverage {percent((breakdown?.scheduling.coverageRate ?? 0) * 100, 0)}</div>
                   <div>{breakdown?.scheduling.openShifts ?? 0} open shifts · overtime risk {percent((breakdown?.scheduling.overtimeRisk ?? 0) * 100, 0)}</div>
                 </div>
                 <div>

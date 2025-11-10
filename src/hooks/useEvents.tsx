@@ -6,6 +6,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { calendarEventsRepository, type CalendarEventRow } from '@/features/calendar/repositories/calendarEventsRepository';
 import { queryKeys } from '@/lib/queryKeys';
+import { CalendarError } from '@/features/calendar/types';
+import { normalizeCalendarError } from '@/features/calendar/hooks/useCalendarMutationError';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -254,6 +256,7 @@ const toUpdatePayload = (updates: Partial<AppEvent>) => {
 };
 
 const parseError = (error: unknown): string => {
+  if (error instanceof CalendarError) return error.message;
   if (error instanceof Error) return error.message;
   if (typeof error === 'object' && error !== null && 'message' in error) {
     const message = (error as { message?: unknown }).message;
@@ -308,7 +311,12 @@ export function useEvents() {
 
   const events = companyId ? eventsQuery.data ?? [] : localEvents;
   const loading = companyId ? eventsQuery.isLoading || eventsQuery.isFetching : false;
-  const error = companyId && eventsQuery.error ? parseError(eventsQuery.error) : null;
+  const rawError = companyId ? eventsQuery.error : null;
+  const errorCode =
+    companyId && rawError && typeof rawError === 'object' && rawError !== null && 'code' in rawError
+      ? String((rawError as { code?: string | number }).code ?? '')
+      : null;
+  const error = companyId && rawError ? parseError(rawError) : null;
 
   useEffect(() => {
     if (companyId && eventsQuery.data) {
@@ -353,12 +361,15 @@ export function useEvents() {
     [defaultStorageKey],
   );
 
-  const createEventMutation = useMutation<AppEvent, Error, Omit<AppEvent, 'id'>>({
+  const createEventMutation = useMutation<AppEvent, CalendarError, Omit<AppEvent, 'id'>>({
     mutationFn: async (payload) => {
       if (!companyId) throw new Error('Company context is not available');
       const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
       const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
-      const row = await calendarEventsRepository.insertEvent(insertPayload);
+      const row = await calendarEventsRepository.insertEvent(insertPayload).catch((error) => {
+        const normalizedError = normalizeCalendarError(error);
+        throw new CalendarError(normalizedError.message, { code: normalizedError.code });
+      });
       const persisted = mapRowToEvent(row);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
@@ -370,15 +381,16 @@ export function useEvents() {
       invalidateCompanyEvents();
     },
     onError: (mutationError) => {
+      const normalizedError = normalizeCalendarError(mutationError);
       toast({
         title: 'Event not saved',
-        description: parseError(mutationError),
+        description: normalizedError.message,
         variant: 'destructive',
       });
     },
   });
 
-  const createVendorVisitMutation = useMutation<AppEvent, Error, Omit<AppEvent, 'id' | 'type'>>({
+  const createVendorVisitMutation = useMutation<AppEvent, CalendarError, Omit<AppEvent, 'id' | 'type'>>({
     mutationFn: async (payload) => {
       if (!companyId) throw new Error('Company context is not available');
       const normalized = withDefaults({ ...payload, type: 'vendor' });
@@ -386,7 +398,10 @@ export function useEvents() {
         ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
         event_type: 'vendor',
       };
-      const row = await calendarEventsRepository.insertEvent(insertPayload);
+      const row = await calendarEventsRepository.insertEvent(insertPayload).catch((error) => {
+        const normalizedError = normalizeCalendarError(error);
+        throw new CalendarError(normalizedError.message, { code: normalizedError.code });
+      });
       const persisted = mapRowToEvent(row);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
@@ -398,18 +413,22 @@ export function useEvents() {
       invalidateCompanyEvents();
     },
     onError: (mutationError) => {
+      const normalizedError = normalizeCalendarError(mutationError);
       toast({
         title: 'Vendor visit not saved',
-        description: parseError(mutationError),
+        description: normalizedError.message,
         variant: 'destructive',
       });
     },
   });
 
-  const updateEventMutation = useMutation<AppEvent, Error, { id: string; updates: Partial<AppEvent> }>({
+  const updateEventMutation = useMutation<AppEvent, CalendarError, { id: string; updates: Partial<AppEvent> }>({
     mutationFn: async ({ id, updates }) => {
       if (!companyId) throw new Error('Company context is not available');
-      const row = await calendarEventsRepository.updateEvent(id, toUpdatePayload(updates));
+      const row = await calendarEventsRepository.updateEvent(id, toUpdatePayload(updates)).catch((error) => {
+        const normalizedError = normalizeCalendarError(error);
+        throw new CalendarError(normalizedError.message, { code: normalizedError.code });
+      });
       if (!row) {
         throw new Error('Event not found');
       }
@@ -430,26 +449,31 @@ export function useEvents() {
       invalidateCompanyEvents();
     },
     onError: (mutationError) => {
+      const normalizedError = normalizeCalendarError(mutationError);
       toast({
         title: 'Update failed',
-        description: parseError(mutationError),
+        description: normalizedError.message,
         variant: 'destructive',
       });
     },
   });
 
-  const deleteEventMutation = useMutation<void, Error, string>({
+  const deleteEventMutation = useMutation<void, CalendarError, string>({
     mutationFn: async (id) => {
       if (!companyId) throw new Error('Company context is not available');
-      await calendarEventsRepository.deleteEvent(id);
+      await calendarEventsRepository.deleteEvent(id).catch((error) => {
+        const normalizedError = normalizeCalendarError(error);
+        throw new CalendarError(normalizedError.message, { code: normalizedError.code });
+      });
     },
     onSuccess: () => {
       invalidateCompanyEvents();
     },
     onError: (mutationError) => {
+      const normalizedError = normalizeCalendarError(mutationError);
       toast({
         title: 'Delete failed',
-        description: parseError(mutationError),
+        description: normalizedError.message,
         variant: 'destructive',
       });
     },
@@ -584,6 +608,7 @@ export function useEvents() {
     events,
     loading,
     error,
+    errorCode,
     createEvent,
     createVendorVisit,
     updateEvent,

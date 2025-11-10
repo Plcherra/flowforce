@@ -10,6 +10,14 @@ type ListUpdatesParams = {
   searchTerm?: string;
 };
 
+type ListDraftsParams = {
+  companyId: string;
+};
+
+type ListEngagementSummariesParams = {
+  companyId: string;
+};
+
 type ListReactionsParams = {
   companyId: string;
   userId: string;
@@ -76,6 +84,21 @@ const engagementSchema = z.object({
   last_analyzed: z.string().nullable().optional(),
 });
 
+const engagementRowSchema = z.object({
+  id: z.string(),
+  update_id: z.string(),
+  company_id: z.string(),
+  likes_count: z.number().nullable().optional(),
+  comments_count: z.number().nullable().optional(),
+  views_count: z.number().nullable().optional(),
+  engagement_score: z.number().nullable().optional(),
+  sentiment_score: z.number().nullable().optional(),
+  ai_summary: z.string().nullable().optional(),
+  last_analyzed: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+});
+
 const companyUpdateRowSchema = z.object({
   id: z.string(),
   company_id: z.string(),
@@ -130,6 +153,7 @@ const parseSupabaseData = <T>(schema: z.ZodType<T>, data: unknown): T => {
 export type CompanyUpdateRow = z.infer<typeof companyUpdateRowSchema>;
 export type ReactionRow = z.infer<typeof reactionRowSchema>;
 export type CommentRow = z.infer<typeof commentRowSchema>;
+export type CompanyUpdateEngagementRow = z.infer<typeof engagementRowSchema>;
 
 const listUpdates = async ({ companyId, page, pageSize, statusFilter, searchTerm }: ListUpdatesParams) => {
   const from = (page - 1) * pageSize;
@@ -176,6 +200,35 @@ const listUpdates = async ({ companyId, page, pageSize, statusFilter, searchTerm
     records: parsed,
     total: count ?? parsed.length,
   };
+};
+
+const listDraftUpdates = async ({ companyId }: ListDraftsParams) => {
+  const { data, error } = await supabase
+    .from('company_updates')
+    .select('*')
+    .eq('company_id', companyId)
+    .eq('status', 'draft')
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
+};
+
+const listEngagementSummaries = async ({ companyId }: ListEngagementSummariesParams) => {
+  const { data, error } = await supabase
+    .from('company_update_engagement')
+    .select('*')
+    .eq('company_id', companyId)
+    .order('last_analyzed', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return parseSupabaseData(z.array(engagementRowSchema), data ?? []);
 };
 
 const listReactions = async ({ companyId, userId, updateIds }: ListReactionsParams) => {
@@ -310,6 +363,8 @@ const createComment = async ({ companyId, updateId, userId, content }: CreateCom
 
 export const companyUpdatesRepository = {
   listUpdates,
+  listDraftUpdates,
+  listEngagementSummaries,
   listReactions,
   listComments,
   createUpdate,

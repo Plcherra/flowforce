@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, User, Flag, MessageSquare, Search, Target } from 'lucide-react';
@@ -17,6 +18,7 @@ import { format, differenceInDays } from 'date-fns';
 import { getTaskStatusBadgeClass, getTaskStatusLabel } from '@/constants/taskStatus';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
@@ -439,7 +441,7 @@ export default function Tasks() {
         <div className={isMobile ? 'space-y-3' : 'space-y-4 lg:col-span-2'}>
           {tasks.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <CardContent className="flex flex-col items-center justify-center rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No tasks yet</h3>
                 <p className="text-muted-foreground text-center mb-4">
@@ -453,7 +455,7 @@ export default function Tasks() {
             </Card>
           ) : filteredTasks.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center space-y-3 py-12 text-center">
+              <CardContent className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
                 <Search className="h-10 w-10 text-muted-foreground" />
                 <h3 className="text-lg font-semibold">No tasks match your filters</h3>
                 <p className="max-w-sm text-sm text-muted-foreground">
@@ -473,8 +475,12 @@ export default function Tasks() {
                   key={task.id}
                   id={`task-card-${task.id}`}
                   data-highlighted={highlightedTaskId === task.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open task ${task.title}`}
                   onClick={() => setSelectedTask(task)}
-                  className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                  onKeyDown={handleTaskKeyDown(task)}
+                  className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     highlightedTaskId === task.id ? 'ring-2 ring-primary' : ''
                   }`}
                 >

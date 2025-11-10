@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { RecentActivity as RecentActivityType } from '@/hooks/inventory/useInventoryDashboard';
+import type { RecentActivity as RecentActivityType } from '@/features/inventory/hooks/useInventoryDashboard';
 
 interface RecentActivityProps {
   activities: RecentActivityType[];

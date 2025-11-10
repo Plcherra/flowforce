@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, TrendingDown, AlertTriangle, BarChart3, Download } from 'lucide-react';
-import { useInventoryDashboard } from '@/hooks/inventory/useInventoryDashboard';
+import { useInventoryDashboard } from '@/features/inventory/hooks/useInventoryDashboard';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
 

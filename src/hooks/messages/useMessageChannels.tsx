@@ -3,6 +3,12 @@ import { useAuth } from '../useAuth';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
 import { supabase } from '@/integrations/supabase/client';
 import { messagesRepository } from '@/repositories/messagesRepository';
+import {
+  createChannel as createChannelService,
+  joinChannel as joinChannelService,
+  updateLastRead as updateLastReadService,
+  deleteChannel as deleteChannelService,
+} from '@/features/messages/api/channelService';
 
 export function useMessageChannels() {
   const { user } = useAuth();
@@ -77,14 +83,7 @@ export function useMessageChannels() {
       }
 
       try {
-        const channel = await messagesRepository.createChannel(channelData, user.id);
-        const uniqueMembers = Array.from(
-          new Set([user.id, ...(channelData.member_ids ?? [])]),
-        ).map((memberId) => ({
-          user_id: memberId,
-          role: memberId === user.id ? 'admin' : 'member',
-        }));
-        await messagesRepository.addChannelMembers(channel.id, uniqueMembers);
+        const channel = await createChannelService(channelData, user.id);
         await fetchChannels();
         setError(null);
         return { data: channel, error: null };
@@ -106,7 +105,7 @@ export function useMessageChannels() {
       }
 
       try {
-        await messagesRepository.addChannelMembers(channelId, [{ user_id: user.id, role: 'member' }]);
+        await joinChannelService(channelId, user.id);
         await fetchChannels();
         setError(null);
         return { error: null };
@@ -124,7 +123,7 @@ export function useMessageChannels() {
       if (!user) return;
 
       try {
-        await messagesRepository.updateLastRead(channelId, user.id);
+        await updateLastReadService(channelId, user.id);
       } catch (error) {
         const issue = error instanceof Error ? error : new Error('Error updating last read');
         console.error(issue);
@@ -145,7 +144,7 @@ export function useMessageChannels() {
       }
 
       try {
-        await messagesRepository.deleteChannel(channelId, user.id);
+        await deleteChannelService(channelId, user.id);
         await fetchChannels();
         setError(null);
         return { error: null };

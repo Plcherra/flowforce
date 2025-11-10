@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import type { InventoryTransferStatus } from '@/hooks/inventory/types';
+import type { InventoryTransferStatus } from '@/features/inventory/hooks/types';
 
 interface TransferNotificationBase {
   transferId: string;

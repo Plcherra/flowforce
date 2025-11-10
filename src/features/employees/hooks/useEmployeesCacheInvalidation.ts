@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { employeesQueryKey } from '@/hooks/useEmployees';
+import { employeesQueryKey } from '@/features/employees/hooks/useEmployees';
 
 export function useEmployeesCacheInvalidation(companyId?: string | null) {
   const queryClient = useQueryClient();

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Package, Plus } from 'lucide-react';
-import { useInventoryItems } from '@/hooks/inventory/useInventoryItems';
+import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
 
 interface ItemSelectorProps {
   open: boolean;

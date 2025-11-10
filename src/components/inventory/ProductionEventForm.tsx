@@ -21,15 +21,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { calculateProductionMaterials } from '@/lib/inventory/production';
-import { useCreateProductionEvent } from '@/hooks/inventory/useInventoryProductionEvents';
-import { useInventoryItems } from '@/hooks/inventory/useInventoryItems';
-import { useInventoryUnits } from '@/hooks/inventory/useInventoryUnits';
+import { useCreateProductionEvent } from '@/features/inventory/hooks/useInventoryProductionEvents';
+import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
+import { useInventoryUnits } from '@/features/inventory/hooks/useInventoryUnits';
 import type {
   InventoryItem,
   InventoryUnit,
   ProductionMaterialUsage,
   ProductionType,
-} from '@/hooks/inventory/types';
+} from '@/features/inventory/hooks/types';
 import { collectUnits } from '@/utils/inventoryUnits';
 import { Loader2, AlertTriangle } from 'lucide-react';
 

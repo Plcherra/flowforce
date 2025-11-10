@@ -1,10 +1,11 @@
 import { useMemo, useCallback } from 'react';
-import { differenceInMilliseconds } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
 import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
+import { buildRangeWindows } from '@/features/operations/utils/ideaMetrics';
+import { parseIdeaKpiInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
 
 export interface IdeaAssessmentMetric {
   metric: string;
@@ -23,7 +24,7 @@ interface IdeaAssessmentState {
   saveAssessment: (notes?: string) => Promise<void>;
 }
 
-async function fetchKpiSnapshot(companyId: string, range: { start: string; end: string }) {
+async function fetchKpiSnapshot(companyId: string, range: { start: string; end: string }): Promise<IdeaKpiInsightRecord[]> {
   const { data, error } = await supabase.rpc('get_kpi_summary', {
     company_id: companyId,
     range_start: range.start,
@@ -44,12 +45,14 @@ async function fetchKpiSnapshot(companyId: string, range: { start: string; end: 
         metric: item.label,
         value: item.value,
         unit: item.unit,
-      }));
+        delta: item.delta,
+        trend: item.trend,
+      } satisfies IdeaKpiInsightRecord));
     }
     throw error;
   }
 
-  return Array.isArray(data) ? data : [];
+  return parseIdeaKpiInsights(data);
 }
 
 async function persistAssessment(options: {
@@ -102,21 +105,7 @@ export function useIdeaAssessments(
   latestInsights: IdeaKpiInsight[],
   enabled: boolean,
 ): IdeaAssessmentState {
-  const normalizedRange = useMemo(() => {
-    const start = range.start.toISOString();
-    const end = range.end.toISOString();
-    return { start, end };
-  }, [range.start, range.end]);
-
-  const previousRange = useMemo(() => {
-    const durationMs = Math.max(differenceInMilliseconds(range.end, range.start), 1);
-    const previousEnd = new Date(range.start.getTime());
-    const previousStart = new Date(previousEnd.getTime() - durationMs);
-    return {
-      start: previousStart.toISOString(),
-      end: previousEnd.toISOString(),
-    };
-  }, [range.end, range.start]);
+  const { normalizedRange, previousRange } = useMemo(() => buildRangeWindows(range), [range]);
 
   const queryClient = useQueryClient();
   const queryKey = useMemo(
@@ -140,7 +129,7 @@ export function useIdeaAssessments(
       ]);
 
       const beforeMap = new Map(
-        beforeSnapshot.map((item: any) => [
+        beforeSnapshot.map((item) => [
           item.id ?? item.metric ?? item.label,
           {
             value: Number(item.value ?? 0),
@@ -149,7 +138,7 @@ export function useIdeaAssessments(
         ]),
       );
 
-      return (afterSnapshot as any[]).map((item, index) => {
+      return afterSnapshot.map((item, index) => {
         const id = item.id ?? item.metric ?? item.label ?? `metric-${index}`;
         const before = beforeMap.get(id) ?? { value: 0, unit: item.unit ?? null };
         const after = Number(item.value ?? 0);

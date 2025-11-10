@@ -7,11 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Plus, Search, Filter, Edit, Trash2, History } from 'lucide-react';
 import { useInventoryItems, useDeleteInventoryItem } from '@/hooks/useInventory';
-import { useInventoryCategories } from '@/hooks/inventory/useInventoryCategories';
+import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryCategories';
 import InventoryItemForm from '@/components/inventory/InventoryItemForm';
 import { InventoryRecipeDialog } from '@/components/inventory/InventoryRecipeDialog';
-import { getUnitHierarchyDisplay } from '@/hooks/inventory/useItemUnits';
-import type { InventoryItem } from '@/hooks/inventory/types';
+import { getUnitHierarchyDisplay } from '@/features/inventory/hooks/useItemUnits';
+import type { InventoryItem } from '@/features/inventory/hooks/types';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ItemsSetup() {

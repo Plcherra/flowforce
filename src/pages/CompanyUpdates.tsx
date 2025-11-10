@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCan } from '@/hooks/useCan';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { useRecognitions } from '@/hooks/useRecognitions';
-import CreateUpdateWizard, { WizardFormData } from '@/components/updates/CreateUpdateWizard';
+import type { WizardFormData } from '@/components/updates/CreateUpdateWizard';
 import { CompanyUpdatesHeader } from '@/features/company-updates/components/CompanyUpdatesHeader';
 import { RecognitionHighlights } from '@/features/company-updates/components/RecognitionHighlights';
 import { UpdateFeedCard } from '@/features/company-updates/components/UpdateFeedCard';
@@ -27,8 +27,13 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertTriangle } from 'lucide-react';
 import { useCommentForm } from '@/features/company-updates/hooks/useCommentForm';
+import { getErrorMessage } from '@/features/company-updates/utils/getErrorMessage';
+import { useCompanyUpdateFilters } from '@/features/company-updates/hooks/useCompanyUpdateFilters';
+import { useCompanyUpdateComments } from '@/features/company-updates/hooks/useCompanyUpdateComments';
+import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
+const CreateUpdateWizard = lazy(() => import('@/components/updates/CreateUpdateWizard'));
 
 type ViewMode = 'feed' | 'grid' | 'list';
 
@@ -37,8 +42,16 @@ export default function CompanyUpdates() {
   const { can } = useCan();
   const { profile } = useProfile();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('feed');
+  const {
+    searchTerm,
+    setSearchTerm,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    viewMode,
+    setViewMode,
+  } = useCompanyUpdateFilters();
   const {
     values: commentInputs,
     errors: commentErrors,
@@ -48,36 +61,40 @@ export default function CompanyUpdates() {
   } = useCommentForm();
   const [visibleComments, setVisibleComments] = useState<Record<string, boolean>>({});
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
   const {
     updates,
     loading,
     error,
-    commentsByUpdate,
     pagination,
-    likeUpdate,
-    addComment,
-    markAsViewed,
-    createUpdate,
-    archiveUpdate,
-    deleteUpdate,
   } = useCompanyUpdates({ page, pageSize, status: 'published', searchTerm });
 
-  const { recognitions: recognitionFeed, loading: recognitionLoading } = useRecognitions();
+  const {
+    recognitions: recognitionFeed,
+    loading: recognitionLoading,
+    error: recognitionError,
+  } = useRecognitions();
 
   const recognitionHighlights = useMemo(
     () => recognitionFeed.slice(0, 3),
     [recognitionFeed]
   );
 
+  const updateIds = useMemo(() => updates.map((update) => update.id), [updates]);
+  const { commentsByUpdate } = useCompanyUpdateComments(updateIds);
+
+  const {
+    createUpdate,
+    archiveUpdate,
+    deleteUpdate,
+    togglePin,
+    toggleLike,
+    markAsViewed,
+    addComment,
+  } = useCompanyUpdateMutations();
+
   const isInitialLoading = loading && updates.length === 0;
-  const errorMessage = error
-    ? typeof error === 'string'
-      ? error
-      : (error as { message?: string }).message ?? 'Unable to load company updates.'
-    : null;
+  const errorMessage = error ? getErrorMessage(error, 'Unable to load company updates.') : null;
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = totalPages > 1;
@@ -106,11 +123,11 @@ export default function CompanyUpdates() {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, []);
+  }, [setPage]);
 
   const handlePageSizeChange = useCallback((nextSize: number) => {
     setPageSize(nextSize);
-  }, []);
+  }, [setPageSize]);
 
   const handleUpdateComplete = useCallback((formData: WizardFormData) => {
     void createUpdate({
@@ -126,13 +143,13 @@ export default function CompanyUpdates() {
     });
   }, [createUpdate]);
 
-  const handleLike = useCallback((updateId: string) => {
-    likeUpdate(updateId);
-  }, [likeUpdate]);
+  const handleLike = useCallback((updateId: string, currentlyLiked: boolean) => {
+    toggleLike({ updateId, currentlyLiked });
+  }, [toggleLike]);
 
   const handleMarkAsViewed = useCallback(
     (updateId: string) => {
-      void markAsViewed(updateId);
+      markAsViewed({ updateId });
     },
     [markAsViewed],
   );
@@ -152,10 +169,10 @@ export default function CompanyUpdates() {
       }
 
       try {
-        await addComment(update.id, content);
+        await addComment({ updateId: update.id, content });
         clearComment(update.id);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to post comment.';
+        const message = getErrorMessage(error, 'Unable to post comment.');
         setCommentError(update.id, message);
         toast({
           title: 'Unable to post comment',
@@ -172,8 +189,9 @@ export default function CompanyUpdates() {
   }, []);
 
   const handleArchive = useCallback((updateId: string) => {
-    archiveUpdate(updateId);
-    toast({ title: 'Update archived', description: 'The update has been moved out of the feed.' });
+    archiveUpdate(updateId).then(() => {
+      toast({ title: 'Update archived', description: 'The update has been moved out of the feed.' });
+    });
   }, [archiveUpdate, toast]);
 
   const handleDelete = useCallback((updateId: string) => {
@@ -182,8 +200,9 @@ export default function CompanyUpdates() {
       return;
     }
 
-    deleteUpdate(updateId);
-    toast({ title: 'Update deleted', description: 'The update has been removed permanently.' });
+    deleteUpdate(updateId).then(() => {
+      toast({ title: 'Update deleted', description: 'The update has been removed permanently.' });
+    });
   }, [deleteUpdate, toast]);
 
   const getUpdateComments = useCallback(
@@ -216,7 +235,7 @@ export default function CompanyUpdates() {
 
       {viewMode === 'feed' && (
         <div className="px-4 py-6 space-y-4">
-          <RecognitionHighlights loading={recognitionLoading} highlights={recognitionHighlights} />
+          <RecognitionHighlights loading={recognitionLoading} highlights={recognitionHighlights} error={recognitionError} />
 
           {isInitialLoading ? (
             <FeedSkeleton />
@@ -232,7 +251,7 @@ export default function CompanyUpdates() {
                   onCommentChange={handleCommentChange}
                   onSubmitComment={handleCommentSubmit}
                   onToggleComments={handleToggleComments}
-                  onLike={handleLike}
+                  onLike={(id) => handleLike(id, update.viewerHasLiked)}
                   onArchive={handleArchive}
                   onDelete={handleDelete}
                   canManage={canCreateUpdate}
@@ -311,11 +330,13 @@ export default function CompanyUpdates() {
       )}
 
       <div id="company-updates-wizard">
-        <CreateUpdateWizard
-          open={createWizardOpen}
-          onOpenChange={setCreateWizardOpen}
-          onComplete={handleUpdateComplete}
-        />
+        <Suspense fallback={<WizardFallback />}>
+          <CreateUpdateWizard
+            open={createWizardOpen}
+            onOpenChange={setCreateWizardOpen}
+            onComplete={handleUpdateComplete}
+          />
+        </Suspense>
       </div>
     </div>
   );
@@ -369,6 +390,21 @@ function ListSkeleton() {
             <Skeleton className="h-4 w-full" />
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function WizardFallback() {
+  return (
+    <div className="flex items-center justify-center py-6">
+      <div className="space-y-3 rounded-lg border bg-card p-6 shadow-sm">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-4 w-64" />
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
       </div>
     </div>
   );

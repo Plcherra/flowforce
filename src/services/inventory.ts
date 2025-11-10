@@ -20,7 +20,7 @@ import type {
   ProductionEventInput,
   ProductionMaterialUsage,
   ProductionApproval,
-} from '@/hooks/inventory/types';
+} from '@/features/inventory/hooks/types';
 import { buildUnitMetaIndex, collectUnits, convertQuantity } from '@/utils/inventoryUnits';
 import { calculateProductionMaterials } from '@/lib/inventory/production';
 

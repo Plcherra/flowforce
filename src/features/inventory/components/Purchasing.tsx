@@ -77,7 +77,7 @@ import type {
   InventoryItem,
   PurchaseOrder,
   SupplierIntegrationDetails,
-} from '@/hooks/inventory/types';
+} from '@/features/inventory/hooks/types';
 
 type DraftLineItem = {
   id: string;

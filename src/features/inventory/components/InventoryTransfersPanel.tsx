@@ -37,10 +37,10 @@ import {
   useCreateInventoryTransfer,
   useInventoryTransfers,
   useUpdateInventoryTransferStatus,
-} from '@/hooks/inventory/useInventoryTransfers';
-import { useEmployees } from '@/hooks/useEmployees';
+} from '@/features/inventory/hooks/useInventoryTransfers';
+import { useEmployees } from '@/features/employees/hooks/useEmployees';
 import { useProfile } from '@/hooks/useProfile';
-import type { InventoryItem, InventoryTransfer, InventoryTransferStatus } from '@/hooks/inventory/types';
+import type { InventoryItem, InventoryTransfer, InventoryTransferStatus } from '@/features/inventory/hooks/types';
 
 interface LineItemRow {
   key: string;

@@ -1,7 +1,7 @@
 import dayjs, { type Dayjs } from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateEmployee } from '@/copilot/rulesEngine';
-import type { Employee } from '@/hooks/useEmployees';
+import type { Employee } from '@/features/employees/hooks/useEmployees';
 import type { RecognitionDetails } from '@/types/recognition';
 import {
   BASE_TRAINING_XP,

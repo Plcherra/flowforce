@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChefHat, Clock, CheckCircle, AlertCircle, Plus, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useInventoryItems } from '@/hooks/inventory/useInventoryItems';
+import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
 

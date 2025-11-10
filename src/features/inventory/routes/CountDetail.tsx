@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Calculator, CheckCircle, Clock, AlertCircle, Save, FileCheck, Plus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useInventoryCounts, useInventoryCountLines } from '@/hooks/inventory/useInventoryCounts';
+import { useInventoryCounts, useInventoryCountLines } from '@/features/inventory/hooks/useInventoryCounts';
 import { MarketManCountingInterface } from '@/components/inventory/MarketManCountingInterface';
 import { ItemSelector } from '@/components/inventory/ItemSelector';
 import { InventoryLayout } from '../components/InventoryLayout';

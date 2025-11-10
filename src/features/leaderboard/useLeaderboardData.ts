@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
-import { useEmployees, type Employee } from '@/hooks/useEmployees';
+import { useEmployees, type Employee } from '@/features/employees/hooks/useEmployees';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import { ensureLeaderboardSynced } from './syncLeaderboard';
 import type {

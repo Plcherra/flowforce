@@ -33,7 +33,7 @@ import {
   convertBetweenUnits, 
   type EnhancedInventoryItem,
   type ItemUnit
-} from '@/hooks/inventory/useItemUnits';
+} from '@/features/inventory/hooks/useItemUnits';
 
 interface CountData {
   item_id: string;

@@ -12,6 +12,7 @@ import { CalendarIcon, Gift, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Goal, GoalStatus } from '@/hooks/useGoals';
 import { useProfile } from '@/hooks/useProfile';
+import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
 
 const REWARD_TYPES = [
   { value: 'recognition', label: 'Recognition XP' },
@@ -67,29 +68,6 @@ export function CreateGoalModal({
   const { profile } = useProfile();
   const [values, setValues] = useState<GoalFormValues>(defaultForm);
   const [error, setError] = useState<string | null>(null);
-
-  const parseRewardDetails = (details: Goal['reward_details']) => {
-    if (!details) return { xp: null, summary: '' };
-    if (typeof details === 'string') {
-      try {
-        const parsed = JSON.parse(details) as { xp?: number | null; summary?: string | null };
-        return {
-          xp: typeof parsed.xp === 'number' ? parsed.xp : null,
-          summary: parsed.summary ?? '',
-        };
-      } catch {
-        return { xp: null, summary: details };
-      }
-    }
-    if (typeof details === 'object') {
-      const typed = details as Record<string, unknown>;
-      return {
-        xp: typeof typed.xp === 'number' ? typed.xp : null,
-        summary: typeof typed.summary === 'string' ? typed.summary : '',
-      };
-    }
-    return { xp: null, summary: '' };
-  };
 
   useEffect(() => {
     if (open) {

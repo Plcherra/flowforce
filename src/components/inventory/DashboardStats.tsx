@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Package, TrendingUp } from 'lucide-react';
-import type { DashboardStats } from '@/hooks/inventory/useInventoryDashboard';
+import type { DashboardStats } from '@/features/inventory/hooks/useInventoryDashboard';
 
 interface DashboardStatsProps {
   stats: DashboardStats;

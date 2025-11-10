@@ -1,4 +1,4 @@
-import type { InventoryUnit } from '@/hooks/inventory/types';
+import type { InventoryUnit } from '@/features/inventory/hooks/types';
 
 interface UnitMeta {
   baseUnitId: string;

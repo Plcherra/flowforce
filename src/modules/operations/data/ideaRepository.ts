@@ -24,68 +24,55 @@ const ideaActionSchema = z.object({
   created_at: z.string(),
 });
 
+const copilotInsightSchema = z.object({
+  id: z.string().optional(),
+  message: z.string().optional(),
+  summary: z.string().optional(),
+  metric: z.string().optional(),
+  severity: z.enum(['info', 'warning', 'critical']).optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+const copilotRecommendationSchema = z.object({
+  dedupeKey: z.string().optional(),
+  id: z.string().optional(),
+  actionType: z.string().optional(),
+  action: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
+  evaluation: z.record(z.any()).optional(),
+  confidence: z.number().optional(),
+  notes: z.array(z.string()).optional(),
+  impacts: z
+    .array(
+      z.object({
+        metric: z.string().optional(),
+        delta: z.number().optional(),
+        unit: z.string().nullable().optional(),
+      }),
+    )
+    .optional(),
+  impact: z.string().optional(),
+});
+
 const ideaDiagnosticsResponseSchema = z.object({
   evaluation: z
     .object({
-      insights: z
-        .array(
-          z.object({
-            id: z.string().optional(),
-            message: z.string().optional(),
-            summary: z.string().optional(),
-            metric: z.string().optional(),
-            severity: z.enum(['info', 'warning', 'critical']).optional(),
-            metadata: z.record(z.any()).optional(),
-          }),
-        )
-        .optional(),
-      recommendedActions: z
-        .array(
-          z.object({
-            dedupeKey: z.string().optional(),
-            actionType: z.string().optional(),
-            metadata: z.record(z.any()).optional(),
-            evaluation: z.record(z.any()).optional(),
-            confidence: z.number().optional(),
-            notes: z.array(z.string()).optional(),
-            impacts: z
-              .array(
-                z.object({
-                  metric: z.string().optional(),
-                  delta: z.number().optional(),
-                  unit: z.string().nullable().optional(),
-                }),
-              )
-              .optional(),
-          }),
-        )
-        .optional(),
+      insights: z.array(copilotInsightSchema).optional(),
+      recommendedActions: z.array(copilotRecommendationSchema).optional(),
     })
     .optional(),
-  causes: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        summary: z.string().optional(),
-        description: z.string().optional(),
-        confidence: z.number().optional(),
-      }),
-    )
-    .optional(),
-  recommendations: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        action: z.string().optional(),
-        impact: z.string().optional(),
-        confidence: z.number().optional(),
-      }),
-    )
-    .optional(),
+  causes: z.array(copilotInsightSchema).optional(),
+  recommendations: z.array(copilotRecommendationSchema).optional(),
 });
 
 export type IdeaKpiInsightRecord = z.infer<typeof ideaKpiInsightSchema>;
 export type IdeaActionRecord = z.infer<typeof ideaActionSchema>;
+export type CopilotInsight = z.infer<typeof copilotInsightSchema>;
+export type CopilotRecommendation = z.infer<typeof copilotRecommendationSchema>;
+
+export function parseIdeaKpiInsights(payload: unknown): IdeaKpiInsightRecord[] {
+  return ideaKpiInsightSchema.array().parse(payload ?? []);
+}
 
 export async function getIdeaInsights(companyId: string, range: DateRange): Promise<IdeaKpiInsightRecord[]> {
   const { data, error } = await supabase.rpc('get_kpi_summary', {
@@ -98,7 +85,7 @@ export async function getIdeaInsights(companyId: string, range: DateRange): Prom
     throw error;
   }
 
-  return ideaKpiInsightSchema.array().parse(data ?? []);
+  return parseIdeaKpiInsights(data);
 }
 
 export async function listIdeaActions(companyId: string, cycleId: string | null): Promise<IdeaActionRecord[]> {
@@ -226,5 +213,10 @@ export async function runIdeaDiagnostics(request: DiagnosticsRequest) {
     recommendedActions: payload.evaluation?.recommendedActions ?? [],
     legacyCauses: payload.causes ?? [],
     legacyRecommendations: payload.recommendations ?? [],
+  } satisfies {
+    insights: CopilotInsight[];
+    recommendedActions: CopilotRecommendation[];
+    legacyCauses: CopilotInsight[];
+    legacyRecommendations: CopilotRecommendation[];
   };
 }

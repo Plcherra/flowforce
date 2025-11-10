@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getIdeaInsights } from '../data/ideaRepository';
+import { getIdeaInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
 
 export interface DateRange {
@@ -79,8 +79,8 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
   };
 }
 
-const mapRecordsToInsights = (records: any[]): IdeaKpiInsight[] => {
-  return records.map((item: any, index: number) => ({
+const mapRecordsToInsights = (records: IdeaKpiInsightRecord[]): IdeaKpiInsight[] => {
+  return records.map((item, index) => ({
     id: item.id ?? `kpi-${index}`,
     label: item.label ?? item.metric ?? 'Metric',
     value: Number(item.value ?? 0),

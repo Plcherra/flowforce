@@ -10,6 +10,7 @@ import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import { logger } from '@/utils/logger';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type TaskNotificationsProps = {
   onTaskNavigate?: (taskId: string) => void;
@@ -99,7 +100,12 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="relative">
+        <Button
+          variant="outline"
+          size="sm"
+          className="relative"
+          aria-label={unreadCount > 0 ? `${unreadCount} unread task notifications` : 'Open task notifications'}
+        >
           {unreadCount > 0 ? (
             <BellRing className="h-4 w-4" />
           ) : (
@@ -149,8 +155,14 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                 </div>
               )}
               {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <div className="space-y-4 p-4" role="status" aria-live="polite">
+                  {[0, 1, 2].map((item) => (
+                    <div key={item} className="space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -162,37 +174,39 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                 <div className="space-y-0">
                   {notifications.map((notification, index) => (
                     <div key={notification.id}>
-                      <div 
-                        className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
-                          !notification.read_at ? 'bg-primary/5 border-l-2 border-l-primary' : ''
-                        }`}
+                      <button
+                        type="button"
                         onClick={() => handleNotificationClick(notification)}
+                        className={`w-full text-left p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                          !notification.read_at
+                            ? 'bg-primary/5 border-l-2 border-l-primary hover:bg-primary/10'
+                            : 'hover:bg-muted/50'
+                        }`}
                       >
                         <div className="flex items-start space-x-3">
-                          <div className="flex-shrink-0 mt-0.5">
+                          <div className="flex-shrink-0 mt-0.5 text-muted-foreground">
                             {getNotificationIcon(notification.type)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium">
-                                {getNotificationTitle(notification)}
-                              </p>
+                              <p className="text-sm font-medium">{getNotificationTitle(notification)}</p>
                               {!notification.read_at && (
-                                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" aria-hidden />
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                              {notification.message}
-                            </p>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{notification.message}</p>
                             <div className="flex items-center justify-between">
                               <p className="text-xs text-muted-foreground">
                                 {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                               </p>
-                              {notification.metadata && typeof notification.metadata === 'object' && (notification.metadata as any)?.due_date && getDueDateBadge((notification.metadata as any).due_date)}
+                              {notification.metadata &&
+                                typeof notification.metadata === 'object' &&
+                                (notification.metadata as any)?.due_date &&
+                                getDueDateBadge((notification.metadata as any).due_date)}
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </button>
                       {index < notifications.length - 1 && <Separator />}
                     </div>
                   ))}

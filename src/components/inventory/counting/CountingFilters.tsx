@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { InventoryCategory } from '@/hooks/inventory/types';
+import { InventoryCategory } from '@/features/inventory/hooks/types';
 
 interface CountingFiltersProps {
   searchTerm: string;

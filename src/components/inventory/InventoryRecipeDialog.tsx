@@ -13,10 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2 } from 'lucide-react';
-import { useInventoryRecipes, useUpsertRecipeLine, useDeleteRecipeLine } from '@/hooks/inventory/useInventoryRecipes';
+import { useInventoryRecipes, useUpsertRecipeLine, useDeleteRecipeLine } from '@/features/inventory/hooks/useInventoryRecipes';
 import { useInventoryItems } from '@/hooks/useInventory';
-import { useInventoryUnits } from '@/hooks/inventory/useInventoryUnits';
-import type { InventoryItem } from '@/hooks/inventory/types';
+import { useInventoryUnits } from '@/features/inventory/hooks/useInventoryUnits';
+import type { InventoryItem } from '@/features/inventory/hooks/types';
 
 interface InventoryRecipeDialogProps {
   item: InventoryItem;

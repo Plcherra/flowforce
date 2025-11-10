@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import { GoalCard } from '@/components/goals/GoalCard';
+import { GoalCard } from '@/features/goals/components/GoalCard';
 import type { Goal, GoalStatus } from '@/hooks/useGoals';
 import type { GoalDialogs } from '@/hooks/useGoalDialogs';
 
