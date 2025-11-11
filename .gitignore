@@ -26,5 +26,10 @@ dist-ssr
 # Reports
 reports/*
 !reports/refactor-backlog.md
+!reports/cleanup-phase3-summary.md
+!reports/cleanup-status/
+!reports/cleanup-status/**
+!reports/module-map/
+!reports/module-map/**
 structure.txt
 scan-report.md
