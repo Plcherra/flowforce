@@ -45,3 +45,13 @@
 | `—` | Next Action | 2. Move archives to `/legacy/` or `/docs/archive/` | Relocate listed docs/reports so the workspace stays focused. | Create archive folders as needed. |
 | `—` | Next Action | 3. Break down oversized files into feature folders | Use refactor targets list as backlog; split per module owners. | Coordinate per-area spikes before touching business logic. |
 | `supabase/migrations/20250625033340-6b603f39-*.sql` | Next Action | 4. Deduplicate migrations with identical timestamps/content | Two files share the same timestamp and SQL, risking drift on deploy. | Merge into single migration and remove duplicate references. |
+
+## Scheduling Schema & Vendor Integration Scope
+
+| Path / Area | Category | Action | Reason | Notes |
+| --- | --- | --- | --- | --- |
+| `supabase/migrations/<new>_calendar_vendor_system.sql` | Next Action | Create unified scheduling schema | Replace the missing `calendar_events` + `vendor_event` tables with `calendar_events`, `event_participants`, and `vendor_visits` plus compatibility views. | Includes RLS, integration fields, and drop-in vendor_event view for legacy queries. |
+| `supabase/functions/schedule-event/index.ts` | Active Area | Add schedule-event edge function | Centralize meeting + vendor visit creation and future-proof for external vendors. | Must support demo mode + upcoming partner sync. |
+| `src/hooks/useEvents.tsx` & related calendar hooks | Active Area | Point creation mutations to `/functions/schedule-event` | Eliminates direct `rest/v1` writes that currently 404 due to missing tables. | Keep local caching + demo UX intact. |
+| `src/features/calendar/components/CreateEventDialog.tsx`, `CreateVendorVisitDialog.tsx` | Active Area | Ensure new schema interop | Forms should detect demo mode, call the function, and hydrate UI with new rows. | Log “Demo mode” when `VITE_DEMO_MODE=true`. |
+| Vendor integrations | Future | Support integration metadata | `vendor_visits` needs `integration_id`, `integration_type`, and webhook placeholders to sync to sites like Ecolab. | Document behaviour in follow-up RFC once partner API spec finalized. |
