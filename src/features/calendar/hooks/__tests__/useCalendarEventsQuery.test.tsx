@@ -7,12 +7,12 @@ vi.mock('@/hooks/useProfile', () => ({
   useProfile: () => ({ profile: { companyId: 'company-1' } }),
 }));
 
-const repositoryMock = vi.hoisted(() => ({
-  listCompanyEventsByRange: vi.fn(),
+const scheduleGatewayMock = vi.hoisted(() => ({
+  fetchEvents: vi.fn(),
 }));
 
-vi.mock('@/features/calendar/repositories/calendarEventsRepository', () => ({
-  calendarEventsRepository: repositoryMock,
+vi.mock('@/lib/api/scheduleGateway', () => ({
+  scheduleGateway: scheduleGatewayMock,
 }));
 
 describe('useCalendarEvents', () => {
@@ -22,7 +22,7 @@ describe('useCalendarEvents', () => {
   };
 
   it('returns events when repository resolves', async () => {
-    repositoryMock.listCompanyEventsByRange.mockResolvedValue([
+    scheduleGatewayMock.fetchEvents.mockResolvedValue([
       {
         id: 'e1',
         title: 'Test',
@@ -59,7 +59,7 @@ describe('useCalendarEvents', () => {
   });
 
   it('surfaces errors from repository', async () => {
-    repositoryMock.listCompanyEventsByRange.mockRejectedValue(new Error('boom'));
+    scheduleGatewayMock.fetchEvents.mockRejectedValue(new Error('boom'));
 
     const { result } = renderHook(
       () =>

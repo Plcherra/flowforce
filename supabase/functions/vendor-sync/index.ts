@@ -35,7 +35,6 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
-const DEMO_MODE = (Deno.env.get("DEMO_MODE") ?? Deno.env.get("VITE_DEMO_MODE") ?? "false").toLowerCase() === "true";
 
 const serializeVisitPayload = (visit: VendorVisitRecord) => ({
   id: visit.id,
@@ -59,7 +58,6 @@ const logSyncAttempt = async (
     responseStatus?: number | null;
     responseBody?: string | null;
     errorMessage?: string | null;
-    demoMode?: boolean;
   }
 ) => {
   const payload = serializeVisitPayload(visit);
@@ -71,8 +69,7 @@ const logSyncAttempt = async (
     response_status: details.responseStatus ?? null,
     response_body: details.responseBody ?? null,
     status: details.status,
-    error_message: details.errorMessage ?? null,
-    demo_mode: details.demoMode ?? false
+    error_message: details.errorMessage ?? null
   });
 
   if (error) {
@@ -119,8 +116,7 @@ const handleInsert = async (event: ChangeEvent<VendorVisitRecord>): Promise<Resp
   if (visit.integration_type !== "website" || !visit.integration_webhook) {
     await logSyncAttempt(visit, {
       status: "pending",
-      responseBody: "No website integration configured",
-      demoMode: DEMO_MODE
+      responseBody: "No website integration configured"
     });
     return new Response("No integration to process", { status: 200 });
   }
@@ -128,17 +124,6 @@ const handleInsert = async (event: ChangeEvent<VendorVisitRecord>): Promise<Resp
   const payload = {
     visit: serializeVisitPayload(visit)
   };
-
-  if (DEMO_MODE) {
-    await logSyncAttempt(visit, {
-      status: "success",
-      responseStatus: 200,
-      responseBody: "[DEMO] Webhook delivery skipped",
-      demoMode: true
-    });
-    await updateVisitSyncStatus(visit.id, "sent");
-    return new Response("Demo vendor sync logged", { status: 200 });
-  }
 
   try {
     const { response, responseText } = await postToWebhook(visit.integration_webhook, payload);

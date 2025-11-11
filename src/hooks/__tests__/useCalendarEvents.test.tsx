@@ -55,12 +55,12 @@ const responses = vi.hoisted(() => ({
   calendarEvents: [] as CalendarEventRow[],
 }));
 
-const calendarEventsRepositoryMock = vi.hoisted(() => ({
-  listCompanyEventsByRange: vi.fn(),
+const scheduleGatewayMock = vi.hoisted(() => ({
+  fetchEvents: vi.fn(),
 }));
 
-vi.mock('@/repositories/calendarEventsRepository', () => ({
-  calendarEventsRepository: calendarEventsRepositoryMock,
+vi.mock('@/lib/api/scheduleGateway', () => ({
+  scheduleGateway: scheduleGatewayMock,
 }));
 
 vi.mock('@/hooks/useProfile', () => ({
@@ -124,7 +124,7 @@ describe('useCalendarEvents', () => {
         ],
       },
     ];
-    calendarEventsRepositoryMock.listCompanyEventsByRange.mockResolvedValue(responses.calendarEvents);
+    scheduleGatewayMock.fetchEvents.mockResolvedValue(responses.calendarEvents);
   });
 
   it('filters events by company and range while combining shift links', async () => {
@@ -146,10 +146,10 @@ describe('useCalendarEvents', () => {
     await waitFor(() => expect(result.current.events).toHaveLength(1));
     queryClient.clear();
 
-    expect(calendarEventsRepositoryMock.listCompanyEventsByRange).toHaveBeenCalledWith({
+    expect(scheduleGatewayMock.fetchEvents).toHaveBeenCalledWith({
       companyId: 'company-1',
-      startIso: '2024-01-01T00:00:00.000Z',
-      endIso: '2024-01-07T23:59:59.999Z',
+      start: '2024-01-01T00:00:00.000Z',
+      end: '2024-01-07T23:59:59.999Z',
       storeId: null,
     });
 

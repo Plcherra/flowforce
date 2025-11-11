@@ -3,9 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
-import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/features/calendar/repositories/calendarEventsRepository';
+import {
+  calendarEventsRepository,
+  type CalendarEventRowWithRelations,
+} from '@/features/calendar/repositories/calendarEventsRepository';
 import { queryKeys } from '@/lib/queryKeys';
-import { scheduleMeeting, scheduleVendorVisit } from '@/shared/api/scheduleClient';
+import { scheduleGateway } from '@/lib/api/scheduleGateway';
 
 type CalendarEventRow = CalendarEventRowWithRelations;
 
@@ -177,10 +180,10 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
       if (!companyId || !isoRange) {
         return [] as CalendarEvent[];
       }
-      const rows = await calendarEventsRepository.listCompanyEventsByRange({
+      const rows = await scheduleGateway.fetchEvents({
         companyId,
-        startIso: isoRange.start,
-        endIso: isoRange.end,
+        start: isoRange.start,
+        end: isoRange.end,
         storeId: normalizedStoreId,
       });
       return rows.map(mapRowToEvent);
@@ -257,7 +260,7 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
 
   const eventType = insertPayload.event_type;
   if (eventType === 'vendor_visit') {
-    const response = await scheduleVendorVisit({
+    const { event } = await scheduleGateway.createVendorVisit({
       calendar: { ...insertPayload, event_type: 'vendor_visit' },
       vendor: {
         company_id: companyId,
@@ -281,48 +284,11 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
           | null,
       },
     });
-
-    if (response.demo) {
-      return mapAppEventToCalendarEvent({
-        id: response.event.id,
-        title: payload.title,
-        description: payload.description ?? null,
-        start: insertPayload.start_time,
-        end: insertPayload.end_time ?? insertPayload.start_time,
-        location: payload.location ?? null,
-        type: 'vendor_visit',
-        color: payload.color ?? null,
-        attendees: payload.attendees ?? [],
-        related_shift_ids: payload.relatedShiftIds ?? [],
-        checklist: payload.checklist ?? [],
-        vendor: payload.vendor ?? null,
-        source: 'calendar',
-      });
-    }
-
-    return mapRowToEvent(response.event as CalendarEventRow);
+    return mapRowToEvent(event as CalendarEventRow);
   }
 
-  const response = await scheduleMeeting(insertPayload);
-  if (response.demo) {
-    return mapAppEventToCalendarEvent({
-      id: response.event.id,
-      title: payload.title,
-      description: payload.description ?? null,
-      start: insertPayload.start_time,
-      end: insertPayload.end_time ?? insertPayload.start_time,
-      location: payload.location ?? null,
-      type: payload.type ?? 'event',
-      color: payload.color ?? null,
-      attendees: payload.attendees ?? [],
-      related_shift_ids: payload.relatedShiftIds ?? [],
-      checklist: payload.checklist ?? [],
-      vendor: payload.vendor ?? null,
-      source: 'calendar',
-    });
-  }
-
-  return mapRowToEvent(response.event as CalendarEventRow);
+  const createdEvent = await scheduleGateway.createEvent(insertPayload);
+  return mapRowToEvent(createdEvent as CalendarEventRow);
 };
 
 export const upsertEventShiftLinks = async ({

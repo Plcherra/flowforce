@@ -26,8 +26,6 @@ type VendorPayload = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const DEMO_MODE = (Deno.env.get("DEMO_MODE") ?? Deno.env.get("VITE_DEMO_MODE") ?? "false")
-  .toLowerCase() === "true";
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   console.error("Missing Supabase credentials for schedule-event function");
@@ -70,19 +68,6 @@ serve(async (req) => {
     }
 
     const calendarPayload = (payload as { calendar?: CalendarPayload }).calendar ?? (payload as CalendarPayload);
-
-    if (DEMO_MODE) {
-      const demoEvent = {
-        id: crypto.randomUUID(),
-        title: calendarPayload.title ?? (type === "vendor_visit" ? "Vendor Visit" : "Meeting"),
-        start_time: calendarPayload.start_time ?? new Date().toISOString(),
-        end_time:
-          calendarPayload.end_time ?? calendarPayload.start_time ?? new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        event_type: type === "vendor_visit" ? "vendor_visit" : "meeting",
-      };
-      console.log("Demo mode: event creation skipped", { type, calendarPayload });
-      return respond(type === "vendor_visit" ? { demo: true, event: demoEvent } : { demo: true, event: demoEvent });
-    }
 
     if (type === "meeting") {
       const eventPayload = normalizeTimes(calendarPayload, "meeting");

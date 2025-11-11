@@ -8,7 +8,7 @@ import { calendarEventsRepository, type CalendarEventRow } from '@/features/cale
 import { queryKeys } from '@/lib/queryKeys';
 import { CalendarError } from '@/features/calendar/types';
 import { normalizeCalendarError } from '@/features/calendar/hooks/useCalendarMutationError';
-import { scheduleMeeting, scheduleVendorVisit } from '@/shared/api/scheduleClient';
+import { scheduleGateway } from '@/lib/api/scheduleGateway';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -302,7 +302,7 @@ export function useEvents() {
     enabled: Boolean(companyId),
     queryFn: async () => {
       if (!companyId) return [] as AppEvent[];
-      const rows = await calendarEventsRepository.listCompanyEvents(companyId);
+      const rows = await scheduleGateway.fetchEvents({ companyId });
       return rows.map(mapRowToEvent);
     },
     initialData: () => (companyId ? readStoredEvents(storageKey) : undefined),
@@ -367,19 +367,11 @@ export function useEvents() {
       if (!companyId) throw new Error('Company context is not available');
       const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
       const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
-      const response = await scheduleMeeting(insertPayload).catch((error) => {
+      const eventRow = await scheduleGateway.createEvent(insertPayload).catch((error) => {
         const normalizedError = normalizeCalendarError(error);
         throw new CalendarError(normalizedError.message, { code: normalizedError.code });
       });
-      if (response.demo) {
-        return {
-          ...normalized,
-          id: response.event.id,
-          persisted: false,
-          source: 'calendar',
-        } satisfies AppEvent;
-      }
-      const persisted = mapRowToEvent(response.event as CalendarEventRow);
+      const persisted = mapRowToEvent(eventRow as CalendarEventRow);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
         syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
@@ -421,19 +413,13 @@ export function useEvents() {
         integration_id: (vendorDetails?.integration_id as string | undefined) ?? null,
         integration_type: (vendorDetails?.integration_type as 'website' | 'partner_api' | 'manual' | undefined) ?? null,
       };
-      const response = await scheduleVendorVisit({ calendar: insertPayload, vendor: vendorPayload }).catch((error) => {
-        const normalizedError = normalizeCalendarError(error);
-        throw new CalendarError(normalizedError.message, { code: normalizedError.code });
-      });
-      if (response.demo) {
-        return {
-          ...normalized,
-          id: response.event.id,
-          persisted: false,
-          source: 'vendor',
-        } satisfies AppEvent;
-      }
-      const persisted = mapRowToEvent(response.event as CalendarEventRow);
+      const { event } = await scheduleGateway
+        .createVendorVisit({ calendar: insertPayload, vendor: vendorPayload })
+        .catch((error) => {
+          const normalizedError = normalizeCalendarError(error);
+          throw new CalendarError(normalizedError.message, { code: normalizedError.code });
+        });
+      const persisted = mapRowToEvent(event as CalendarEventRow);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
         syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
