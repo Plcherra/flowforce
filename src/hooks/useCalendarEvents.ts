@@ -214,7 +214,7 @@ export interface CalendarEventCreateInput {
   title: string;
   description?: string | null;
   location?: string | null;
-  type?: 'event' | 'meeting' | 'vendor';
+  type?: 'event' | 'meeting' | 'vendor_visit';
   color?: string | null;
   start: string | Date;
   end?: string | Date | null;
@@ -256,7 +256,7 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
   };
 
   const eventType = insertPayload.event_type;
-  if (eventType === 'vendor' || eventType === 'vendor_visit') {
+  if (eventType === 'vendor_visit') {
     const response = await scheduleVendorVisit({
       calendar: { ...insertPayload, event_type: 'vendor_visit' },
       vendor: {
@@ -290,7 +290,7 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
         start: insertPayload.start_time,
         end: insertPayload.end_time ?? insertPayload.start_time,
         location: payload.location ?? null,
-        type: 'vendor',
+        type: 'vendor_visit',
         color: payload.color ?? null,
         attendees: payload.attendees ?? [],
         related_shift_ids: payload.relatedShiftIds ?? [],

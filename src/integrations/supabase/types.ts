@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       analytics_cache: {
@@ -35,87 +60,6 @@ export type Database = {
           data?: Json
           expires_at?: string
           id?: string
-        }
-        Relationships: []
-      }
-      ai_insights: {
-        Row: {
-          company_id: string | null
-          data: Json
-          expires_at: string | null
-          generated_at: string | null
-          goal_id: string | null
-          id: string
-          insight_type: string
-        }
-        Insert: {
-          company_id?: string | null
-          data: Json
-          expires_at?: string | null
-          generated_at?: string | null
-          goal_id?: string | null
-          id?: string
-          insight_type: string
-        }
-        Update: {
-          company_id?: string | null
-          data?: Json
-          expires_at?: string | null
-          generated_at?: string | null
-          goal_id?: string | null
-          id?: string
-          insight_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ai_insights_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ai_insights_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      audit_logs: {
-        Row: {
-          action: string
-          created_at: string
-          id: string
-          new_values: Json | null
-          old_values: Json | null
-          performed_by: string | null
-          record_id: string | null
-          table_name: string
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          id?: string
-          new_values?: Json | null
-          old_values?: Json | null
-          performed_by?: string | null
-          record_id?: string | null
-          table_name: string
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          id?: string
-          new_values?: Json | null
-          old_values?: Json | null
-          performed_by?: string | null
-          record_id?: string | null
-          table_name?: string
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -195,64 +139,43 @@ export type Database = {
       }
       calendar_events: {
         Row: {
-          attendees: Json
-          checklist: Json
-          color: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           description: string | null
-          end_time: string | null
+          end_time: string
           event_type: string
           id: string
           location: string | null
-          metadata: Json
-          related_shift_ids: string[]
           start_time: string
-          store_id: string | null
           title: string
           updated_at: string
-          vendor: Json | null
         }
         Insert: {
-          attendees?: Json
-          checklist?: Json
-          color?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           created_by?: string | null
           description?: string | null
-          end_time?: string | null
-          event_type?: string
+          end_time: string
+          event_type: string
           id?: string
           location?: string | null
-          metadata?: Json
-          related_shift_ids?: string[]
           start_time: string
-          store_id?: string | null
           title: string
           updated_at?: string
-          vendor?: Json | null
         }
         Update: {
-          attendees?: Json
-          checklist?: Json
-          color?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
-          end_time?: string | null
+          end_time?: string
           event_type?: string
           id?: string
           location?: string | null
-          metadata?: Json
-          related_shift_ids?: string[]
           start_time?: string
-          store_id?: string | null
           title?: string
           updated_at?: string
-          vendor?: Json | null
         }
         Relationships: [
           {
@@ -262,129 +185,11 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      event_participants: {
-        Row: {
-          avatar_url: string | null
-          company_id: string
-          created_at: string
-          email: string | null
-          event_id: string
-          id: string
-          metadata: Json
-          name: string | null
-          profile_id: string | null
-          response_status: string
-          role: string | null
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          company_id: string
-          created_at?: string
-          email?: string | null
-          event_id: string
-          id?: string
-          metadata?: Json
-          name?: string | null
-          profile_id?: string | null
-          response_status?: string
-          role?: string | null
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          company_id?: string
-          created_at?: string
-          email?: string | null
-          event_id?: string
-          id?: string
-          metadata?: Json
-          name?: string | null
-          profile_id?: string | null
-          response_status?: string
-          role?: string | null
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "event_participants_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_participants_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "calendar_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_participants_profile_id_fkey"
-            columns: ["profile_id"]
+            foreignKeyName: "calendar_events_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      event_shift_links: {
-        Row: {
-          company_id: string
-          created_at: string
-          event_id: string
-          id: string
-          linked_at: string
-          metadata: Json
-          shift_id: string
-          store_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          event_id: string
-          id?: string
-          linked_at?: string
-          metadata?: Json
-          shift_id: string
-          store_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          event_id?: string
-          id?: string
-          linked_at?: string
-          metadata?: Json
-          shift_id?: string
-          store_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_shift_links_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_shift_links_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "calendar_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_shift_links_shift_id_fkey"
-            columns: ["shift_id"]
-            isOneToOne: false
-            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]
@@ -784,132 +589,6 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log: {
-        Row: {
-          action: string
-          actor_id: string
-          created_at: string
-          entity: string
-          entity_id: string
-          id: string
-          meta: Json
-        }
-        Insert: {
-          action: string
-          actor_id: string
-          created_at?: string
-          entity: string
-          entity_id: string
-          id?: string
-          meta?: Json
-        }
-        Update: {
-          action?: string
-          actor_id?: string
-          created_at?: string
-          entity?: string
-          entity_id?: string
-          id?: string
-          meta?: Json
-        }
-        Relationships: []
-      }
-      availability_exception: {
-        Row: {
-          approved_by: string | null
-          created_at: string
-          employee_id: string
-          end_date: string
-          id: string
-          reason: string | null
-          start_date: string
-          updated_at: string
-        }
-        Insert: {
-          approved_by?: string | null
-          created_at?: string
-          employee_id: string
-          end_date: string
-          id?: string
-          reason?: string | null
-          start_date: string
-          updated_at?: string
-        }
-        Update: {
-          approved_by?: string | null
-          created_at?: string
-          employee_id?: string
-          end_date?: string
-          id?: string
-          reason?: string | null
-          start_date?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      availability_request: {
-        Row: {
-          created_at: string
-          decision_note: string | null
-          employee_id: string
-          id: string
-          manager_id: string | null
-          payload: Json
-          status: Database["public"]["Enums"]["availability_request_status"]
-          updated_at: string
-          week_start: string
-        }
-        Insert: {
-          created_at?: string
-          decision_note?: string | null
-          employee_id: string
-          id?: string
-          manager_id?: string | null
-          payload?: Json
-          status?: Database["public"]["Enums"]["availability_request_status"]
-          updated_at?: string
-          week_start: string
-        }
-        Update: {
-          created_at?: string
-          decision_note?: string | null
-          employee_id?: string
-          id?: string
-          manager_id?: string | null
-          payload?: Json
-          status?: Database["public"]["Enums"]["availability_request_status"]
-          updated_at?: string
-          week_start?: string
-        }
-        Relationships: []
-      }
-      org_prefs: {
-        Row: {
-          auto_lock_day_of_week: number
-          auto_lock_hour: number
-          availability_lock_mode: Database["public"]["Enums"]["availability_lock_mode"]
-          created_at: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          auto_lock_day_of_week?: number
-          auto_lock_hour?: number
-          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          auto_lock_day_of_week?: number
-          auto_lock_hour?: number
-          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       custom_section_pages: {
         Row: {
           content: Json
@@ -968,7 +647,6 @@ export type Database = {
       }
       custom_sections: {
         Row: {
-          company_id: string
           category: string
           company_id: string
           created_at: string
@@ -1026,7 +704,6 @@ export type Database = {
       }
       departments: {
         Row: {
-          company_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -1036,7 +713,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1046,7 +722,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1057,13 +732,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "departments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "departments_manager_id_fkey"
             columns: ["manager_id"]
             isOneToOne: false
@@ -1072,65 +740,48 @@ export type Database = {
           },
         ]
       }
-      documents: {
+      event_participants: {
         Row: {
-          company_id: string
-          created_at: string
-          doc_date: string | null
-          file_id: string
+          event_id: string
           id: string
-          language: string | null
-          meta: Json
-          processing_error: string | null
-          processing_state: Database["public"]["Enums"]["document_processing_state"]
-          source: string | null
-          text_extracted: string | null
-          title: string | null
-          updated_at: string
+          profile_id: string
+          role: string | null
+          rsvp_status: string | null
         }
         Insert: {
-          company_id?: string
-          created_at?: string
-          doc_date?: string | null
-          file_id: string
+          event_id: string
           id?: string
-          language?: string | null
-          meta?: Json
-          processing_error?: string | null
-          processing_state?: Database["public"]["Enums"]["document_processing_state"]
-          source?: string | null
-          text_extracted?: string | null
-          title?: string | null
-          updated_at?: string
+          profile_id: string
+          role?: string | null
+          rsvp_status?: string | null
         }
         Update: {
-          company_id?: string
-          created_at?: string
-          doc_date?: string | null
-          file_id?: string
+          event_id?: string
           id?: string
-          language?: string | null
-          meta?: Json
-          processing_error?: string | null
-          processing_state?: Database["public"]["Enums"]["document_processing_state"]
-          source?: string | null
-          text_extracted?: string | null
-          title?: string | null
-          updated_at?: string
+          profile_id?: string
+          role?: string | null
+          rsvp_status?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "documents_company_id_fkey"
-            columns: ["company_id"]
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "calendar_events"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "documents_file_id_fkey"
-            columns: ["file_id"]
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: "files"
+            referencedRelation: "calendar_events_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1208,120 +859,6 @@ export type Database = {
           {
             foreignKeyName: "expenses_employee_id_fkey"
             columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      events: {
-        Row: {
-          company_id: string
-          created_at: string
-          details: Json
-          document_id: string | null
-          event_type: Database["public"]["Enums"]["event_type"]
-          id: string
-          occurred_at: string | null
-          severity: Database["public"]["Enums"]["event_severity"]
-          summary: string
-          tags: string[]
-          updated_at: string
-        }
-        Insert: {
-          company_id?: string
-          created_at?: string
-          details?: Json
-          document_id?: string | null
-          event_type: Database["public"]["Enums"]["event_type"]
-          id?: string
-          occurred_at?: string | null
-          severity?: Database["public"]["Enums"]["event_severity"]
-          summary: string
-          tags?: string[]
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          details?: Json
-          document_id?: string | null
-          event_type?: Database["public"]["Enums"]["event_type"]
-          id?: string
-          occurred_at?: string | null
-          severity?: Database["public"]["Enums"]["event_severity"]
-          summary?: string
-          tags?: string[]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "events_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      files: {
-        Row: {
-          checksum: string | null
-          company_id: string
-          file_size: number | null
-          filename: string
-          id: string
-          metadata: Json
-          mime_type: string | null
-          storage_path: string
-          updated_at: string
-          uploaded_at: string
-          uploader_id: string | null
-        }
-        Insert: {
-          checksum?: string | null
-          company_id: string
-          file_size?: number | null
-          filename: string
-          id?: string
-          metadata?: Json
-          mime_type?: string | null
-          storage_path: string
-          updated_at?: string
-          uploaded_at?: string
-          uploader_id?: string | null
-        }
-        Update: {
-          checksum?: string | null
-          company_id?: string
-          file_size?: number | null
-          filename?: string
-          id?: string
-          metadata?: Json
-          mime_type?: string | null
-          storage_path?: string
-          updated_at?: string
-          uploaded_at?: string
-          uploader_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "files_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "files_uploader_id_fkey"
-            columns: ["uploader_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1834,8 +1371,6 @@ export type Database = {
       }
       goal_rewards: {
         Row: {
-          award_rule: string | null
-          company_id: string
           awarded_at: string
           created_by: string
           goal_id: string
@@ -1845,8 +1380,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          award_rule?: string | null
-          company_id?: string
           awarded_at?: string
           created_by: string
           goal_id: string
@@ -1856,8 +1389,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          award_rule?: string | null
-          company_id?: string
           awarded_at?: string
           created_by?: string
           goal_id?: string
@@ -1872,481 +1403,6 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goal_rewards_company_fk"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hr_roster_cache: {
-        Row: {
-          company_id: string
-          snapshot: Json
-          synced_at: string
-        }
-        Insert: {
-          company_id: string
-          snapshot?: Json
-          synced_at?: string
-        }
-        Update: {
-          company_id?: string
-          snapshot?: Json
-          synced_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hr_roster_cache_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gamification_leaderboard: {
-        Row: {
-          achievements: Json
-          badge_codes: string[]
-          badge_tier: string
-          challenges: Json
-          company_id: string
-          created_at: string
-          department_id: string | null
-          employee_id: string
-          id: string
-          insights: Json
-          last_challenge_triggered: string | null
-          last_synced_at: string
-          period: string
-          period_end: string | null
-          period_start: string | null
-          role: string
-          updated_at: string
-          xp_goals: number
-          xp_recognitions: number
-          xp_tasks: number
-          xp_total: number
-          xp_training: number
-        }
-        Insert: {
-          achievements?: Json
-          badge_codes?: string[]
-          badge_tier?: string
-          challenges?: Json
-          company_id: string
-          created_at?: string
-          department_id?: string | null
-          employee_id: string
-          id?: string
-          insights?: Json
-          last_challenge_triggered?: string | null
-          last_synced_at?: string
-          period: string
-          period_end?: string | null
-          period_start?: string | null
-          role: string
-          updated_at?: string
-          xp_goals?: number
-          xp_recognitions?: number
-          xp_tasks?: number
-          xp_total?: number
-          xp_training?: number
-        }
-        Update: {
-          achievements?: Json
-          badge_codes?: string[]
-          badge_tier?: string
-          challenges?: Json
-          company_id?: string
-          created_at?: string
-          department_id?: string | null
-          employee_id?: string
-          id?: string
-          insights?: Json
-          last_challenge_triggered?: string | null
-          last_synced_at?: string
-          period?: string
-          period_end?: string | null
-          period_start?: string | null
-          role?: string
-          updated_at?: string
-          xp_goals?: number
-          xp_recognitions?: number
-          xp_tasks?: number
-          xp_total?: number
-          xp_training?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gamification_leaderboard_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gamification_leaderboard_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gamification_leaderboard_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_courses: {
-        Row: {
-          auto_schedule_eligible: boolean
-          category: string
-          certification_code: string | null
-          certification_id: string | null
-          company_id: string
-          created_at: string
-          created_by: string | null
-          delivery_mode: string
-          description: string | null
-          estimated_hours: number
-          featured: boolean
-          id: string
-          level_requirement: number
-          role_unlock: string[]
-          slug: string
-          target_roles: string[]
-          title: string
-          updated_at: string
-          xp_reward: number
-        }
-        Insert: {
-          auto_schedule_eligible?: boolean
-          company_id?: string
-          category: string
-          certification_code?: string | null
-          certification_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          delivery_mode?: string
-          description?: string | null
-          estimated_hours?: number
-          featured?: boolean
-          id?: string
-          level_requirement?: number
-          role_unlock?: string[]
-          slug: string
-          target_roles?: string[]
-          title: string
-          updated_at?: string
-          xp_reward?: number
-        }
-        Update: {
-          auto_schedule_eligible?: boolean
-          company_id?: string
-          category?: string
-          certification_code?: string | null
-          certification_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          delivery_mode?: string
-          description?: string | null
-          estimated_hours?: number
-          featured?: boolean
-          id?: string
-          level_requirement?: number
-          role_unlock?: string[]
-          slug?: string
-          target_roles?: string[]
-          title?: string
-          updated_at?: string
-          xp_reward?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_courses_company_fk"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_courses_certification_fk"
-            columns: ["certification_code"]
-            isOneToOne: false
-            referencedRelation: "badge_catalog"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "learning_courses_certification_id_fkey"
-            columns: ["certification_id"]
-            isOneToOne: false
-            referencedRelation: "certification_catalog"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_courses_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_completions: {
-        Row: {
-          certification_awarded: string | null
-          company_id: string | null
-          completed_at: string
-          course_id: string
-          employee_id: string
-          id: string
-          metadata: Json
-          passed: boolean
-          xp_earned: number
-        }
-        Insert: {
-          certification_awarded?: string | null
-          company_id?: string | null
-          completed_at?: string
-          course_id: string
-          employee_id: string
-          id?: string
-          metadata?: Json
-          passed?: boolean
-          xp_earned?: number
-        }
-        Update: {
-          certification_awarded?: string | null
-          company_id?: string | null
-          completed_at?: string
-          course_id?: string
-          employee_id?: string
-          id?: string
-          metadata?: Json
-          passed?: boolean
-          xp_earned?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_completions_certification_awarded_fkey"
-            columns: ["certification_awarded"]
-            isOneToOne: false
-            referencedRelation: "certification_catalog"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_completions_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_completions_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "learning_courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_completions_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_enrollments: {
-        Row: {
-          company_id: string
-          completed_at: string | null
-          course_id: string
-          created_at: string
-          current_module: number
-          employee_id: string
-          hours_completed: number
-          id: string
-          last_activity_at: string
-          level: number
-          progress_percent: number
-          started_at: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          company_id?: string
-          completed_at?: string | null
-          course_id: string
-          created_at?: string
-          current_module?: number
-          employee_id: string
-          hours_completed?: number
-          id?: string
-          last_activity_at?: string
-          level?: number
-          progress_percent?: number
-          started_at?: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          company_id?: string
-          completed_at?: string | null
-          course_id?: string
-          created_at?: string
-          current_module?: number
-          employee_id?: string
-          hours_completed?: number
-          id?: string
-          last_activity_at?: string
-          level?: number
-          progress_percent?: number
-          started_at?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_enrollments_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "learning_courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_enrollments_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_enrollments_company_fk"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_modules: {
-        Row: {
-          company_id: string
-          content: string | null
-          course_id: string
-          created_at: string
-          description: string | null
-          estimated_minutes: number
-          id: string
-          order_index: number
-          title: string
-          xp_award: number
-        }
-        Insert: {
-          company_id?: string
-          content?: string | null
-          course_id: string
-          created_at?: string
-          description?: string | null
-          estimated_minutes?: number
-          id?: string
-          order_index?: number
-          title: string
-          xp_award?: number
-        }
-        Update: {
-          company_id?: string
-          content?: string | null
-          course_id?: string
-          created_at?: string
-          description?: string | null
-          estimated_minutes?: number
-          id?: string
-          order_index?: number
-          title?: string
-          xp_award?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_modules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "learning_courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_modules_company_fk"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_progress_events: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          delta_hours: number
-          delta_progress: number
-          enrollment_id: string
-          event_type: string
-          id: string
-          module_id: string | null
-          note: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          delta_hours?: number
-          delta_progress?: number
-          enrollment_id: string
-          event_type: string
-          id?: string
-          module_id?: string | null
-          note?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          delta_hours?: number
-          delta_progress?: number
-          enrollment_id?: string
-          event_type?: string
-          id?: string
-          module_id?: string | null
-          note?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_progress_events_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_progress_events_enrollment_id_fkey"
-            columns: ["enrollment_id"]
-            isOneToOne: false
-            referencedRelation: "learning_enrollments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_progress_events_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "learning_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -2620,209 +1676,6 @@ export type Database = {
       }
       inv_counts: {
         Row: {
-          completed_at: string | null
-          count_date: string
-          count_period: string | null
-          count_type: string
-          counted_by: string
-          created_at: string
-          description: string | null
-          id: string
-          location_id: string | null
-          notes: string | null
-          review_notes: string | null
-          review_status: string
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: string
-          submitted_at: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          count_date?: string
-          count_period?: string | null
-          count_type: string
-          counted_by: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          location_id?: string | null
-          notes?: string | null
-          review_notes?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          submitted_at?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          count_date?: string
-          count_period?: string | null
-          count_type?: string
-          counted_by?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          location_id?: string | null
-          notes?: string | null
-          review_notes?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: string
-          submitted_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_counts_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "inv_locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_counts_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_count_events: {
-        Row: {
-          actor_id: string | null
-          count_id: string
-          created_at: string
-          event_type: string
-          id: string
-          payload: Json
-        }
-        Insert: {
-          actor_id?: string | null
-          count_id: string
-          created_at?: string
-          event_type: string
-          id?: string
-          payload?: Json
-        }
-        Update: {
-          actor_id?: string | null
-          count_id?: string
-          created_at?: string
-          event_type?: string
-          id?: string
-          payload?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_count_events_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_count_events_count_id_fkey"
-            columns: ["count_id"]
-            isOneToOne: false
-            referencedRelation: "inv_counts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_count_locations: {
-        Row: {
-          count_id: string
-          created_at: string
-          id: string
-          location_id: string
-        }
-        Insert: {
-          count_id: string
-          created_at?: string
-          id?: string
-          location_id: string
-        }
-        Update: {
-          count_id?: string
-          created_at?: string
-          id?: string
-          location_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_count_locations_count_id_fkey"
-            columns: ["count_id"]
-            isOneToOne: false
-            referencedRelation: "inv_counts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_count_locations_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "inv_locations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_count_scans: {
-        Row: {
-          count_id: string
-          id: string
-          item_id: string | null
-          metadata: Json
-          scan_type: string
-          scanned_at: string
-          scanned_by: string | null
-          scanned_code: string
-        }
-        Insert: {
-          count_id: string
-          id?: string
-          item_id?: string | null
-          metadata?: Json
-          scan_type?: string
-          scanned_at?: string
-          scanned_by?: string | null
-          scanned_code: string
-        }
-        Update: {
-          count_id?: string
-          id?: string
-          item_id?: string | null
-          metadata?: Json
-          scan_type?: string
-          scanned_at?: string
-          scanned_by?: string | null
-          scanned_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_count_scans_count_id_fkey"
-            columns: ["count_id"]
-            isOneToOne: false
-            referencedRelation: "inv_counts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_count_scans_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inv_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_count_scans_scanned_by_fkey"
-            columns: ["scanned_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
           completed_at: string | null
           count_date: string
           count_type: string
@@ -3217,240 +2070,6 @@ export type Database = {
           },
         ]
       }
-      inv_production_approvals: {
-        Row: {
-          action: string
-          action_at: string
-          action_by: string
-          id: string
-          notes: string | null
-          production_id: string
-        }
-        Insert: {
-          action: string
-          action_at?: string
-          action_by: string
-          id?: string
-          notes?: string | null
-          production_id: string
-        }
-        Update: {
-          action?: string
-          action_at?: string
-          action_by?: string
-          id?: string
-          notes?: string | null
-          production_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_production_approvals_action_by_fkey"
-            columns: ["action_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_approvals_production_id_fkey"
-            columns: ["production_id"]
-            isOneToOne: false
-            referencedRelation: "inv_production_events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_production_events: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          approval_status: string
-          batch_reference: string | null
-          company_id: string
-          created_at: string
-          created_by: string
-          id: string
-          item_id: string
-          labor_cost: number
-          material_cost: number
-          notes: string | null
-          overhead_cost: number
-          produced_at: string
-          produced_quantity: number
-          produced_unit_id: string
-          production_type: string
-          total_output_cost: number
-          unit_output_cost: number | null
-          updated_at: string
-          yield_quantity: number | null
-          yield_unit_id: string | null
-          waste_quantity: number | null
-          waste_unit_id: string | null
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          approval_status?: string
-          batch_reference?: string | null
-          company_id: string
-          created_at?: string
-          created_by: string
-          id?: string
-          item_id: string
-          labor_cost?: number
-          material_cost?: number
-          notes?: string | null
-          overhead_cost?: number
-          produced_at?: string
-          produced_quantity: number
-          produced_unit_id: string
-          production_type: string
-          total_output_cost?: number
-          unit_output_cost?: number | null
-          updated_at?: string
-          yield_quantity?: number | null
-          yield_unit_id?: string | null
-          waste_quantity?: number | null
-          waste_unit_id?: string | null
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          approval_status?: string
-          batch_reference?: string | null
-          company_id?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          item_id?: string
-          labor_cost?: number
-          material_cost?: number
-          notes?: string | null
-          overhead_cost?: number
-          produced_at?: string
-          produced_quantity?: number
-          produced_unit_id?: string
-          production_type?: string
-          total_output_cost?: number
-          unit_output_cost?: number | null
-          updated_at?: string
-          yield_quantity?: number | null
-          yield_unit_id?: string | null
-          waste_quantity?: number | null
-          waste_unit_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_production_events_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inv_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_produced_unit_id_fkey"
-            columns: ["produced_unit_id"]
-            isOneToOne: false
-            referencedRelation: "inv_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_waste_unit_id_fkey"
-            columns: ["waste_unit_id"]
-            isOneToOne: false
-            referencedRelation: "inv_units"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_events_yield_unit_id_fkey"
-            columns: ["yield_unit_id"]
-            isOneToOne: false
-            referencedRelation: "inv_units"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_production_materials: {
-        Row: {
-          created_at: string
-          id: string
-          ingredient_item_id: string
-          production_id: string
-          quantity_used: number
-          total_cost: number | null
-          unit_cost: number | null
-          unit_id: string
-          updated_at: string
-          waste_quantity: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          ingredient_item_id: string
-          production_id: string
-          quantity_used: number
-          total_cost?: number | null
-          unit_cost?: number | null
-          unit_id: string
-          updated_at?: string
-          waste_quantity?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          ingredient_item_id?: string
-          production_id?: string
-          quantity_used?: number
-          total_cost?: number | null
-          unit_cost?: number | null
-          unit_id?: string
-          updated_at?: string
-          waste_quantity?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_production_materials_ingredient_item_id_fkey"
-            columns: ["ingredient_item_id"]
-            isOneToOne: false
-            referencedRelation: "inv_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_materials_production_id_fkey"
-            columns: ["production_id"]
-            isOneToOne: false
-            referencedRelation: "inv_production_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_production_materials_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "inv_units"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       inv_purchase_lines: {
         Row: {
           expiration_date: string | null
@@ -3742,224 +2361,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      inv_transfer_audit: {
-        Row: {
-          action: string
-          actor_id: string | null
-          created_at: string
-          id: string
-          new_status: string | null
-          new_values: Json | null
-          note: string | null
-          old_status: string | null
-          old_values: Json | null
-          transfer_id: string
-        }
-        Insert: {
-          action: string
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          new_status?: string | null
-          new_values?: Json | null
-          note?: string | null
-          old_status?: string | null
-          old_values?: Json | null
-          transfer_id: string
-        }
-        Update: {
-          action?: string
-          actor_id?: string | null
-          created_at?: string
-          id?: string
-          new_status?: string | null
-          new_values?: Json | null
-          note?: string | null
-          old_status?: string | null
-          old_values?: Json | null
-          transfer_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_transfer_audit_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfer_audit_transfer_id_fkey"
-            columns: ["transfer_id"]
-            isOneToOne: false
-            referencedRelation: "inv_transfers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_transfer_items: {
-        Row: {
-          cost_per_unit: number | null
-          created_at: string
-          id: string
-          item_id: string
-          quantity: number
-          total_cost: number | null
-          transfer_id: string
-          unit_id: string
-        }
-        Insert: {
-          cost_per_unit?: number | null
-          created_at?: string
-          id?: string
-          item_id: string
-          quantity: number
-          total_cost?: number | null
-          transfer_id: string
-          unit_id: string
-        }
-        Update: {
-          cost_per_unit?: number | null
-          created_at?: string
-          id?: string
-          item_id?: string
-          quantity?: number
-          total_cost?: number | null
-          transfer_id?: string
-          unit_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_transfer_items_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "inv_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfer_items_transfer_id_fkey"
-            columns: ["transfer_id"]
-            isOneToOne: false
-            referencedRelation: "inv_transfers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfer_items_unit_id_fkey"
-            columns: ["unit_id"]
-            isOneToOne: false
-            referencedRelation: "inv_units"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inv_transfers: {
-        Row: {
-          comments: string | null
-          company_id: string
-          created_at: string
-          delivery_date: string | null
-          fulfiller_id: string
-          from_location_id: string
-          id: string
-          received_at: string | null
-          recipient_id: string
-          rejected_at: string | null
-          requested_at: string
-          requested_by: string
-          sent_at: string | null
-          status: string
-          status_note: string | null
-          to_location_id: string
-          total_cost: number
-          total_quantity: number
-          updated_at: string
-        }
-        Insert: {
-          comments?: string | null
-          company_id?: string
-          created_at?: string
-          delivery_date?: string | null
-          fulfiller_id: string
-          from_location_id: string
-          id?: string
-          received_at?: string | null
-          recipient_id: string
-          rejected_at?: string | null
-          requested_at?: string
-          requested_by?: string
-          sent_at?: string | null
-          status?: string
-          status_note?: string | null
-          to_location_id: string
-          total_cost?: number
-          total_quantity?: number
-          updated_at?: string
-        }
-        Update: {
-          comments?: string | null
-          company_id?: string
-          created_at?: string
-          delivery_date?: string | null
-          fulfiller_id?: string
-          from_location_id?: string
-          id?: string
-          received_at?: string | null
-          recipient_id?: string
-          rejected_at?: string | null
-          requested_at?: string
-          requested_by?: string
-          sent_at?: string | null
-          status?: string
-          status_note?: string | null
-          to_location_id?: string
-          total_cost?: number
-          total_quantity?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inv_transfers_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfers_fulfiller_id_fkey"
-            columns: ["fulfiller_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfers_from_location_id_fkey"
-            columns: ["from_location_id"]
-            isOneToOne: false
-            referencedRelation: "inv_locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfers_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfers_requested_by_fkey"
-            columns: ["requested_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inv_transfers_to_location_id_fkey"
-            columns: ["to_location_id"]
-            isOneToOne: false
-            referencedRelation: "inv_locations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       inv_units: {
         Row: {
@@ -4406,6 +2807,33 @@ export type Database = {
           },
         ]
       }
+      org_prefs: {
+        Row: {
+          auto_lock_day_of_week: number
+          auto_lock_hour: number
+          availability_lock_mode: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          auto_lock_day_of_week?: number
+          auto_lock_hour?: number
+          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_lock_day_of_week?: number
+          auto_lock_hour?: number
+          availability_lock_mode?: Database["public"]["Enums"]["availability_lock_mode"]
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_approvals: {
         Row: {
           approver_id: string
@@ -4535,92 +2963,6 @@ export type Database = {
           },
         ]
       }
-      idea_actions: {
-        Row: {
-          action_name: string
-          company_id: string
-          created_at: string
-          cycle_id: string | null
-          id: string
-          result: Json | null
-          status: string
-        }
-        Insert: {
-          action_name: string
-          company_id: string
-          created_at?: string
-          cycle_id?: string | null
-          id?: string
-          result?: Json | null
-          status?: string
-        }
-        Update: {
-          action_name?: string
-          company_id?: string
-          created_at?: string
-          cycle_id?: string | null
-          id?: string
-          result?: Json | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "idea_actions_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "idea_actions_cycle_id_fkey"
-            columns: ["cycle_id"]
-            isOneToOne: false
-            referencedRelation: "idea_cycles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      idea_cycles: {
-        Row: {
-          actions: Json | null
-          assessments: Json | null
-          company_id: string | null
-          created_at: string | null
-          id: string
-          insights: Json | null
-          range: unknown
-          stage: string
-        }
-        Insert: {
-          actions?: Json | null
-          assessments?: Json | null
-          company_id?: string | null
-          created_at?: string | null
-          id?: string
-          insights?: Json | null
-          range: unknown
-          stage: string
-        }
-        Update: {
-          actions?: Json | null
-          assessments?: Json | null
-          company_id?: string | null
-          created_at?: string | null
-          id?: string
-          insights?: Json | null
-          range?: unknown
-          stage?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "idea_cycles_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       position_assignments: {
         Row: {
           assigned_at: string | null
@@ -4741,7 +3083,6 @@ export type Database = {
           emergency_contact: Json | null
           employee_id: string | null
           employment_status: Database["public"]["Enums"]["employment_status"]
-          eligible_for_schedule: boolean
           first_name: string
           hire_date: string | null
           id: string
@@ -4765,7 +3106,6 @@ export type Database = {
           emergency_contact?: Json | null
           employee_id?: string | null
           employment_status?: Database["public"]["Enums"]["employment_status"]
-          eligible_for_schedule?: boolean
           first_name: string
           hire_date?: string | null
           id: string
@@ -4789,7 +3129,6 @@ export type Database = {
           emergency_contact?: Json | null
           employee_id?: string | null
           employment_status?: Database["public"]["Enums"]["employment_status"]
-          eligible_for_schedule?: boolean
           first_name?: string
           hire_date?: string | null
           id?: string
@@ -5444,47 +3783,6 @@ export type Database = {
           },
         ]
       }
-      skill_matrix: {
-        Row: {
-          created_at: string
-          employee_id: string
-          id: string
-          last_review: string | null
-          level: number
-          role: string
-          updated_at: string
-          xp: number
-        }
-        Insert: {
-          created_at?: string
-          employee_id: string
-          id?: string
-          last_review?: string | null
-          level?: number
-          role: string
-          updated_at?: string
-          xp?: number
-        }
-        Update: {
-          created_at?: string
-          employee_id?: string
-          id?: string
-          last_review?: string | null
-          level?: number
-          role?: string
-          updated_at?: string
-          xp?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "skill_matrix_employee_fk"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       staff_availability: {
         Row: {
           created_at: string | null
@@ -5563,59 +3861,8 @@ export type Database = {
         }
         Relationships: []
       }
-      system_settings: {
-        Row: {
-          admin_config: Json
-          appearance: Json
-          company_id: string
-          created_at: string
-          general: Json
-          id: string
-          integrations: Json
-          localization: Json
-          notifications: Json
-          security: Json
-          updated_at: string
-        }
-        Insert: {
-          admin_config?: Json
-          appearance?: Json
-          company_id: string
-          created_at?: string
-          general?: Json
-          id?: string
-          integrations?: Json
-          localization?: Json
-          notifications?: Json
-          security?: Json
-          updated_at?: string
-        }
-        Update: {
-          admin_config?: Json
-          appearance?: Json
-          company_id?: string
-          created_at?: string
-          general?: Json
-          id?: string
-          integrations?: Json
-          localization?: Json
-          notifications?: Json
-          security?: Json
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "system_settings_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       task_activities: {
         Row: {
-          company_id: string
           action_type: string
           created_at: string
           description: string
@@ -5625,7 +3872,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          company_id: string
           action_type: string
           created_at?: string
           description: string
@@ -5635,7 +3881,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          company_id?: string
           action_type?: string
           created_at?: string
           description?: string
@@ -5645,13 +3890,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "task_activities_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "task_activities_task_id_fkey"
             columns: ["task_id"]
@@ -5744,7 +3982,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       task_workflow_instances: {
@@ -5814,21 +4052,15 @@ export type Database = {
           created_at: string
           created_by: string
           department_id: string | null
-          goal_id: string | null
           description: string | null
           due_date: string | null
           estimated_hours: number | null
           id: string
-          links: Json
           parent_task_id: string | null
           priority: Database["public"]["Enums"]["task_priority"]
-          origin_document_id: string | null
-          origin_event_id: string | null
           status: Database["public"]["Enums"]["task_status"]
-          source: Database["public"]["Enums"]["task_source"]
           tags: string[] | null
           title: string
-          company_id: string | null
           updated_at: string
           workflow_id: string | null
         }
@@ -5840,21 +4072,15 @@ export type Database = {
           created_at?: string
           created_by: string
           department_id?: string | null
-          goal_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number | null
           id?: string
-          links?: Json
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
-          origin_document_id?: string | null
-          origin_event_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
-          source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title: string
-          company_id?: string | null
           updated_at?: string
           workflow_id?: string | null
         }
@@ -5866,21 +4092,15 @@ export type Database = {
           created_at?: string
           created_by?: string
           department_id?: string | null
-          goal_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number | null
           id?: string
-          links?: Json
           parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
-          origin_document_id?: string | null
-          origin_event_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
-          source?: Database["public"]["Enums"]["task_source"]
           tags?: string[] | null
           title?: string
-          company_id?: string | null
           updated_at?: string
           workflow_id?: string | null
         }
@@ -5911,27 +4131,6 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_origin_document_id_fkey"
-            columns: ["origin_document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_origin_event_id_fkey"
-            columns: ["origin_event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -5983,7 +4182,6 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
-          company_id: string | null
           created_at: string
           end_date: string
           id: string
@@ -5998,7 +4196,6 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
-          company_id?: string | null
           created_at?: string
           end_date: string
           id?: string
@@ -6013,7 +4210,6 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
-          company_id?: string | null
           created_at?: string
           end_date?: string
           id?: string
@@ -6025,15 +4221,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "time_off_requests_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_companies: {
         Row: {
@@ -6168,6 +4356,79 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_visits: {
+        Row: {
+          company_id: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          end_time: string
+          id: string
+          integration_id: string | null
+          integration_type: string | null
+          linked_event_id: string | null
+          location: string | null
+          service_type: string | null
+          start_time: string
+          vendor_name: string
+        }
+        Insert: {
+          company_id: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          id?: string
+          integration_id?: string | null
+          integration_type?: string | null
+          linked_event_id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time: string
+          vendor_name: string
+        }
+        Update: {
+          company_id?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          integration_id?: string | null
+          integration_type?: string | null
+          linked_event_id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time?: string
+          vendor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_visits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_visits_linked_event_id_fkey"
+            columns: ["linked_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_visits_linked_event_id_fkey"
+            columns: ["linked_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events_full"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       week_templates: {
         Row: {
           company_id: string | null
@@ -6278,7 +4539,7 @@ export type Database = {
           conditions: Json | null
           created_at: string
           description: string | null
-          estimated_duration: unknown | null
+          estimated_duration: unknown
           id: string
           name: string
           required: boolean | null
@@ -6294,7 +4555,7 @@ export type Database = {
           conditions?: Json | null
           created_at?: string
           description?: string | null
-          estimated_duration?: unknown | null
+          estimated_duration?: unknown
           id?: string
           name: string
           required?: boolean | null
@@ -6310,7 +4571,7 @@ export type Database = {
           conditions?: Json | null
           created_at?: string
           description?: string | null
-          estimated_duration?: unknown | null
+          estimated_duration?: unknown
           id?: string
           name?: string
           required?: boolean | null
@@ -6392,16 +4653,88 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      calendar_events_full: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          end_time: string | null
+          event_type: string | null
+          id: string | null
+          location: string | null
+          participants: Json | null
+          start_time: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_event: {
+        Row: {
+          company_id: string | null
+          description: string | null
+          end_time: string | null
+          id: string | null
+          location: string | null
+          service_type: string | null
+          start_time: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time?: string | null
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_visits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_access_channel_members: {
         Args: { channel_id: string; user_id: string }
         Returns: boolean
       }
-      create_company_invite: {
-        Args:
-          | {
+      create_company_invite:
+        | {
+            Args: {
               company_uuid: string
               employee_birth_date?: string
               employee_first_name?: string
@@ -6410,9 +4743,16 @@ export type Database = {
               invite_email: string
               invite_role?: string
             }
-          | { company_uuid: string; invite_email: string; invite_role?: string }
-        Returns: string
-      }
+            Returns: string
+          }
+        | {
+            Args: {
+              company_uuid: string
+              invite_email: string
+              invite_role?: string
+            }
+            Returns: string
+          }
       create_company_with_owner: {
         Args: {
           company_data: Json
@@ -6434,10 +4774,7 @@ export type Database = {
         }
         Returns: string
       }
-      generate_invite_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_invite_token: { Args: never; Returns: string }
       get_company_roles: {
         Args: { company_uuid?: string }
         Returns: {
@@ -6452,55 +4789,29 @@ export type Database = {
           permissions: Json
         }[]
       }
-      get_user_company_id: {
-        Args: { user_uuid?: string }
-        Returns: string
-      }
-      get_user_role: {
-        Args: { user_uuid?: string }
-        Returns: string
-      }
-      has_role: {
-        Args:
-          | {
+      get_user_company_id: { Args: { user_uuid?: string }; Returns: string }
+      get_user_role: { Args: { user_uuid?: string }; Returns: string }
+      has_role:
+        | { Args: { _role: string; _user_id: string }; Returns: boolean }
+        | {
+            Args: {
               _role: Database["public"]["Enums"]["user_role"]
               _user_id: string
             }
-          | { _role: string; _user_id: string }
-        Returns: boolean
-      }
-      is_admin_or_manager: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      is_company_admin: {
-        Args: { user_uuid?: string }
-        Returns: boolean
-      }
-      optimize_rls_init: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      replace_event_participants: {
-        Args: { p_company_id: string; p_event_id: string; p_participants?: Json }
-        Returns: null
-      }
-      replace_event_shift_links: {
-        Args: { p_company_id: string; p_event_id: string; p_shift_ids?: string[] }
-        Returns: null
-      }
+            Returns: boolean
+          }
+      is_admin_or_manager: { Args: { _user_id: string }; Returns: boolean }
+      is_company_admin: { Args: { user_uuid?: string }; Returns: boolean }
+      optimize_rls_init: { Args: never; Returns: undefined }
       register_company_v2: {
         Args: { p_locale?: string; p_name: string; p_timezone?: string }
         Returns: string
       }
     }
     Enums: {
+      approval_status: "pending" | "approved" | "rejected"
       availability_lock_mode: "auto" | "open" | "lock"
       availability_request_status: "pending" | "approved" | "denied"
-      certification_status: "available" | "in_progress" | "earned" | "expired"
-      employee_report_category: "performance" | "attendance" | "behavior" | "customer"
-      promotion_status: "pending" | "approved" | "rejected"
-      approval_status: "pending" | "approved" | "rejected"
       department_type:
         | "hr"
         | "finance"
@@ -6510,15 +4821,7 @@ export type Database = {
         | "it"
         | "customer_service"
         | "management"
-      document_processing_state: "pending" | "processing" | "ready" | "error"
       employment_status: "active" | "inactive" | "terminated" | "on_leave"
-      event_severity: "low" | "medium" | "high"
-      event_type:
-        | "incident"
-        | "customer_complaint"
-        | "prep_gap"
-        | "policy_violation"
-        | "other"
       field_type:
         | "text"
         | "email"
@@ -6567,7 +4870,6 @@ export type Database = {
         | "task"
         | "image_selection"
       form_status: "draft" | "published" | "archived"
-      learning_course_status: "not_started" | "in_progress" | "completed"
       schedule_status:
         | "scheduled"
         | "confirmed"
@@ -6576,8 +4878,7 @@ export type Database = {
         | "no_show"
       schedule_type: "shift" | "meeting" | "task" | "break" | "time_off"
       task_priority: "low" | "medium" | "high" | "urgent"
-      task_source: "manual" | "from_report" | "auto"
-      task_status: "todo" | "in_progress" | "review" | "blocked" | "done" | "cancelled" | "completed"
+      task_status: "todo" | "in_progress" | "review" | "completed" | "cancelled"
       time_entry_type: "clock_in" | "clock_out" | "break_start" | "break_end"
       user_role:
         | "admin"
@@ -6713,9 +5014,14 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       approval_status: ["pending", "approved", "rejected"],
+      availability_lock_mode: ["auto", "open", "lock"],
+      availability_request_status: ["pending", "approved", "denied"],
       department_type: [
         "hr",
         "finance",
@@ -6726,17 +5032,7 @@ export const Constants = {
         "customer_service",
         "management",
       ],
-      document_processing_state: ["pending", "processing", "ready", "error"],
       employment_status: ["active", "inactive", "terminated", "on_leave"],
-      certification_status: ["available", "in_progress", "earned", "expired"],
-      event_severity: ["low", "medium", "high"],
-      event_type: [
-        "incident",
-        "customer_complaint",
-        "prep_gap",
-        "policy_violation",
-        "other",
-      ],
       field_type: [
         "text",
         "email",
@@ -6787,7 +5083,6 @@ export const Constants = {
         "image_selection",
       ],
       form_status: ["draft", "published", "archived"],
-      learning_course_status: ["not_started", "in_progress", "completed"],
       schedule_status: [
         "scheduled",
         "confirmed",
@@ -6797,8 +5092,7 @@ export const Constants = {
       ],
       schedule_type: ["shift", "meeting", "task", "break", "time_off"],
       task_priority: ["low", "medium", "high", "urgent"],
-      task_source: ["manual", "from_report", "auto"],
-      task_status: ["todo", "in_progress", "review", "blocked", "done", "cancelled", "completed"],
+      task_status: ["todo", "in_progress", "review", "completed", "cancelled"],
       time_entry_type: ["clock_in", "clock_out", "break_start", "break_end"],
       user_role: [
         "admin",
@@ -6813,711 +5107,3 @@ export const Constants = {
     },
   },
 } as const
-      badge_catalog: {
-        Row: {
-          code: string
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          min_level: number | null
-          role: string | null
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          min_level?: number | null
-          role?: string | null
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          min_level?: number | null
-          role?: string | null
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      certification_catalog: {
-        Row: {
-          badge_code: string | null
-          code: string
-          created_at: string
-          description: string | null
-          id: string
-          issuer: string | null
-          linked_course_id: string | null
-          requirement_config: Json
-          title: string
-          unlocks_role: string | null
-          updated_at: string
-          xp_reward: number
-        }
-        Insert: {
-          badge_code?: string | null
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          issuer?: string | null
-          linked_course_id?: string | null
-          requirement_config?: Json
-          title: string
-          unlocks_role?: string | null
-          updated_at?: string
-          xp_reward?: number
-        }
-        Update: {
-          badge_code?: string | null
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          issuer?: string | null
-          linked_course_id?: string | null
-          requirement_config?: Json
-          title?: string
-          unlocks_role?: string | null
-          updated_at?: string
-          xp_reward?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "certification_catalog_badge_code_fkey"
-            columns: ["badge_code"]
-            isOneToOne: false
-            referencedRelation: "badge_catalog"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "certification_catalog_linked_course_id_fkey"
-            columns: ["linked_course_id"]
-            isOneToOne: false
-            referencedRelation: "learning_courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      certification_progress: {
-        Row: {
-          achieved_at: string | null
-          certification_code: string
-          courses_completed: number
-          created_at: string
-          employee_id: string
-          expires_at: string | null
-          goals_completed: number
-          id: string
-          last_evaluated_at: string
-          progress_percent: number
-          requirement_breakdown: Json | null
-          status: Database["public"]["Enums"]["certification_status"]
-          tasks_completed: number
-          updated_at: string
-          xp_earned: number
-        }
-        Insert: {
-          achieved_at?: string | null
-          certification_code: string
-          courses_completed?: number
-          created_at?: string
-          employee_id: string
-          expires_at?: string | null
-          goals_completed?: number
-          id?: string
-          last_evaluated_at?: string
-          progress_percent?: number
-          requirement_breakdown?: Json | null
-          status?: Database["public"]["Enums"]["certification_status"]
-          tasks_completed?: number
-          updated_at?: string
-          xp_earned?: number
-        }
-        Update: {
-          achieved_at?: string | null
-          certification_code?: string
-          courses_completed?: number
-          created_at?: string
-          employee_id?: string
-          expires_at?: string | null
-          goals_completed?: number
-          id?: string
-          last_evaluated_at?: string
-          progress_percent?: number
-          requirement_breakdown?: Json | null
-          status?: Database["public"]["Enums"]["certification_status"]
-          tasks_completed?: number
-          updated_at?: string
-          xp_earned?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "certification_progress_certification_code_fkey"
-            columns: ["certification_code"]
-            isOneToOne: false
-            referencedRelation: "certification_catalog"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "certification_progress_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_certifications: {
-        Row: {
-          awarded_at: string
-          awarded_by: string | null
-          certification_id: string
-          employee_id: string
-          id: string
-          notes: string | null
-        }
-        Insert: {
-          awarded_at?: string
-          awarded_by?: string | null
-          certification_id: string
-          employee_id: string
-          id?: string
-          notes?: string | null
-        }
-        Update: {
-          awarded_at?: string
-          awarded_by?: string | null
-          certification_id?: string
-          employee_id?: string
-          id?: string
-          notes?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_certifications_awarded_by_fkey"
-            columns: ["awarded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_certifications_certification_id_fkey"
-            columns: ["certification_id"]
-            isOneToOne: false
-            referencedRelation: "certification_catalog"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_certifications_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_badge: {
-        Row: {
-          awarded_at: string
-          awarded_by: string | null
-          badge_code: string
-          created_at: string
-          employee_id: string
-          id: string
-          reason: string | null
-        }
-        Insert: {
-          awarded_at?: string
-          awarded_by?: string | null
-          badge_code: string
-          created_at?: string
-          employee_id: string
-          id?: string
-          reason?: string | null
-        }
-        Update: {
-          awarded_at?: string
-          awarded_by?: string | null
-          badge_code?: string
-          created_at?: string
-          employee_id?: string
-          id?: string
-          reason?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_badge_awarded_by_fk"
-            columns: ["awarded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_badge_badge_fk"
-            columns: ["badge_code"]
-            isOneToOne: false
-            referencedRelation: "badge_catalog"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "employee_badge_employee_fk"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_report: {
-        Row: {
-          category: Database["public"]["Enums"]["employee_report_category"]
-          created_at: string
-          created_by: string
-          date: string
-          employee_id: string
-          id: string
-          notes: string | null
-          severity: number
-          updated_at: string
-        }
-        Insert: {
-          category: Database["public"]["Enums"]["employee_report_category"]
-          created_at?: string
-          created_by: string
-          date: string
-          employee_id: string
-          id?: string
-          notes?: string | null
-          severity: number
-          updated_at?: string
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["employee_report_category"]
-          created_at?: string
-          created_by?: string
-          date?: string
-          employee_id?: string
-          id?: string
-          notes?: string | null
-          severity?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_report_created_by_fk"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_report_employee_fk"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_course_progress: {
-        Row: {
-          completed_at: string | null
-          course_code: string
-          created_at: string
-          employee_id: string
-          id: string
-          last_interaction_at: string | null
-          progress_percent: number
-          started_at: string | null
-          status: Database["public"]["Enums"]["learning_course_status"]
-          updated_at: string
-        }
-        Insert: {
-          completed_at?: string | null
-          course_code: string
-          created_at?: string
-          employee_id: string
-          id?: string
-          last_interaction_at?: string | null
-          progress_percent?: number
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["learning_course_status"]
-          updated_at?: string
-        }
-        Update: {
-          completed_at?: string | null
-          course_code?: string
-          created_at?: string
-          employee_id?: string
-          id?: string
-          last_interaction_at?: string | null
-          progress_percent?: number
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["learning_course_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_course_progress_course_code_fkey"
-            columns: ["course_code"]
-            isOneToOne: false
-            referencedRelation: "learning_courses"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "learning_course_progress_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      learning_courses: {
-        Row: {
-          category: string | null
-          code: string
-          created_at: string
-          description: string | null
-          duration_minutes: number | null
-          id: string
-          level: string | null
-          metadata: Json | null
-          title: string
-          updated_at: string
-          xp_value: number
-        }
-        Insert: {
-          category?: string | null
-          code: string
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          level?: string | null
-          metadata?: Json | null
-          title: string
-          updated_at?: string
-          xp_value?: number
-        }
-        Update: {
-          category?: string | null
-          code?: string
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          level?: string | null
-          metadata?: Json | null
-          title?: string
-          updated_at?: string
-          xp_value?: number
-        }
-        Relationships: []
-      }
-      learning_progress: {
-        Row: {
-          ai_recommendation: string | null
-          enrollment_id: string
-          id: string
-          metadata: Json | null
-          module_id: string | null
-          progress_percent: number
-          recorded_at: string
-          recorded_by: string | null
-          quiz_score: number | null
-          time_spent_minutes: number
-        }
-        Insert: {
-          ai_recommendation?: string | null
-          enrollment_id: string
-          id?: string
-          metadata?: Json | null
-          module_id?: string | null
-          progress_percent?: number
-          recorded_at?: string
-          recorded_by?: string | null
-          quiz_score?: number | null
-          time_spent_minutes?: number
-        }
-        Update: {
-          ai_recommendation?: string | null
-          enrollment_id?: string
-          id?: string
-          metadata?: Json | null
-          module_id?: string | null
-          progress_percent?: number
-          recorded_at?: string
-          recorded_by?: string | null
-          quiz_score?: number | null
-          time_spent_minutes?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learning_progress_enrollment_id_fkey"
-            columns: ["enrollment_id"]
-            isOneToOne: false
-            referencedRelation: "learning_enrollments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_progress_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "learning_modules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learning_progress_recorded_by_fkey"
-            columns: ["recorded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      performance_reviews: {
-        Row: {
-          action_items: Json
-          ai_insight_id: string | null
-          ai_summary: string | null
-          company_id: string
-          created_at: string
-          employee_id: string
-          goal_id: string | null
-          id: string
-          review_cycle: string
-          review_date: string
-          review_period_end: string | null
-          review_period_start: string | null
-          reviewer_id: string | null
-          score: number
-          summary: string | null
-          updated_at: string
-        }
-        Insert: {
-          action_items?: Json
-          ai_insight_id?: string | null
-          ai_summary?: string | null
-          company_id: string
-          created_at?: string
-          employee_id: string
-          goal_id?: string | null
-          id?: string
-          review_cycle?: string
-          review_date?: string
-          review_period_end?: string | null
-          review_period_start?: string | null
-          reviewer_id?: string | null
-          score: number
-          summary?: string | null
-          updated_at?: string
-        }
-        Update: {
-          action_items?: Json
-          ai_insight_id?: string | null
-          ai_summary?: string | null
-          company_id?: string
-          created_at?: string
-          employee_id?: string
-          goal_id?: string | null
-          id?: string
-          review_cycle?: string
-          review_date?: string
-          review_period_end?: string | null
-          review_period_start?: string | null
-          reviewer_id?: string | null
-          score?: number
-          summary?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "performance_reviews_ai_insight_id_fkey"
-            columns: ["ai_insight_id"]
-            isOneToOne: false
-            referencedRelation: "ai_insights"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "performance_reviews_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "performance_reviews_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "performance_reviews_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "performance_reviews_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      performance_goal_reviews: {
-        Row: {
-          action_items: Json
-          ai_insight_id: string | null
-          ai_summary: string | null
-          company_id: string
-          created_at: string
-          employee_id: string
-          goal_completed_at: string | null
-          goal_id: string | null
-          goal_owner_id: string | null
-          goal_priority: string | null
-          goal_progress: number | null
-          goal_status: string | null
-          goal_title: string | null
-          insight_data: Json | null
-          insight_expires_at: string | null
-          insight_generated_at: string | null
-          insight_type: string | null
-          review_cycle: string
-          review_date: string
-          review_id: string
-          review_period_end: string | null
-          review_period_start: string | null
-          reviewer_id: string | null
-          score: number
-          summary: string | null
-          target_completion_date: string | null
-          updated_at: string
-        }
-        Insert: never
-        Update: never
-        Relationships: []
-      }
-      promotion_proposal: {
-        Row: {
-          created_at: string
-          decided_at: string | null
-          decided_by: string | null
-          employee_id: string
-          id: string
-          proposed_level: number
-          proposed_role: string
-          rationale: string | null
-          status: Database["public"]["Enums"]["promotion_status"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          decided_at?: string | null
-          decided_by?: string | null
-          employee_id: string
-          id?: string
-          proposed_level: number
-          proposed_role: string
-          rationale?: string | null
-          status?: Database["public"]["Enums"]["promotion_status"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          decided_at?: string | null
-          decided_by?: string | null
-          employee_id?: string
-          id?: string
-          proposed_level?: number
-          proposed_role?: string
-          rationale?: string | null
-          status?: Database["public"]["Enums"]["promotion_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "promotion_proposal_decided_by_fk"
-            columns: ["decided_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "promotion_proposal_employee_fk"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      recognition_award_rules: {
-        Row: {
-          active: boolean
-          badge_code: string | null
-          code: string
-          company_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          metadata: Json
-          threshold: number
-          trigger_type: string
-          updated_at: string
-          xp_award: number
-        }
-        Insert: {
-          active?: boolean
-          badge_code?: string | null
-          code: string
-          company_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json
-          threshold: number
-          trigger_type: string
-          updated_at?: string
-          xp_award?: number
-        }
-        Update: {
-          active?: boolean
-          badge_code?: string | null
-          code?: string
-          company_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json
-          threshold?: number
-          trigger_type?: string
-          updated_at?: string
-          xp_award?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recognition_award_rules_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }

@@ -8,6 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import * as Icons from 'lucide-react';
 import { ProcessedNavigationItem } from '@/hooks/useNavigationData';
+import { cn } from '@/lib/utils';
 
 interface NavigationItemProps {
   item: ProcessedNavigationItem;
@@ -64,26 +65,32 @@ const NavigationItemComponent = ({ item }: NavigationItemProps) => {
       <SidebarMenuButton
         asChild
         isActive={item.isActive}
-        className="rounded-xl"
+        className={cn(
+          'rounded-xl',
+          isCollapsed && 'rounded-full'
+        )}
       >
         <button
           onClick={handleNavigation}
           data-active={item.isActive}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-xl border transition-all duration-300 group relative overflow-hidden animate-reduced-motion-safe ${
+          className={cn(
+            'w-full flex items-center gap-3 px-4 py-3 text-left rounded-xl border transition-all duration-300 group relative overflow-hidden animate-reduced-motion-safe',
             item.isActive
               ? 'bg-primary/20 text-primary border-primary/30 shadow-lg animate-scale-in'
-              : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-transparent hover:border-primary/20 hover:shadow-md hover-scale'
-          }`}
+              : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-transparent hover:border-primary/20 hover:shadow-md hover-scale',
+            isCollapsed && 'justify-center gap-0 px-0 py-0 rounded-full border-transparent bg-transparent shadow-none overflow-visible hover:border-transparent focus-visible:ring-0'
+          )}
         >
           {/* Subtle gradient overlay for active state */}
-          {item.isActive && (
+          {item.isActive && !isCollapsed && (
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent rounded-xl animate-fade-in" />
           )}
           
           {/* Icon with enhanced animations */}
-          <div className={`relative z-10 transition-transform duration-200 ${
-            item.isActive ? 'scale-110' : 'group-hover:scale-105'
-          }`}>
+          <div className={cn(
+            'relative z-10 transition-transform duration-200',
+            !isCollapsed && (item.isActive ? 'scale-110' : 'group-hover:scale-105')
+          )}>
             {getIcon()}
           </div>
           
@@ -97,7 +104,7 @@ const NavigationItemComponent = ({ item }: NavigationItemProps) => {
           )}
           
           {/* Active indicator */}
-          {item.isActive && (
+          {item.isActive && !isCollapsed && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full animate-scale-in" />
           )}
         </button>

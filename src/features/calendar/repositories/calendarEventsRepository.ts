@@ -60,42 +60,63 @@ export type CalendarEventRowWithRelations = CalendarEventRow & {
   event_shift_links?: Tables<'event_shift_links'>[] | null;
 };
 
-const calendarEventRowWithRelationsSchema: z.ZodType<CalendarEventRowWithRelations> =
-  calendarEventRowSchema.extend({
-    event_participants: z.array(eventParticipantRowSchema).nullable().optional(),
-    event_shift_links: z.array(eventShiftLinkRowSchema).nullable().optional(),
-  });
+type CalendarEventViewRow = CalendarEventRow & {
+  participants?: Tables<'event_participants'>[] | null;
+};
 
-async function listCompanyEvents(companyId: string): Promise<CalendarEventRow[]> {
-  const { data, error } = await supabase
-    .from('calendar_events')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('start_time', { ascending: true });
+const calendarEventViewRowSchema: z.ZodType<CalendarEventViewRow> = calendarEventRowSchema.extend({
+  participants: z.array(eventParticipantRowSchema).nullable().optional(),
+});
 
-  if (error) {
-    throw error;
-  }
+const CALENDAR_EVENTS_VIEW = 'calendar_events_full' as const;
 
-  return z.array(calendarEventRowSchema).parse(data ?? []);
-}
+const CALENDAR_EVENTS_VIEW_SELECT = [
+  'id',
+  'company_id',
+  'store_id',
+  'created_by',
+  'title',
+  'description',
+  'location',
+  'event_type',
+  'color',
+  'start_time',
+  'end_time',
+  'attendees',
+  'related_shift_ids',
+  'checklist',
+  'vendor',
+  'metadata',
+  'created_at',
+  'updated_at',
+  'participants',
+].join(',');
 
-async function listCompanyEventsByRange(params: {
+type CalendarEventsQueryOptions = {
   companyId: string;
-  startIso: string;
-  endIso: string;
+  startIso?: string;
+  endIso?: string;
   storeId?: string | null;
-}): Promise<CalendarEventRowWithRelations[]> {
-  const { companyId, startIso, endIso, storeId = null } = params;
+};
 
+async function fetchCalendarEventsWithRelations(
+  options: CalendarEventsQueryOptions,
+): Promise<CalendarEventRowWithRelations[]> {
+  const { companyId, startIso, endIso, storeId } = options;
+
+  // calendar_events_full view isn't in the generated Database types yet, so we cast here.
   let query = supabase
-    .from('calendar_events')
-    .select('*, event_participants(*), event_shift_links(*)')
+    .from(CALENDAR_EVENTS_VIEW as never)
+    .select(CALENDAR_EVENTS_VIEW_SELECT)
     .eq('company_id', companyId)
-    .gte('start_time', startIso)
-    .lte('start_time', endIso)
     .order('start_time', { ascending: true });
 
+  if (startIso) {
+    query = query.gte('start_time', startIso);
+  }
+  if (endIso) {
+    query = query.lte('end_time', endIso);
+  }
   if (storeId) {
     query = query.eq('store_id', storeId);
   }
@@ -105,7 +126,54 @@ async function listCompanyEventsByRange(params: {
     throw error;
   }
 
-  return z.array(calendarEventRowWithRelationsSchema).parse(data ?? []);
+  const rows = z.array(calendarEventViewRowSchema).parse(data ?? []);
+  const eventIds = rows.map((row) => row.id);
+
+  let shiftLinksMap = new Map<string, Tables<'event_shift_links'>[]>();
+  if (eventIds.length > 0) {
+    const { data: shiftLinkRows, error: shiftLinkError } = await supabase
+      .from('event_shift_links')
+      .select('*')
+      .in('event_id', eventIds);
+    if (shiftLinkError) {
+      throw shiftLinkError;
+    }
+    const parsedShiftLinks = z.array(eventShiftLinkRowSchema).parse(shiftLinkRows ?? []);
+    shiftLinksMap = parsedShiftLinks.reduce((map, link) => {
+      const list = map.get(link.event_id) ?? [];
+      list.push(link);
+      map.set(link.event_id, list);
+      return map;
+    }, new Map<string, Tables<'event_shift_links'>[]>());
+  }
+
+  return rows.map((row) => {
+    const { participants, ...rest } = row;
+    return {
+      ...rest,
+      event_participants: participants ?? [],
+      event_shift_links: shiftLinksMap.get(row.id) ?? [],
+    };
+  });
+}
+
+async function listCompanyEvents(companyId: string): Promise<CalendarEventRowWithRelations[]> {
+  return fetchCalendarEventsWithRelations({ companyId });
+}
+
+async function listCompanyEventsByRange(params: {
+  companyId: string;
+  startIso: string;
+  endIso: string;
+  storeId?: string | null;
+}): Promise<CalendarEventRowWithRelations[]> {
+  const { companyId, startIso, endIso, storeId = null } = params;
+  return fetchCalendarEventsWithRelations({
+    companyId,
+    startIso,
+    endIso,
+    storeId,
+  });
 }
 
 async function insertEvent(payload: TablesInsert<'calendar_events'>): Promise<CalendarEventRow> {

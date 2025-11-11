@@ -54,6 +54,7 @@ export default function EventsHubPage() {
 
   useEffect(() => {
     if (error) {
+      console.error('[Calendar] load error', error);
       setOffline(true);
       if (!offlineToastShown.current) {
         toast({

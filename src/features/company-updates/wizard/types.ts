@@ -19,6 +19,7 @@ export interface WizardFormData {
   template?: UpdateTemplate;
   title: string;
   body: string;
+  bodyPlainText?: string;
   richContent?: string;
   type: 'announcement' | 'news' | 'event' | 'policy';
   priority: 'high' | 'medium' | 'low';
@@ -26,6 +27,18 @@ export interface WizardFormData {
   recipients: UpdateRecipient;
   publishingSettings: PublishingSettings;
   category?: string;
+  updateMedia: UpdateMediaItem[];
+}
+
+export interface UpdateMediaItem {
+  id: string;
+  url: string;
+  type: 'image' | 'video' | 'file';
+  name: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+  storagePath: string;
 }
 
 export interface CompanyUpdateWizardProps {

@@ -1,6 +1,7 @@
+import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
 
-const ENDPOINT = '/functions/v1/schedule-event';
+const FUNCTION_NAME = 'schedule-event';
 const isDemoMode = () => String(import.meta.env.VITE_DEMO_MODE ?? 'false') === 'true';
 
 interface ScheduleMeetingResponse {
@@ -12,17 +13,21 @@ interface ScheduleVendorVisitResponse extends ScheduleMeetingResponse {
   visit?: Tables<'vendor_visits'> & Record<string, unknown>;
 }
 
-async function postScheduleEvent(body: unknown) {
-  const response = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+async function invokeScheduleFunction<TResponse>(body: Record<string, unknown>): Promise<TResponse> {
+  const { data, error } = await supabase.functions.invoke<TResponse>(FUNCTION_NAME, {
+    body,
   });
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || 'Unable to schedule event');
+
+  if (error) {
+    const message = error.message || error.name || 'Unable to schedule event';
+    throw new Error(message);
   }
-  return response.json();
+
+  if (!data) {
+    throw new Error('Empty response from schedule-event function');
+  }
+
+  return data;
 }
 
 function buildDemoEvent(type: 'meeting' | 'vendor_visit', title?: string) {
@@ -40,7 +45,7 @@ export async function scheduleMeeting(payload: TablesInsert<'calendar_events'>):
     console.log('Demo mode: event creation skipped', payload);
     return { demo: true, event: buildDemoEvent('meeting', payload.title ?? undefined) };
   }
-  return postScheduleEvent({ type: 'meeting', payload: { calendar: payload } });
+  return invokeScheduleFunction<ScheduleMeetingResponse>({ type: 'meeting', payload: { calendar: payload } });
 }
 
 export async function scheduleVendorVisit(payload: {
@@ -63,5 +68,5 @@ export async function scheduleVendorVisit(payload: {
     console.log('Demo mode: vendor visit creation skipped', payload);
     return { demo: true, event: buildDemoEvent('vendor_visit', payload.calendar.title) };
   }
-  return postScheduleEvent({ type: 'vendor_visit', payload });
+  return invokeScheduleFunction<ScheduleVendorVisitResponse>({ type: 'vendor_visit', payload });
 }

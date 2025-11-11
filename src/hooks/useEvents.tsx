@@ -15,10 +15,10 @@ function makeId() {
 }
 
 const STORAGE_KEY = 'cf_events_v1';
-const DEFAULT_EVENT_COLORS: Record<'meeting' | 'event' | 'vendor', string> = {
+const DEFAULT_EVENT_COLORS: Record<'meeting' | 'event' | 'vendor_visit', string> = {
   meeting: '#0ea5e9',
   event: '#6366f1',
-  vendor: '#f97316',
+  vendor_visit: '#f97316',
 };
 
 type EventSource = 'calendar' | 'vendor' | 'local';
@@ -44,7 +44,7 @@ export type AppEvent = {
   start: string;
   end?: string;
   location?: string;
-  type?: 'event' | 'meeting' | 'vendor';
+  type?: 'event' | 'meeting' | 'vendor_visit';
   color?: string | null;
   vendor?: {
     name: string;
@@ -84,7 +84,7 @@ const readStoredEvents = (key: string): AppEvent[] | undefined => {
     const mapped = parsed.map((entry) => ({
       ...entry,
       persisted: entry.persisted ?? true,
-      source: entry.source ?? (entry.type === 'vendor' ? 'vendor' : 'calendar'),
+      source: entry.source ?? (entry.type === 'vendor_visit' ? 'vendor' : 'calendar'),
     }));
     return sortEvents(mapped);
   } catch (error) {
@@ -163,7 +163,7 @@ const mapRowToEvent = (row: CalendarEventRow): AppEvent => {
     vendor: (row.vendor as AppEvent['vendor']) ?? undefined,
     created_at: row.created_at ?? undefined,
     persisted: true,
-    source: metadata?.source ?? (type === 'vendor' ? 'vendor' : 'calendar'),
+    source: metadata?.source ?? (type === 'vendor_visit' ? 'vendor' : 'calendar'),
   };
 };
 
@@ -402,7 +402,7 @@ export function useEvents() {
   const createVendorVisitMutation = useMutation<AppEvent, CalendarError, Omit<AppEvent, 'id' | 'type'>>({
     mutationFn: async (payload) => {
       if (!companyId) throw new Error('Company context is not available');
-      const normalized = withDefaults({ ...payload, type: 'vendor' });
+      const normalized = withDefaults({ ...payload, type: 'vendor_visit' });
       const insertPayload = {
         ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
         event_type: 'vendor_visit',
@@ -535,7 +535,7 @@ export function useEvents() {
   const createVendorVisit = useCallback(
     async (payload: Omit<AppEvent, 'id' | 'type'>) => {
       if (!companyId) {
-        const normalized = withDefaults({ ...payload, type: 'vendor' });
+        const normalized = withDefaults({ ...payload, type: 'vendor_visit' });
         const localEvent: AppEvent = {
           ...normalized,
           id: makeId(),

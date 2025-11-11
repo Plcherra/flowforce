@@ -16,7 +16,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      collapsible="offcanvas"
+      collapsible="icon"
       className="border-r border-primary/20 animate-fade-in animate-reduced-motion-safe"
     >
       <SidebarHeader className="p-4 border-b border-primary/20">

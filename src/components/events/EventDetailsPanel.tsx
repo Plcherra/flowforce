@@ -9,7 +9,7 @@ import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConso
 const TYPE_LABEL: Record<NonNullable<AppEvent['type']>, string> = {
   meeting: 'Meeting',
   event: 'Event',
-  vendor: 'Vendor visit',
+  vendor_visit: 'Vendor visit',
 };
 
 interface EventDetailsPanelProps {
