@@ -1,0 +1,5 @@
+{
+  "path": "src/sections/events/Meetings.tsx",
+  "status": "conditional",
+  "reason": "pending calendar section overhaul"
+}

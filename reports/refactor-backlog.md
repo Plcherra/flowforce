@@ -21,3 +21,5 @@ Pulled from `project-cleanup-phase2.md` and `scan-report.md`, this backlog lists
 | `src/components/onboarding/OnboardingRoleManager.tsx` | 517 | Onboarding | Break down table, dialog, and assignment logic into sub-components. |
 | `src/services/scheduling/autoScheduler.ts` | 510 | Scheduling Automation | Separate heuristics from IO and document algorithm hooks. |
 | `src/pages/CompanyUpdates.tsx` | 508 | Communications | Move Supabase calls + analytics cards into feature modules. |
+| src/features/scheduling/dialogs/AddShiftDialog.tsx | 40 | Scheduling | Scaffold dialog placeholder; expand to multi-step wizard later. |
+| src/features/inventory/services/index.ts | 60 | Inventory Services | Implement typed repositories (items, counts, transfers). |

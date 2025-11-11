@@ -1,0 +1,5 @@
+{
+  "path": "src/pages/availability/index.tsx",
+  "status": "conditional",
+  "reason": "waiting on Enhanced Scheduling merge"
+}

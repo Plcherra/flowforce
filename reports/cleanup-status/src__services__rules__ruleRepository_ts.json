@@ -1,0 +1,5 @@
+{
+  "path": "src/services/rules/ruleRepository.ts",
+  "status": "conditional",
+  "reason": "awaiting permissions workstream"
+}
