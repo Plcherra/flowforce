@@ -8,6 +8,7 @@ import { calendarEventsRepository, type CalendarEventRow } from '@/features/cale
 import { queryKeys } from '@/lib/queryKeys';
 import { CalendarError } from '@/features/calendar/types';
 import { normalizeCalendarError } from '@/features/calendar/hooks/useCalendarMutationError';
+import { scheduleMeeting, scheduleVendorVisit } from '@/shared/api/scheduleClient';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -366,11 +367,19 @@ export function useEvents() {
       if (!companyId) throw new Error('Company context is not available');
       const normalized = withDefaults({ ...payload, type: payload.type ?? 'event' });
       const insertPayload = toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'calendar');
-      const row = await calendarEventsRepository.insertEvent(insertPayload).catch((error) => {
+      const response = await scheduleMeeting(insertPayload).catch((error) => {
         const normalizedError = normalizeCalendarError(error);
         throw new CalendarError(normalizedError.message, { code: normalizedError.code });
       });
-      const persisted = mapRowToEvent(row);
+      if (response.demo) {
+        return {
+          ...normalized,
+          id: response.event.id,
+          persisted: false,
+          source: 'calendar',
+        } satisfies AppEvent;
+      }
+      const persisted = mapRowToEvent(response.event as CalendarEventRow);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
         syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),
@@ -396,13 +405,35 @@ export function useEvents() {
       const normalized = withDefaults({ ...payload, type: 'vendor' });
       const insertPayload = {
         ...toInsertPayload(normalized as AppEvent, companyId, user?.id ?? null, 'vendor'),
-        event_type: 'vendor',
+        event_type: 'vendor_visit',
       };
-      const row = await calendarEventsRepository.insertEvent(insertPayload).catch((error) => {
+      const vendorDetails = normalized.vendor as Record<string, unknown> | undefined;
+      const vendorPayload = {
+        company_id: companyId,
+        vendor_name: normalized.vendor?.name ?? normalized.title ?? 'Vendor Visit',
+        service_type: normalized.vendor?.service_type ?? null,
+        contact_email: normalized.vendor?.contact_email ?? null,
+        contact_phone: normalized.vendor?.contact_phone ?? null,
+        location: insertPayload.location ?? null,
+        start_time: insertPayload.start_time,
+        end_time: insertPayload.end_time ?? insertPayload.start_time,
+        description: insertPayload.description ?? null,
+        integration_id: (vendorDetails?.integration_id as string | undefined) ?? null,
+        integration_type: (vendorDetails?.integration_type as 'website' | 'partner_api' | 'manual' | undefined) ?? null,
+      };
+      const response = await scheduleVendorVisit({ calendar: insertPayload, vendor: vendorPayload }).catch((error) => {
         const normalizedError = normalizeCalendarError(error);
         throw new CalendarError(normalizedError.message, { code: normalizedError.code });
       });
-      const persisted = mapRowToEvent(row);
+      if (response.demo) {
+        return {
+          ...normalized,
+          id: response.event.id,
+          persisted: false,
+          source: 'vendor',
+        } satisfies AppEvent;
+      }
+      const persisted = mapRowToEvent(response.event as CalendarEventRow);
       await Promise.all([
         syncEventParticipants(companyId, persisted.id, normalized.attendees),
         syncEventShiftLinks(companyId, persisted.id, normalized.related_shift_ids ?? []),

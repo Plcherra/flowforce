@@ -5,6 +5,7 @@ import type { Tables } from '@/integrations/supabase/public-types';
 import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
 import { calendarEventsRepository, type CalendarEventRowWithRelations } from '@/features/calendar/repositories/calendarEventsRepository';
 import { queryKeys } from '@/lib/queryKeys';
+import { scheduleMeeting, scheduleVendorVisit } from '@/shared/api/scheduleClient';
 
 type CalendarEventRow = CalendarEventRowWithRelations;
 
@@ -254,8 +255,74 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
     metadata: payload.metadata ?? {},
   };
 
-  const row = await calendarEventsRepository.insertEvent(insertPayload);
-  return mapRowToEvent(row as CalendarEventRow);
+  const eventType = insertPayload.event_type;
+  if (eventType === 'vendor' || eventType === 'vendor_visit') {
+    const response = await scheduleVendorVisit({
+      calendar: { ...insertPayload, event_type: 'vendor_visit' },
+      vendor: {
+        company_id: companyId,
+        vendor_name: payload.vendor?.name ?? payload.title,
+        service_type: payload.vendor?.service_type ?? null,
+        contact_email: payload.vendor?.contact_email ?? null,
+        contact_phone: payload.vendor?.contact_phone ?? null,
+        location: insertPayload.location ?? null,
+        start_time: insertPayload.start_time,
+        end_time: insertPayload.end_time ?? insertPayload.start_time,
+        description: insertPayload.description ?? null,
+        integration_id: (payload.vendor as Record<string, unknown> | undefined)?.integration_id as
+          | string
+          | undefined
+          | null,
+        integration_type: (payload.vendor as Record<string, unknown> | undefined)?.integration_type as
+          | 'website'
+          | 'partner_api'
+          | 'manual'
+          | undefined
+          | null,
+      },
+    });
+
+    if (response.demo) {
+      return mapAppEventToCalendarEvent({
+        id: response.event.id,
+        title: payload.title,
+        description: payload.description ?? null,
+        start: insertPayload.start_time,
+        end: insertPayload.end_time ?? insertPayload.start_time,
+        location: payload.location ?? null,
+        type: 'vendor',
+        color: payload.color ?? null,
+        attendees: payload.attendees ?? [],
+        related_shift_ids: payload.relatedShiftIds ?? [],
+        checklist: payload.checklist ?? [],
+        vendor: payload.vendor ?? null,
+        source: 'calendar',
+      });
+    }
+
+    return mapRowToEvent(response.event as CalendarEventRow);
+  }
+
+  const response = await scheduleMeeting(insertPayload);
+  if (response.demo) {
+    return mapAppEventToCalendarEvent({
+      id: response.event.id,
+      title: payload.title,
+      description: payload.description ?? null,
+      start: insertPayload.start_time,
+      end: insertPayload.end_time ?? insertPayload.start_time,
+      location: payload.location ?? null,
+      type: payload.type ?? 'event',
+      color: payload.color ?? null,
+      attendees: payload.attendees ?? [],
+      related_shift_ids: payload.relatedShiftIds ?? [],
+      checklist: payload.checklist ?? [],
+      vendor: payload.vendor ?? null,
+      source: 'calendar',
+    });
+  }
+
+  return mapRowToEvent(response.event as CalendarEventRow);
 };
 
 export const upsertEventShiftLinks = async ({
