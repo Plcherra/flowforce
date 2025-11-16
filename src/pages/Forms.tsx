@@ -144,9 +144,10 @@ export default function Forms() {
   }, []);
 
   const handleFillSubmitted = useCallback(() => {
-    setFillFormId(null);
     void refetchForms();
   }, [refetchForms]);
+
+  const activeFillForm = fillFormId ? forms.find((form) => form.id === fillFormId) ?? null : null;
 
   return (
     <PageAsyncWrapper
@@ -283,6 +284,7 @@ export default function Forms() {
                 open
                 onOpenChange={handleFillDialogChange}
                 formId={fillFormId}
+                form={activeFillForm ?? undefined}
                 onSubmitted={handleFillSubmitted}
               />
             </ErrorBoundary>

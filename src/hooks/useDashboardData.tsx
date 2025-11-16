@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { differenceInCalendarDays, endOfWeek, startOfWeek } from 'date-fns';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
@@ -18,53 +19,27 @@ export interface DashboardStats {
   taskCompletion: number;
 }
 
+type EmployeeRow = {
+  id: string;
+  employment_status: string | null;
+  department_id: string | null;
+};
+
 type ScheduleRow = {
   id: string;
   start_time: string;
+  end_time: string | null;
   company_id: string | null;
+  user_id: string | null;
+  status: string | null;
 };
 
-type PendingTimeOffRow = {
+type TimeOffRequestRow = {
   id: string;
-  company_id: string | null;
-};
-
-type ApprovedTimeOffRow = {
+  user_id: string | null;
   start_date: string | null;
   end_date: string | null;
-  company_id: string | null;
-};
-
-type CoverageTemplateRow = {
-  id: string;
-  company_id: string | null;
-  required_count: number | null;
-  shift_windows: unknown;
-};
-
-type ScheduleShiftRow = {
-  id: string;
-  company_id: string | null;
-  employee_id: string | null;
   status: string | null;
-  hours: number | null;
-  day: string | null;
-  start_time: string | null;
-  end_time: string | null;
-};
-
-type OperationsTaskRow = {
-  id: string;
-  status: string | null;
-  company_id: string | null;
-  day: string | null;
-};
-
-type EmployeeRosterRow = {
-  id: string;
-  company_id: string | null;
-  weekly_max_hours: number | null;
-  active: boolean | null;
 };
 
 const TIME_OFF_ALLOWANCE_PER_EMPLOYEE = 25;
@@ -96,6 +71,44 @@ const FALLBACK_STATS: DashboardStats = {
   taskCompletion: 74,
 };
 
+const SCHEMA_MISMATCH_CODES = new Set(['42703', '42P01']);
+const DEFAULT_SHIFT_HOURS = 8;
+
+const isSchemaMismatchError = (error: unknown): error is PostgrestError => {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as PostgrestError;
+  if (candidate.code && SCHEMA_MISMATCH_CODES.has(candidate.code)) {
+    return true;
+  }
+  const message = (candidate.message ?? '').toLowerCase();
+  return message.includes('does not exist');
+};
+
+const deriveDepartmentCount = (employees: EmployeeRow[]) => {
+  const ids = new Set<string>();
+  employees.forEach((employee) => {
+    if (employee?.department_id) {
+      ids.add(employee.department_id);
+    }
+  });
+  return ids.size;
+};
+
+const computeScheduleDurationHours = (row: ScheduleRow) => {
+  const start = row.start_time ? Date.parse(row.start_time) : Number.NaN;
+  const end = row.end_time ? Date.parse(row.end_time) : Number.NaN;
+  if (Number.isNaN(start) || Number.isNaN(end)) {
+    return DEFAULT_SHIFT_HOURS;
+  }
+  let diff = (end - start) / (1000 * 60 * 60);
+  if (!Number.isFinite(diff) || diff <= 0) {
+    diff += 24;
+  }
+  return Math.max(diff, 0);
+};
+
+const clampPercent = (value: number, cap = 150) => Math.round(Math.max(0, Math.min(value, cap)));
+
 export function useDashboardData() {
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
@@ -120,168 +133,77 @@ export function useDashboardData() {
       const todayIso = today.toISOString().split('T')[0];
       const dayStart = `${todayIso}T00:00:00`;
       const dayEnd = `${todayIso}T23:59:59`;
+      const dayStartDate = new Date(dayStart);
+      const dayEndDate = new Date(dayEnd);
       const weekStartDate = startOfWeek(today, { weekStartsOn: 1 });
       const weekEndDate = endOfWeek(today, { weekStartsOn: 1 });
       const weekStartIso = weekStartDate.toISOString().split('T')[0];
       const weekEndIso = weekEndDate.toISOString().split('T')[0];
+      const weekStartBoundary = `${weekStartIso}T00:00:00`;
+      const weekEndBoundary = `${weekEndIso}T23:59:59`;
 
-      const [
-        employeesResponse,
-        departmentsResponse,
-        schedulesResponse,
-        requestedRequestsResponse,
-        approvedRequestsResponse,
-        coverageTemplatesResponse,
-        scheduleShiftsResponse,
-        operationsTasksResponse,
-        employeeRosterResponse,
-      ] = await Promise.all([
-        supabase.from('profiles').select('employment_status').eq('company_id', companyId),
-        supabase.from('departments').select('id').eq('company_id', companyId),
+      const [employeesResponse, schedulesResponse] = await Promise.all([
+        supabase.from('profiles').select('id, employment_status, department_id').eq('company_id', companyId),
         supabase
           .from('schedules')
-          .select('id, start_time, company_id')
+          .select('id, start_time, end_time, company_id, user_id, status')
           .eq('company_id', companyId)
-          .gte('start_time', dayStart)
-          .lt('start_time', dayEnd),
-        supabase
-          .from('time_off_requests')
-          .select('id, company_id')
-          .eq('company_id', companyId)
-          .eq('status', 'requested'),
-        supabase
-          .from('time_off_requests')
-          .select('start_date, end_date, company_id')
-          .eq('company_id', companyId)
-          .eq('status', 'approved'),
-        supabase
-          .from('coverage_templates')
-          .select('id, company_id, required_count, shift_windows')
-          .eq('company_id', companyId),
-        supabase
-          .from('schedule_shifts')
-          .select('id, company_id, employee_id, status, hours, day, start_time, end_time')
-          .eq('company_id', companyId)
-          .gte('day', weekStartIso)
-          .lte('day', weekEndIso),
-        supabase
-          .from('operations_tasks')
-          .select('id, status, company_id, day')
-          .eq('company_id', companyId)
-          .gte('day', weekStartIso)
-          .lte('day', weekEndIso),
-        supabase
-          .from('employees')
-          .select('id, company_id, weekly_max_hours, active')
-          .eq('company_id', companyId),
+          .gte('start_time', weekStartBoundary)
+          .lte('start_time', weekEndBoundary),
       ]);
 
-      const failedResponses = [
-        { label: 'profiles', response: employeesResponse },
-        { label: 'departments', response: departmentsResponse },
-        { label: 'schedules', response: schedulesResponse },
-        { label: 'time_off_requests (requested)', response: requestedRequestsResponse },
-        { label: 'time_off_requests (approved)', response: approvedRequestsResponse },
-        { label: 'coverage_templates', response: coverageTemplatesResponse },
-        { label: 'schedule_shifts', response: scheduleShiftsResponse },
-        { label: 'operations_tasks', response: operationsTasksResponse },
-        { label: 'employees_roster', response: employeeRosterResponse },
-      ].filter(({ response }) => response.error);
-
-      if (failedResponses.length > 0) {
-        failedResponses.forEach(({ label, response }) => {
-          console.error('[useDashboardData] Query failed', {
-            label,
-            companyId,
-            error: response.error,
-          });
-        });
-        const messages = failedResponses
-          .map(({ label, response }) => `${label}: ${response.error?.message ?? 'unknown error'}`)
-          .join('; ');
-        throw new Error(messages);
+      if (employeesResponse.error) {
+        throw employeesResponse.error;
+      }
+      if (schedulesResponse.error) {
+        throw schedulesResponse.error;
       }
 
-      const employees = employeesResponse.data ?? [];
-      const departments = departmentsResponse.data ?? [];
+      const employees = (employeesResponse.data ?? []) as EmployeeRow[];
       const rawSchedules = (schedulesResponse.data ?? []) as ScheduleRow[];
-      const rawRequestedRequests = (requestedRequestsResponse.data ?? []) as PendingTimeOffRow[];
-      const rawApprovedRequests = (approvedRequestsResponse.data ?? []) as ApprovedTimeOffRow[];
-
       const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
       if (schedules.length !== rawSchedules.length) {
         console.warn('[useDashboardData] Filtered schedules from other companies', JSON.stringify({ removed: rawSchedules.length - schedules.length, companyId }));
       }
 
-      const timeOffRequests = rawRequestedRequests.filter((entry) => entry?.company_id === companyId);
-      if (timeOffRequests.length !== rawRequestedRequests.length) {
-        console.warn('[useDashboardData] Filtered requested time off from other companies', JSON.stringify({ removed: rawRequestedRequests.length - timeOffRequests.length, companyId }));
-      }
-
-      const approvedTimeOff = rawApprovedRequests.filter((entry) => entry?.company_id === companyId);
-
-      const coverageTemplatesRaw = (coverageTemplatesResponse.data ?? []) as CoverageTemplateRow[];
-      const scheduleShiftsRaw = (scheduleShiftsResponse.data ?? []) as ScheduleShiftRow[];
-      const operationsTasksRaw = (operationsTasksResponse.data ?? []) as OperationsTaskRow[];
-      const rosterRaw = (employeeRosterResponse.data ?? []) as EmployeeRosterRow[];
-
-      const coverageTemplates = coverageTemplatesRaw.filter((row) => row?.company_id === companyId);
-      const totalRequiredSlots = coverageTemplates.reduce((total, template) => {
-        const required = Number(template.required_count) || 0;
-        const windows = Array.isArray(template.shift_windows) ? template.shift_windows.length : 1;
-        return total + required * (windows > 0 ? windows : 1);
-      }, 0);
-
-      const parseTimeToMinutes = (value: string | null | undefined) => {
-        if (!value) return null;
-        const [hour = '0', minute = '0'] = value.split(':');
-        const hours = Number.parseInt(hour, 10);
-        const minutes = Number.parseInt(minute, 10);
-        if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
-        return hours * 60 + minutes;
-      };
-
-      const computeShiftHours = (row: ScheduleShiftRow) => {
-        if (typeof row.hours === 'number' && Number.isFinite(row.hours)) {
-          return Math.max(row.hours, 0);
+      let totalDepartments = 0;
+      try {
+        const { data, error } = await supabase.from('departments').select('id').eq('company_id', companyId);
+        if (error) throw error;
+        totalDepartments = (data ?? []).length;
+      } catch (deptError) {
+        if (isSchemaMismatchError(deptError)) {
+          totalDepartments = deriveDepartmentCount(employees);
+          console.warn('[useDashboardData] Departments table missing company scope, using derived counts', {
+            companyId,
+            fallback: totalDepartments,
+          });
+        } else {
+          throw deptError;
         }
-        const start = parseTimeToMinutes(row.start_time);
-        const end = parseTimeToMinutes(row.end_time);
-        if (start == null || end == null) return 0;
-        let diff = end - start;
-        if (diff <= 0) diff += 24 * 60;
-        return diff / 60;
-      };
-
-      const scheduleShifts = scheduleShiftsRaw.filter(
-        (row) => row?.company_id === companyId && row.day && row.day >= weekStartIso && row.day <= weekEndIso,
-      );
-      const scheduledSlots = scheduleShifts.filter(
-        (row) => row.employee_id && (row.status ?? '').toLowerCase() !== 'cancelled',
-      ).length;
-      const scheduledHours = scheduleShifts.reduce((total, row) => {
-        if (!row.employee_id) return total;
-        return total + computeShiftHours(row);
-      }, 0);
-
-      const coverageCompleteness = totalRequiredSlots > 0 ? Math.round(Math.min((scheduledSlots / totalRequiredSlots) * 100, 150)) : 0;
-
-      const rosterActive = rosterRaw.filter((row) => row?.company_id === companyId && row.active !== false);
-      const totalCapacityHours = rosterActive.reduce((total, row) => total + (Number(row.weekly_max_hours) || 0), 0);
-      const hoursUtilization = totalCapacityHours > 0 ? Math.round(Math.min((scheduledHours / totalCapacityHours) * 100, 150)) : 0;
-
-      const weeklyTasks = operationsTasksRaw.filter((row) => row?.company_id === companyId);
-      const completedTasks = weeklyTasks.filter((row) => (row.status ?? '').toLowerCase() === 'done').length;
-      const taskCompletion = weeklyTasks.length > 0 ? Math.round((completedTasks / weeklyTasks.length) * 100) : 0;
-      if (approvedTimeOff.length !== rawApprovedRequests.length) {
-        console.warn('[useDashboardData] Filtered approved time off requests from other companies', JSON.stringify({ removed: rawApprovedRequests.length - approvedTimeOff.length, companyId }));
       }
 
-      const totalEmployees = employees.length;
-      const activeEmployees = employees.filter(employee => employee?.employment_status === 'active').length;
-      const totalDepartments = departments.length;
-      const todaysShifts = schedules.length;
-      const pendingTimeOff = timeOffRequests.length;
+      const employeeIds = employees.map((employee) => employee.id).filter(Boolean);
+      const employeeIdSet = new Set(employeeIds);
+      let companyTimeOff: TimeOffRequestRow[] = [];
+      if (employeeIds.length > 0) {
+        const { data, error } = await supabase
+          .from('time_off_requests')
+          .select('id, user_id, start_date, end_date, status')
+          .in('user_id', employeeIds);
+        if (error) {
+          throw error;
+        }
+        companyTimeOff = (data ?? []) as TimeOffRequestRow[];
+      }
+
+      const scopedTimeOff = companyTimeOff.filter((entry) => entry.user_id && employeeIdSet.has(entry.user_id));
+      if (scopedTimeOff.length !== companyTimeOff.length) {
+        console.warn('[useDashboardData] Filtered time off entries from other companies', JSON.stringify({ removed: companyTimeOff.length - scopedTimeOff.length, companyId }));
+      }
+
+      const timeOffRequests = scopedTimeOff.filter((entry) => (entry.status ?? '').toLowerCase() === 'requested');
+      const approvedTimeOff = scopedTimeOff.filter((entry) => (entry.status ?? '').toLowerCase() === 'approved');
 
       const approvedUpcoming = approvedTimeOff.filter(request => {
         if (!request.end_date) return false;
@@ -298,6 +220,24 @@ export function useDashboardData() {
         const span = differenceInCalendarDays(requestEnd, effectiveStart) + 1;
         return total + Math.max(span, 0);
       }, 0);
+
+      const totalEmployees = employees.length;
+      const activeEmployees = employees.filter(employee => employee?.employment_status === 'active').length;
+      const todaysShifts = schedules.filter((entry) => {
+        if (!entry.start_time) return false;
+        const startTime = new Date(entry.start_time);
+        if (Number.isNaN(startTime.getTime())) return false;
+        return startTime >= dayStartDate && startTime <= dayEndDate;
+      }).length;
+      const pendingTimeOff = timeOffRequests.length;
+      const scheduledHours = schedules.reduce((total, row) => total + computeScheduleDurationHours(row), 0);
+
+      const estimatedSlots = Math.max(activeEmployees * 5, 1);
+      const coverageCompleteness = estimatedSlots > 0 ? clampPercent((schedules.length / estimatedSlots) * 100) : 0;
+
+      const totalCapacityHours = activeEmployees * 40;
+      const hoursUtilization = totalCapacityHours > 0 ? clampPercent((scheduledHours / totalCapacityHours) * 100) : 0;
+      const taskCompletion = activeEmployees > 0 ? clampPercent((todaysShifts / activeEmployees) * 100, 100) : 0;
 
       const estimatedAllowance = totalEmployees * TIME_OFF_ALLOWANCE_PER_EMPLOYEE;
       const balanceRemaining = Math.max(estimatedAllowance - approvedDaysUsed, 0);

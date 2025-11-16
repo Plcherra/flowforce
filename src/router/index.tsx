@@ -56,6 +56,7 @@ const TemplatesOverview = lazy(() => import('../pages/Templates.tsx'));
 const TemplateDetail = lazy(() => import('../pages/TemplateDetail.tsx'));
 const Features = lazy(() => import('../pages/Features.tsx'));
 const Pricing = lazy(() => import('../pages/Pricing.tsx'));
+const HrDevelopment = lazy(() => import('../pages/HrDevelopment.tsx'));
 
 export const router = createBrowserRouter([
   {
@@ -97,6 +98,10 @@ export const router = createBrowserRouter([
       {
         path: "pricing",
         element: <Pricing />,
+      },
+      {
+        path: "hr-development",
+        element: <HrDevelopment />,
       },
       {
         path: "app",

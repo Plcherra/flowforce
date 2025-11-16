@@ -1,73 +1,56 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { useState } from 'react';
+import { Loader2, PlusCircle, Sparkles } from 'lucide-react';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { GoalHeader } from '@/features/goals/components/GoalHeader';
-import { GoalList } from '@/features/goals/components/GoalList';
-import { GoalModal } from '@/features/goals/components/GoalModal';
-import { GoalEmptyState } from '@/features/goals/components/GoalEmptyState';
-import { useGoals, type Goal, type GoalStatus, type UseGoalsReturn } from '@/hooks/useGoals';
-import { useGoalDialogs, type GoalDialogs } from '@/hooks/useGoalDialogs';
-import type { GoalFormValues } from '@/features/goals/components/CreateGoalModal';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useGoals, type Goal } from '@/hooks/useGoals';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
-import { useGoalActions } from '@/features/goals/hooks/useGoalActions';
 import { useGoalSuggestion } from '@/features/goals/hooks/useGoalSuggestion';
+import { GoalCard } from '@/features/goals/ui/GoalCard';
+import {
+  GoalModal,
+  type GoalModalSubmitPayload,
+  type GoalSuggestionInput,
+} from '@/features/goals/ui/GoalModal';
+import { buildRewardDetails } from '@/features/goals/utils/rewardUtils';
+import { linkTaskToGoal } from '@/features/goals/services/goalTaskLinks';
 
 export default function GoalsPage() {
   const goalsState = useGoals();
-  const {
-    goals,
-    stats,
-    isLoading,
-    isFetching,
-    error,
-    createGoal,
-    updateGoal,
-    deleteGoal,
-    toggleStatus,
-    creating,
-    updating,
-  } = goalsState;
-
-  const dialogs = useGoalDialogs();
+  const { goals, stats, loading, error, createGoal, updateGoal, deleteGoal, creating, updating } =
+    goalsState;
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const canSuggestGoals = Boolean(companyId);
-  const goalSuggestion = useGoalSuggestion(companyId);
-  const { handleCreate, handleUpdate, handleToggleStatus, deleteGoalById } = useGoalActions({
-    createGoal,
-    updateGoal,
-    deleteGoal,
-    toggleStatus,
-  });
+  const { suggesting, requestSuggestion } = useGoalSuggestion(companyId);
 
-  const saving = creating || updating;
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [suggestedGoal, setSuggestedGoal] = useState<GoalSuggestionInput | null>(null);
+  const [linkingTasks, setLinkingTasks] = useState(false);
 
-  const handleDelete = useCallback(
-    async (goal: Goal) => {
-      const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
-      if (!confirmed) {
-        return;
-      }
+  const saving = creating || updating || linkingTasks;
 
-      await deleteGoalById(goal.id);
-    },
-    [deleteGoalById],
-  );
-    const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteGoalById(goal.id);
+  const openCreateModal = () => {
+    setSelectedGoal(null);
+    setSuggestedGoal(null);
+    setModalOpen(true);
   };
 
-  const handleSuggestGoal = useCallback(async () => {
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedGoal(null);
+    setSuggestedGoal(null);
+  };
+
+  const handleSuggestGoal = async () => {
     try {
-      const suggestion = await (goalSuggestion?.requestSuggestion?.(stats, goals) ?? Promise.reject(new Error('Goal suggestions unavailable')));
-      dialogs.open(null, { suggestion });
+      const suggestion = await requestSuggestion(stats, goals);
+      setSelectedGoal(null);
+      setSuggestedGoal(suggestion);
+      setModalOpen(true);
     } catch (suggestionError) {
       const message =
         suggestionError instanceof Error ? suggestionError.message : 'Try again shortly.';
@@ -77,128 +60,190 @@ export default function GoalsPage() {
         variant: 'destructive',
       });
     }
-  }, [dialogs, goalSuggestion, goals, stats, toast]);
+  };
+
+  const handleDeleteGoal = async (goal: Goal) => {
+    const confirmed = window.confirm(`Delete goal "${goal.title ?? 'Untitled goal'}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteGoal(goal.id);
+      if (selectedGoal?.id === goal.id) {
+        closeModal();
+      }
+    } catch (deleteError) {
+      const message = deleteError instanceof Error ? deleteError.message : 'Try again shortly.';
+      toast({
+        title: 'Unable to delete goal',
+        description: message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSubmitGoal = async (values: GoalModalSubmitPayload) => {
+    const rewardDetails = buildRewardDetails({
+      rewardSummary: null,
+      xpValue: values.xpReward,
+    });
+
+    try {
+      if (values.goalId) {
+        await updateGoal({
+          id: values.goalId,
+          updates: {
+            title: values.title,
+            description: values.description || null,
+            target_completion_date: values.targetDate,
+            reward_type: values.xpReward != null ? 'recognition' : null,
+            reward_details: rewardDetails,
+          },
+        });
+      } else {
+        const created = await createGoal({
+          title: values.title,
+          description: values.description || null,
+          target_completion_date: values.targetDate,
+          reward_type: values.xpReward != null ? 'recognition' : null,
+          reward_details: rewardDetails,
+          status: 'active',
+          progress: 0,
+        });
+
+        const tasksToLink = Object.entries(values.taskWeights);
+        if (created?.id && tasksToLink.length > 0) {
+          setLinkingTasks(true);
+          try {
+            await Promise.all(
+              tasksToLink.map(([taskId, weight]) => linkTaskToGoal(created.id, taskId, weight)),
+            );
+          } finally {
+            setLinkingTasks(false);
+          }
+        }
+      }
+
+      closeModal();
+    } catch (submitError) {
+      setLinkingTasks(false);
+      const message = submitError instanceof Error ? submitError.message : 'Try again shortly.';
+      toast({
+        title: 'Unable to save goal',
+        description: message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
-    <ErrorBoundary
-      onReset={() => {
-        void goalsState.refetch();
-      }}
-      fallbackRender={({ error: boundaryError, resetErrorBoundary }) => (
-        <div className="space-y-4 p-6">
-          <Alert variant="destructive">
-            <AlertTitle>Error loading goals</AlertTitle>
-            <AlertDescription>
-              {boundaryError.message ?? 'Please try again shortly.'}
-            </AlertDescription>
-          </Alert>
+    <main className="space-y-8 p-6">
+      <header className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-background/80 p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-sm uppercase tracking-wide text-muted-foreground">Goals</p>
+          <h1 className="text-2xl font-semibold text-foreground">Align your team with XP-ready goals</h1>
+          <p className="text-sm text-muted-foreground">
+            Track progress, reward outcomes, and use AI to draft new objectives.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
           <Button
+            type="button"
             variant="outline"
-            onClick={() => {
-              resetErrorBoundary();
-            }}
+            onClick={handleSuggestGoal}
+            disabled={!companyId || suggesting}
+            className="gap-2"
           >
-            Retry
+            {suggesting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            Get AI Suggestion
+          </Button>
+          <Button type="button" onClick={openCreateModal} className="gap-2">
+            <PlusCircle className="h-4 w-4" />
+            Create goal
           </Button>
         </div>
+      </header>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryTile label="Active" value={stats.active} />
+        <SummaryTile label="Completed" value={stats.completed} />
+        <SummaryTile label="Average progress" value={`${stats.averageProgress}%`} />
+        <SummaryTile label="Total goals" value={stats.total} />
+      </section>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to load goals</AlertTitle>
+          <AlertDescription>{error.message ?? 'Please try again shortly.'}</AlertDescription>
+        </Alert>
       )}
-    >
-      <GoalsContent
-        state={goalsState}
-        dialogs={dialogs}
-        suggesting={suggesting}
-        canSuggest={canSuggestGoals}
-        onSuggestGoal={handleSuggestGoal}
-        onToggleStatus={handleToggleStatus}
-        onDelete={handleDelete}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
+
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-64 rounded-xl" />
+          ))}
+        </div>
+      ) : goals.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/20 p-12 text-center">
+          <p className="text-lg font-medium text-foreground">No goals yet</p>
+          <p className="text-sm text-muted-foreground">
+            Start by creating a goal or ask AI for inspiration.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <Button variant="outline" onClick={handleSuggestGoal} disabled={!companyId || suggesting}>
+              Get AI Suggestion
+            </Button>
+            <Button onClick={openCreateModal}>Create goal</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {goals.map((goal) => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={(current) => {
+                setSelectedGoal(current);
+                setSuggestedGoal(null);
+                setModalOpen(true);
+              }}
+              onDelete={(current) => {
+                void handleDeleteGoal(current);
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <GoalModal
+        open={modalOpen}
+        goal={selectedGoal}
+        suggestion={selectedGoal ? null : suggestedGoal}
         saving={saving}
+        onClose={closeModal}
+        onSubmit={handleSubmitGoal}
+        onDelete={selectedGoal ? handleDeleteGoal : undefined}
       />
-    </ErrorBoundary>
+    </main>
   );
 }
 
-interface GoalsContentProps {
-  state: UseGoalsReturn;
-  dialogs: GoalDialogs;
-  suggesting: boolean;
-  canSuggest: boolean;
-  onSuggestGoal: () => void;
-  onToggleStatus: (goal: Goal, status: GoalStatus) => Promise<void>;
-  onDelete: (goal: Goal) => Promise<void>;
-  onCreate: (values: GoalFormValues) => Promise<void>;
-  onUpdate: (goal: Goal, values: GoalFormValues) => Promise<void>;
-  saving: boolean;
+interface SummaryTileProps {
+  label: string;
+  value: string | number;
 }
 
-function GoalsContent({
-  state,
-  dialogs,
-  suggesting,
-  canSuggest,
-  onSuggestGoal,
-  onToggleStatus,
-  onDelete,
-  onCreate,
-  onUpdate,
-  saving,
-}: GoalsContentProps) {
-  const { goals, stats, isLoading, isFetching, error, refetch } = state;
-  const initialLoading = isLoading && goals.length === 0;
-  const blockingError = error && goals.length === 0;
-
-  if (blockingError) {
-    return (
-      <main className="space-y-4 p-6">
-        <Alert variant="destructive">
-          <AlertTitle>Unable to load goals</AlertTitle>
-          <AlertDescription>
-            {error?.message ?? 'We could not load your goals. Please retry.'}
-          </AlertDescription>
-        </Alert>
-        <Button
-          variant="outline"
-          onClick={() => {
-            void refetch();
-          }}
-        >
-          Retry
-        </Button>
-      </main>
-    );
-  }
-
+function SummaryTile({ label, value }: SummaryTileProps) {
   return (
-    <main className="space-y-6 p-6">
-      <GoalHeader
-        dialogs={dialogs}
-        count={goals.length}
-        stats={stats}
-        isLoadingStats={initialLoading}
-        onSuggestGoal={onSuggestGoal}
-        suggesting={suggesting}
-        canSuggest={canSuggest}
-      />
-
-      {goals.length > 0 || initialLoading ? (
-        <GoalList
-          data={goals}
-          dialogs={dialogs}
-          isLoading={isLoading}
-          isFetching={isFetching}
-          error={error}
-          onToggleStatus={onToggleStatus}
-          onDelete={onDelete}
-          onRetry={() => {
-            void refetch();
-          }}
-        />
-      ) : (
-        <GoalEmptyState dialogs={dialogs} />
-      )}
-
-      <GoalModal dialogs={dialogs} saving={saving} onCreate={onCreate} onUpdate={onUpdate} />
-    </main>
+    <div className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-sm">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
+    </div>
   );
 }

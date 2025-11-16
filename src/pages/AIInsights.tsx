@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
 import { usePerformanceOverview } from '@/hooks/usePerformanceOverview';
 import { Brain, Users } from 'lucide-react';
+import { XPBar, RecognitionFeed } from '@/features/gamification/components';
 
 const AIInsightsPanel = lazy(() => import('@/components/ai/AIInsightsPanel'));
 const AIChatAssistant = lazy(() => import('@/components/ai/AIChatAssistant'));
@@ -104,6 +105,62 @@ export default function AIInsights() {
         confidence,
         trendClass,
         reviewDate: review.reviewDate,
+      };
+    });
+  }, [goalReviews]);
+  const xpTrajectory = useMemo(() => {
+    const completed = goalSummary?.completed ?? 0;
+    const active = goalSummary?.active ?? 0;
+    const xpEstimate = completed * 150 + active * 60;
+    const nextMilestone = {
+      label: 'Momentum Boost',
+      xpRequired: xpEstimate + 500,
+      description: 'Projected XP if recommendations are delivered.',
+    };
+    const previousMilestone =
+      xpEstimate > 300 ? { label: 'Current Baseline', xpRequired: Math.max(xpEstimate - 500, 0) } : undefined;
+    return { xpEstimate, nextMilestone, previousMilestone };
+  }, [goalSummary]);
+  const recommendedActions = useMemo(() => {
+    if (goalReviews.length === 0) {
+      return [
+        {
+          id: 'ai-rec-placeholder',
+          name: 'Connect your goals workspace',
+          badgeLabel: 'AI Suggestion',
+          badgeClassName: 'bg-slate-100 text-slate-700',
+          message: 'Sync active goals to unlock XP-based recommendations.',
+          xpSnapshot: 120,
+          createdAt: new Date().toISOString(),
+        },
+      ];
+    }
+    return goalReviews.slice(0, 5).map((review, index) => {
+      const progress = review.goalProgress ?? 0;
+      let badgeLabel = 'Focus Goal';
+      let message = 'Align next steps with managers to maintain trajectory.';
+      if (progress >= 80) {
+        badgeLabel = 'Accelerate';
+        message = 'Add a stretch target for additional XP bonus.';
+      } else if (progress < 40) {
+        badgeLabel = 'Intervene';
+        message = 'Assign support tasks to unblock this goal.';
+      }
+      const badgeClassName =
+        badgeLabel === 'Accelerate'
+          ? 'bg-emerald-100 text-emerald-700'
+          : badgeLabel === 'Intervene'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-slate-100 text-slate-700';
+      const xpSnapshot = progress >= 70 ? 180 : progress >= 50 ? 140 : 90;
+      return {
+        id: review.reviewId ?? `rec-${index}`,
+        name: review.goalTitle ?? 'Strategic Goal',
+        badgeLabel,
+        badgeClassName,
+        message,
+        xpSnapshot,
+        createdAt: review.reviewDate ?? new Date().toISOString(),
       };
     });
   }, [goalReviews]);
@@ -210,6 +267,23 @@ export default function AIInsights() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-[1.5fr,1fr]">
+              <XPBar
+                currentXP={xpTrajectory.xpEstimate}
+                nextMilestone={xpTrajectory.nextMilestone}
+                previousMilestone={xpTrajectory.previousMilestone}
+                loading={summaryLoading && !goalSummary}
+                className="h-full"
+              />
+              <RecognitionFeed
+                events={recommendedActions}
+                loading={summaryLoading && goalReviews.length === 0}
+                title="AI Recommended Goals"
+                description="Suggested goal or task focus areas ranked by projected XP impact."
+                className="h-full"
+              />
             </div>
           </TabsContent>
 

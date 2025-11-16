@@ -1,6 +1,6 @@
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState, type ComponentType } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Loader2, RefreshCw, Sparkles, Filter, Plus } from 'lucide-react';
+import { Loader2, RefreshCw, Sparkles, Filter, Plus, CheckCircle2, GraduationCap, Target } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ import {
   type RecognitionFilterKey,
   type RecognitionTimelineFilter,
 } from '@/features/recognitions/hooks/useRecognitionFiltering';
+import { XPBar, BadgesGallery, RecognitionFeed } from '@/features/gamification/components';
 
 const FILTER_CONFIG: Array<{ key: RecognitionFilterKey; label: string; sources?: RecognitionSourceType[] }> = [
   { key: 'all', label: 'All' },
@@ -41,6 +42,62 @@ const TIMELINE_OPTIONS: Array<{ value: RecognitionTimelineFilter; label: string 
   { value: '90', label: 'Last 90 days' },
   { value: '365', label: 'Last 12 months' },
   { value: 'all', label: 'All time' },
+];
+
+type BadgeBlueprint = {
+  id: string;
+  name: string;
+  description: string;
+  icon: ComponentType<{ className?: string }>;
+  sources: RecognitionSourceType[];
+  required: number;
+  xpValue: number;
+};
+
+const XP_MILESTONE_STEPS = [
+  { label: 'Rising Star', xpRequired: 1000, description: 'Unlock automation boosts for your first 1K XP.' },
+  { label: 'Momentum Maker', xpRequired: 2500, description: 'Keeps recognitions flowing every week.' },
+  { label: 'Culture Champion', xpRequired: 5000, description: 'Triggers org-wide shout-outs and Copilot actions.' },
+  { label: 'Legend Status', xpRequired: 7500, description: 'Reserved for leaders driving cross-team impact.' },
+] as const;
+
+const BADGE_BLUEPRINTS: BadgeBlueprint[] = [
+  {
+    id: 'goal-closer',
+    name: 'Goal Closer',
+    description: 'Earn 3 recognitions tied to goal milestones.',
+    icon: Target,
+    sources: ['goal_milestone', 'goal_completion'],
+    required: 3,
+    xpValue: 250,
+  },
+  {
+    id: 'task-hero',
+    name: 'Task Hero',
+    description: 'Complete 5 tasks that trigger recognition.',
+    icon: CheckCircle2,
+    sources: ['task_completion'],
+    required: 5,
+    xpValue: 150,
+  },
+  {
+    id: 'learning-luminary',
+    name: 'Learning Luminary',
+    description: 'Finish 2 training or onboarding journeys.',
+    icon: GraduationCap,
+    sources: ['training_completion', 'onboarding_completion'],
+    required: 2,
+    xpValue: 200,
+  },
+  {
+    id: 'culture-champion',
+    name: 'Culture Champion',
+    description: 'Share 3 manual shout-outs in the last 90 days.',
+    icon: Sparkles,
+    sources: ['manual'],
+    required: 3,
+    xpValue: 100,
+  },
 ];
 
 const LEADERBOARD_TIER_BADGE: Record<string, string> = {
@@ -375,6 +432,69 @@ export default function Recognition() {
     timelineFilter,
     sourceFilter: sourceFilter?.sources,
   });
+  const recognitionXpSummary = useMemo(() => {
+    const xpTotal = filteredRecognitions.reduce(
+      (total, record) => total + (record.reward_details?.xp_awarded ?? 0),
+      0,
+    );
+    const nextDefined = XP_MILESTONE_STEPS.find((step) => xpTotal < step.xpRequired);
+    const nextMilestone =
+      nextDefined ??
+      {
+        label: 'Legend Status',
+        xpRequired: xpTotal + 500,
+        description: 'Keep momentum to unlock surprise automations.',
+      };
+    const previousMilestone =
+      [...XP_MILESTONE_STEPS].reverse().find((step) => step.xpRequired <= xpTotal) ?? null;
+    return { xpTotal, nextMilestone, previousMilestone };
+  }, [filteredRecognitions]);
+  const badgeGalleryItems = useMemo(
+    () =>
+      BADGE_BLUEPRINTS.map((blueprint) => {
+        const matches = filteredRecognitions.filter((record) => {
+          const source = record.reward_details?.source ?? 'manual';
+          return blueprint.sources.includes(source);
+        });
+        const earned = matches.length >= blueprint.required;
+        const latest = matches[0];
+        return {
+          id: blueprint.id,
+          name: blueprint.name,
+          description: blueprint.description,
+          icon: blueprint.icon,
+          xpValue: blueprint.xpValue,
+          earnedAt:
+            earned && latest?.awarded_at
+              ? formatDistanceToNow(new Date(latest.awarded_at), { addSuffix: true })
+              : null,
+          locked: !earned,
+        };
+      }),
+    [filteredRecognitions],
+  );
+  const recognitionFeedItems = useMemo(
+    () =>
+      filteredRecognitions.slice(0, 8).map((record) => {
+        const details = record.reward_details;
+        const source = details?.source ?? 'manual';
+        const meta = recognitionSourceMeta[source] ?? recognitionSourceMeta.manual;
+        const recipientName = record.recipient
+          ? `${record.recipient.first_name ?? ''} ${record.recipient.last_name ?? ''}`.trim()
+          : '';
+        return {
+          id: record.id,
+          name: recipientName || 'Team Member',
+          badgeLabel: meta.label,
+          badgeClassName: meta.badgeColor,
+          message: details?.message,
+          xpSnapshot: details?.xp_awarded ?? undefined,
+          createdAt: record.awarded_at ?? new Date().toISOString(),
+          avatarUrl: record.recipient?.avatar_url ?? undefined,
+        };
+      }),
+    [filteredRecognitions],
+  );
   const leaderboardRecognitionLeaders = useMemo(
     () =>
       leaderboardInsights
@@ -494,7 +614,27 @@ export default function Recognition() {
         ))}
       </div>
 
-      <Card>
+      <div className="grid gap-4 xl:grid-cols-[1.5fr,1fr]">
+        <XPBar
+          currentXP={recognitionXpSummary.xpTotal}
+          nextMilestone={recognitionXpSummary.nextMilestone}
+          previousMilestone={recognitionXpSummary.previousMilestone ?? undefined}
+          loading={loading}
+          className="h-full"
+        />
+        <RecognitionFeed events={recognitionFeedItems} loading={loading} className="h-full" />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.5fr,1fr]">
+        <BadgesGallery
+          badges={badgeGalleryItems}
+          loading={loading}
+          columns={3}
+          className="h-full"
+          title="Recognition Badges"
+          description="Earned badges from goals, tasks, training, and manual shout-outs."
+        />
+      <Card className="h-full">
         <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
@@ -566,6 +706,7 @@ export default function Recognition() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex w-full flex-wrap gap-1 rounded-md bg-muted p-1 md:w-auto">

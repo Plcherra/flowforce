@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import {
   Award,
   BarChart3,
@@ -6,6 +6,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Trophy,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,7 @@ import {
 import type { LeaderboardBadgeTier, LeaderboardPeriod } from '@/features/leaderboard/types';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { XPBar, BadgesGallery, GamificationLeaderboard } from '@/features/gamification/components';
 
 const badgeColors: Record<LeaderboardBadgeTier, string> = {
   Bronze: 'bg-amber-900/10 text-amber-900 border-amber-900/30',
@@ -35,6 +37,13 @@ const badgeColors: Record<LeaderboardBadgeTier, string> = {
   Gold: 'bg-amber-400/20 text-amber-700 border-amber-500/30',
   Platinum: 'bg-indigo-100 text-indigo-700 border-indigo-300',
 };
+
+const LEADERBOARD_MILESTONES = [
+  { label: 'Engagement Tier I', xpRequired: 15000, description: 'Unlocks automated challenges for the org.' },
+  { label: 'Engagement Tier II', xpRequired: 30000, description: 'Copilot launches recognition campaigns weekly.' },
+  { label: 'Elite Tier', xpRequired: 60000, description: 'Company qualifies for quarterly XP accelerators.' },
+  { label: 'Legend Tier', xpRequired: 100000, description: 'All squads eligible for custom rewards.' },
+] as const;
 
 const LeaderboardXpChart = lazy(() => import('@/features/leaderboard/components/LeaderboardXpChart'));
 
@@ -68,6 +77,68 @@ export default function Leaderboard() {
     roles,
     lastUpdated,
   });
+  const xpProgressSummary = useMemo(() => {
+    const totalXp = entries.reduce((sum, entry) => sum + entry.xp.total, 0);
+    const nextDefined = LEADERBOARD_MILESTONES.find((milestone) => totalXp < milestone.xpRequired);
+    const nextMilestone =
+      nextDefined ??
+      {
+        label: 'Legend Tier',
+        xpRequired: totalXp + 5000,
+        description: 'Set a new challenge to keep XP momentum high.',
+      };
+    const previousMilestone =
+      [...LEADERBOARD_MILESTONES].reverse().find((milestone) => milestone.xpRequired <= totalXp) ?? null;
+    return { totalXp, nextMilestone, previousMilestone };
+  }, [entries]);
+  const leaderboardBadgeHighlights = useMemo(() => {
+    const badgeMap = new Map<string, number>();
+    entries.forEach((entry) => {
+      entry.badges.forEach((badge) => {
+        badgeMap.set(badge, (badgeMap.get(badge) ?? 0) + 1);
+      });
+    });
+    const highlights = Array.from(badgeMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([badge, count]) => ({
+        id: badge,
+        name: badge,
+        description: `${count} teammates unlocked`,
+        icon: Trophy,
+        xpValue: 150 + count * 10,
+        earnedAt: null,
+        locked: false,
+      }));
+    while (highlights.length < 6) {
+      const index = highlights.length + 1;
+      highlights.push({
+        id: `locked-${index}`,
+        name: `Future Badge ${index}`,
+        description: 'Unlocks once Copilot challenges run.',
+        icon: Trophy,
+        xpValue: 0,
+        earnedAt: null,
+        locked: true,
+      });
+    }
+    return highlights;
+  }, [entries]);
+  const leaderboardShowcaseEntries = useMemo(
+    () =>
+      filteredEntries.slice(0, 5).map((entry) => ({
+        id: entry.employeeId,
+        name: entry.fullName,
+        avatarUrl: entry.avatarUrl ?? undefined,
+        email: entry.email,
+        xp: entry.xp.total,
+        goalsCompleted: entry.goalCount,
+        department: entry.department?.name ?? null,
+        role: entry.role,
+        rank: entry.rank,
+      })),
+    [filteredEntries],
+  );
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -148,6 +219,24 @@ export default function Leaderboard() {
           </p>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 xl:grid-cols-[1.4fr,1fr]">
+        <XPBar
+          currentXP={xpProgressSummary.totalXp}
+          nextMilestone={xpProgressSummary.nextMilestone}
+          previousMilestone={xpProgressSummary.previousMilestone ?? undefined}
+          loading={loading}
+          className="h-full"
+        />
+        <BadgesGallery
+          badges={leaderboardBadgeHighlights}
+          loading={loading}
+          columns={3}
+          className="h-full"
+          title="Badge Spotlight"
+          description="Most common awards unlocked during this period."
+        />
+      </div>
 
       {error && (
         <Card className="border-destructive/50 bg-destructive/5">
@@ -292,6 +381,12 @@ export default function Leaderboard() {
                 </Suspense>
               </CardContent>
             </Card>
+
+            <GamificationLeaderboard
+              entries={leaderboardShowcaseEntries}
+              loading={loading}
+              description={`Top performers for the ${leaderboardPeriodOptions.find((option) => option.value === period)?.label ?? period} period`}
+            />
 
             <Card>
               <CardHeader className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">

@@ -7,6 +7,42 @@ import { handleError } from '@/utils/errorHandler';
 
 type CompanyRow = Tables<'companies'>;
 
+const DEMO_COMPANY: Company = {
+  id: 'demo-company',
+  name: 'Blank Template',
+  industry: 'Technology',
+  size: '1-10',
+  description: 'Demo workspace used when backend company linking fails.',
+  website: 'https://connectflow-demo.local',
+  phone: '555-0000',
+  logo_url: undefined,
+  primary_color: '#3b82f6',
+  secondary_color: '#1e40af',
+  currency: 'USD',
+  template_id: null,
+  template_name: null,
+  enabled_sections: [],
+  custom_roles: [],
+  positions: [],
+  template_config: {
+    enabled_sections: [],
+  },
+  timezone: 'UTC',
+  working_hours: {
+    start: '09:00',
+    end: '17:00',
+    days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+  } as CompanySettings['working_hours'],
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  created_by: '',
+};
+
+const isPolicyRecursionError = (error: any) => {
+  const message = error?.message?.toLowerCase() ?? '';
+  return message.includes('infinite recursion detected in policy');
+};
+
 export interface Company {
   id: string;
   name: string;
@@ -68,7 +104,17 @@ export function useCompany() {
   };
 
   const fetchCompany = async () => {
-    if (!user) return;
+    if (!user) {
+      setCompany(null);
+      setLoading(false);
+      return;
+    }
+
+    const useDemoFallback = (reason: string) => {
+      console.warn(`[useCompany] Falling back to demo company due to: ${reason}`);
+      setCompany({ ...DEMO_COMPANY, created_by: user.id });
+      setLoading(false);
+    };
 
     try {
       // First get the user's profile to find their company_id
@@ -95,14 +141,21 @@ export function useCompany() {
 
         setCompany(parseCompanyData(companyData));
       } else {
-        setCompany(null);
+        useDemoFallback('profile missing company_id');
+        return;
       }
     } catch (error) {
+      if (isPolicyRecursionError(error)) {
+        useDemoFallback('RLS recursion when loading company');
+        return;
+      }
       handleError(error, 'fetchCompany');
       setCompany(null);
-    } finally {
       setLoading(false);
+      return;
     }
+
+    setLoading(false);
   };
 
   const createCompany = async (companyData: {

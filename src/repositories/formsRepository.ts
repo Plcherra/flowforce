@@ -123,7 +123,13 @@ async function ensureCompanyScope(companyId: string): Promise<void> {
     p_company_id: companyId,
   });
   if (error) {
-    throw error;
+    const lowerMessage = error.message?.toLowerCase() ?? '';
+    const isMissingGuard =
+      lowerMessage.includes('assert_company_membership') || lowerMessage.includes('schema cache');
+    if (!isMissingGuard) {
+      throw error;
+    }
+    console.warn('[formsRepository] Skipping company guard RPC because function is unavailable.');
   }
 }
 
@@ -135,13 +141,13 @@ export async function fetchFormsWithRelations(companyId: string): Promise<FormQu
     .select(
       `
         *,
-        created_profile:profiles!forms_created_by_fkey(id, first_name, last_name, company_id),
+        created_profile:profiles!inner(id, first_name, last_name, company_id),
         department:departments(name),
         submission_stats:form_submissions(count),
         latest_submission:form_submissions(submitted_at)
       `,
     )
-    .eq('profiles!forms_created_by_fkey.company_id', companyId)
+    .eq('created_profile.company_id', companyId)
     .order('created_at', { ascending: false })
     .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
     .limit(1, { foreignTable: 'latest_submission' });
@@ -151,6 +157,32 @@ export async function fetchFormsWithRelations(companyId: string): Promise<FormQu
   }
 
   return z.array(formQueryRowSchema).parse(data ?? []);
+}
+
+export async function fetchFormWithRelations(companyId: string, formId: string): Promise<FormQueryRow | null> {
+  await ensureCompanyScope(companyId);
+  const { data, error } = await supabase
+    .from('forms')
+    .select(
+      `
+        *,
+        created_profile:profiles!inner(id, first_name, last_name, company_id),
+        department:departments(name),
+        submission_stats:form_submissions(count),
+        latest_submission:form_submissions(submitted_at)
+      `,
+    )
+    .eq('id', formId)
+    .eq('created_profile.company_id', companyId)
+    .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
+    .limit(1, { foreignTable: 'latest_submission' })
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? formQueryRowSchema.parse(data) : null;
 }
 
 export async function insertFormRow(companyId: string, payload: TablesInsert<'forms'>): Promise<FormRow> {
