@@ -317,6 +317,240 @@ export type Database = {
         }
         Relationships: []
       }
+      certification_catalog: {
+        Row: {
+          badge_code: string | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          issuer: string | null
+          linked_course_id: string | null
+          requirement_config: Json
+          title: string
+          unlocks_role: string | null
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          badge_code?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          issuer?: string | null
+          linked_course_id?: string | null
+          requirement_config?: Json
+          title: string
+          unlocks_role?: string | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          badge_code?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          issuer?: string | null
+          linked_course_id?: string | null
+          requirement_config?: Json
+          title?: string
+          unlocks_role?: string | null
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      certification_progress: {
+        Row: {
+          achieved_at: string | null
+          certification_code: string
+          courses_completed: number
+          created_at: string
+          employee_id: string
+          expires_at: string | null
+          goals_completed: number
+          id: string
+          last_evaluated_at: string
+          progress_percent: number
+          requirement_breakdown: Json | null
+          status: string
+          tasks_completed: number
+          updated_at: string
+          xp_earned: number
+        }
+        Insert: {
+          achieved_at?: string | null
+          certification_code: string
+          courses_completed?: number
+          created_at?: string
+          employee_id: string
+          expires_at?: string | null
+          goals_completed?: number
+          id?: string
+          last_evaluated_at?: string
+          progress_percent?: number
+          requirement_breakdown?: Json | null
+          status?: string
+          tasks_completed?: number
+          updated_at?: string
+          xp_earned?: number
+        }
+        Update: {
+          achieved_at?: string | null
+          certification_code?: string
+          courses_completed?: number
+          created_at?: string
+          employee_id?: string
+          expires_at?: string | null
+          goals_completed?: number
+          id?: string
+          last_evaluated_at?: string
+          progress_percent?: number
+          requirement_breakdown?: Json | null
+          status?: string
+          tasks_completed?: number
+          updated_at?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      employee_badge: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          badge_code: string
+          created_at: string
+          employee_id: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_code: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          badge_code?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      learning_course_progress: {
+        Row: {
+          completed_at: string | null
+          course_code: string
+          created_at: string
+          employee_id: string
+          id: string
+          last_interaction_at: string | null
+          progress_percent: number
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_code: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          last_interaction_at?: string | null
+          progress_percent?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_code?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          last_interaction_at?: string | null
+          progress_percent?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_courses: {
+        Row: {
+          auto_schedule_eligible: boolean
+          category: string
+          certification_code: string | null
+          certification_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          delivery_mode: string
+          description: string | null
+          estimated_hours: number
+          featured: boolean
+          id: string
+          level_requirement: number
+          role_unlock: string[] | null
+          slug: string
+          target_roles: string[] | null
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          auto_schedule_eligible?: boolean
+          category: string
+          certification_code?: string | null
+          certification_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: string
+          description?: string | null
+          estimated_hours?: number
+          featured?: boolean
+          id?: string
+          level_requirement?: number
+          role_unlock?: string[] | null
+          slug: string
+          target_roles?: string[] | null
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          auto_schedule_eligible?: boolean
+          category?: string
+          certification_code?: string | null
+          certification_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: string
+          description?: string | null
+          estimated_hours?: number
+          featured?: boolean
+          id?: string
+          level_requirement?: number
+          role_unlock?: string[] | null
+          slug?: string
+          target_roles?: string[] | null
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       company_invites: {
         Row: {
           accepted_at: string | null

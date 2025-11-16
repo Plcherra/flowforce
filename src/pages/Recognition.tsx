@@ -1,4 +1,4 @@
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState, type ComponentType } from 'react';
+import { memo, useDeferredValue, useEffect, useMemo, useState, type ComponentType } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Loader2, RefreshCw, Sparkles, Filter, Plus, CheckCircle2, GraduationCap, Target } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -520,9 +520,8 @@ export default function Recognition() {
     [stats],
   );
 
-  const handleCreateRecognition = useCallback(
-    async (form: ManualRecognitionForm) => {
-      setCreating(true);
+  const handleCreateRecognition = async (form: ManualRecognitionForm) => {
+    setCreating(true);
     try {
       await createManualRecognition({
         userId: form.userId,
@@ -540,14 +539,12 @@ export default function Recognition() {
         description: 'Please try again or contact your administrator.',
         variant: 'destructive',
       });
-      } finally {
-        setCreating(false);
-      }
-    },
-    [createManualRecognition, toast],
-  );
+    } finally {
+      setCreating(false);
+    }
+  };
 
-  const handleSyncAutomation = useCallback(async () => {
+  const handleSyncAutomation = async () => {
     try {
       await syncAutomation();
       toast({
@@ -572,7 +569,7 @@ export default function Recognition() {
         variant: 'destructive',
       });
     }
-  }, [refreshLeaderboard, syncAutomation, toast]);
+  };
 
   return (
     <div className="p-6 space-y-6">

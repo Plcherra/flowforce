@@ -1,5 +1,4 @@
-
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,16 +45,13 @@ export default function Certifications() {
   const { certifications, loading, error, refresh, metrics } = useCertifications();
   const navigate = useNavigate();
 
-  const handleCertificationAction = useCallback(
-    (cert: CertificationViewModel) => {
-      const params = new URLSearchParams({
-        tab: 'catalog',
-        certification: cert.code,
-      });
-      navigate(`/app/learning-center?${params.toString()}`);
-    },
-    [navigate],
-  );
+  const handleCertificationAction = (cert: CertificationViewModel) => {
+    const params = new URLSearchParams({
+      tab: 'catalog',
+      certification: cert.code,
+    });
+    navigate(`/app/learning-center?${params.toString()}`);
+  };
 
   const metricsCards = useMemo(
     () => [

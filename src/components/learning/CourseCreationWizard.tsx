@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BookOpen, CheckCircle2, Clock, Layers, Loader2, Plus, ShieldCheck, Target } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -160,28 +160,25 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
     });
   };
 
-  const handleModuleAdd = useCallback(
-    (module: CourseModuleInput) => {
-      if (!module.title.trim()) {
-        toast({
-          title: 'Module title required',
-          description: 'Add a module title before saving it.',
-          variant: 'destructive',
-        });
-        return;
-      }
+  const handleModuleAdd = (module: CourseModuleInput) => {
+    if (!module.title.trim()) {
+      toast({
+        title: 'Module title required',
+        description: 'Add a module title before saving it.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-      setModules((prev) => [
-        ...prev,
-        {
-          ...module,
-          estimatedMinutes: Math.max(10, module.estimatedMinutes),
-          xpAward: Math.max(50, module.xpAward),
-        },
-      ]);
-    },
-    [toast],
-  );
+    setModules((prev) => [
+      ...prev,
+      {
+        ...module,
+        estimatedMinutes: Math.max(10, module.estimatedMinutes),
+        xpAward: Math.max(50, module.xpAward),
+      },
+    ]);
+  };
 
   const removeModule = (index: number) => {
     setModules((prev) => prev.filter((_, idx) => idx !== index));
@@ -254,8 +251,8 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="flex h-screen flex-col overflow-hidden border border-border bg-background p-0 sm:h-[85vh] sm:max-w-4xl">
+        <DialogHeader className="border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <BookOpen className="h-5 w-5 text-primary" />
             Launch new training
@@ -263,7 +260,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
           <DialogDescription>{header.description}</DialogDescription>
         </DialogHeader>
 
-        <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 border-b px-6 py-3 text-sm text-muted-foreground">
           {[0, 1, 2].map((value) => (
             <div key={value} className="flex items-center gap-2">
               <div
@@ -282,9 +279,9 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
           ))}
         </div>
 
-        <div className="flex flex-col max-h-[85vh] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
         {step === 0 && (
-          <div className="flex flex-col p-6 space-y-6">
+          <div className="space-y-6">
             <section className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="course-title">Course title</Label>
@@ -461,7 +458,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
         )}
 
         {step === 1 && (
-          <div className="flex flex-col p-6 space-y-6">
+          <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
               <div className="space-y-4">
                 <Card>
@@ -548,7 +545,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
         )}
 
         {step === 2 && (
-          <div className="flex flex-col p-6 space-y-6">
+          <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">Course summary</CardTitle>
@@ -597,7 +594,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading }: 
         )}
         </div>
 
-        <DialogFooter className="mt-6 flex items-center justify-between">
+        <DialogFooter className="flex items-center justify-between border-t px-6 py-4">
           <div className="space-x-2">
             {step > 0 && (
               <Button variant="outline" onClick={() => setStep((prev) => (prev > 0 ? ((prev - 1) as WizardStep) : prev))}>

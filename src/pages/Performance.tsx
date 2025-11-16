@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { RefreshCw, Target, BarChart3, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -164,27 +164,24 @@ export default function Performance() {
   } = useLeaderboardData(leaderboardPeriod);
   const [activeTab, setActiveTab] = useState<PerformanceTab>('overview');
   const goalsTabRef = useRef<HTMLButtonElement | null>(null);
-  const handleTabChange = useCallback(
-    (value: string) => {
-      if (isPerformanceTab(value) && value !== activeTab) {
-        setActiveTab(value);
-      }
-    },
-    [activeTab],
-  );
-  const handleSelectGoalsTab = useCallback(() => {
+  const handleTabChange = (value: string) => {
+    if (isPerformanceTab(value) && value !== activeTab) {
+      setActiveTab(value);
+    }
+  };
+  const handleSelectGoalsTab = () => {
     setActiveTab('goals');
     goalsTabRef.current?.focus();
-  }, []);
-  const handleRetryLeaderboard = useCallback(() => {
+  };
+  const handleRetryLeaderboard = () => {
     refreshLeaderboard?.();
-  }, [refreshLeaderboard]);
-  const handleRetryRecognitions = useCallback(() => {
+  };
+  const handleRetryRecognitions = () => {
     refreshRecognitions?.();
-  }, [refreshRecognitions]);
-  const handleRefetchPerformance = useCallback(() => {
+  };
+  const handleRefetchPerformance = () => {
     refetch?.();
-  }, [refetch]);
+  };
   const recentReviews = reviews.slice(0, 20);
   const unifiedReviews = goalReviews.slice(0, 10);
   const topRecognitions = useMemo(() => recognitions.slice(0, 5), [recognitions]);

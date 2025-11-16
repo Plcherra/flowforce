@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addDays, addMinutes, differenceInCalendarDays, formatDistanceToNow } from 'date-fns';
 import {
@@ -292,7 +292,7 @@ export function AIQuickActions({ className }: { className?: string }) {
     nextReminder,
   ]);
 
-  const handleTriggerCopilot = useCallback(async () => {
+  const handleTriggerCopilot = async () => {
     setPendingAction('copilot');
     try {
       const outcome = simulate(DEFAULT_ADJUSTMENTS);
@@ -319,9 +319,9 @@ export function AIQuickActions({ className }: { className?: string }) {
     } finally {
       setPendingAction((current) => (current === 'copilot' ? null : current));
     }
-  }, [refreshSimulator, refetchTasks, simulate, toast, triggerCopilot]);
+  };
 
-  const handleCreateBacklogTask = useCallback(async () => {
+  const handleCreateBacklogTask = async () => {
     if (!user) {
       toast({
         title: 'Sign-in required',
@@ -380,16 +380,9 @@ export function AIQuickActions({ className }: { className?: string }) {
     } finally {
       setPendingAction((current) => (current === 'tasks' ? null : current));
     }
-  }, [
-    createTask,
-    dueSoonTasks.length,
-    overdueTasks.length,
-    refetchTasks,
-    toast,
-    user,
-  ]);
+  };
 
-  const handleCreateReminder = useCallback(async () => {
+  const handleCreateReminder = async () => {
     setPendingAction('reminders');
     try {
       await createReminder({
@@ -426,9 +419,9 @@ export function AIQuickActions({ className }: { className?: string }) {
     } finally {
       setPendingAction((current) => (current === 'reminders' ? null : current));
     }
-  }, [createReminder, overdueTasks.length, refetchReminders, toast]);
+  };
 
-  const handleCreateGoal = useCallback(async () => {
+  const handleCreateGoal = async () => {
     if (!user) {
       toast({
         title: 'Sign-in required',
@@ -468,83 +461,69 @@ export function AIQuickActions({ className }: { className?: string }) {
     } finally {
       setPendingAction((current) => (current === 'goals' ? null : current));
     }
-  }, [atRiskGoals.length, createGoal, refetchGoals, toast, user]);
+  };
 
-  const quickActions: QuickActionDescriptor[] = useMemo(
-    () => [
-      {
-        id: 'copilot',
-        badge: 'Co-Pilot',
-        title: 'Trigger automation playbook',
-        description:
-          'Generate recommended follow-up tasks from Co-Pilot and push them to the automation queue.',
-        icon: <Sparkles className="h-5 w-5 text-primary" />,
-        metrics: metricsSnapshot.copilot,
-        primaryLabel: 'Trigger Co-Pilot',
-        secondaryLabel: 'Open simulator',
-        onPrimary: handleTriggerCopilot,
-        onSecondary: () => navigate('/ai-insights?tab=simulator'),
-        disabled: simulatorLoading,
-      },
-      {
-        id: 'tasks',
-        badge: 'Tasks',
-        title: 'Assign backlog recovery',
-        description:
-          overdueTasks.length > 0
-            ? `Coordinate owners to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? '' : 's'}.`
-            : 'Stay ahead of upcoming deadlines by issuing a quick checkpoint task.',
-        icon: <ClipboardList className="h-5 w-5 text-blue-600" />,
-        metrics: metricsSnapshot.tasks,
-        primaryLabel: 'Create follow-up task',
-        secondaryLabel: 'Open tasks',
-        onPrimary: handleCreateBacklogTask,
-        onSecondary: () => navigate('/tasks'),
-      },
-      {
-        id: 'reminders',
-        badge: 'Reminders',
-        title: 'Schedule follow-up reminder',
-        description:
-          overdueReminders.length > 0
-            ? `There are ${overdueReminders.length} overdue reminder${overdueReminders.length === 1 ? '' : 's'}. Queue a short follow-up.`
-            : 'Keep the loop tight by setting a quick reminder to review progress.',
-        icon: <AlarmClock className="h-5 w-5 text-rose-600" />,
-        metrics: metricsSnapshot.reminders,
-        primaryLabel: 'Set reminder',
-        secondaryLabel: 'View reminders',
-        onPrimary: handleCreateReminder,
-        onSecondary: () => navigate('/tasks#reminders'),
-      },
-      {
-        id: 'goals',
-        badge: 'Goals',
-        title: 'Launch checkpoint goal',
-        description:
-          atRiskGoals.length > 0
-            ? `Stabilise ${atRiskGoals.length} goal${atRiskGoals.length === 1 ? '' : 's'} trending behind.`
-            : 'Lock in velocity by capturing a short checkpoint goal with linked tasks.',
-        icon: <Target className="h-5 w-5 text-purple-600" />,
-        metrics: metricsSnapshot.goals,
-        primaryLabel: 'Create goal sprint',
-        secondaryLabel: 'Review goals',
-        onPrimary: handleCreateGoal,
-        onSecondary: () => navigate('/goals'),
-      },
-    ],
-    [
-      atRiskGoals.length,
-      handleCreateBacklogTask,
-      handleCreateGoal,
-      handleCreateReminder,
-      handleTriggerCopilot,
-      metricsSnapshot,
-      navigate,
-      overdueReminders.length,
-      overdueTasks.length,
-      simulatorLoading,
-    ],
-  );
+  const quickActions: QuickActionDescriptor[] = [
+    {
+      id: 'copilot',
+      badge: 'Co-Pilot',
+      title: 'Trigger automation playbook',
+      description:
+        'Generate recommended follow-up tasks from Co-Pilot and push them to the automation queue.',
+      icon: <Sparkles className="h-5 w-5 text-primary" />,
+      metrics: metricsSnapshot.copilot,
+      primaryLabel: 'Trigger Co-Pilot',
+      secondaryLabel: 'Open simulator',
+      onPrimary: handleTriggerCopilot,
+      onSecondary: () => navigate('/ai-insights?tab=simulator'),
+      disabled: simulatorLoading,
+    },
+    {
+      id: 'tasks',
+      badge: 'Tasks',
+      title: 'Assign backlog recovery',
+      description:
+        overdueTasks.length > 0
+          ? `Coordinate owners to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? '' : 's'}.`
+          : 'Stay ahead of upcoming deadlines by issuing a quick checkpoint task.',
+      icon: <ClipboardList className="h-5 w-5 text-blue-600" />,
+      metrics: metricsSnapshot.tasks,
+      primaryLabel: 'Create follow-up task',
+      secondaryLabel: 'Open tasks',
+      onPrimary: handleCreateBacklogTask,
+      onSecondary: () => navigate('/tasks'),
+    },
+    {
+      id: 'reminders',
+      badge: 'Reminders',
+      title: 'Schedule follow-up reminder',
+      description:
+        overdueReminders.length > 0
+          ? `There are ${overdueReminders.length} overdue reminder${overdueReminders.length === 1 ? '' : 's'}. Queue a short follow-up.`
+          : 'Keep the loop tight by setting a quick reminder to review progress.',
+      icon: <AlarmClock className="h-5 w-5 text-rose-600" />,
+      metrics: metricsSnapshot.reminders,
+      primaryLabel: 'Set reminder',
+      secondaryLabel: 'View reminders',
+      onPrimary: handleCreateReminder,
+      onSecondary: () => navigate('/tasks#reminders'),
+    },
+    {
+      id: 'goals',
+      badge: 'Goals',
+      title: 'Launch checkpoint goal',
+      description:
+        atRiskGoals.length > 0
+          ? `Stabilise ${atRiskGoals.length} goal${atRiskGoals.length === 1 ? '' : 's'} trending behind.`
+          : 'Lock in velocity by capturing a short checkpoint goal with linked tasks.',
+      icon: <Target className="h-5 w-5 text-purple-600" />,
+      metrics: metricsSnapshot.goals,
+      primaryLabel: 'Create goal sprint',
+      secondaryLabel: 'Review goals',
+      onPrimary: handleCreateGoal,
+      onSecondary: () => navigate('/goals'),
+    },
+  ];
 
   const overallLoading = tasksLoading || goalsLoading || remindersLoading;
 

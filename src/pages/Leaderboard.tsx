@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
+import dayjs from 'dayjs';
 import {
   Award,
   BarChart3,
@@ -52,9 +53,9 @@ export default function Leaderboard() {
 
   const { entries, analytics, departments, roles, challenges, loading, syncing, error, lastUpdated, refresh } =
     useLeaderboardData(period);
-  const updatePeriod = useCallback((next: LeaderboardPeriod) => {
+  const updatePeriod = (next: LeaderboardPeriod) => {
     setPeriod(next);
-  }, []);
+  };
   const {
     departmentFilter,
     roleFilter,

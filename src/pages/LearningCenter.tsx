@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, RefreshCcw, Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -174,13 +174,13 @@ export default function LearningCenter() {
   const showAdminSkeleton = loading && metrics.length === 0;
   const showAdminEmpty = !loading && metrics.length === 0;
 
-  const handleTabChange = useCallback((value: string) => {
+  const handleTabChange = (value: string) => {
     setActiveTab((previous) => (isLearningTab(value) ? value : previous));
-  }, []);
+  };
 
-  const handleShowProgress = useCallback(() => setActiveTab('overview'), []);
-  const handleOpenWizard = useCallback(() => setWizardOpen(true), []);
-  const handleWizardOpenChange = useCallback((open: boolean) => setWizardOpen(open), []);
+  const handleShowProgress = () => setActiveTab('overview');
+  const handleOpenWizard = () => setWizardOpen(true);
+  const handleWizardOpenChange = (open: boolean) => setWizardOpen(open);
 
   const personalStats = snapshot
     ? [
