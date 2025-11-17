@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useRecognitionFiltering } from '../useRecognitionFiltering';
 import type { RecognitionRecord } from '@/types/recognition';
-import type { Employee } from '@/features/employees/hooks/useEmployees';
+import type { Employee } from '@/hooks/useEmployees';
 
 const mockEmployees: Employee[] = [
   {

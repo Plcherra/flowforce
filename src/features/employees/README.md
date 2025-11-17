@@ -9,7 +9,7 @@
 
 ### Usage
 ```tsx
-import { useEmployees } from '@/features/employees/hooks/useEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 
 const { employees, loading } = useEmployees({ includeInactive: true });
 ```

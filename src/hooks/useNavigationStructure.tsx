@@ -160,7 +160,7 @@ export function useNavigationStructure() {
             }
 
             if (isHelpDeskSection) {
-              const helpDeskHref = '/messages/helpdesk';
+              const helpDeskHref = '/app/help-desk';
               const helpDeskCanonical = canonicalizePath(helpDeskHref);
 
               if (canonicalPaths.has(helpDeskCanonical)) {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { WizardFormData, WizardStepId } from './types';
 import { WIZARD_STEPS } from './steps';
@@ -87,98 +87,83 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
   const steps = WIZARD_STEPS;
   const currentStep = steps[currentStepIndex];
 
-  const progress = useMemo(() => ((currentStepIndex + 1) / steps.length) * 100, [currentStepIndex, steps.length]);
+  const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
-  const canProceedToStep = useCallback(
-    (stepId: WizardStepId) => {
-      const validator = STEP_VALIDATORS[stepId];
-      return validator ? validator(formData) : true;
-    },
-    [formData],
-  );
+  const canProceedToStep = (stepId: WizardStepId) => {
+    const validator = STEP_VALIDATORS[stepId];
+    return validator ? validator(formData) : true;
+  };
 
-  const canProceedToNext = useMemo(() => canProceedToStep(currentStep.id), [canProceedToStep, currentStep.id]);
+  const canProceedToNext = canProceedToStep(currentStep.id);
 
-  const goToStep = useCallback(
-    (index: number) => {
-      if (index < 0 || index >= steps.length) return;
-      setCurrentStepIndex(index);
-    },
-    [steps.length],
-  );
+  const goToStep = (index: number) => {
+    if (index < 0 || index >= steps.length) return;
+    setCurrentStepIndex(index);
+  };
 
-  const goNext = useCallback(() => {
+  const goNext = () => {
     if (!canProceedToNext) return;
     setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
-  }, [canProceedToNext, steps.length]);
+  };
 
-  const goBack = useCallback(() => {
+  const goBack = () => {
     setCurrentStepIndex((prev) => Math.max(prev - 1, 0));
-  }, []);
+  };
 
-  const clearDraft = useCallback(() => {
+  const clearDraft = () => {
     if (typeof window === 'undefined') return;
     window.localStorage.removeItem(STORAGE_KEY);
     persistedRef.current = null;
     setLastSavedAt(null);
-  }, []);
+  };
 
-  const persistDraft = useCallback(
-    (data: WizardFormData) => {
-      if (typeof window === 'undefined') return;
-      const payload: PersistedDraft = {
-        data,
-        savedAt: new Date().toISOString(),
-      };
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        persistedRef.current = payload;
-        setLastSavedAt(new Date(payload.savedAt));
-      } catch (error) {
-        console.warn('Failed to persist update draft', error);
-      }
-    },
-    [],
-  );
+  const persistDraft = (data: WizardFormData) => {
+    if (typeof window === 'undefined') return;
+    const payload: PersistedDraft = {
+      data,
+      savedAt: new Date().toISOString(),
+    };
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      persistedRef.current = payload;
+      setLastSavedAt(new Date(payload.savedAt));
+    } catch (error) {
+      console.warn('Failed to persist update draft', error);
+    }
+  };
 
   const scheduleSaveRef = useRef<number>();
 
-  const handleAutoSave = useCallback(
-    (data: WizardFormData) => {
-      if (typeof window === 'undefined') return;
-      if (scheduleSaveRef.current) {
-        window.clearTimeout(scheduleSaveRef.current);
+  const handleAutoSave = (data: WizardFormData) => {
+    if (typeof window === 'undefined') return;
+    if (scheduleSaveRef.current) {
+      window.clearTimeout(scheduleSaveRef.current);
+    }
+
+    scheduleSaveRef.current = window.setTimeout(() => {
+      const isDefaultState = JSON.stringify({ ...DEFAULT_FORM_DATA, ...initialState }) === JSON.stringify(data);
+      if (isDefaultState) {
+        clearDraft();
+        return;
       }
+      persistDraft(data);
+    }, 500);
+  };
 
-      scheduleSaveRef.current = window.setTimeout(() => {
-        const isDefaultState = JSON.stringify({ ...DEFAULT_FORM_DATA, ...initialState }) === JSON.stringify(data);
-        if (isDefaultState) {
-          clearDraft();
-          return;
-        }
-        persistDraft(data);
-      }, 500);
-    },
-    [clearDraft, initialState, persistDraft],
-  );
+  const updateFormData = (updates: Partial<WizardFormData>) => {
+    setFormData((prev) => {
+      const next = { ...prev, ...updates };
+      handleAutoSave(next);
+      return next;
+    });
+  };
 
-  const updateFormData = useCallback(
-    (updates: Partial<WizardFormData>) => {
-      setFormData((prev) => {
-        const next = { ...prev, ...updates };
-        handleAutoSave(next);
-        return next;
-      });
-    },
-    [handleAutoSave],
-  );
-
-  const reset = useCallback(() => {
+  const reset = () => {
     setFormData({ ...DEFAULT_FORM_DATA, ...initialState });
     setCurrentStepIndex(0);
     setIsSubmitting(false);
     clearDraft();
-  }, [clearDraft, initialState]);
+  };
 
   return {
     steps,

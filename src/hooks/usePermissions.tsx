@@ -33,98 +33,98 @@ type Permission =
 
 type UserRole = 'staff' | 'supervisor' | 'manager' | 'admin' | 'owner';
 
+const defaultPermissionHelpers = {
+  can: () => false,
+  hasRole: () => false,
+  role: undefined as UserRole | undefined,
+  positionRole: undefined as UserRole | undefined,
+  getDisplayRole: () => 'Loading...',
+  isLoading: true,
+};
+
 export function usePermissions() {
   const { profile, loading: profileLoading } = useProfile();
   const { roles, loading: rolesLoading } = useCompanyRoles();
   const { data: overrides, isLoading: overridesLoading } = useUserPermissionOverrides(profile?.id || null);
 
-  // Memoize the permission calculations using the new resolver
-  const permissionHelpers = useMemo(() => {
-    if (profileLoading || rolesLoading || overridesLoading || !profile?.role) {
-      return {
-        can: () => false,
-        hasRole: () => false,
-        role: undefined,
-        positionRole: undefined,
-        getDisplayRole: () => 'Loading...',
-        isLoading: true
-      };
+  if (profileLoading || rolesLoading || overridesLoading) {
+    return defaultPermissionHelpers;
+  }
+
+  if (!profile?.role) {
+    return {
+      ...defaultPermissionHelpers,
+      isLoading: false,
+      getDisplayRole: () => 'Employee',
+    };
+  }
+
+  const roleHierarchy: Record<UserRole, number> = {
+    staff: 1,
+    supervisor: 2,
+    manager: 3,
+    admin: 4,
+    owner: 5,
+  };
+
+  const profileRole = profile.role as UserRole;
+  const positionRole = profile.position?.role as UserRole | undefined;
+  const effectiveRole = (positionRole || profileRole) as UserRole;
+  const companyRole = Array.isArray(roles)
+    ? roles.find((role) => role.name.toLowerCase() === effectiveRole.toLowerCase())
+    : undefined;
+
+  const context: PermissionContext = {
+    rolePermissions: companyRole?.permissions || {},
+    userOverrides: overrides || [],
+    userId: profile.id,
+    roleId: companyRole?.id,
+  };
+
+  const resolver = createPermissionResolver(context);
+  const getCurrentRoleLevel = () => roleHierarchy[effectiveRole] || 0;
+
+  const can = (permission: Permission): boolean => {
+    try {
+      return resolver.resolve(permission as any);
+    } catch (error) {
+      console.error('Failed to resolve permission', error);
+      return false;
+    }
+  };
+
+  const hasRole = (requiredRole: string | string[]): boolean => {
+    if (!profile?.role) return false;
+
+    if (Array.isArray(requiredRole)) {
+      return requiredRole.some((roleKey) => {
+        const requiredLevel = roleHierarchy[roleKey as UserRole] || 0;
+        return getCurrentRoleLevel() >= requiredLevel;
+      });
     }
 
-    const role = profile.role as UserRole;
-    const positionRole = profile.position?.role as UserRole | undefined;
-    const effectiveRole = positionRole || role;
+    const requiredLevel = roleHierarchy[requiredRole as UserRole] || 0;
+    return getCurrentRoleLevel() >= requiredLevel;
+  };
 
-    // Find the company role configuration
-    const companyRole = Array.isArray(roles) 
-      ? roles.find(r => r.name.toLowerCase() === effectiveRole.toLowerCase())
-      : undefined;
+  const getDisplayRole = (): string => {
+    if (profile?.position?.name) {
+      return profile.position.name;
+    }
 
-    // Create permission context for the resolver
-    const context: PermissionContext = {
-      rolePermissions: companyRole?.permissions || {},
-      userOverrides: overrides || [],
-      userId: profile.id,
-      roleId: companyRole?.id
-    };
+    if (companyRole?.name) {
+      return companyRole.name;
+    }
 
-    // Create resolver instance
-    const resolver = createPermissionResolver(context);
+    return profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Employee';
+  };
 
-    // Role hierarchy for hasRole function
-    const roleHierarchy = {
-      'staff': 1,
-      'supervisor': 2,
-      'manager': 3,
-      'admin': 4,
-      'owner': 5
-    };
-
-    const getCurrentRoleLevel = () => roleHierarchy[effectiveRole] || 0;
-
-    const can = (permission: Permission): boolean => {
-      return resolver.resolve(permission as any);
-    };
-
-    const hasRole = (requiredRole: string | string[]): boolean => {
-      if (!profile?.role) return false;
-      
-      if (Array.isArray(requiredRole)) {
-        return requiredRole.some(r => {
-          const requiredLevel = roleHierarchy[r as UserRole] || 0;
-          return getCurrentRoleLevel() >= requiredLevel;
-        });
-      }
-      
-      const requiredLevel = roleHierarchy[requiredRole as UserRole] || 0;
-      return getCurrentRoleLevel() >= requiredLevel;
-    };
-
-    const getDisplayRole = (): string => {
-      if (profile?.position?.name) {
-        return profile.position.name;
-      }
-      
-      // Use company role name if available
-      if (companyRole?.name) {
-        return companyRole.name;
-      }
-      
-      // Fallback to profile role with proper capitalization
-      return profile?.role 
-        ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1)
-        : 'Employee';
-    };
-
-    return {
-      can,
-      hasRole,
-      role,
-      positionRole,
-      getDisplayRole,
-      isLoading: false
-    };
-  }, [profile, roles, overrides, profileLoading, rolesLoading, overridesLoading]);
-
-  return permissionHelpers;
+  return {
+    can,
+    hasRole,
+    role: profileRole,
+    positionRole,
+    getDisplayRole,
+    isLoading: false,
+  };
 }

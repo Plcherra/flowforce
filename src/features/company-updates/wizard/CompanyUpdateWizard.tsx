@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -56,32 +56,25 @@ export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyU
   const { toast } = useToast();
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
-  const autoSaveLabel = useMemo(() => {
-    if (draft.lastSavedAt) {
-      return `Autosaved ${formatDistanceToNow(draft.lastSavedAt, { addSuffix: true })}`;
+  const autoSaveLabel = draft.lastSavedAt
+    ? `Autosaved ${formatDistanceToNow(draft.lastSavedAt, { addSuffix: true })}`
+    : draft.hasPersistedDraft
+      ? 'Draft restored from previous session'
+      : 'Autosave enabled';
+
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (!nextOpen && draft.isSubmitting) {
+      return;
     }
-    if (draft.hasPersistedDraft) {
-      return 'Draft restored from previous session';
+
+    if (!nextOpen) {
+      draft.reset();
     }
-    return 'Autosave enabled';
-  }, [draft.hasPersistedDraft, draft.lastSavedAt]);
 
-  const handleDialogChange = useCallback(
-    (nextOpen: boolean) => {
-      if (!nextOpen && draft.isSubmitting) {
-        return;
-      }
+    onOpenChange(nextOpen);
+  };
 
-      if (!nextOpen) {
-        draft.reset();
-      }
-
-      onOpenChange(nextOpen);
-    },
-    [draft, onOpenChange],
-  );
-
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     draft.setIsSubmitting(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -103,104 +96,104 @@ export function CompanyUpdateWizard({ open, onOpenChange, onComplete }: CompanyU
     } finally {
       draft.setIsSubmitting(false);
     }
-  }, [draft, onComplete, onOpenChange, toast]);
+  };
 
   const StepRenderer = STEP_COMPONENT_RENDERERS[draft.currentStep.id];
   const summaryIndex = draft.steps.findIndex((step) => step.id === 'summary');
   const designIndex = draft.steps.findIndex((step) => step.id === 'design');
 
-  const quickActions = useMemo<QuickAction[]>(() => {
-    const actions: QuickAction[] = [
-      {
-        id: 'preview',
-        label: 'Preview',
-        icon: Eye,
-        targetId: 'wizard-preview',
-        jumpToStep: designIndex >= 0 ? designIndex : undefined,
-      },
-      {
-        id: 'media',
-        label: 'Media',
-        icon: ImageIcon,
-        targetId: 'wizard-section-media',
-        jumpToStep: designIndex >= 0 ? designIndex : undefined,
-      },
-      {
-        id: 'style',
-        label: 'Style',
-        icon: Palette,
-        targetId: 'wizard-section-style',
-        jumpToStep: designIndex >= 0 ? designIndex : undefined,
-      },
-    ];
-
-    if (summaryIndex >= 0) {
-      actions.push({ id: 'publish', label: 'Publish', icon: Send, jumpToStep: summaryIndex });
-    }
-
-    return actions;
-  }, [designIndex, summaryIndex]);
+  const quickActions = buildQuickActions(designIndex, summaryIndex);
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent
         style={{ transform: 'none' }}
-        className="h-screen w-screen max-w-none overflow-hidden rounded-none border-none bg-background p-0 shadow-none"
+        className="flex h-screen w-screen max-w-none flex-col overflow-hidden rounded-none border-none bg-background p-0 shadow-none"
       >
-        <div className="flex h-full flex-col bg-background">
-          <WizardTopBar
-            currentStepIndex={draft.currentStepIndex}
-            totalSteps={draft.steps.length}
-            statusLabel={autoSaveLabel}
-            progress={draft.progress}
-          />
+        <WizardTopBar
+          currentStepIndex={draft.currentStepIndex}
+          totalSteps={draft.steps.length}
+          statusLabel={autoSaveLabel}
+          progress={draft.progress}
+        />
 
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex flex-1 flex-col overflow-hidden">
-              <StepNavigation currentIndex={draft.currentStepIndex} onStepChange={draft.goToStep} />
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <StepNavigation currentIndex={draft.currentStepIndex} onStepChange={draft.goToStep} />
 
-              <div className="flex flex-1 overflow-hidden">
-                <div className="flex-1 overflow-y-auto px-8 py-6">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={draft.currentStep.id}
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -16 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
-                    >
-                      {StepRenderer({
-                        formData: draft.formData,
-                        updateFormData: draft.updateFormData,
-                        ...(draft.currentStep.id === 'design'
-                          ? {
-                              previewDevice,
-                              onPreviewDeviceChange: setPreviewDevice,
-                            }
-                          : {}),
-                      })}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-
-                <QuickActionRail actions={quickActions} onJumpToStep={draft.goToStep} />
+            <div className="flex flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto px-8 py-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={draft.currentStep.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    {StepRenderer({
+                      formData: draft.formData,
+                      updateFormData: draft.updateFormData,
+                      ...(draft.currentStep.id === 'design'
+                        ? {
+                            previewDevice,
+                            onPreviewDeviceChange: setPreviewDevice,
+                          }
+                        : {}),
+                    })}
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
-              <WizardFooter
-                progress={draft.progress}
-                canProceedNext={draft.canProceedToNext}
-                isSubmitting={draft.isSubmitting}
-                currentIndex={draft.currentStepIndex}
-                onBack={draft.goBack}
-                onNext={draft.goNext}
-                onSubmit={handleSubmit}
-              />
+              <QuickActionRail actions={quickActions} onJumpToStep={draft.goToStep} />
             </div>
+
+            <WizardFooter
+              progress={draft.progress}
+              canProceedNext={draft.canProceedToNext}
+              isSubmitting={draft.isSubmitting}
+              currentIndex={draft.currentStepIndex}
+              onBack={draft.goBack}
+              onNext={draft.goNext}
+              onSubmit={handleSubmit}
+            />
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
+}
+
+function buildQuickActions(designIndex: number, summaryIndex: number): QuickAction[] {
+  const actions: QuickAction[] = [
+    {
+      id: 'preview',
+      label: 'Preview',
+      icon: Eye,
+      targetId: 'wizard-preview',
+      jumpToStep: designIndex >= 0 ? designIndex : undefined,
+    },
+    {
+      id: 'media',
+      label: 'Media',
+      icon: ImageIcon,
+      targetId: 'wizard-section-media',
+      jumpToStep: designIndex >= 0 ? designIndex : undefined,
+    },
+    {
+      id: 'style',
+      label: 'Style',
+      icon: Palette,
+      targetId: 'wizard-section-style',
+      jumpToStep: designIndex >= 0 ? designIndex : undefined,
+    },
+  ];
+
+  if (summaryIndex >= 0) {
+    actions.push({ id: 'publish', label: 'Publish', icon: Send, jumpToStep: summaryIndex });
+  }
+
+  return actions;
 }
 
 function WizardTopBar({

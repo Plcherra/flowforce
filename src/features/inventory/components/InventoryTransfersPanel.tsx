@@ -38,7 +38,7 @@ import {
   useInventoryTransfers,
   useUpdateInventoryTransferStatus,
 } from '@/features/inventory/hooks/useInventoryTransfers';
-import { useEmployees } from '@/features/employees/hooks/useEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useProfile } from '@/hooks/useProfile';
 import type { InventoryItem, InventoryTransfer, InventoryTransferStatus } from '@/features/inventory/hooks/types';
 

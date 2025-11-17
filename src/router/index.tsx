@@ -21,11 +21,11 @@ const Employees = lazy(() => import('../pages/Employees.tsx'));
 const PositionManagement = lazy(() => import('../pages/PositionManagement.tsx'));
 const Goals = lazy(() => import('../pages/Goals.tsx'));
 const Tasks = lazy(() => import('../pages/Tasks.tsx'));
-const Performance = lazy(() => import('../pages/Performance.tsx'));
+const Performance = lazy(() => import('../pages/Performance'));
 const TimeOff = lazy(() => import('../pages/TimeOff.tsx'));
-const Recognition = lazy(() => import('../pages/Recognition.tsx'));
+const Recognition = lazy(() => import('../pages/Recognition'));
 const Expenses = lazy(() => import('../pages/Expenses.tsx'));
-const Leaderboard = lazy(() => import('../pages/Leaderboard.tsx'));
+const Leaderboard = lazy(() => import('../pages/Leaderboard'));
 // Use explicit path to avoid barrel/star export resolution issues
 // Import Forms eagerly to avoid dynamic import resolution issues in dev
 import Forms from '../pages/Forms.tsx';
@@ -39,11 +39,11 @@ const Purchasing = lazy(() => import('../pages/Purchasing.tsx'));
 const EnhancedScheduling = lazy(() => import('../pages/EnhancedScheduling.tsx'));
 const ScheduleLobby = lazy(() => import('../pages/ScheduleLobby.tsx'));
 const Operations = lazy(() => import('../modules/operations/pages/OperationsPage.tsx'));
-const Certifications = lazy(() => import('../pages/Certifications.tsx'));
-const LearningCenter = lazy(() => import('../pages/LearningCenter.tsx'));
+const Certifications = lazy(() => import('../pages/Certifications'));
+const LearningCenter = lazy(() => import('../pages/LearningCenter'));
 const Resources = lazy(() => import('../pages/Resources.tsx'));
 const Cookbook = lazy(() => import('../pages/Cookbook.tsx'));
-const AIInsights = lazy(() => import('../pages/AIInsights.tsx'));
+const AIInsights = lazy(() => import('../pages/AIInsights'));
 const Settings = lazy(() => import('../modules/system/pages/SettingsPage.tsx'));
 const Profile = lazy(() => import('../pages/Profile.tsx'));
 const Admin = lazy(() => import('../pages/Admin.tsx'));
@@ -57,6 +57,7 @@ const TemplateDetail = lazy(() => import('../pages/TemplateDetail.tsx'));
 const Features = lazy(() => import('../pages/Features.tsx'));
 const Pricing = lazy(() => import('../pages/Pricing.tsx'));
 const HrDevelopment = lazy(() => import('../pages/HrDevelopment.tsx'));
+const HelpDesk = lazy(() => import('../pages/HelpDesk.tsx'));
 
 export const router = createBrowserRouter([
   {
@@ -192,6 +193,10 @@ export const router = createBrowserRouter([
           {
             path: "company-updates",
             element: <CompanyUpdates />,
+          },
+          {
+            path: "help-desk",
+            element: <HelpDesk />,
           },
           {
             path: "analytics",

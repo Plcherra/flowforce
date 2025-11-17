@@ -43,7 +43,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCan } from '@/hooks/useCan';
 import { useCompanyRoles } from '@/hooks/useCompanyRoles';
 import { usePositions } from '@/hooks/usePositions';
-import { useEmployees, type Employee } from '@/features/employees/hooks/useEmployees';
+import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import { useAuth } from '@/hooks/useAuth';
 import { evaluateEmployee } from '@/copilot/rulesEngine';
 import type { Database } from '@/integrations/supabase/types';

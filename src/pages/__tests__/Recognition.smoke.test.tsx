@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { RecognitionRecord } from '@/types/recognition';
-import type { Employee } from '@/features/employees/hooks/useEmployees';
+import type { Employee } from '@/hooks/useEmployees';
 import type { LeaderboardInsightRecord } from '@/stores/useLeaderboardInsights';
 import Recognition from '../Recognition';
 
@@ -14,7 +14,7 @@ vi.mock('@/hooks/useRecognitions', () => ({
   useRecognitions: () => mockUseRecognitions(),
 }));
 
-vi.mock('@/features/employees/hooks/useEmployees', () => ({
+vi.mock('@/hooks/useEmployees', () => ({
   useEmployees: () => mockUseEmployees(),
 }));
 

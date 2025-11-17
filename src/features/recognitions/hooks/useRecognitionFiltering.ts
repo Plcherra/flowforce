@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { subDays } from 'date-fns';
-import type { Employee } from '@/features/employees/hooks/useEmployees';
+import type { Employee } from '@/hooks/useEmployees';
 import type { RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
 
 export type RecognitionFilterKey = 'all' | 'goals' | 'tasks' | 'training' | 'manual';

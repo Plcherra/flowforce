@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
 import { getReplacementCandidates } from '@/services/scheduling/replacement';
-import type { Employee } from '@/features/employees/hooks/useEmployees';
+import type { Employee } from '@/hooks/useEmployees';
 import type { ShiftWizardFormData } from './types';
 
 type UsersTabProps = {

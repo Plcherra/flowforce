@@ -13,6 +13,9 @@ import { useSidebarScroll } from '@/hooks/useSidebarScroll';
 export function AppSidebar() {
   const { processedSections, canManageSections, getIsActive } = useNavigationData();
   const { scrollContainerRef } = useSidebarScroll();
+  const sections = Array.isArray(processedSections) ? processedSections : [];
+  const canManage = Boolean(canManageSections);
+  const isActiveFn = typeof getIsActive === 'function' ? getIsActive : () => false;
 
   return (
     <Sidebar 
@@ -28,7 +31,7 @@ export function AppSidebar() {
         </div>
 
         {/* Dashboard Navigation - More accessible position */}
-        <DashboardNavigation isActive={getIsActive('/dashboard')} />
+        <DashboardNavigation isActive={isActiveFn('/dashboard')} />
       </SidebarHeader>
 
       <SidebarContent 
@@ -42,7 +45,7 @@ export function AppSidebar() {
       >
         {/* Navigation Sections with staggered animation */}
         <div className="space-y-6">
-          {processedSections.map((section, index) => (
+          {sections.map((section, index) => (
             <div 
               key={section.id}
               className="animate-fade-in"
@@ -50,7 +53,7 @@ export function AppSidebar() {
             >
               <NavigationSection 
                 section={section} 
-                canManageSections={canManageSections}
+                canManageSections={canManage}
               />
             </div>
           ))}

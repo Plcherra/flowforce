@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../useAuth';
 import type { Message } from '@/types/messages';
-import { supabase } from '@/integrations/supabase/client';
 import { messagesRepository } from '@/repositories/messagesRepository';
+import { useRealtime } from '@/hooks/useRealtime';
 
 export function useChannelMessages(channelId: string | null) {
   const { user } = useAuth();
@@ -26,31 +26,6 @@ export function useChannelMessages(channelId: string | null) {
     }
   }, [user?.id]);
 
-  const subscribeToChannelMessages = useCallback(
-    (targetChannelId: string) => {
-      const channel = supabase
-        .channel(`messages:${targetChannelId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `channel_id=eq.${targetChannelId}`,
-          },
-          () => {
-            fetchMessages(targetChannelId);
-          },
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    },
-    [fetchMessages],
-  );
-
   useEffect(() => {
     if (!channelId || !user?.id) {
       setMessages([]);
@@ -59,14 +34,27 @@ export function useChannelMessages(channelId: string | null) {
     }
 
     fetchMessages(channelId);
-    const unsubscribe = subscribeToChannelMessages(channelId);
+  }, [channelId, fetchMessages, user?.id]);
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
+  useRealtime({
+    channel: channelId ? `messages:${channelId}` : 'messages',
+    events: channelId
+      ? [
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `channel_id=eq.${channelId}`,
+          },
+        ]
+      : [],
+    enabled: Boolean(channelId && user?.id),
+    onPayload: () => {
+      if (channelId) {
+        void fetchMessages(channelId);
       }
-    };
-  }, [channelId, fetchMessages, subscribeToChannelMessages, user?.id]);
+    },
+  });
 
   const clearError = useCallback(() => setError(null), []);
 

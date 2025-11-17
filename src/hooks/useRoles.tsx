@@ -26,23 +26,36 @@ export function useProfiles() {
     queryKey: ['profiles', user?.id ?? 'guest'],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      if (!user) return [] as Profile[];
+      if (!user?.id) return [] as Profile[];
 
-      const metadataCompanyId =
-        typeof user.user_metadata?.company_id === 'string'
-          ? (user.user_metadata.company_id as string)
-          : null;
+      try {
+        const metadataCompanyId =
+          typeof user.user_metadata?.company_id === 'string'
+            ? (user.user_metadata.company_id as string)
+            : null;
 
-      const companyId = await resolveCompanyId(user.id, metadataCompanyId);
+        const companyId = await resolveCompanyId(user.id, metadataCompanyId);
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+        if (!companyId) {
+          return [];
+        }
 
-      if (error) throw error;
-      return data as Profile[];
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Failed to load profiles', error);
+          return [];
+        }
+
+        return (data ?? []) as Profile[];
+      } catch (error) {
+        console.error('Unexpected profiles query error', error);
+        return [];
+      }
     },
   });
 }
@@ -54,30 +67,41 @@ export function useRoles() {
     queryKey: ['directory-roles', user?.id ?? 'guest'],
     enabled: Boolean(user?.id),
     queryFn: async () => {
-      if (!user) return [] as DirectoryRole[];
-      const metadataCompanyId =
-        typeof user.user_metadata?.company_id === 'string'
-          ? (user.user_metadata.company_id as string)
-          : null;
+      if (!user?.id) return [] as DirectoryRole[];
 
-      const companyId = await resolveCompanyId(user.id, metadataCompanyId);
+      try {
+        const metadataCompanyId =
+          typeof user.user_metadata?.company_id === 'string'
+            ? (user.user_metadata.company_id as string)
+            : null;
 
-      const { data, error } = await supabase
-        .from('company_roles')
-        .select('id, name, permissions')
-        .eq('company_id', companyId)
-        .eq('is_active', true)
-        .order('hierarchy_level', { ascending: true });
+        const companyId = await resolveCompanyId(user.id, metadataCompanyId);
 
-      if (error) {
-        throw error;
+        if (!companyId) {
+          return [];
+        }
+
+        const { data, error } = await supabase
+          .from('company_roles')
+          .select('id, name, permissions')
+          .eq('company_id', companyId)
+          .eq('is_active', true)
+          .order('hierarchy_level', { ascending: true });
+
+        if (error) {
+          console.error('Failed to load roles', error);
+          return [];
+        }
+
+        return (data ?? []).map((role) => ({
+          id: role.id,
+          name: role.name,
+          permissions: parsePermissions(role.permissions),
+        }));
+      } catch (error) {
+        console.error('Unexpected roles query error', error);
+        return [];
       }
-
-      return (data ?? []).map((role) => ({
-        id: role.id,
-        name: role.name,
-        permissions: parsePermissions(role.permissions),
-      }));
     },
   });
 }
@@ -224,21 +248,21 @@ function normalizeRoleName(roleName: string) {
 }
 
 async function resolveCompanyId(userId: string, fallback: string | null) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('company_id')
-    .eq('id', userId)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('company_id')
+      .eq('id', userId)
+      .single();
 
-  if (error) {
-    throw error;
+    if (error) {
+      console.error('Failed to resolve company id for profile', error);
+      return fallback;
+    }
+
+    return data?.company_id ?? fallback;
+  } catch (error) {
+    console.error('Unexpected error resolving company id', error);
+    return fallback;
   }
-
-  const companyId = data?.company_id ?? fallback;
-
-  if (!companyId) {
-    throw new Error('No company context available for this request');
-  }
-
-  return companyId;
 }

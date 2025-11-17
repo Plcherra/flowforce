@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Check, Plus, X } from 'lucide-react';
-import { useEmployees } from '@/features/employees/hooks/useEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { cn } from '@/lib/utils';
 import type { AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';

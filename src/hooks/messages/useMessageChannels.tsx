@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../useAuth';
+import { useRealtime } from '@/hooks/useRealtime';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
-import { supabase } from '@/integrations/supabase/client';
 import { messagesRepository } from '@/repositories/messagesRepository';
 import {
   createChannel as createChannelService,
@@ -42,37 +42,19 @@ export function useMessageChannels() {
     }
 
     fetchChannels();
-
-    const channelSubscription = supabase
-      .channel('message_channels_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'message_channels',
-        },
-        () => {
-          fetchChannels();
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'channel_members',
-        },
-        () => {
-          fetchChannels();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channelSubscription);
-    };
   }, [fetchChannels, user]);
+
+  useRealtime({
+    channel: 'message_channels_changes',
+    events: [
+      { event: '*', schema: 'public', table: 'message_channels' },
+      { event: '*', schema: 'public', table: 'channel_members' },
+    ],
+    enabled: Boolean(user?.id),
+    onPayload: () => {
+      void fetchChannels();
+    },
+  });
 
   const createChannel = useCallback(
     async (channelData: CreateChannelData) => {

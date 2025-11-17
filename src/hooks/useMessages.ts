@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
-import { useMessageChannels } from './useMessageChannels';
-import { useChannelMessages } from './useChannelMessages';
-import { useMessageOperations } from './useMessageOperations';
+import { useState } from 'react';
+import { useMessageChannels } from './messages/useMessageChannels';
+import { useChannelMessages } from './messages/useChannelMessages';
+import { useMessageOperations } from './messages/useMessageOperations';
 
 export function useMessages() {
   const [currentChannelId, setCurrentChannelId] = useState<string | null>(null);
-  
+
   const {
     channels,
     loading: channelsLoading,
@@ -26,27 +26,27 @@ export function useMessages() {
     clearError: clearMessagesError,
   } = useChannelMessages(currentChannelId);
 
-  const {
-    sendMessage,
-    searchMessages,
-    deleteMessage,
-  } = useMessageOperations();
+  const { sendMessage, searchMessages, deleteMessage } = useMessageOperations();
 
-  const clearError = useCallback(() => {
+  const safeChannels = Array.isArray(channels) ? channels : [];
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const loading = Boolean(channelsLoading || messagesLoading);
+  const clearError = () => {
     clearChannelsError();
     clearMessagesError();
-  }, [clearChannelsError, clearMessagesError]);
+  };
 
   return {
     // Channel state
-    channels,
+    channels: safeChannels,
     currentChannelId,
     setCurrentChannelId,
-    
+
     // Messages state
-    messages,
-    loading: channelsLoading || messagesLoading,
-    
+    messages: safeMessages,
+    loading,
+    isChannelListEmpty: safeChannels.length === 0,
+
     // Channel operations
     createChannel,
     joinChannel,

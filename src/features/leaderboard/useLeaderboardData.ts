@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useProfile } from '@/hooks/useProfile';
-import { useEmployees, type Employee } from '@/features/employees/hooks/useEmployees';
+import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import { useLeaderboardInsightsStore } from '@/stores/useLeaderboardInsights';
 import { ensureLeaderboardSynced } from './syncLeaderboard';
 import { fetchLeaderboardProfiles, fetchLeaderboardRows, type LeaderboardRowRecord } from './leaderboardRepository';

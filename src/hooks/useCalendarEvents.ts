@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
@@ -168,7 +167,7 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
   const { storeId = null, range, enabled = true } = params;
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const isoRange = useMemo(() => toIsoRange(range), [range]);
+  const isoRange = toIsoRange(range);
   const normalizedStoreId = storeId ?? null;
   const queryEnabled = Boolean(enabled && companyId && isoRange);
 
@@ -186,13 +185,14 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
         end: isoRange.end,
         storeId: normalizedStoreId,
       });
-      return rows.map(mapRowToEvent);
+      const list = Array.isArray(rows) ? rows : [];
+      return list.map(mapRowToEvent);
     },
     enabled: queryEnabled,
     staleTime: 30_000,
   });
 
-  const events = eventsQuery.data ?? [];
+  const events = Array.isArray(eventsQuery.data) ? eventsQuery.data : [];
   const loading = queryEnabled ? eventsQuery.isLoading || eventsQuery.isFetching : false;
   const error =
     eventsQuery.error instanceof Error
@@ -201,9 +201,9 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
         ? 'Unable to load events'
         : null;
 
-  const refresh = useCallback(async () => {
+  const refresh = async () => {
     await eventsQuery.refetch();
-  }, [eventsQuery]);
+  };
 
   return {
     events,

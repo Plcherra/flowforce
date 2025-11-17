@@ -1,4 +1,4 @@
-import type { Employee } from '@/features/employees/hooks/useEmployees';
+import type { Employee } from '@/hooks/useEmployees';
 
 export interface ReplacementCandidate extends Employee {
   score: number;

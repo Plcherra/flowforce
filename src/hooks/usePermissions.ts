@@ -1,6 +1,5 @@
 export * from './usePermissions.tsx';
 
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
@@ -41,21 +40,27 @@ export function usePermissionFlags() {
     queryFn: async (): Promise<RolePermissionSet[]> => {
       if (!companyId) return [];
 
-      const { data, error } = await supabase
-        .from('company_roles')
-        .select('id, name, permissions')
-        .eq('company_id', companyId)
-        .order('hierarchy_level', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('company_roles')
+          .select('id, name, permissions')
+          .eq('company_id', companyId)
+          .order('hierarchy_level', { ascending: true });
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.error('Failed to load permission flags', error);
+          return [];
+        }
+
+        return (data ?? []).map((role) => ({
+          id: role.id,
+          name: role.name,
+          permissions: normalizePermissions(role.permissions),
+        }));
+      } catch (error) {
+        console.error('Unexpected permission flags query error', error);
+        return [];
       }
-
-      return (data ?? []).map((role) => ({
-        id: role.id,
-        name: role.name,
-        permissions: normalizePermissions(role.permissions),
-      }));
     },
   });
 
@@ -95,15 +100,13 @@ export function usePermissionFlags() {
     },
   });
 
-  const roleOptions = useMemo(
-    () =>
-      (rolesQuery.data ?? []).map((role) => ({
+  const roleOptions = Array.isArray(rolesQuery.data)
+    ? rolesQuery.data.map((role) => ({
         id: role.id,
         name: role.name,
         permissions: role.permissions,
-      })),
-    [rolesQuery.data],
-  );
+      }))
+    : [];
 
   return {
     roles: roleOptions,

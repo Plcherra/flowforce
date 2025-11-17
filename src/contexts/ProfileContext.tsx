@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,6 +27,12 @@ type ProfileDetails = {
   email?: string | null;
   employeeId?: string | null;
   roleId?: string | null;
+  isPlaceholder?: boolean;
+  position?: {
+    id?: string | null;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 } & Partial<LegacyProfileFields>;
 
 type ProfileContextValue = {
@@ -39,7 +45,7 @@ type ProfileContextValue = {
 
 const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
 
-const profileCache = new Map<string, ProfileDetails | null>();
+const profileCache = new Map<string, ProfileDetails>();
 
 const buildCacheKey = (userId: string, companyId: string | null | undefined) =>
   `${userId}:${companyId ?? 'none'}`;
@@ -62,80 +68,192 @@ const resolveActiveCompanyIdFromUser = (user: User | null) => {
   );
 };
 
+const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
+  const fallbackId = user?.id ?? 'anonymous-user';
+  const companyId = resolveActiveCompanyIdFromUser(user);
+  const userMetadata = user?.user_metadata as Record<string, unknown> | undefined;
+  const placeholderFirstName =
+    readMetadataValue(userMetadata, 'first_name') ?? (typeof user?.email === 'string' ? user.email.split('@')[0] : 'New');
+  const placeholderLastName = readMetadataValue(userMetadata, 'last_name') ?? 'Teammate';
+  const resolvedRole =
+    readMetadataValue(userMetadata, 'role') ??
+    readMetadataValue(userMetadata, 'position_role') ??
+    'staff';
+
+  return {
+    userId: fallbackId,
+    companyId,
+    role: resolvedRole,
+    id: fallbackId,
+    company_id: companyId,
+    firstName: placeholderFirstName,
+    lastName: placeholderLastName,
+    first_name: placeholderFirstName,
+    last_name: placeholderLastName,
+    email: user?.email ?? null,
+    avatar_url: readMetadataValue(userMetadata, 'avatar_url'),
+    employeeId: null,
+    employee_id: null,
+    employment_status: null,
+    department_id: null,
+    hire_date: null,
+    role_id: null,
+    roleId: null,
+    locationIds: [],
+    position: null,
+    isPlaceholder: true,
+  };
+};
+
 async function fetchProfileFromSupabase(userId: string, companyId: string | null): Promise<ProfileDetails | null> {
-  let query = supabase
-    .from('profiles')
-    .select(
-      'id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date',
-    )
-    .eq('id', userId);
+  try {
+    let query = supabase
+      .from('profiles')
+      .select(
+        'id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date',
+      )
+      .eq('id', userId);
 
-  if (companyId) {
-    query = query.eq('company_id', companyId);
-  }
+    if (companyId) {
+      query = query.eq('company_id', companyId);
+    }
 
-  const { data, error } = await query.maybeSingle();
+    const { data, error } = await query.maybeSingle();
 
-  if (error) {
+    if (error) {
+      if (import.meta.env.DEV) {
+        console.error('[ProfileProvider] Failed to load profile', {
+          userId,
+          companyId,
+          error,
+        });
+      }
+      return null;
+    }
+
+    if (!data) {
+      if (import.meta.env.DEV) {
+        console.error('[ProfileProvider] Missing profile row', {
+          userId,
+          companyId,
+        });
+      }
+      return null;
+    }
+
+    return {
+      userId: data.id,
+      companyId: data.company_id ?? null,
+      role: data.role ?? null,
+      id: data.id,
+      company_id: data.company_id ?? null,
+      firstName: data.first_name ?? null,
+      lastName: data.last_name ?? null,
+      first_name: data.first_name ?? null,
+      last_name: data.last_name ?? null,
+      email: data.email ?? null,
+      avatar_url: data.avatar_url ?? null,
+      employeeId: data.employee_id ?? null,
+      employee_id: data.employee_id ?? null,
+      employment_status: data.employment_status ?? null,
+      department_id: data.department_id ?? null,
+      hire_date: data.hire_date ?? null,
+      role_id: data.role_id ?? null,
+      roleId: data.role_id ?? null,
+      locationIds: [],
+      position: null,
+      isPlaceholder: false,
+    };
+  } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[ProfileProvider] Failed to load profile', {
+      console.error('[ProfileProvider] Unexpected profile fetch error', {
         userId,
         companyId,
         error,
       });
     }
-    throw error;
+    return null;
   }
-
-  if (!data) {
-    const missingError = new Error(
-      companyId
-        ? `Profile not found for user ${userId} in company ${companyId}`
-        : `Profile not found for user ${userId}`,
-    );
-    if (import.meta.env.DEV) {
-      console.error('[ProfileProvider] Missing profile row', {
-        userId,
-        companyId,
-      });
-    }
-    throw missingError;
-  }
-
-  // NOTE: locationIds are currently unavailable via Supabase relationships in this context.
-  // When the relationship is defined, extend this query to populate the array.
-  return {
-    userId: data.id,
-    companyId: data.company_id ?? null,
-    role: data.role ?? null,
-    id: data.id,
-    company_id: data.company_id ?? null,
-    firstName: data.first_name ?? null,
-    lastName: data.last_name ?? null,
-    first_name: data.first_name ?? null,
-    last_name: data.last_name ?? null,
-    email: data.email ?? null,
-    avatar_url: data.avatar_url ?? null,
-    employeeId: data.employee_id ?? null,
-    employee_id: data.employee_id ?? null,
-    employment_status: data.employment_status ?? null,
-    department_id: data.department_id ?? null,
-    hire_date: data.hire_date ?? null,
-    role_id: data.role_id ?? null,
-    roleId: data.role_id ?? null,
-    locationIds: [],
-  };
 }
 
-async function getProfile(userId: string, companyId: string | null, forceRefresh = false): Promise<ProfileDetails | null> {
-  const cacheKey = buildCacheKey(userId, companyId);
-  if (!forceRefresh && profileCache.has(cacheKey)) {
-    return profileCache.get(cacheKey) ?? null;
+async function getProfile(userId: string, companyId: string | null, _forceRefresh = false): Promise<ProfileDetails | null> {
+  return fetchProfileFromSupabase(userId, companyId);
+}
+
+interface LoadProfileStateOptions {
+  user: User | null;
+  forceRefresh: boolean;
+  lastLoadedKeyRef: MutableRefObject<string | null>;
+  setProfile: (profile: ProfileDetails | null) => void;
+  setError: (message: string | null) => void;
+  setLoading: (value: boolean) => void;
+  signal?: { cancelled: boolean };
+}
+
+async function loadProfileState({
+  user,
+  forceRefresh,
+  lastLoadedKeyRef,
+  setProfile,
+  setError,
+  setLoading,
+  signal,
+}: LoadProfileStateOptions) {
+  if (!user?.id) {
+    if (!signal?.cancelled) {
+      setProfile(null);
+      setError(null);
+      setLoading(false);
+      lastLoadedKeyRef.current = null;
+    }
+    return;
   }
 
-  const profile = await fetchProfileFromSupabase(userId, companyId);
-  profileCache.set(cacheKey, profile ?? null);
-  return profile;
+  const activeCompanyId = resolveActiveCompanyIdFromUser(user);
+  const cacheKey = buildCacheKey(user.id, activeCompanyId);
+
+  if (forceRefresh) {
+    profileCache.delete(cacheKey);
+  } else if (profileCache.has(cacheKey)) {
+    const cachedProfile = profileCache.get(cacheKey);
+    if (cachedProfile) {
+      setProfile(cachedProfile);
+      setError(null);
+      lastLoadedKeyRef.current = cacheKey;
+      if (!cachedProfile.isPlaceholder) {
+        setLoading(false);
+        return;
+      }
+    }
+  }
+
+  if (!signal?.cancelled) {
+    setLoading(true);
+  }
+
+  try {
+    const fetchedProfile = await getProfile(user.id, activeCompanyId, forceRefresh);
+    if (signal?.cancelled) return;
+
+    const resolvedProfile = fetchedProfile ?? buildProfilePlaceholder(user);
+    profileCache.set(cacheKey, resolvedProfile);
+
+    setProfile(resolvedProfile);
+    setError(null);
+    lastLoadedKeyRef.current = cacheKey;
+  } catch (error) {
+    if (signal?.cancelled) return;
+
+    const placeholder = buildProfilePlaceholder(user);
+    profileCache.set(cacheKey, placeholder);
+    setProfile(placeholder);
+    const message = error instanceof Error ? error.message : 'Failed to load profile';
+    setError(message);
+  } finally {
+    if (!signal?.cancelled) {
+      setLoading(false);
+    }
+  }
 }
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
@@ -143,96 +261,53 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [resolvedCacheKey, setResolvedCacheKey] = useState<string | null>(null);
-
-  const loadProfile = useCallback(
-    async (forceRefresh = false) => {
-      if (!user?.id) {
-        setProfile(null);
-        setResolvedCacheKey(null);
-        setError(null);
-        setLoading(false);
-        return;
-      }
-
-      const userId = user.id;
-      const activeCompanyId = resolveActiveCompanyIdFromUser(user);
-      const cacheKey = buildCacheKey(userId, activeCompanyId);
-
-      if (!forceRefresh && profileCache.has(cacheKey)) {
-        setProfile(profileCache.get(cacheKey) ?? null);
-        setResolvedCacheKey(cacheKey);
-        setError(null);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const nextProfile = await getProfile(userId, activeCompanyId, forceRefresh);
-        setProfile(nextProfile);
-        setResolvedCacheKey(cacheKey);
-        setError(null);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load profile';
-        if (import.meta.env.DEV) {
-          console.error('[ProfileProvider] loadProfile error', {
-            userId,
-            companyId: activeCompanyId,
-            error: err,
-          });
-        }
-        profileCache.delete(cacheKey);
-        setProfile(null);
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [user],
-  );
+  const lastLoadedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (authLoading) {
       return;
     }
 
-    if (!user?.id) {
-      setProfile(null);
-      setResolvedCacheKey(null);
-      setError(null);
-      setLoading(false);
-      return;
-    }
+    const signal = { cancelled: false };
 
-    const activeCompanyId = resolveActiveCompanyIdFromUser(user);
-    const cacheKey = buildCacheKey(user.id, activeCompanyId);
-
-    if (resolvedCacheKey === cacheKey) {
-      return;
-    }
-
-    loadProfile(false).catch(() => {
-      // Errors are handled inside loadProfile.
+    loadProfileState({
+      user,
+      forceRefresh: false,
+      lastLoadedKeyRef,
+      setProfile,
+      setError,
+      setLoading,
+      signal,
+    }).catch(() => {
+      // Errors handled inside loadProfileState
     });
-  }, [authLoading, loadProfile, resolvedCacheKey, user]);
 
-  const refreshProfile = useCallback(async () => {
-    await loadProfile(true);
-  }, [loadProfile]);
+    return () => {
+      signal.cancelled = true;
+    };
+  }, [authLoading, user]);
 
-  const value = useMemo<ProfileContextValue>(
-    () => ({
-      profile,
-      loading: authLoading || loading,
-      error,
-      refreshProfile,
-      refetchProfile: refreshProfile,
-    }),
-    [authLoading, error, loading, profile, refreshProfile],
-  );
+  const refreshProfile = async () => {
+    await loadProfileState({
+      user,
+      forceRefresh: true,
+      lastLoadedKeyRef,
+      setProfile,
+      setError,
+      setLoading,
+    });
+  };
 
-  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
+  const safeProfile = profile ?? buildProfilePlaceholder(user);
+  const contextValue: ProfileContextValue = {
+    profile: safeProfile,
+    loading: authLoading || loading,
+    error,
+    refreshProfile,
+    refetchProfile: refreshProfile,
+  };
+
+  return <ProfileContext.Provider value={contextValue}>{children}</ProfileContext.Provider>;
 }
 
 export function useProfile(): ProfileContextValue {

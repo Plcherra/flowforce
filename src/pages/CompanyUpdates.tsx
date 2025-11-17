@@ -31,11 +31,45 @@ import { getErrorMessage } from '@/features/company-updates/utils/getErrorMessag
 import { useCompanyUpdateFilters } from '@/features/company-updates/hooks/useCompanyUpdateFilters';
 import { useCompanyUpdateComments } from '@/features/company-updates/hooks/useCompanyUpdateComments';
 import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
+import { useCommunicationBootstrap } from '@/hooks/useCommunicationBootstrap';
+import { PageLoader } from '@/components/common/PageLoader';
+import { EmptyStateCard } from '@/components/common/EmptyStateCard';
+import { Megaphone } from 'lucide-react';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const CreateUpdateWizard = lazy(() => import('@/components/updates/CreateUpdateWizard'));
 
 export default function CompanyUpdates() {
+  const bootstrap = useCommunicationBootstrap({ includeInactiveEmployees: true });
+
+  if (!bootstrap.userReady || bootstrap.loading) {
+    return <PageLoader text="Loading company updates..." />;
+  }
+
+  if (bootstrap.error) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Unable to load workspace</AlertTitle>
+          <AlertDescription>{bootstrap.error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!bootstrap.ready) {
+    return (
+      <div className="p-6">
+        <EmptyStateCard
+          title="Workspace data is still loading"
+          description="Company updates unlock once we have your organization and employee information."
+          icon={<Megaphone className="h-5 w-5" />}
+        />
+      </div>
+    );
+  }
+
   const isMobile = useIsMobile();
   const { can } = useCan();
   const { profile } = useProfile();

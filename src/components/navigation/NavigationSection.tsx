@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
   SidebarGroup,
@@ -16,10 +16,12 @@ interface NavigationSectionProps {
   canManageSections: boolean;
 }
 
-const NavigationSectionComponent = ({ section, canManageSections }: NavigationSectionProps) => {
+export function NavigationSection({ section, canManageSections }: NavigationSectionProps) {
   const { state: sidebarState } = useSidebar();
   const { t } = useTranslation();
   const isCollapsed = sidebarState === 'collapsed';
+  const items = Array.isArray(section.items) ? section.items : [];
+  const translationKey = section.translationKey || 'custom';
 
   return (
     <SidebarGroup className="animate-fade-in">
@@ -28,12 +30,12 @@ const NavigationSectionComponent = ({ section, canManageSections }: NavigationSe
           isCollapsed ? 'hidden' : ''
         }`}
       >
-        {t(`navigation.${section.translationKey}`)}
+        {t(`navigation.${translationKey}`)}
       </SidebarGroupLabel>
       
       <SidebarGroupContent>
         <SidebarMenu className="space-y-1">
-          {section.items.map((item, index) => (
+          {items.map((item, index) => (
             <div 
               key={item.id} 
               className="animate-fade-in"
@@ -46,16 +48,14 @@ const NavigationSectionComponent = ({ section, canManageSections }: NavigationSe
 
         {/* Add new section button for admins */}
         {canManageSections && !isCollapsed && (
-          <div className="mt-2 animate-fade-in" style={{ animationDelay: `${section.items.length * 50}ms` }}>
+          <div className="mt-2 animate-fade-in" style={{ animationDelay: `${items.length * 50}ms` }}>
             <AddNewSectionButton 
-              category={t(`navigation.${section.translationKey}`)}
-              categoryKey={section.translationKey}
+              category={t(`navigation.${translationKey}`)}
+              categoryKey={translationKey}
             />
           </div>
         )}
       </SidebarGroupContent>
     </SidebarGroup>
   );
-};
-
-export const NavigationSection = memo(NavigationSectionComponent);
+}

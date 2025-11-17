@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
@@ -14,15 +14,16 @@ interface NavigationItemProps {
   item: ProcessedNavigationItem;
 }
 
-const NavigationItemComponent = ({ item }: NavigationItemProps) => {
+export function NavigationItem({ item }: NavigationItemProps) {
   const navigate = useNavigate();
   const { state: sidebarState } = useSidebar();
   const { t } = useTranslation();
   const isCollapsed = sidebarState === 'collapsed';
 
-  const handleNavigation = useCallback(() => {
+  const handleNavigation = () => {
+    if (!item?.href) return;
     navigate(item.href);
-  }, [navigate, item.href]);
+  };
 
   const getItemLabel = (translationKey?: string) => {
     if (!translationKey) return item.name;
@@ -111,6 +112,4 @@ const NavigationItemComponent = ({ item }: NavigationItemProps) => {
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
-};
-
-export const NavigationItem = memo(NavigationItemComponent);
+}

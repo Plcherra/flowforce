@@ -169,7 +169,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
 
   if (!pageSlug) {
     if (isHelpDeskSection) {
-      return <Navigate to="/app/messages/helpdesk" replace />;
+      return <Navigate to="/app/help-desk" replace />;
     }
 
     if (templateKey.includes('event') || sectionRoute.includes('event') || sectionName.includes('event')) {

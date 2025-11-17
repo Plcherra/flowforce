@@ -18,7 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { usePositions } from '@/hooks/usePositions';
-import { useEmployees } from '@/features/employees/hooks/useEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useQueryClient } from '@tanstack/react-query';

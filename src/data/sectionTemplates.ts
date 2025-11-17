@@ -115,14 +115,14 @@ export const QUICK_TEMPLATES: QuickTemplate[] = [
     icon: 'Headphones',
     category: 'communication',
     config: {
-      path: '/help-desk',
+      path: '/app/help-desk',
       permissions: ['viewOwnProfile'],
       pages: [
         {
           name: 'tickets',
           title: 'Support Tickets',
           icon: 'Ticket',
-          route: '/help-desk/tickets',
+          route: '/app/help-desk',
           content: [],
           permissions: ['viewOwnProfile']
         }

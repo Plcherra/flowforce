@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
 import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 import { useAnnouncements } from '@/hooks/useAnnouncements';
-import { useEmployees } from '@/features/employees/hooks/useEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useEvents } from '@/hooks/useEvents';
 import { formatDistanceToNow } from 'date-fns';
 import type { CustomSection, CustomSectionPage } from '@/hooks/useCustomSections';

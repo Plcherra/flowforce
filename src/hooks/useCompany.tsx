@@ -7,7 +7,7 @@ import { handleError } from '@/utils/errorHandler';
 
 type CompanyRow = Tables<'companies'>;
 
-const DEMO_COMPANY: Company = {
+export const DEMO_COMPANY: Company = {
   id: 'demo-company',
   name: 'Blank Template',
   industry: 'Technology',
@@ -41,6 +41,47 @@ const DEMO_COMPANY: Company = {
 const isPolicyRecursionError = (error: any) => {
   const message = error?.message?.toLowerCase() ?? '';
   return message.includes('infinite recursion detected in policy');
+};
+
+export const getDemoCompany = (ownerId?: string): Company => {
+  const now = new Date().toISOString();
+  return {
+    ...DEMO_COMPANY,
+    enabled_sections: [...DEMO_COMPANY.enabled_sections],
+    custom_roles: DEMO_COMPANY.custom_roles.map((role) => ({
+      ...role,
+      permissions: { ...(role.permissions || {}) },
+    })),
+    positions: DEMO_COMPANY.positions.map((position) => ({
+      ...position,
+      permissions: { ...(position.permissions || {}) },
+    })),
+    template_config: { ...DEMO_COMPANY.template_config },
+    working_hours: { ...DEMO_COMPANY.working_hours },
+    created_at: now,
+    updated_at: now,
+    created_by: ownerId ?? DEMO_COMPANY.created_by,
+  };
+};
+
+const parseJSONValue = <T,>(value: unknown, fallback: T): T => {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
+  if (typeof value === 'object') {
+    return value as T;
+  }
+
+  return fallback;
 };
 
 export interface Company {
@@ -83,23 +124,22 @@ export function useCompany() {
   }, [user]);
 
   const parseCompanyData = (data: CompanyRow): Company => {
+    const enabledSections = parseJSONValue<string[]>(data.enabled_sections, []);
+    const customRoles = parseJSONValue<CompanyRole[]>(data.custom_roles, []);
+    const positions = parseJSONValue<Position[]>(data.positions, []);
+    const templateConfig = parseJSONValue<CompanyConfig>(data.template_config, DEMO_COMPANY.template_config);
+    const workingHours = parseJSONValue<CompanySettings['working_hours']>(
+      data.working_hours,
+      DEMO_COMPANY.working_hours,
+    );
+
     return {
       ...data,
-      enabled_sections: Array.isArray(data.enabled_sections) 
-        ? data.enabled_sections 
-        : JSON.parse(data.enabled_sections as string || '[]'),
-      custom_roles: Array.isArray(data.custom_roles) 
-        ? data.custom_roles 
-        : JSON.parse(data.custom_roles as string || '[]'),
-      positions: Array.isArray(data.positions) 
-        ? data.positions 
-        : JSON.parse(data.positions as string || '[]'),
-      template_config: typeof data.template_config === 'object' 
-        ? data.template_config 
-        : JSON.parse(data.template_config as string || '{}'),
-      working_hours: typeof data.working_hours === 'object' 
-        ? data.working_hours 
-        : JSON.parse(data.working_hours as string || '{}')
+      enabled_sections: enabledSections,
+      custom_roles: customRoles,
+      positions,
+      template_config: templateConfig,
+      working_hours: workingHours,
     };
   };
 
@@ -112,7 +152,7 @@ export function useCompany() {
 
     const useDemoFallback = (reason: string) => {
       console.warn(`[useCompany] Falling back to demo company due to: ${reason}`);
-      setCompany({ ...DEMO_COMPANY, created_by: user.id });
+      setCompany(getDemoCompany(user?.id));
       setLoading(false);
     };
 
@@ -150,8 +190,7 @@ export function useCompany() {
         return;
       }
       handleError(error, 'fetchCompany');
-      setCompany(null);
-      setLoading(false);
+      useDemoFallback('encountered an unexpected error while loading company');
       return;
     }
 
