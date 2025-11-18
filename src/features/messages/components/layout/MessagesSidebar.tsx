@@ -53,10 +53,13 @@ export function MessagesSidebar({
   };
 
   return (
-    <div className="flex h-full flex-col bg-card">
-      <div className="space-y-3 border-b border-border/60 p-4">
+    <div className="flex h-full flex-col">
+      <div className="space-y-3 border-b border-border/70 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Channels</h2>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Communication</p>
+            <h2 className="text-lg font-semibold">Channels</h2>
+          </div>
           <div className="flex items-center gap-2">
             {canShowAvailability && typeof onToggleAvailable === 'function' && (
               <Button
@@ -135,10 +138,10 @@ export function MessagesSidebar({
                   key={channel.id}
                   type="button"
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    'flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     currentChannelId === channel.id
-                      ? 'border-primary/40 bg-primary/5 shadow-sm'
-                      : 'hover:bg-primary/5'
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'hover:border-primary/40 hover:bg-primary/5'
                   )}
                   onClick={() => onChannelSelect(channel.id)}
                   aria-pressed={currentChannelId === channel.id}

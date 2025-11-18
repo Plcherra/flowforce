@@ -71,12 +71,13 @@ export function InventoryNav() {
   const featureFlags = useFeatureFlags();
 
   return (
-    <nav className="flex space-x-1 bg-muted p-1 rounded-lg">
+    <nav className="grid gap-2">
       {navItems.map((item) => {
-        // Check feature flag if specified
         if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag)) {
           return null;
         }
+
+        const isCurrent = location.pathname === item.href || (item.href === '/inventory' && location.pathname === '/inventory');
 
         return (
           <IfCan key={item.href} permission={item.permission}>
@@ -85,15 +86,20 @@ export function InventoryNav() {
               end={item.href === '/inventory'}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                  isActive
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                  'group flex items-center justify-between rounded-2xl border px-3 py-3 text-sm font-medium transition-colors',
+                  isActive || isCurrent
+                    ? 'border-primary/60 bg-primary/5 text-foreground shadow-sm'
+                    : 'border-transparent bg-muted/40 text-muted-foreground hover:border-primary/30 hover:bg-background hover:text-foreground'
                 )
               }
             >
-              <item.icon className="h-4 w-4" />
-              <span>{item.name}</span>
+              <span className="flex items-center gap-2">
+                <item.icon className="h-4 w-4" />
+                {item.name}
+              </span>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground group-hover:text-foreground">
+                flow
+              </span>
             </NavLink>
           </IfCan>
         );

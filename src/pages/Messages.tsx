@@ -36,6 +36,8 @@ export default function Messages() {
   }
 
   const viewModel = useMessagesViewModel();
+  const organizationId = bootstrap.organization?.id ?? null;
+  const organizationName = bootstrap.organization?.name ?? null;
 
   if (viewModel.loading) {
     return <PageLoader text="Preparing conversations..." />;
@@ -53,5 +55,11 @@ export default function Messages() {
     );
   }
 
-  return <MessagesShell viewModel={viewModel} />;
+  return (
+    <MessagesShell
+      viewModel={viewModel}
+      organizationId={organizationId}
+      organizationName={organizationName ?? undefined}
+    />
+  );
 }
