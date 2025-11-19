@@ -99,7 +99,7 @@ export default function GoalsPage() {
             description: values.description || null,
             target_completion_date: values.targetDate,
             reward_type: values.xpReward != null ? 'recognition' : null,
-            reward_details: rewardDetails,
+            reward_details: rewardDetails as unknown as any,
           },
         });
       } else {
@@ -108,7 +108,7 @@ export default function GoalsPage() {
           description: values.description || null,
           target_completion_date: values.targetDate,
           reward_type: values.xpReward != null ? 'recognition' : null,
-          reward_details: rewardDetails,
+          reward_details: rewardDetails as unknown as any,
           status: 'active',
           progress: 0,
         });
