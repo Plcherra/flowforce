@@ -61,7 +61,7 @@ vi.mock('@/hooks/useInventory', () => ({
   useCreateSupplier: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
-vi.mock('@/hooks/useEmployeesCacheInvalidation', () => ({
+vi.mock('@/features/employees/hooks/useEmployeesCacheInvalidation', () => ({
   useEmployeesCacheInvalidation: () => vi.fn(),
 }));
 

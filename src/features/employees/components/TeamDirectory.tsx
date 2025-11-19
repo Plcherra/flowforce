@@ -25,7 +25,7 @@ import { InviteEmployeeDialog } from '@/components/employees/InviteEmployeeDialo
 import { useEmployees, type Employee as DirectoryEmployee } from '@/hooks/useEmployees';
 import { employeesRepository } from '@/repositories/employeesRepository';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useEmployeesCacheInvalidation } from '@/hooks/useEmployeesCacheInvalidation';
+import { useEmployeesCacheInvalidation } from '@/features/employees/hooks/useEmployeesCacheInvalidation';
 import { useVendorForm, type VendorFormValues } from '@/features/inventory/hooks/useVendorForm';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { TableSkeleton } from '@/components/common/TableSkeleton';

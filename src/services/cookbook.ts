@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { InventoryItem, InventoryRecipeLine, InventoryUnit } from '@/features/inventory/hooks/types';
-import { InventoryService } from './inventory';
+import { InventoryService } from '@/features/inventory/services/inventoryService';
 
 export interface RecipeNutrition {
   calories?: number;
@@ -315,4 +315,3 @@ export class CookbookService {
     return [headers, ...rows].map((row) => row.join(',')).join('\n');
   }
 }
-
