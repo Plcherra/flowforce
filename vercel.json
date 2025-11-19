@@ -4,5 +4,12 @@
       "source": "/app(/.*)?",
       "destination": "/index.html"
     }
+  ],
+  "version": 2,
+  "crons": [
+    {
+      "path": "/api/ops/run-detectors",
+      "schedule": "*/15 * * * *"
+    }
   ]
 }
