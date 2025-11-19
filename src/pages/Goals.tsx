@@ -69,6 +69,7 @@ export default function GoalsPage() {
     }
 
     try {
+      
       await deleteGoal(goal.id);
       if (selectedGoal?.id === goal.id) {
         closeModal();
