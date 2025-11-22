@@ -2,6 +2,9 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { runKpiDetectors } from '@/server/ops/detectors/runKpiDetectors';
 import { detectIssues } from '@/server/ops/issues/detectIssues';
 import { supabaseAdmin } from '@/server/supabase/admin';
+import { generateAutoPlanForOrg } from "@/server/ops/detectors/autoPlanBuilder";
+
+await generateAutoPlanForOrg(id);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {

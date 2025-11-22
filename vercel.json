@@ -9,7 +9,7 @@
   "crons": [
     {
       "path": "/api/ops/run-detectors",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/6 * * * *"
     }
   ]
 }
