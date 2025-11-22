@@ -1,10 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { runKpiDetectors } from "@/server/ops/detectors/runKpiDetectors";
-import { detectIssues } from "@/server/ops/issues/detectIssues";
-import { supabaseAdmin } from "@/server/supabase/admin";
+import { VercelRequest, VercelResponse } from '@vercel/node';
+import { runKpiDetectors } from '@/server/ops/detectors/runKpiDetectors';
+import { detectIssues } from '@/server/ops/issues/detectIssues';
+import { supabaseAdmin } from '@/server/supabase/admin';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Optional authentication:
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "unauthorized" });
   }
@@ -18,6 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     for (const org of orgs) {
       const id = org.id;
+
       await runKpiDetectors(id);
       await detectIssues(id);
     }
