@@ -1,15 +1,19 @@
 {
+  "version": 2,
   "rewrites": [
     {
       "source": "/app(/.*)?",
       "destination": "/index.html"
     }
   ],
-  "version": 2,
   "crons": [
     {
       "path": "/api/ops/run-detectors",
-      "schedule": "*/6 * * * *"
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/ops/run-dev-detectors",
+      "schedule": "30 */4 * * *"
     }
   ]
 }

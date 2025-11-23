@@ -1,9 +1,14 @@
+import { supabaseAdmin } from "../supabaseAdmin";
+import { maybeAutoRunDevTasks } from "../codexEngine/taskRunner";
+
 export async function upsertAutoTasks(orgId: string, tasks: any[]) {
-  // Save tasks either in supabase or local JSON store
-  // For now assume supabase:
-  for (const task of tasks) {
-    await supabaseAdmin
-      .from("codex_auto_tasks")
-      .upsert(task, { onConflict: "id" });
-  }
+  if (!tasks.length) return;
+
+  const { error } = await supabaseAdmin
+    .from("codex_auto_tasks")
+    .upsert(tasks, { onConflict: "id" });
+
+  if (error) throw error;
+
+  await maybeAutoRunDevTasks(tasks);
 }

@@ -1,10 +1,8 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { runKpiDetectors } from '@/server/ops/detectors/runKpiDetectors';
-import { detectIssues } from '@/server/ops/issues/detectIssues';
-import { supabaseAdmin } from '@/server/supabase/admin';
+import { VercelRequest, VercelResponse } from "@vercel/node";
+import { runKpiDetectors } from "@/server/ops/detectors/runKpiDetectors";
+import { detectIssues } from "@/server/ops/issues/detectIssues";
+import { supabaseAdmin } from "@/server/supabaseAdmin";
 import { generateAutoPlanForOrg } from "@/server/ops/detectors/autoPlanBuilder";
-
-await generateAutoPlanForOrg(id);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -23,6 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await runKpiDetectors(id);
       await detectIssues(id);
+      await generateAutoPlanForOrg(id);
     }
 
     return res.status(200).json({ ok: true, processed: orgs.length });
