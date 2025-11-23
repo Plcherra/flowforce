@@ -168,7 +168,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
   useEffect(() => {
     if (!messagesError) return;
 
-    logger.error?.('Messages module error', messagesError);
+    logger.error('Messages module error', { error: messagesError });
     toast({
       title: 'Something went wrong',
       description: messagesError.message ?? 'Please try again shortly.',
@@ -242,7 +242,9 @@ export function useMessagesViewModel(): MessagesViewModelState {
   }, []);
 
   const handleScheduleMessage = useCallback((content: string, scheduledFor: Date): void => {
-    logger.debug('Scheduled message:', content, 'for', scheduledFor);
+    logger.debug('Scheduled message', {
+      context: { content, scheduledFor },
+    });
   }, []);
 
   const handleThreadMessage = useCallback((message: ThreadMessage): void => {

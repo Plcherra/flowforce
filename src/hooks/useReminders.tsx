@@ -145,7 +145,7 @@ export function useReminders() {
       });
 
     } catch (error) {
-      logger.error('Error triggering reminder:', error);
+      logger.error('Error triggering reminder', { error });
       throw error;
     }
   };
@@ -162,7 +162,7 @@ export function useReminders() {
         description: 'Reminder marked as completed.',
       });
     } catch (error) {
-      console.error('Error marking reminder as completed:', error);
+      logger.error('Error marking reminder as completed', { error });
       toast({
         title: 'Error',
         description: 'Failed to update reminder.',

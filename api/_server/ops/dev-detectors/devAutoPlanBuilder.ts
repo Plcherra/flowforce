@@ -1,12 +1,12 @@
-import { issueToTask } from "../detectors/issueToTaskMapper";
-import { upsertAutoTasks } from "../../task/upsertAutoTasks";
+import { issueToTask } from "../detectors/issueToTaskMapper.js";
+import { upsertAutoTasks } from "../../task/upsertAutoTasks.js";
 
-import { missingFileDetector } from "./missingFileDetector";
-import { incompleteFeatureDetector } from "./incompleteFeatureDetector";
-import { missingLogicDetector } from "./missingLogicDetector";
-import { missingModuleDetector } from "./missingModuleDetector";
-import { missingPageDetector } from "./missingPageDetector";
-import { schemaMismatchDetector } from "./schemaMismatchDetector";
+import { missingFileDetector } from "./missingFileDetector.js";
+import { incompleteFeatureDetector } from "./incompleteFeatureDetector.js";
+import { missingLogicDetector } from "./missingLogicDetector.js";
+import { missingModuleDetector } from "./missingModuleDetector.js";
+import { missingPageDetector } from "./missingPageDetector.js";
+import { schemaMismatchDetector } from "./schemaMismatchDetector.js";
 
 export async function runDevAutoPlan(orgId: string) {
   const issues = [

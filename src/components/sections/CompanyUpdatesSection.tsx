@@ -29,7 +29,7 @@ export default function CompanyUpdatesSection() {
 
   const handleEdit = (update: CompanyUpdate) => {
     // TODO: Open edit update dialog
-    logger.debug('Edit update:', update);
+    logger.debug('Edit update', { context: { updateId: update.id } });
   };
 
   const handleView = (updateId: string) => {

@@ -1,10 +1,10 @@
-import { issueToTask } from "./issueToTaskMapper";
-import { upsertAutoTasks } from "../../task/upsertAutoTasks";
+import { issueToTask } from "./issueToTaskMapper.js";
+import { upsertAutoTasks } from "../../task/upsertAutoTasks.js";
 
-import { runCoverageDetector } from "./scheduling/coverageDetector";
-import { runAvailabilityDetector } from "./scheduling/availabilityDetector";
-import { runOvertimeDetector } from "./scheduling/overtimeDetector";
-import { runTimeOffRiskDetector } from "./scheduling/timeOffRiskDetector";
+import { runCoverageDetector } from "./scheduling/coverageDetector.js";
+import { runAvailabilityDetector } from "./scheduling/availabilityDetector.js";
+import { runOvertimeDetector } from "./scheduling/overtimeDetector.js";
+import { runTimeOffRiskDetector } from "./scheduling/timeOffRiskDetector.js";
 
 export async function generateAutoPlanForOrg(orgId: string) {
   const issues = [

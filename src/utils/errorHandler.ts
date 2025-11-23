@@ -1,5 +1,6 @@
 // Centralized error handling utilities
 import { toast } from '@/hooks/use-toast';
+import { captureError } from '@/utils/logger';
 
 export interface AppError {
   message: string;
@@ -17,10 +18,13 @@ export function handleError(error: any, context?: string): AppError {
     details: error
   };
 
-  // Log error for debugging (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    console.error(`Error in ${context || 'unknown context'}:`, error);
-  }
+  captureError(error, {
+    message: context ? `${context}: ${errorMessage}` : errorMessage,
+    context: {
+      code: errorCode,
+      context,
+    },
+  });
 
   return appError;
 }

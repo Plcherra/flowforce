@@ -65,10 +65,12 @@ export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTem
       };
 
       // TODO: Implement template creation when week templates are fully supported
-      logger.debug('Template creation not yet implemented:', {
-        name: newTemplate.name,
-        description: newTemplate.description,
-        templateData
+      logger.debug('Template creation not yet implemented', {
+        context: {
+          name: newTemplate.name,
+          description: newTemplate.description,
+          templateData
+        }
       });
 
       setNewTemplate({ name: '', description: '' });

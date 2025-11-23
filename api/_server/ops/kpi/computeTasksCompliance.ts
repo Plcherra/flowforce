@@ -1,7 +1,9 @@
-import { supabaseAdmin } from "../../supabaseAdmin";
-import type { OpsKpiSnapshot } from './types';
+import { supabaseAdmin } from "../../supabaseAdmin.js";
+import { createServerLogger } from "../../utils/logger.js";
+import type { OpsKpiSnapshot } from './types.js';
 
 export async function computeTasksCompliance(orgId: string): Promise<OpsKpiSnapshot> {
+  const logger = createServerLogger('computeTasksCompliance', { orgId, tags: ['kpi'] });
   let completionRate = 0.92;
   try {
     const { data, error } = await supabaseAdmin
@@ -14,11 +16,18 @@ export async function computeTasksCompliance(orgId: string): Promise<OpsKpiSnaps
       completionRate = data.length > 0 ? completed / data.length : completionRate;
     }
     if (error) {
-      console.warn('[computeTasksCompliance] fallback to default', error);
+      logger.warn('Tasks query returned error, using default completion rate', {
+        error,
+        context: { defaultCompletion: completionRate },
+      });
     }
   } catch (error) {
-    console.warn('[computeTasksCompliance] unable to query tasks', error);
+    logger.warn('Unable to query tasks for compliance', { error });
   }
+
+  logger.debug('Computed tasks compliance', {
+    context: { completionRate },
+  });
 
   return {
     kpiKey: 'tasks_compliance',

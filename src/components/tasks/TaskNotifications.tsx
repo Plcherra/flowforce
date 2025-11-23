@@ -92,7 +92,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
         onTaskNavigate(notification.task_id);
         setIsOpen(false);
       } else {
-        logger.debug('Navigate to task:', notification.task_id);
+        logger.debug('Navigate to task', { context: { taskId: notification.task_id } });
       }
     }
   };

@@ -83,7 +83,7 @@ export function NotificationsPanel() {
     // Navigate to task if task_id exists
     if (notification.task_id) {
   // You can implement navigation here
-  logger.debug('Navigate to task:', notification.task_id);
+  logger.debug('Navigate to task', { context: { taskId: notification.task_id } });
     }
   };
 

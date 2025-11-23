@@ -54,7 +54,7 @@ export function FileUploadField({
         });
 
       if (uploadError) {
-        logger.error('File upload error:', uploadError);
+        logger.error('File upload error', { error: uploadError, context: { filePath } });
         return null;
       }
 
@@ -69,7 +69,7 @@ export function FileUploadField({
         type: file.type
       };
     } catch (error) {
-      console.error('Error uploading file:', error);
+      logger.error('Error uploading file', { error, context: { fileName: file.name } });
       return null;
     }
   }, []);

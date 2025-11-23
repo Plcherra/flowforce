@@ -1,5 +1,5 @@
-import { supabaseAdmin } from "../supabaseAdmin";
-import { maybeAutoRunDevTasks } from "../codexEngine/taskRunner";
+import { supabaseAdmin } from "../supabaseAdmin.js";
+import { maybeAutoRunDevTasks } from "../codexEngine/taskRunner.js";
 
 export async function upsertAutoTasks(orgId: string, tasks: any[]) {
   if (!tasks.length) return;

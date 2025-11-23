@@ -1,4 +1,4 @@
-import { DetectorIssue } from "./types";
+import { DetectorIssue } from "./types.js";
 
 export function issueToTask(issue: DetectorIssue) {
   return {

@@ -86,3 +86,7 @@ npm run seed:kpi-insights
 ```
 
 Optional: set `KPI_RANGE_DAYS` (defaults to 14) to change the rolling window. The script is idempotent and can be scheduled (e.g., nightly) to keep KPI cards fresh.
+
+## Error/debug logging
+
+Structured client and API logs now flow into the `system_logs` table in Supabase. Configure levels and ingestion via env vars (see `docs/error-debug-system.md`) and use `/api/logs` for client-side forwarding.

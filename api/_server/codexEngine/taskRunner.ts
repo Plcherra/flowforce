@@ -1,4 +1,5 @@
-import { supabaseAdmin } from "../supabaseAdmin";
+import { supabaseAdmin } from "../supabaseAdmin.js";
+import { createServerLogger } from "../utils/logger.js";
 
 export interface CodexAutoTask {
   id: string;
@@ -7,10 +8,12 @@ export interface CodexAutoTask {
   [key: string]: unknown;
 }
 
+const logger = createServerLogger('codexTaskRunner', { tags: ['codex'] });
+
 export const Codex = {
   async run(task: CodexAutoTask) {
     // Placeholder: hook into the Codex execution pipeline.
-    console.info(`[Codex] Auto-running task ${task.id}`);
+    logger.info('Auto-running task', { context: { taskId: task.id, source: task.generated_by } });
   },
 };
 
@@ -29,10 +32,10 @@ export async function maybeAutoRunDevTasks(tasks: CodexAutoTask[]) {
         .eq("id", task.id);
 
       if (error) {
-        console.error(`[Codex] Failed to mark task ${task.id} done`, error);
+        logger.error('Failed to mark task done', { error, context: { taskId: task.id } });
       }
     } catch (err) {
-      console.error(`[Codex] Failed to auto-run task ${task.id}`, err);
+      logger.error('Failed to auto-run task', { error: err, context: { taskId: task.id } });
     }
   }
 }
