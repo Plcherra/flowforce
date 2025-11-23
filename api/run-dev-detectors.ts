@@ -1,4 +1,4 @@
-import { runDevAutoPlan } from "../src/server/ops/dev-detectors/devAutoPlanBuilder";
+import { runDevAutoPlan } from "./_server/ops/dev-detectors/devAutoPlanBuilder";
 
 export default async function handler(req: any, res: any) {
   try {

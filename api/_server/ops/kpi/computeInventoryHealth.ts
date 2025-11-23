@@ -1,11 +1,11 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseAdmin } from "../../supabaseAdmin";
 import type { OpsKpiSnapshot } from './types';
 
 export async function computeInventoryHealth(orgId: string): Promise<OpsKpiSnapshot> {
   let healthyCount = 18;
   let totalCount = 24;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('inventory_items')
       .select('id,on_hand_quantity,par_level')
       .eq('org_id', orgId)

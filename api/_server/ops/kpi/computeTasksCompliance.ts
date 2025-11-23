@@ -1,10 +1,10 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseAdmin } from "../../supabaseAdmin";
 import type { OpsKpiSnapshot } from './types';
 
 export async function computeTasksCompliance(orgId: string): Promise<OpsKpiSnapshot> {
   let completionRate = 0.92;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('tasks')
       .select('status', { count: 'exact' })
       .eq('org_id', orgId)

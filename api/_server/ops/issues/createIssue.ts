@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseAdmin } from "../../supabaseAdmin";
 
 export interface CreateIssueInput {
   orgId: string;
@@ -22,7 +22,7 @@ export async function createIssue(input: CreateIssueInput) {
     source: metadata ?? {},
   };
 
-  const { data, error } = await supabase.from('ops_issues').insert(payload).select('*').single();
+  const { data, error } = await supabaseAdmin.from('ops_issues').insert(payload).select('*').single();
   if (error) {
     throw error;
   }

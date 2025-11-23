@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseAdmin } from "../../supabaseAdmin";
 import type { OpsKpiSnapshot } from '../kpi/types';
 import { computeTasksCompliance } from '../kpi/computeTasksCompliance';
 import { computeInventoryHealth } from '../kpi/computeInventoryHealth';
@@ -28,7 +28,7 @@ export async function runKpiDetectors({ orgId }: RunKpiDetectorsOptions): Promis
     metadata: snapshot.metadata ?? {},
   }));
 
-  const { error } = await supabase.from('ops_kpi_snapshots').insert(rows);
+  const { error } = await supabaseAdmin.from('ops_kpi_snapshots').insert(rows);
   if (error) {
     console.error('[runKpiDetectors] failed to upsert snapshots', error);
   }

@@ -1,7 +1,7 @@
-import { runKpiDetectors } from "../src/server/ops/detectors/runKpiDetectors";
-import { detectIssues } from "../src/server/ops/issues/detectIssues";
-import { supabaseAdmin } from "../src/server/supabaseAdmin";
-import { generateAutoPlanForOrg } from "../src/server/ops/detectors/autoPlanBuilder";
+import { runKpiDetectors } from "./_server/ops/detectors/runKpiDetectors";
+import { detectIssues } from "./_server/ops/issues/detectIssues";
+import { supabaseAdmin } from "./_server/supabaseAdmin";
+import { generateAutoPlanForOrg } from "./_server/ops/detectors/autoPlanBuilder";
 
 export default async function handler(req: any, res: any) {
   try {
@@ -18,8 +18,8 @@ export default async function handler(req: any, res: any) {
     for (const org of orgs) {
       const id = org.id;
 
-      await runKpiDetectors(id);
-      await detectIssues(id);
+      await runKpiDetectors({ orgId: id });
+      await detectIssues({ orgId: id });
       await generateAutoPlanForOrg(id);
     }
 

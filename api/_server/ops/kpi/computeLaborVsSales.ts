@@ -1,11 +1,11 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseAdmin } from "../../supabaseAdmin";
 import type { OpsKpiSnapshot } from './types';
 
 export async function computeLaborVsSales(orgId: string): Promise<OpsKpiSnapshot> {
   let laborCost = 42000;
   let sales = 135000;
   try {
-    const { data: laborData, error: laborError } = await supabase
+    const { data: laborData, error: laborError } = await supabaseAdmin
       .from('labor_entries')
       .select('cost')
       .eq('org_id', orgId)
@@ -14,7 +14,7 @@ export async function computeLaborVsSales(orgId: string): Promise<OpsKpiSnapshot
       laborCost = laborData.reduce((sum, entry) => sum + Number(entry.cost ?? 0), 0) || laborCost;
     }
 
-    const { data: salesData, error: salesError } = await supabase
+    const { data: salesData, error: salesError } = await supabaseAdmin
       .from('sales_ledger')
       .select('net_sales')
       .eq('org_id', orgId)
