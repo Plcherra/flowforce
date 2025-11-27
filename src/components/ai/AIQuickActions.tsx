@@ -343,7 +343,7 @@ export function AIQuickActions({ className }: { className?: string }) {
     setPendingAction('tasks');
     try {
       const dueDate = addDays(new Date(), overdueTasks.length > 0 ? 1 : 2).toISOString();
-      const priority = overdueTasks.length >= 5 ? 'urgent' : overdueTasks.length > 0 ? 'high' : 'medium';
+      const priority = (overdueTasks.length >= 5 ? 'urgent' : overdueTasks.length > 0 ? 'high' : 'medium') as 'high' | 'low' | 'medium' | 'urgent';
 
       const payload = {
         title: '[AI] Backlog recovery sprint',
@@ -409,7 +409,10 @@ export function AIQuickActions({ className }: { className?: string }) {
         snooze_enabled: true,
         auto_complete: false,
         snooze_count: 0,
-      });
+        last_triggered_at: null,
+        next_reminder_at: addMinutes(new Date(), 45).toISOString(),
+        task_id: null,
+      } as any);
 
       toast({
         title: 'Reminder scheduled',

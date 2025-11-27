@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TablesInsert } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
