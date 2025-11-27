@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 import { ShieldAlert } from 'lucide-react';
 

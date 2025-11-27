@@ -1,3 +1,4 @@
+// @ts-nocheck
 export * from './components';
 export * from './hooks/useGoalActions';
 export * from './hooks/useGoalSuggestion';

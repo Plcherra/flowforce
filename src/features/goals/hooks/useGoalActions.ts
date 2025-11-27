@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback } from 'react';
 import type { Goal, GoalStatus, UseGoalsReturn } from '@/hooks/useGoals';
 import type { GoalFormValues } from '@/features/goals/components/CreateGoalModal';

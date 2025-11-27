@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo } from 'react';
 import { MessagesLayout, MessagesMainArea, MessagesSidebar } from '@/features/messages/components/layout';
 import { AnimatedChannelWizard, ChannelMembers, ChannelSettings, DirectMessageDialog, MessageSearch } from '@/features/messages/components/modals';

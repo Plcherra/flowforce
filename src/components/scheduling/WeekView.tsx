@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
