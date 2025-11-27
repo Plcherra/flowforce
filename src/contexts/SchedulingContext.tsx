@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';

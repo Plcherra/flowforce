@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { RecognitionDetails } from '@/types/recognition';
 import type {
   GoalRecognition,

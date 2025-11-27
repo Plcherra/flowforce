@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';

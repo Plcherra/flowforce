@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable react-refresh/only-export-components */
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

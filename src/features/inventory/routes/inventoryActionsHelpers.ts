@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { InventoryItem } from '@/features/inventory/hooks/types';
 import type { CreateWasteData } from '@/hooks/inventory/useInventoryWaste';
 

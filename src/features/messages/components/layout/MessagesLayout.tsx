@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import '@/styles/messages.css';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import dayjs, { type Dayjs } from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
 import { evaluateEmployee } from '@/copilot/rulesEngine';

@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 

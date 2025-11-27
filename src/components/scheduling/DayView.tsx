@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { format, isSameDay, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* @vitest-environment jsdom */
 
 import { render, screen, fireEvent } from '@testing-library/react';

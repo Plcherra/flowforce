@@ -10,6 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { NavigationItem } from './NavigationItem';
 import { AddNewSectionButton } from '@/components/sidebar/AddNewSectionButton';
 import { ProcessedNavigationSection } from '@/hooks/useNavigationData';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface NavigationSectionProps {
   section: ProcessedNavigationSection;
@@ -23,13 +28,13 @@ const NavigationSectionComponent = ({ section, canManageSections }: NavigationSe
 
   return (
     <SidebarGroup className="animate-fade-in">
-      <SidebarGroupLabel 
-        className={`text-xs font-semibold text-primary/80 uppercase tracking-wider px-3 py-2 mb-2 border border-primary/20 rounded-full bg-primary/5 transition-all duration-300 hover:bg-primary/10 hover:border-primary/30 ${
-          isCollapsed ? 'hidden' : ''
-        }`}
-      >
-        {t(`navigation.${section.translationKey}`)}
-      </SidebarGroupLabel>
+      {!isCollapsed && (
+        <SidebarGroupLabel 
+          className="text-xs font-semibold text-primary/80 uppercase tracking-wider px-3 py-2 mb-2 border border-primary/20 rounded-full bg-primary/5 transition-all duration-300 hover:bg-primary/10 hover:border-primary/30"
+        >
+          {t(`navigation.${section.translationKey}`)}
+        </SidebarGroupLabel>
+      )}
       
       <SidebarGroupContent>
         <SidebarMenu className="space-y-1">

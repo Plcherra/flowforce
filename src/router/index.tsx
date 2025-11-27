@@ -64,6 +64,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
+        // Redirect root to dashboard for logged-in users, show landing for guests
         element: <Index />,
       },
       {
