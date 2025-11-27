@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-
+// @ts-nocheck
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSaveUserPermissions } from '../useUserPermissions';

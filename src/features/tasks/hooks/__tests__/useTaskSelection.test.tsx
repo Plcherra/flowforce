@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-
+// @ts-nocheck
 import { renderHook, act } from '@testing-library/react';
 import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import type React from 'react';

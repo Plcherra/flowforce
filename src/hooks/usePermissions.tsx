@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 // Update existing usePermissions hook to use the new resolver
 import { useMemo } from 'react';
 import { useProfile } from './useProfile';

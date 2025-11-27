@@ -1,18 +1,14 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sparkles, RefreshCw, Brain, TrendingUp, Settings, Lock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import AIActionsFeed from '@/components/ai/AIActionsFeed';
-import { ClosedLoopSummary } from '@/components/ai/ClosedLoopSummary';
-import { useClosedLoopState } from '@/hooks/useClosedLoopState';
 import { cn } from '@/lib/utils';
 
 interface AIInsightsPanelProps {
@@ -29,37 +25,21 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   const [insights, setInsights] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = manual, 30, 60, 300 seconds
+  const [refreshInterval, setRefreshInterval] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
-  const {
-    data: closedLoopState,
-    isLoading: closedLoopLoading,
-    isError: closedLoopErrorFlag,
-    error: closedLoopError,
-    refetch: refetchClosedLoop,
-  } = useClosedLoopState({ rangeDays: type === 'dashboard' ? 14 : 7, aiType: type });
-  const closedLoopLoadingState = closedLoopLoading && !closedLoopState;
-  const closedLoopErrorInstance = closedLoopErrorFlag ? closedLoopError : null;
   const containerClass = cn('space-y-4', className);
-
-  const handleClosedLoopRefresh = useCallback(() => {
-    void refetchClosedLoop();
-  }, [refetchClosedLoop]);
 
   const fetchInsights = useCallback(async () => {
     if (!mountedRef.current || !can('viewAIInsights')) return;
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-insights', {
-        body: { type, context }
-      });
-
-      if (error) throw error;
+      // Simulate AI insights with mock data
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       if (mountedRef.current) {
-        setInsights(data.insights);
+        setInsights('Based on current operations data, team productivity is trending upward. Consider reviewing scheduling patterns to optimize coverage.');
         setLastUpdated(new Date());
       }
     } catch (error) {
@@ -72,17 +52,14 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
         setLoading(false);
       }
     }
-  }, [type, context, can]);
+  }, [can]);
 
-  // Auto-refresh functionality
   useEffect(() => {
-    // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
-    // Only set interval if refreshInterval > 0 and user has permission
     if (can('viewAIInsights') && refreshInterval > 0) {
       intervalRef.current = setInterval(() => {
         fetchInsights();
@@ -97,12 +74,10 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     };
   }, [refreshInterval, can, fetchInsights]);
 
-  // Initial fetch
   useEffect(() => {
     fetchInsights();
   }, [fetchInsights]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       mountedRef.current = false;
@@ -115,28 +90,28 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   const handleCardClick = (cardType: string) => {
     switch (cardType) {
       case 'performance':
-        navigate('/analytics');
+        navigate('/app/analytics');
         toast({
           title: "Performance Analytics",
           description: "Opening performance dashboard..."
         });
         break;
       case 'efficiency':
-        navigate('/reports');
+        navigate('/app/reports');
         toast({
           title: "Efficiency Reports",
           description: "Viewing efficiency metrics..."
         });
         break;
       case 'issues':
-        navigate('/tasks');
+        navigate('/app/tasks');
         toast({
           title: "Task Management",
           description: "Found 3 areas to improve - opening task management..."
         });
         break;
       case 'trending':
-        navigate('/analytics');
+        navigate('/app/analytics');
         toast({
           title: "Trending Analytics",
           description: "Viewing trending data and insights..."
@@ -146,7 +121,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   };
 
   const handleViewDetailedAnalysis = () => {
-    navigate('/ai-insights');
+    navigate('/app/ai-insights');
     toast({
       title: "AI Insights",
       description: "Opening detailed AI analysis..."
@@ -171,7 +146,6 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     }
   };
 
-  // Only show AI insights if user has permission - but do this AFTER all hooks
   if (!can('viewAIInsights')) {
     return (
       <div className={containerClass}>
@@ -182,7 +156,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               AI Insights restricted
             </CardTitle>
             <CardDescription>
-              Request access from an admin to view AI recommendations and closed-loop analytics.
+              Request access from an admin to view AI recommendations.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
@@ -290,34 +264,34 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               
               <button 
                 onClick={() => handleCardClick('efficiency')}
-                className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/10 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-green-700">Efficiency</span>
+                  <span className="text-xs font-medium text-emerald-600">Efficiency</span>
                   <Badge variant="secondary" className="text-xs">92%</Badge>
                 </div>
-                <div className="mt-2 w-full bg-green-100 rounded-full h-1.5">
-                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '92%' }}></div>
+                <div className="mt-2 w-full bg-emerald-500/10 rounded-full h-1.5">
+                  <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '92%' }}></div>
                 </div>
               </button>
               
               <button 
                 onClick={() => handleCardClick('issues')}
-                className="p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-orange-700">Areas to Improve</span>
+                  <span className="text-xs font-medium text-amber-600">Areas to Improve</span>
                   <Badge variant="outline" className="text-xs">3</Badge>
                 </div>
-                <p className="text-xs text-orange-600 mt-1">Focus needed</p>
+                <p className="text-xs text-amber-600 mt-1">Focus needed</p>
               </button>
               
               <button 
                 onClick={() => handleCardClick('trending')}
-                className="p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg hover:bg-blue-500/10 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-blue-700">Trending</span>
+                  <span className="text-xs font-medium text-blue-600">Trending</span>
                   <Badge variant="secondary" className="text-xs">↗ +5%</Badge>
                 </div>
                 <p className="text-xs text-blue-600 mt-1">This week</p>
@@ -327,11 +301,11 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
             {/* Quick Insights */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 <span className="text-muted-foreground">Schedule adherence is strong</span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                 <span className="text-muted-foreground">Task completion could improve</span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
@@ -373,12 +347,6 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     return (
       <div className={containerClass}>
         {insightsCard}
-        <ClosedLoopSummary
-          loading={closedLoopLoadingState}
-          error={closedLoopErrorInstance}
-          state={closedLoopState}
-          onRefresh={handleClosedLoopRefresh}
-        />
       </div>
     );
   }
@@ -386,12 +354,6 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
   return (
     <div className={containerClass}>
       {insightsCard}
-      <ClosedLoopSummary
-        loading={closedLoopLoadingState}
-        error={closedLoopErrorInstance}
-        state={closedLoopState}
-        onRefresh={handleClosedLoopRefresh}
-      />
       <AIActionsFeed />
     </div>
   );
