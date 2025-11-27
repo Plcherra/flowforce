@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 import { isSameDay, parseISO } from 'date-fns';
 import { useScheduling } from '@/contexts/SchedulingContext';

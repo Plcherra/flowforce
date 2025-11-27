@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';

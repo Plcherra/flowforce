@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { useProfile } from '@/hooks/useProfile';

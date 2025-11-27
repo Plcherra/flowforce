@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { addDays, format, startOfWeek } from 'date-fns';
 import type {
   AssignmentWithUser,

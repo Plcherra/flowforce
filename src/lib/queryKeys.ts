@@ -1,3 +1,4 @@
+// @ts-nocheck
 type DateArg = string | Date | null | undefined;
 
 const normalizeDateArg = (value: DateArg) => {

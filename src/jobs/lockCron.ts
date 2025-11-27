@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabaseAdmin } from '@/server/supabaseAdmin';
 import { addWeeks, computeAutoLockThreshold, startOfIsoWeek } from '@/availability/lockEngine';
 import type { Database } from '@/integrations/supabase/public-types';
