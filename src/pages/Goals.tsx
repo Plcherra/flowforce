@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -44,10 +44,11 @@ export default function GoalsPage() {
   });
 
   const saving = creating || updating;
+  const suggesting = goalSuggestion?.isLoading ?? false;
 
   const handleDelete = useCallback(
     async (goal: Goal) => {
-      const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
+      const confirmed = window.confirm(`Delete goal "${goal.title}"?`);
       if (!confirmed) {
         return;
       }
@@ -56,13 +57,6 @@ export default function GoalsPage() {
     },
     [deleteGoalById],
   );
-    const confirmed = window.confirm(`Delete goal “${goal.title}”?`);
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteGoalById(goal.id);
-  };
 
   const handleSuggestGoal = useCallback(async () => {
     try {
