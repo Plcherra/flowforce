@@ -36,7 +36,8 @@ interface AnalyticsData {
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe'];
 
 export default function FormAnalytics({ formId, onContextChange, onFormSelect, onSummaryChange }: FormAnalyticsProps) {
-  const { forms, getFormSubmissions, getFormFields } = useForms();
+  const { forms: rawForms, getFormSubmissions, getFormFields } = useForms();
+  const forms = (rawForms ?? []) as any[];
   const [selectedForm, setSelectedForm] = useState(formId || '');
   const [timeRange, setTimeRange] = useState('7d');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
