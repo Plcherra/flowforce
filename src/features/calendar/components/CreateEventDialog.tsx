@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import {
   Dialog,
@@ -167,7 +166,7 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
               id: user.id,
               name,
               avatar_url: user.avatar_url ?? null,
-              role: shift.job_position?.name ?? user.role ?? undefined,
+              role: shift.job_position?.name ?? null,
             });
           });
         });
