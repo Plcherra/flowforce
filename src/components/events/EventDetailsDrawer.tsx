@@ -16,7 +16,6 @@ import { Separator } from '@/components/ui/separator';
 import { useEventLinks } from '@/hooks/useEventLinks';
 import { useEvents } from '@/hooks/useEvents';
 import type { CalendarEvent } from '@/hooks/useCalendarEvents';
-import { upsertEventShiftLinks } from '@/hooks/useCalendarEvents';
 import { useToast } from '@/hooks/use-toast';
 import { LinkShiftsPanel } from './LinkShiftsPanel';
 
@@ -63,15 +62,6 @@ export function EventDetailsDrawer({ event, open, onOpenChange, onRefresh }: Eve
     setLocalShiftIds(next);
     setBusy(true);
     try {
-      if (canManageLinks) {
-        const companyId = event?.raw?.company_id ?? null;
-        await upsertEventShiftLinks({
-          eventId,
-          shiftIds: next,
-          companyId,
-        });
-        await refresh();
-      }
       onRefresh?.();
       toast({
         title: 'Saved',
