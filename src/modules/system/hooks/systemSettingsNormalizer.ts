@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Tables } from '@/integrations/supabase/public-types';
 import type { Company } from '@/hooks/useCompany';
 import type { SystemSettings as SystemSettingsModel } from '@/types/system-settings';

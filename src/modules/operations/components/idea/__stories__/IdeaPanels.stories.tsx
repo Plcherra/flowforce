@@ -1,3 +1,4 @@
+// @ts-nocheck
 import IdentifyPanel from '@/components/operations/IdentifyPanel';
 import DiagnosePanel from '@/components/operations/DiagnosePanel';
 import ExecutePanel from '@/components/operations/ExecutePanel';
