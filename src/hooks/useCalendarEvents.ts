@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
@@ -109,40 +108,16 @@ const parseAttendeesJson = (value: Tables<'calendar_events'>['attendees']): Cale
 
 const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
   const participantRows = Array.isArray(row.event_participants) ? row.event_participants : [];
-  const shiftLinks = Array.isArray(row.event_shift_links) ? row.event_shift_links : [];
 
-  const participantMap = new Map<string, CalendarEventParticipant>();
-
-  parseAttendeesJson(row.attendees).forEach((attendee) => {
-    participantMap.set(attendee.id, attendee);
-  });
-
-  participantRows.forEach((participant) => {
-    const key = participant.profile_id ?? participant.email ?? participant.id;
-    if (!key) return;
-    const name =
-      participant.name ??
-      participant.email ??
-      participant.profile_id ??
-      (participant.id ? `Participant ${participant.id.slice(0, 6)}` : 'Participant');
-
-    participantMap.set(key, {
-      id: key,
-      name,
-      avatar_url: participant.avatar_url ?? null,
-      role: participant.role ?? null,
-      participantId: participant.id,
-      profileId: participant.profile_id ?? null,
-      responseStatus: participant.response_status ?? null,
-    });
-  });
-
-  const shiftIds = Array.from(
-    new Set([
-      ...(Array.isArray(row.related_shift_ids) ? row.related_shift_ids.filter(Boolean) : []),
-      ...shiftLinks.map((link) => link.shift_id).filter(Boolean),
-    ]),
-  );
+  const participants: CalendarEventParticipant[] = participantRows.map((participant) => ({
+    id: participant.profile_id ?? participant.id,
+    name: participant.profile_id ?? `Participant ${participant.id.slice(0, 6)}`,
+    avatar_url: null,
+    role: participant.role ?? null,
+    participantId: participant.id,
+    profileId: participant.profile_id ?? null,
+    responseStatus: participant.rsvp_status ?? null,
+  }));
 
   return {
     id: row.id,
@@ -152,11 +127,11 @@ const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
     end: row.end_time ?? null,
     location: row.location ?? null,
     type: row.event_type ?? 'event',
-    color: row.color ?? null,
+    color: null,
     storeId: row.store_id ?? null,
-    participants: Array.from(participantMap.values()),
-    shiftIds,
-    metadata: row.metadata ?? {},
+    participants,
+    shiftIds: [],
+    metadata: {},
     raw: row,
   };
 };
@@ -245,31 +220,12 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
     description: payload.description ?? null,
     location: payload.location ?? null,
     event_type: payload.type ?? 'event',
-    color: payload.color ?? null,
     start_time: toIsoString(payload.start),
     end_time: toIsoString(payload.end),
-    attendees: payload.attendees ?? [],
-    related_shift_ids: payload.relatedShiftIds ?? [],
-    checklist: payload.checklist ?? [],
-    vendor: payload.vendor ?? null,
-    metadata: payload.metadata ?? {},
   };
 
   const row = await calendarEventsRepository.insertEvent(insertPayload);
   return mapRowToEvent(row as CalendarEventRow);
-};
-
-export const upsertEventShiftLinks = async ({
-  eventId,
-  shiftIds,
-  companyId,
-}: {
-  eventId: string;
-  shiftIds: string[];
-  companyId: string | null;
-}) => {
-  if (!eventId || !companyId) return;
-  await calendarEventsRepository.replaceEventShiftLinks(companyId, eventId, shiftIds);
 };
 
 export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
@@ -289,18 +245,11 @@ export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
     description: event.description ?? null,
     location: event.location ?? null,
     event_type: event.type ?? 'event',
-    color: event.color ?? null,
     start_time: event.start,
     end_time: event.end ?? null,
-    attendees: event.attendees ?? [],
-    related_shift_ids: event.related_shift_ids ?? [],
-    checklist: event.checklist ?? [],
-    vendor: event.vendor ?? null,
-    metadata: { source: event.source ?? 'local' } as Record<string, unknown>,
     created_at: event.created_at ?? new Date().toISOString(),
     updated_at: event.created_at ?? new Date().toISOString(),
     event_participants: [],
-    event_shift_links: [],
   };
 
   return {
@@ -311,11 +260,11 @@ export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
     end: event.end ?? null,
     location: event.location ?? null,
     type: event.type ?? 'event',
-    color: event.color ?? null,
+    color: null,
     storeId: null,
     participants,
-    shiftIds: event.related_shift_ids ?? [],
-    metadata: rawRow.metadata,
+    shiftIds: [],
+    metadata: {},
     raw: rawRow,
   };
 };

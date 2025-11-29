@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -78,7 +77,7 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
               id: assignment.user.id,
               name,
               avatar_url: assignment.user.avatar_url ?? null,
-              role: shift.job_position?.name ?? assignment.user.role ?? undefined,
+              role: shift.job_position?.name ?? null,
             });
           }
         });
