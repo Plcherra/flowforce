@@ -1,1 +1,1 @@
-export { default } from '@/pages/OperationsIntelligence';
+export { default } from '@/screens/OperationsIntelligence';

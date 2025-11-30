@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,44779,e=>{"use strict";var t=e.i(271645),a=e.i(618566);function i(){let e=(0,a.useRouter)();return(0,t.useEffect)(()=>{e.replace("/app/enhanced-scheduling?tab=availability&availability=team")},[e]),null}e.s(["default",()=>i])}]);

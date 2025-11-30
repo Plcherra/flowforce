@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/app/layout,_N_T_/app/availability/layout,_N_T_/app/availability/manage/layout,_N_T_/app/availability/manage/page,_N_T_/app/availability/manage"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/app/availability/manage/__PAGE__",
+    "/app/availability/manage",
+    "/app/availability",
+    "/app",
+    "/_index",
+    "/_head"
+  ]
+}

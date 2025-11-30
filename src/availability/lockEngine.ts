@@ -49,7 +49,7 @@ const defaultDeps: LockEngineDeps = {
   },
   async getApprovedExceptions(_orgId, range) {
     const { data, error } = await supabase
-      .from('availability_exception')
+      .from('availability_exception' as any)
       .select('employee_id,start_date,end_date,approved_by')
       .lte('start_date', range.end)
       .gte('end_date', range.start)
@@ -60,11 +60,11 @@ const defaultDeps: LockEngineDeps = {
       throw error;
     }
 
-    return (data ?? []) as AvailabilityExceptionRow[];
+    return (data ?? []) as unknown as AvailabilityExceptionRow[];
   },
   async hasApprovedException(_orgId, employeeId, date) {
     const { data, error } = await supabase
-      .from('availability_exception')
+      .from('availability_exception' as any)
       .select('id')
       .eq('employee_id', employeeId)
       .lte('start_date', date)

@@ -1,13 +1,8 @@
-const requireEnv = (value: string | undefined, key: string): string => {
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
+import { appEnv, requireEnv } from '@/lib/env';
 
-export const SUPABASE_URL = requireEnv(import.meta.env.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL');
+export const SUPABASE_URL = requireEnv(appEnv.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL');
 export const SUPABASE_ANON_KEY = requireEnv(
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  appEnv.VITE_SUPABASE_PUBLISHABLE_KEY,
   'VITE_SUPABASE_PUBLISHABLE_KEY',
 );
 export const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;

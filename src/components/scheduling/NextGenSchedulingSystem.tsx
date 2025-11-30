@@ -34,6 +34,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { appEnv } from '@/lib/env';
 
 export const formatDailyHoursLabel = (day: string, parsedDate?: Date) => {
   const date = parsedDate ?? parseISO(day);
@@ -257,7 +258,7 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
     : 'All scheduled locations';
 
   const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
-  const showDebugTools = import.meta.env.DEV || isManager;
+  const showDebugTools = appEnv.DEV || isManager;
 
   const handleTabChange = (value: string) => {
     if (value !== activeTab) {

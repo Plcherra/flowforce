@@ -3,6 +3,7 @@ import { useNavigation } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '@/components/ui/error-boundary';
+import { appEnv } from '@/lib/env';
 
 interface RouteLoadingBoundaryProps {
   children: ReactNode;
@@ -38,7 +39,7 @@ export function RouteLoadingBoundary({ children, fallback }: RouteLoadingBoundar
 
   const content = children ?? inlineErrorFallback;
   const renderContent = (
-    <ErrorBoundary fallback={inlineErrorFallback} showDetails={import.meta.env.DEV}>
+    <ErrorBoundary fallback={inlineErrorFallback} showDetails={appEnv.DEV}>
       <Suspense fallback={safeFallback}>{content}</Suspense>
     </ErrorBoundary>
   );

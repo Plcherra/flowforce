@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
+import { appEnv } from '@/lib/env';
 
 export type OperationsInsightRecord = {
   id?: string;
@@ -29,7 +30,7 @@ export function useOperationsData() {
     return (
       normalizeCompanyId(profile?.company_id) ??
       normalizeCompanyId(profile?.companyId) ??
-      normalizeCompanyId(import.meta.env.VITE_DEFAULT_COMPANY_ID)
+      normalizeCompanyId(appEnv.VITE_DEFAULT_COMPANY_ID)
     );
   }, [profile?.companyId, profile?.company_id]);
 

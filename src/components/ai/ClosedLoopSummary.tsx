@@ -22,7 +22,12 @@ interface ClosedLoopSummaryProps {
 }
 
 export function ClosedLoopSummary({ loading, error, state, onRefresh }: ClosedLoopSummaryProps) {
-  const severity = state?.detection.severityBreakdown ?? { high: 0, medium: 0, low: 0 };
+  const severity =
+    (state?.detection.severityBreakdown as { high: number; medium: number; low: number } | undefined) ?? {
+      high: 0,
+      medium: 0,
+      low: 0,
+    };
   const riskScore = state?.interpretation.riskScore ?? 0;
   const ackRate = state?.learning.acknowledgmentRate;
   const guardrailStatus = state?.execution.guardrail.status ?? 'allowed';
@@ -210,4 +215,3 @@ export function ClosedLoopSummary({ loading, error, state, onRefresh }: ClosedLo
     </Card>
   );
 }
-

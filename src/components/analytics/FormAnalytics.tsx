@@ -47,7 +47,7 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
       setSelectedForm(formId);
       return;
     }
-    if (!selectedForm && forms.length) {
+    if (!selectedForm && Array.isArray(forms) && forms.length) {
       setSelectedForm(forms[0].id);
     }
   }, [formId, forms, selectedForm]);

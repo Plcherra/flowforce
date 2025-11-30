@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
+import { appEnv } from '@/lib/env';
 
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+const apiKey = appEnv.VITE_OPENAI_API_KEY;
 
 const openai = new OpenAI({
   apiKey,

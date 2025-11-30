@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getIdeaInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
 import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
+import { appEnv } from '@/lib/env';
 
 export interface DateRange {
   start: Date;
@@ -54,7 +55,7 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
       } catch (error) {
         const message = (error as Error)?.message ?? '';
         if (message.includes('function public.get_kpi_summary')) {
-          if (import.meta.env.DEV) {
+          if (appEnv.DEV) {
             console.warn(
               '[useIdeaInsights] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary.',
               message,

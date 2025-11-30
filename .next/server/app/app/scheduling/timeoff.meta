@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/app/layout,_N_T_/app/scheduling/layout,_N_T_/app/scheduling/timeoff/layout,_N_T_/app/scheduling/timeoff/page,_N_T_/app/scheduling/timeoff"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/app/scheduling/timeoff/__PAGE__",
+    "/app/scheduling/timeoff",
+    "/app/scheduling",
+    "/app",
+    "/_index",
+    "/_head"
+  ]
+}

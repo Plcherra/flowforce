@@ -2,8 +2,10 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { sections } from './registry';
 
-// Statically import page components via conventional file names
-const pageImports = import.meta.glob('./**/*.tsx');
+// Statically map section pages without relying on build-time globbing
+const pageImports: Record<string, () => Promise<{ default: React.ComponentType<any> }>> = {
+  './events/index.tsx': () => import('./events/index'),
+};
 
 export function buildSectionRoutes(): React.ReactElement[] {
   const routes: React.ReactElement[] = [];

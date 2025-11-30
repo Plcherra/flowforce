@@ -5,8 +5,10 @@
  * simply return empty datasets so the rest of the analytics pipeline keeps working.
  */
 
-const CONNECTEAM_API_BASE = import.meta.env.VITE_CONNECTEAM_API_BASE ?? 'https://api.connecteam.com/v1';
-const CONNECTEAM_API_KEY = import.meta.env.VITE_CONNECTEAM_API_KEY ?? '';
+import { appEnv } from '@/lib/env';
+
+const CONNECTEAM_API_BASE = appEnv.VITE_CONNECTEAM_API_BASE ?? 'https://api.connecteam.com/v1';
+const CONNECTEAM_API_KEY = appEnv.VITE_CONNECTEAM_API_KEY ?? '';
 
 export interface ConnecteamForm {
   id: string;

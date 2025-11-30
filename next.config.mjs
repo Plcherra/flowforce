@@ -1,0 +1,55 @@
+const aliasPath = './src/lib/router-adapter';
+
+const nextConfig = {
+  reactStrictMode: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias['react-router-dom'] = aliasPath;
+    return config;
+  },
+  turbopack: {
+    resolveAlias: {
+      'react-router-dom': aliasPath,
+    },
+  },
+  async redirects() {
+    return [
+      { source: '/dashboard', destination: '/app/dashboard', permanent: false },
+      { source: '/messages', destination: '/app/messages', permanent: false },
+      { source: '/calendar', destination: '/app/calendar', permanent: false },
+      { source: '/meetings', destination: '/app/meetings', permanent: false },
+      { source: '/employees', destination: '/app/employees', permanent: false },
+      { source: '/employee-directory', destination: '/app/employees', permanent: false },
+      { source: '/invite-employee', destination: '/app/employees?invite=1', permanent: false },
+      { source: '/position-management', destination: '/app/position-management', permanent: false },
+      { source: '/performance', destination: '/app/performance', permanent: false },
+      { source: '/time-off', destination: '/app/scheduling/timeoff', permanent: false },
+      { source: '/recognition', destination: '/app/recognition', permanent: false },
+      { source: '/leaderboard', destination: '/app/leaderboard', permanent: false },
+      { source: '/expenses', destination: '/app/expenses', permanent: false },
+      { source: '/forms', destination: '/app/forms', permanent: false },
+      { source: '/company-updates', destination: '/app/company-updates', permanent: false },
+      { source: '/inventory-actions', destination: '/app/inventory-actions', permanent: false },
+      { source: '/inventory-count-execution', destination: '/app/inventory-count-execution', permanent: false },
+      { source: '/items-setup', destination: '/app/items-setup', permanent: false },
+      { source: '/purchasing', destination: '/app/purchasing', permanent: false },
+      { source: '/enhanced-scheduling', destination: '/app/enhanced-scheduling', permanent: false },
+      { source: '/schedule-lobby', destination: '/app/schedule-lobby', permanent: false },
+      { source: '/certifications', destination: '/app/certifications', permanent: false },
+      { source: '/learning-center', destination: '/app/learning-center', permanent: false },
+      { source: '/resources', destination: '/app/resources', permanent: false },
+      { source: '/cookbook', destination: '/app/cookbook', permanent: false },
+      { source: '/ai-insights', destination: '/app/ai-insights', permanent: false },
+      { source: '/settings', destination: '/app/settings', permanent: false },
+      { source: '/profile', destination: '/app/profile', permanent: false },
+      { source: '/admin', destination: '/app/admin', permanent: false },
+      { source: '/sections-permissions', destination: '/app/sections-permissions', permanent: false },
+      { source: '/add-section', destination: '/app/add-section', permanent: false },
+      { source: '/permission-demo', destination: '/app/permission-demo', permanent: false },
+    ];
+  },
+};
+
+export default nextConfig;

@@ -1,2 +1,2 @@
-export { supabaseAdmin } from "../../api/_server/supabaseAdmin";
-export { default } from "../../api/_server/supabaseAdmin";
+export { supabaseAdmin } from "../../app/api/_server/supabaseAdmin";
+export { default } from "../../app/api/_server/supabaseAdmin";

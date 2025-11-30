@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type MutableRef
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { appEnv } from '@/lib/env';
 
 type LegacyProfileFields = {
   id: string;
@@ -121,7 +122,7 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
     const { data, error } = await query.maybeSingle();
 
     if (error) {
-      if (import.meta.env.DEV) {
+      if (appEnv.DEV) {
         console.error('[ProfileProvider] Failed to load profile', {
           userId,
           companyId,
@@ -132,7 +133,7 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
     }
 
     if (!data) {
-      if (import.meta.env.DEV) {
+      if (appEnv.DEV) {
         console.error('[ProfileProvider] Missing profile row', {
           userId,
           companyId,
@@ -165,7 +166,7 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
       isPlaceholder: false,
     };
   } catch (error) {
-    if (import.meta.env.DEV) {
+    if (appEnv.DEV) {
       console.error('[ProfileProvider] Unexpected profile fetch error', {
         userId,
         companyId,

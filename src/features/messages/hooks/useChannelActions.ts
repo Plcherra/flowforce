@@ -9,6 +9,7 @@ import {
   deleteChannel as deleteChannelService,
   updateLastRead as updateLastReadService,
 } from '@/features/messages/api/channelService';
+import { appEnv } from '@/lib/env';
 
 export function useChannelActions() {
   const { user } = useAuth();
@@ -114,7 +115,7 @@ export function useChannelActions() {
       try {
         await updateLastReadService(channelId, userId);
       } catch (error) {
-        if (import.meta.env.DEV) {
+        if (appEnv.DEV) {
           console.error('Failed to update last read', error);
         }
       }

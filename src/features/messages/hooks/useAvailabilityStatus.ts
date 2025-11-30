@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import { getAvailability, updateAvailabilityFlag } from '@/features/messages/api/userStatusService';
+import { appEnv } from '@/lib/env';
 
 interface AvailabilityStatus {
   available: boolean;
@@ -30,7 +31,7 @@ export function useAvailabilityStatus(): AvailabilityStatus {
           previousValueRef.current = availabilityFlag;
         }
       } catch (error) {
-        if (import.meta.env.DEV) {
+        if (appEnv.DEV) {
           console.error('Failed to load availability flag', error);
         }
       } finally {
@@ -51,7 +52,7 @@ export function useAvailabilityStatus(): AvailabilityStatus {
     try {
       await updateAvailabilityFlag(value);
     } catch (error) {
-      if (import.meta.env.DEV) {
+      if (appEnv.DEV) {
         console.error('Failed to update availability status', error);
       }
       if (isMountedRef.current) {

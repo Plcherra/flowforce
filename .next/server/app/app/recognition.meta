@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/app/layout,_N_T_/app/recognition/layout,_N_T_/app/recognition/page,_N_T_/app/recognition"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/app/recognition/__PAGE__",
+    "/app/recognition",
+    "/app",
+    "/_index",
+    "/_head"
+  ]
+}

@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { useAuth } from '@/hooks/useAuth';
+import { appEnv } from '@/lib/env';
 
 interface AppShellProps {
   children?: ReactNode;
@@ -40,7 +41,7 @@ export default function AppShell({ children }: AppShellProps) {
             
             {/* Main Content - with scroll restoration and loading states */}
             <main className="flex-1 overflow-y-auto min-h-0">
-              <ErrorBoundary showDetails={import.meta.env.DEV}>
+              <ErrorBoundary showDetails={appEnv.DEV}>
                 <Suspense
                   fallback={
                     <div className="p-6">

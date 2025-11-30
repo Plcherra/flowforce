@@ -124,7 +124,7 @@ export function BusinessAnalyticsBoard({ companyId, onContextChange, className }
       </div>
 
       {data?.notice && (
-        <Alert variant={data.isFallback ? 'warning' : 'default'}>
+        <Alert variant="default">
           <AlertTitle>{data.isFallback ? 'Using simulator defaults' : 'Analytics status'}</AlertTitle>
           <AlertDescription>{data.notice}</AlertDescription>
         </Alert>

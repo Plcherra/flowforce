@@ -3,6 +3,7 @@ import { subWeeks } from 'date-fns';
 import { useCompany } from '@/hooks/useCompany';
 import { useProfile } from '@/hooks/useProfile';
 import type { DateRange } from '../hooks/useIdeaInsights';
+import { appEnv } from '@/lib/env';
 
 export type IdeaStage = 'identify' | 'diagnose' | 'execute' | 'assess';
 
@@ -46,7 +47,7 @@ export function IdeaProvider({ children }: IdeaProviderProps) {
   const fallbackCompanyId =
     normalizeCompanyId(profile?.company_id) ??
     normalizeCompanyId(profile?.companyId) ??
-    normalizeCompanyId(import.meta.env.VITE_DEFAULT_COMPANY_ID);
+    normalizeCompanyId(appEnv.VITE_DEFAULT_COMPANY_ID);
 
   const resolvedCompanyId = normalizeCompanyId(company?.id) ?? fallbackCompanyId;
   const loading = companyLoading || profileLoading;

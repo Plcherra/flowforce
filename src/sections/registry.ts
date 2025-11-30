@@ -1,4 +1,5 @@
 import type { PageMeta } from './PageFactory';
+import eventsConfig from './events/section.config';
 
 export type SectionMeta = {
   title: string;
@@ -8,12 +9,7 @@ export type SectionMeta = {
   pages: PageMeta[];
 };
 
-// Vite will glob-import configs under /src/sections/**/section.config.ts
-const configs = import.meta.glob('./**/section.config.ts', { eager: true }) as Record<string, any>;
-
-export const sections: SectionMeta[] = Object.values(configs)
-  .map((mod: any) => mod.default as SectionMeta)
-  .filter(Boolean);
+export const sections: SectionMeta[] = [eventsConfig].filter(Boolean);
 
 export function getSectionBySlug(slug: string) {
   return sections.find((s) => s.slug === slug);
@@ -27,4 +23,3 @@ export function getNavByCategory() {
   });
   return byCat;
 }
-

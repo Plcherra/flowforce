@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "rewrites": [
-    {
-      "source": "/app(/.*)?",
-      "destination": "/index.html"
-    }
-  ],
   "crons": [
     {
       "path": "/api/run-detectors",

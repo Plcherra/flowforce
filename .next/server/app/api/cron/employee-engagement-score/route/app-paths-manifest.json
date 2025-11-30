@@ -1,0 +1,3 @@
+{
+  "/api/cron/employee-engagement-score/route": "app/api/cron/employee-engagement-score/route.js"
+}

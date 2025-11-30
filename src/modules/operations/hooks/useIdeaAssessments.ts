@@ -6,6 +6,7 @@ import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
 import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
 import { buildRangeWindows } from '@/features/operations/utils/ideaMetrics';
 import { parseIdeaKpiInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
+import { appEnv } from '@/lib/env';
 
 export interface IdeaAssessmentMetric {
   metric: string;
@@ -33,7 +34,7 @@ async function fetchKpiSnapshot(companyId: string, range: { start: string; end: 
 
   if (error) {
     if (error.message?.includes('function public.get_kpi_summary')) {
-      if (import.meta.env.DEV) {
+      if (appEnv.DEV) {
         console.warn(
           '[useIdeaAssessments] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary.',
           error.message,

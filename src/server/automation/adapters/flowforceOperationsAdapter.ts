@@ -1,4 +1,5 @@
 import type { AutomationScript } from '../validateScript';
+import { appEnv } from '@/lib/env';
 
 type DispatchResult = {
   dispatched: boolean;
@@ -6,7 +7,7 @@ type DispatchResult = {
 };
 
 export async function dispatchAutomationToFlowForce(script: AutomationScript): Promise<DispatchResult> {
-  const endpoint = import.meta.env.VITE_FLOWFORCE_AUTOMATIONS_ENDPOINT;
+  const endpoint = appEnv.VITE_FLOWFORCE_AUTOMATIONS_ENDPOINT;
   if (!endpoint) {
     console.info('[FlowForceAdapter] no endpoint configured, skipping dispatch');
     return { dispatched: false };

@@ -1,3 +1,4 @@
+import { appEnv } from '@/lib/env';
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const LEVEL_WEIGHT: Record<LogLevel, number> = {
@@ -15,11 +16,11 @@ function normalizeLevel(value: string | undefined | null, fallback: LogLevel): L
   return VALID_LEVELS.includes(lower) ? lower : fallback;
 }
 
-const runtimeLogLevel = normalizeLevel(import.meta.env.VITE_LOG_LEVEL, 'info');
-const remoteLogLevel = normalizeLevel(import.meta.env.VITE_REMOTE_LOG_LEVEL, 'warn');
-const remoteLoggingEnabled = (import.meta.env.VITE_ENABLE_REMOTE_LOGS ?? 'true') !== 'false';
-const remoteEndpoint = import.meta.env.VITE_REMOTE_LOG_ENDPOINT || '/api/logs';
-const ingestToken = import.meta.env.VITE_LOG_INGEST_TOKEN;
+const runtimeLogLevel = normalizeLevel(appEnv.VITE_LOG_LEVEL, 'info');
+const remoteLogLevel = normalizeLevel(appEnv.VITE_REMOTE_LOG_LEVEL, 'warn');
+const remoteLoggingEnabled = appEnv.VITE_ENABLE_REMOTE_LOGS;
+const remoteEndpoint = appEnv.VITE_REMOTE_LOG_ENDPOINT || '/api/logs';
+const ingestToken = appEnv.VITE_LOG_INGEST_TOKEN;
 
 export interface LogContext {
   orgId?: string;

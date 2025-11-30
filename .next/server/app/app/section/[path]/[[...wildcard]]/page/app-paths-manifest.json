@@ -1,0 +1,3 @@
+{
+  "/app/section/[path]/[[...wildcard]]/page": "app/app/section/[path]/[[...wildcard]]/page.js"
+}

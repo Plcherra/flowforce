@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { OPERATIONS_AUTOMATION_SYSTEM_PROMPT } from '@/server/automation/prompts/operations';
 import { serializeAutomationContext } from '@/server/automation/prompts/automationCommon';
 import { validateAutomationScript, type AutomationScript } from '@/server/automation/validateScript';
+import { appEnv } from '@/lib/env';
 
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+const apiKey = appEnv.VITE_OPENAI_API_KEY;
 const openai = apiKey
   ? new OpenAI({
       apiKey,
