@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../app/onboarding/page.tsx"],"sourcesContent":["import { redirect } from 'next/navigation';\n\nexport default function OnboardingRedirect() {\n  redirect('/company-registration');\n}\n"],"names":[],"mappings":"6UAAA,EAAA,CAAA,CAAA,QAAA,IAAA,EAAA,EAAA,CAAA,CAAA,QAEe,SAAS,IACtB,CAAA,EAAA,EAAA,QAAA,AAAQ,EAAC,wBACX"}

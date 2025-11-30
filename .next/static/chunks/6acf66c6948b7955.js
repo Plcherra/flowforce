@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,703810,e=>{"use strict";var t=e.i(843476),s=e.i(683437);function i(){return(0,t.jsx)(s.Navigate,{to:"/app/messages/helpdesk",replace:!0})}function o(){return(0,t.jsx)(i,{})}e.s(["default",()=>o],703810)}]);
