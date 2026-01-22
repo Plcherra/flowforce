@@ -1,9 +1,25 @@
 import { appEnv, requireEnv } from '@/lib/env';
 
-export const SUPABASE_URL = requireEnv(appEnv.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL');
-export const SUPABASE_ANON_KEY = requireEnv(
+// Safe getter that logs warnings instead of throwing during module init
+// Works for both server and client - allows app to start even without env vars
+const getEnvOrWarn = (value: string | undefined, key: string): string => {
+  if (!value) {
+    // Log warning but don't throw - allows dev server and app to start
+    // The app will use placeholder values instead
+    if (typeof window === 'undefined') {
+      console.warn(`[Config] Missing environment variable: ${key}. Using placeholder.`);
+    } else {
+      console.warn(`[Config] Missing environment variable: ${key}. Some features may not work.`);
+    }
+    return '';
+  }
+  return value;
+};
+
+export const SUPABASE_URL = getEnvOrWarn(appEnv.VITE_SUPABASE_URL, 'VITE_SUPABASE_URL');
+export const SUPABASE_ANON_KEY = getEnvOrWarn(
   appEnv.VITE_SUPABASE_PUBLISHABLE_KEY,
   'VITE_SUPABASE_PUBLISHABLE_KEY',
 );
-export const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
-export const REST_BASE = `${SUPABASE_URL}/rest/v1`;
+export const FUNCTIONS_BASE = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : '';
+export const REST_BASE = SUPABASE_URL ? `${SUPABASE_URL}/rest/v1` : '';

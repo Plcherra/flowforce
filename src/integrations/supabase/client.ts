@@ -6,4 +6,25 @@ import type { Database } from './types';
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Safe client creation - use placeholder values if env vars are missing (prevents hang during dev server startup)
+const safeUrl = SUPABASE_URL || 'https://placeholder.supabase.co';
+const safeKey = SUPABASE_ANON_KEY || 'placeholder-key';
+
+const isUsingPlaceholder = !SUPABASE_URL || !SUPABASE_ANON_KEY || 
+  SUPABASE_URL === 'https://placeholder.supabase.co' || 
+  SUPABASE_ANON_KEY === 'placeholder-key';
+
+if (isUsingPlaceholder) {
+  if (typeof window === 'undefined') {
+    console.warn('[Supabase Client] Missing Supabase credentials. Using placeholder client. Check your .env.local file.');
+  } else {
+    console.warn('[Supabase Client] ⚠️ Missing Supabase credentials. Sign in will fail. Create .env.local with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  }
+}
+
+export const supabase = createClient<Database>(safeUrl, safeKey, {
+  auth: {
+    persistSession: typeof window !== 'undefined',
+    autoRefreshToken: typeof window !== 'undefined',
+  },
+});

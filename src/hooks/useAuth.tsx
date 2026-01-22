@@ -89,18 +89,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Check if Supabase is configured
+      const supabaseUrl = (supabase as any).supabaseUrl || '';
+      if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+        const error = {
+          message: 'Supabase is not configured. Please create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for details.',
+        };
+        toast({
+          title: 'Configuration Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return { error };
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        // Provide more helpful error messages
+        let errorMessage = error.message;
+        if (error.message.includes('Invalid API key') || error.message.includes('invalid_api_key')) {
+          errorMessage = 'Invalid API key. Please check your .env.local file has the correct NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for help.';
+        }
+        
         toast({
           title: 'Sign In Failed',
-          description: error.message,
+          description: errorMessage,
           variant: 'destructive',
         });
-        return { error };
+        return { error: { ...error, message: errorMessage } };
       }
 
       return { error: null };

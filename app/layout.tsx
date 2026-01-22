@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Debug logging for dev server startup
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[RootLayout] Rendering layout at', new Date().toISOString());
+  }
+
   return (
     <html lang="en">
       <body className="min-h-screen bg-background antialiased">

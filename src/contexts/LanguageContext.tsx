@@ -25,16 +25,24 @@ export const languages = [
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n?.language || 'en');
 
   useEffect(() => {
+    // Check if i18n is initialized and has the 'on' method
+    if (!i18n || typeof i18n.on !== 'function') {
+      console.warn('[LanguageProvider] i18n is not properly initialized');
+      return;
+    }
+
     const handleLanguageChange = (lng: string) => {
       setCurrentLanguage(lng);
     };
 
     i18n.on('languageChanged', handleLanguageChange);
     return () => {
-      i18n.off('languageChanged', handleLanguageChange);
+      if (typeof i18n.off === 'function') {
+        i18n.off('languageChanged', handleLanguageChange);
+      }
     };
   }, [i18n]);
 

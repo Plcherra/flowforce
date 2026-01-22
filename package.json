@@ -1,10 +1,12 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "flowforce-nextjs",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "dev:turbo": "next dev --turbo",
+    "dev:fast": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",

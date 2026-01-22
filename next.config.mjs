@@ -5,14 +5,38 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack: (config) => {
+  // Optimize webpack for faster dev builds
+  webpack: (config, { dev, isServer }) => {
     config.resolve.alias['react-router-dom'] = aliasPath;
+    
+    // Speed up dev builds (only modify if needed)
+    if (dev && !isServer) {
+      // Faster source maps in dev
+      if (!config.devtool) {
+        config.devtool = 'eval-cheap-module-source-map';
+      }
+    }
+    
     return config;
   },
   turbopack: {
     resolveAlias: {
       'react-router-dom': aliasPath,
     },
+  },
+  // Experimental features for faster dev
+  experimental: {
+    // Enable faster refresh
+    optimizePackageImports: [
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      'lucide-react',
+      'date-fns',
+    ],
   },
   async redirects() {
     return [
