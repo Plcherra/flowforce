@@ -1,5 +1,5 @@
 import { ReactNode, Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from '@/lib/router-adapter';
 import { AppSidebar } from '@/components/AppSidebar';
 import { TopNavbar } from '@/components/layout/TopNavbar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';

@@ -1,5 +1,5 @@
 import { Suspense, ReactNode } from 'react';
-import { useNavigation } from 'react-router-dom';
+import { useNavigation } from '@/lib/router-adapter';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '@/components/ui/error-boundary';

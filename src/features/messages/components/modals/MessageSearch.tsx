@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, X, MessageSquare, Hash, Users, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 
 interface SearchResult {
@@ -38,6 +39,7 @@ interface MessageSearchProps {
 
 export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchProps) {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,9 +78,17 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
   const performSearch = async (query: string) => {
     if (!user) return;
 
+    const companyId = profile?.companyId ?? profile?.company_id ?? null;
+    if (!companyId) {
+      console.warn('Company context required for message search');
+      setResults([]);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Search messages
+      // Search messages - filter by channels that belong to the company
+      // Messages are scoped through channel membership, but we add an extra layer of security
       const { data: messageResults, error: messageError } = await supabase
         .from('messages')
         .select(`
@@ -88,20 +98,23 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
           sender_profile:profiles!messages_sender_id_fkey(
             first_name,
             last_name,
-            avatar_url
+            avatar_url,
+            company_id
           ),
           channel:message_channels!messages_channel_id_fkey(
             id,
             name,
             type,
-            is_private
+            is_private,
+            company_id
           )
         `)
+        .eq('channel.company_id', companyId)
         .textSearch('content', query)
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // Search channels
+      // Search channels - filter by company_id
       const { data: channelResults, error: channelError } = await supabase
         .from('message_channels')
         .select(`
@@ -110,8 +123,10 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
           description,
           type,
           is_private,
-          created_at
+          created_at,
+          company_id
         `)
+        .eq('company_id', companyId)
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
         .order('created_at', { ascending: false })
         .limit(5);

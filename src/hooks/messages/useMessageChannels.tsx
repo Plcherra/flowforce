@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../useAuth';
+import { useProfile } from '../useProfile';
 import { useRealtime } from '@/hooks/useRealtime';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
 import { messagesRepository } from '@/repositories/messagesRepository';
@@ -12,6 +13,7 @@ import {
 
 export function useMessageChannels() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [channels, setChannels] = useState<MessageChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -21,7 +23,8 @@ export function useMessageChannels() {
 
     setLoading(true);
     try {
-      const data = await messagesRepository.listChannels(user.id);
+      const companyId = profile?.companyId ?? profile?.company_id ?? null;
+      const data = await messagesRepository.listChannels(user.id, companyId);
       setChannels(data ?? []);
       setError(null);
     } catch (error) {
@@ -31,7 +34,7 @@ export function useMessageChannels() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, profile?.companyId, profile?.company_id]);
 
   useEffect(() => {
     if (!user) {

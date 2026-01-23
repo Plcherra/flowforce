@@ -70,6 +70,24 @@ export function useCompanyUpdateMutations() {
     onSuccess: invalidateUpdates,
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ updateId, payload }: { updateId: string; payload: Partial<Record<string, unknown>> }) => {
+      if (!companyId) throw new Error('Missing company context.');
+      await companyUpdatesRepository.updateUpdate({ companyId, updateId, payload });
+    },
+    onSuccess: () => {
+      invalidateUpdates();
+      toast({ title: 'Update updated', description: 'Your changes have been saved.' });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Unable to update',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (updateId: string) => {
       if (!companyId) throw new Error('Missing company context.');
@@ -246,6 +264,10 @@ export function useCompanyUpdateMutations() {
     createUpdate: (input: CreateCompanyUpdateInput) => {
       ensureCompany();
       return createUpdateMutation.mutateAsync(input);
+    },
+    updateUpdate: (updateId: string, payload: Partial<Record<string, unknown>>) => {
+      ensureCompany();
+      return updateMutation.mutateAsync({ updateId, payload });
     },
     archiveUpdate: (updateId: string) => {
       ensureCompany();

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { MessageAttachment } from '@/types/messages';
-import { sendMessage as sendMessageService, deleteMessage as deleteMessageService } from '@/features/messages/api/messageService';
+import { sendMessage as sendMessageService, deleteMessage as deleteMessageService, updateMessage as updateMessageService } from '@/features/messages/api/messageService';
 
 export function useMessageActions() {
   const { user } = useAuth();
@@ -23,6 +23,23 @@ export function useMessageActions() {
       } catch (error) {
         toast({
           title: 'Unable to send message',
+          description: error instanceof Error ? error.message : 'Please try again shortly.',
+          variant: 'destructive',
+        });
+        throw error;
+      }
+    },
+    [ensureUser, toast],
+  );
+
+  const updateMessage = useCallback(
+    async (messageId: string, content: string) => {
+      const userId = ensureUser();
+      try {
+        return await updateMessageService(messageId, userId, content);
+      } catch (error) {
+        toast({
+          title: 'Unable to update message',
           description: error instanceof Error ? error.message : 'Please try again shortly.',
           variant: 'destructive',
         });
@@ -55,6 +72,7 @@ export function useMessageActions() {
 
   return {
     sendMessage,
+    updateMessage,
     deleteMessage,
   };
 }

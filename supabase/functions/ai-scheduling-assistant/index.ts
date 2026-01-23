@@ -2,80 +2,200 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Restrict CORS to trusted origins only
+const getAllowedOrigin = (origin: string | null): string => {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    // Add your production domains here
+    // 'https://yourdomain.com',
+  ];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    return origin;
+  }
+  return allowedOrigins[0] || '';
 };
 
+const corsHeaders = (origin: string | null) => ({
+  'Access-Control-Allow-Origin': getAllowedOrigin(origin),
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+});
+
+// Validate user authentication and company membership
+async function validateAuth(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    throw Object.assign(new Error('Missing Authorization header'), { status: 401 });
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw Object.assign(new Error('Missing Supabase configuration'), { status: 500 });
+  }
+
+  // Create client with user's auth token
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    global: {
+      headers: {
+        Authorization: authHeader,
+      },
+    },
+  });
+
+  // Validate user session
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw Object.assign(new Error('Unauthorized'), { status: 401 });
+  }
+
+  // Get user's company_id
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', userData.user.id)
+    .maybeSingle();
+
+  if (profileError || !profile?.company_id) {
+    throw Object.assign(new Error('No company context found for user'), { status: 403 });
+  }
+
+  return { supabase, userId: userData.user.id, userCompanyId: profile.company_id };
+}
+
+// Validate that requested companyId matches user's company
+function validateCompanyAccess(userCompanyId: string, requestedCompanyId: string | undefined) {
+  if (!requestedCompanyId) {
+    return userCompanyId; // Use user's company if none specified
+  }
+  
+  if (requestedCompanyId !== userCompanyId) {
+    throw Object.assign(
+      new Error('Access denied: Cannot access data from other companies'),
+      { status: 403 }
+    );
+  }
+  
+  return requestedCompanyId;
+}
+
 serve(async (req) => {
+  const origin = req.headers.get('Origin');
+  const headers = corsHeaders(origin);
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
+    // Validate authentication and get user's company
+    const { supabase, userId, userCompanyId } = await validateAuth(req);
+    
     const { action, data } = await req.json();
+    
+    // Validate and scope company_id for all actions
+    const validatedCompanyId = validateCompanyAccess(userCompanyId, data?.companyId);
+    
+    // Create scoped data object with validated company_id
+    const scopedData = { ...data, companyId: validatedCompanyId };
+    
+    let response: Response;
     
     switch (action) {
       case 'generate_recommendations':
-        return await generateShiftRecommendations(supabase, data);
+        response = await generateShiftRecommendations(supabase, scopedData, userId, validatedCompanyId);
+        break;
       case 'analyze_coverage':
-        return await analyzeCoverage(supabase, data);
+        response = await analyzeCoverage(supabase, scopedData, validatedCompanyId);
+        break;
       case 'check_compliance':
-        return await checkCompliance(supabase, data);
+        response = await checkCompliance(supabase, scopedData, validatedCompanyId);
+        break;
       case 'generate_insights':
-        return await generateInsights(supabase, data);
+        response = await generateInsights(supabase, scopedData, validatedCompanyId);
+        break;
       case 'auto_schedule':
-        return await autoGenerateSchedule(supabase, data);
+        response = await autoGenerateSchedule(supabase, scopedData, validatedCompanyId);
+        break;
       default:
         throw new Error('Invalid action');
     }
+    
+    // Add CORS headers to response
+    const origin = req.headers.get('Origin');
+    const corsHeadersObj = corsHeaders(origin);
+    const newHeaders = new Headers(response.headers);
+    Object.entries(corsHeadersObj).forEach(([key, value]) => {
+      newHeaders.set(key, value);
+    });
+    
+    return new Response(response.body, {
+      status: response.status,
+      headers: newHeaders,
+    });
   } catch (error) {
     console.error('Error in AI scheduling assistant:', error);
+    const status = (error as { status?: number }).status ?? 500;
+    const origin = req.headers.get('Origin');
+    const corsHeadersObj = corsHeaders(origin);
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status,
+      headers: { ...corsHeadersObj, 'Content-Type': 'application/json' },
     });
   }
 });
 
 // Generate smart shift recommendations based on AI analysis
-async function generateShiftRecommendations(supabase: any, { scheduleId, companyId }: any) {
-  // Get schedule details
-  const { data: schedule } = await supabase
+async function generateShiftRecommendations(supabase: any, { scheduleId, companyId }: any, userId: string, validatedCompanyId: string) {
+  if (!scheduleId) {
+    throw Object.assign(new Error('scheduleId is required'), { status: 400 });
+  }
+
+  // Get schedule details - ensure it belongs to the user's company
+  const { data: schedule, error: scheduleError } = await supabase
     .from('schedules')
     .select('*')
     .eq('id', scheduleId)
+    .eq('company_id', validatedCompanyId)
     .single();
 
-  // Get staff availability
+  if (scheduleError || !schedule) {
+    throw Object.assign(new Error('Schedule not found or access denied'), { status: 404 });
+  }
+
+  // Get staff availability - scope to company
   const { data: availability } = await supabase
     .from('staff_availability')
     .select(`
       *,
-      profiles(id, first_name, last_name, role)
+      profiles!inner(id, first_name, last_name, role, company_id)
     `)
+    .eq('profiles.company_id', validatedCompanyId)
     .eq('day_of_week', new Date(schedule.start_time).getDay());
 
-  // Get staff performance data
+  // Get staff performance data - scope to company
   const { data: performance } = await supabase
     .from('staff_performance')
-    .select('*')
+    .select(`
+      *,
+      profiles!inner(company_id)
+    `)
+    .eq('profiles.company_id', validatedCompanyId)
     .eq('role', schedule.role)
     .gte('date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
     .order('date', { ascending: false });
 
-  // Get current schedule load
+  // Get current schedule load - scope to company
   const { data: currentAssignments } = await supabase
     .from('schedule_assignments')
     .select(`
       *,
-      schedules(start_time, end_time)
+      schedules!inner(start_time, end_time, company_id)
     `)
+    .eq('schedules.company_id', validatedCompanyId)
     .gte('schedules.start_time', new Date(schedule.start_time).toISOString().split('T')[0])
     .lte('schedules.start_time', new Date(schedule.start_time).toISOString().split('T')[0] + 'T23:59:59');
 
@@ -140,22 +260,28 @@ async function generateShiftRecommendations(supabase: any, { scheduleId, company
   }).sort((a: any, b: any) => b.score - a.score) || [];
 
   return new Response(JSON.stringify({ recommendations }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 // Analyze schedule coverage and identify gaps
-async function analyzeCoverage(supabase: any, { companyId, weekStart }: any) {
+async function analyzeCoverage(supabase: any, { companyId, weekStart }: any, validatedCompanyId: string) {
+  if (!weekStart) {
+    throw Object.assign(new Error('weekStart is required'), { status: 400 });
+  }
+  
+  // Use validated company ID
+  const companyIdToUse = validatedCompanyId;
   const weekEnd = new Date(new Date(weekStart).getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  // Get all schedules for the week
+  // Get all schedules for the week - scoped to validated company
   const { data: schedules } = await supabase
     .from('schedules')
     .select(`
       *,
       schedule_assignments(user_id, status)
     `)
-    .eq('company_id', companyId)
+    .eq('company_id', companyIdToUse)
     .gte('start_time', weekStart)
     .lte('start_time', weekEnd.toISOString());
 
@@ -184,17 +310,21 @@ async function analyzeCoverage(supabase: any, { companyId, weekStart }: any) {
       'Peak hours: 12PM-6PM need more staff'
     ]
   }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 // Check compliance violations
-async function checkCompliance(supabase: any, { companyId, userId, schedules }: any) {
-  // Get compliance rules
+async function checkCompliance(supabase: any, { companyId, userId, schedules }: any, validatedCompanyId: string) {
+  if (!schedules || !Array.isArray(schedules)) {
+    throw Object.assign(new Error('schedules array is required'), { status: 400 });
+  }
+  
+  // Get compliance rules - scoped to validated company
   const { data: rules } = await supabase
     .from('compliance_rules')
     .select('*')
-    .eq('company_id', companyId)
+    .eq('company_id', validatedCompanyId)
     .eq('is_active', true);
 
   const violations = [];
@@ -235,12 +365,12 @@ async function checkCompliance(supabase: any, { companyId, userId, schedules }: 
   });
 
   return new Response(JSON.stringify({ violations, totalWeeklyHours }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 // Generate AI insights
-async function generateInsights(supabase: any, { companyId }: any) {
+async function generateInsights(supabase: any, { companyId }: any, validatedCompanyId: string) {
   const insights = {
     overworkedStaff: [],
     underutilizedStaff: [],
@@ -249,13 +379,14 @@ async function generateInsights(supabase: any, { companyId }: any) {
     recommendations: []
   };
 
-  // Get performance data for analysis
+  // Get performance data for analysis - scoped to validated company
   const { data: performance } = await supabase
     .from('staff_performance')
     .select(`
       *,
-      profiles(first_name, last_name)
+      profiles!inner(first_name, last_name, company_id)
     `)
+    .eq('profiles.company_id', validatedCompanyId)
     .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
   // Analyze overwork
@@ -283,13 +414,17 @@ async function generateInsights(supabase: any, { companyId }: any) {
   ];
 
   return new Response(JSON.stringify({ insights }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 // Auto-generate schedule using AI
-async function autoGenerateSchedule(supabase: any, { companyId, weekStart, preferences }: any) {
-  console.log('Auto-generating schedule for week:', weekStart);
+async function autoGenerateSchedule(supabase: any, { companyId, weekStart, preferences }: any, validatedCompanyId: string) {
+  if (!weekStart) {
+    throw Object.assign(new Error('weekStart is required'), { status: 400 });
+  }
+  
+  console.log('Auto-generating schedule for week:', weekStart, 'company:', validatedCompanyId);
   
   // This would contain the full AI scheduling algorithm
   // For now, returning a basic template
@@ -309,6 +444,6 @@ async function autoGenerateSchedule(supabase: any, { companyId, weekStart, prefe
   };
 
   return new Response(JSON.stringify({ schedule: generatedSchedule }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }

@@ -28,7 +28,7 @@ export async function maybeAutoRunDevTasks(tasks: CodexAutoTask[]) {
 
       const { error } = await supabaseAdmin
         .from("codex_auto_tasks")
-        .update({ status: "done" })
+        .update({ status: "completed" })
         .eq("id", task.id);
 
       if (error) {

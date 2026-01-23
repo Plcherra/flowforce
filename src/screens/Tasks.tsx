@@ -44,7 +44,7 @@ const RemindersPanel = lazy(() =>
   }))
 );
 
-const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as const;
+const KNOWN_STATUSES = ['todo', 'in_progress', 'review', 'blocked', 'done', 'completed', 'cancelled'] as const;
 type KnownTaskStatus = typeof KNOWN_STATUSES[number];
 type TaskStatusFilter = KnownTaskStatus | 'all' | 'other';
 
@@ -138,7 +138,8 @@ export default function Tasks() {
     const dueDate = new Date(task.due_date);
     const normalizedStatus = normalizeStatus(task.status);
 
-    if (normalizedStatus === 'done') {
+    // Treat both 'done' and 'completed' as completed states
+    if (normalizedStatus === 'done' || normalizedStatus === 'completed') {
       return {
         label: 'Completed',
         className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -182,20 +183,25 @@ export default function Tasks() {
 
   const activeCount = tasks.reduce((count, task) => {
     const status = normalizeStatus(task.status);
-    return status === 'done' || status === 'cancelled' ? count : count + 1;
+    // Treat both 'done' and 'completed' as inactive states
+    return (status === 'done' || status === 'completed' || status === 'cancelled') ? count : count + 1;
   }, 0);
 
   const overdueCount = tasks.reduce((count, task) => {
     if (!task.due_date) return count;
     const dueDate = new Date(task.due_date);
-    return dueDate < now && normalizeStatus(task.status) !== 'done' ? count + 1 : count;
+    const status = normalizeStatus(task.status);
+    // Don't count completed tasks as overdue
+    return dueDate < now && status !== 'done' && status !== 'completed' ? count + 1 : count;
   }, 0);
 
   const dueSoonCount = tasks.reduce((count, task) => {
     if (!task.due_date) return count;
     const dueDate = new Date(task.due_date);
     if (dueDate < now) return count;
-    if (normalizeStatus(task.status) === 'done') return count;
+    const status = normalizeStatus(task.status);
+    // Don't count completed tasks
+    if (status === 'done' || status === 'completed') return count;
     return differenceInDays(dueDate, now) <= 7 ? count + 1 : count;
   }, 0);
 

@@ -202,7 +202,13 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       }
 
       try {
-        const { error: deleteError } = await supabase.from('schedules').delete().eq('id', id);
+        ensureCompanyContext();
+        // Add company_id filter to prevent cross-tenant deletion
+        const { error: deleteError } = await supabase
+          .from('schedules')
+          .delete()
+          .eq('id', id)
+          .eq('company_id', companyId!);
         if (deleteError) throw deleteError;
         await refetchAll();
         toast({
@@ -220,7 +226,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
         return false;
       }
     },
-    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+    [companyId, ensureCompanyContext, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const assign = useCallback(
@@ -297,7 +303,13 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
 
       try {
         ensureCompanyContext();
-        const { error: deleteError } = await supabase.from('vendor_event').delete().eq('id', id);
+        // vendor_event is a view, so delete from vendor_visits table
+        // Add company_id filter to prevent cross-tenant deletion
+        const { error: deleteError } = await supabase
+          .from('vendor_visits')
+          .delete()
+          .eq('id', id)
+          .eq('company_id', companyId!);
         if (deleteError) throw deleteError;
         await refetchAll();
         toast({
@@ -493,12 +505,15 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
           .lt('start_time', params.weekEnd);
         if (schedulesError) throw schedulesError;
 
+        // vendor_event is now a view based on vendor_visits table
+        // It has start_time/end_time (timestamptz) instead of event_date
+        // Delete from vendor_visits table since views don't support DELETE
         const { error: vendorsError } = await supabase
-          .from('vendor_event')
+          .from('vendor_visits')
           .delete()
           .eq('company_id', companyId!)
-          .gte('event_date', params.weekStart)
-          .lt('event_date', params.weekEnd);
+          .gte('start_time', params.weekStart)
+          .lt('start_time', params.weekEnd);
         if (vendorsError) throw vendorsError;
 
         await refetchAll();

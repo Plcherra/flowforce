@@ -95,18 +95,23 @@ export function useForms() {
 
   const fetchForms = useCallback(async (tenantCompanyId: string): Promise<FormWithMeta[]> => {
     const rows = await fetchFormsWithRelations(tenantCompanyId);
-    const filteredRows = rows.filter((form) => form.created_profile?.company_id === tenantCompanyId);
-
-    if (filteredRows.length !== rows.length) {
-      const removed = rows.length - filteredRows.length;
-      console.warn(
-        '[useForms] Filtered out forms from other companies',
-        JSON.stringify({ removed, tenantCompanyId }),
-      );
+    
+    // Security: Validate that all forms belong to the company (defensive check)
+    // The repository query already filters by created_profile.company_id, but this ensures data integrity
+    const invalidForms = rows.filter((form) => form.created_profile?.company_id !== tenantCompanyId);
+    if (invalidForms.length > 0) {
+      console.error('[useForms] SECURITY WARNING: Forms from other companies detected', {
+        tenantCompanyId,
+        invalidCount: invalidForms.length,
+        invalidIds: invalidForms.map(f => f.id),
+      });
+      // Filter out invalid forms for security
+      // In production, this should trigger an alert/audit log
     }
-
+    
+    const validForms = rows.filter((form) => form.created_profile?.company_id === tenantCompanyId);
     const schemaFallback = useFormSchemaStore.getState().schema;
-    return filteredRows.map((form) => convertQueryRowToMeta(form, schemaFallback));
+    return validForms.map((form) => convertQueryRowToMeta(form, schemaFallback));
   }, []);
 
   const formsQuery = useQuery<FormWithMeta[]>({

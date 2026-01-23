@@ -6,9 +6,14 @@ import { PageLoader } from '@/components/common/PageLoader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { MessageCircle } from 'lucide-react';
+import ErrorBoundary from '@/components/ui/error-boundary';
+import { MessagesErrorFallback } from '@/components/ui/feature-error-fallbacks';
 
 export default function Messages() {
   const bootstrap = useCommunicationBootstrap();
+  const viewModel = useMessagesViewModel();
+  const organizationId = bootstrap.organization?.id ?? null;
+  const organizationName = bootstrap.organization?.name ?? null;
 
   if (!bootstrap.userReady || bootstrap.loading) {
     return <PageLoader text="Loading your workspace..." />;
@@ -35,10 +40,6 @@ export default function Messages() {
     );
   }
 
-  const viewModel = useMessagesViewModel();
-  const organizationId = bootstrap.organization?.id ?? null;
-  const organizationName = bootstrap.organization?.name ?? null;
-
   if (viewModel.loading) {
     return <PageLoader text="Preparing conversations..." />;
   }
@@ -56,10 +57,12 @@ export default function Messages() {
   }
 
   return (
-    <MessagesShell
-      viewModel={viewModel}
-      organizationId={organizationId}
-      organizationName={organizationName ?? undefined}
-    />
+    <ErrorBoundary fallbackRender={MessagesErrorFallback}>
+      <MessagesShell
+        viewModel={viewModel}
+        organizationId={organizationId}
+        organizationName={organizationName ?? undefined}
+      />
+    </ErrorBoundary>
   );
 }

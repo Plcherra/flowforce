@@ -32,7 +32,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AutoScheduleDialog } from './AutoScheduleDialog';
 import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@/lib/router-adapter';
 import { Skeleton } from '@/components/ui/skeleton';
 import { appEnv } from '@/lib/env';
 

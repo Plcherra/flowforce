@@ -54,42 +54,69 @@ export function useTaskNotifications() {
       return;
     }
 
-    const channel = supabase
-      .channel(`task-notifications-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'task_notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const notification = payload.new as TaskNotification;
-          toast({
-            title: notification.title,
-            description: notification.message,
-            duration: 5000,
-          });
-          invalidateNotifications();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'task_notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          invalidateNotifications();
-        }
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-  return () => {
-      supabase.removeChannel(channel);
+    try {
+      channel = supabase
+        .channel(`task-notifications-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'task_notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            try {
+              const notification = payload.new as TaskNotification;
+              toast({
+                title: notification.title,
+                description: notification.message,
+                duration: 5000,
+              });
+              invalidateNotifications();
+            } catch (error) {
+              const errorMessage = error instanceof Error 
+                ? error.message 
+                : typeof error === 'object' && error !== null && 'message' in error
+                  ? String(error.message)
+                  : 'Unknown error handling notification';
+              console.error('Error handling notification INSERT:', errorMessage, error);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'task_notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            try {
+              invalidateNotifications();
+            } catch (error) {
+              console.error('Error handling notification UPDATE:', error);
+            }
+          }
+        )
+        .subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            // Successfully subscribed
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            console.warn(`Task notifications subscription ${status}:`, err);
+          }
+        });
+    } catch (error) {
+      console.error('Error setting up task notifications subscription:', error);
+    }
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [user?.id, toast]);
 
@@ -105,9 +132,31 @@ export function useTaskNotifications() {
           setServiceError(null);
         }
       } catch (error) {
-        console.error('Error checking due tasks:', error);
+        // Handle various error types and extract meaningful messages
+        let errorMessage = 'Unable to check due tasks.';
+        
+        if (error instanceof Error) {
+          errorMessage = error.message || errorMessage;
+        } else if (error && typeof error === 'object') {
+          // Try to extract message from error object
+          if ('message' in error && typeof error.message === 'string') {
+            errorMessage = error.message;
+          } else if ('error' in error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if ('code' in error) {
+            errorMessage = `Error code: ${String(error.code)}`;
+          }
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        
+        // Only log if there's a meaningful error message
+        if (errorMessage !== 'Unable to check due tasks.' || error) {
+          console.error('Error checking due tasks:', errorMessage, error);
+        }
+        
         if (isMounted) {
-          setServiceError(error instanceof Error ? error.message : 'Unable to check due tasks.');
+          setServiceError(errorMessage);
         }
       }
     };

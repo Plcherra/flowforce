@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { createTicket, updateTicket, deleteTicket } from '@/repositories/ticketsRepository';
+import type { CreateTicketInput, UpdateTicketInput } from '@/repositories/ticketsRepository';
 
 export type HelpDeskTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 export type HelpDeskTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -44,6 +47,12 @@ export interface UseTicketsResult {
   error: string | null;
   refresh: () => Promise<void>;
   usingFallback: boolean;
+  createTicket: (input: CreateTicketInput) => Promise<HelpDeskTicket>;
+  updateTicket: (ticketId: string, updates: UpdateTicketInput) => Promise<HelpDeskTicket>;
+  deleteTicket: (ticketId: string) => Promise<void>;
+  creating: boolean;
+  updating: boolean;
+  deleting: boolean;
 }
 
 const DEFAULT_TICKET_STATUS: HelpDeskTicketStatus = 'open';
@@ -138,11 +147,51 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
     await fetchTickets();
   };
 
+  const createTicketMutation = useMutation({
+    mutationFn: async (input: CreateTicketInput) => {
+      return createTicket(input);
+    },
+    onSuccess: () => {
+      void refresh();
+    },
+  });
+
+  const updateTicketMutation = useMutation({
+    mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: UpdateTicketInput }) => {
+      if (!effectiveCompanyId) {
+        throw new Error('Company context required to update tickets');
+      }
+      return updateTicket(ticketId, effectiveCompanyId, updates);
+    },
+    onSuccess: () => {
+      void refresh();
+    },
+  });
+
+  const deleteTicketMutation = useMutation({
+    mutationFn: async (ticketId: string) => {
+      if (!effectiveCompanyId) {
+        throw new Error('Company context required to delete tickets');
+      }
+      return deleteTicket(ticketId, effectiveCompanyId);
+    },
+    onSuccess: () => {
+      void refresh();
+    },
+  });
+
   return {
     tickets,
     loading,
     error,
     refresh,
     usingFallback,
+    createTicket: createTicketMutation.mutateAsync,
+    updateTicket: (ticketId: string, updates: UpdateTicketInput) =>
+      updateTicketMutation.mutateAsync({ ticketId, updates }),
+    deleteTicket: deleteTicketMutation.mutateAsync,
+    creating: createTicketMutation.isPending,
+    updating: updateTicketMutation.isPending,
+    deleting: deleteTicketMutation.isPending,
   };
 }

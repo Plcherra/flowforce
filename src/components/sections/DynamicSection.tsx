@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useParams, Navigate, useNavigate } from 'react-router-dom';
+import { useParams, Navigate, useNavigate } from '@/lib/router-adapter';
 import { useCustomSections } from '@/hooks/useCustomSections';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 import CompanyUpdatesSection from './CompanyUpdatesSection';

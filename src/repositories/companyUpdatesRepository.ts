@@ -51,6 +51,12 @@ type DeleteUpdateParams = {
   updateId: string;
 };
 
+type UpdateUpdateParams = {
+  companyId: string;
+  updateId: string;
+  payload: Partial<Record<string, unknown>>;
+};
+
 type ReactionMutationParams = {
   companyId: string;
   updateId: string;
@@ -292,6 +298,21 @@ const updateStatus = async ({ companyId, updateId, status }: UpdateStatusParams)
   }
 };
 
+const updateUpdate = async ({ companyId, updateId, payload }: UpdateUpdateParams) => {
+  const { error } = await supabase
+    .from('company_updates')
+    .update({
+      ...payload,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('company_id', companyId)
+    .eq('id', updateId);
+
+  if (error) {
+    throw error;
+  }
+};
+
 const togglePin = async ({ companyId, updateId, isPinned }: TogglePinParams) => {
   const { error } = await supabase
     .from('company_updates')
@@ -368,6 +389,7 @@ export const companyUpdatesRepository = {
   listReactions,
   listComments,
   createUpdate,
+  updateUpdate,
   updateStatus,
   togglePin,
   deleteUpdate,

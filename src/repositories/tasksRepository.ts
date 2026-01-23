@@ -100,6 +100,11 @@ export async function fetchTasksByCompany(companyId: string): Promise<TaskWithRe
 }
 
 export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
+  // Ensure company_id is set for security
+  if (!taskData.company_id) {
+    throw new Error('company_id is required when creating a task');
+  }
+
   const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
 
   if (error) {
@@ -111,19 +116,38 @@ export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
 
 export async function updateTaskRow(
   id: string,
-  updates: Partial<Omit<TaskRow, 'id'>>
+  updates: Partial<Omit<TaskRow, 'id'>>,
+  companyId?: string | null
 ): Promise<TaskRow> {
-  const { data, error } = await supabase.from('tasks').update(updates).eq('id', id).select().single();
+  let query = supabase.from('tasks').update(updates).eq('id', id);
+  
+  // Add company_id filter if provided for security
+  if (companyId) {
+    query = query.eq('company_id', companyId);
+  }
+  
+  const { data, error } = await query.select().single();
 
   if (error) {
     throw error;
+  }
+  
+  if (!data) {
+    throw new Error('Task not found or access denied');
   }
 
   return taskRowSchema.parse(data);
 }
 
-export async function deleteTaskRow(id: string): Promise<void> {
-  const { error } = await supabase.from('tasks').delete().eq('id', id);
+export async function deleteTaskRow(id: string, companyId?: string | null): Promise<void> {
+  let query = supabase.from('tasks').delete().eq('id', id);
+  
+  // Add company_id filter if provided for security
+  if (companyId) {
+    query = query.eq('company_id', companyId);
+  }
+  
+  const { error } = await query;
 
   if (error) {
     throw error;

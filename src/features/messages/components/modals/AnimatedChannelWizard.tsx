@@ -97,6 +97,7 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
       const selectFields =
         'id, first_name, last_name, email, avatar_url, employment_status, role';
       const currentProfileId = profile?.id ?? currentUser?.id ?? null;
+      const companyId = profile?.companyId ?? profile?.company_id ?? null;
       const canIncludeSelf = ['admin', 'owner', 'company_admin', 'manager'].includes(
         (profile?.role ?? '').toLowerCase(),
       );
@@ -110,9 +111,16 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
       };
 
       try {
+        if (!companyId) {
+          console.warn('Company context required to load channel members');
+          setMemberOptions([]);
+          return;
+        }
+
         const { data: activeData, error: activeError } = await supabase
           .from('profiles')
           .select(selectFields)
+          .eq('company_id', companyId)
           .eq('employment_status', 'active')
           .order('first_name');
 
@@ -121,9 +129,11 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
         let visibleUsers = applyVisibility(activeData);
 
         if (visibleUsers.length === 0) {
+          // Fallback: still filter by company_id
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('profiles')
             .select(selectFields)
+            .eq('company_id', companyId)
             .order('first_name');
 
           if (fallbackError) throw fallbackError;

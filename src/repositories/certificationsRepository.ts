@@ -139,21 +139,31 @@ export async function fetchCompletedTasks(employeeId: string, companyId: string 
 }
 
 export async function fetchCompletedGoals(employeeId: string, companyId: string | null) {
-  const { data, error } = await supabase.from('goal_participants').select('goal_id').eq('user_id', employeeId);
+  // First get goal participants for the employee
+  const { data: participantsData, error: participantsError } = await supabase
+    .from('goal_participants')
+    .select('goal_id')
+    .eq('user_id', employeeId);
 
-  if (error) {
-    throw error;
+  if (participantsError) {
+    throw participantsError;
   }
 
-  const participants = goalParticipantSchema.array().parse(data ?? []);
+  const participants = goalParticipantSchema.array().parse(participantsData ?? []);
   const goalIds = participants.map((participant) => participant.goal_id);
 
   if (goalIds.length === 0) {
     return 0;
   }
 
-  let goalsQuery = supabase.from('goals').select('id').in('id', goalIds).eq('status', 'completed');
+  // Then filter goals by company_id and status
+  let goalsQuery = supabase
+    .from('goals')
+    .select('id')
+    .in('id', goalIds)
+    .eq('status', 'completed');
 
+  // Add company_id filter for tenant isolation
   if (companyId) {
     goalsQuery = goalsQuery.eq('company_id', companyId);
   }

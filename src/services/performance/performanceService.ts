@@ -479,6 +479,12 @@ export async function createPerformanceGoal(
     progress: 0,
     ...goal,
   };
+  
+  // Validate company_id is present for tenant isolation
+  if (!payload.company_id) {
+    throw new Error('company_id is required when creating a performance goal');
+  }
+  
   const { data, error } = await client.from('goals').insert(payload).select().single();
   if (error) throw new Error(`Failed to create performance goal: ${error.message}`);
   return data;
@@ -487,23 +493,34 @@ export async function createPerformanceGoal(
 export async function updatePerformanceGoal(
   id: Tables<'goals'>['id'],
   updates: TablesUpdate<'goals'>,
+  companyId?: string,
   client: SupabaseClient = supabase,
 ) {
-  const { data, error } = await client
-    .from('goals')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+  let query = client.from('goals').update(updates).eq('id', id);
+  
+  // Add company_id filter if provided for tenant isolation
+  if (companyId) {
+    query = query.eq('company_id', companyId);
+  }
+  
+  const { data, error } = await query.select().single();
   if (error) throw new Error(`Failed to update performance goal: ${error.message}`);
   return data;
 }
 
 export async function deletePerformanceGoal(
   id: Tables<'goals'>['id'],
+  companyId?: string,
   client: SupabaseClient = supabase,
 ) {
-  const { error } = await client.from('goals').delete().eq('id', id);
+  let query = client.from('goals').delete().eq('id', id);
+  
+  // Add company_id filter if provided for tenant isolation
+  if (companyId) {
+    query = query.eq('company_id', companyId);
+  }
+  
+  const { error } = await query;
   if (error) throw new Error(`Failed to delete performance goal: ${error.message}`);
 }
 
@@ -634,7 +651,7 @@ export async function simulatePerformanceCrud(
       status: 'active',
       target_completion_date: referenceDate.add(30, 'day').format('YYYY-MM-DD'),
     };
-    const updatedGoal = await updatePerformanceGoal(createdGoal.id, goalUpdates, client);
+    const updatedGoal = await updatePerformanceGoal(createdGoal.id, goalUpdates, companyId, client);
 
     snapshots.postUpdate = await fetchPerformanceDataset(client);
 
@@ -646,7 +663,7 @@ export async function simulatePerformanceCrud(
       createdResources.participant = undefined;
     }
 
-    await deletePerformanceGoal(createdGoal.id, client);
+    await deletePerformanceGoal(createdGoal.id, companyId, client);
     createdResources.goal = undefined;
 
     snapshots.postCleanup = await fetchPerformanceDataset(client);
@@ -684,7 +701,7 @@ export async function simulatePerformanceCrud(
 
     if (createdResources.goal) {
       try {
-        await deletePerformanceGoal(createdResources.goal.id, client);
+        await deletePerformanceGoal(createdResources.goal.id, companyId, client);
       } catch {
         /* ignore cleanup failures */
       }

@@ -50,7 +50,8 @@ interface MessagesViewModelState {
   handleThreadMessage: (message: ThreadMessage) => void;
   handleDeleteChannel: (channelId: string) => Promise<void>;
   handleChannelUpdated: () => Promise<void>;
-  handleDeleteMessage: (messageId: string) => Promise<void>;
+    handleUpdateMessage: (messageId: string, content: string) => Promise<void>;
+    handleDeleteMessage: (messageId: string) => Promise<void>;
   sidebarWidth: number;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   activeFilter: FilterType;
@@ -82,7 +83,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const location = useLocation();
   const params = useParams<{ filter?: string }>();
   const { deleteChannel: deleteChannelAction, updateLastRead: updateLastReadAction } = useChannelActions();
-  const { sendMessage: sendMessageAction, deleteMessage: deleteMessageAction } = useMessageActions();
+  const { sendMessage: sendMessageAction, deleteMessage: deleteMessageAction, updateMessage: updateMessageAction } = useMessageActions();
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -274,6 +275,18 @@ export function useMessagesViewModel(): MessagesViewModelState {
     await refetchChannels();
   }, [refetchChannels]);
 
+  const handleUpdateMessage = useCallback(
+    async (messageId: string, content: string): Promise<void> => {
+      try {
+        await updateMessageAction(messageId, content);
+        await refetchMessages();
+      } catch {
+        // toast handled inside action
+      }
+    },
+    [updateMessageAction, refetchMessages],
+  );
+
   const handleDeleteMessage = useCallback(
     async (messageId: string): Promise<void> => {
       try {
@@ -342,6 +355,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
     profile,
     handleDeleteChannel,
     handleChannelUpdated,
+    handleUpdateMessage,
     handleDeleteMessage,
   };
 }

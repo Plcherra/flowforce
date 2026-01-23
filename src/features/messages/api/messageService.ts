@@ -10,6 +10,10 @@ export async function sendMessage(
   return messagesRepository.insertMessage(channelId, senderId, content, options);
 }
 
+export async function updateMessage(messageId: string, senderId: string, content: string) {
+  return messagesRepository.updateMessage(messageId, senderId, content);
+}
+
 export async function deleteMessage(messageId: string, senderId: string) {
   await messagesRepository.deleteMessage(messageId, senderId);
 }

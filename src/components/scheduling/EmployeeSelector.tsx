@@ -7,6 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Check, Plus, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useScheduling } from '@/contexts/SchedulingContext';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
 
@@ -20,23 +21,48 @@ export function EmployeeSelector({ shiftId, selectedEmployees = [] }: EmployeeSe
   const {
     mutations: { assign: assignUserToShift, unassign: unassignUserFromShift },
   } = useScheduling();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
 
   const handleAssignEmployee = async (employeeId: string) => {
     try {
-      await assignUserToShift(shiftId, employeeId);
-      setOpen(false);
+      const success = await assignUserToShift(shiftId, employeeId);
+      if (success) {
+        setOpen(false);
+        toast({
+          title: 'Employee assigned',
+          description: 'Employee has been assigned to this shift.',
+        });
+      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to assign employee';
       console.error('Error assigning employee:', error);
+      toast({
+        title: 'Assignment failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
   const handleUnassignEmployee = async (employeeId: string) => {
     try {
-      await unassignUserFromShift(shiftId, employeeId);
+      const success = await unassignUserFromShift(shiftId, employeeId);
+      if (success) {
+        toast({
+          title: 'Employee unassigned',
+          description: 'Employee has been removed from this shift.',
+        });
+      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to unassign employee';
       console.error('Error unassigning employee:', error);
+      toast({
+        title: 'Unassignment failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 

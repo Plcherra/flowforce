@@ -1,6 +1,7 @@
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'blocked' | 'done' | 'cancelled' | 'completed';
 
-export const TASK_STATUS_FLOW: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
+// Use 'completed' instead of 'done' to match database enum
+export const TASK_STATUS_FLOW: TaskStatus[] = ['todo', 'in_progress', 'review', 'completed'];
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   todo: 'To Do',

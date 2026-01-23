@@ -21,6 +21,7 @@ import { usePositions } from '@/hooks/usePositions';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { parse, differenceInMinutes } from 'date-fns';
 import { DetailsTab } from './shift-wizard/DetailsTab';
@@ -75,6 +76,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
   const [activeTab, setActiveTab] = useState('details');
   const [formData, setFormData] = useState<ShiftWizardFormData>(() => createDefaultFormState(selectedDate));
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -170,12 +172,24 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
     const assignments = formData.assigned_users ?? [];
     if (assignments.length === 0) return;
 
+    const errors: string[] = [];
     for (const userId of assignments) {
       try {
-        await assign(shiftId, userId);
+        const success = await assign(shiftId, userId);
+        if (!success) {
+          errors.push(`Failed to assign user ${userId}`);
+        }
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to assign user to shift';
         console.error('Failed to assign user to shift', err);
+        errors.push(errorMessage);
       }
+    }
+    
+    if (errors.length > 0) {
+      // Note: Individual assignment errors are already shown via toast in the assign function
+      // This is just a summary if multiple assignments fail
+      console.warn('Some user assignments failed', errors);
     }
   };
 
@@ -224,9 +238,20 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
         await refetchAll();
         onOpenChange?.(false);
         resetForm();
+        
+        toast({
+          title: 'Shift created',
+          description: `Shift "${formData.title || 'Untitled'}" has been ${publish ? 'published' : 'saved as draft'}.`,
+        });
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create shift';
       console.error('Failed to create shift', err);
+      toast({
+        title: 'Shift creation failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }

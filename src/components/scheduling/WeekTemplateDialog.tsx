@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWeekTemplates } from '@/hooks/scheduling/useWeekTemplates';
+import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { Save, Calendar, Eye } from 'lucide-react';
 
@@ -40,6 +41,7 @@ const getTemplateShiftCount = (template: WeekTemplateRecord): number => {
 
 export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTemplateDialogProps) {
   const { templates: weekTemplates } = useWeekTemplates();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('load');
   const [loading, setLoading] = useState(false);
   
@@ -75,8 +77,19 @@ export function WeekTemplateDialog({ open, onOpenChange, selectedDate }: WeekTem
 
       setNewTemplate({ name: '', description: '' });
       setActiveTab('load');
+      
+      toast({
+        title: 'Template creation not yet available',
+        description: 'Week template creation is coming soon. This feature is not yet implemented.',
+      });
     } catch (error) {
-      // Error saving template
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save template';
+      logger.error('Error saving template', { error, context: { name: newTemplate.name } });
+      toast({
+        title: 'Error saving template',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }

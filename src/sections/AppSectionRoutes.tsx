@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@/lib/router-adapter';
 import { sections } from './registry';
 
 // Statically map section pages without relying on build-time globbing

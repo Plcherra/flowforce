@@ -13,6 +13,8 @@ import FormLivePreview from '@/components/forms/editor/FormLivePreview';
 import type { FormField } from '@/types/forms';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import ErrorBoundary from '@/components/ui/error-boundary';
+import { FormsErrorFallback } from '@/components/ui/feature-error-fallbacks';
 
 interface FormBuilderDialogProps {
   open: boolean;
@@ -223,25 +225,26 @@ export default function FormBuilderDialog({
           </div>
         </DialogHeader>
 
-        <div className="relative flex flex-1 flex-col">
-          <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 overflow-hidden">
-            <ResizablePanel
-              defaultSize={20}
-              minSize={15}
-              maxSize={25}
-              className="flex min-h-0 min-w-[220px] flex-col"
-            >
-              <FormFieldLibrary onAddField={handleAddTemplate} />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50} minSize={40} className="flex min-h-0 flex-col">
-              <FormEditorPanel />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={30} minSize={25} className="flex min-h-0 flex-col">
-              <FormLivePreview />
-            </ResizablePanel>
-          </ResizablePanelGroup>
+        <ErrorBoundary fallbackRender={FormsErrorFallback}>
+          <div className="relative flex flex-1 flex-col">
+            <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 overflow-hidden">
+              <ResizablePanel
+                defaultSize={20}
+                minSize={15}
+                maxSize={25}
+                className="flex min-h-0 min-w-[220px] flex-col"
+              >
+                <FormFieldLibrary onAddField={handleAddTemplate} />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={50} minSize={40} className="flex min-h-0 flex-col">
+                <FormEditorPanel />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={30} minSize={25} className="flex min-h-0 flex-col">
+                <FormLivePreview />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           {loading && (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/70">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -250,7 +253,8 @@ export default function FormBuilderDialog({
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </ErrorBoundary>
 
         <div className="flex flex-shrink-0 items-center justify-between border-t bg-muted/40 px-6 py-4">
           <div className="flex flex-col text-xs text-muted-foreground">

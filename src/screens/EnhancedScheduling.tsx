@@ -1,9 +1,9 @@
-
 import { NextGenSchedulingSystem } from '@/components/scheduling/NextGenSchedulingSystem';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@/lib/router-adapter';
 import { SchedulingProvider } from '@/contexts/SchedulingContext';
+import ErrorBoundary from '@/components/ui/error-boundary';
+import { SchedulingErrorFallback } from '@/components/ui/feature-error-fallbacks';
 
 export default function EnhancedScheduling() {
   const isMobile = useIsMobile();
@@ -11,12 +11,14 @@ export default function EnhancedScheduling() {
   const locationFilter = params.get('location') || undefined;
 
   return (
-    <SchedulingProvider>
-      <div>
-        <div className={isMobile ? 'p-2' : 'p-6'}>
-          <NextGenSchedulingSystem locationFilter={locationFilter} />
+    <ErrorBoundary fallbackRender={SchedulingErrorFallback}>
+      <SchedulingProvider>
+        <div>
+          <div className={isMobile ? 'p-2' : 'p-6'}>
+            <NextGenSchedulingSystem locationFilter={locationFilter} />
+          </div>
         </div>
-      </div>
-    </SchedulingProvider>
+      </SchedulingProvider>
+    </ErrorBoundary>
   );
 }

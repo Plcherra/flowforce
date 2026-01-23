@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { AuthError, UserMetadata } from '@/types/common';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/config';
 
 interface AuthContextType {
   user: User | null;
@@ -89,9 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Check if Supabase is configured
-      const supabaseUrl = (supabase as any).supabaseUrl || '';
-      if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+      // Check if Supabase is configured by checking the config values
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY || 
+          SUPABASE_URL.includes('placeholder') || 
+          SUPABASE_ANON_KEY.includes('placeholder')) {
         const error = {
           message: 'Supabase is not configured. Please create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for details.',
         };

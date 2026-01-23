@@ -9,10 +9,28 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Restrict CORS to trusted origins only
+const getAllowedOrigin = (origin: string | null): string => {
+  // In production, replace with your actual frontend domain(s)
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    // Add your production domains here
+    // 'https://yourdomain.com',
+  ];
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    return origin;
+  }
+  // Default to first allowed origin or deny if none match
+  return allowedOrigins[0] || '';
 };
+
+const corsHeaders = (origin: string | null) => ({
+  'Access-Control-Allow-Origin': getAllowedOrigin(origin),
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+});
 
 const requestSchema = z.object({
   type: z.enum(['dashboard', 'scheduler', 'expenses', 'reports', 'chat']),
@@ -236,8 +254,11 @@ async function buildAnalysisData(
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('Origin');
+  const headers = corsHeaders(origin);
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   try {
@@ -307,15 +328,18 @@ serve(async (req) => {
     const aiResponse = await response.json();
     const insights = aiResponse.choices[0].message.content;
 
-    return new Response(JSON.stringify({ insights, data: analysisData }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Don't return raw data - only return insights to prevent data exfiltration
+    return new Response(JSON.stringify({ insights }), {
+      headers: { ...headers, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in ai-insights function:', error);
     const status = (error as { status?: number }).status ?? 500;
+    const origin = req.headers.get('Origin');
+    const headers = corsHeaders(origin);
     return new Response(JSON.stringify({ error: error.message }), {
       status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...headers, 'Content-Type': 'application/json' },
     });
   }
 });

@@ -2,7 +2,8 @@ import React, { useRef, useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { MessageCircle, Trash2, Edit2, Check, X } from 'lucide-react';
 import { MessageReactions } from './MessageReactions';
 import { format } from 'date-fns';
 import type { Message, ThreadMessage } from '@/types/messages';
@@ -24,16 +25,35 @@ interface MessagesListProps {
   onThreadMessage: (message: ThreadMessage) => void;
   currentUserId: string | null;
   onDeleteMessage: (messageId: string) => Promise<void>;
+  onUpdateMessage?: (messageId: string, content: string) => Promise<void>;
+  channelMembers?: Array<{ user_id: string; last_read_at: string | null }>;
 }
 
-export function MessagesList({ messages, loading, onThreadMessage, currentUserId, onDeleteMessage }: MessagesListProps) {
+export function MessagesList({ messages, loading, onThreadMessage, currentUserId, onDeleteMessage, onUpdateMessage, channelMembers = [] }: MessagesListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagePendingDelete, setMessagePendingDelete] = useState<Message | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleSaveEdit = async (messageId: string) => {
+    if (!onUpdateMessage || !editContent.trim()) return;
+    setUpdating(true);
+    try {
+      await onUpdateMessage(messageId, editContent.trim());
+      setEditingMessageId(null);
+      setEditContent('');
+    } catch (error) {
+      console.error('Failed to update message:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -82,6 +102,18 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
               ? [replyProfile.first_name, replyProfile.last_name].filter(Boolean).join(' ').trim() || 'a teammate'
               : 'a teammate';
 
+            // Calculate read receipts
+            const messageTime = createdAt ? createdAt.getTime() : 0;
+            const readBy = channelMembers
+              .filter((member) => {
+                if (member.user_id === message.sender_id) return false; // Don't show sender as read
+                if (!member.last_read_at) return false;
+                const readTime = new Date(member.last_read_at).getTime();
+                return readTime >= messageTime;
+              })
+              .map((m) => m.user_id);
+            const unreadCount = channelMembers.length - readBy.length - 1; // -1 for sender
+
             return (
               <div
                 key={message.id}
@@ -104,44 +136,118 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                       </p>
                     </div>
                   )}
-                  <p className="mt-1 text-sm text-foreground">{message.content}</p>
+                  
+                  {/* Message Content - Edit or Display */}
+                  {editingMessageId === message.id ? (
+                    <div className="mt-2 space-y-2">
+                      <Input
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSaveEdit(message.id);
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingMessageId(null);
+                            setEditContent('');
+                          }
+                        }}
+                        autoFocus
+                        className="text-sm"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSaveEdit(message.id)}
+                          disabled={updating || !editContent.trim()}
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingMessageId(null);
+                            setEditContent('');
+                          }}
+                          disabled={updating}
+                        >
+                          <X className="h-3 w-3 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-sm text-foreground">
+                        {message.content}
+                        {message.edited_at && (
+                          <span className="ml-2 text-xs text-muted-foreground italic">(edited)</span>
+                        )}
+                      </p>
 
-                  {/* Message Actions */}
-                  <div className="mt-2 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={`Open thread for message from ${displayName}`}
-                      onClick={() => {
-                        onThreadMessage({
-                          id: message.id,
-                          content: message.content,
-                          sender: {
-                            id: message.sender_id,
-                            name: displayName,
-                            avatar: senderProfile.avatar_url ?? undefined,
-                          },
-                          createdAt: createdAt ?? new Date(),
-                          replyCount: 0,
-                        });
-                      }}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                    {message.sender_id === currentUserId && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Delete message"
-                        onClick={() => setMessagePendingDelete(message)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                      {/* Message Actions */}
+                      <div className="mt-2 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={`Open thread for message from ${displayName}`}
+                          onClick={() => {
+                            onThreadMessage({
+                              id: message.id,
+                              content: message.content,
+                              sender: {
+                                id: message.sender_id,
+                                name: displayName,
+                                avatar: senderProfile.avatar_url ?? undefined,
+                              },
+                              createdAt: createdAt ?? new Date(),
+                              replyCount: 0,
+                            });
+                          }}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                        {message.sender_id === currentUserId && onUpdateMessage && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Edit message"
+                            onClick={() => {
+                              setEditingMessageId(message.id);
+                              setEditContent(message.content);
+                            }}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {message.sender_id === currentUserId && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label="Delete message"
+                            onClick={() => setMessagePendingDelete(message)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   {/* Message Reactions */}
                   <MessageReactions messageId={message.id} className="mt-2" />
+
+                  {/* Read Receipts */}
+                  {readBy.length > 0 && (
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <span>Read by {readBy.length}</span>
+                      {unreadCount > 0 && <span>• {unreadCount} unread</span>}
+                    </div>
+                  )}
                 </div>
               </div>
             );

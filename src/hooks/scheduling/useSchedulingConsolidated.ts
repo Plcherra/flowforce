@@ -129,9 +129,13 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     if (!schedulesQuery.error || !range.start) {
       return;
     }
-    const message = schedulesQuery.error instanceof Error ? schedulesQuery.error.message : DEFAULT_ERROR;
-    console.error('Failed to load scheduling data, using fallback data.', schedulesQuery.error);
-    setError(message);
+    const errorMessage = schedulesQuery.error instanceof Error 
+      ? schedulesQuery.error.message 
+      : typeof schedulesQuery.error === 'object' && schedulesQuery.error !== null && 'message' in schedulesQuery.error
+        ? String(schedulesQuery.error.message)
+        : DEFAULT_ERROR;
+    console.error('Failed to load scheduling data, using fallback data.', errorMessage, schedulesQuery.error);
+    setError(errorMessage);
     const fallback = buildSchedulingFallbackData({ start: range.start });
     setShifts(fallback.shifts);
     setAssignments(fallback.assignments);

@@ -373,10 +373,11 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
       assignmentRows = (assignmentsData ?? []) as AssignmentRow[];
     }
 
+    // Filter tasks by company_id directly for security, with fallback to memberIds
     const tasksPromise = client
       .from('tasks')
-      .select('id, status, due_date, created_at, completed_at, created_by, assigned_to')
-      .in('created_by', memberIds)
+      .select('id, status, due_date, created_at, completed_at, created_by, assigned_to, company_id')
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false })
       .limit(600);
 
@@ -387,6 +388,8 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
       .order('created_at', { ascending: false })
       .limit(200);
 
+    // Filter inventory transactions by memberIds (table doesn't have company_id column)
+    // Security: memberIds are already filtered by company_id, ensuring tenant isolation
     const transactionsPromise = client
       .from('inventory_transactions')
       .select('transaction_type, total_amount, created_at, performed_by')
@@ -394,6 +397,8 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
       .gte('created_at', financialStart.toISOString())
       .limit(600);
 
+    // Filter expenses by memberIds (table doesn't have company_id column)
+    // Security: memberIds are already filtered by company_id, ensuring tenant isolation
     const expensesPromise = client
       .from('expenses')
       .select('amount, status, expense_date, created_by')

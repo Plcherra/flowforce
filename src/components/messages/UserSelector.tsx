@@ -60,6 +60,7 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
     setLoading(true);
     const includeSelf = currentProfile?.role === 'admin';
     const currentProfileId = currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
+    const companyId = currentProfile?.companyId ?? currentProfile?.company_id ?? null;
     const selectFields =
       'id, first_name, last_name, email, avatar_url, employment_status, role';
 
@@ -72,20 +73,29 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
     };
 
     try {
-      const { data: activeData, error: activeError } = await supabase
+      if (!companyId) {
+        throw new Error('Company context required to load users');
+      }
+
+      let query = supabase
         .from('profiles')
         .select(selectFields)
+        .eq('company_id', companyId)
         .eq('employment_status', 'active')
         .order('first_name');
+
+      const { data: activeData, error: activeError } = await query;
 
       if (activeError) throw activeError;
 
       let visibleUsers = applySelfVisibility(activeData);
 
       if (visibleUsers.length === 0) {
+        // Fallback: still filter by company_id
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('profiles')
           .select(selectFields)
+          .eq('company_id', companyId)
           .order('first_name');
 
         if (fallbackError) throw fallbackError;

@@ -16,8 +16,8 @@ export async function updateChannel(channelId: string, payload: Partial<Pick<Mes
   if (error) throw error;
 }
 
-export async function deleteChannel(channelId: string, userId: string) {
-  await messagesRepository.deleteChannel(channelId, userId);
+export async function deleteChannel(channelId: string, userId: string, companyId?: string | null) {
+  await messagesRepository.deleteChannel(channelId, userId, companyId);
 }
 
 export async function createChannel(channelData: CreateChannelData, ownerId: string) {

@@ -136,20 +136,41 @@ async function ensureChannelMembership(channelId: string, userId: string) {
   }
 }
 
-async function listChannels(userId: string): Promise<MessageChannel[]> {
-  const { data, error } = await supabase
+async function listChannels(userId: string, companyId?: string | null): Promise<MessageChannel[]> {
+  let query = supabase
     .from('message_channels')
     .select(`
       *,
-      created_profile:profiles!created_by(first_name, last_name),
+      created_profile:profiles!created_by(first_name, last_name, company_id),
       department:departments(name),
       channel_members!inner(user_id, role, last_read_at)
     `)
-    .eq('channel_members.user_id', userId)
-    .order('updated_at', { ascending: false });
+    .eq('channel_members.user_id', userId);
+  
+  // Filter by creator's company_id if provided for additional security
+  // Note: message_channels table doesn't have company_id column, so we filter via creator's profile
+  if (companyId) {
+    query = query.eq('created_profile.company_id', companyId);
+  }
+  
+  query = query.order('updated_at', { ascending: false });
+
+  const { data, error } = await query;
 
   if (error) throw error;
   const parsed = MessageChannelSchema.array().parse(data ?? []);
+  
+  // Additional client-side filtering as safety net
+  if (companyId) {
+    const filtered = parsed.filter((channel) => {
+      // Type-safe access to created_profile company_id
+      const createdProfile = channel.created_profile as { company_id?: string } | undefined;
+      const creatorCompanyId = createdProfile?.company_id;
+      return creatorCompanyId === companyId;
+    });
+    return filtered as MessageChannel[];
+  }
+  
   return parsed as MessageChannel[];
 }
 
@@ -289,6 +310,38 @@ async function insertMessage(
   return normalized as Message;
 }
 
+async function updateMessage(messageId: string, senderId: string, content: string): Promise<Message> {
+  const { data, error } = await supabase
+    .from('messages')
+    .update({
+      content,
+      edited_at: new Date().toISOString(),
+    })
+    .eq('id', messageId)
+    .eq('sender_id', senderId)
+    .select(`
+      *,
+      sender_profile:profiles!sender_id(first_name, last_name, avatar_url),
+      reply_to_message:messages!reply_to_id(
+        content,
+        sender_profile:profiles!sender_id(first_name, last_name)
+      )
+    `)
+    .single();
+
+  if (error) throw error;
+  const parsed = RawMessageSchema.parse(data);
+  const normalized = {
+    ...parsed,
+    attachments: parsed.attachments ?? [],
+    reply_to_message: Array.isArray(parsed.reply_to_message)
+      ? parsed.reply_to_message[0] ?? null
+      : parsed.reply_to_message ?? null,
+  };
+
+  return normalized as Message;
+}
+
 async function deleteMessage(messageId: string, senderId: string) {
   const { error } = await supabase
     .from('messages')
@@ -374,8 +427,30 @@ async function removeMember(memberId: string) {
   if (error) throw error;
 }
 
-async function deleteChannel(channelId: string, userId: string) {
+async function deleteChannel(channelId: string, userId: string, companyId?: string | null) {
   await ensureChannelMembership(channelId, userId);
+  
+  // Verify company_id for tenant isolation if provided
+  if (companyId) {
+    const { data: channelData, error: channelError } = await supabase
+      .from('message_channels')
+      .select('created_by, created_profile:profiles!created_by(company_id)')
+      .eq('id', channelId)
+      .maybeSingle();
+    
+    if (channelError) throw channelError;
+    if (!channelData) {
+      throw new Error('Channel not found');
+    }
+    
+    const createdProfile = channelData.created_profile as { company_id?: string } | undefined;
+    const creatorCompanyId = createdProfile?.company_id;
+    
+    if (creatorCompanyId !== companyId) {
+      throw new Error('Forbidden: Cannot delete channel from another company');
+    }
+  }
+  
   const { error: messagesError } = await supabase.from('messages').delete().eq('channel_id', channelId);
   if (messagesError) throw messagesError;
 
@@ -393,6 +468,7 @@ export const messagesRepository = {
   updateLastRead,
   listMessages,
   insertMessage,
+  updateMessage,
   searchMessages,
   listChannelMembers,
   updateMemberRole,

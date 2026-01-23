@@ -34,9 +34,10 @@ const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow['status']>> = {
 export const TASK_STATUS_TRANSITIONS = {
   todo: ['in_progress', 'cancelled'],
   in_progress: ['review', 'blocked', 'cancelled', 'todo'],
-  review: ['done', 'todo', 'cancelled'],
+  review: ['completed', 'todo', 'cancelled'], // Use 'completed' instead of 'done'
   blocked: ['in_progress', 'cancelled'],
-  done: [],
+  done: [], // Keep for backward compatibility but prefer 'completed'
+  completed: [], // Final state
   cancelled: ['todo'],
 } as const;
 
@@ -74,6 +75,7 @@ export function useTasks() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [tasksError, setTasksError] = useState<string | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
 
   const tasksQuery = useQuery({
     queryKey: ['tasks', user?.id],
@@ -81,11 +83,12 @@ export function useTasks() {
     staleTime: 60_000,
     queryFn: async () => {
       if (!user) return [];
-      const companyId = await fetchCompanyIdForUser(user.id);
-      if (!companyId) {
+      const fetchedCompanyId = await fetchCompanyIdForUser(user.id);
+      if (!fetchedCompanyId) {
         throw new Error('No company context found for the current profile.');
       }
-      return fetchTasksByCompany(companyId);
+      setCompanyId(fetchedCompanyId);
+      return fetchTasksByCompany(fetchedCompanyId);
     },
   });
 
@@ -110,9 +113,14 @@ export function useTasks() {
 
   const createTask = async (taskData: TaskInsert) => {
     try {
+      if (!companyId) {
+        throw new Error('Company context required to create tasks');
+      }
+
       const normalizedTaskData: TaskInsert = {
         ...taskData,
         goal_id: taskData.goal_id ?? null,
+        company_id: taskData.company_id ?? companyId, // Ensure company_id is set
       };
 
       const createdTask = await insertTask(normalizedTaskData);
@@ -125,8 +133,9 @@ export function useTasks() {
       await invalidateTasks();
       return { data: createdTask, error: null };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create task';
       console.error('Error creating task:', error);
-      return { data: null, error };
+      return { data: null, error: errorMessage };
     }
   };
 
@@ -136,8 +145,12 @@ export function useTasks() {
   ) => {
     try {
       const previousTask = tasks.find((task) => task.id === id);
+      
+      if (!companyId) {
+        throw new Error('Company context required to update tasks');
+      }
 
-      const updatedTask = await updateTaskRow(id, updates);
+      const updatedTask = await updateTaskRow(id, updates, companyId);
 
       const previousGoalId = previousTask?.goal_id ?? null;
       const newGoalId = updatedTask.goal_id ?? null;
@@ -164,8 +177,12 @@ export function useTasks() {
     try {
       const taskToDelete = tasks.find((task) => task.id === id);
       const goalId = taskToDelete?.goal_id ?? null;
+      
+      if (!companyId) {
+        throw new Error('Company context required to delete tasks');
+      }
 
-      await deleteTaskRow(id);
+      await deleteTaskRow(id, companyId);
 
       if (goalId) {
         await syncGoalProgress(goalId);
@@ -232,7 +249,8 @@ export function useTasks() {
     const statusForWrite = (STATUS_WRITE_TARGET[nextStatus] ?? nextStatus) as TaskRow['status'];
     const updates: Partial<TaskRow> = {
       status: statusForWrite,
-      completed_at: nextStatus === 'done' ? new Date().toISOString() : null,
+      // Set completed_at when status is 'completed' (or 'done' for backward compatibility)
+      completed_at: (nextStatus === 'completed' || nextStatus === 'done') ? new Date().toISOString() : null,
     };
 
     return updateTask(taskId, updates);

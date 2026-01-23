@@ -9,11 +9,14 @@ import { useCompanyUpdateComments } from '@/features/company-updates/hooks/useCo
 import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
 import { UpdatesTableView } from './updates/UpdatesTableView';
 import { UpdatesFeedView } from './updates/UpdatesFeedView';
+import { EditUpdateDialog } from '@/features/company-updates/components/EditUpdateDialog';
 import type { CompanyUpdate } from '@/types/companyUpdates';
 
 export default function CompanyUpdatesSection() {
   const { can } = useCan();
   const [viewMode, setViewMode] = useState<'table' | 'feed'>('table');
+  const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { updates, loading } = useCompanyUpdates();
   const { commentsByUpdate } = useCompanyUpdateComments(updates.map((update) => update.id));
   const comments = useMemo(
@@ -28,8 +31,8 @@ export default function CompanyUpdatesSection() {
   };
 
   const handleEdit = (update: CompanyUpdate) => {
-    // TODO: Open edit update dialog
-    logger.debug('Edit update', { context: { updateId: update.id } });
+    setEditingUpdate(update);
+    setEditDialogOpen(true);
   };
 
   const handleView = (updateId: string) => {
@@ -142,6 +145,21 @@ export default function CompanyUpdatesSection() {
           )}
         </div>
       </div>
+
+      <EditUpdateDialog
+        open={editDialogOpen}
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) {
+            setEditingUpdate(null);
+          }
+        }}
+        update={editingUpdate}
+        onUpdateComplete={() => {
+          setEditDialogOpen(false);
+          setEditingUpdate(null);
+        }}
+      />
     </div>
   );
 }

@@ -213,6 +213,7 @@ function ConversationColumn({ vm }: MessagesSubSectionProps) {
         onToggleAvailable={vm.handleAvailabilityChange}
         currentUserId={vm.profile?.id ?? null}
         onDeleteMessage={vm.handleDeleteMessage}
+        onUpdateMessage={vm.handleUpdateMessage}
       />
     </motion.div>
   );
@@ -317,6 +318,9 @@ function MobileLayout({ vm }: MessagesSubSectionProps) {
           onThreadMessage={vm.handleThreadMessage}
           onShowCreateDialog={() => vm.setShowCreateDialog(true)}
           isMobile={vm.isMobile}
+          currentUserId={vm.profile?.id ?? null}
+          onDeleteMessage={vm.handleDeleteMessage}
+          onUpdateMessage={vm.handleUpdateMessage}
           showMobileSidebar={vm.showMobileSidebar}
           onToggleMobileSidebar={() => vm.setShowMobileSidebar((prev) => !prev)}
           canShowAvailability={vm.canToggleAvailability}

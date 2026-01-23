@@ -1,12 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LifeBuoy, RefreshCw, AlertCircle, X } from 'lucide-react';
+import { LifeBuoy, RefreshCw, AlertCircle, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTickets } from '@/hooks/useTickets';
+import { CreateTicketDialog } from '@/features/helpdesk/components/CreateTicketDialog';
 
 interface HelpDeskPanelProps {
   companyId?: string | null;
@@ -30,6 +31,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDeskPanelProps) {
   const hasCompany = Boolean(companyId);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { tickets, loading, error, refresh, usingFallback } = useTickets({
     companyId: companyId ?? undefined,
     enabled: hasCompany,
@@ -65,6 +67,15 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          className="gap-2"
+          onClick={() => setCreateDialogOpen(true)}
+          disabled={!hasCompany}
+        >
+          <Plus className="h-4 w-4" />
+          New Ticket
+        </Button>
         <Button
           size="sm"
           variant="outline"
@@ -111,7 +122,11 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
                 <motion.div
                   key={ticket.id}
                   layout
-                  className="rounded-2xl border border-border/70 bg-background/80 p-3"
+                  className="rounded-2xl border border-border/70 bg-background/80 p-3 cursor-pointer hover:bg-background/90 transition-colors"
+                  onClick={() => {
+                    // Could open ticket details dialog here if needed
+                    window.location.href = '/app/help-desk';
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold">{ticket.subject}</p>
@@ -137,6 +152,12 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
           </ScrollArea>
         )}
       </div>
+
+      <CreateTicketDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onTicketCreated={refresh}
+      />
     </div>
   );
 }

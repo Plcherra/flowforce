@@ -210,10 +210,15 @@ export function useGoals(options: UseGoalsOptions = {}) {
       if (!id) {
         throw new Error('Goal id is required for updates.');
       }
+      const companyId = normalizedFilters.companyId;
+      if (!companyId) {
+        throw new Error('Company context required to update goals.');
+      }
       const { error } = await supabase
         .from('goals')
         .update(updates)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
       if (error) {
         throw new Error(error.message ?? 'Failed to update goal');
       }
@@ -226,7 +231,15 @@ export function useGoals(options: UseGoalsOptions = {}) {
       if (!id) {
         throw new Error('Goal id is required for deletion.');
       }
-      const { error } = await supabase.from('goals').delete().eq('id', id);
+      const companyId = normalizedFilters.companyId;
+      if (!companyId) {
+        throw new Error('Company context required to delete goals.');
+      }
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id)
+        .eq('company_id', companyId);
       if (error) {
         throw new Error(error.message ?? 'Failed to delete goal');
       }

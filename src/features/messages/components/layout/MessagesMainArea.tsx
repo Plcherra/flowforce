@@ -25,6 +25,7 @@ interface MessagesMainAreaProps {
   onToggleAvailable?: (v: boolean) => Promise<void> | void;
   currentUserId: string | null;
   onDeleteMessage: (messageId: string) => Promise<void>;
+  onUpdateMessage?: (messageId: string, content: string) => Promise<void>;
 }
 
 export function MessagesMainArea({
@@ -47,6 +48,7 @@ export function MessagesMainArea({
   onToggleAvailable,
   currentUserId,
   onDeleteMessage,
+  onUpdateMessage,
 }: MessagesMainAreaProps) {
   if (!channel) {
     return (
@@ -88,6 +90,8 @@ export function MessagesMainArea({
         onThreadMessage={onThreadMessage}
         currentUserId={currentUserId}
         onDeleteMessage={onDeleteMessage}
+        onUpdateMessage={onUpdateMessage}
+        channelMembers={channel?.channel_members ?? []}
       />
 
       <MessageInput

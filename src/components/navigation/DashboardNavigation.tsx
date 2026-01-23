@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@/lib/router-adapter';
 import { useSidebar } from '@/components/ui/sidebar';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { useTranslation } from 'react-i18next';

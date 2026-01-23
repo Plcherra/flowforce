@@ -5,35 +5,52 @@ import { detectIssues } from '../_server/ops/issues/detectIssues';
 import { supabaseAdmin } from '../_server/supabaseAdmin';
 import { generateAutoPlanForOrg } from '../_server/ops/detectors/autoPlanBuilder';
 import { createServerLogger } from '../_server/utils/logger';
+import { verifyCronRequest } from '@/lib/cron/verifyCron';
+import type { Tables } from '@/integrations/supabase/public-types';
 
 export const dynamic = 'force-dynamic';
+
+interface OrganizationRow {
+  id: string;
+}
+
+const toPlainHeaders = (headers: Headers) => {
+  const plain: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    plain[key] = value;
+  });
+  return plain;
+};
 
 async function handle(request: NextRequest) {
   const requestId = request.headers.get('x-request-id') ?? randomUUID();
   const logger = createServerLogger('run-detectors', { requestId, tags: ['cron', 'ops'] });
 
   try {
-    if (request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
-      logger.warn('Unauthorized detector invocation attempted');
+    // Use consistent cron authentication
+    const auth = verifyCronRequest(toPlainHeaders(request.headers));
+    if (!auth.ok) {
+      logger.warn('Unauthorized detector invocation attempted', { context: { reason: auth.reason } });
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 
+    // Use companies table (organizations might be legacy/alias)
     const { data: orgs, error } = await supabaseAdmin
-      .from('organizations')
+      .from('companies')
       .select('id');
 
     if (error) {
-      logger.error('Failed to load organizations', { error });
+      logger.error('Failed to load companies', { error });
       throw error;
     }
 
-    logger.info('Running detectors cron', { context: { orgCount: orgs.length } });
+    logger.info('Running detectors cron', { context: { orgCount: orgs?.length ?? 0 } });
 
     let processed = 0;
     let failures = 0;
 
-    for (const org of orgs) {
-      const id = (org as any).id;
+    for (const org of (orgs ?? []) as OrganizationRow[]) {
+      const id = org.id;
       const orgLogger = logger.child({ orgId: id });
 
       orgLogger.info('Starting detectors for org');
@@ -51,10 +68,10 @@ async function handle(request: NextRequest) {
     }
 
     logger.info('Detector cron finished', {
-      context: { processed, failures, total: orgs.length },
+      context: { processed, failures, total: orgs?.length ?? 0 },
     });
 
-    return NextResponse.json({ ok: true, processed, failures, total: orgs.length });
+    return NextResponse.json({ ok: true, processed, failures, total: orgs?.length ?? 0 });
   } catch (err) {
     logger.error('Detector cron error', { error: err });
     return NextResponse.json({ error: 'Cron error', details: String(err) }, { status: 500 });

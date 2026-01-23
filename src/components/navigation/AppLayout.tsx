@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet, ScrollRestoration } from 'react-router-dom';
+import { Outlet, ScrollRestoration } from '@/lib/router-adapter';
 import { useRoutePreloader } from '@/hooks/useRoutePreloader';
 import { useNavigationAnalytics } from '@/hooks/useNavigationAnalytics';
 import { NavigationGuard } from '@/components/navigation/NavigationGuard';

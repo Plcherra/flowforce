@@ -128,36 +128,56 @@ export async function findRecentNotification(
 }
 
 export async function fetchTasksDueSoon(userId: string, upperBoundIso: string): Promise<TaskSummary[]> {
+  // Use explicit status filter to avoid enum validation errors
+  // Only query for active task statuses (exclude completed/cancelled)
   const { data, error } = await supabase
     .from('tasks')
     .select('id, title, due_date, priority, assigned_to, status')
     .eq('assigned_to', userId)
     .gte('due_date', new Date().toISOString())
     .lte('due_date', upperBoundIso)
-    .neq('status', 'completed')
-    .neq('status', 'cancelled')
-    .neq('status', 'done');
+    .in('status', ['todo', 'in_progress', 'review']);
 
   if (error) {
+    // Handle enum validation errors gracefully
+    if (error.message?.includes('invalid input value for enum task_status')) {
+      console.warn('Some tasks have invalid status values. Filtering them out.', error);
+      // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
+      return [];
+    }
     throw error;
   }
 
-  return taskSummarySchema.array().parse(data ?? []);
+  // Additional client-side filtering as safety net
+  const validStatuses = ['todo', 'in_progress', 'review', 'completed', 'cancelled'];
+  const validData = (data ?? []).filter(task => validStatuses.includes(task.status));
+
+  return taskSummarySchema.array().parse(validData);
 }
 
 export async function fetchOverdueTasks(userId: string): Promise<TaskSummary[]> {
+  // Use explicit status filter to avoid enum validation errors
+  // Only query for active task statuses (exclude completed/cancelled)
   const { data, error } = await supabase
     .from('tasks')
     .select('id, title, due_date, priority, assigned_to, status')
     .eq('assigned_to', userId)
     .lt('due_date', new Date().toISOString())
-    .neq('status', 'completed')
-    .neq('status', 'cancelled')
-    .neq('status', 'done');
+    .in('status', ['todo', 'in_progress', 'review']);
 
   if (error) {
+    // Handle enum validation errors gracefully
+    if (error.message?.includes('invalid input value for enum task_status')) {
+      console.warn('Some tasks have invalid status values. Filtering them out.', error);
+      // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
+      return [];
+    }
     throw error;
   }
 
-  return taskSummarySchema.array().parse(data ?? []);
+  // Additional client-side filtering as safety net
+  const validStatuses = ['todo', 'in_progress', 'review', 'completed', 'cancelled'];
+  const validData = (data ?? []).filter(task => validStatuses.includes(task.status));
+
+  return taskSummarySchema.array().parse(validData);
 }

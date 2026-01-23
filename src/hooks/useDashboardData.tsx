@@ -161,10 +161,23 @@ export function useDashboardData() {
 
       const employees = (employeesResponse.data ?? []) as EmployeeRow[];
       const rawSchedules = (schedulesResponse.data ?? []) as ScheduleRow[];
-      const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
-      if (schedules.length !== rawSchedules.length) {
-        console.warn('[useDashboardData] Filtered schedules from other companies', JSON.stringify({ removed: rawSchedules.length - schedules.length, companyId }));
+      
+      // Security: Validate that all schedules belong to the company (defensive check)
+      // The query already filters by company_id at the database level, but this ensures data integrity
+      // If RLS fails or there's a bug, we catch it here
+      const invalidSchedules = rawSchedules.filter((entry) => entry?.company_id !== companyId);
+      if (invalidSchedules.length > 0) {
+        console.error('[useDashboardData] SECURITY WARNING: Schedules from other companies detected', {
+          companyId,
+          invalidCount: invalidSchedules.length,
+          invalidIds: invalidSchedules.map(s => s.id),
+        });
+        // In production, this should trigger an alert/audit log to security team
+        // For now, filter out invalid schedules as a safety measure
       }
+      
+      // Filter out any invalid schedules (should be empty if query works correctly)
+      const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
 
       let totalDepartments = 0;
       try {
@@ -197,9 +210,19 @@ export function useDashboardData() {
         companyTimeOff = (data ?? []) as TimeOffRequestRow[];
       }
 
+      // Security: Filter time off requests to only those belonging to company employees
+      // This is necessary because time_off_requests table may not have company_id column
       const scopedTimeOff = companyTimeOff.filter((entry) => entry.user_id && employeeIdSet.has(entry.user_id));
-      if (scopedTimeOff.length !== companyTimeOff.length) {
-        console.warn('[useDashboardData] Filtered time off entries from other companies', JSON.stringify({ removed: companyTimeOff.length - scopedTimeOff.length, companyId }));
+      
+      // Security: Validate that all time off requests belong to company employees
+      const invalidTimeOff = companyTimeOff.filter((entry) => entry.user_id && !employeeIdSet.has(entry.user_id));
+      if (invalidTimeOff.length > 0) {
+        console.error('[useDashboardData] SECURITY WARNING: Time off requests from other companies detected', {
+          companyId,
+          invalidCount: invalidTimeOff.length,
+          invalidUserIds: invalidTimeOff.map(t => t.user_id).filter(Boolean),
+        });
+        // In production, this should trigger an alert/audit log
       }
 
       const timeOffRequests = scopedTimeOff.filter((entry) => (entry.status ?? '').toLowerCase() === 'requested');

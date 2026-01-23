@@ -41,35 +41,6 @@ const CreateUpdateWizard = lazy(() => import('@/components/updates/CreateUpdateW
 
 export default function CompanyUpdates() {
   const bootstrap = useCommunicationBootstrap({ includeInactiveEmployees: true });
-
-  if (!bootstrap.userReady || bootstrap.loading) {
-    return <PageLoader text="Loading company updates..." />;
-  }
-
-  if (bootstrap.error) {
-    return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Unable to load workspace</AlertTitle>
-          <AlertDescription>{bootstrap.error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!bootstrap.ready) {
-    return (
-      <div className="p-6">
-        <EmptyStateCard
-          title="Workspace data is still loading"
-          description="Company updates unlock once we have your organization and employee information."
-          icon={<Megaphone className="h-5 w-5" />}
-        />
-      </div>
-    );
-  }
-
   const isMobile = useIsMobile();
   const { can } = useCan();
   const { profile } = useProfile();
@@ -106,6 +77,34 @@ export default function CompanyUpdates() {
     loading: recognitionLoading,
     error: recognitionError,
   } = useRecognitions();
+
+  if (!bootstrap.userReady || bootstrap.loading) {
+    return <PageLoader text="Loading company updates..." />;
+  }
+
+  if (bootstrap.error) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Unable to load workspace</AlertTitle>
+          <AlertDescription>{bootstrap.error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!bootstrap.ready) {
+    return (
+      <div className="p-6">
+        <EmptyStateCard
+          title="Workspace data is still loading"
+          description="Company updates unlock once we have your organization and employee information."
+          icon={<Megaphone className="h-5 w-5" />}
+        />
+      </div>
+    );
+  }
 
   const recognitionHighlights = useMemo(
     () => recognitionFeed.slice(0, 3),

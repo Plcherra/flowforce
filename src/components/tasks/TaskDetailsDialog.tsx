@@ -312,8 +312,8 @@ export function TaskDetailsDialog({
 
       if (targetStatus === 'in_progress') {
         successMessage = 'Task is now in progress.';
-      } else if (targetStatus === 'done') {
-        successMessage = 'Task marked as done.';
+      } else if (targetStatus === 'done' || targetStatus === 'completed') {
+        successMessage = 'Task marked as completed.';
       } else if (targetStatus === 'blocked') {
         successMessage = 'Task marked as blocked.';
       } else if (targetStatus === 'todo') {
