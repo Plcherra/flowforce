@@ -57,6 +57,10 @@ const isNetworkError = (error: unknown) => {
 
 async function request<T>(url: string, init: RequestInit, operation: string, attempt = 0): Promise<T> {
   try {
+    if (!url || url === '/functions/v1' || url === '/rest/v1') {
+      throw new Error(`Invalid URL for ${operation}: ${url}. Check SUPABASE_URL configuration.`);
+    }
+    
     const response = await fetch(url, init);
     if (!response.ok) {
       let errorMessage = `Request failed (${response.status})`;
@@ -77,7 +81,7 @@ async function request<T>(url: string, init: RequestInit, operation: string, att
       } catch (parseError) {
         logger.error('[scheduleGateway] Failed to parse error response', { error: parseError, tags: ['error'] });
       }
-      logger.error('[scheduleGateway] Request failed', { context: { operation, status: response.status, errorMessage }, tags: ['error'] });
+      logger.error('[scheduleGateway] Request failed', { context: { operation, status: response.status, errorMessage, url }, tags: ['error'] });
       throw new Error(errorMessage);
     }
 
@@ -94,11 +98,23 @@ async function request<T>(url: string, init: RequestInit, operation: string, att
     return (await response.json()) as T;
   } catch (error) {
     if (attempt === 0 && isNetworkError(error)) {
-      logger.warn('[scheduleGateway] Network error, retrying once', { context: { operation }, tags: ['warning'] });
+      logger.warn('[scheduleGateway] Network error, retrying once', { context: { operation, url }, tags: ['warning'] });
       return request<T>(url, init, operation, attempt + 1);
     }
-    logger.error('[scheduleGateway] Request threw', { context: { operation }, error, tags: ['error'] });
-    throw error instanceof Error ? error : new Error('Network request failed');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('[scheduleGateway] Request threw', { 
+      context: { operation, url, attempt }, 
+      error: errorMessage,
+      errorDetails: error instanceof Error ? { name: error.name, stack: error.stack } : error,
+      tags: ['error'] 
+    });
+    
+    // Provide more helpful error messages
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+      throw new Error(`Cannot connect to Supabase function. Check your SUPABASE_URL configuration and ensure the function is deployed.`);
+    }
+    
+    throw error instanceof Error ? error : new Error(`Network request failed: ${errorMessage}`);
   }
 }
 

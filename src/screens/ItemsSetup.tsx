@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Plus, Search, Filter, Edit, Trash2, History } from 'lucide-react';
 import { useInventoryItems, useDeleteInventoryItem } from '@/hooks/useInventory';
+import { asArray, safeArrayFilter } from '@/utils/reactQueryTypes';
 import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryCategories';
 import InventoryItemForm from '@/components/inventory/InventoryItemForm';
 import { InventoryRecipeDialog } from '@/components/inventory/InventoryRecipeDialog';
@@ -24,13 +25,15 @@ export default function ItemsSetup() {
   const [recipeItem, setRecipeItem] = useState<InventoryItem | undefined>();
   const [isRecipeDialogOpen, setRecipeDialogOpen] = useState(false);
   
-  const { data: items = [], isLoading } = useInventoryItems();
-  const { data: categories = [] } = useInventoryCategories();
+  const { data: itemsData, isLoading } = useInventoryItems();
+  const { data: categoriesData } = useInventoryCategories();
+  const items = asArray(itemsData);
+  const categories = asArray(categoriesData);
   const deleteItem = useDeleteInventoryItem();
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = safeArrayFilter(items, item => {
     const matchesSearch = !normalizedSearch ||
       item.name.toLowerCase().includes(normalizedSearch) ||
       item.description?.toLowerCase().includes(normalizedSearch) ||

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { useSchedulingConsolidated } from '@/hooks/scheduling/useSchedulingConsolidated';
+import { asArray, safeArrayFilter, safeArrayReduce, safeArrayLength, safeArrayMap } from '@/utils/reactQueryTypes';
 import type { TimeOffWithUser } from '@/hooks/scheduling/types';
 import { Calendar, Plus, Clock, Check, X, AlertCircle, ShieldCheck, Users, RefreshCw } from 'lucide-react';
 import { addDays, differenceInDays, format, parseISO, isWithinInterval } from 'date-fns';
@@ -63,8 +64,8 @@ export default function TimeOff() {
   const rangeEnd = addDays(new Date(), 30);
 
   const {
-    timeOffRequests = [],
-    shifts = [],
+    timeOffRequests: timeOffRequestsData,
+    shifts: shiftsData,
     loading,
     error,
     refetchAll,
@@ -75,6 +76,9 @@ export default function TimeOff() {
     enabled: Boolean(companyId),
   });
 
+  const timeOffRequests = asArray(timeOffRequestsData);
+  const shifts = asArray(shiftsData);
+
   const canManageRequests = useMemo(() => {
     if (!profile?.role) return false;
     const normalized = profile.role.toLowerCase();
@@ -82,25 +86,25 @@ export default function TimeOff() {
   }, [profile?.role]);
 
   const summary = useMemo(() => {
-    const requested = timeOffRequests.filter((request) => request.status === 'requested');
-    const approved = timeOffRequests.filter((request) => request.status === 'approved');
-    const denied = timeOffRequests.filter((request) => request.status === 'denied');
+    const requested = safeArrayFilter(timeOffRequests, (request) => request.status === 'requested');
+    const approved = safeArrayFilter(timeOffRequests, (request) => request.status === 'approved');
+    const denied = safeArrayFilter(timeOffRequests, (request) => request.status === 'denied');
 
-    const approvedDays = approved.reduce((total, request) => {
+    const approvedDays = safeArrayReduce(approved, (total, request) => {
       return total + calculateDays(request.start_date, request.end_date);
     }, 0);
 
     return {
-      requested: requested.length,
-      approved: approved.length,
-      denied: denied.length,
+      requested: safeArrayLength(requested),
+      approved: safeArrayLength(approved),
+      denied: safeArrayLength(denied),
       daysUsed: approvedDays,
       balanceRemaining: Math.max(TIME_OFF_ALLOWANCE_DAYS - approvedDays, 0),
     };
   }, [timeOffRequests]);
 
   const conflictsByRequest = useMemo(() => {
-    if (timeOffRequests.length === 0 || shifts.length === 0) {
+    if (safeArrayLength(timeOffRequests) === 0 || safeArrayLength(shifts) === 0) {
       return new Map<string, number>();
     }
 
@@ -113,12 +117,13 @@ export default function TimeOff() {
 
       const start = parseISO(request.start_date);
       const end = parseISO(request.end_date);
-      const conflicts = shifts.filter((shift) => {
+      const conflicts = safeArrayFilter(shifts, (shift) => {
         if (!shift.start_time) return false;
         const shiftStart = new Date(shift.start_time);
         if (!isWithinInterval(shiftStart, { start, end })) return false;
         return shift.assignments?.some((assignment) => assignment.user_id === request.user_id);
-      }).length;
+      });
+      const conflictCount = safeArrayLength(conflicts);
 
       map.set(request.id, conflicts);
     });
@@ -128,7 +133,7 @@ export default function TimeOff() {
 
   const openConflictCount = useMemo(
     () =>
-      timeOffRequests.reduce((total, request) => {
+      safeArrayReduce(timeOffRequests, (total, request) => {
         if (request.status !== 'requested') return total;
         return total + (conflictsByRequest.get(request.id) ?? 0);
       }, 0),
@@ -167,7 +172,7 @@ export default function TimeOff() {
     }
   };
 
-  const isLoading = loading && timeOffRequests.length === 0;
+  const isLoading = loading && safeArrayLength(timeOffRequests) === 0;
 
   return (
     <div className="space-y-6 p-6">
@@ -271,7 +276,7 @@ export default function TimeOff() {
                     <div key={index} className="h-20 animate-pulse rounded-md bg-muted" />
                   ))}
                 </div>
-              ) : timeOffRequests.length === 0 ? (
+              ) : safeArrayLength(timeOffRequests) === 0 ? (
                 <div className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
                   No time-off requests in the window yet. Employees can submit requests from the mobile app or scheduling workspace.
                 </div>

@@ -146,7 +146,19 @@ function log(level: LogLevel, scope: string, message: string, meta: LogMeta = {}
         console.warn(consoleMessage, payload ?? '');
         break;
       case 'error':
-        console.error(consoleMessage, meta.error ?? payload ?? '');
+        // Properly serialize error objects to avoid [object Object]
+        const errorToLog = meta.error 
+          ? (meta.error instanceof Error 
+              ? `${meta.error.name}: ${meta.error.message}${meta.error.stack ? '\n' + meta.error.stack : ''}`
+              : typeof meta.error === 'object'
+              ? JSON.stringify(serializeError(meta.error), null, 2)
+              : String(meta.error))
+          : (payload 
+              ? (typeof payload === 'object' 
+                  ? JSON.stringify(sanitizeContext(payload as Record<string, unknown>), null, 2)
+                  : String(payload))
+              : '');
+        console.error(consoleMessage, errorToLog);
         break;
     }
   }

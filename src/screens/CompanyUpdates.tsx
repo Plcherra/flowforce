@@ -40,6 +40,7 @@ const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const CreateUpdateWizard = lazy(() => import('@/components/updates/CreateUpdateWizard'));
 
 export default function CompanyUpdates() {
+  // All hooks must be called before any conditional returns
   const bootstrap = useCommunicationBootstrap({ includeInactiveEmployees: true });
   const isMobile = useIsMobile();
   const { can } = useCan();
@@ -78,6 +79,31 @@ export default function CompanyUpdates() {
     error: recognitionError,
   } = useRecognitions();
 
+  // Compute updateIds with safe fallback
+  const updateIds = useMemo(() => {
+    if (!Array.isArray(updates) || updates.length === 0) {
+      return [];
+    }
+    return updates.map((update) => update.id).filter(Boolean);
+  }, [updates]);
+
+  // All hooks must be called unconditionally before any early returns
+  const { commentsByUpdate } = useCompanyUpdateComments(updateIds);
+  const {
+    createUpdate,
+    archiveUpdate,
+    deleteUpdate,
+    toggleLike,
+    markAsViewed,
+    addComment,
+  } = useCompanyUpdateMutations();
+
+  const recognitionHighlights = useMemo(
+    () => (Array.isArray(recognitionFeed) ? recognitionFeed.slice(0, 3) : []),
+    [recognitionFeed]
+  );
+
+  // Early returns after all hooks
   if (!bootstrap.userReady || bootstrap.loading) {
     return <PageLoader text="Loading company updates..." />;
   }
@@ -105,23 +131,6 @@ export default function CompanyUpdates() {
       </div>
     );
   }
-
-  const recognitionHighlights = useMemo(
-    () => recognitionFeed.slice(0, 3),
-    [recognitionFeed]
-  );
-
-  const updateIds = useMemo(() => updates.map((update) => update.id), [updates]);
-  const { commentsByUpdate } = useCompanyUpdateComments(updateIds);
-
-  const {
-    createUpdate,
-    archiveUpdate,
-    deleteUpdate,
-    toggleLike,
-    markAsViewed,
-    addComment,
-  } = useCompanyUpdateMutations();
 
   const isInitialLoading = loading && updates.length === 0;
   const errorMessage = error ? getErrorMessage(error, 'Unable to load company updates.') : null;

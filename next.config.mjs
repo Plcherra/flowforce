@@ -72,6 +72,13 @@ const nextConfig = {
       { source: '/sections-permissions', destination: '/app/sections-permissions', permanent: false },
       { source: '/add-section', destination: '/app/add-section', permanent: false },
       { source: '/permission-demo', destination: '/app/permission-demo', permanent: false },
+      { source: '/tasks', destination: '/app/tasks', permanent: false },
+      { source: '/goals', destination: '/app/goals', permanent: false },
+      { source: '/operations', destination: '/app/operations', permanent: false },
+      { source: '/analytics', destination: '/app/analytics', permanent: false },
+      { source: '/reports', destination: '/app/reports', permanent: false },
+      { source: '/help-desk', destination: '/app/help-desk', permanent: false },
+      { source: '/helpdesk', destination: '/app/help-desk', permanent: false },
     ];
   },
 };

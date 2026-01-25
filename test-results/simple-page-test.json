@@ -1,0 +1,265 @@
+{
+  "timestamp": "2026-01-25T15:12:17.151Z",
+  "baseUrl": "http://localhost:3000",
+  "results": [
+    {
+      "route": "/",
+      "status": "ERROR",
+      "loadTime": 26,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/dashboard",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/messages",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/tasks",
+      "status": "ERROR",
+      "loadTime": 2,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/goals",
+      "status": "ERROR",
+      "loadTime": 2,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/forms",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/employees",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/calendar",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/operations",
+      "status": "ERROR",
+      "loadTime": 3,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/analytics",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/reports",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/admin",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/settings",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/expenses",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/time-off",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/enhanced-scheduling",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/inventory-actions",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/items-setup",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/performance",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/learning-center",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/company-updates",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/help-desk",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/availability/manage",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/scheduling/timeoff",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/schedule-lobby",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/cookbook",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/purchasing",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/certifications",
+      "status": "ERROR",
+      "loadTime": 2,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/leaderboard",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/recognition",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/meetings",
+      "status": "ERROR",
+      "loadTime": 2,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/ai-insights",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/profile",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/position-management",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/sections-permissions",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/invite-employee",
+      "status": "ERROR",
+      "loadTime": 1,
+      "error": "fetch failed",
+      "success": false
+    },
+    {
+      "route": "/app/add-section",
+      "status": "ERROR",
+      "loadTime": 0,
+      "error": "fetch failed",
+      "success": false
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Factory, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useInventoryItems, useInventoryLocations, useCreateWaste } from '@/hooks/useInventory';
+import { asArray, safeArrayMap } from '@/utils/reactQueryTypes';
 import { InventoryTransfersPanel } from '@/components/inventory/InventoryTransfersPanel';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
@@ -28,15 +29,17 @@ export default function InventoryActionsPage() {
   const { toast } = useToast();
   // Fetch real data
   const {
-    data: items = [],
+    data: itemsData,
     isLoading: itemsLoading,
     error: itemsError,
   } = useInventoryItems();
   const {
-    data: locations = [],
+    data: locationsData,
     isLoading: locationsLoading,
     error: locationsError,
   } = useInventoryLocations();
+  const items = asArray(itemsData);
+  const locations = asArray(locationsData);
   const createWaste = useCreateWaste();
   const isReferenceDataLoading = itemsLoading || locationsLoading;
 
@@ -72,11 +75,11 @@ export default function InventoryActionsPage() {
   type AdjustmentFormState = typeof adjustmentForm;
 
   const itemOptions = useMemo(
-    () => items.map((item) => ({ id: item.id, label: `${item.name} (${item.unit?.name || 'units'})` })),
+    () => safeArrayMap(items, (item) => ({ id: item.id, label: `${item.name} (${item.unit?.name || 'units'})` })),
     [items],
   );
   const locationOptions = useMemo(
-    () => locations.map((location) => ({ id: location.id, label: location.name })),
+    () => safeArrayMap(locations, (location) => ({ id: location.id, label: location.name })),
     [locations],
   );
   const wasteFormDisabled = createWaste.isPending || isReferenceDataLoading;

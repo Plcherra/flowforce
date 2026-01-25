@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useExpenses, type Expense as ExpenseRecord } from '@/hooks/useExpenses';
+import { asArray, safeArrayFilter, safeArrayReduce } from '@/utils/reactQueryTypes';
 import { useProfile } from '@/hooks/useProfile';
 import { useCan } from '@/hooks/useCan';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -77,7 +78,8 @@ export default function Expenses() {
   const isMobile = useIsMobile();
   const { profile } = useProfile();
   const { can } = useCan();
-  const { data: expenses = [], isLoading, createExpense, updateExpense } = useExpenses();
+  const { data: expensesData, isLoading, createExpense, updateExpense } = useExpenses();
+  const expenses = asArray(expensesData);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -112,15 +114,15 @@ export default function Expenses() {
   );
 
   const totalAmount = useMemo(
-    () => filteredExpenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0),
+    () => safeArrayReduce(filteredExpenses, (sum, expense) => sum + Number(expense.amount || 0), 0),
     [filteredExpenses],
   );
   const pendingExpenses = useMemo(
-    () => filteredExpenses.filter(expense => expense.status === 'pending'),
+    () => safeArrayFilter(filteredExpenses, expense => expense.status === 'pending'),
     [filteredExpenses],
   );
   const pendingAmount = useMemo(
-    () => pendingExpenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0),
+    () => safeArrayReduce(pendingExpenses, (sum, expense) => sum + Number(expense.amount || 0), 0),
     [pendingExpenses],
   );
 

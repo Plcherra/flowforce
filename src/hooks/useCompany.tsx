@@ -39,9 +39,13 @@ export const DEMO_COMPANY: Company = {
   created_by: '',
 };
 
-const isPolicyRecursionError = (error: any) => {
-  const message = error?.message?.toLowerCase() ?? '';
-  return message.includes('infinite recursion detected in policy');
+const isPolicyRecursionError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const message = (error as { message?: string })?.message?.toLowerCase() ?? '';
+  const errorString = String(error).toLowerCase();
+  return message.includes('infinite recursion detected in policy') || 
+         errorString.includes('infinite recursion detected in policy') ||
+         message.includes('recursion') && message.includes('policy');
 };
 
 export const getDemoCompany = (ownerId?: string): Company => {
@@ -177,6 +181,11 @@ export function useCompany() {
           .single();
 
         if (companyError) {
+          // Check for recursion error before throwing
+          if (isPolicyRecursionError(companyError)) {
+            useDemoFallback('RLS recursion when loading company');
+            return;
+          }
           throw handleError(companyError, 'fetching company data');
         }
 

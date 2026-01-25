@@ -194,7 +194,12 @@ const buildEmployeeRecords = async (companyId: string, includeInactive: boolean)
       };
     });
   } catch (error) {
-    logger.error('Failed to build employee records', { error, tags: ['error'] });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error('Failed to build employee records', { 
+      error: errorMessage,
+      errorDetails: error instanceof Error ? { name: error.name, stack: error.stack } : error,
+      tags: ['error', 'employees'] 
+    });
     return [];
   }
 };

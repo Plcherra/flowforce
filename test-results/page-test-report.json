@@ -1,0 +1,656 @@
+{
+  "timestamp": "2026-01-25T15:15:19.907Z",
+  "baseUrl": "http://localhost:3000",
+  "summary": {
+    "total": 46,
+    "successful": 35,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 10
+  },
+  "results": [
+    {
+      "route": "/",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3382,
+      "authenticated": true,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/dashboard",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/messages",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/tasks",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/goals",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/forms",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/employees",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/calendar",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/enhanced-scheduling",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3223,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/scheduling/timeoff",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3175,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/schedule-lobby",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3172,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/time-off",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3177,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/enhanced-scheduling?tab=availability",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 1203,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/availability/manage",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2236,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/operations",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/company-updates",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3450,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/help-desk",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2268,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/analytics",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3450,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/reports",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3700,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/ai-insights",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 5487,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/inventory-actions",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3702,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/inventory-count-execution",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2641,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/items-setup",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2227,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/purchasing",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2226,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/cookbook",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2861,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/performance",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2977,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/learning-center",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2860,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/certifications",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3065,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/leaderboard",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3073,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/recognition",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3082,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/meetings",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3644,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/admin",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/settings",
+      "status": "skipped",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "Authentication required"
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/position-management",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2526,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/sections-permissions",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2527,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/invite-employee",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2610,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/add-section",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3342,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/resources",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3338,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/resources/docs",
+      "status": "failed",
+      "errors": [
+        {
+          "type": "console",
+          "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "location": {
+            "url": "http://localhost:3000/app/resources/docs",
+            "lineNumber": 0,
+            "columnNumber": 0
+          }
+        }
+      ],
+      "warnings": [],
+      "loadTime": 0,
+      "authenticated": false,
+      "hasContent": false,
+      "issues": [
+        "HTTP 404"
+      ],
+      "statusCode": 404
+    },
+    {
+      "route": "/app/resources/docs/getting-started",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2917,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/resources/docs/user-manual",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2910,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/resources/docs/integrations",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2911,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/resources/docs/api",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2362,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/expenses",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 3255,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/profile",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2356,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    },
+    {
+      "route": "/app/events/calendar",
+      "status": "success",
+      "errors": [],
+      "warnings": [],
+      "loadTime": 2032,
+      "authenticated": false,
+      "hasContent": true,
+      "issues": [
+        "Error indicator found: ",
+        "Error indicator found: "
+      ],
+      "statusCode": 200
+    }
+  ]
+}
