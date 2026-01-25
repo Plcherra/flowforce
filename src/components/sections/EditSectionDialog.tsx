@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
 import { useCustomSections, type CustomSection } from '@/hooks/useCustomSections';
+import { logger } from '@/utils/logger';
 
 interface EditSectionDialogProps {
   section: CustomSection | null;
@@ -50,7 +51,7 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
       });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating section:', error);
+      logger.error('Error updating section:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,7 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
       await deleteSection(section.id);
       onOpenChange(false);
     } catch (error) {
-      console.error('Error deleting section:', error);
+      logger.error('Error deleting section:', { error, tags: ['error'] });
     } finally {
       setDeleteLoading(false);
     }

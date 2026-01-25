@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MessageCircle, Send, Minimize2, Maximize2, X, Bot, User } from 'lucide-react';
 import { useAIChat } from '@/features/ai/hooks/useAIChat';
+import { logger } from '@/utils/logger';
 
 type MessageRole = 'user' | 'assistant';
 
@@ -76,7 +77,7 @@ export default function AIChatAssistant({ context }: AIChatAssistantProps) {
       };
       appendMessage(assistantMessage);
     } catch (error) {
-      console.error('Failed to get AI response:', error);
+      logger.error('Failed to get AI response:', { error, tags: ['error'] });
       setErrorMessage('Unable to contact FlowForce AI right now. Showing the last known response instead.');
       appendMessage({
         id: (Date.now() + 1).toString(),

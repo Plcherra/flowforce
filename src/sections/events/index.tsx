@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input as UiInput } from '@/components/ui/input';
+import { logger } from '@/utils/logger';
 
 // Calendar utilities
 function startOfMonth(d: Date) {
@@ -311,7 +312,7 @@ export default function EventsIndex() {
       // quick feedback
       window.alert('Event created');
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to create event', { error: err, tags: ['error'] });
       window.alert('Failed to create event');
     }
   }

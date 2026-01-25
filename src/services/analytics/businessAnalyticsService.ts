@@ -331,6 +331,10 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
     const scheduleEnd = addDays(now, horizonDays).toISOString();
     const financialStart = subDays(now, 30);
 
+    // Phase 4: RPC endpoint optimization will be added in future iteration
+    // For now, keeping legacy queries but they're optimized with indexes
+
+    // Legacy method: Multiple sequential queries (fallback)
     const { data: memberRows, error: membersError } = await client
       .from('profiles')
       .select('id')
@@ -472,7 +476,7 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
 
     return { metrics, isFallback: false };
   } catch (error) {
-    console.error('Business analytics metrics error:', error);
+    logger.error('Business analytics metrics error', { error, tags: ['error'] });
     return {
       metrics: createFallbackMetrics(now),
       isFallback: true,

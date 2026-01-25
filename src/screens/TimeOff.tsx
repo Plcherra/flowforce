@@ -10,6 +10,7 @@ import type { TimeOffWithUser } from '@/hooks/scheduling/types';
 import { Calendar, Plus, Clock, Check, X, AlertCircle, ShieldCheck, Users, RefreshCw } from 'lucide-react';
 import { addDays, differenceInDays, format, parseISO, isWithinInterval } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 const TIME_OFF_ALLOWANCE_DAYS = 25;
 
@@ -155,7 +156,7 @@ export default function TimeOff() {
       });
       await refetchAll();
     } catch (updateError) {
-      console.error('Failed to update time-off request', updateError);
+      logger.error('Failed to update time-off request', { error: updateError, tags: ['error'] });
       toast({
         title: 'Update failed',
         description: updateError instanceof Error ? updateError.message : 'Please try again later.',

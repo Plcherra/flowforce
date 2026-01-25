@@ -32,6 +32,7 @@ import type {
   LearningProgressSnapshot,
   PersonalLearningSnapshot,
 } from '@/types/learning';
+import { logger } from '@/utils/logger';
 
 type SkillSnapshot = {
   role: string;
@@ -151,7 +152,7 @@ export function useLearningCenter() {
             });
             return { enrollmentId: enrollment.id, ...page };
           } catch (err) {
-            console.error('Failed to load progress history', err);
+            logger.error('Failed to load progress history', { error: err, tags: ['error'] });
             toast({
               title: 'Progress unavailable',
               description: 'Some progress history could not be loaded. Please try refreshing.',
@@ -338,7 +339,7 @@ export function useLearningCenter() {
         learningInvalidators.progress(queryClient, companyKey, profileKey);
         return enrollment;
       } catch (err) {
-        console.error('Failed to enroll in course', err);
+        logger.error('Failed to enroll in course', { error: err, tags: ['error'] });
         toast({
           title: 'Enrollment failed',
           description: 'Unable to enroll in the selected course.',
@@ -411,7 +412,7 @@ export function useLearningCenter() {
         learningInvalidators.catalog(queryClient, companyKey);
         learningInvalidators.insights(queryClient, companyKey);
       } catch (err) {
-        console.error('Failed to update module progress', err);
+        logger.error('Failed to update module progress', { error: err, tags: ['error'] });
         toast({
           title: 'Progress update failed',
           description: 'Could not mark the module as completed.',
@@ -482,7 +483,7 @@ export function useLearningCenter() {
           };
         });
       } catch (error) {
-        console.error('Failed to paginate progress history', error);
+        logger.error('Failed to paginate progress history', { error, tags: ['error'] });
         toast({
           title: 'Unable to load more progress',
           description: 'Please check your connection and try again.',
@@ -575,7 +576,7 @@ async function fetchAdminEnrollments(limit = ADMIN_ENROLLMENT_LIMIT): Promise<Le
 
   const parsed = adminEnrollmentsResponseSchema.safeParse(data);
   if (!parsed.success) {
-    console.error('[learning] Invalid admin enrollment payload', parsed.error.flatten());
+    logger.error('[learning] Invalid admin enrollment payload', { error: parsed.error.flatten(), tags: ['error'] });
     throw new Error('Malformed admin enrollment response.');
   }
   return parsed.data.enrollments;

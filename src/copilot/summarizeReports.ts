@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface SummarizeWeeklyReportsPayload {
   weekStart: string;
@@ -36,7 +37,7 @@ export async function summarizeWeeklyReports(now: Dayjs = dayjs(), companyId?: s
 
     return data ?? null;
   } catch (rpcError) {
-    console.error('[summarizeWeeklyReports] Supabase function invocation failed', rpcError);
+    logger.error('[summarizeWeeklyReports] Supabase function invocation failed', { error: rpcError, tags: ['error'] });
     throw rpcError;
   }
 }

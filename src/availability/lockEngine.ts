@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 export const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -41,7 +42,7 @@ const defaultDeps: LockEngineDeps = {
       .maybeSingle();
 
     if (error) {
-      console.error('[lockEngine] Failed to fetch org preferences', error);
+      logger.error('[lockEngine] Failed to fetch org preferences', { error, tags: ['error'] });
       throw error;
     }
 
@@ -56,7 +57,7 @@ const defaultDeps: LockEngineDeps = {
       .not('approved_by', 'is', null);
 
     if (error) {
-      console.error('[lockEngine] Failed to fetch availability exceptions', error);
+      logger.error('[lockEngine] Failed to fetch availability exceptions', { error, tags: ['error'] });
       throw error;
     }
 
@@ -73,7 +74,7 @@ const defaultDeps: LockEngineDeps = {
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('[lockEngine] Failed to check availability exception', error);
+      logger.error('[lockEngine] Failed to check availability exception', { error, tags: ['error'] });
       throw error;
     }
 

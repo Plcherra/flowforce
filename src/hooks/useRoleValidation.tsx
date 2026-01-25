@@ -4,6 +4,7 @@ import { useProfile } from './useProfile';
 import { useCompanyRoles } from './useCompanyRoles';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
 
 /**
  * Hook to provide role validation and auto-assignment guardrails
@@ -37,7 +38,7 @@ export function useRoleValidation() {
 
           await refetchProfile();
           
-          console.info('[Role Validation] Auto-assigned role_id:', matchingRole.id, 'for role:', matchingRole.name);
+          logger.info('[Role Validation] Auto-assigned role_id', { context: { roleId: matchingRole.id, roleName: matchingRole.name }, tags: ['role-validation'] });
           return;
         }
 
@@ -73,11 +74,11 @@ export function useRoleValidation() {
               description: `You've been assigned the ${defaultRole.name} role.`,
             });
             
-            console.info('[Role Validation] Auto-assigned default role:', defaultRole.name);
+            logger.info('[Role Validation] Auto-assigned default role', { context: { roleName: defaultRole.name }, tags: ['role-validation'] });
           }
         }
       } catch (error) {
-        console.error('[Role Validation] Failed to validate/fix role:', error);
+        logger.error('[Role Validation] Failed to validate/fix role', { error, tags: ['error', 'role-validation'] });
       }
     };
 

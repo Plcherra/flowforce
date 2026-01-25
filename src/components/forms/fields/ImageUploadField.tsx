@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ImageIcon, Upload, X, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface ImageUploadFieldProps {
   label: string;
@@ -43,7 +44,7 @@ export function ImageUploadField({
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
         return null;
       }
 
@@ -53,7 +54,7 @@ export function ImageUploadField({
 
       return data.publicUrl;
     } catch (error) {
-      console.error('Error uploading file:', error);
+      logger.error('Error uploading file:', { error, tags: ['error'] });
       return null;
     }
   }, []);
@@ -119,7 +120,7 @@ export function ImageUploadField({
         });
       }
     } catch (error) {
-      console.error('Error handling file upload:', error);
+      logger.error('Error handling file upload:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to upload images",

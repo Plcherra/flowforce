@@ -7,6 +7,7 @@ import { useCompanyRoles, type CompanyRole } from '@/hooks/useCompanyRoles';
 import RoleManagementDialog from './RoleManagementDialog';
 import { Plus, Edit, Trash2, Shield, AlertTriangle } from 'lucide-react';
 import { useCan } from '@/hooks/useCan';
+import { logger } from '@/utils/logger';
 
 export default function RoleConfigurationTab() {
   const { can } = useCan();
@@ -34,7 +35,7 @@ export default function RoleConfigurationTab() {
       setDialogOpen(false);
       setEditingRole(undefined);
     } catch (error) {
-      console.error('Failed to save role:', error);
+      logger.error('Failed to save role:', { error, tags: ['error'] });
     }
   };
 

@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { logger } from "@/utils/logger"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -88,9 +89,9 @@ const SidebarProvider = React.forwardRef<
         }
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {
-          console.warn(
+          logger.warn(
             "SidebarProvider: unable to read sidebar state from localStorage",
-            error
+            { error, tags: ['warning'] }
           )
         }
       }
@@ -128,9 +129,9 @@ const SidebarProvider = React.forwardRef<
             )
           } catch (error) {
             if (process.env.NODE_ENV !== "production") {
-              console.warn(
+              logger.warn(
                 "SidebarProvider: unable to persist sidebar state to localStorage",
-                error
+                { error, tags: ['warning'] }
               )
             }
           }

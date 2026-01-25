@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface OpsIssue {
   id: string;
@@ -47,7 +48,7 @@ export function IssuesStream() {
         .limit(12);
       if (!active) return;
       if (error) {
-        console.error('[IssuesStream] failed to load issues', error);
+        logger.error('[IssuesStream] failed to load issues', { error, tags: ['error'] });
         setIssues([]);
       } else {
         setIssues(
@@ -89,7 +90,7 @@ export function IssuesStream() {
       const payload = (await response.json()) as AutomationSuggestionResponse;
       setDrawerResult(payload);
     } catch (error) {
-      console.error('[IssuesStream] automation generation failed', error);
+      logger.error('[IssuesStream] automation generation failed', { error, tags: ['error'] });
       setDrawerError(error instanceof Error ? error.message : 'Unable to generate suggestion');
     } finally {
       setDrawerLoading(false);

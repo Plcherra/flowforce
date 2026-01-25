@@ -13,6 +13,7 @@ import { InventoryRecipeDialog } from '@/components/inventory/InventoryRecipeDia
 import { getUnitHierarchyDisplay } from '@/features/inventory/hooks/useItemUnits';
 import type { InventoryItem } from '@/features/inventory/hooks/types';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export default function ItemsSetup() {
   const { toast } = useToast();
@@ -59,7 +60,7 @@ export default function ItemsSetup() {
       try {
         await deleteItem.mutateAsync(item.id);
       } catch (error) {
-        console.error('Failed to delete item:', error);
+        logger.error('Failed to delete item:', { error, tags: ['error'] });
       }
     }
   };

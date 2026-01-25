@@ -4,6 +4,8 @@ import dayjs from 'dayjs';
 import { useAuth } from '@/hooks/useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { employeesRepository, type EmployeeProfileRow } from '@/repositories/employeesRepository';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 type ProfileRow = Tables<'profiles'>;
 
@@ -56,7 +58,7 @@ const fetchInChunks = async <T,>(
     const results = await Promise.all(chunks.map((chunk) => fetcher(chunk)));
     return results.flat();
   } catch (error) {
-    console.error('Failed to load chunked employee data', error);
+    logger.error('Failed to load chunked employee data', { error, tags: ['error'] });
     return [];
   }
 };
@@ -79,22 +81,56 @@ const buildEmployeeRecords = async (companyId: string, includeInactive: boolean)
 
     const lookback = dayjs().subtract(30, 'day').format('YYYY-MM-DD');
 
-    const [skillsData, badgesData, reportsData, attendanceData] = await Promise.all([
-      fetchInChunks(ids, (chunk) => employeesRepository.fetchSkillMatrixForEmployees(chunk)),
-      fetchInChunks(ids, (chunk) => employeesRepository.fetchEmployeeBadges(chunk)),
-      fetchInChunks(ids, (chunk) =>
-        employeesRepository.fetchEmployeeReports({
-          employeeIds: chunk,
-          since: lookback,
-        }),
-      ),
-      fetchInChunks(ids, (chunk) =>
-        employeesRepository.fetchStaffPerformance({
-          employeeIds: chunk,
-          since: lookback,
-        }),
-      ),
-    ]);
+    // Try RPC endpoint first (Phase 4 optimization)
+    let skillsData: Tables<'skill_matrix'>[] = [];
+    let badgesData: Tables<'employee_badge'>[] = [];
+    let reportsData: Tables<'employee_report'>[] = [];
+    let attendanceData: Tables<'staff_performance'>[] = [];
+
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_employee_enrichment', {
+        p_company_id: companyId,
+        p_employee_ids: ids,
+        p_lookback_date: lookback,
+      });
+
+      if (!rpcError && rpcData) {
+        // Parse RPC response
+        skillsData = (rpcData.skills ?? []) as Tables<'skill_matrix'>[];
+        badgesData = (rpcData.badges ?? []) as Tables<'employee_badge'>[];
+        reportsData = (rpcData.reports ?? []) as Tables<'employee_report'>[];
+        attendanceData = (rpcData.attendance ?? []) as Tables<'staff_performance'>[];
+      } else if (rpcError) {
+        logger.warn('Employee enrichment RPC unavailable, using legacy queries', {
+          error: rpcError,
+          tags: ['performance', 'employees'],
+        });
+        throw rpcError; // Fall through to legacy method
+      }
+    } catch (rpcFallbackError) {
+      // Legacy method: Multiple sequential queries (fallback)
+      logger.warn('Employee enrichment RPC not available, using legacy queries', {
+        error: rpcFallbackError,
+        tags: ['performance', 'employees'],
+      });
+
+      [skillsData, badgesData, reportsData, attendanceData] = await Promise.all([
+        fetchInChunks(ids, (chunk) => employeesRepository.fetchSkillMatrixForEmployees(chunk)),
+        fetchInChunks(ids, (chunk) => employeesRepository.fetchEmployeeBadges(chunk)),
+        fetchInChunks(ids, (chunk) =>
+          employeesRepository.fetchEmployeeReports({
+            employeeIds: chunk,
+            since: lookback,
+          }),
+        ),
+        fetchInChunks(ids, (chunk) =>
+          employeesRepository.fetchStaffPerformance({
+            employeeIds: chunk,
+            since: lookback,
+          }),
+        ),
+      ]);
+    }
 
     const skillMap = new Map<string, { level: number; xp: number }>();
     (skillsData ?? []).forEach((row) => {
@@ -158,7 +194,7 @@ const buildEmployeeRecords = async (companyId: string, includeInactive: boolean)
       };
     });
   } catch (error) {
-    console.error('Failed to build employee records', error);
+    logger.error('Failed to build employee records', { error, tags: ['error'] });
     return [];
   }
 };
@@ -198,7 +234,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
         }
       })
       .catch((error) => {
-        console.error('Failed to resolve company context:', error);
+        logger.error('Failed to resolve company context', { error, tags: ['error'] });
         if (active) {
           setResolvedCompanyId(null);
           setContextError('Unable to resolve company context.');
@@ -228,7 +264,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
       try {
         return await buildEmployeeRecords(effectiveCompanyId, includeInactive);
       } catch (error) {
-        console.error('Failed to load employees', error);
+        logger.error('Failed to load employees', { error, tags: ['error'] });
         return [];
       }
     },

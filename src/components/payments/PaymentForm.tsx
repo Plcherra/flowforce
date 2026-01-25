@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { usePayments } from '@/hooks/usePayments';
 import { useProfile } from '@/hooks/useProfile';
 import { Plus } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 export default function PaymentForm() {
   const [open, setOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function PaymentForm() {
       });
       setOpen(false);
     } catch (error) {
-      console.error('Failed to create payment:', error);
+      logger.error('Failed to create payment:', { error, tags: ['error'] });
     }
   };
 

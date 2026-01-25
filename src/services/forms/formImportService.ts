@@ -1,6 +1,7 @@
 import { uploadReportFile } from '@/services/ingestion/api';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 export interface FormImportResult {
   form: Tables<'forms'>;
@@ -58,10 +59,10 @@ export async function importFormFromFile(file: File, userId: string) {
       const text = await file.text();
       extractedSnippet = text.slice(0, 2000);
     } catch (error) {
-      console.warn('Unable to extract raw text from uploaded file', error);
+      logger.warn('Unable to extract raw text from uploaded file', { error, tags: ['warning'] });
     }
   } catch (error) {
-    console.warn('Document ingestion failed – continuing without document linkage', error);
+    logger.warn('Document ingestion failed – continuing without document linkage', { error, tags: ['warning'] });
   }
 
   const { data: form, error } = await supabase

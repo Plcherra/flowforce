@@ -1,4 +1,5 @@
 import { appEnv, requireEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 // Safe getter that logs warnings instead of throwing during module init
 // Works for both server and client - allows app to start even without env vars
@@ -7,9 +8,9 @@ const getEnvOrWarn = (value: string | undefined, key: string): string => {
     // Log warning but don't throw - allows dev server and app to start
     // The app will use placeholder values instead
     if (typeof window === 'undefined') {
-      console.warn(`[Config] Missing environment variable: ${key}. Using placeholder.`);
+      logger.warn(`[Config] Missing environment variable: ${key}. Using placeholder`, { context: { key }, tags: ['warning'] });
     } else {
-      console.warn(`[Config] Missing environment variable: ${key}. Some features may not work.`);
+      logger.warn(`[Config] Missing environment variable: ${key}. Some features may not work`, { context: { key }, tags: ['warning'] });
     }
     return '';
   }

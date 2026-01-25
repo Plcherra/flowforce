@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-
+import { logger } from '@/utils/logger';
 
 interface ExpenseData {
   category: string;
@@ -95,7 +95,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       });
       resetForm();
     } catch (error) {
-      console.error('Failed to create expense:', error);
+      logger.error('Failed to create expense:', { error, tags: ['error'] });
     } finally {
       setIsSubmitting(false);
     }

@@ -18,11 +18,13 @@ export interface InviteData {
   role: string;
 }
 
+import type { User, Session } from '@supabase/supabase-js';
+
 export interface AuthContextType {
-  user: any; // Replace with proper user type from Supabase
-  session: any; // Replace with proper session type from Supabase
+  user: User | null; // User type from Supabase
+  session: Session | null; // Session type from Supabase
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, metadata?: any) => Promise<{ error: any | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: unknown | null }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, metadata?: Record<string, unknown>) => Promise<{ error: unknown | null }>;
   signOut: () => Promise<void>;
 }

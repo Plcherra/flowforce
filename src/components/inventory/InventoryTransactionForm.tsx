@@ -12,6 +12,7 @@ import { useInventoryItems } from '@/hooks/useInventory';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Plus } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 export function computeInventoryTransactionTotals(quantity: number, conversionFactor: number, unitPrice?: number) {
   const normalizedQuantity = quantity * conversionFactor;
@@ -154,7 +155,7 @@ export default function InventoryTransactionForm() {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create inventory transaction.';
       setFormError(message);
-      console.error('Failed to create inventory transaction:', error);
+      logger.error('Failed to create inventory transaction:', { error, tags: ['error'] });
     } finally {
       setIsSubmitting(false);
     }

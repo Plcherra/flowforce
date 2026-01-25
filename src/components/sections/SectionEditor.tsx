@@ -27,6 +27,7 @@ import {
   Clock
 } from 'lucide-react';
 import { CustomSection, CustomSectionPage, SectionTemplate } from '@/hooks/useCustomSections';
+import { logger } from '@/utils/logger';
 
 interface SectionEditorProps {
   section?: CustomSection;
@@ -143,7 +144,7 @@ export default function SectionEditor({
       await onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Error saving section:', error);
+      logger.error('Error saving section:', { error, tags: ['error'] });
     } finally {
       setSaving(false);
     }

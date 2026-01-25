@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { InventoryCategory } from './types';
+import { logger } from '@/utils/logger';
 
 export function useInventoryCategories() {
   return useQuery({
@@ -57,7 +58,7 @@ export function useCreateInventoryCategory() {
         description: message,
         variant: 'destructive',
       });
-      console.error('Create category error:', error);
+      logger.error('Create category error', { error, tags: ['error'] });
     },
   });
 }
@@ -99,7 +100,7 @@ export function useDeleteInventoryCategory() {
         description: message,
         variant: 'destructive',
       });
-      console.error('Delete category error:', error);
+      logger.error('Delete category error', { error, tags: ['error'] });
     },
   });
 }

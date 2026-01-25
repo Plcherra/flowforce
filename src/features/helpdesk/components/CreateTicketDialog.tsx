@@ -12,6 +12,7 @@ import { createTicket } from '@/repositories/ticketsRepository';
 import type { HelpDeskTicketPriority } from '@/hooks/useTickets';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface CreateTicketDialogProps {
   open: boolean;
@@ -61,7 +62,7 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
       if (error) throw error;
       setDepartments(data ?? []);
     } catch (error) {
-      console.error('Failed to load departments:', error);
+      logger.error('Failed to load departments', { error, tags: ['error'] });
     } finally {
       setDepartmentsLoading(false);
     }
@@ -141,7 +142,7 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
       onOpenChange(false);
       onTicketCreated?.();
     } catch (error) {
-      console.error('Failed to create ticket:', error);
+      logger.error('Failed to create ticket', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to create ticket. Please try again.',

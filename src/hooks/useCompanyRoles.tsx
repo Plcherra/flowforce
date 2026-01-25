@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
 
 export interface CompanyRole {
   id: string;
@@ -110,7 +111,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         .single();
 
       if (currentProfileError) {
-        console.error('Error resolving current profile for company roles:', currentProfileError);
+        logger.error('Error resolving current profile for company roles', { error: currentProfileError, tags: ['error'] });
       }
 
       const companyId = currentProfile?.company_id ?? metadataCompanyId;
@@ -136,7 +137,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
       setRoles(parsedRoles);
     } catch (err: unknown) {
-      console.error('Error fetching company roles:', err);
+      logger.error('Error fetching company roles', { error: err, tags: ['error'] });
       const normalizedError = normalizeError(err);
       setError(normalizedError);
 
@@ -153,7 +154,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
   useEffect(() => {
     if (user) {
       fetchRoles().catch((err) => {
-        console.error('Unhandled error while fetching company roles:', err);
+        logger.error('Unhandled error while fetching company roles', { error: err, tags: ['error'] });
       });
     } else {
       setRoles([]);
@@ -176,7 +177,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         .single();
 
       if (profileError) {
-        console.error('Error fetching user profile:', profileError);
+        logger.error('Error fetching user profile', { error: profileError, tags: ['error'] });
         throw profileError;
       }
 
@@ -196,7 +197,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         .single();
 
       if (error) {
-        console.error('Error creating role:', error);
+        logger.error('Error creating role', { error, tags: ['error'] });
         throw error;
       }
       
@@ -210,8 +211,8 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       });
       fetchRoles();
     },
-    onError: (error: any) => {
-      console.error('Create role mutation error:', error);
+    onError: (error: unknown) => {
+      logger.error('Create role mutation error', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: error.message || "Failed to create role",
@@ -235,7 +236,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         .single();
 
       if (error) {
-        console.error('Error updating role:', error);
+        logger.error('Error updating role', { error, tags: ['error'] });
         throw error;
       }
       
@@ -249,8 +250,8 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       });
       fetchRoles();
     },
-    onError: (error: any) => {
-      console.error('Update role mutation error:', error);
+    onError: (error: unknown) => {
+      logger.error('Update role mutation error', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: error.message || "Failed to update role",
@@ -269,7 +270,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         .eq('id', roleId);
 
       if (error) {
-        console.error('Error deactivating role:', error);
+        logger.error('Error deactivating role', { error, tags: ['error'] });
         throw error;
       }
       
@@ -282,8 +283,8 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       });
       fetchRoles();
     },
-    onError: (error: any) => {
-      console.error('Delete role mutation error:', error);
+    onError: (error: unknown) => {
+      logger.error('Delete role mutation error', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: error.message || "Failed to deactivate role",

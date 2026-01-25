@@ -14,6 +14,7 @@ import type {
   ProductionApproval,
 } from '@/features/inventory/hooks/types';
 import { calculateProductionMaterials } from '@/lib/inventory/production';
+import { logger } from '@/utils/logger';
 import {
   listInventoryItems,
   createInventoryItem,
@@ -52,7 +53,7 @@ async function resolveActiveCompanyId(client: SupabaseClient = supabase): Promis
   try {
     const { data: authData, error: authError } = await client.auth.getUser();
     if (authError) {
-      console.warn('[inventory] Failed to resolve authenticated user', authError);
+      logger.warn('[inventory] Failed to resolve authenticated user', { error: authError, tags: ['warning'] });
       return null;
     }
 
@@ -68,13 +69,13 @@ async function resolveActiveCompanyId(client: SupabaseClient = supabase): Promis
       .maybeSingle();
 
     if (error) {
-      console.warn('[inventory] Failed to resolve company id', error);
+      logger.warn('[inventory] Failed to resolve company id', { error, tags: ['warning'] });
       return null;
     }
 
     return data?.company_id ?? null;
   } catch (error) {
-    console.warn('[inventory] Unexpected error resolving company id', error);
+    logger.warn('[inventory] Unexpected error resolving company id', { error, tags: ['warning'] });
     return null;
   }
 }

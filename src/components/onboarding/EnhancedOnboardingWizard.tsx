@@ -15,6 +15,7 @@ import WizardNavigation from './WizardNavigation';
 import { ValidationManager } from './ValidationManager';
 import { UserInfo, CompanyInfo } from '@/types/onboarding';
 import StepRenderer from './StepRenderer';
+import { logger } from '@/utils/logger';
 
 interface Branding {
   logo: File | null;
@@ -221,7 +222,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Error creating account:', error);
+      logger.error('Error creating account:', { error, tags: ['error'] });
       toast({
         title: t('onboarding.messages.setupError'),
         description: t('onboarding.messages.setupErrorDescription'),

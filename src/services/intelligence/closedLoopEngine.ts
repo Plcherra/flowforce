@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { ScheduleGuardrailEngine, type GuardrailResult } from '@/services/guardrail/scheduleGuardrailEngine';
 import { evaluateEmployee, type CopilotDecision } from '@/copilot/rulesEngine';
+import { logger } from '@/utils/logger';
 
 type EventRow = Tables<'events'>;
 type TaskRow = Tables<'tasks'>;
@@ -139,13 +140,13 @@ async function resolveCompanyId(userId: string): Promise<string | null> {
       .maybeSingle();
 
     if (error) {
-      console.warn('[closedLoop] Failed to resolve company id', error);
+      logger.warn('[closedLoop] Failed to resolve company id', { error, tags: ['warning'] });
       return null;
     }
 
     return data?.company_id ?? null;
   } catch (error) {
-    console.warn('[closedLoop] Unexpected error resolving company id', error);
+    logger.warn('[closedLoop] Unexpected error resolving company id', { error, tags: ['warning'] });
     return null;
   }
 }
@@ -158,12 +159,12 @@ async function fetchOrDefault<T>(
   try {
     const { data, error } = await promise;
     if (error) {
-      console.warn(`[closedLoop] ${debugLabel} query failed`, error);
+      logger.warn(`[closedLoop] ${debugLabel} query failed`, { context: { debugLabel }, error, tags: ['warning'] });
       return fallback;
     }
     return data ?? fallback;
   } catch (error) {
-    console.warn(`[closedLoop] ${debugLabel} query threw`, error);
+    logger.warn(`[closedLoop] ${debugLabel} query threw`, { context: { debugLabel }, error, tags: ['warning'] });
     return fallback;
   }
 }
@@ -334,7 +335,7 @@ async function fetchEmployeeDecisions(employeeIds: string[]): Promise<CopilotDec
       const decision = await evaluateEmployee(employeeId);
       decisions.push(decision);
     } catch (error) {
-      console.warn('[closedLoop] Unable to evaluate employee context', employeeId, error);
+      logger.warn('[closedLoop] Unable to evaluate employee context', { context: { employeeId }, error, tags: ['warning'] });
     }
   }
 
@@ -406,7 +407,7 @@ async function fetchAiSummary(
     });
 
     if (error) {
-      console.warn('[closedLoop] AI insights invocation failed', error);
+      logger.warn('[closedLoop] AI insights invocation failed', { error, tags: ['warning'] });
       return {
         summary: 'Unable to generate AI insights at this time.',
         generatedAt: null,
@@ -419,7 +420,7 @@ async function fetchAiSummary(
       source: 'supabase:function:ai-insights',
     };
   } catch (error) {
-    console.warn('[closedLoop] AI insights invocation errored', error);
+    logger.warn('[closedLoop] AI insights invocation errored', { error, tags: ['warning'] });
     return {
       summary: 'AI insights temporarily unavailable.',
       generatedAt: null,

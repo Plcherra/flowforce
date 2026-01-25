@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCan } from '@/hooks/useCan';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
+import { logger } from '@/utils/logger';
 
 export interface AuditLog {
   id: string;
@@ -44,8 +45,8 @@ export function useAuditLogs() {
 
       if (error) {
         // Gracefully handle missing table when feature flag is disabled or migration not run
-        if ((error as any).code === '42P01') {
-          console.warn('[useAuditLogs] audit_logs table not found. Returning empty list.');
+        if ((error as Record<string, unknown>).code === '42P01') {
+          logger.warn('[useAuditLogs] audit_logs table not found. Returning empty list', { tags: ['warning'] });
           return [];
         }
 

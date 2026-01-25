@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useFormSchemaStore } from '@/stores/useFormSchemaStore';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/utils/logger';
 import {
   fetchFormsWithRelations,
   insertFormRow,
@@ -100,10 +101,13 @@ export function useForms() {
     // The repository query already filters by created_profile.company_id, but this ensures data integrity
     const invalidForms = rows.filter((form) => form.created_profile?.company_id !== tenantCompanyId);
     if (invalidForms.length > 0) {
-      console.error('[useForms] SECURITY WARNING: Forms from other companies detected', {
-        tenantCompanyId,
-        invalidCount: invalidForms.length,
-        invalidIds: invalidForms.map(f => f.id),
+      logger.error('SECURITY WARNING: Forms from other companies detected', {
+        context: {
+          tenantCompanyId,
+          invalidCount: invalidForms.length,
+          invalidIds: invalidForms.map(f => f.id),
+        },
+        tags: ['security', 'tenant-isolation'],
       });
       // Filter out invalid forms for security
       // In production, this should trigger an alert/audit log
@@ -129,7 +133,10 @@ export function useForms() {
     throwOnError: false,
     retry: 1,
     onError: (error) => {
-      console.error('Error fetching forms:', error);
+      logger.error('Error fetching forms', {
+        error,
+        tags: ['forms', 'data-fetch'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to load forms',
@@ -188,7 +195,10 @@ export function useForms() {
 
       return { data: created, error: null };
     } catch (error) {
-      console.error('Error creating form:', error);
+      logger.error('Error creating form', {
+        error,
+        tags: ['forms', 'create'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to create form',
@@ -234,7 +244,10 @@ export function useForms() {
 
       return { error: null };
     } catch (error) {
-      console.error('Error updating form:', error);
+      logger.error('Error updating form', {
+        error,
+        tags: ['forms', 'update'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to update form',
@@ -266,7 +279,10 @@ export function useForms() {
 
       return { error: null };
     } catch (error) {
-      console.error('Error deleting form:', error);
+      logger.error('Error deleting form', {
+        error,
+        tags: ['forms', 'delete'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to delete form',
@@ -287,16 +303,23 @@ export function useForms() {
       if (!rows.length) {
         const fallback = buildFormFieldFallback(formId);
         if (fallback.length) {
-          console.warn('Supabase returned no form fields; using local schema fallback.');
+          logger.warn('Supabase returned no form fields; using local schema fallback', {
+            tags: ['forms', 'data-fallback'],
+          });
           return { data: fallback, error: null };
         }
       }
       return { data: rows, error: null };
     } catch (error) {
-      console.error('Error fetching form fields:', error);
+      logger.error('Error fetching form fields', {
+        error,
+        tags: ['forms', 'data-fetch'],
+      });
       const fallback = buildFormFieldFallback(formId);
       if (fallback.length) {
-        console.warn('Using locally cached form schema due to Supabase error.');
+        logger.warn('Using locally cached form schema due to Supabase error', {
+          tags: ['forms', 'data-fallback'],
+        });
         return { data: fallback, error: null };
       }
       return { data: [], error };
@@ -325,7 +348,10 @@ export function useForms() {
       });
       return { error: null };
     } catch (error) {
-      console.error('Error saving form fields:', error);
+      logger.error('Error saving form fields', {
+        error,
+        tags: ['forms', 'save'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to save form fields',
@@ -345,7 +371,10 @@ export function useForms() {
       const data = await repositoryFetchFormSubmissions(companyId, formId);
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching form submissions:', error);
+      logger.error('Error fetching form submissions', {
+        error,
+        tags: ['forms', 'submissions'],
+      });
       return { data: [], error };
     }
   };
@@ -390,7 +419,10 @@ export function useForms() {
 
       return { data: submission, error: null };
     } catch (error) {
-      console.error('Error submitting form:', error);
+      logger.error('Error submitting form', {
+        error,
+        tags: ['forms', 'submit'],
+      });
       toast({
         title: 'Error',
         description: 'Failed to submit form',

@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface CreateAnnouncementProps {
   open: boolean;
@@ -74,7 +75,7 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
       onAnnouncementCreated?.();
       onClose();
     } catch (error) {
-      console.error('Error creating announcement:', error);
+      logger.error('Error creating announcement:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to create announcement',

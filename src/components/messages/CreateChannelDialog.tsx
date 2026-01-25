@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useMessageChannels } from '@/hooks/messages/useMessageChannels';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface CreateChannelDialogProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
       });
       onClose();
     } catch (error) {
-      console.error('Error creating channel:', error);
+      logger.error('Error creating channel:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to create channel',

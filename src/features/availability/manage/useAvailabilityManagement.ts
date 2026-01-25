@@ -19,6 +19,7 @@ import type {
   OrgPrefs,
 } from '@/types/availability';
 import type { AvailabilityGrid } from '@/components/availability/AvailabilityRequestForm';
+import { logger } from '@/utils/logger';
 
 import type {
   AvailabilityEmployee,
@@ -266,7 +267,7 @@ export function useAvailabilityManagement({
       await refetchAll();
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Unable to save lock settings', { error, tags: ['error'] });
       toast({
         title: 'Unable to save lock settings',
         description: error instanceof Error ? error.message : 'Please try again later.',
@@ -344,7 +345,7 @@ export function useAvailabilityManagement({
       await refetchAll();
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Unable to approve request', { error, tags: ['error'] });
       toast({
         title: 'Unable to approve request',
         description: error instanceof Error ? error.message : 'Please try again later.',
@@ -395,7 +396,7 @@ export function useAvailabilityManagement({
       await refetchAll();
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Unable to deny request', { error, tags: ['error'] });
       toast({
         title: 'Unable to deny request',
         description: error instanceof Error ? error.message : 'Please try again later.',
@@ -440,7 +441,7 @@ export function useAvailabilityManagement({
       await refetchAll();
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Unable to save exception', { error, tags: ['error'] });
       toast({
         title: 'Unable to save exception',
         description: error instanceof Error ? error.message : 'Please try again later.',

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createTicket, updateTicket, deleteTicket } from '@/repositories/ticketsRepository';
 import type { CreateTicketInput, UpdateTicketInput } from '@/repositories/ticketsRepository';
+import { logger } from '@/utils/logger';
 
 export type HelpDeskTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 export type HelpDeskTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -130,7 +131,7 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
     } catch (unknownError) {
       const message =
         unknownError instanceof Error ? unknownError.message : 'Unable to load help desk tickets.';
-      console.error('[useTickets] Failed to load tickets', unknownError);
+      logger.error('[useTickets] Failed to load tickets', { error: unknownError, tags: ['error'] });
       setTickets([]);
       setError(message);
       setUsingFallback(true);

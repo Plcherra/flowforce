@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { InventoryTransaction } from './types';
+import { logger } from '@/utils/logger';
 
 type InventoryTransactionRow = Tables<'inventory_transactions'>;
 
@@ -88,7 +89,7 @@ export function useCreateInventoryTransaction() {
         description: 'Failed to record transaction',
         variant: 'destructive',
       });
-      console.error('Create transaction error:', error);
+      logger.error('Create transaction error', { error, tags: ['error'] });
     },
   });
 }

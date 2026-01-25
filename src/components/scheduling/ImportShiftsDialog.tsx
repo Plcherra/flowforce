@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, FileSpreadsheet, Download, AlertCircle } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ImportShiftsDialogProps {
   open: boolean;
@@ -42,7 +43,7 @@ export function ImportShiftsDialog({ open, onOpenChange }: ImportShiftsDialogPro
       onOpenChange(false);
       setSelectedFile(null);
     } catch (error) {
-      console.error('Error importing shifts:', error);
+      logger.error('Error importing shifts:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

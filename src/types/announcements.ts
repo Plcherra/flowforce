@@ -4,7 +4,7 @@ export interface Announcement {
   content: string;
   priority: string;
   target_audience: string;
-  target_ids: any;
+  target_ids: unknown; // Array of user/group IDs, stored as JSON
   created_by: string;
   company_id: string;
   expires_at?: string;

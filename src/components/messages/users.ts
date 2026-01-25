@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 export type PresenceStatus = 'online' | 'offline' | 'away';
 
 export interface ChatUser {
@@ -19,7 +21,7 @@ export function loadUsers(): ChatUser[] {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.warn('Failed to parse stored chat users', error);
+    logger.warn('Failed to parse stored chat users', { error, tags: ['warning'] });
     return [];
   }
 }

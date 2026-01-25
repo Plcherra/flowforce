@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { QUICK_TEMPLATES } from '@/data/sectionTemplates';
+import { logger } from '@/utils/logger';
 
 export interface CustomSection {
   id: string;
@@ -61,7 +62,7 @@ const parseJsonArray = (value: any) => {
       const parsed = JSON.parse(value);
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-      console.error('Failed to parse JSON array', error);
+      logger.error('Failed to parse JSON array', { error, tags: ['error'] });
       return [];
     }
   }
@@ -137,7 +138,7 @@ export function useCustomSections() {
           .filter((section) => !shouldExcludeSection(section))
       );
     } catch (error) {
-      console.error('Error fetching custom sections:', error);
+      logger.error('Error fetching custom sections', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to load custom sections",
@@ -165,7 +166,7 @@ export function useCustomSections() {
           .filter((template) => !shouldExcludeTemplate(template))
       );
     } catch (error) {
-      console.error('Error fetching section templates:', error);
+      logger.error('Error fetching section templates', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to load section templates",
@@ -317,7 +318,7 @@ export function useCustomSections() {
 
       return normalizeSectionRecord({ ...section, pages: initialPages });
     } catch (error) {
-      console.error('Error creating section:', error);
+      logger.error('Error creating section', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to create section",
@@ -342,7 +343,7 @@ export function useCustomSections() {
         description: "Section updated successfully"
       });
     } catch (error) {
-      console.error('Error updating section:', error);
+      logger.error('Error updating section', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to update section",
@@ -367,7 +368,7 @@ export function useCustomSections() {
         description: "Section deleted successfully"
       });
     } catch (error) {
-      console.error('Error deleting section:', error);
+      logger.error('Error deleting section', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to delete section",
@@ -390,7 +391,7 @@ export function useCustomSections() {
 
       await fetchSections();
     } catch (error) {
-      console.error('Error updating section order:', error);
+      logger.error('Error updating section order', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to update section order",

@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { InventoryService } from '@/features/inventory/services/inventoryService';
 import type { InventoryLocation } from '@/features/inventory/hooks/types';
+import { logger } from '@/utils/logger';
 
 export function useInventoryLocations() {
   const { profile, loading } = useProfile();
@@ -52,7 +53,7 @@ export function useCreateInventoryLocation() {
         description: message,
         variant: 'destructive',
       });
-      console.error('Create location error:', error);
+      logger.error('Create location error', { error, tags: ['error'] });
     },
   });
 }
@@ -79,7 +80,7 @@ export function useDeleteInventoryLocation() {
         description: message,
         variant: 'destructive',
       });
-      console.error('Delete location error:', error);
+      logger.error('Delete location error', { error, tags: ['error'] });
     },
   });
 }

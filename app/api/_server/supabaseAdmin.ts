@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createServerLogger } from './utils/logger';
 
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -7,13 +8,15 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // This prevents errors during Next.js startup when scanning API routes
 let supabaseAdminInstance: ReturnType<typeof createClient> | null = null;
 
+const logger = createServerLogger('supabaseAdmin');
+
 function getSupabaseAdmin() {
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     const error = new Error(
       "Missing Supabase service role configuration. " +
       "Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables."
     );
-    console.error('[supabaseAdmin]', error.message);
+    logger.error('Missing Supabase service role configuration', { error, tags: ['error'] });
     throw error;
   }
   

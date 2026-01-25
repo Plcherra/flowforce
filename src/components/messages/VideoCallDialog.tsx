@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Camera, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface VideoCallDialogProps {
   isOpen: boolean;
@@ -68,7 +69,7 @@ export function VideoCallDialog({
         localVideoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error('Error accessing media:', error);
+      logger.error('Error accessing media:', { error, tags: ['error'] });
       toast({
         title: "Media Access Error",
         description: "Could not access camera or microphone",

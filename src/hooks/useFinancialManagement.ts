@@ -293,6 +293,8 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
         pending: (pendingResponse.data as Payment[]) ?? [],
       };
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Phase 4 optimization)
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   return useMemo(() => {
@@ -579,6 +581,8 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
         waste: (wasteResponse.data as WasteEvent[]) ?? [],
       };
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Phase 4 optimization)
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const snapshot = useMemo<ManagerFinancialSnapshot>(() => {

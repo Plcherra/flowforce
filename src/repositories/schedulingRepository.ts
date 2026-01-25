@@ -189,6 +189,10 @@ export async function fetchSchedulingWeek(params: {
             .from('time_off_requests')
             .select('*')
             .in('user_id', memberIds)
+            // Phase 4: Add date range filter to only fetch relevant time off requests
+            // Include requests that overlap with the week range (start_date <= endIso AND end_date >= startIso)
+            .lte('start_date', endIso.split('T')[0]) // Requests starting before or during the week
+            .gte('end_date', startIso.split('T')[0]) // Requests ending during or after the week
             .order('created_at', { ascending: false })
             .limit(100)
         : Promise.resolve({ data: [], error: null }),
@@ -197,6 +201,10 @@ export async function fetchSchedulingWeek(params: {
             .from('user_unavailability')
             .select('*')
             .in('user_id', memberIds)
+            // Phase 4: Add date range filter to only fetch unavailability in the week range
+            // Include entries that overlap with the week range
+            .lte('start_time', endIso) // Unavailability starting before or during the week
+            .or(`end_time.gte.${startIso},end_time.is.null`) // Ending during/after the week, or no end time
             .order('start_time', { ascending: true })
         : Promise.resolve({ data: [], error: null }),
     ]);

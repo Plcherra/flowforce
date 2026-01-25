@@ -33,6 +33,7 @@ import type { LockEngineDeps } from '@/availability/lockEngine';
 import { useToast } from '@/hooks/use-toast';
 import type { AvailabilityLockMode, AvailabilityRequest, AvailabilityException, OrgPrefs } from '@/types/availability';
 import { notifyManagersNewRequest } from '@/notifications/availability';
+import { logger } from '@/utils/logger';
 
 const HOURS = Array.from({ length: 16 }).map((_, index) => 6 + index); // 06:00 -> 21:00
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -305,7 +306,7 @@ export function AvailabilityRequestForm({
       queryClient.invalidateQueries(['availability-last-request', employeeId]);
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Error saving availability', { error, tags: ['error'] });
       toast({
         title: 'Unable to save',
         description: error instanceof Error ? error.message : 'Please try again later.',
@@ -356,7 +357,7 @@ export function AvailabilityRequestForm({
       queryClient.invalidateQueries(['availability-last-request', employeeId]);
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('Error submitting availability request', { error, tags: ['error'] });
       toast({
         title: 'Unable to submit request',
         description: error instanceof Error ? error.message : 'Please try again later.',

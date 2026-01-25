@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Plus, Package, Trash2, Edit } from 'lucide-react';
 import { useItemUnits, useCreateItemUnit, useUpdateItemUnit, formatUnitDisplay } from '@/features/inventory/hooks/useItemUnits';
 import { useInventoryUnits } from '@/features/inventory/hooks/useInventoryUnits';
+import { logger } from '@/utils/logger';
 
 interface ItemUnitManagerProps {
   itemId: string;
@@ -60,7 +61,7 @@ export function ItemUnitManager({ itemId, itemName, open, onOpenChange }: ItemUn
       });
       setIsAddingUnit(false);
     } catch (error) {
-      console.error('Failed to add unit:', error);
+      logger.error('Failed to add unit:', { error, tags: ['error'] });
     }
   };
 

@@ -8,6 +8,7 @@ import { Bell, Megaphone, AlertTriangle, Info, X, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 import type { Announcement } from '@/types/announcements';
 
@@ -98,7 +99,7 @@ export function AnnouncementBanner({ className = '' }: AnnouncementBannerProps) 
 
       setAnnouncements(announcementsWithReadStatus);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      logger.error('Error fetching announcements:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -122,7 +123,7 @@ export function AnnouncementBanner({ className = '' }: AnnouncementBannerProps) 
         )
       );
     } catch (error) {
-      console.error('Error marking announcement as read:', error);
+      logger.error('Error marking announcement as read:', { error, tags: ['error'] });
     }
   };
 

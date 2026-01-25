@@ -28,6 +28,8 @@ import {
   useUpdateUserRole,
   PERMISSION_KEYS,
   type PermissionKey,
+} from '@/hooks/useUserPermissions';
+import { logger } from '@/utils/logger';
   type PermissionValue,
 } from '@/hooks/useUserPermissions';
 import { PERMISSIONS_BY_CATEGORY } from '@/lib/permissions/registry';
@@ -160,7 +162,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
 
       setHasChanges(false);
     } catch (error) {
-      console.error('Error saving changes:', error);
+      logger.error('Error saving changes:', { error, tags: ['error'] });
     }
   };
 

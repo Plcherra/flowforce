@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/server/supabaseAdmin';
 import { addWeeks, computeAutoLockThreshold, startOfIsoWeek } from '@/availability/lockEngine';
 import type { Database } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type OrgPrefRow = Database['public']['Tables']['org_prefs']['Row'];
 
@@ -20,7 +21,7 @@ export async function runAvailabilityLockCron(now: Date = new Date()): Promise<L
     .select('id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour');
 
   if (error) {
-    console.error('[lockCron] Unable to fetch org prefs', error);
+    logger.error('[lockCron] Unable to fetch org prefs', { error, tags: ['error'] });
     throw error;
   }
 
@@ -56,7 +57,7 @@ export async function runAvailabilityLockCron(now: Date = new Date()): Promise<L
       });
 
       if (insertResult.error) {
-        console.error('[lockCron] Failed to insert audit log', insertResult.error);
+        logger.error('[lockCron] Failed to insert audit log', { error: insertResult.error, tags: ['error'] });
         throw insertResult.error;
       }
     }

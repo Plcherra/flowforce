@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type WeekTemplate = Tables<'week_templates'>;
 
@@ -22,7 +23,7 @@ export function useWeekTemplates() {
       if (error) throw error;
       setTemplates(data || []);
     } catch (error) {
-      console.error('Error fetching week templates:', error);
+      logger.error('Error fetching week templates', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -40,7 +41,7 @@ export function useWeekTemplates() {
       setTemplates(prev => [...prev, data]);
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating week template:', error);
+      logger.error('Error creating week template', { error, tags: ['error'] });
       return { data: null, error };
     }
   };

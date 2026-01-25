@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mic, Square, Play, Pause, Upload, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface AudioRecordingFieldProps {
   label: string;
@@ -49,7 +50,7 @@ export function AudioRecordingField({
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
         return null;
       }
 
@@ -59,7 +60,7 @@ export function AudioRecordingField({
 
       return data.publicUrl;
     } catch (error) {
-      console.error('Error uploading audio:', error);
+      logger.error('Error uploading audio:', { error, tags: ['error'] });
       return null;
     }
   }, []);
@@ -128,10 +129,10 @@ export function AudioRecordingField({
           }
           return prev + 1;
         });
-      }, 1000);
+        }, 1000);
 
     } catch (error) {
-      console.error('Error starting recording:', error);
+      logger.error('Error starting recording:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to access microphone",
@@ -216,7 +217,7 @@ export function AudioRecordingField({
         });
       }
     } catch (error) {
-      console.error('Error uploading files:', error);
+      logger.error('Error uploading files:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to upload audio files",

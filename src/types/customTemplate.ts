@@ -14,7 +14,7 @@ export interface CustomPageContent {
   id: string;
   type: 'text' | 'form' | 'chart' | 'table' | 'image' | 'video' | 'calendar' | 'kanban';
   title: string;
-  content: any; // Flexible content based on type
+  content: unknown; // Flexible content based on type (JSON)
   position: { x: number; y: number; width: number; height: number };
   styling: {
     backgroundColor?: string;

@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/config';
 import type { Database } from './types';
+import { logger } from '@/utils/logger';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -16,9 +17,9 @@ const isUsingPlaceholder = !SUPABASE_URL || !SUPABASE_ANON_KEY ||
 
 if (isUsingPlaceholder) {
   if (typeof window === 'undefined') {
-    console.warn('[Supabase Client] Missing Supabase credentials. Using placeholder client. Check your .env.local file.');
+    logger.warn('[Supabase Client] Missing Supabase credentials. Using placeholder client. Check your .env.local file', { tags: ['warning'] });
   } else {
-    console.warn('[Supabase Client] ⚠️ Missing Supabase credentials. Sign in will fail. Create .env.local with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+    logger.warn('[Supabase Client] ⚠️ Missing Supabase credentials. Sign in will fail. Create .env.local with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY', { tags: ['warning'] });
   }
 }
 

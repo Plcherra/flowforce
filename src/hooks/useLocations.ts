@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
+import { logger } from '@/utils/logger';
 
 export interface OrganizationLocation {
   id: string;
@@ -34,7 +35,7 @@ export function useLocations() {
           .order('name', { ascending: true });
 
         if (error) {
-          console.error('Failed to load locations', error);
+          logger.error('Failed to load locations', { error, tags: ['error'] });
           return [];
         }
 
@@ -50,7 +51,7 @@ export function useLocations() {
           capacity: location.capacity ?? null,
         }));
       } catch (error) {
-        console.error('Unexpected locations query error', error);
+        logger.error('Unexpected locations query error', { error, tags: ['error'] });
         return [];
       }
     },

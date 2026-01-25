@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json, Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
@@ -171,7 +172,7 @@ async function fetchRosterSnapshot(companyId: string): Promise<EmployeeProfileRo
   const snapshot = rosterCacheRowSchema.parse({ company_id: companyId, snapshot: data.snapshot });
   const parsed = z.array(employeeProfileWithRelationsSchema).safeParse(snapshot.snapshot);
   if (!parsed.success) {
-    console.warn('[employeesRepository] Invalid roster cache snapshot', parsed.error);
+    logger.warn('[employeesRepository] Invalid roster cache snapshot', { error: parsed.error, tags: ['warning'] });
     return null;
   }
   return parsed.data;

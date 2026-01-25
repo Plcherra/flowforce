@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/logger';
 
 export interface TaskFormAssignee {
   id: string;
@@ -69,7 +70,7 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       setAssignees((assigneesResult.data ?? []) as TaskFormAssignee[]);
       setGoals((goalsResult.data ?? []) as TaskFormGoal[]);
     } catch (fetchError) {
-      console.error('Error loading task form options:', fetchError);
+      logger.error('Error loading task form options', { error: fetchError, tags: ['error'] });
       setError(fetchError instanceof Error ? fetchError.message : 'Failed to load options');
       setAssignees([]);
       setGoals([]);

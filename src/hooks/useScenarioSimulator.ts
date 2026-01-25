@@ -10,6 +10,7 @@ import {
   type ScenarioOutcome,
 } from '@/lib/ai/scenarioEngine';
 import { fetchBusinessAnalyticsSnapshot, getFallbackBusinessSnapshot } from '@/services/analytics/businessAnalyticsService';
+import { logger } from '@/utils/logger';
 
 export interface UseScenarioSimulatorOptions {
   companyId?: string | null;
@@ -71,7 +72,7 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
       setError(isFallback ? notice ?? 'Using simulator defaults.' : null);
       setLoading(false);
     } catch (err) {
-      console.error('Scenario simulator baseline error:', err);
+      logger.error('Scenario simulator baseline error', { error: err, tags: ['error'] });
       const fallbackSnapshot = getFallbackBusinessSnapshot();
       setBaseline(fallbackSnapshot.baseline);
       setIsUsingFallback(true);
@@ -120,7 +121,7 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
         .select('id');
 
       if (insertError) {
-        console.error('Failed to push Co-Pilot actions', insertError);
+        logger.error('Failed to push Co-Pilot actions', { error: insertError, tags: ['error'] });
         throw insertError;
       }
 

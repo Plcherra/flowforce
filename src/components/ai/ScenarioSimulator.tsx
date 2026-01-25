@@ -17,6 +17,7 @@ import {
   type RiskLevel,
   type ScenarioAdjustments,
 } from '@/lib/ai/scenarioEngine';
+import { logger } from '@/utils/logger';
 
 interface ScenarioSimulatorProps {
   className?: string;
@@ -89,7 +90,7 @@ export default function ScenarioSimulator({ className }: ScenarioSimulatorProps)
         description: `Generated ${created} follow-up task${created === 1 ? '' : 's'} from this scenario.`,
       });
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to push copilot actions', { error: err, tags: ['error'] });
       pushToast({
         title: 'Unable to push actions',
         description: err instanceof Error ? err.message : 'Co-Pilot automation failed.',

@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { logger } from '@/utils/logger';
 import {
   Upload,
   FileSpreadsheet,
@@ -93,14 +94,14 @@ function buildInviteLink(token: string) {
 
 async function triggerOnboardingChecklist(inviteId: string): Promise<boolean> {
   try {
-    const { error } = await supabase.rpc('trigger_onboarding_checklist' as any, { invite_id: inviteId });
+    const { error } = await supabase.rpc('trigger_onboarding_checklist' as unknown as string, { invite_id: inviteId });
     if (error) {
-      console.warn('Failed to trigger onboarding checklist', error.message);
+      logger.warn('Failed to trigger onboarding checklist', { error: error.message, tags: ['warning'] });
       return false;
     }
     return true;
   } catch (error) {
-    console.warn('Failed to trigger onboarding checklist', error);
+    logger.warn('Failed to trigger onboarding checklist', { error, tags: ['warning'] });
     return false;
   }
 }

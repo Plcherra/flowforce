@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Position } from '@/hooks/usePositions';
 import type { ShiftWizardFormData, BreakItem } from './types';
+import { logger } from '@/utils/logger';
 
 type DetailsTabProps = {
   formData: ShiftWizardFormData;
@@ -68,7 +69,7 @@ export function DetailsTab({ formData, setFormData, positions, distinctLocations
         if (error) throw error;
         setShiftTemplates((data ?? []) as ShiftTemplate[]);
       } catch (err) {
-        console.error('Failed to load shift templates', err);
+        logger.error('Failed to load shift templates', { error: err, tags: ['error'] });
       }
     };
 

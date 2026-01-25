@@ -5,7 +5,7 @@ export interface FormSubmission {
   id: string;
   form_id: string;
   submitted_by: string;
-  submission_data: any;
+  submission_data: unknown; // JSON data from form submission
   submitted_at: string;
   ip_address?: string;
   user_agent?: string;
@@ -24,8 +24,8 @@ export interface FormField {
   placeholder?: string;
   is_required: boolean;
   field_order: number;
-  options?: any;
-  validation_rules?: any;
+  options?: unknown; // JSON field for field options
+  validation_rules?: unknown; // JSON field for validation rules
 }
 
 export interface Schedule {

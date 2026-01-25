@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import ResourceSection from '@/components/resources/ResourceSection';
 import HelpSection from '@/components/resources/HelpSection';
 import LoadingSpinner from '@/components/resources/LoadingSpinner';
+import { logger } from '@/utils/logger';
 
 interface ResourceData {
   documentation: any[];
@@ -68,7 +69,7 @@ export default function Resources() {
         const data = await response.json();
         setResourceData(data);
       } catch (error) {
-        console.error('Failed to fetch resources:', error);
+        logger.error('Failed to fetch resources:', { error, tags: ['error'] });
       } finally {
         setLoading(false);
       }

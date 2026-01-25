@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 import {
   fetchActivePerformanceProfiles,
   fetchGoalParticipantsByGoalIds,
@@ -46,7 +47,7 @@ async function resolveActiveCompanyId(
   try {
     const { data: authData, error: authError } = await client.auth.getUser();
     if (authError) {
-      console.warn('[performance] Failed to resolve authenticated user', authError);
+      logger.warn('[performance] Failed to resolve authenticated user', { error: authError, tags: ['warning'] });
       return null;
     }
 
@@ -62,13 +63,13 @@ async function resolveActiveCompanyId(
       .maybeSingle();
 
     if (error) {
-      console.warn('[performance] Failed to resolve company id', error);
+      logger.warn('[performance] Failed to resolve company id', { error, tags: ['warning'] });
       return null;
     }
 
     return data?.company_id ?? null;
   } catch (error) {
-    console.warn('[performance] Unexpected error resolving company id', error);
+    logger.warn('[performance] Unexpected error resolving company id', { error, tags: ['warning'] });
     return null;
   }
 }

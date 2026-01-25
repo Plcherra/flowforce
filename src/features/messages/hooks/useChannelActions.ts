@@ -10,6 +10,7 @@ import {
   updateLastRead as updateLastReadService,
 } from '@/features/messages/api/channelService';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 export function useChannelActions() {
   const { user } = useAuth();
@@ -116,7 +117,7 @@ export function useChannelActions() {
         await updateLastReadService(channelId, userId);
       } catch (error) {
         if (appEnv.DEV) {
-          console.error('Failed to update last read', error);
+          logger.error('Failed to update last read', { error, tags: ['error'] });
         }
       }
     },

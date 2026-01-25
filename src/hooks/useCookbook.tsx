@@ -6,6 +6,7 @@ import { CookbookService, type CookbookRecipe } from '@/services/cookbook';
 import type { InventoryItem, InventoryUnit } from './inventory/types';
 import type { InventoryWaste } from '@/features/inventory/hooks/useInventoryWaste';
 import { useToast } from './use-toast';
+import { logger } from '@/utils/logger';
 
 export type UOM =
   | 'each'
@@ -91,7 +92,7 @@ export function useCookbook() {
         }
       }
     } catch (err) {
-      console.warn('Failed to load favorites from storage', err);
+      logger.warn('Failed to load favorites from storage', { error: err, tags: ['warning'] });
     }
   }, []);
 
@@ -247,7 +248,7 @@ export function useCookbook() {
           description: `${recipe.item.name} production recorded with smart inventory deduction.`,
         });
       } catch (err) {
-        console.warn('Failed to log production, falling back to demo mode', err);
+        logger.warn('Failed to log production, falling back to demo mode', { error: err, tags: ['warning'] });
         toast({
           title: 'Demo mode: production simulated',
           description:
@@ -317,7 +318,7 @@ export function useCookbook() {
           description: 'Waste event captured and inventory updated.',
         });
       } catch (err) {
-        console.warn('Failed to record waste, falling back to demo mode', err);
+        logger.warn('Failed to record waste, falling back to demo mode', { error: err, tags: ['warning'] });
         toast({
           title: 'Demo mode: waste logged locally',
           description: 'Waste tracking will sync once Supabase tables are available.',

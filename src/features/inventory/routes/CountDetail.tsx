@@ -13,6 +13,7 @@ import { ItemSelector } from '@/components/inventory/ItemSelector';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { IfCan } from '@/components/permissions/IfCan';
 import { listInventoryCountEvents } from '@/features/inventory/repositories/countsRepository';
+import { logger } from '@/utils/logger';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -134,7 +135,7 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
       const data = await listInventoryCountEvents(countId);
       setEvents(data);
     } catch (error) {
-      console.error('Error loading count events:', error);
+      logger.error('Error loading count events', { error, tags: ['error'] });
     } finally {
       setLoadingEvents(false);
     }
@@ -194,7 +195,7 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
       // Navigate back to counts list
       navigate('/inventory/counts');
     } catch (error) {
-      console.error('Error completing count:', error);
+      logger.error('Error completing count', { error, tags: ['error'] });
       toast({
         title: "Error", 
         description: "Failed to complete count",
@@ -239,7 +240,7 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
         description: 'Inventory count has been approved and finalized.',
       });
     } catch (error) {
-      console.error('Error approving count:', error);
+      logger.error('Error approving count', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to approve count',
@@ -264,7 +265,7 @@ export default function CountDetailPage({ countId: propCountId }: CountDetailPag
         description: 'The count has been sent back for additional work.',
       });
     } catch (error) {
-      console.error('Error rejecting count:', error);
+      logger.error('Error rejecting count', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to send count back for revisions',

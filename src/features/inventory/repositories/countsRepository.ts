@@ -74,7 +74,7 @@ export async function listInventoryCounts(options: CountRepositoryOptions = {}):
 
   return inventoryCountArraySchema.parse(data ?? []).map((count) => ({
     ...count,
-    locations: (count.locations ?? []).map((entry: any) => entry?.location).filter(Boolean),
+    locations: (count.locations ?? []).map((entry: Record<string, unknown>) => entry?.location).filter(Boolean),
   })) as InventoryCount[];
 }
 
@@ -99,7 +99,7 @@ export async function getInventoryCount(countId: string, options: CountRepositor
   const parsed = inventoryCountSchema.parse(data);
   return {
     ...parsed,
-    locations: (parsed.locations ?? []).map((entry: any) => entry?.location).filter(Boolean),
+    locations: (parsed.locations ?? []).map((entry: Record<string, unknown>) => entry?.location).filter(Boolean),
   } as InventoryCount;
 }
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface Position {
   id: string;
@@ -72,7 +73,7 @@ export function usePositions() {
         permissions: item.permissions
       })));
     } catch (error) {
-      console.error('Error fetching positions:', error);
+      logger.error('Error fetching positions:', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to load positions',
@@ -125,7 +126,7 @@ export function usePositions() {
         setAssignments([]);
       }
     } catch (error) {
-      console.error('Error fetching position assignments:', error);
+      logger.error('Error fetching position assignments:', { error, tags: ['error'] });
     }
   };
 
@@ -175,7 +176,7 @@ export function usePositions() {
       });
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating position:', error);
+      logger.error('Error creating position:', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to create position',
@@ -217,7 +218,7 @@ export function usePositions() {
       });
       return { data, error: null };
     } catch (error) {
-      console.error('Error updating position:', error);
+      logger.error('Error updating position:', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to update position',
@@ -243,7 +244,7 @@ export function usePositions() {
       });
       return { error: null };
     } catch (error) {
-      console.error('Error deleting position:', error);
+      logger.error('Error deleting position:', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to delete position',
@@ -289,7 +290,7 @@ export function usePositions() {
       });
       return { data, error: null };
     } catch (error) {
-      console.error('Error assigning user to position:', error);
+      logger.error('Error assigning user to position', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to assign user',
@@ -316,7 +317,7 @@ export function usePositions() {
       });
       return { error: null };
     } catch (error) {
-      console.error('Error removing user from position:', error);
+      logger.error('Error removing user from position:', { error, tags: ['error'] });
       toast({
         variant: 'destructive',
         title: 'Unable to remove user',

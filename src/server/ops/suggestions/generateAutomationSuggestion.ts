@@ -4,6 +4,7 @@ import { OPERATIONS_AUTOMATION_SYSTEM_PROMPT } from '@/server/automation/prompts
 import { serializeAutomationContext } from '@/server/automation/prompts/automationCommon';
 import { validateAutomationScript, type AutomationScript } from '@/server/automation/validateScript';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 const apiKey = appEnv.VITE_OPENAI_API_KEY;
 const openai = apiKey
@@ -60,7 +61,7 @@ export async function generateAutomationSuggestion({ issueId, orgId }: GenerateA
   try {
     parsed = JSON.parse(text) as AutomationScript;
   } catch (parseError) {
-    console.error('[generateAutomationSuggestion] invalid JSON', parseError, text);
+    logger.error('[generateAutomationSuggestion] invalid JSON', { error: parseError, context: { text }, tags: ['error'] });
     throw new Error('Automation generator returned invalid JSON');
   }
 

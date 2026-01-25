@@ -126,15 +126,18 @@ const mapBadgeRow = (row: BadgeCatalogRow): BadgeRecord => ({
   role: row.role ?? null,
 });
 
-const mapEarnedBadge = (row: any): EarnedBadge => ({
-  id: row.id,
-  code: row.badge_code,
-  title: row.badge?.title ?? row.badge_code,
-  description: row.badge?.description ?? null,
-  icon: row.badge?.icon ?? null,
-  awardedAt: row.awarded_at,
-  reason: row.reason ?? null,
-});
+const mapEarnedBadge = (row: Record<string, unknown>): EarnedBadge => {
+  const badge = row.badge as Record<string, unknown> | null | undefined;
+  return {
+    id: row.id as string,
+    code: (row.badge_code as string) ?? '',
+    title: (badge?.title as string | undefined) ?? (row.badge_code as string) ?? '',
+    description: (badge?.description as string | null | undefined) ?? null,
+    icon: (badge?.icon as string | null | undefined) ?? null,
+    awardedAt: row.awarded_at as string,
+    reason: (row.reason as string | null | undefined) ?? null,
+  };
+};
 
 const filterBadges = (badges: BadgeCatalogRow[], role: string | null, search: string | undefined) => {
   const searchValue = search?.toLowerCase() ?? '';

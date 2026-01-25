@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
+import { retrySupabaseQuery } from '@/utils/retry';
 
 export type TaskRow = Tables<'tasks'>;
 export type TaskInsert = TablesInsert<'tasks'>;
@@ -39,10 +40,10 @@ const taskRowSchema: z.ZodType<TaskRow> = z
     due_date: z.string().nullable(),
     estimated_hours: z.number().nullable(),
     actual_hours: z.number().nullable(),
-    attachments: z.any().nullable(),
+    attachments: z.unknown().nullable(), // Json type from database
     completed_at: z.string().nullable(),
     created_at: z.string(),
-    links: z.any(),
+    links: z.unknown(), // Custom field, can be array or object
     parent_task_id: z.string().nullable(),
     origin_document_id: z.string().nullable(),
     origin_event_id: z.string().nullable(),
@@ -80,17 +81,21 @@ export type TaskWithRelations = z.infer<typeof taskWithRelationsSchema>;
 export type TaskCommentWithUser = z.infer<typeof taskCommentWithUserSchema>;
 
 export async function fetchTasksByCompany(companyId: string): Promise<TaskWithRelations[]> {
-  const { data, error } = await supabase
-    .from('tasks')
-    .select(`
-      *,
-      assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
-      created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
-      department:departments(name),
-      goal:goals(id, title, status, progress, target_completion_date)
-    `)
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false });
+  // Phase 6: Apply retry logic to critical data fetch
+  const { data, error } = await retrySupabaseQuery(
+    () => supabase
+      .from('tasks')
+      .select(`
+        *,
+        assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
+        created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
+        department:departments(name),
+        goal:goals(id, title, status, progress, target_completion_date)
+      `)
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false }),
+    { maxRetries: 2, baseDelay: 500 } // Fewer retries for read operations
+  );
 
   if (error) {
     throw error;

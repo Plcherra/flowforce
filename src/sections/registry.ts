@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { PageMeta } from './PageFactory';
 import eventsConfig from './events/section.config';
 
@@ -16,7 +17,7 @@ export function getSectionBySlug(slug: string) {
 }
 
 export function getNavByCategory() {
-  const byCat: Record<string, { name: string; href: string; icon: any }[]> = {};
+  const byCat: Record<string, { name: string; href: string; icon: React.ReactNode | undefined }[]> = {};
   sections.forEach((s) => {
     const list = byCat[s.category] || (byCat[s.category] = []);
     list.push({ name: s.title, href: `/sections/${s.slug}`, icon: undefined });

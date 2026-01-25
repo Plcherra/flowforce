@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useAuth } from './useAuth';
 import type { PermissionKey } from './useUserPermissions';
 import { isPermissionKey as isRegisteredPermissionKey } from '@/lib/permissions/registry';
+import { logger } from '@/utils/logger';
 
 interface AuditLogEntry {
   user_id: string;
@@ -41,15 +42,15 @@ export function usePermissionAudit() {
         timestamp: new Date().toISOString()
       };
 
-      // Development: Log to console
+      // Development: Log to logger
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Permission Audit]', auditEntry);
+        logger.info('[Permission Audit]', { context: auditEntry, tags: ['audit', 'permission'] });
       }
 
       // Production: Could send to audit service or log table
       // await supabase.from('permission_audit_logs').insert(auditEntry);
     } catch (error) {
-      console.error('[Permission Audit] Failed to log permission check:', error);
+      logger.error('[Permission Audit] Failed to log permission check', { error, tags: ['error', 'audit'] });
     }
   }, [user?.id]);
 
@@ -77,10 +78,10 @@ export function usePermissionAudit() {
       };
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Permission Audit] Override:', auditEntry);
+        logger.info('[Permission Audit] Override', { context: auditEntry, tags: ['audit', 'permission'] });
       }
     } catch (error) {
-      console.error('[Permission Audit] Failed to log permission override:', error);
+      logger.error('[Permission Audit] Failed to log permission override', { error, tags: ['error', 'audit'] });
     }
   }, [user?.id]);
 

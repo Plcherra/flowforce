@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import {
   createTaskNotification,
   deleteNotification as deleteNotificationRecord,
@@ -82,7 +83,7 @@ export function useTaskNotifications() {
                 : typeof error === 'object' && error !== null && 'message' in error
                   ? String(error.message)
                   : 'Unknown error handling notification';
-              console.error('Error handling notification INSERT:', errorMessage, error);
+              logger.error('Error handling notification INSERT:', { error, context: { errorMessage }, tags: ['error'] });
             }
           }
         )
@@ -98,7 +99,7 @@ export function useTaskNotifications() {
             try {
               invalidateNotifications();
             } catch (error) {
-              console.error('Error handling notification UPDATE:', error);
+              logger.error('Error handling notification UPDATE:', { error, tags: ['error'] });
             }
           }
         )
@@ -106,11 +107,11 @@ export function useTaskNotifications() {
           if (status === 'SUBSCRIBED') {
             // Successfully subscribed
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            console.warn(`Task notifications subscription ${status}:`, err);
+            logger.warn(`Task notifications subscription ${status}:`, { error: err, tags: ['warning'] });
           }
         });
     } catch (error) {
-      console.error('Error setting up task notifications subscription:', error);
+      logger.error('Error setting up task notifications subscription:', { error, tags: ['error'] });
     }
 
     return () => {
@@ -152,7 +153,7 @@ export function useTaskNotifications() {
         
         // Only log if there's a meaningful error message
         if (errorMessage !== 'Unable to check due tasks.' || error) {
-          console.error('Error checking due tasks:', errorMessage, error);
+          logger.error('Error checking due tasks:', { error, context: { errorMessage }, tags: ['error'] });
         }
         
         if (isMounted) {
@@ -223,7 +224,7 @@ export function useTaskNotifications() {
       await markNotificationAsRead(notificationId);
       await invalidateNotifications();
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', { error, tags: ['error'] });
       setServiceError((error as Error)?.message ?? 'Unable to update notification.');
     }
   };
@@ -234,7 +235,7 @@ export function useTaskNotifications() {
       await markAllNotificationsAsRead(user.id);
       await invalidateNotifications();
     } catch (error) {
-      console.error('Error marking notifications as read:', error);
+      logger.error('Error marking notifications as read:', { error, tags: ['error'] });
       setServiceError((error as Error)?.message ?? 'Unable to update notifications.');
     }
   };
@@ -244,7 +245,7 @@ export function useTaskNotifications() {
       await deleteNotificationRecord(notificationId);
       await invalidateNotifications();
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', { error, tags: ['error'] });
       setServiceError((error as Error)?.message ?? 'Unable to delete notification.');
     }
   };
@@ -254,7 +255,7 @@ export function useTaskNotifications() {
       await createTaskNotification(input);
       await invalidateNotifications();
     } catch (error) {
-      console.error('Error creating notification:', error);
+      logger.error('Error creating notification:', { error, tags: ['error'] });
       setServiceError((error as Error)?.message ?? 'Unable to create notification.');
     }
   };

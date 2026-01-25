@@ -1,5 +1,6 @@
 import type { AutomationScript } from '../validateScript';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 type DispatchResult = {
   dispatched: boolean;
@@ -9,7 +10,7 @@ type DispatchResult = {
 export async function dispatchAutomationToFlowForce(script: AutomationScript): Promise<DispatchResult> {
   const endpoint = appEnv.VITE_FLOWFORCE_AUTOMATIONS_ENDPOINT;
   if (!endpoint) {
-    console.info('[FlowForceAdapter] no endpoint configured, skipping dispatch');
+    logger.info('[FlowForceAdapter] no endpoint configured, skipping dispatch', { tags: ['info'] });
     return { dispatched: false };
   }
 

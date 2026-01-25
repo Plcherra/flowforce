@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 
 import type { WizardFormData, WizardStepId } from './types';
 import { WIZARD_STEPS } from './steps';
+import { logger } from '@/utils/logger';
 
 const DEFAULT_FORM_DATA: WizardFormData = {
   title: '',
@@ -128,7 +129,7 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
       persistedRef.current = payload;
       setLastSavedAt(new Date(payload.savedAt));
     } catch (error) {
-      console.warn('Failed to persist update draft', error);
+      logger.warn('Failed to persist update draft', { error, tags: ['warning'] });
     }
   };
 

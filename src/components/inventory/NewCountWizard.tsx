@@ -16,6 +16,7 @@ import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryC
 import { useInventoryLocations } from '@/features/inventory/hooks/useInventoryLocations';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 interface NewCountWizardProps {
   open: boolean;
@@ -154,7 +155,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         }
       }
     } catch (error) {
-      console.warn('Failed to load stored count types', error);
+      logger.warn('Failed to load stored count types', { error, tags: ['warning'] });
     }
 
     setCountTypes(DEFAULT_COUNT_TYPES);

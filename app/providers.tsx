@@ -9,21 +9,22 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 // Initialize i18next before using it
 import '@/i18n/config';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Debug logging for dev
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Providers] Component mounted at', new Date().toISOString());
+    if (appEnv.DEV) {
+      logger.debug('Providers component mounted', { timestamp: new Date().toISOString() });
     }
   }, []);
 
   const [queryClient] = useState(
     () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Providers] Creating QueryClient');
+      if (appEnv.DEV) {
+        logger.debug('Creating QueryClient', { tags: ['react-query'] });
       }
       return new QueryClient({
         defaultOptions: {

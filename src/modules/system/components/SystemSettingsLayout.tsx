@@ -9,6 +9,7 @@ import { EmptyState } from './EmptyState';
 import { SystemSettingsContext } from '../hooks/SystemSettingsContext';
 import { useSystemSettings } from '../hooks/useSystemSettings';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 type TabConfig = {
   key: string;
@@ -40,7 +41,7 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
 
   const handleProfilerRender = (id: string, phase: 'mount' | 'update', actualDuration: number) => {
     if (appEnv.DEV) {
-      console.debug(`[system-settings] ${id} ${phase} render: ${actualDuration.toFixed(1)}ms`);
+      logger.debug(`[system-settings] ${id} ${phase} render: ${actualDuration.toFixed(1)}ms`, { context: { id, phase, duration: actualDuration }, tags: ['debug'] });
     }
     if (typeof performance !== 'undefined' && 'mark' in performance) {
       performance.mark(`system-settings:${id}:${phase}`);

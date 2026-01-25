@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { ScheduleRulebook, RulebookStep, RulebookConstraint } from '@/types/scheduleRulebook';
+import { logger } from '@/utils/logger';
 
 type DbRulebook = {
   id: string;
@@ -127,7 +128,7 @@ export async function fetchRulebookFromSupabase(identifier: string): Promise<Sch
   const { data, error } = await query;
 
   if (error) {
-    console.error('Failed to fetch rulebook', error);
+    logger.error('Failed to fetch rulebook', { error, tags: ['error'] });
     return null;
   }
 

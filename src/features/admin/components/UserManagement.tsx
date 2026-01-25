@@ -48,6 +48,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { evaluateEmployee } from '@/copilot/rulesEngine';
 import type { Database } from '@/integrations/supabase/types';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 import { logAuditEvent } from '@/services/audit/auditService';
 
 interface DepartmentRecord {
@@ -268,7 +269,7 @@ export default function UserManagement() {
             const decision = await evaluateEmployee(employee.id);
             return { employee, decision };
           } catch (error) {
-            console.error('Failed to evaluate employee for Copilot insights:', error);
+            logger.error('Failed to evaluate employee for Copilot insights', { error, tags: ['error'] });
             return null;
           }
         }),

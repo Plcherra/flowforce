@@ -28,6 +28,7 @@ import { useScheduling } from '@/contexts/SchedulingContext';
 import { format } from 'date-fns';
 import { useEvents } from '@/hooks/useEvents';
 import type { CopilotDraftWarning, CopilotScheduleMetadata } from '@/services/scheduling/autoScheduler';
+import { logger } from '@/utils/logger';
 
 const vendorLabelLookup: Record<string, string> = {
   ecolab: 'Ecolab Service',
@@ -110,7 +111,7 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
         }
       }
     } catch (error) {
-      console.error('Error saving shift:', error);
+      logger.error('Error saving shift:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -123,7 +124,7 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
     try {
       await updateSchedule(shift.id, { is_published: true });
     } catch (error) {
-      console.error('Error publishing shift:', error);
+      logger.error('Error publishing shift:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -137,7 +138,7 @@ export function ShiftDetailsPanel({ shiftId, onClose }: ShiftDetailsPanelProps) 
       await deleteSchedule(shift.id);
       onClose();
     } catch (error) {
-      console.error('Error deleting shift:', error);
+      logger.error('Error deleting shift:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

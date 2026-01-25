@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { InventoryService } from '@/features/inventory/services/inventoryService';
 import { InventoryItem, InventoryItemInsert, InventoryItemUpdate } from './types';
+import { logger } from '@/utils/logger';
 
 export function useInventoryItems() {
   const { toast } = useToast();
@@ -34,7 +35,7 @@ export function useCreateInventoryItem() {
       });
     },
     onError: (error: Error) => {
-      console.error('Create inventory item error:', error);
+      logger.error('Create inventory item error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error.message || 'Failed to create inventory item',
@@ -59,7 +60,7 @@ export function useUpdateInventoryItem() {
       });
     },
     onError: (error: Error) => {
-      console.error('Update inventory item error:', error);
+      logger.error('Update inventory item error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error.message || 'Failed to update inventory item',
@@ -83,7 +84,7 @@ export function useDeleteInventoryItem() {
       });
     },
     onError: (error: Error) => {
-      console.error('Delete inventory item error:', error);
+      logger.error('Delete inventory item error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete inventory item',

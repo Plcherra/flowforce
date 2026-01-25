@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import type { InventoryTransferStatus } from '@/features/inventory/hooks/types';
+import { logger } from '@/utils/logger';
 
 interface TransferNotificationBase {
   transferId: string;
@@ -18,7 +19,7 @@ interface StatusChangeNotification extends TransferNotificationBase {
 }
 
 const logNotification = (type: string, payload: Record<string, unknown>) => {
-  console.info(`[notify][inventory-transfer][${type}]`, payload);
+  logger.info(`[notify][inventory-transfer][${type}]`, { context: payload, tags: ['info'] });
 };
 
 const formatDeliveryDate = (deliveryDate?: string | null) => {

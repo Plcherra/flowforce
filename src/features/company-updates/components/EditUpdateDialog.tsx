@@ -11,6 +11,7 @@ import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useC
 import { RichTextEditor } from '@/features/company-updates/wizard/RichTextEditor';
 import type { CompanyUpdate } from '@/types/companyUpdates';
 import { Loader2 } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface EditUpdateDialogProps {
   open: boolean;
@@ -75,7 +76,7 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
       onOpenChange(false);
       onUpdateComplete?.();
     } catch (error) {
-      console.error('Failed to update:', error);
+      logger.error('Failed to update', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to update. Please try again.',

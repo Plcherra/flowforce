@@ -3,6 +3,7 @@ import { useNavigate } from '@/lib/router-adapter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 export interface ErrorBoundaryRenderProps {
   error: Error;
@@ -41,7 +42,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+    logger.error('ErrorBoundary caught:', { error, errorInfo, tags: ['error'] });
 
     this.setState({
       hasError: true,

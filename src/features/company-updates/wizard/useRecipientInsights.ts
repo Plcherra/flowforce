@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { WizardFormData } from './types';
+import { logger } from '@/utils/logger';
 
 export interface RecipientSegment {
   id: string;
@@ -64,7 +65,7 @@ export function useRecipientInsights(formData: WizardFormData) {
           error: null,
         });
       } catch (err) {
-        console.error('Failed to load recipient insights', err);
+        logger.error('Failed to load recipient insights', { error: err, tags: ['error'] });
         if (!cancelled) {
           setState((prev) => ({ ...prev, loading: false, error: 'Unable to load recipient metrics' }));
           toast({

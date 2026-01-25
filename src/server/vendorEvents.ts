@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/server/supabaseAdmin';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 export type VendorEvent = Tables<'vendor_event'>;
 
@@ -76,6 +77,6 @@ export async function linkToShift(eventId: string, shiftId: string | null) {
   // Note: vendor_visits doesn't have shift_id field
   // If you need to link vendor visits to shifts, consider using linked_event_id
   // to link to a calendar_event that references the shift
-  console.warn('linkToShift: vendor_visits table does not support shift_id. Consider using linked_event_id instead.');
+  logger.warn('linkToShift: vendor_visits table does not support shift_id. Consider using linked_event_id instead', { tags: ['warning'] });
   return { data: null, error: new Error('shift_id is not supported in vendor_visits schema') };
 }

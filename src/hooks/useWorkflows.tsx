@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type Workflow = Tables<'workflows'>;
 type WorkflowStep = Tables<'workflow_steps'>;
@@ -37,7 +38,7 @@ export function useWorkflows() {
       if (error) throw error;
       setWorkflows(data || []);
     } catch (error) {
-      console.error('Error fetching workflows:', error);
+      logger.error('Error fetching workflows', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -55,7 +56,7 @@ export function useWorkflows() {
       await fetchWorkflows(); // Refresh the list
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating workflow:', error);
+      logger.error('Error creating workflow', { error, tags: ['error'] });
       return { data: null, error };
     }
   };
@@ -73,7 +74,7 @@ export function useWorkflows() {
       await fetchWorkflows(); // Refresh the list
       return { data, error: null };
     } catch (error) {
-      console.error('Error updating workflow:', error);
+      logger.error('Error updating workflow', { error, tags: ['error'] });
       return { data: null, error };
     }
   };
@@ -89,7 +90,7 @@ export function useWorkflows() {
       await fetchWorkflows(); // Refresh the list
       return { error: null };
     } catch (error) {
-      console.error('Error deleting workflow:', error);
+      logger.error('Error deleting workflow', { error, tags: ['error'] });
       return { error };
     }
   };
@@ -108,7 +109,7 @@ export function useWorkflows() {
       if (error) throw error;
       return { data: data || [], error: null };
     } catch (error) {
-      console.error('Error fetching workflow steps:', error);
+      logger.error('Error fetching workflow steps', { error, tags: ['error'] });
       return { data: [], error };
     }
   };
@@ -124,7 +125,7 @@ export function useWorkflows() {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating workflow step:', error);
+      logger.error('Error creating workflow step', { error, tags: ['error'] });
       return { data: null, error };
     }
   };

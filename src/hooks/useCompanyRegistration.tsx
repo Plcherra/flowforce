@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserInfo, CompanyInfo, Branding, OnboardingRole } from '@/types/onboarding';
 import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
+import { logger } from '@/utils/logger';
 
 interface RegistrationData {
   userInfo: UserInfo;
@@ -132,8 +133,8 @@ export function useCompanyRegistration() {
     return result;
   };
 
-  const handleRegistrationError = (error: any): RegistrationError => {
-    console.error('Registration error:', error);
+  const handleRegistrationError = (error: unknown): RegistrationError => {
+    logger.error('Registration error', { error, tags: ['error'] });
 
     if (error.message?.includes('email') || error.message?.includes('User already registered')) {
       return {

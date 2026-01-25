@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
 import { CompanyRole, Position, CompanyConfig, CompanySettings } from '@/types/common';
 import { handleError } from '@/utils/errorHandler';
+import { logger } from '@/utils/logger';
 
 type CompanyRow = Tables<'companies'>;
 
@@ -151,7 +152,7 @@ export function useCompany() {
     }
 
     const useDemoFallback = (reason: string) => {
-      console.warn(`[useCompany] Falling back to demo company due to: ${reason}`);
+      logger.warn('[useCompany] Falling back to demo company', { context: { reason }, tags: ['warning'] });
       setCompany(getDemoCompany(user?.id));
       setLoading(false);
     };

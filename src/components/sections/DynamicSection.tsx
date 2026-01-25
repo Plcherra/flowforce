@@ -14,6 +14,7 @@ import { SectionConfigurationWizard } from '@/components/sections/SectionConfigu
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getSectionComponent } from '@/components/sections/componentRegistry';
+import { logger } from '@/utils/logger';
 
 interface DynamicSectionProps {
   sectionPath?: string;
@@ -33,9 +34,9 @@ const extractSlug = (value?: string | null) => {
   return parts[parts.length - 1] || '';
 };
 
-const getSectionSlug = (section: any) => {
+const getSectionSlug = (section: Record<string, unknown> | null | undefined) => {
   const raw = String(section?.path || '').replace(/^\/+/, '');
-  return raw || slugify(section?.name || section?.id || 'section');
+  return raw || slugify(String(section?.name || section?.id || 'section'));
 };
 
 export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
@@ -72,7 +73,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
     sectionRoute.includes('help-desk') ||
     sectionName.includes('help desk');
 
-  const handleWizardSave = async (updates: any) => {
+  const handleWizardSave = async (updates: Record<string, unknown>) => {
     try {
       await supabase
         .from('custom_sections')
@@ -90,13 +91,13 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
         .eq('section_id', section.id);
 
       const existingBySlug = new Map(
-        (existingPages || []).map((page: any) => {
-          const slug = extractSlug(page.route || page.name);
+        (existingPages || []).map((page: Record<string, unknown>) => {
+          const slug = extractSlug(String(page.route || page.name || ''));
           return [slug, page];
         })
       );
 
-      const finalPages = (updates.pages || []).map((p: any, index: number) => {
+      const finalPages = (Array.isArray(updates.pages) ? updates.pages : []).map((p: Record<string, unknown>, index: number) => {
         const baseSlug = slugify(
           extractSlug(p.route) || p.name || p.title || `page-${index + 1}`,
         );
@@ -126,8 +127,8 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
       });
 
       const seenSlugs = new Set<string>();
-      const pagesToInsert: any[] = [];
-      const pagesToUpdate: { id: string; values: any }[] = [];
+      const pagesToInsert: Record<string, unknown>[] = [];
+      const pagesToUpdate: { id: string; values: Record<string, unknown> }[] = [];
 
       finalPages.forEach(({ slug, payload }) => {
         seenSlugs.add(slug);
@@ -140,11 +141,11 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
       });
 
       const pagesToDelete = (existingPages || [])
-        .filter((page: any) => {
-          const slug = extractSlug(page.route || page.name);
+        .filter((page: Record<string, unknown>) => {
+          const slug = extractSlug(String(page.route || page.name || ''));
           return slug && !seenSlugs.has(slug);
         })
-        .map((page: any) => page.id);
+        .map((page: Record<string, unknown>) => page.id as string);
 
       for (const { id, values } of pagesToUpdate) {
         await supabase.from('custom_section_pages').update(values).eq('id', id);
@@ -161,7 +162,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
       await refetch();
       toast({ title: 'Section updated' });
     } catch (error) {
-      console.error('Failed to configure section', error);
+      logger.error('Failed to configure section', { error, tags: ['error'] });
       toast({ title: 'Failed to configure section', variant: 'destructive' });
       throw error;
     }
@@ -207,7 +208,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
     }
   }
 
-  const page = section.custom_section_pages?.find((p: any) => extractSlug(p.route || p.name || p.title) === pageSlug);
+  const page = section.custom_section_pages?.find((p: Record<string, unknown>) => extractSlug(String(p.route || p.name || p.title || '')) === pageSlug);
 
   if (!page) {
     return <Navigate to={`/app/section/${sectionSlug}`} replace />;
@@ -238,9 +239,9 @@ function GenericSectionRenderer({
   onOpenWizard,
   onNavigateToPage,
 }: {
-  section: any;
+  section: Record<string, unknown>;
   onOpenWizard: () => void;
-  onNavigateToPage: (page: any) => void;
+  onNavigateToPage: (page: Record<string, unknown>) => void;
 }) {
   const { can } = useCan();
   const navigate = useNavigate();
@@ -252,7 +253,7 @@ function GenericSectionRenderer({
       return <span className="text-base">{section.icon}</span>;
     }
 
-    const IconComponent = (Icons as any)[section.icon];
+    const IconComponent = (Icons as Record<string, React.ComponentType>)[String(section.icon || '')] as React.ComponentType | undefined;
     if (IconComponent) {
       return <IconComponent className="h-4 w-4" />;
     }
@@ -320,8 +321,8 @@ function GenericSectionRenderer({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {hasPages ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {section.custom_section_pages.map((page: any, index: number) => {
-              const IconComponent = (page.icon && (Icons as any)[page.icon]) || Icons.FileText;
+            {(Array.isArray(section.custom_section_pages) ? section.custom_section_pages : []).map((page: Record<string, unknown>, index: number) => {
+              const IconComponent = (page.icon && (Icons as Record<string, React.ComponentType>)[String(page.icon)]) || Icons.FileText;
               const componentMeta = getSectionComponent(
                 page.componentId || extractSlug(page.content?.[0]?.component) || page.content?.[0]?.type
               ) || getSectionComponent(page.content?.[0]?.component || page.content?.[0]?.type);
@@ -403,13 +404,13 @@ function SectionPageView({
   onBack,
   onOpenWizard,
 }: {
-  section: any;
-  page: any;
+  section: Record<string, unknown>;
+  page: Record<string, unknown>;
   onBack: () => void;
   onOpenWizard: () => void;
 }) {
   const { can } = useCan();
-  const IconComponent = (page.icon && (Icons as any)[page.icon]) || Icons.FileText;
+  const IconComponent = (page.icon && (Icons as Record<string, React.ComponentType>)[String(page.icon)]) || Icons.FileText;
   const componentEntry = Array.isArray(page.content) && page.content.length > 0 ? page.content[0] : null;
   const componentId = page.componentId || componentEntry?.component || componentEntry?.type;
   const componentMeta = componentId ? getSectionComponent(componentId) : undefined;

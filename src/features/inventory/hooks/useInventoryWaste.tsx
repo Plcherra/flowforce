@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { InventoryService } from '@/features/inventory/services/inventoryService';
+import { logger } from '@/utils/logger';
 
 // Re-export interfaces for compatibility
 export interface InventoryWaste {
@@ -64,7 +65,7 @@ export function useCreateWaste() {
       });
     },
     onError: (error) => {
-      console.error('Error creating waste record:', error);
+      logger.error('Error creating waste record', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to record waste. Please try again.',
@@ -91,7 +92,7 @@ export function useUpdateWaste() {
       });
     },
     onError: (error) => {
-      console.error('Error updating waste record:', error);
+      logger.error('Error updating waste record', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to update waste record. Please try again.',
@@ -117,7 +118,7 @@ export function useDeleteWaste() {
       });
     },
     onError: (error) => {
-      console.error('Error deleting waste record:', error);
+      logger.error('Error deleting waste record', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to delete waste record. Please try again.',

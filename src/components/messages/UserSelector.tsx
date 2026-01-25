@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface User {
   id: string;
@@ -108,7 +109,7 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
 
       setUsers(deduped);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.error('Error fetching users:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to load users',

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface BadgeCatalogRow {
   code: string;
@@ -177,7 +178,7 @@ export function useEmployeeEngagement(
       }));
       setBadges(mappedBadges);
     } catch (err) {
-      console.error('Failed to fetch engagement data', err);
+      logger.error('Failed to fetch engagement data', { error: err, tags: ['error'] });
       setError('Unable to load engagement data right now.');
       setSnapshot(defaultSnapshot);
       setBadges([]);

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { InventorySupplier } from './types';
+import { logger } from '@/utils/logger';
 
 export function useInventorySuppliers(companyId?: string | null) {
   const query = useQuery({
@@ -59,7 +60,7 @@ export function useCreateSupplier() {
         .single();
 
       if (error) {
-        console.error('Database error:', error);
+        logger.error('Database error', { error, tags: ['error'] });
         throw new Error(error.message || 'Failed to create supplier');
       }
       return data;
@@ -72,7 +73,7 @@ export function useCreateSupplier() {
       });
     },
     onError: (error: Error) => {
-      console.error('Create supplier error:', error);
+      logger.error('Create supplier error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error.message || 'Failed to create supplier',

@@ -29,6 +29,7 @@ import { useEmployeesCacheInvalidation } from '@/features/employees/hooks/useEmp
 import { useVendorForm, type VendorFormValues } from '@/features/inventory/hooks/useVendorForm';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { TableSkeleton } from '@/components/common/TableSkeleton';
+import { logger } from '@/utils/logger';
 
 type Department = Tables<'departments'> & { color?: string | null };
 type EmployeesTab = 'all' | 'managers' | 'inactive' | 'vendors';
@@ -114,7 +115,7 @@ export function TeamDirectory() {
       setShowAddVendorDialog(false);
       resetVendorForm();
     } catch (error) {
-      console.error('Error creating vendor:', error);
+      logger.error('Error creating vendor', { error, tags: ['error'] });
       vendorForm.setError('root', {
         message: error instanceof Error ? error.message : 'Unable to create vendor. Please try again.',
       });
@@ -135,7 +136,7 @@ export function TeamDirectory() {
       setDepartments(data || []);
       setDepartmentError(null);
     } catch (unknownErr) {
-      console.error('Error fetching departments:', unknownErr);
+      logger.error('Error fetching departments', { error: unknownErr, tags: ['error'] });
       setDepartmentError('Department filters are unavailable right now. Once Supabase is back online, refresh to restore filters.');
       setDepartments([]);
     }

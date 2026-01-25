@@ -17,7 +17,7 @@ const taskActivitySchema: z.ZodType<TaskActivityRow> = z
     user_id: z.string(),
     action_type: z.string(),
     description: z.string(),
-    metadata: z.any().nullable(),
+    metadata: z.unknown().nullable(), // Json type from database
     created_at: z.string(),
     company_id: z.string(),
   })

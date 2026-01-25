@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { ScheduleRulebook, RulebookStep, StepCriterion } from '@/types/scheduleRulebook';
+import { logger } from '@/utils/logger';
 
 export interface WorkflowCriterionSnapshot {
   recordId?: string;
@@ -55,7 +56,7 @@ export async function fetchWorkflowSnapshot(rulebook: ScheduleRulebook, workflow
     .eq('workflow_id', workflowId);
 
   if (error) {
-    console.error('Failed to load workflow snapshot', error);
+    logger.error('Failed to load workflow snapshot', { error, tags: ['error'] });
     return {};
   }
 
@@ -126,7 +127,7 @@ export async function upsertWorkflowCriterionState(params: {
     .single();
 
   if (error) {
-    console.error('Failed to upsert workflow criterion', error);
+    logger.error('Failed to upsert workflow criterion', { error, tags: ['error'] });
     return null;
   }
 
@@ -161,7 +162,7 @@ export async function setWorkflowCriterionApproval(params: {
     .single();
 
   if (error) {
-    console.error('Failed to update approval status', error);
+    logger.error('Failed to update approval status', { error, tags: ['error'] });
     return null;
   }
 
@@ -191,7 +192,7 @@ async function ensureWorkflowSteps(rulebook: ScheduleRulebook, workflowId: strin
     .eq('workflow_id', workflowId);
 
   if (error) {
-    console.error('Failed to check workflow steps', error);
+    logger.error('Failed to check workflow steps', { error, tags: ['error'] });
     return;
   }
 
@@ -210,7 +211,7 @@ async function ensureWorkflowSteps(rulebook: ScheduleRulebook, workflowId: strin
 
   const { error: insertError } = await supabase.from('schedule_workflow_steps').insert(inserts);
   if (insertError) {
-    console.error('Failed to insert workflow steps', insertError);
+    logger.error('Failed to insert workflow steps', { error: insertError, tags: ['error'] });
   }
 }
 
@@ -230,7 +231,7 @@ function parseEvidenceValue(value: unknown): number | string | boolean | undefin
       return value.value ?? value;
     }
   } catch (error) {
-    console.warn('Failed to parse evidence value', error);
+    logger.warn('Failed to parse evidence value', { error, tags: ['warning'] });
   }
   return undefined;
 }

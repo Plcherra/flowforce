@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface Reaction {
   id: string;
@@ -38,7 +39,7 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
       if (error) throw error;
       setReactions(data || []);
     } catch (error) {
-      console.error('Error fetching reactions:', error);
+      logger.error('Error fetching reactions', { error, tags: ['error'] });
     }
   }, []);
 
@@ -100,7 +101,7 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
       if (error) throw error;
       setShowEmojiPicker(false);
     } catch (error) {
-      console.error('Error adding reaction:', error);
+      logger.error('Error adding reaction', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to add reaction',
@@ -120,7 +121,7 @@ export function MessageReactions({ messageId, className = '' }: MessageReactions
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error removing reaction:', error);
+      logger.error('Error removing reaction', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to remove reaction',

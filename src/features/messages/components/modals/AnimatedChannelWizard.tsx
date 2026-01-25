@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/utils/logger';
 
 interface AnimatedChannelWizardProps {
   open: boolean;
@@ -112,7 +113,7 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
 
       try {
         if (!companyId) {
-          console.warn('Company context required to load channel members');
+          logger.warn('Company context required to load channel members', { tags: ['warning'] });
           setMemberOptions([]);
           return;
         }
@@ -152,7 +153,7 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
           }));
         }
       } catch (error) {
-        console.error('Error fetching users for channel wizard:', error);
+        logger.error('Error fetching users for channel wizard', { error, tags: ['error'] });
         if (!cancelled) {
           setMemberOptions([]);
           toast({
@@ -226,7 +227,7 @@ export function AnimatedChannelWizard({ open, onClose }: AnimatedChannelWizardPr
       setCurrentStep(1);
       onClose();
     } catch (error) {
-      console.error('Error creating channel:', error);
+      logger.error('Error creating channel:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to create channel',

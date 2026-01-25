@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { dispatchAutomationToFlowForce } from '@/server/automation/adapters/flowforceOperationsAdapter';
 import type { AutomationScript } from '@/server/automation/validateScript';
+import { logger } from '@/utils/logger';
 
 interface AutomationSuggestion {
   id: string;
@@ -34,7 +35,7 @@ export function AutomationsPanel() {
         .limit(10);
       if (!active) return;
       if (error) {
-        console.error('[AutomationsPanel] failed to load suggestions', error);
+        logger.error('[AutomationsPanel] failed to load suggestions', { error, tags: ['error'] });
         setSuggestions([]);
       } else {
         setSuggestions((data ?? []) as AutomationSuggestion[]);
@@ -56,7 +57,7 @@ export function AutomationsPanel() {
     try {
       await dispatchAutomationToFlowForce(suggestion.script);
     } catch (error) {
-      console.error('[AutomationsPanel] Failed to dispatch automation', error);
+      logger.error('[AutomationsPanel] Failed to dispatch automation', { error, tags: ['error'] });
     } finally {
       setDispatching(null);
     }

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface AuditEventPayload {
   targetUserId?: string | null;
@@ -22,7 +23,7 @@ export async function logAuditEvent({
   newValues = null,
 }: AuditEventPayload): Promise<void> {
   if (!action || !tableName) {
-    console.warn('[auditService] Missing action or table name, skipping audit log.');
+    logger.warn('[auditService] Missing action or table name, skipping audit log', { tags: ['warning'] });
     return;
   }
 
@@ -36,10 +37,10 @@ export async function logAuditEvent({
   });
 
   if (error) {
-    console.error('[auditService] Failed to log audit event', {
-      action,
-      tableName,
+    logger.error('[auditService] Failed to log audit event', {
+      context: { action, tableName },
       error,
+      tags: ['error'],
     });
   }
 }

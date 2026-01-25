@@ -37,7 +37,7 @@ export function useReminders() {
       const data = await fetchRemindersForUser(user.id);
       setReminders(data);
     } catch (error) {
-      console.error('Error fetching reminders:', error);
+      logger.error('Error fetching reminders:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export function useReminders() {
       await fetchReminders();
       await invalidatePerformanceDataset();
     } catch (error) {
-      console.error('Error creating reminder:', error);
+      logger.error('Error creating reminder:', { error, tags: ['error'] });
       throw error;
     }
   };
@@ -68,7 +68,7 @@ export function useReminders() {
       await fetchReminders();
       await invalidatePerformanceDataset();
     } catch (error) {
-      console.error('Error updating reminder:', error);
+      logger.error('Error updating reminder:', { error, tags: ['error'] });
       throw error;
     }
   };
@@ -84,7 +84,7 @@ export function useReminders() {
         description: 'Reminder deleted successfully.',
       });
     } catch (error) {
-      console.error('Error deleting reminder:', error);
+      logger.error('Error deleting reminder:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to delete reminder.',
@@ -106,7 +106,7 @@ export function useReminders() {
         last_triggered_at: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error snoozing reminder:', error);
+      logger.error('Error snoozing reminder:', { error, tags: ['error'] });
       throw error;
     }
   };

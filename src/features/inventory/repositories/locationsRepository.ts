@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { InventoryLocation } from '@/features/inventory/hooks/types';
+import { logger } from '@/utils/logger';
 
 const inventoryLocationSchema: z.ZodType<InventoryLocation> = z.object({
   id: z.string().uuid(),
@@ -29,7 +30,7 @@ export async function listInventoryLocations({
   const scopedCompanyId = companyId ?? (await resolveCompanyId());
 
   if (!scopedCompanyId) {
-    console.warn('[inventory] listLocations called without an active company context');
+    logger.warn('[inventory] listLocations called without an active company context', { tags: ['warning'] });
     return [];
   }
 

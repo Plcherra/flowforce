@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/logger';
 
 import type { Announcement, CreateAnnouncementData } from '@/types/announcements';
 
@@ -78,7 +79,7 @@ export function useAnnouncements() {
 
       setAnnouncements(announcementsWithReadStatus);
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      logger.error('Error fetching announcements', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

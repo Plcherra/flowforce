@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface ProfileSummary {
   id: string;
@@ -9,11 +10,11 @@ interface ProfileSummary {
 }
 
 const sendEmail = async (to: string[], subject: string, body: string) => {
-  console.info('[notify][email]', { to, subject, body });
+  logger.info('[notify][email]', { context: { to, subject, body }, tags: ['info'] });
 };
 
 const sendInAppNotification = async (userIds: string[], message: string) => {
-  console.info('[notify][in-app]', { userIds, message });
+  logger.info('[notify][in-app]', { context: { userIds, message }, tags: ['info'] });
 };
 
 const fetchRequestWithEmployee = async (requestId: string) => {
@@ -64,7 +65,7 @@ export async function notifyManagersNewRequest(requestId: string): Promise<void>
       `${employee.first_name} ${employee.last_name} submitted an availability request (week of ${requestedWeek}).`,
     );
   } catch (error) {
-    console.error('[notifyManagersNewRequest] Failed', error);
+    logger.error('[notifyManagersNewRequest] Failed', { error, tags: ['error'] });
   }
 }
 
@@ -91,7 +92,7 @@ export async function notifyEmployeeDecision(requestId: string): Promise<void> {
       `Your availability request for ${dayjs(request.week_start).format('MMM D')} was ${decisionDetail}.`,
     );
   } catch (error) {
-    console.error('[notifyEmployeeDecision] Failed', error);
+    logger.error('[notifyEmployeeDecision] Failed', { error, tags: ['error'] });
   }
 }
 

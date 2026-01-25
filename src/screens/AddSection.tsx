@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CreateSectionDialog } from '@/components/sections/CreateSectionDialog';
 import { SectionConfigurationWizard } from '@/components/sections/SectionConfigurationWizard';
+import { logger } from '@/utils/logger';
 
 const slugify = (value: string) => value
   .toLowerCase()
@@ -51,7 +52,7 @@ export default function AddSection() {
       setNewSection(createdSection);
       setShowConfigWizard(true);
     } catch (error) {
-      console.error('Error creating section:', error);
+      logger.error('Error creating section:', { error, tags: ['error'] });
     } finally {
       setIsCreating(false);
     }
@@ -171,7 +172,7 @@ export default function AddSection() {
       // 3) Navigate to new section
       navigate(`/app/section/${sectionSlug}`);
     } catch (error) {
-      console.error('Error configuring section:', error);
+      logger.error('Error configuring section:', { error, tags: ['error'] });
     }
   };
 

@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateCourseWorkload } from '@/services/learning/learningService';
 import type { CourseCreationPayload, CourseModuleInput, LearningDeliveryMode } from '@/types/learning';
+import { logger } from '@/utils/logger';
 import CourseWizardHeader from './CourseWizardHeader';
 import CourseWizardSteps from './CourseWizardSteps';
 import CourseWizardFooter from './CourseWizardFooter';
@@ -104,7 +105,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
       .order('title', { ascending: true })
       .then(({ data, error }) => {
         if (error) {
-          console.warn('Unable to load certification catalog', error);
+          logger.warn('Unable to load certification catalog', { error, tags: ['warning'] });
           setCertificationOptions([]);
           return;
         }

@@ -1,3 +1,21 @@
+/**
+ * Authentication hooks and context provider
+ * 
+ * Provides authentication state management, sign-in, sign-up, password reset,
+ * and session management functionality for the application.
+ * 
+ * @module hooks/useAuth
+ * @example
+ * ```typescript
+ * const { user, signIn, signOut } = useAuth();
+ * 
+ * // Sign in
+ * const { error } = await signIn('user@example.com', 'password');
+ * 
+ * // Sign out
+ * await signOut();
+ * ```
+ */
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
@@ -5,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { AuthError, UserMetadata } from '@/types/common';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/config';
+import { logger } from '@/utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -63,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(data.session);
         setUser(data.session?.user ?? null);
       } catch (error) {
-        console.error('Failed to hydrate auth session', error);
+        logger.error('Failed to hydrate auth session', { error, tags: ['error'] });
         if (isMounted) {
           setSession(null);
           setUser(null);
@@ -76,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     hydrateSession().catch((error) => {
-      console.error('Unexpected auth initialization error', error);
+      logger.error('Unexpected auth initialization error', { error, tags: ['error'] });
       if (isMounted) {
         setLoading(false);
       }
@@ -88,6 +107,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  /**
+   * Sign in with email and password
+   * 
+   * @param email - User email address
+   * @param password - User password
+   * @returns Object with error property (null if successful)
+   * 
+   * @example
+   * ```typescript
+   * const { error } = await signIn('user@example.com', 'password123');
+   * if (error) {
+   *   console.error('Sign in failed:', error.message);
+   * }
+   * ```
+   */
   const signIn = async (email: string, password: string) => {
     try {
       // Check if Supabase is configured by checking the config values
@@ -137,6 +171,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Sign up a new user with email and password
+   * 
+   * @param email - User email address
+   * @param password - User password
+   * @param firstName - User first name
+   * @param lastName - User last name
+   * @param metadata - Optional user metadata
+   * @returns Object with error property (null if successful)
+   * 
+   * @example
+   * ```typescript
+   * const { error } = await signUp(
+   *   'user@example.com',
+   *   'password123',
+   *   'John',
+   *   'Doe'
+   * );
+   * ```
+   */
   const signUp = async (
     email: string,
     password: string,
@@ -287,6 +341,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * useAuth - Hook to access authentication context
+ * 
+ * Provides access to current user, session, loading state, and authentication methods.
+ * Must be used within an AuthProvider.
+ * 
+ * @returns Authentication context with user, session, loading state, and auth methods
+ * @throws Error if used outside AuthProvider
+ * 
+ * @example
+ * ```typescript
+ * const { user, loading, signIn, signOut } = useAuth();
+ * 
+ * if (loading) return <Loading />;
+ * if (!user) return <LoginForm />;
+ * 
+ * return <Dashboard user={user} />;
+ * ```
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

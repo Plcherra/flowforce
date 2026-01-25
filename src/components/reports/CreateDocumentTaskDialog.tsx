@@ -13,6 +13,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { DocumentWithRelations } from '@/types/ingestion';
+import { logger } from '@/utils/logger';
 
 interface CreateDocumentTaskDialogProps {
   document: DocumentWithRelations | null;
@@ -96,7 +97,7 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
       resetForm();
       onClose();
     } catch (err) {
-      console.error('Failed to create document task', err);
+      logger.error('Failed to create document task', { error: err, tags: ['error'] });
       const message = err instanceof Error ? err.message : 'Unable to create task.';
       toast({
         title: 'Task creation failed',

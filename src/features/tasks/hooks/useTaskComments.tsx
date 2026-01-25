@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTasks, type TaskWithRelations } from '@/hooks/useTasks';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 export type TaskCommentRow = Tables<'task_comments'>;
 export type TaskCommentWithUser = TaskCommentRow & {
@@ -27,7 +28,7 @@ export function useTaskComments(task: TaskWithRelations | null, open: boolean) {
       const { data } = await getTaskComments(task.id);
       setComments((data as TaskCommentWithUser[]) ?? []);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      logger.error('Error fetching comments:', { error, tags: ['error'] });
     } finally {
       setLoadingComments(false);
     }
@@ -55,7 +56,7 @@ export function useTaskComments(task: TaskWithRelations | null, open: boolean) {
         setComments((prev) => [...prev, data as TaskCommentWithUser]);
         return { success: true };
       } catch (error) {
-        console.error('Error adding comment:', error);
+        logger.error('Error adding comment:', { error, tags: ['error'] });
         return { success: false, error: error as Error };
       } finally {
         setAddingComment(false);

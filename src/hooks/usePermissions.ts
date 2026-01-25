@@ -7,6 +7,7 @@ import { useUserPermissionOverrides } from './useUserPermissions';
 import type { TeamRole } from './useTeamManagement';
 import { createPermissionResolver, type PermissionContext } from '@/lib/permissions/resolver';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 type Permission =
   | 'viewOwnProfile'
@@ -88,9 +89,9 @@ export function usePermissions() {
 
   const can = (permission: Permission): boolean => {
     try {
-      return resolver.resolve(permission as any);
+      return resolver.resolve(permission as unknown);
     } catch (error) {
-      console.error('Failed to resolve permission', error);
+      logger.error('Failed to resolve permission', { error, tags: ['error'] });
       return false;
     }
   };
@@ -172,7 +173,7 @@ export function usePermissionFlags() {
           .order('hierarchy_level', { ascending: true });
 
         if (error) {
-          console.error('Failed to load permission flags', error);
+          logger.error('Failed to load permission flags', { error, tags: ['error'] });
           return [];
         }
 
@@ -182,7 +183,7 @@ export function usePermissionFlags() {
           permissions: normalizePermissions(role.permissions),
         }));
       } catch (error) {
-        console.error('Unexpected permission flags query error', error);
+        logger.error('Unexpected permission flags query error', { error, tags: ['error'] });
         return [];
       }
     },

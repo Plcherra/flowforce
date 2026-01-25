@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScanLine, Camera, Type, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface ScanConfig {
   scan_types?: ('barcode' | 'qr_code')[];
@@ -58,7 +59,7 @@ export function ScannerField({
         setIsScanning(true);
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      logger.error('Error accessing camera:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Unable to access camera. Please check permissions.",

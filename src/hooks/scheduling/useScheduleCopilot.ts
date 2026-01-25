@@ -3,6 +3,7 @@ import { getScheduleRulebook } from '@/services/scheduleRulebookService';
 import { fetchRulebookFromSupabase } from '@/services/guardrail/supabaseScheduleRulebookRepository';
 import { ScheduleGuardrailEngine, type GuardrailAction, type GuardrailResult } from '@/services/guardrail/scheduleGuardrailEngine';
 import type { RulebookStep, ScheduleRulebook, StepCriterion } from '@/types/scheduleRulebook';
+import { logger } from '@/utils/logger';
 import {
   fetchWorkflowSnapshot as fetchWorkflowSnapshotFromSupabase,
   upsertWorkflowCriterionState,
@@ -70,7 +71,7 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         }
       })
       .catch((error) => {
-        console.error('Failed to load rulebook from Supabase', error);
+        logger.error('Failed to load rulebook from Supabase', { error, tags: ['error'] });
         if (!isMounted) return;
         setRulebook(getScheduleRulebook(options.rulebookId));
       })
@@ -112,7 +113,7 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         setCriterionState(hydrateStateFromSnapshot(rulebook, snapshot));
       })
       .catch((error) => {
-        console.error('Failed to hydrate workflow state', error);
+        logger.error('Failed to hydrate workflow state', { error, tags: ['error'] });
       })
       .finally(() => {
         if (active) {

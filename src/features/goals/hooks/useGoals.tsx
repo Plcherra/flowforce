@@ -3,6 +3,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import type { TablesInsert } from '@/integrations/supabase/public-types';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/utils/logger';
 import {
   deleteGoalRow,
   fetchGoalRewards,
@@ -71,14 +72,14 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
       const taskLinks = await fetchGoalTasks(goalIds);
       goalTasksMap = groupGoalTasks(taskLinks);
     } catch (goalTasksError) {
-      console.warn('[useGoals] Failed to load goal task links', goalTasksError);
+      logger.warn('[useGoals] Failed to load goal task links', { error: goalTasksError, tags: ['warning'] });
     }
 
     let rewardList: Awaited<ReturnType<typeof fetchGoalRewards>> = [];
     try {
       rewardList = await fetchGoalRewards(goalIds, companyId);
     } catch (rewardsError) {
-      console.warn('[useGoals] Failed to load goal rewards', rewardsError);
+      logger.warn('[useGoals] Failed to load goal rewards', { error: rewardsError, tags: ['warning'] });
     }
 
     const rewardUserIds = Array.from(
@@ -95,7 +96,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
         const rewardProfiles = await fetchProfilesByIds(companyId, rewardUserIds);
         rewardUsers = buildOwnerMap(rewardProfiles);
       } catch (rewardProfileError) {
-        console.warn('[useGoals] Failed to load recognition recipients', rewardProfileError);
+        logger.warn('[useGoals] Failed to load recognition recipients', { error: rewardProfileError, tags: ['warning'] });
       }
     }
 

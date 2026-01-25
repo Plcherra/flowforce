@@ -6,6 +6,7 @@
  */
 
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 const CONNECTEAM_API_BASE = appEnv.VITE_CONNECTEAM_API_BASE ?? 'https://api.connecteam.com/v1';
 const CONNECTEAM_API_KEY = appEnv.VITE_CONNECTEAM_API_KEY ?? '';
@@ -61,7 +62,7 @@ export async function fetchConnecteamForms(params: FetchParams = {}): Promise<Co
     }
     return data as unknown as ConnecteamForm[];
   } catch (error) {
-    console.warn('Connecteam forms fetch failed', error);
+    logger.warn('Connecteam forms fetch failed', { error, tags: ['warning'] });
     return [];
   }
 }
@@ -78,7 +79,7 @@ export async function fetchConnecteamFormSubmissions(
     }
     return data as unknown as ConnecteamFormSubmission[];
   } catch (error) {
-    console.warn(`Connecteam submissions fetch failed for form ${formId}`, error);
+    logger.warn(`Connecteam submissions fetch failed for form ${formId}`, { context: { formId }, error, tags: ['warning'] });
     return [];
   }
 }

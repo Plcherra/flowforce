@@ -4,6 +4,7 @@ import { useProfile } from '../useProfile';
 import { useRealtime } from '@/hooks/useRealtime';
 import type { MessageChannel, CreateChannelData } from '@/types/messages';
 import { messagesRepository } from '@/repositories/messagesRepository';
+import { logger } from '@/utils/logger';
 import {
   createChannel as createChannelService,
   joinChannel as joinChannelService,
@@ -29,7 +30,7 @@ export function useMessageChannels() {
       setError(null);
     } catch (error) {
       const issue = error instanceof Error ? error : new Error('Error fetching channels');
-      console.error('Error fetching channels:', issue);
+      logger.error('Error fetching channels:', { error: issue, tags: ['error'] });
       setError(issue);
     } finally {
       setLoading(false);
@@ -111,7 +112,7 @@ export function useMessageChannels() {
         await updateLastReadService(channelId, user.id);
       } catch (error) {
         const issue = error instanceof Error ? error : new Error('Error updating last read');
-        console.error(issue);
+        logger.error('Error updating last read', { error: issue, tags: ['error'] });
         setError(issue);
       }
     },

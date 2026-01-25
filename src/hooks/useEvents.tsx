@@ -9,6 +9,7 @@ import { queryKeys } from '@/lib/queryKeys';
 import { CalendarError } from '@/features/calendar/types';
 import { normalizeCalendarError } from '@/features/calendar/hooks/useCalendarMutationError';
 import { scheduleGateway } from '@/lib/api/scheduleGateway';
+import { logger } from '@/utils/logger';
 
 function makeId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -88,7 +89,7 @@ const readStoredEvents = (key: string): AppEvent[] | undefined => {
     }));
     return sortEvents(mapped);
   } catch (error) {
-    console.error('Failed to parse cached events', error);
+    logger.error('Failed to parse cached events', { error, tags: ['error'] });
     return undefined;
   }
 };
@@ -99,7 +100,7 @@ const persistStoredEvents = (key: string, events: AppEvent[]) => {
     const payload = events.map(({ persisted, source, ...rest }) => ({ ...rest, persisted, source }));
     window.localStorage.setItem(key, JSON.stringify(payload));
   } catch (error) {
-    console.error('Failed to persist events locally', error);
+    logger.error('Failed to persist events locally', { error, tags: ['error'] });
   }
 };
 
@@ -108,7 +109,7 @@ const removeStoredEvents = (key: string) => {
   try {
     window.localStorage.removeItem(key);
   } catch (error) {
-    console.error('Failed to clear cached events', error);
+    logger.error('Failed to clear cached events', { error, tags: ['error'] });
   }
 };
 
@@ -197,7 +198,7 @@ const syncEventParticipants = async (
 
     await calendarEventsRepository.replaceEventParticipants(companyId, eventId, payload);
   } catch (error) {
-    console.warn('Failed to sync event participants', error);
+    logger.warn('Failed to sync event participants', { error, tags: ['warning'] });
   }
 };
 
@@ -211,7 +212,7 @@ const syncEventShiftLinks = async (
     const uniqueShiftIds = Array.from(new Set((shiftIds ?? []).filter(Boolean)));
     await calendarEventsRepository.replaceEventShiftLinks(companyId, eventId, uniqueShiftIds);
   } catch (error) {
-    console.warn('Failed to sync event shift links', error);
+    logger.warn('Failed to sync event shift links', { error, tags: ['warning'] });
   }
 };
 

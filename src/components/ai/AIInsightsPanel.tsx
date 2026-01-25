@@ -14,6 +14,7 @@ import AIActionsFeed from '@/components/ai/AIActionsFeed';
 import { ClosedLoopSummary } from '@/components/ai/ClosedLoopSummary';
 import { useClosedLoopState } from '@/hooks/useClosedLoopState';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 
 interface AIInsightsPanelProps {
   type: 'dashboard' | 'scheduler' | 'expenses' | 'reports';
@@ -63,7 +64,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
         setLastUpdated(new Date());
       }
     } catch (error) {
-      console.error('Failed to fetch AI insights:', error);
+      logger.error('Failed to fetch AI insights:', { error, tags: ['error'] });
       if (mountedRef.current) {
         setInsights('Unable to generate insights at this time. Please try again later.');
       }

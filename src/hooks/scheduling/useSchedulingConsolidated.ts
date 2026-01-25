@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { canViewScheduleDrafts } from '@/utils/authRoles';
 import { buildSchedulingFallbackData } from './fallbackData';
+import { logger } from '@/utils/logger';
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -134,7 +135,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       : typeof schedulesQuery.error === 'object' && schedulesQuery.error !== null && 'message' in schedulesQuery.error
         ? String(schedulesQuery.error.message)
         : DEFAULT_ERROR;
-    console.error('Failed to load scheduling data, using fallback data.', errorMessage, schedulesQuery.error);
+    logger.error('Failed to load scheduling data, using fallback data', { error: schedulesQuery.error, context: { errorMessage }, tags: ['error'] });
     setError(errorMessage);
     const fallback = buildSchedulingFallbackData({ start: range.start });
     setShifts(fallback.shifts);

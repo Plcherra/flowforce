@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { RecognitionDetails, RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
 import type { TrainingAssignment, TrainingModule } from '@/types/training';
 import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type GoalRow = Tables<'goals'>;
 type GoalMilestoneRow = Tables<'goal_milestones'>;
@@ -142,13 +143,13 @@ function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
     try {
       candidate = JSON.parse(candidate);
     } catch (error) {
-      console.warn('Failed to parse recognition details string', error);
+      logger.warn('Failed to parse recognition details string', { error, tags: ['warning'] });
       return null;
     }
   }
   const parsed = recognitionDetailsSchema.safeParse(candidate);
   if (!parsed.success) {
-    console.warn('Invalid recognition details payload', parsed.error);
+    logger.warn('Invalid recognition details payload', { error: parsed.error, tags: ['warning'] });
     return null;
   }
   return parsed.data as RecognitionDetails;

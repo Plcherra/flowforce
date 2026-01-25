@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserPlus, Search, X } from 'lucide-react';
 import { usePositions } from '@/hooks/usePositions';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface User {
   id: string;
@@ -43,7 +44,7 @@ export function UserPositionAssignment({ children }: UserPositionAssignmentProps
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.error('Error fetching users:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

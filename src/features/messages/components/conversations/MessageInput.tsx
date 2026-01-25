@@ -5,6 +5,7 @@ import { Send } from 'lucide-react';
 import { MessageAttachments } from './MessageAttachments';
 import type { MessageAttachment } from '@/types/messages';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface MessageInputProps {
   channelId: string;
@@ -51,7 +52,7 @@ export function MessageInput({ channelId, channelName, onSendMessage }: MessageI
       setMessageAttachments([]);
       resizeTextarea();
     } catch (error) {
-      console.error('Failed to send message', error);
+      logger.error('Failed to send message', { error, tags: ['error'] });
       setErrorMessage('Unable to send message. Please try again.');
       toast({
         title: 'Message not sent',

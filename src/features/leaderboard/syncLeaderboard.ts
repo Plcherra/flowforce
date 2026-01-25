@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { evaluateEmployee } from '@/copilot/rulesEngine';
 import type { Employee } from '@/hooks/useEmployees';
 import type { RecognitionDetails } from '@/types/recognition';
+import { logger } from '@/utils/logger';
 import {
   BASE_TRAINING_XP,
   GOAL_COMPLETION_XP,
@@ -73,7 +74,7 @@ function parseRecognitionDetails(raw: unknown): RecognitionDetails | null {
     try {
       return JSON.parse(raw) as RecognitionDetails;
     } catch (error) {
-      console.warn('[leaderboard] unable to parse recognition details string', error);
+      logger.warn('[leaderboard] unable to parse recognition details string', { error, tags: ['warning'] });
       return null;
     }
   }
@@ -147,7 +148,7 @@ async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRan
   if (employeeIds.length === 0) return new Map<string, LeaderboardSyncMetrics>();
 
   let query = supabase
-    .from('recognitions' as any)
+    .from('recognitions')
     .select('user_id, awarded_at, reward_details, award_rule')
     .eq('company_id', companyId)
     .in('user_id', employeeIds);
@@ -163,7 +164,7 @@ async function collectRecognitionMetrics(employeeIds: string[], range: PeriodRan
   if (error) throw error;
 
   const metrics = new Map<string, LeaderboardSyncMetrics>();
-  (data ?? []).forEach((row: any) => {
+  (data ?? []).forEach((row: Record<string, unknown>) => {
     const employeeId = row.user_id as string | null;
     if (!employeeId) return;
     const entry = ensureMetrics(metrics, employeeId);
@@ -303,7 +304,7 @@ async function evaluateCopilotChallenges(
           challenges.set(row.employee_id, rowChallenges);
         }
       } catch (error) {
-        console.error('[leaderboard] Copilot evaluation failed', error);
+        logger.error('[leaderboard] Copilot evaluation failed', { error, tags: ['error'] });
       }
     }),
   );
@@ -394,7 +395,7 @@ export async function syncLeaderboard({
     .upsert(rows, { onConflict: 'employee_id,period,period_start' });
 
   if (error) {
-    console.error('[leaderboard] Failed to sync leaderboard', error);
+    logger.error('[leaderboard] Failed to sync leaderboard', { error, tags: ['error'] });
     throw error;
   }
 
@@ -415,7 +416,7 @@ export async function ensureLeaderboardSynced(
     .limit(1);
 
   if (error) {
-    console.error('[leaderboard] Failed to check sync status', error);
+    logger.error('[leaderboard] Failed to check sync status', { error, tags: ['error'] });
     return false;
   }
 

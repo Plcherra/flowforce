@@ -10,6 +10,7 @@ import { usePositions, type Position, type PositionAssignment } from '@/hooks/us
 import { PERMISSION_KEYS, type PermissionKey } from '@/hooks/useUserPermissions';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { logger } from '@/utils/logger';
 import {
   BarChart3,
   CalendarCheck,
@@ -597,7 +598,7 @@ export default function SectionPermissionsTab() {
         description: 'Role access changes propagated to linked positions and employees.'
       });
     } catch (error) {
-      console.error('Failed to save role matrix', error);
+      logger.error('Failed to save role matrix', { error, tags: ['error'] });
       toast({
         title: 'Save failed',
         description: 'We could not sync the updated permissions. Please retry.',

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type GoalTaskRow = Tables<'goal_tasks'> & {
   task?: Pick<Tables<'tasks'>, 'status'> | null;
@@ -40,7 +41,7 @@ export const syncGoalProgress = async (goalId: string | null | undefined) => {
     .eq('goal_id', goalId);
 
   if (goalTasksError) {
-    console.error('Error fetching goal tasks for progress sync:', goalTasksError);
+    logger.error('Error fetching goal tasks for progress sync', { error: goalTasksError, tags: ['error'] });
     return;
   }
 
@@ -51,7 +52,7 @@ export const syncGoalProgress = async (goalId: string | null | undefined) => {
     .single();
 
   if (goalError) {
-    console.error('Error fetching goal for progress sync:', goalError);
+    logger.error('Error fetching goal for progress sync', { error: goalError, tags: ['error'] });
     return;
   }
 
@@ -80,6 +81,6 @@ export const syncGoalProgress = async (goalId: string | null | undefined) => {
     .eq('id', goalId);
 
   if (updateError) {
-    console.error('Error updating goal progress:', updateError);
+    logger.error('Error updating goal progress', { error: updateError, tags: ['error'] });
   }
 };

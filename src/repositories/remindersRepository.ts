@@ -25,7 +25,7 @@ const reminderRowSchema: z.ZodType<ReminderRow> = z
     updated_at: z.string(),
     sound_enabled: z.boolean(),
     sound_type: z.string(),
-    notification_methods: z.any(),
+    notification_methods: z.unknown(), // Json type from database, normalized to string[]
     repeat_enabled: z.boolean(),
     repeat_interval: z.string().nullable(),
     snooze_enabled: z.boolean(),

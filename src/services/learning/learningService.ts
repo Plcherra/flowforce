@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert } from '@/integrations/supabase/types';
+import { logger } from '@/utils/logger';
 
 let learningClient = supabase;
 
@@ -146,7 +147,7 @@ const fromTable = <Row>(table: string) => learningClient.from<Row>(table as any)
 const parseWithSchema = <Schema extends z.ZodTypeAny>(schema: Schema, payload: unknown, context: string) => {
   const result = schema.safeParse(payload);
   if (!result.success) {
-    console.error(`[learning] Invalid payload for ${context}`, result.error.flatten());
+    logger.error(`[learning] Invalid payload for ${context}`, { error: result.error.flatten(), tags: ['error'] });
     throw new Error(`Learning data for ${context} is malformed.`);
   }
   return result.data;
@@ -209,7 +210,7 @@ const mapModule = (row: ModuleRow): LearningModule => {
         }
       }
     } catch (error) {
-      console.warn('Unable to parse module content metadata', error);
+      logger.warn('Unable to parse module content metadata', { error, tags: ['warning'] });
     }
   }
 
@@ -555,7 +556,7 @@ export async function updateEnrollmentProgress(
   try {
     await supabase.from(TABLE_PROGRESS_SNAPSHOTS as any).insert(snapshotPayload);
   } catch (snapshotError) {
-    console.warn('[learning] unable to persist progress snapshot', snapshotError);
+    logger.warn('[learning] unable to persist progress snapshot', { error: snapshotError, tags: ['warning'] });
   }
 
   return mapEnrollment(row);
@@ -618,7 +619,7 @@ export async function fetchProgressHistoryPage(params: {
 
   const parsed = progressHistoryResponseSchema.safeParse(data);
   if (!parsed.success) {
-    console.error('[learning] Invalid progress history payload', parsed.error.flatten());
+    logger.error('[learning] Invalid progress history payload', { error: parsed.error.flatten(), tags: ['error'] });
     throw new Error('Malformed progress history response.');
   }
 

@@ -23,6 +23,7 @@ import { fetchTaskActivitiesForCompany } from '@/repositories/taskActivitiesRepo
 import { fetchCompanyIdForUser } from '@/repositories/companyRepository';
 import { supabase } from '@/integrations/supabase/client';
 import type { TaskActivityWithActor } from '@/repositories/taskActivitiesRepository';
+import { logger } from '@/utils/logger';
 
 export function TaskActivityFeed() {
   const { user } = useAuth();
@@ -89,7 +90,7 @@ export function TaskActivityFeed() {
 
         subscriptionRef.current = channel;
       } catch (error) {
-        console.error('Error subscribing to task activities:', error);
+        logger.error('Error subscribing to task activities:', { error, tags: ['error'] });
       }
     };
 

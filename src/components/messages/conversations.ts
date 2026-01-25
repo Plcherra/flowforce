@@ -1,4 +1,5 @@
 import type { ChatUser } from './users';
+import { logger } from '@/utils/logger';
 
 export interface ChatAttachment {
   id: string;
@@ -38,7 +39,7 @@ export function loadConversations(): Conversation[] {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    console.warn('Failed to parse stored conversations', error);
+    logger.warn('Failed to parse stored conversations', { error, tags: ['warning'] });
     return [];
   }
 }

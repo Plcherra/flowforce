@@ -29,6 +29,7 @@ import {
 import { useCustomSections } from '@/hooks/useCustomSections';
 import { useToast } from '@/hooks/use-toast';
 import * as Icons from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 const createSectionSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
@@ -95,7 +96,7 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
       form.reset();
       onSuccess?.(createdSection);
     } catch (error) {
-      console.error('Error creating section:', error);
+      logger.error('Error creating section:', { error, tags: ['error'] });
     } finally {
       setIsCreating(false);
     }

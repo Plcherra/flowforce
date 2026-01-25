@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings, Hash, Users, Lock, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useChannelActions } from '@/features/messages/hooks/useChannelActions';
+import { logger } from '@/utils/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +81,7 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
       await onChannelUpdated?.();
       onClose();
     } catch (error) {
-      console.error('Error updating channel:', error);
+      logger.error('Error updating channel:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to update channel settings',
@@ -102,7 +103,7 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
       await onChannelUpdated?.();
       onClose();
     } catch (error) {
-      console.error('Error deleting channel:', error);
+      logger.error('Error deleting channel:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to delete channel',

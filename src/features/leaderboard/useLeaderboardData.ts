@@ -13,6 +13,7 @@ import type {
   LeaderboardEntry,
   LeaderboardPeriod,
 } from './types';
+import { logger } from '@/utils/logger';
 
 const MANAGER_ROLES = new Set(['manager', 'admin', 'company_admin', 'owner']);
 
@@ -48,17 +49,19 @@ export function mapToLeaderboardEntry(
   if (!employee && !fallbackProfile) return null;
 
   const achievements = Array.isArray(row.achievements) ? row.achievements : [];
-  const achievementsMap = new Map<string, any>(
+  const achievementsMap = new Map<string, unknown>(
     achievements
-      .filter((item: any) => item && typeof item === 'object' && typeof item.code === 'string')
-      .map((item: any) => [item.code, item]),
+      .filter((item: unknown): item is Record<string, unknown> => item !== null && typeof item === 'object' && 'code' in item && typeof item.code === 'string')
+      .map((item: Record<string, unknown>) => [item.code as string, item]),
   );
   const insights = Array.isArray(row.insights) ? row.insights : [];
   const challenges = (Array.isArray(row.challenges) ? row.challenges : []).filter(
-    (challenge: any) =>
-      challenge &&
+    (challenge: unknown): challenge is LeaderboardChallenge =>
+      challenge !== null &&
       typeof challenge === 'object' &&
+      'employeeId' in challenge &&
       typeof challenge.employeeId === 'string' &&
+      'focus' in challenge &&
       typeof challenge.focus === 'string',
   );
   const fallbackDepartment = fallbackProfile?.department ?? row.department ?? null;
@@ -295,7 +298,7 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
 
     if (employees.length > 0) {
       employees.forEach((employee) => {
-        const key = (employee as any).department_id ?? employee.department?.id ?? null;
+        const key = employee.department_id ?? employee.department?.id ?? null;
         const name = employee.department?.name ?? null;
         if (!map.has(key)) {
           map.set(key, { id: key, name, count: 0 });
@@ -347,7 +350,7 @@ export function useLeaderboardData(period: LeaderboardPeriod): UseLeaderboardDat
             setManualSyncing(true);
             await ensureLeaderboardSynced(companyId, roster, period);
           } catch (err) {
-            console.error('[leaderboard] Manual sync failed', err);
+            logger.error('[leaderboard] Manual sync failed', { error: err, tags: ['error'] });
           } finally {
             setManualSyncing(false);
           }

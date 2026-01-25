@@ -10,6 +10,7 @@ import { useScheduling } from '@/contexts/SchedulingContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { AssignmentWithUser } from '@/hooks/scheduling/useSchedulingConsolidated';
+import { logger } from '@/utils/logger';
 
 interface EmployeeSelectorProps {
   shiftId: string;
@@ -37,7 +38,7 @@ export function EmployeeSelector({ shiftId, selectedEmployees = [] }: EmployeeSe
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to assign employee';
-      console.error('Error assigning employee:', error);
+      logger.error('Error assigning employee:', { error, tags: ['error'] });
       toast({
         title: 'Assignment failed',
         description: errorMessage,
@@ -57,7 +58,7 @@ export function EmployeeSelector({ shiftId, selectedEmployees = [] }: EmployeeSe
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to unassign employee';
-      console.error('Error unassigning employee:', error);
+      logger.error('Error unassigning employee:', { error, tags: ['error'] });
       toast({
         title: 'Unassignment failed',
         description: errorMessage,
@@ -134,7 +135,7 @@ export function EmployeeSelector({ shiftId, selectedEmployees = [] }: EmployeeSe
               {Array.isArray(availableEmployees) && availableEmployees.length > 0 ? (
                 availableEmployees.map((employee) => {
                   if (!employee || !employee.id) {
-                    console.warn('Invalid employee data:', employee);
+                    logger.warn('Invalid employee data:', { context: { employee }, tags: ['warning'] });
                     return null;
                   }
                   return (

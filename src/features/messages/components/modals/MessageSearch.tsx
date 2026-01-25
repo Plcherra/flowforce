@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 interface SearchResult {
   type: 'message' | 'channel';
@@ -80,7 +81,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
 
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
-      console.warn('Company context required for message search');
+      logger.warn('Company context required for message search', { tags: ['warning'] });
       setResults([]);
       return;
     }
@@ -154,7 +155,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
 
       setResults(formattedResults);
     } catch (error) {
-      console.error('Search error:', error);
+      logger.error('Search error:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

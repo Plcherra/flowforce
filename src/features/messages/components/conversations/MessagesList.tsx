@@ -8,6 +8,7 @@ import { MessageReactions } from './MessageReactions';
 import { format } from 'date-fns';
 import type { Message, ThreadMessage } from '@/types/messages';
 import { Skeleton } from '@/components/ui/skeleton';
+import { logger } from '@/utils/logger';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,7 +50,7 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
       setEditingMessageId(null);
       setEditContent('');
     } catch (error) {
-      console.error('Failed to update message:', error);
+      logger.error('Failed to update message', { error, tags: ['error'] });
     } finally {
       setUpdating(false);
     }

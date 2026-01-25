@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 type LegacyProfileFields = {
   id: string;
@@ -123,10 +124,10 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
 
     if (error) {
       if (appEnv.DEV) {
-        console.error('[ProfileProvider] Failed to load profile', {
-          userId,
-          companyId,
+        logger.error('[ProfileProvider] Failed to load profile', {
+          context: { userId, companyId },
           error,
+          tags: ['error'],
         });
       }
       return null;
@@ -134,9 +135,9 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
 
     if (!data) {
       if (appEnv.DEV) {
-        console.error('[ProfileProvider] Missing profile row', {
-          userId,
-          companyId,
+        logger.error('[ProfileProvider] Missing profile row', {
+          context: { userId, companyId },
+          tags: ['error'],
         });
       }
       return null;
@@ -167,10 +168,10 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
     };
   } catch (error) {
     if (appEnv.DEV) {
-      console.error('[ProfileProvider] Unexpected profile fetch error', {
-        userId,
-        companyId,
+      logger.error('[ProfileProvider] Unexpected profile fetch error', {
+        context: { userId, companyId },
         error,
+        tags: ['error'],
       });
     }
     return null;

@@ -11,6 +11,7 @@ import { useCan } from '@/hooks/useCan';
 import { DollarSign, Clock, Check, X, Search, Filter } from 'lucide-react';
 import PaymentForm from './PaymentForm';
 import { format } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 export default function PaymentsOverview() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +42,7 @@ export default function PaymentsOverview() {
         rejected_at: null,
       });
     } catch (error) {
-      console.error('Error approving payment:', error);
+      logger.error('Error approving payment:', { error, tags: ['error'] });
     }
   };
 
@@ -56,7 +57,7 @@ export default function PaymentsOverview() {
         rejected_at: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('Error rejecting payment:', error);
+      logger.error('Error rejecting payment:', { error, tags: ['error'] });
     }
   };
 

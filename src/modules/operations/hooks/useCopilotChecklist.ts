@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
+import { logger } from '@/utils/logger';
 
 type TaskStatus = 'pending' | 'done' | 'missed';
 
@@ -365,7 +366,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       const failed = responses.filter(({ response }) => response.error);
       if (failed.length > 0) {
         failed.forEach(({ label, response }) => {
-          console.error('[useCopilotChecklist] Query failed', { label, error: response.error });
+          logger.error('[useCopilotChecklist] Query failed', { context: { label }, error: response.error, tags: ['error'] });
         });
         throw failed[0].response.error as PostgrestError;
       }
@@ -480,7 +481,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
           },
         });
         if (error) {
-          console.warn('[useCopilotChecklist] Failed to enqueue Copilot actions', error);
+          logger.warn('[useCopilotChecklist] Failed to enqueue Copilot actions', { error, tags: ['warning'] });
         }
       }
 

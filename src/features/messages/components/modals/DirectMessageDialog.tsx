@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserSelector } from '@/components/messages/UserSelector';
 import { useMessageChannels } from '@/hooks/messages/useMessageChannels';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface User {
   id: string;
@@ -48,7 +49,7 @@ export function DirectMessageDialog({ open, onClose, onChannelCreated }: DirectM
 
       onClose();
     } catch (error) {
-      console.error('Error creating DM channel:', error);
+      logger.error('Error creating DM channel:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to start conversation',

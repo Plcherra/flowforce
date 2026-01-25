@@ -48,6 +48,7 @@ import {
 import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
 import { useTaskComments, type TaskCommentWithUser } from '@/features/tasks/hooks';
 import { CommentsSkeleton } from '@/components/loading/TaskSkeletons';
+import { logger } from '@/utils/logger';
 
 type ButtonVariant = 'default' | 'secondary' | 'outline';
 interface TaskDetailsDialogProps {
@@ -189,7 +190,7 @@ export function TaskDetailsDialog({
           : 'Task is now unassigned.',
       });
     } catch (error) {
-      console.error('Error updating task assignment:', error);
+      logger.error('Error updating task assignment:', { error, tags: ['error'] });
       setAssignmentValue(previousAssignedTo ?? 'none');
       toast({
         title: 'Assignment update failed',
@@ -251,7 +252,7 @@ export function TaskDetailsDialog({
           : 'Task is no longer linked to a goal.',
       });
     } catch (error) {
-      console.error('Error updating task goal link:', error);
+      logger.error('Error updating task goal link:', { error, tags: ['error'] });
       setGoalValue(previousGoalId ?? 'none');
       toast({
         title: 'Goal update failed',
@@ -332,7 +333,7 @@ export function TaskDetailsDialog({
         description: successMessage,
       });
     } catch (error) {
-      console.error('Error updating task status:', error);
+      logger.error('Error updating task status:', { error, tags: ['error'] });
       toast({
         title: 'Status update failed',
         description: 'An unexpected error occurred. Please try again.',

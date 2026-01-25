@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type EventShiftLinkRow = Tables<'event_shift_links'>;
 type EventShiftLinkWithShift = EventShiftLinkRow & {
@@ -57,7 +58,7 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
       setLinks((response.data as EventShiftLinkWithShift[]) ?? []);
     } catch (err) {
-      console.error('Failed to load event shift links', err);
+      logger.error('Failed to load event shift links', { error: err, tags: ['error'] });
       setLinks([]);
       setError(err instanceof Error ? err.message : 'Unable to load linked shifts');
     } finally {
@@ -93,7 +94,7 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
         setLinks((prev) => [...prev, ...((response.data ?? []) as EventShiftLinkWithShift[])]);
       } catch (err) {
-        console.error('Failed to link shifts to event', err);
+        logger.error('Failed to link shifts to event', { error: err, tags: ['error'] });
         setError(err instanceof Error ? err.message : 'Unable to link shifts');
         throw err;
       } finally {
@@ -124,7 +125,7 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
         setLinks((prev) => prev.filter((link) => link.shift_id !== shiftId));
       } catch (err) {
-        console.error('Failed to unlink shift from event', err);
+        logger.error('Failed to unlink shift from event', { error: err, tags: ['error'] });
         setError(err instanceof Error ? err.message : 'Unable to unlink shift');
         throw err;
       } finally {

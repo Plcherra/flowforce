@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -25,11 +25,15 @@ import { useCan } from '@/hooks/useCan';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ExpenseForm from '@/components/expenses/ExpenseForm';
 import PaymentsOverview from '@/components/payments/PaymentsOverview';
-import AIChatAssistant from '@/components/ai/AIChatAssistant';
-import AIInsightsPanel from '@/components/ai/AIInsightsPanel';
 import RoleGuard from '@/components/RoleGuard';
-import { EmployeeFinancialOverview } from '@/components/financial/EmployeeFinancialOverview';
-import { ManagerFinancialOverview } from '@/components/financial/ManagerFinancialOverview';
+import { logger } from '@/utils/logger';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Phase 4: Lazy load heavy financial components for better initial bundle size
+const AIChatAssistant = lazy(() => import('@/components/ai/AIChatAssistant').then(m => ({ default: m.default })));
+const AIInsightsPanel = lazy(() => import('@/components/ai/AIInsightsPanel').then(m => ({ default: m.default })));
+const EmployeeFinancialOverview = lazy(() => import('@/components/financial/EmployeeFinancialOverview').then(m => ({ default: m.EmployeeFinancialOverview })));
+const ManagerFinancialOverview = lazy(() => import('@/components/financial/ManagerFinancialOverview').then(m => ({ default: m.ManagerFinancialOverview })));
 import {
   Plus,
   User,
@@ -134,7 +138,7 @@ export default function Expenses() {
       });
       setShowCreateDialog(false);
     } catch (error) {
-      console.error('Error creating expense:', error);
+      logger.error('Error creating expense:', { error, tags: ['error'] });
     }
   };
 
@@ -149,7 +153,7 @@ export default function Expenses() {
         rejected_at: null,
       });
     } catch (error) {
-      console.error('Error approving expense:', error);
+      logger.error('Error approving expense:', { error, tags: ['error'] });
     }
   };
 
@@ -164,7 +168,7 @@ export default function Expenses() {
         rejected_at: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('Error rejecting expense:', error);
+      logger.error('Error rejecting expense:', { error, tags: ['error'] });
     }
   };
 
@@ -264,7 +268,9 @@ export default function Expenses() {
           </TabsList>
 
           <TabsContent value="employee" className="space-y-6">
-            <EmployeeFinancialOverview />
+            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+              <EmployeeFinancialOverview />
+            </Suspense>
           </TabsContent>
 
           {canViewManagement ? (
@@ -276,8 +282,12 @@ export default function Expenses() {
                   </CardContent>
                 </Card>
               }>
-                <ManagerFinancialOverview />
-                <AIInsightsPanel type="expenses" />
+                <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+                  <ManagerFinancialOverview />
+                </Suspense>
+                <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
+                  <AIInsightsPanel type="expenses" />
+                </Suspense>
               </RoleGuard>
             </TabsContent>
           ) : null}
@@ -462,7 +472,9 @@ export default function Expenses() {
         </Tabs>
       </div>
 
-      <AIChatAssistant context="expenses" />
+      <Suspense fallback={<Skeleton className="h-[200px] w-full" />}>
+        <AIChatAssistant context="expenses" />
+      </Suspense>
     </div>
   );
 }

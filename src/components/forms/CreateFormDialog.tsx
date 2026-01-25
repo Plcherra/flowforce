@@ -22,6 +22,7 @@ import { useForms } from '@/hooks/useForms';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { importFormFromFile } from '@/services/forms/formImportService';
+import { logger } from '@/utils/logger';
 
 interface CreateFormDialogProps {
   open: boolean;
@@ -168,7 +169,7 @@ export default function CreateFormDialog({
       resetDialog();
       onOpenChange(false);
     } catch (error) {
-      console.error('Unable to create form', error);
+      logger.error('Unable to create form', { error, tags: ['error'] });
       toast({
         title: 'Form creation failed',
         description: error instanceof Error ? error.message : 'Unexpected error occurred.',

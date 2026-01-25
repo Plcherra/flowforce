@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/utils/logger';
 
 interface NavigationEvent {
   route: string;
@@ -37,7 +38,7 @@ export function useNavigationAnalytics() {
     };
 
     // Log navigation for debugging (in production, this would send to analytics service)
-    console.log('Navigation Event:', navigationEvent);
+    logger.info('Navigation Event', { context: navigationEvent, tags: ['analytics', 'navigation'] });
 
     // Store recent navigation history in sessionStorage for debugging
     const recentNavigation = JSON.parse(sessionStorage.getItem('recent_navigation') || '[]');
@@ -52,7 +53,7 @@ export function useNavigationAnalytics() {
 
     // Track page title changes for SEO
     if (document.title) {
-      console.log(`Page title: ${document.title} for route: ${location.pathname}`);
+      logger.info('Page title', { context: { title: document.title, route: location.pathname }, tags: ['analytics', 'seo'] });
     }
   }, [location]);
 }

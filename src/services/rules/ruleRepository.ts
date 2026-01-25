@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { AppRule, RuleCondition, RuleAction, RuleTarget, RuleAuditEntry } from '@/types/rules';
+import { logger } from '@/utils/logger';
 
 type DbRule = {
   id: string;
@@ -78,7 +79,7 @@ export async function listRules(): Promise<AppRule[]> {
     .order('name', { ascending: true });
 
   if (error) {
-    console.error('Failed to fetch rules', error);
+    logger.error('Failed to fetch rules', { error, tags: ['error'] });
     return [];
   }
 
@@ -108,7 +109,7 @@ export async function getRuleBySlug(slug: string): Promise<AppRule | null> {
     .maybeSingle();
 
   if (error) {
-    console.error('Failed to fetch rule', error);
+    logger.error('Failed to fetch rule', { error, tags: ['error'] });
     return null;
   }
 
@@ -124,7 +125,7 @@ export async function listRuleAudits(ruleId: string, limit = 50): Promise<RuleAu
     .limit(limit);
 
   if (error) {
-    console.error('Failed to fetch rule audits', error);
+    logger.error('Failed to fetch rule audits', { error, tags: ['error'] });
     return [];
   }
 

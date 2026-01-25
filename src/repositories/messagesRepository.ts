@@ -7,6 +7,7 @@ import type {
   MessageChannel,
   SearchResult,
 } from '@/types/messages';
+import { logger } from '@/utils/logger';
 
 const ProfileSchema = z.object({
   first_name: z.string().nullable().optional(),
@@ -222,10 +223,14 @@ async function updateLastRead(channelId: string, userId: string) {
   if (error) throw error;
 }
 
-async function listMessages(channelId: string, userId: string): Promise<Message[]> {
+async function listMessages(
+  channelId: string,
+  userId: string,
+  options?: { limit?: number; after?: string },
+): Promise<Message[]> {
   await ensureChannelMembership(channelId, userId);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('messages')
     .select(`
       *,
@@ -237,6 +242,16 @@ async function listMessages(channelId: string, userId: string): Promise<Message[
     `)
     .eq('channel_id', channelId)
     .order('created_at', { ascending: true });
+
+  // Pagination support (Phase 4 optimization)
+  if (options?.after) {
+    query = query.gt('created_at', options.after);
+  }
+  if (options?.limit) {
+    query = query.limit(options.limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   const parsed = RawMessageSchema.array().parse(data ?? []);
@@ -251,12 +266,60 @@ async function listMessages(channelId: string, userId: string): Promise<Message[
   return normalized as Message[];
 }
 
+// Phase 5: Zod schemas for message input validation
+const MessageContentSchema = z.string()
+  .min(1, 'Message content cannot be empty')
+  .max(10000, 'Message content must be less than 10000 characters');
+
+const MessageAttachmentInputSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1).max(255),
+  path: z.string().url().nullable().optional(),
+  url: z.string().url().nullable().optional(),
+  type: z.string().max(100).nullable().optional(),
+  size: z.number().int().positive().nullable().optional(),
+});
+
+const InsertMessageOptionsSchema = z.object({
+  replyToId: z.string().uuid().optional(),
+  attachments: z.array(MessageAttachmentInputSchema).max(10, 'Maximum 10 attachments allowed').optional(),
+});
+
 async function insertMessage(
   channelId: string,
   senderId: string,
   content: string,
   options: { replyToId?: string; attachments?: MessageAttachment[] } = {},
 ): Promise<Message> {
+  // Phase 5: Validate inputs with Zod schemas
+  const contentValidation = MessageContentSchema.safeParse(content);
+  if (!contentValidation.success) {
+    const error = contentValidation.error.errors[0]?.message ?? 'Invalid message content';
+    logger.error('[messagesRepository] Invalid message content', { 
+      errors: contentValidation.error.errors,
+      tags: ['validation', 'error'] 
+    });
+    throw new Error(error);
+  }
+
+  const optionsValidation = InsertMessageOptionsSchema.safeParse(options);
+  if (!optionsValidation.success) {
+    const errors = optionsValidation.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    logger.error('[messagesRepository] Invalid message options', { 
+      errors: optionsValidation.error.errors,
+      tags: ['validation', 'error'] 
+    });
+    throw new Error(`Invalid message options: ${errors}`);
+  }
+
+  // Validate channelId and senderId format
+  if (!z.string().uuid().safeParse(channelId).success) {
+    throw new Error('Invalid channelId format');
+  }
+  if (!z.string().uuid().safeParse(senderId).success) {
+    throw new Error('Invalid senderId format');
+  }
+
   await ensureChannelMembership(channelId, senderId);
 
   const attachmentsPayload = (options.attachments ?? []).map((attachment) => ({

@@ -11,6 +11,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import type { HelpDeskTicket, HelpDeskTicketStatus, HelpDeskTicketPriority } from '@/hooks/useTickets';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 interface TicketDetailsDialogProps {
   open: boolean;
@@ -57,7 +58,7 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
 
       onTicketUpdated?.();
     } catch (error) {
-      console.error('Failed to update ticket:', error);
+      logger.error('Failed to update ticket', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to update ticket. Please try again.',

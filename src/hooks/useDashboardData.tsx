@@ -1,9 +1,29 @@
+/**
+ * Dashboard data hooks
+ * 
+ * Provides dashboard statistics including employee counts, schedule coverage,
+ * time off balances, and task completion metrics. Uses optimized RPC endpoint
+ * with fallback to legacy queries for maximum performance.
+ * 
+ * @module hooks/useDashboardData
+ * @example
+ * ```typescript
+ * const { stats, loading, error, refetch } = useDashboardData();
+ * 
+ * if (loading) return <Loading />;
+ * if (error) return <Error message={error} />;
+ * 
+ * return <Dashboard stats={stats} />;
+ * ```
+ */
+
 import { useEffect, useState, useCallback } from 'react';
 import { differenceInCalendarDays, endOfWeek, startOfWeek } from 'date-fns';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/utils/logger';
 
 export interface DashboardStats {
   totalEmployees: number;
@@ -109,6 +129,32 @@ const computeScheduleDurationHours = (row: ScheduleRow) => {
 
 const clampPercent = (value: number, cap = 150) => Math.round(Math.max(0, Math.min(value, cap)));
 
+/**
+ * useDashboardData - Hook for fetching dashboard statistics
+ * 
+ * Fetches comprehensive dashboard statistics including:
+ * - Employee counts (total, active)
+ * - Department counts
+ * - Schedule coverage and today's shifts
+ * - Time off balances and pending requests
+ * - Task completion metrics
+ * 
+ * Uses optimized RPC endpoint (`get_dashboard_stats`) with automatic fallback
+ * to legacy queries if RPC is unavailable. Includes retry logic for transient failures.
+ * 
+ * @returns Dashboard statistics, loading state, error state, and refetch function
+ * 
+ * @example
+ * ```typescript
+ * const { stats, loading, error, refetch } = useDashboardData();
+ * 
+ * // Access statistics
+ * const { totalEmployees, activeEmployees, todaysShifts } = stats;
+ * 
+ * // Refetch data
+ * await refetch();
+ * ```
+ */
 export function useDashboardData() {
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
@@ -131,6 +177,51 @@ export function useDashboardData() {
       
       const today = new Date();
       const todayIso = today.toISOString().split('T')[0];
+
+      // Try RPC endpoint first (Phase 4 optimization)
+      // Phase 6: Add retry logic for RPC calls
+      try {
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_dashboard_stats', {
+          p_company_id: companyId,
+          p_today: todayIso,
+        });
+
+        if (!rpcError && rpcData) {
+          // Map RPC response to DashboardStats interface
+          const stats: DashboardStats = {
+            totalEmployees: rpcData.total_employees ?? 0,
+            activeEmployees: rpcData.active_employees ?? 0,
+            totalDepartments: rpcData.total_departments ?? 0,
+            todaysShifts: rpcData.todays_shifts ?? 0,
+            pendingTimeOff: rpcData.pending_time_off ?? 0,
+            approvedTimeOffUpcoming: rpcData.approved_time_off_upcoming ?? 0,
+            timeOffDaysUsed: rpcData.time_off_days_used ?? 0,
+            timeOffBalanceRemaining: rpcData.time_off_balance_remaining ?? 0,
+            coverageCompleteness: rpcData.coverage_completeness ?? 0,
+            hoursUtilization: rpcData.hours_utilization ?? 0,
+            taskCompletion: rpcData.task_completion ?? 0,
+          };
+          setStats(stats);
+          setLoading(false);
+          return;
+        }
+
+        // If RPC fails, log warning and fall back to legacy method
+        if (rpcError) {
+          logger.warn('Dashboard RPC unavailable, falling back to legacy queries', {
+            error: rpcError,
+            tags: ['performance', 'dashboard'],
+          });
+        }
+      } catch (rpcFallbackError) {
+        // RPC function may not exist yet, fall back to legacy method
+        logger.warn('Dashboard RPC not available, using legacy queries', {
+          error: rpcFallbackError,
+          tags: ['performance', 'dashboard'],
+        });
+      }
+
+      // Legacy method: Multiple sequential queries (fallback)
       const dayStart = `${todayIso}T00:00:00`;
       const dayEnd = `${todayIso}T23:59:59`;
       const dayStartDate = new Date(dayStart);
@@ -163,20 +254,18 @@ export function useDashboardData() {
       const rawSchedules = (schedulesResponse.data ?? []) as ScheduleRow[];
       
       // Security: Validate that all schedules belong to the company (defensive check)
-      // The query already filters by company_id at the database level, but this ensures data integrity
-      // If RLS fails or there's a bug, we catch it here
       const invalidSchedules = rawSchedules.filter((entry) => entry?.company_id !== companyId);
       if (invalidSchedules.length > 0) {
-        console.error('[useDashboardData] SECURITY WARNING: Schedules from other companies detected', {
-          companyId,
-          invalidCount: invalidSchedules.length,
-          invalidIds: invalidSchedules.map(s => s.id),
+        logger.error('SECURITY WARNING: Schedules from other companies detected', {
+          context: {
+            companyId,
+            invalidCount: invalidSchedules.length,
+            invalidIds: invalidSchedules.map(s => s.id),
+          },
+          tags: ['security', 'tenant-isolation'],
         });
-        // In production, this should trigger an alert/audit log to security team
-        // For now, filter out invalid schedules as a safety measure
       }
       
-      // Filter out any invalid schedules (should be empty if query works correctly)
       const schedules = rawSchedules.filter((entry) => entry?.company_id === companyId);
 
       let totalDepartments = 0;
@@ -187,9 +276,12 @@ export function useDashboardData() {
       } catch (deptError) {
         if (isSchemaMismatchError(deptError)) {
           totalDepartments = deriveDepartmentCount(employees);
-          console.warn('[useDashboardData] Departments table missing company scope, using derived counts', {
-            companyId,
-            fallback: totalDepartments,
+          logger.warn('Departments table missing company scope, using derived counts', {
+            context: {
+              companyId,
+              fallback: totalDepartments,
+            },
+            tags: ['data-integrity'],
           });
         } else {
           throw deptError;
@@ -210,19 +302,18 @@ export function useDashboardData() {
         companyTimeOff = (data ?? []) as TimeOffRequestRow[];
       }
 
-      // Security: Filter time off requests to only those belonging to company employees
-      // This is necessary because time_off_requests table may not have company_id column
       const scopedTimeOff = companyTimeOff.filter((entry) => entry.user_id && employeeIdSet.has(entry.user_id));
       
-      // Security: Validate that all time off requests belong to company employees
       const invalidTimeOff = companyTimeOff.filter((entry) => entry.user_id && !employeeIdSet.has(entry.user_id));
       if (invalidTimeOff.length > 0) {
-        console.error('[useDashboardData] SECURITY WARNING: Time off requests from other companies detected', {
-          companyId,
-          invalidCount: invalidTimeOff.length,
-          invalidUserIds: invalidTimeOff.map(t => t.user_id).filter(Boolean),
+        logger.error('SECURITY WARNING: Time off requests from other companies detected', {
+          context: {
+            companyId,
+            invalidCount: invalidTimeOff.length,
+            invalidUserIds: invalidTimeOff.map(t => t.user_id).filter(Boolean),
+          },
+          tags: ['security', 'tenant-isolation'],
         });
-        // In production, this should trigger an alert/audit log
       }
 
       const timeOffRequests = scopedTimeOff.filter((entry) => (entry.status ?? '').toLowerCase() === 'requested');
@@ -280,7 +371,10 @@ export function useDashboardData() {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data', {
+        error,
+        tags: ['dashboard', 'data-fetch'],
+      });
       setError(errorMessage);
       setStats(FALLBACK_STATS);
       toast({

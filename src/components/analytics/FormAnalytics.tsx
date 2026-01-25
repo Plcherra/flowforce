@@ -10,6 +10,7 @@ import { TrendingUp, Users, FileText, Calendar, Download, Activity } from 'lucid
 import { useForms } from '@/hooks/useForms';
 import { FormSubmission } from '@/types/common';
 import type { AssistantContext } from '@/types/ai';
+import { logger } from '@/utils/logger';
 
 interface FormAnalyticsProps {
   formId?: string;
@@ -149,7 +150,7 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
         setAnalyticsData(data);
       }
     } catch (error) {
-      console.error('Error loading analytics:', error);
+      logger.error('Error loading analytics:', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }

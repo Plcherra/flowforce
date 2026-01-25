@@ -10,8 +10,11 @@ import type {
   InventoryUnit,
 } from '@/features/inventory/hooks/types';
 import { buildUnitMetaIndex, collectUnits, convertQuantity } from '@/utils/inventoryUnits';
+import { logger } from '@/utils/logger';
 
-const inventoryItemSchema: z.ZodType<InventoryItem> = z.any();
+// Note: Using passthrough() as InventoryItem has complex nested types
+// TODO: Define proper Zod schema for InventoryItem when types are finalized
+const inventoryItemSchema: z.ZodType<InventoryItem> = z.object({}).passthrough() as z.ZodType<InventoryItem>;
 
 type ListItemsOptions = {
   companyId?: string;
@@ -28,7 +31,7 @@ export async function listInventoryItems({
   const activeCompanyId = companyId ?? (await resolveCompanyId());
 
   if (!activeCompanyId) {
-    console.warn('[inventory] listItems called without an active company context');
+    logger.warn('[inventory] listItems called without an active company context', { tags: ['warning'] });
     return [];
   }
 

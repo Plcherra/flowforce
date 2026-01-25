@@ -141,20 +141,27 @@ export const formatPositionForDatabase = (position: OnboardingPosition) => ({
   permissions: position.permissions || {}
 });
 
-export const getErrorMessage = (error: any): string => {
+export const getErrorMessage = (error: unknown): string => {
   if (typeof error === 'string') return error;
-  if (error?.message) return error.message;
+  if (error !== null && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
   return 'An unexpected error occurred';
 };
 
-export const isNetworkError = (error: any): boolean => {
-  return error?.message?.includes('fetch') || 
-         error?.message?.includes('network') || 
-         error?.name === 'NetworkError';
+export const isNetworkError = (error: unknown): boolean => {
+  if (error !== null && typeof error === 'object') {
+    const message = 'message' in error && typeof error.message === 'string' ? error.message : '';
+    const name = 'name' in error && typeof error.name === 'string' ? error.name : '';
+    return message.includes('fetch') || message.includes('network') || name === 'NetworkError';
+  }
+  return false;
 };
 
-export const isAuthError = (error: any): boolean => {
-  return error?.message?.includes('email') || 
-         error?.message?.includes('password') || 
-         error?.message?.includes('already registered');
+export const isAuthError = (error: unknown): boolean => {
+  if (error !== null && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    const message = error.message.toLowerCase();
+    return message.includes('email') || message.includes('password') || message.includes('already registered');
+  }
+  return false;
 };

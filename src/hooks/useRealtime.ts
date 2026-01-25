@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 type PostgresEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 
@@ -52,15 +53,35 @@ export function useRealtime<T = Record<string, unknown>>({
             filter: eventConfig.filter,
           },
           (payload) => {
-            handlerRef.current?.(payload as RealtimePostgresChangesPayload<T>);
+            // Phase 5: Error handling for payload processing
+            try {
+              handlerRef.current?.(payload as RealtimePostgresChangesPayload<T>);
+            } catch (error) {
+              logger.error('[useRealtime] Error processing payload', { 
+                error, 
+                channel, 
+                table: eventConfig.table,
+                tags: ['error', 'realtime'] 
+              });
+            }
           },
         );
       });
     } catch (error) {
-      console.error('[useRealtime] Failed to register event handlers', error);
+      logger.error('[useRealtime] Failed to register event handlers', { error, tags: ['error'] });
     }
 
-    realtimeChannel.subscribe((status) => {
+    realtimeChannel.subscribe((status, err) => {
+      // Phase 5: Error handling for subscription failures
+      if (err) {
+        logger.error('[useRealtime] Subscription error', { 
+          error: err, 
+          channel, 
+          tags: ['error', 'realtime'] 
+        });
+        setSubscribed(false);
+        return;
+      }
       setSubscribed(status === 'SUBSCRIBED');
     });
 

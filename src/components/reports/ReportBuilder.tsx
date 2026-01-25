@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCreateReport, useUpdateReport, CustomReport } from '@/hooks/useReports';
 import { Plus, Save, ArrowLeft } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ReportBuilderProps {
   report?: CustomReport;
@@ -95,7 +96,7 @@ export default function ReportBuilder({ report, onSuccess, onBack }: ReportBuild
       setOpen(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Failed to save report:', error);
+      logger.error('Failed to save report:', { error, tags: ['error'] });
     }
   };
 

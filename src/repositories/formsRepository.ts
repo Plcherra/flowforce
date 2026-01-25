@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
@@ -129,7 +130,7 @@ async function ensureCompanyScope(companyId: string): Promise<void> {
     if (!isMissingGuard) {
       throw error;
     }
-    console.warn('[formsRepository] Skipping company guard RPC because function is unavailable.');
+    logger.warn('[formsRepository] Skipping company guard RPC because function is unavailable.', { tags: ['warning'] });
   }
 }
 

@@ -18,6 +18,7 @@ import {
 } from '@/features/inventory/repositories/countsRepository';
 import type { CreateInventoryCountInput } from '@/features/inventory/repositories/countsRepository';
 import type { InventoryCount, InventoryCountLine } from './types';
+import { logger } from '@/utils/logger';
 
 export function useInventoryCounts() {
   const [counts, setCounts] = useState<InventoryCount[]>([]);
@@ -30,7 +31,7 @@ export function useInventoryCounts() {
       const data = await listInventoryCounts();
       setCounts(data);
     } catch (error) {
-      console.error('Error fetching counts:', error);
+      logger.error('Error fetching counts:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to load inventory counts",
@@ -52,11 +53,12 @@ export function useInventoryCounts() {
 
       fetchCounts();
       return created;
-    } catch (error: any) {
-      console.error('Error creating count:', error);
+    } catch (error: unknown) {
+      logger.error('Error creating count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to create inventory count';
       toast({
         title: "Error",
-        description: error?.message || "Failed to create inventory count",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -73,11 +75,12 @@ export function useInventoryCounts() {
       });
 
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error updating count:', error);
+    } catch (error: unknown) {
+      logger.error('Error updating count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to update count';
       toast({
         title: "Error", 
-        description: error?.message || "Failed to update count",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -94,11 +97,12 @@ export function useInventoryCounts() {
       });
 
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error completing count:', error);
+    } catch (error: unknown) {
+      logger.error('Error completing count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to complete count';
       toast({
         title: "Error",
-        description: error?.message || "Failed to complete count",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -115,11 +119,12 @@ export function useInventoryCounts() {
       });
 
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error deleting count:', error);
+    } catch (error: unknown) {
+      logger.error('Error deleting count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to delete count';
       toast({
         title: "Error",
-        description: error?.message || "Failed to delete count", 
+        description: message, 
         variant: "destructive",
       });
       throw error;
@@ -134,11 +139,12 @@ export function useInventoryCounts() {
         description: "Count sent for supervisor review",
       });
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error submitting count:', error);
+    } catch (error: unknown) {
+      logger.error('Error submitting count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to submit count for review';
       toast({
         title: "Error",
-        description: error?.message || "Failed to submit count for review",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -153,11 +159,12 @@ export function useInventoryCounts() {
         description: "Inventory count approved",
       });
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error approving count:', error);
+    } catch (error: unknown) {
+      logger.error('Error approving count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to approve count';
       toast({
         title: "Error",
-        description: error?.message || "Failed to approve count",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -172,11 +179,12 @@ export function useInventoryCounts() {
         description: "Count requires additional review",
       });
       fetchCounts();
-    } catch (error: any) {
-      console.error('Error rejecting count:', error);
+    } catch (error: unknown) {
+      logger.error('Error rejecting count:', { error, tags: ['error'] });
+      const message = error instanceof Error ? error.message : 'Failed to send count back for revisions';
       toast({
         title: "Error",
-        description: error?.message || "Failed to send count back for revisions",
+        description: message,
         variant: "destructive",
       });
       throw error;
@@ -218,7 +226,7 @@ export function useInventoryCountLines(countId?: string) {
       const data = await listInventoryCountLines(countId);
       setCountLines(data);
     } catch (error) {
-      console.error('Error fetching count lines:', error);
+      logger.error('Error fetching count lines:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to load count details",
@@ -240,7 +248,7 @@ export function useInventoryCountLines(countId?: string) {
       });
       fetchCountLines();
     } catch (error) {
-      console.error('Error adding items to count:', error);
+      logger.error('Error adding items to count:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to add items to count",
@@ -261,7 +269,7 @@ export function useInventoryCountLines(countId?: string) {
 
       fetchCountLines();
     } catch (error) {
-      console.error('Error updating count line:', error);
+      logger.error('Error updating count line:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to update count line",
@@ -282,7 +290,7 @@ export function useInventoryCountLines(countId?: string) {
 
       fetchCountLines();
     } catch (error) {
-      console.error('Error removing item from count:', error);
+      logger.error('Error removing item from count:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to remove item from count",

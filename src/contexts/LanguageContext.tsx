@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { logger } from '@/utils/logger';
 
 interface LanguageContextType {
   currentLanguage: string;
@@ -30,7 +31,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if i18n is initialized and has the 'on' method
     if (!i18n || typeof i18n.on !== 'function') {
-      console.warn('[LanguageProvider] i18n is not properly initialized');
+      logger.warn('[LanguageProvider] i18n is not properly initialized', { tags: ['warning'] });
       return;
     }
 

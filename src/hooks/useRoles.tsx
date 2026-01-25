@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from './useAuth';
+import { logger } from '@/utils/logger';
 
 export interface Profile {
   id: string;
@@ -47,13 +48,13 @@ export function useProfiles() {
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Failed to load profiles', error);
+          logger.error('Failed to load profiles', { error, tags: ['error'] });
           return [];
         }
 
         return (data ?? []) as Profile[];
       } catch (error) {
-        console.error('Unexpected profiles query error', error);
+        logger.error('Unexpected profiles query error', { error, tags: ['error'] });
         return [];
       }
     },
@@ -89,7 +90,7 @@ export function useRoles() {
           .order('hierarchy_level', { ascending: true });
 
         if (error) {
-          console.error('Failed to load roles', error);
+          logger.error('Failed to load roles', { error, tags: ['error'] });
           return [];
         }
 
@@ -99,7 +100,7 @@ export function useRoles() {
           permissions: parsePermissions(role.permissions),
         }));
       } catch (error) {
-        console.error('Unexpected roles query error', error);
+        logger.error('Unexpected roles query error', { error, tags: ['error'] });
         return [];
       }
     },
@@ -256,13 +257,13 @@ async function resolveCompanyId(userId: string, fallback: string | null) {
       .single();
 
     if (error) {
-      console.error('Failed to resolve company id for profile', error);
+      logger.error('Failed to resolve company id for profile', { error, tags: ['error'] });
       return fallback;
     }
 
     return data?.company_id ?? fallback;
   } catch (error) {
-    console.error('Unexpected error resolving company id', error);
+    logger.error('Unexpected error resolving company id', { error, tags: ['error'] });
     return fallback;
   }
 }

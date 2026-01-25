@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 import { useEngagementAnalytics } from '@/hooks/useEngagementAnalytics';
 import { formatDistanceToNow } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 function Sparkline({ data }: { data: number[] }) {
   const max = Math.max(...data, 1);
@@ -42,7 +43,7 @@ export default function EngagementOverview() {
       .filter((update) => !update.aiSummary && !isAnalyzing)
       .forEach((update) => {
         analyze(update).catch((error) => {
-          console.warn('Failed to analyze engagement', error);
+          logger.warn('Failed to analyze engagement', { error, tags: ['warning'] });
         });
       });
   }, [updates, analyze, isAnalyzing]);

@@ -13,6 +13,7 @@ import { useReminders } from '@/hooks/useReminders';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { logger } from '@/utils/logger';
 
 interface CreateReminderDialogProps {
   open: boolean;
@@ -125,7 +126,7 @@ export function CreateReminderDialog({ open, onOpenChange, taskId }: CreateRemin
       setReminderInterval('custom');
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating reminder:', error);
+      logger.error('Error creating reminder:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to create reminder. Please try again.',

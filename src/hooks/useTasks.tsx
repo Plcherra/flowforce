@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { syncGoalProgress } from '@/services/goals/goalProgressService';
 export type { TaskWithRelations } from '@/repositories/tasksRepository';
+import { logger } from '@/utils/logger';
 
 import {
   ensureGoalTaskLink,
@@ -71,6 +72,26 @@ export const normalizeTaskStatus = (status: TaskStatusValue | null | undefined):
 
 const capitalizeFallback = (value: string) => value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 
+/**
+ * useTasks - Hook for managing tasks
+ * 
+ * Provides task data, CRUD operations, comments, and goal linking functionality.
+ * Automatically fetches tasks for the current user's company.
+ * 
+ * @returns Task management interface with tasks array, CRUD methods, and utilities
+ * 
+ * @example
+ * ```typescript
+ * const { 
+ *   tasks, 
+ *   loading, 
+ *   error,
+ *   createTask,
+ *   updateTask,
+ *   deleteTask 
+ * } = useTasks();
+ * ```
+ */
 export function useTasks() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -134,7 +155,7 @@ export function useTasks() {
       return { data: createdTask, error: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create task';
-      console.error('Error creating task:', error);
+      logger.error('Error creating task:', { error, tags: ['error'] });
       return { data: null, error: errorMessage };
     }
   };
@@ -168,7 +189,7 @@ export function useTasks() {
       await invalidateTasks();
       return { data: updatedTask, error: null };
     } catch (error) {
-      console.error('Error updating task:', error);
+      logger.error('Error updating task:', { error, tags: ['error'] });
       return { data: null, error };
     }
   };
@@ -191,7 +212,7 @@ export function useTasks() {
       await invalidateTasks();
       return { error: null };
     } catch (error) {
-      console.error('Error deleting task:', error);
+      logger.error('Error deleting task:', { error, tags: ['error'] });
       return { error };
     }
   };
@@ -203,7 +224,7 @@ export function useTasks() {
       const data = await insertTaskComment(taskId, user.id, comment);
       return { data, error: null };
     } catch (error) {
-      console.error('Error adding comment:', error);
+      logger.error('Error adding comment:', { error, tags: ['error'] });
       return { data: null, error };
     }
   };
@@ -213,7 +234,7 @@ export function useTasks() {
       const data = await fetchTaskComments(taskId);
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      logger.error('Error fetching comments:', { error, tags: ['error'] });
       return { data: [], error };
     }
   };
@@ -223,7 +244,7 @@ export function useTasks() {
       const data = await fetchTaskTimeline(taskId);
       return { data, error: null };
     } catch (error) {
-      console.error('Error fetching task timeline:', error);
+      logger.error('Error fetching task timeline:', { error, tags: ['error'] });
       return { data: [], error };
     }
   };
@@ -234,7 +255,7 @@ export function useTasks() {
 
     if (!task || !current) {
       const error = new Error('Task not found for status transition.');
-      console.warn(error.message);
+      logger.warn('Task not found for status transition', { context: { taskId, current }, tags: ['warning'] });
       return { data: null, error };
     }
 
@@ -242,7 +263,7 @@ export function useTasks() {
 
     if (!allowedTransitions.includes(nextStatus)) {
       const message = `Invalid status transition from ${current} to ${nextStatus}`;
-      console.warn(message);
+      logger.warn('Invalid status transition', { context: { current, nextStatus, taskId }, tags: ['warning'] });
       return { data: null, error: new Error(message) };
     }
 

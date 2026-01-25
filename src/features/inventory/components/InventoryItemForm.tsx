@@ -16,6 +16,7 @@ import { Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ClickableLabel from './ClickableLabel';
 import type { InventoryItem } from '@/features/inventory/hooks/types';
+import { logger } from '@/utils/logger';
 
 interface UnitLevel {
   id?: string;
@@ -281,7 +282,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
       setFormData({ ...formData, category: newCategory.name, category_id: newCategory.id });
       setShowSuggestions(false);
     } catch (error) {
-      console.error('Failed to create category:', error);
+      logger.error('Failed to create category', { error, tags: ['error'] });
     }
   };
 
@@ -296,7 +297,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
         }
         setShowSuggestions(false);
       } catch (error) {
-        console.error('Failed to delete category:', error);
+        logger.error('Failed to delete category', { error, tags: ['error'] });
       }
     }
   };
@@ -319,7 +320,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
       setLocationInput(newLocation.name || locationInput.trim());
       setShowLocationSuggestions(false);
     } catch (error) {
-      console.error('Failed to create location:', error);
+      logger.error('Failed to create location', { error, tags: ['error'] });
     }
   };
 
@@ -340,7 +341,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
       setSupplierInput(newSupplier.name || supplierInput.trim());
       setShowSupplierSuggestions(false);
     } catch (error) {
-      console.error('Failed to create supplier:', error);
+      logger.error('Failed to create supplier', { error, tags: ['error'] });
     }
   };
 
@@ -367,7 +368,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
         }
         setShowLocationSuggestions(false);
       } catch (error) {
-        console.error('Failed to delete location:', error);
+        logger.error('Failed to delete location', { error, tags: ['error'] });
       }
     }
   };
@@ -457,7 +458,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
               }
             }
           } catch (unitError) {
-            console.warn('Failed to upsert unit level:', unitError);
+            logger.warn('Failed to upsert unit level', { error: unitError, tags: ['warning'] });
           }
         }
 
@@ -465,7 +466,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
           try {
             await deleteItemUnit.mutateAsync(removedId);
           } catch (deleteError) {
-            console.warn('Failed to delete unit level:', deleteError);
+            logger.warn('Failed to delete unit level', { error: deleteError, tags: ['warning'] });
           }
         }
       }
@@ -503,7 +504,7 @@ export default function InventoryItemForm({ children, editItem, open: controlled
       setFieldConfig(defaultConfig);
       setOpen(false);
     } catch (error) {
-      console.error('Failed to save inventory item:', error);
+      logger.error('Failed to save inventory item', { error, tags: ['error'] });
     }
   };
 

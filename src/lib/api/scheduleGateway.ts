@@ -4,6 +4,7 @@ import type {
   CalendarEventRow,
   CalendarEventRowWithRelations,
 } from '@/features/calendar/repositories/calendarEventsRepository';
+import { logger } from '@/utils/logger';
 
 type VendorVisitRow = Tables<'vendor_visits'>;
 type EventShiftLinkRow = Tables<'event_shift_links'>;
@@ -74,9 +75,9 @@ async function request<T>(url: string, init: RequestInit, operation: string, att
           }
         }
       } catch (parseError) {
-        console.error('[scheduleGateway] Failed to parse error response', parseError);
+        logger.error('[scheduleGateway] Failed to parse error response', { error: parseError, tags: ['error'] });
       }
-      console.error('[scheduleGateway] Request failed', { operation, status: response.status, errorMessage });
+      logger.error('[scheduleGateway] Request failed', { context: { operation, status: response.status, errorMessage }, tags: ['error'] });
       throw new Error(errorMessage);
     }
 
@@ -93,10 +94,10 @@ async function request<T>(url: string, init: RequestInit, operation: string, att
     return (await response.json()) as T;
   } catch (error) {
     if (attempt === 0 && isNetworkError(error)) {
-      console.warn('[scheduleGateway] Network error, retrying once', { operation });
+      logger.warn('[scheduleGateway] Network error, retrying once', { context: { operation }, tags: ['warning'] });
       return request<T>(url, init, operation, attempt + 1);
     }
-    console.error('[scheduleGateway] Request threw', { operation, error });
+    logger.error('[scheduleGateway] Request threw', { context: { operation }, error, tags: ['error'] });
     throw error instanceof Error ? error : new Error('Network request failed');
   }
 }

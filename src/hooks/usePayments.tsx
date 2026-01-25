@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface User {
   first_name: string;
@@ -117,7 +118,7 @@ export function usePayments() {
         description: 'Failed to create payment',
         variant: 'destructive',
       });
-      console.error('Create payment error:', error);
+      logger.error('Create payment error', { error, tags: ['error'] });
     },
   });
 
@@ -146,7 +147,7 @@ export function usePayments() {
         description: 'Failed to update payment',
         variant: 'destructive',
       });
-      console.error('Update payment error:', error);
+      logger.error('Update payment error', { error, tags: ['error'] });
     },
   });
 

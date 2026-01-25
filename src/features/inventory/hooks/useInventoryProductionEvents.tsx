@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { InventoryService } from '@/features/inventory/services/inventoryService';
 import type { ProductionEvent, ProductionEventInput } from './types';
+import { logger } from '@/utils/logger';
 
 const productionEventsQueryKey = ['inventory-production-events'];
 
@@ -39,7 +40,7 @@ export function useCreateProductionEvent() {
         description: message,
         variant: 'destructive',
       });
-      console.error('Create production event error:', error);
+      logger.error('Create production event error', { error, tags: ['error'] });
     },
   });
 }

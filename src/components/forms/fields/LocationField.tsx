@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Navigation, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface LocationData {
   latitude: number;
@@ -77,7 +78,7 @@ export function LocationField({
             description: "Location captured successfully",
           });
         } catch (error) {
-          console.error('Error getting address:', error);
+          logger.error('Error getting address:', { error, tags: ['error'] });
           // Still save location even if address lookup fails
           const locationData: LocationData = {
             latitude,

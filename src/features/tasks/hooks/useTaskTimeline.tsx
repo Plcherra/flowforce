@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 export type TaskActivity = Tables<'task_activities'>;
 
@@ -30,7 +31,7 @@ export function useTaskTimeline(taskId: string | null, open: boolean) {
           setActivities(data ?? []);
         }
       } catch (error) {
-        console.error('Error fetching task timeline:', error);
+        logger.error('Error fetching task timeline:', { error, tags: ['error'] });
       } finally {
         if (isMounted) {
           setLoading(false);

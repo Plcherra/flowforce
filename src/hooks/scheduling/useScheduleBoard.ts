@@ -5,6 +5,7 @@ import { useScheduling } from '@/contexts/SchedulingContext';
 import { useProfile } from '@/hooks/useProfile';
 import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
 import type { VendorEventWithMetadata, ProfileSummary } from './useSchedulingConsolidated';
+import { logger } from '@/utils/logger';
 
 interface LocationOption {
   id: string;
@@ -131,7 +132,7 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Failed to load locations', error);
+        logger.error('Failed to load locations', { error, tags: ['error'] });
         return;
       }
 

@@ -14,6 +14,7 @@ import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
 import { useCalendarEvents, mapAppEventToCalendarEvent } from '@/hooks/useCalendarEvents';
 import { useEvents } from '@/hooks/useEvents';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -54,7 +55,7 @@ export default function EventsHubPage() {
 
   useEffect(() => {
     if (error) {
-      console.error('[Calendar] load error', error);
+      logger.error('[Calendar] load error', { error, tags: ['error'] });
       setOffline(true);
       if (!offlineToastShown.current) {
         toast({

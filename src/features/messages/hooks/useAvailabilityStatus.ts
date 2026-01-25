@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import { getAvailability, updateAvailabilityFlag } from '@/features/messages/api/userStatusService';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 interface AvailabilityStatus {
   available: boolean;
@@ -32,7 +33,7 @@ export function useAvailabilityStatus(): AvailabilityStatus {
         }
       } catch (error) {
         if (appEnv.DEV) {
-          console.error('Failed to load availability flag', error);
+          logger.error('Failed to load availability flag', { error, tags: ['error'] });
         }
       } finally {
         if (isMountedRef.current) {
@@ -53,7 +54,7 @@ export function useAvailabilityStatus(): AvailabilityStatus {
       await updateAvailabilityFlag(value);
     } catch (error) {
       if (appEnv.DEV) {
-        console.error('Failed to update availability status', error);
+        logger.error('Failed to update availability status', { error, tags: ['error'] });
       }
       if (isMountedRef.current) {
         setAvailable(previousValueRef.current);

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { MessageAttachment } from '@/types/messages';
+import { logger } from '@/utils/logger';
 
 interface MessageAttachmentsProps {
   messageId?: string;
@@ -77,7 +78,7 @@ export function MessageAttachments({
         description: `${newAttachments.length} file(s) uploaded successfully`,
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to upload files',
@@ -109,7 +110,7 @@ export function MessageAttachments({
         description: 'File removed successfully',
       });
     } catch (error) {
-      console.error('Remove error:', error);
+      logger.error('Remove error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to remove file',
@@ -138,7 +139,7 @@ export function MessageAttachments({
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Download error:', error);
+      logger.error('Download error', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to download file',

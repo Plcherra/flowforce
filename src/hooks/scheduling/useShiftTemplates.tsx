@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type ShiftTemplate = Tables<'shift_templates'>;
 
@@ -25,7 +26,7 @@ export function useShiftTemplates() {
       if (error) throw error;
       setTemplates(data || []);
     } catch (error) {
-      console.error('Error fetching shift templates:', error);
+      logger.error('Error fetching shift templates', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ export function useShiftTemplates() {
       setTemplates(prev => [...prev, data]);
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating shift template:', error);
+      logger.error('Error creating shift template', { error, tags: ['error'] });
       return { data: null, error };
     }
   };

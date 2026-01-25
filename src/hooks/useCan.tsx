@@ -4,6 +4,7 @@ import { useCompanyRoles } from './useCompanyRoles';
 import { useUserPermissionOverrides, type PermissionKey } from './useUserPermissions';
 import { createPermissionResolver, type PermissionContext } from '@/lib/permissions/resolver';
 import { usePermissionAudit } from './usePermissionAudit';
+import { logger } from '@/utils/logger';
 
 /**
  * Hook for checking permissions using the resolver system
@@ -60,11 +61,14 @@ export function useCan(permissionKey?: PermissionKey) {
 
     // Debug logging for permission resolution (only in development)
     if (process.env.NODE_ENV === 'development' && !userRole) {
-      console.warn('[useCan] No matching role found for user:', {
-        userId: profile.id,
-        userRole: profile.role,
-        userRoleId: profile.role_id,
-        availableRoles: roles?.map(r => ({ id: r.id, name: r.name }))
+      logger.warn('[useCan] No matching role found for user', {
+        context: {
+          userId: profile.id,
+          userRole: profile.role,
+          userRoleId: profile.role_id,
+          availableRoles: roles?.map(r => ({ id: r.id, name: r.name }))
+        },
+        tags: ['warning', 'permission']
       });
     }
 
@@ -98,7 +102,9 @@ export function useCan(permissionKey?: PermissionKey) {
       permissionCache.current[key] = result;
       
       // Log the permission check for audit (async, non-blocking)
-      logPermissionCheck(key, result, source).catch(console.error);
+      logPermissionCheck(key, result, source).catch((error) => {
+        logger.error('Failed to log permission check', { error, tags: ['error', 'audit'] });
+      });
       
       return result;
     };

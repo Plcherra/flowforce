@@ -30,6 +30,7 @@ import { TasksTab } from './shift-wizard/TasksTab';
 import { NotesTab } from './shift-wizard/NotesTab';
 import type { ShiftTask, ShiftWizardFormData } from './shift-wizard/types';
 import { queryKeys } from '@/lib/queryKeys';
+import { logger } from '@/utils/logger';
 
 interface ShiftWizardDialogProps {
   open?: boolean;
@@ -181,7 +182,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to assign user to shift';
-        console.error('Failed to assign user to shift', err);
+        logger.error('Failed to assign user to shift', { error: err, tags: ['error'] });
         errors.push(errorMessage);
       }
     }
@@ -189,7 +190,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
     if (errors.length > 0) {
       // Note: Individual assignment errors are already shown via toast in the assign function
       // This is just a summary if multiple assignments fail
-      console.warn('Some user assignments failed', errors);
+      logger.warn('Some user assignments failed', { context: { errors }, tags: ['warning'] });
     }
   };
 
@@ -246,7 +247,7 @@ export function ShiftWizardDialog({ open, onOpenChange, selectedDate, children }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create shift';
-      console.error('Failed to create shift', err);
+      logger.error('Failed to create shift', { error: err, tags: ['error'] });
       toast({
         title: 'Shift creation failed',
         description: errorMessage,

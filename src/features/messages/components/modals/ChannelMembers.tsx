@@ -19,6 +19,7 @@ import { Users, MoreVertical, UserPlus, Crown, Shield, User as UserIcon } from '
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { messagesRepository, type ChannelMemberDetail } from '@/repositories/messagesRepository';
+import { logger } from '@/utils/logger';
 
 const AvatarPlaceholder = ({ name }: { name: string }) => (
   <AvatarFallback className="bg-muted text-muted-foreground">
@@ -48,7 +49,7 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
       const data = await messagesRepository.listChannelMembers(channelId, user.id);
       setMembers(data);
     } catch (error) {
-      console.error('Error fetching members:', error);
+      logger.error('Error fetching members:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to load channel members',
@@ -76,7 +77,7 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
 
       fetchMembers(); // Refresh the list
     } catch (error) {
-      console.error('Error updating member role:', error);
+      logger.error('Error updating member role:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to update member role',
@@ -104,7 +105,7 @@ export function ChannelMembers({ open, onClose, channelId, channelName, isAdmin 
       setMemberPendingRemoval(null);
       fetchMembers(); // Refresh the list
     } catch (error) {
-      console.error('Error removing member:', error);
+      logger.error('Error removing member:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'Failed to remove member',

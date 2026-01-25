@@ -9,6 +9,7 @@ import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { recordInventoryCountScan } from '@/features/inventory/repositories/countsRepository';
 import type { InventoryCountLine } from '@/features/inventory/hooks/types';
 import { Barcode, Trash } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface MarketManCountingInterfaceProps {
   countId: string;
@@ -99,7 +100,7 @@ export function MarketManCountingInterface({
         description: 'Barcode has been recorded for this count.',
       });
     } catch (error) {
-      console.error('Error logging barcode scan:', error);
+      logger.error('Error logging barcode scan:', { error, tags: ['error'] });
       toast({
         title: 'Scan Failed',
         description: 'Unable to record the barcode scan.',

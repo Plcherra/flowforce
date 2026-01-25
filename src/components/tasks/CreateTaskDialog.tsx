@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CreateReminderDialog } from '@/components/reminders/CreateReminderDialog';
 import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
+import { logger } from '@/utils/logger';
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -158,7 +159,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
         handleDialogChange(false);
       }
     } catch (error) {
-      console.error('Error creating task:', error);
+      logger.error('Error creating task:', { error, tags: ['error'] });
       toast({
         title: 'Error',
         description: 'An unexpected error occurred.',

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
@@ -221,7 +222,7 @@ async function replaceEventParticipants(
     return;
   }
 
-  console.warn('replace_event_participants RPC unavailable, falling back to manual sync', rpcResponse.error);
+  logger.warn('replace_event_participants RPC unavailable, falling back to manual sync', { error: rpcResponse.error, tags: ['warning'] });
 
   const { error: deleteError } = await supabase
     .from('event_participants')
@@ -258,7 +259,7 @@ async function replaceEventShiftLinks(
     return;
   }
 
-  console.warn('replace_event_shift_links RPC unavailable, falling back to manual sync', rpcResponse.error);
+  logger.warn('replace_event_shift_links RPC unavailable, falling back to manual sync', { error: rpcResponse.error, tags: ['warning'] });
 
   const { error: deleteError } = await supabase
     .from('event_shift_links')

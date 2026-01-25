@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { MOCK_KPI_INSIGHTS } from '@/mock/kpi_insights';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 
 export interface AIKpiInsight {
   metric: string;
@@ -95,10 +96,7 @@ export function useAIKPIInsights(companyId?: string | null, range?: RangeInput) 
       if (error) {
         if (error.message?.includes('get_ai_kpi_insights')) {
           if (appEnv.DEV) {
-            console.warn(
-              '[useAIKPIInsights] RPC get_ai_kpi_insights unavailable, returning mock data.',
-              error.message,
-            );
+            logger.warn('[useAIKPIInsights] RPC get_ai_kpi_insights unavailable, returning mock data', { error: error.message, tags: ['warning'] });
           }
           return MOCK_KPI_INSIGHTS.map((item) => ({ ...item })) as AIKpiInsight[];
         }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type TimeEntry = Tables<'time_entries'>;
 
@@ -32,7 +33,7 @@ export function useTimeEntries() {
       if (error) throw error;
       setTimeEntries(data || []);
     } catch (error) {
-      console.error('Error fetching time entries:', error);
+      logger.error('Error fetching time entries', { error, tags: ['error'] });
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export function useTimeEntries() {
       setTimeEntries(prev => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
-      console.error('Error creating time entry:', error);
+      logger.error('Error creating time entry', { error, tags: ['error'] });
       return { data: null, error };
     }
   };

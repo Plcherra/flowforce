@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PenTool, RotateCcw, Check, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface SignatureData {
   signature_data: string; // Base64 encoded
@@ -129,7 +130,7 @@ export function SignatureField({
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
         toast({
           title: "Error",
           description: "Failed to save signature",
@@ -155,7 +156,7 @@ export function SignatureField({
         description: "Signature saved successfully",
       });
     } catch (error) {
-      console.error('Error saving signature:', error);
+      logger.error('Error saving signature:', { error, tags: ['error'] });
       toast({
         title: "Error",
         description: "Failed to save signature",

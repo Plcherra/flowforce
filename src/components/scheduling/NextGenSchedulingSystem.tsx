@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -18,22 +18,24 @@ import {
   Bug,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { EnhancedCalendarView } from './EnhancedCalendarView';
-import { AIInsightsDashboard } from './AIInsightsDashboard';
-import { WeeklySchedulingChecklist } from './WeeklySchedulingChecklist';
-import { SchedulingWorkflow } from './SchedulingWorkflow';
-import { SchedulingNotifications } from './SchedulingNotifications';
-import { StaffShiftManagement } from './StaffShiftManagement';
-import { PersonalAvailabilityPanel } from './availability/PersonalAvailabilityPanel';
-import { TeamAvailabilityPanel } from './availability/TeamAvailabilityPanel';
-import { CopilotSchedulerSidebar } from './CopilotSchedulerSidebar';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Phase 4: Lazy load heavy scheduling components for better initial bundle size
+const EnhancedCalendarView = lazy(() => import('./EnhancedCalendarView').then(m => ({ default: m.EnhancedCalendarView })));
+const AIInsightsDashboard = lazy(() => import('./AIInsightsDashboard').then(m => ({ default: m.AIInsightsDashboard })));
+const WeeklySchedulingChecklist = lazy(() => import('./WeeklySchedulingChecklist').then(m => ({ default: m.WeeklySchedulingChecklist })));
+const SchedulingWorkflow = lazy(() => import('./SchedulingWorkflow').then(m => ({ default: m.SchedulingWorkflow })));
+const SchedulingNotifications = lazy(() => import('./SchedulingNotifications').then(m => ({ default: m.SchedulingNotifications })));
+const StaffShiftManagement = lazy(() => import('./StaffShiftManagement').then(m => ({ default: m.StaffShiftManagement })));
+const PersonalAvailabilityPanel = lazy(() => import('./availability/PersonalAvailabilityPanel').then(m => ({ default: m.PersonalAvailabilityPanel })));
+const TeamAvailabilityPanel = lazy(() => import('./availability/TeamAvailabilityPanel').then(m => ({ default: m.TeamAvailabilityPanel })));
+const CopilotSchedulerSidebar = lazy(() => import('./CopilotSchedulerSidebar').then(m => ({ default: m.CopilotSchedulerSidebar })));
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AutoScheduleDialog } from './AutoScheduleDialog';
 import { useProfile } from '@/hooks/useProfile';
 import { useScheduling } from '@/contexts/SchedulingContext';
 import { useSearchParams } from '@/lib/router-adapter';
-import { Skeleton } from '@/components/ui/skeleton';
 import { appEnv } from '@/lib/env';
 
 export const formatDailyHoursLabel = (day: string, parsedDate?: Date) => {
@@ -545,7 +547,9 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                 disabled={retryDisabled}
               />
             ) : (
-              <AIInsightsDashboard />
+              <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+                <AIInsightsDashboard />
+              </Suspense>
             )}
           </TabsContent>
 
@@ -576,8 +580,12 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
               />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <SchedulingWorkflow />
-                <SchedulingNotifications />
+                <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+                  <SchedulingWorkflow />
+                </Suspense>
+                <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
+                  <SchedulingNotifications />
+                </Suspense>
               </div>
             )}
           </TabsContent>
@@ -605,10 +613,14 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
                   </TabsList>
                 </div>
                 <TabsContent value="personal" className="mt-0 space-y-6">
-                  <PersonalAvailabilityPanel />
+                  <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
+                    <PersonalAvailabilityPanel />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="team" className="mt-0 space-y-6">
-                  <TeamAvailabilityPanel />
+                  <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
+                    <TeamAvailabilityPanel />
+                  </Suspense>
                 </TabsContent>
               </Tabs>
             )}
@@ -650,7 +662,9 @@ export function NextGenSchedulingSystem({ locationFilter }: { locationFilter?: s
           <DialogHeader>
             <DialogTitle>Weekly Scheduling Checklist</DialogTitle>
           </DialogHeader>
-          <WeeklySchedulingChecklist />
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <WeeklySchedulingChecklist />
+          </Suspense>
         </DialogContent>
       </Dialog>
 

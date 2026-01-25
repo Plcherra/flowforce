@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
 import { appEnv } from '@/lib/env';
+import { logger } from '@/utils/logger';
 import {
   fetchCertificationContext,
   upsertCertificationProgressRows,
@@ -142,7 +143,7 @@ async function evaluateCertifications(employeeId: string): Promise<Certification
     return await buildCertificationEvaluation(employeeId, context);
   } catch (error) {
     if (appEnv.DEV) {
-      console.error('Failed to load certifications', error);
+      logger.error('Failed to load certifications', { error, tags: ['error'] });
     }
     throw new Error('certifications.errors.load');
   }

@@ -1,5 +1,30 @@
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { HelpDeskTicket, HelpDeskTicketStatus, HelpDeskTicketPriority } from '@/hooks/useTickets';
+import { logger } from '@/utils/logger';
+
+// Phase 5: Zod schemas for input validation
+const HelpDeskTicketStatusSchema = z.enum(['open', 'in_progress', 'resolved', 'closed']);
+const HelpDeskTicketPrioritySchema = z.enum(['low', 'medium', 'high', 'urgent']);
+
+const CreateTicketInputSchema = z.object({
+  subject: z.string().min(1, 'Subject is required').max(500, 'Subject must be less than 500 characters'),
+  description: z.string().max(5000, 'Description must be less than 5000 characters').nullable().optional(),
+  priority: HelpDeskTicketPrioritySchema.optional(),
+  category: z.string().max(100).nullable().optional(),
+  department_id: z.string().uuid().nullable().optional(),
+  company_id: z.string().uuid('Invalid company_id format'),
+  requester_id: z.string().uuid('Invalid requester_id format'),
+});
+
+const UpdateTicketInputSchema = z.object({
+  subject: z.string().min(1).max(500).optional(),
+  description: z.string().max(5000).nullable().optional(),
+  status: HelpDeskTicketStatusSchema.optional(),
+  priority: HelpDeskTicketPrioritySchema.optional(),
+  assigned_to: z.string().uuid().nullable().optional(),
+  category: z.string().max(100).nullable().optional(),
+});
 
 export interface CreateTicketInput {
   subject: string;
@@ -24,23 +49,27 @@ const DEFAULT_STATUS: HelpDeskTicketStatus = 'open';
 const DEFAULT_PRIORITY: HelpDeskTicketPriority = 'medium';
 
 export async function createTicket(input: CreateTicketInput): Promise<HelpDeskTicket> {
-  if (!input.company_id) {
-    throw new Error('company_id is required when creating a ticket');
+  // Phase 5: Validate input with Zod schema
+  const validationResult = CreateTicketInputSchema.safeParse(input);
+  if (!validationResult.success) {
+    const errors = validationResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    logger.error('[ticketsRepository] Invalid ticket input', { 
+      errors: validationResult.error.errors,
+      tags: ['validation', 'error'] 
+    });
+    throw new Error(`Invalid ticket input: ${errors}`);
   }
 
-  if (!input.requester_id) {
-    throw new Error('requester_id is required when creating a ticket');
-  }
-
+  const validatedInput = validationResult.data;
   const payload = {
-    subject: input.subject,
-    description: input.description ?? null,
+    subject: validatedInput.subject,
+    description: validatedInput.description ?? null,
     status: DEFAULT_STATUS,
-    priority: input.priority ?? DEFAULT_PRIORITY,
-    category: input.category ?? null,
-    requester_id: input.requester_id,
+    priority: validatedInput.priority ?? DEFAULT_PRIORITY,
+    category: validatedInput.category ?? null,
+    requester_id: validatedInput.requester_id,
     assigned_to: null,
-    company_id: input.company_id,
+    company_id: validatedInput.company_id,
   };
 
   const { data, error } = await supabase
@@ -72,6 +101,25 @@ export async function updateTicket(
   companyId: string,
   updates: UpdateTicketInput,
 ): Promise<HelpDeskTicket> {
+  // Phase 5: Validate input with Zod schema
+  const validationResult = UpdateTicketInputSchema.safeParse(updates);
+  if (!validationResult.success) {
+    const errors = validationResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    logger.error('[ticketsRepository] Invalid ticket update input', { 
+      errors: validationResult.error.errors,
+      tags: ['validation', 'error'] 
+    });
+    throw new Error(`Invalid ticket update input: ${errors}`);
+  }
+
+  // Validate ticketId and companyId format
+  if (!z.string().uuid().safeParse(ticketId).success) {
+    throw new Error('Invalid ticketId format');
+  }
+  if (!z.string().uuid().safeParse(companyId).success) {
+    throw new Error('Invalid companyId format');
+  }
+
   const { data, error } = await supabase
     .from('helpdesk_tickets')
     .update({

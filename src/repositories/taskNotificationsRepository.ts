@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/public-types';
+import { logger } from '@/utils/logger';
 
 type TaskNotificationRow = Tables<'task_notifications'>;
 type TaskRow = Tables<'tasks'>;
@@ -14,7 +15,7 @@ const notificationSchema: z.ZodType<TaskNotificationRow> = z
     title: z.string(),
     message: z.string(),
     type: z.string(),
-    metadata: z.any().nullable(),
+    metadata: z.unknown().nullable(), // Json type from database
     read_at: z.string().nullable(),
     created_at: z.string(),
   })
@@ -141,7 +142,7 @@ export async function fetchTasksDueSoon(userId: string, upperBoundIso: string): 
   if (error) {
     // Handle enum validation errors gracefully
     if (error.message?.includes('invalid input value for enum task_status')) {
-      console.warn('Some tasks have invalid status values. Filtering them out.', error);
+      logger.warn('Some tasks have invalid status values. Filtering them out.', { error, tags: ['warning'] });
       // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
       return [];
     }
@@ -168,7 +169,7 @@ export async function fetchOverdueTasks(userId: string): Promise<TaskSummary[]> 
   if (error) {
     // Handle enum validation errors gracefully
     if (error.message?.includes('invalid input value for enum task_status')) {
-      console.warn('Some tasks have invalid status values. Filtering them out.', error);
+      logger.warn('Some tasks have invalid status values. Filtering them out.', { error, tags: ['warning'] });
       // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
       return [];
     }
