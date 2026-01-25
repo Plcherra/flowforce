@@ -124,12 +124,12 @@ export function useCookbook() {
   });
 
   const items = useMemo<InventoryItem[]>(() => {
-    if (itemsQuery.data && itemsQuery.data.length > 0) return itemsQuery.data;
+    if (Array.isArray(itemsQuery.data) && itemsQuery.data.length > 0) return itemsQuery.data;
     return getDemoItems();
   }, [itemsQuery.data]);
 
   const recipes = useMemo<CookbookRecipe[]>(() => {
-    if (recipesQuery.data && recipesQuery.data.length > 0) return recipesQuery.data;
+    if (Array.isArray(recipesQuery.data) && recipesQuery.data.length > 0) return recipesQuery.data;
     return buildDemoRecipes(items);
   }, [recipesQuery.data, items]);
 

@@ -33,6 +33,7 @@ export interface LogContext {
 export interface LogMeta extends LogContext {
   context?: Record<string, unknown>;
   error?: unknown;
+  timestamp?: string;
 }
 
 export interface ClientLogger {

@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCan } from '@/hooks/useCan';
 import { useForms } from '@/hooks/useForms';
 import type { FormWithMeta } from '@/hooks/useForms';
+import { asArray, safeArrayFilter } from '@/utils/reactQueryTypes';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { PageAsyncWrapper } from '@/components/ui/async-wrapper';
 
@@ -58,9 +59,7 @@ export default function Forms() {
   const sections = useMemo<FormSectionConfig[]>(() => {
     const trimmedQuery = query.trim();
     if (statusFilter === 'archived') {
-      const archivedForms = forms.filter(
-        (form) => form.status === 'archived' && matchesQuery(form, trimmedQuery),
-      );
+      const archivedForms = safeArrayFilter(forms, (form) => form.status === 'archived' && matchesQuery(form, trimmedQuery));
       return [
         {
           key: 'archived',
@@ -71,7 +70,7 @@ export default function Forms() {
       ];
     }
 
-    const activeForms = forms.filter((form) => {
+    const activeForms = safeArrayFilter(forms, (form) => {
       if (form.status === 'archived') {
         return false;
       }
@@ -81,8 +80,8 @@ export default function Forms() {
       return matchesQuery(form, trimmedQuery);
     });
 
-    const myForms = activeForms.filter((form) => form.created_by === user?.id);
-    const teamForms = activeForms.filter((form) => form.created_by !== user?.id);
+    const myForms = safeArrayFilter(activeForms, (form) => form.created_by === user?.id);
+    const teamForms = safeArrayFilter(activeForms, (form) => form.created_by !== user?.id);
 
     const activeSections = [
       {
@@ -116,7 +115,7 @@ export default function Forms() {
     return activeSections;
   }, [forms, statusFilter, query, user?.id, canCreateForms]);
 
-  const builderForm = builderFormId ? forms.find((form) => form.id === builderFormId) : null;
+  const builderForm = builderFormId ? asArray(forms).find((form) => form.id === builderFormId) : null;
   const builderInitialTitle = builderForm?.title ?? builderFallback?.title ?? 'New Form';
   const builderInitialDescription = builderForm?.description ?? builderFallback?.description ?? '';
 

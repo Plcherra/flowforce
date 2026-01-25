@@ -657,7 +657,7 @@ export function InviteEmployeesModal({
           <div className="rounded-md border">
             <ScrollArea className="h-48">
               <div className="divide-y">
-                {invitesQuery.data?.length ? (
+                {Array.isArray(invitesQuery.data) && invitesQuery.data.length > 0 ? (
                   invitesQuery.data.map((invite) => (
                     <div key={invite.id} className="flex items-center justify-between gap-3 px-3 py-3 text-sm">
                       <div className="min-w-0">

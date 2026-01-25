@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGoals, type Goal } from '@/hooks/useGoals';
+import { asArray, safeArrayMap, safeArrayLength } from '@/utils/reactQueryTypes';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useGoalSuggestion } from '@/features/goals/hooks/useGoalSuggestion';
@@ -118,7 +119,7 @@ export default function GoalsPage() {
           setLinkingTasks(true);
           try {
             await Promise.all(
-              tasksToLink.map(([taskId, weight]) => linkTaskToGoal(created.id, taskId, weight)),
+              safeArrayMap(tasksToLink, ([taskId, weight]) => linkTaskToGoal(created.id, taskId, weight)),
             );
           } finally {
             setLinkingTasks(false);
@@ -205,7 +206,7 @@ export default function GoalsPage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {goals.map((goal) => (
+          {safeArrayMap(goals, (goal) => (
             <GoalCard
               key={goal.id}
               goal={goal}

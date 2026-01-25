@@ -29,6 +29,7 @@ const persistenceEnabled = process.env.LOG_PERSISTENCE !== 'false';
 
 export interface LogContext {
   orgId?: string;
+  companyId?: string;
   userId?: string;
   requestId?: string;
   location?: string;
@@ -38,6 +39,11 @@ export interface LogContext {
 export interface LogMeta extends LogContext {
   context?: Record<string, unknown>;
   error?: unknown;
+  timestamp?: string;
+  operation?: string;
+  table?: string;
+  recordId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface ServerLogger {

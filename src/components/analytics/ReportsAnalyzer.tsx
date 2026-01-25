@@ -34,6 +34,7 @@ import { useForms } from '@/hooks/useForms';
 import { useDocumentInbox } from '@/hooks/useDocumentIngestion';
 import type { AssistantContext } from '@/types/ai';
 import type { DocumentWithRelations } from '@/types/ingestion';
+import { asArray, safeArrayMap, safeArrayFilter, safeArrayReduce, safeArrayLength } from '@/utils/reactQueryTypes';
 
 const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'];
 
@@ -48,7 +49,7 @@ interface ComparisonRecord {
 }
 
 function parseMetaAccuracy(document: DocumentWithRelations) {
-  const meta = (document.meta ?? {}) as Record<string, any>;
+  const meta = ((document as any).meta ?? {}) as Record<string, any>;
   if (typeof meta?.accuracy === 'number') return Math.round(meta.accuracy * 100);
   if (typeof meta?.confidence === 'number') return Math.round(meta.confidence * 100);
   return null;
@@ -60,14 +61,15 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
   const { forms } = useForms();
-  const { data: documents = [], isLoading } = useDocumentInbox({ limit: 100 });
+  const { data: documentsData, isLoading } = useDocumentInbox({ limit: 100 });
+  const documents = asArray(documentsData);
 
   const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
   const startDate = useMemo(() => subDays(new Date(), days - 1), [days]);
 
   const filteredDocuments = useMemo(
     () =>
-      documents.filter((document) => {
+      safeArrayFilter(documents, (document: any) => {
         const reference = document.doc_date ?? document.created_at;
         if (!reference) return false;
         return new Date(reference) >= startDate;
@@ -77,7 +79,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
 
   const filteredForms = useMemo(
     () =>
-      forms.filter((form) => {
+      safeArrayFilter(asArray(forms), (form) => {
         if (!form.latest_submission_at) return false;
         return new Date(form.latest_submission_at) >= startDate;
       }),
@@ -85,26 +87,23 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
   );
 
   const totalFormSubmissions = useMemo(
-    () => forms.reduce((sum, form) => sum + (form.submissions_count ?? 0), 0),
+    () => safeArrayReduce(asArray(forms), (sum, form) => sum + (form.submissions_count ?? 0), 0),
     [forms],
   );
 
   const formsWithActivity = useMemo(
-    () => forms.filter((form) => (form.submissions_count ?? 0) > 0),
+    () => safeArrayFilter(asArray(forms), (form) => (form.submissions_count ?? 0) > 0),
     [forms],
   );
 
   const readyReports = useMemo(
-    () => filteredDocuments.filter((document) => document.processing_state === 'ready'),
+    () => safeArrayFilter(filteredDocuments, (document: any) => document.processing_state === 'ready'),
     [filteredDocuments],
   );
 
   const followUpActions = useMemo(
     () =>
-      filteredDocuments.reduce(
-        (sum, document) => sum + (document.originating_tasks?.length ?? 0),
-        0,
-      ),
+      safeArrayReduce(filteredDocuments, (sum: number, document: any) => sum + (document.originating_tasks?.length ?? 0), 0),
     [filteredDocuments],
   );
 
@@ -120,12 +119,14 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
     return Math.round((completed / totalItems) * 100);
   })();
 
-  const formsCompletionRate = forms.length
-    ? Math.round((formsWithActivity.length / forms.length) * 100)
+  const formsArray = asArray(forms);
+  const formsLength = safeArrayLength(forms);
+  const formsCompletionRate = formsLength > 0
+    ? Math.round((formsWithActivity.length / formsLength) * 100)
     : 0;
 
-  const formsEngagementScore = forms.length
-    ? Math.min(100, Math.round((totalFormSubmissions / (forms.length * 12 || 1)) * 100))
+  const formsEngagementScore = formsLength > 0
+    ? Math.min(100, Math.round((totalFormSubmissions / (formsLength * 12 || 1)) * 100))
     : 0;
 
   const reportsEngagementScore = filteredDocuments.length
@@ -147,7 +148,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
       });
     }
 
-    filteredDocuments.forEach((document) => {
+    filteredDocuments.forEach((document: any) => {
       const reference = document.doc_date ?? document.created_at;
       if (!reference) return;
       const key = reference.slice(0, 10);
@@ -231,10 +232,10 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
   ]);
 
   const statusBreakdown = useMemo(() => {
-    const counts = filteredDocuments.reduce<Record<string, number>>((acc, document) => {
+    const counts = safeArrayReduce(filteredDocuments, (acc: Record<string, number>, document: any) => {
       acc[document.processing_state] = (acc[document.processing_state] ?? 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     return Object.entries(counts).map(([status, value], index) => ({
       status,
@@ -245,16 +246,16 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
 
   const sortedDocuments = useMemo(
     () =>
-      [...filteredDocuments].sort((a, b) => {
-        const aDate = new Date(a.created_at ?? 0).getTime();
-        const bDate = new Date(b.created_at ?? 0).getTime();
+      [...filteredDocuments].sort((a: any, b: any) => {
+        const aDate = new Date((a.created_at as string | undefined) ?? 0).getTime();
+        const bDate = new Date((b.created_at as string | undefined) ?? 0).getTime();
         return bDate - aDate;
       }),
     [filteredDocuments],
   );
 
   const selectedReport = useMemo(
-    () => sortedDocuments.find((document) => document.id === selectedReportId) ?? null,
+    () => sortedDocuments.find((document: any) => document.id === selectedReportId) ?? null,
     [sortedDocuments, selectedReportId],
   );
 
@@ -328,12 +329,13 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
 
   const selectedContext: AssistantContext | null = useMemo(() => {
     if (!selectedReport) return null;
+    const report = selectedReport as any;
 
-    const followUps = selectedReport.originating_tasks?.length ?? 0;
+    const followUps = report.originating_tasks?.length ?? 0;
     const extractedAccuracy = parseMetaAccuracy(selectedReport);
 
     const insights = [
-      selectedReport.processing_state !== 'ready'
+      report.processing_state !== 'ready'
         ? {
             title: 'Processing stalled',
             detail: 'Report is not ready yet. Consider prioritizing extraction validation.',
@@ -353,16 +355,16 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
 
     return {
       type: 'report',
-      title: selectedReport.title ?? selectedReport.file?.filename ?? 'Report',
-      subtitle: `Updated ${formatDistanceToNow(new Date(selectedReport.updated_at), { addSuffix: true })}`,
+      title: report.title ?? report.file?.filename ?? 'Report',
+      subtitle: `Updated ${formatDistanceToNow(new Date(report.updated_at), { addSuffix: true })}`,
       metrics: [
-        { label: 'Status', value: selectedReport.processing_state },
+        { label: 'Status', value: report.processing_state },
         {
           label: 'Accuracy',
           value: extractedAccuracy !== null ? `${extractedAccuracy}%` : `${accuracyScore}%`,
         },
         { label: 'Follow-ups', value: `${followUps}` },
-        { label: 'Source', value: selectedReport.source ?? 'N/A' },
+        { label: 'Source', value: report.source ?? 'N/A' },
       ],
       insights,
       recommendedActions: [
@@ -639,7 +641,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
             <CardContent>
               <ScrollArea className="max-h-[360px]">
                 <div className="space-y-3">
-                  {sortedDocuments.map((document) => {
+                  {safeArrayMap(sortedDocuments, (document: any) => {
                     const isActive = document.id === selectedReportId;
                     const tasks = document.originating_tasks?.length ?? 0;
                     const accuracy = parseMetaAccuracy(document);

@@ -55,7 +55,12 @@ interface LockInfo {
   deps: LockEngineDeps;
 }
 
-const toISODate = (date: Date) => date.toISOString().slice(0, 10);
+const toISODate = (date: Date | dayjs.Dayjs) => {
+  if (dayjs.isDayjs(date)) {
+    return date.format('YYYY-MM-DD');
+  }
+  return date.toISOString().slice(0, 10);
+};
 
 const getDateForOffset = (weekStart: string, offset: number) => {
   const base = dayjs(weekStart);
@@ -115,6 +120,7 @@ export function AvailabilityRequestForm({
       const weekStartDate = weekStart;
       const start = dayjs(weekStartDate);
       const end = start.add(6, 'day');
+      // Convert dayjs to Date for format() calls
 
       const { data: exceptionsData, error: exceptionsError } = await supabase
         .from('availability_exception')
@@ -127,7 +133,11 @@ export function AvailabilityRequestForm({
         throw exceptionsError;
       }
 
-      const exceptions: AvailabilityException[] = (exceptionsData ?? []).map((row) => ({
+      if (!Array.isArray(exceptionsData)) {
+        throw new Error('Expected array from availability_exception query');
+      }
+
+      const exceptions: AvailabilityException[] = exceptionsData.map((row: any) => ({
         id: row.id,
         employeeId: row.employee_id,
         startDate: row.start_date,

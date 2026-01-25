@@ -12,6 +12,16 @@ export type EventType = DocumentEvent['event_type'];
 export type TaskSource = TaskRecord['source'];
 
 export interface DocumentWithRelations extends ExtractedDocument {
+  // Explicitly include commonly accessed properties for type safety
+  doc_date?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  processing_state?: 'pending' | 'processing' | 'ready' | 'error';
+  title?: string | null;
+  source?: string | null;
+  meta?: Record<string, unknown> | null;
+  id: string;
+  // Relations
   file?: IngestedFile | null;
   events?: DocumentEvent[];
   originating_tasks?: TaskRecord[];

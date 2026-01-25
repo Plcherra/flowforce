@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, User, Flag, MessageSquare, Search, Target } from 'lucide-react';
 import { useTasks, type TaskWithRelations, normalizeTaskStatus, labelFor } from '@/hooks/useTasks';
+import { asArray, safeArrayReduce } from '@/utils/reactQueryTypes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TaskNotifications } from '@/components/tasks/TaskNotifications';
 import { format, differenceInDays } from 'date-fns';
@@ -99,7 +100,8 @@ const normalizePriority = (priority: string | null | undefined): KnownTaskPriori
 
 export default function Tasks() {
   const isMobile = useIsMobile();
-  const { tasks, loading, error, refetchTasks } = useTasks();
+  const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
+  const tasks = asArray(tasksData);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const {
     statusFilter,

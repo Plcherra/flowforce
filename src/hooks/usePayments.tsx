@@ -72,9 +72,12 @@ export function usePayments() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!Array.isArray(data)) {
+        return [];
+      }
       
       // first map into a nullable PaymentWithUsers (so we can drop any with missing users)
-       const withUsers = data.map(payment => {
+       const withUsers = data.map((payment: any) => {
         const approver = isUser(payment.approver) ? payment.approver : null;
         const creator  = isUser(payment.creator)  ? payment.creator  : null;
         if (!approver || !creator) return null;

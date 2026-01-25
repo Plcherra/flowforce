@@ -95,16 +95,17 @@ export function ExecutePanel({
     void createCycle();
   }, [createCycle]);
 
-  const pendingActions = actionsState.data.filter((action) => action.status !== 'executed');
-  const executedActions = actionsState.data.filter((action) => action.status === 'executed');
+  const actionsData = Array.isArray(actionsState.data) ? actionsState.data : [];
+  const pendingActions = actionsData.filter((action) => action.status !== 'executed');
+  const executedActions = actionsData.filter((action) => action.status === 'executed');
 
   const queuedRecommendationIds = useMemo(() => {
     return new Set(
-      actionsState.data
+      actionsData
         .map((action) => action.result?.recommendationId)
         .filter((value): value is string => typeof value === 'string'),
     );
-  }, [actionsState.data]);
+  }, [actionsData]);
 
   const disableActionControls = !activeCycleId;
 

@@ -17,7 +17,7 @@
     "gen:section": "node scripts/generate-section.mjs",
     "seed:kpi-insights": "node scripts/seedKpiInsights.mjs",
     "roster:sync": "node scripts/nightlyRosterSync.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.2",

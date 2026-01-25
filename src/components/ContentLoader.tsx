@@ -7,9 +7,9 @@ export function ContentLoader({ children }: { children: React.ReactNode }) {
   const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    if (navigation.state === 'loading') {
+    if ((navigation.state as string) === 'loading') {
       // Show loader after 100ms to avoid flash for fast transitions
       timeoutId = setTimeout(() => setShowLoader(true), 100);
     } else {

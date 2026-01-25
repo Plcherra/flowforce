@@ -1,6 +1,7 @@
 import React from 'react';
 import { MessagesShell } from '@/features/messages/components/layout';
 import { useMessagesViewModel } from '@/features/messages/hooks/useMessagesViewModel';
+import { safeArrayLength } from '@/utils/reactQueryTypes';
 import { useCommunicationBootstrap } from '@/hooks/useCommunicationBootstrap';
 import { PageLoader } from '@/components/common/PageLoader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -44,7 +45,7 @@ export default function Messages() {
     return <PageLoader text="Preparing conversations..." />;
   }
 
-  if (viewModel.channels.length === 0) {
+  if (safeArrayLength(viewModel.channels) === 0) {
     return (
       <div className="p-6">
         <EmptyStateCard

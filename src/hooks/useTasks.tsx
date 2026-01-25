@@ -51,6 +51,7 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
   review: 'In Review',
   blocked: 'Blocked',
   done: 'Done',
+  completed: 'Completed',
   cancelled: 'Cancelled',
 };
 
@@ -259,7 +260,7 @@ export function useTasks() {
       return { data: null, error };
     }
 
-    const allowedTransitions = TASK_STATUS_TRANSITIONS[current] ?? [];
+    const allowedTransitions = (TASK_STATUS_TRANSITIONS[current] ?? []) as readonly TaskStatus[];
 
     if (!allowedTransitions.includes(nextStatus)) {
       const message = `Invalid status transition from ${current} to ${nextStatus}`;

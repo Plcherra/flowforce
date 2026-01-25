@@ -17,7 +17,8 @@ interface AssessPanelProps {
 
 export function AssessPanel({ insights, assessments, stageDescription, onRestart }: AssessPanelProps) {
   const [saving, setSaving] = useState(false);
-  const hasAssessments = assessments.data.length > 0;
+  const assessmentsData = Array.isArray(assessments.data) ? assessments.data : [];
+  const hasAssessments = assessmentsData.length > 0;
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -83,7 +84,7 @@ export function AssessPanel({ insights, assessments, stageDescription, onRestart
         </div>
       ) : hasAssessments ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          {assessments.data.map((metric) => (
+          {assessmentsData.map((metric) => (
             <Card key={metric.metric} className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">

@@ -28,10 +28,9 @@ import {
   useUpdateUserRole,
   PERMISSION_KEYS,
   type PermissionKey,
-} from '@/hooks/useUserPermissions';
-import { logger } from '@/utils/logger';
   type PermissionValue,
 } from '@/hooks/useUserPermissions';
+import { logger } from '@/utils/logger';
 import { PERMISSIONS_BY_CATEGORY } from '@/lib/permissions/registry';
 import type { Tables } from '@/integrations/supabase/public-types';
 

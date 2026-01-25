@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../_server/supabaseAdmin';
 import { createServerLogger } from '../../_server/utils/logger';
-import { verifyCronRequest } from '../../../../lib/cron/verifyCron';
+import { verifyCronRequest } from '@/lib/cron/verifyCron';
 
 const loggerScope = 'cron-schedule-auto-publish';
 

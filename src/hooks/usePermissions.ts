@@ -199,7 +199,8 @@ export function usePermissionFlags() {
       key: PermissionFlag['key'];
       value: boolean;
     }) => {
-      const existing = rolesQuery.data?.find((role) => role.id === roleId);
+      const rolesData = Array.isArray(rolesQuery.data) ? rolesQuery.data : [];
+      const existing = rolesData.find((role) => role.id === roleId);
       const permissions = { ...(existing?.permissions ?? {}) };
       permissions[key] = value;
 
@@ -225,13 +226,12 @@ export function usePermissionFlags() {
     },
   });
 
-  const roleOptions = Array.isArray(rolesQuery.data)
-    ? rolesQuery.data.map((role) => ({
-        id: role.id,
-        name: role.name,
-        permissions: role.permissions,
-      }))
-    : [];
+  const rolesData = Array.isArray(rolesQuery.data) ? rolesQuery.data : [];
+  const roleOptions = rolesData.map((role) => ({
+    id: role.id,
+    name: role.name,
+    permissions: role.permissions,
+  }));
 
   return {
     roles: roleOptions,

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Users, FileText, Calendar, Download, Activity } from 'lucide-react';
 import { useForms } from '@/hooks/useForms';
+import { asArray, safeArrayMap, safeArrayLength } from '@/utils/reactQueryTypes';
 import { FormSubmission } from '@/types/common';
 import type { AssistantContext } from '@/types/ai';
 import { logger } from '@/utils/logger';
@@ -215,7 +216,8 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
       return;
     }
 
-    const formMeta = forms.find((form) => form.id === selectedForm);
+    const formsArray = asArray(forms);
+    const formMeta = formsArray.find((form) => form.id === selectedForm);
     if (!formMeta) {
       onContextChange(null);
       onSummaryChange?.({
@@ -318,7 +320,8 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
     onContextChange(contextPayload);
   }, [analyticsData, selectedForm, forms, timeRange, onContextChange, onSummaryChange]);
 
-  if (!forms.length) {
+  const formsArray = asArray(forms);
+  if (!formsArray.length) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
@@ -339,7 +342,7 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
               <SelectValue placeholder="Select a form" />
             </SelectTrigger>
             <SelectContent>
-              {forms.map((form) => (
+              {safeArrayMap(forms, (form) => (
                 <SelectItem key={form.id} value={form.id}>
                   {form.title}
                 </SelectItem>
