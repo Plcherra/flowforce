@@ -1,7 +1,6 @@
-
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from '@/lib/router-adapter';
-import { useAuth } from '@/hooks/useAuth';
+import { ReactNode, useEffect } from "react";
+import { useNavigate } from "@/lib/router-adapter";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,7 +12,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      navigate("/auth");
     }
   }, [user, loading, navigate]);
 

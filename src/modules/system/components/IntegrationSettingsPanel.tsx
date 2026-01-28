@@ -1,59 +1,72 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
-import type { IntegrationConnection } from '@/types/system-settings';
-import { ErrorState } from './ErrorState';
-import { useIntegrationSettings } from '../hooks/useIntegrationSettings';
-import { useSystemSettingsContext } from '../hooks/SystemSettingsContext';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Loader2 } from "lucide-react";
+import type { IntegrationConnection } from "@/types/system-settings";
+import { ErrorState } from "./ErrorState";
+import { useIntegrationSettings } from "../hooks/useIntegrationSettings";
+import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 
 type ProviderMeta = {
   key: string;
   name: string;
   description: string;
-  authType: 'api_key' | 'oauth';
+  authType: "api_key" | "oauth";
   documentation: string;
 };
 
 const PROVIDERS: ProviderMeta[] = [
   {
-    key: 'toast',
-    name: 'Toast',
-    description: 'Payroll, scheduling, and sales data sync',
-    authType: 'api_key',
-    documentation: 'https://pos.toasttab.com/',
+    key: "toast",
+    name: "Toast",
+    description: "Payroll, scheduling, and sales data sync",
+    authType: "api_key",
+    documentation: "https://pos.toasttab.com/",
   },
   {
-    key: 'marketman',
-    name: 'MarketMan',
-    description: 'Inventory and recipe cost synchronization',
-    authType: 'api_key',
-    documentation: 'https://www.marketman.com/',
+    key: "marketman",
+    name: "MarketMan",
+    description: "Inventory and recipe cost synchronization",
+    authType: "api_key",
+    documentation: "https://www.marketman.com/",
   },
   {
-    key: 'connecteam',
-    name: 'Connecteam',
-    description: 'Scheduling and HR data via OAuth',
-    authType: 'oauth',
-    documentation: 'https://www.connecteam.com/',
+    key: "connecteam",
+    name: "Connecteam",
+    description: "Scheduling and HR data via OAuth",
+    authType: "oauth",
+    documentation: "https://www.connecteam.com/",
   },
   {
-    key: 'quickbooks',
-    name: 'QuickBooks Online',
-    description: 'Accounting and payroll sync',
-    authType: 'oauth',
-    documentation: 'https://quickbooks.intuit.com/',
+    key: "quickbooks",
+    name: "QuickBooks Online",
+    description: "Accounting and payroll sync",
+    authType: "oauth",
+    documentation: "https://quickbooks.intuit.com/",
   },
 ];
 
@@ -71,32 +84,40 @@ export function IntegrationSettingsPanel() {
     saveError,
   } = useIntegrationSettings(system);
 
-  const [activeProvider, setActiveProvider] = useState<ProviderMeta | null>(null);
-  const [apiKey, setApiKey] = useState('');
-  const [notes, setNotes] = useState('');
+  const [activeProvider, setActiveProvider] = useState<ProviderMeta | null>(
+    null,
+  );
+  const [apiKey, setApiKey] = useState("");
+  const [notes, setNotes] = useState("");
 
-  const providerStatus = useMemo(() => integrations.providers ?? {}, [integrations.providers]);
+  const providerStatus = useMemo(
+    () => integrations.providers ?? {},
+    [integrations.providers],
+  );
 
   if (globalError) {
     return <ErrorState message={globalError.message} />;
   }
 
   const handleConnect = async (provider: ProviderMeta) => {
-    if (provider.authType === 'api_key' && !apiKey.trim()) {
+    if (provider.authType === "api_key" && !apiKey.trim()) {
       return;
     }
     const connection: IntegrationConnection = {
       id: `${provider.key}-${Date.now()}`,
       provider: provider.key,
-      status: 'connected',
+      status: "connected",
       authType: provider.authType,
       lastSyncedAt: new Date().toISOString(),
-      metadata: provider.authType === 'api_key' ? { apiKey: apiKey.trim(), notes } : undefined,
+      metadata:
+        provider.authType === "api_key"
+          ? { apiKey: apiKey.trim(), notes }
+          : undefined,
     };
     await connectIntegration(provider.key, connection);
     setActiveProvider(null);
-    setApiKey('');
-    setNotes('');
+    setApiKey("");
+    setNotes("");
   };
 
   const handleDisconnect = async (providerKey: string) => {
@@ -107,14 +128,17 @@ export function IntegrationSettingsPanel() {
     <Card>
       <CardHeader>
         <CardTitle>Integrations</CardTitle>
-        <CardDescription>Manage third-party connections and synchronization rules.</CardDescription>
+        <CardDescription>
+          Manage third-party connections and synchronization rules.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           {PROVIDERS.map((provider) => {
-            const status = providerStatus[provider.key]?.status ?? 'disconnected';
-            const isConnected = status === 'connected';
-            const isPending = status === 'pending';
+            const status =
+              providerStatus[provider.key]?.status ?? "disconnected";
+            const isConnected = status === "connected";
+            const isPending = status === "pending";
             return (
               <Card key={provider.key} className="border-muted shadow-sm">
                 <CardHeader className="space-y-1">
@@ -122,7 +146,11 @@ export function IntegrationSettingsPanel() {
                     <CardTitle className="text-base">{provider.name}</CardTitle>
                     <Badge
                       variant={
-                        isConnected ? 'default' : isPending ? 'secondary' : 'outline'
+                        isConnected
+                          ? "default"
+                          : isPending
+                            ? "secondary"
+                            : "outline"
                       }
                     >
                       {status}
@@ -134,7 +162,8 @@ export function IntegrationSettingsPanel() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <p className="text-xs text-muted-foreground">
-                    Auth type: {provider.authType === 'api_key' ? 'API Key' : 'OAuth'}
+                    Auth type:{" "}
+                    {provider.authType === "api_key" ? "API Key" : "OAuth"}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {isConnected ? (
@@ -152,11 +181,17 @@ export function IntegrationSettingsPanel() {
                         onClick={() => setActiveProvider(provider)}
                         disabled={!canEdit || saving}
                       >
-                        {provider.authType === 'oauth' ? 'Start OAuth' : 'Connect'}
+                        {provider.authType === "oauth"
+                          ? "Start OAuth"
+                          : "Connect"}
                       </Button>
                     )}
                     <Button variant="ghost" size="sm" asChild>
-                      <a href={provider.documentation} target="_blank" rel="noreferrer">
+                      <a
+                        href={provider.documentation}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         Docs
                       </a>
                     </Button>
@@ -168,7 +203,9 @@ export function IntegrationSettingsPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground">Connection activity</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Connection activity
+          </h3>
           <Table className="mt-3">
             <TableHeader>
               <TableRow>
@@ -181,24 +218,29 @@ export function IntegrationSettingsPanel() {
             <TableBody>
               {integrations.connections.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={4}
+                    className="text-center text-sm text-muted-foreground"
+                  >
                     No connections yet.
                   </TableCell>
                 </TableRow>
               ) : (
                 integrations.connections.map((connection) => (
                   <TableRow key={connection.id}>
-                    <TableCell className="font-medium">{connection.provider}</TableCell>
+                    <TableCell className="font-medium">
+                      {connection.provider}
+                    </TableCell>
                     <TableCell>{connection.status}</TableCell>
                     <TableCell>
                       {connection.connectedAt
                         ? new Date(connection.connectedAt).toLocaleString()
-                        : '—'}
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       {connection.lastSyncedAt
                         ? new Date(connection.lastSyncedAt).toLocaleString()
-                        : '—'}
+                        : "—"}
                     </TableCell>
                   </TableRow>
                 ))
@@ -208,7 +250,9 @@ export function IntegrationSettingsPanel() {
         </div>
 
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Adjust auto-sync rules and mappings as integrations go live.</span>
+          <span>
+            Adjust auto-sync rules and mappings as integrations go live.
+          </span>
           <Button
             variant="ghost"
             size="sm"
@@ -233,10 +277,12 @@ export function IntegrationSettingsPanel() {
               <DialogHeader>
                 <DialogTitle>Connect {activeProvider.name}</DialogTitle>
               </DialogHeader>
-              {activeProvider.authType === 'api_key' ? (
+              {activeProvider.authType === "api_key" ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">API Key</label>
+                    <label className="text-sm font-medium text-foreground">
+                      API Key
+                    </label>
                     <Input
                       value={apiKey}
                       onChange={(event) => setApiKey(event.target.value)}
@@ -244,7 +290,9 @@ export function IntegrationSettingsPanel() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Notes</label>
+                    <label className="text-sm font-medium text-foreground">
+                      Notes
+                    </label>
                     <Textarea
                       value={notes}
                       onChange={(event) => setNotes(event.target.value)}
@@ -255,20 +303,28 @@ export function IntegrationSettingsPanel() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Continue to {activeProvider.name} to authorize FlowForce. You will be redirected back
-                  automatically.
+                  Continue to {activeProvider.name} to authorize FlowForce. You
+                  will be redirected back automatically.
                 </p>
               )}
               <DialogFooter>
-                <Button variant="outline" onClick={() => setActiveProvider(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveProvider(null)}
+                >
                   Cancel
                 </Button>
                 <Button
                   onClick={() => handleConnect(activeProvider)}
-                  disabled={saving || (activeProvider.authType === 'api_key' && !apiKey.trim())}
+                  disabled={
+                    saving ||
+                    (activeProvider.authType === "api_key" && !apiKey.trim())
+                  }
                 >
-                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {activeProvider.authType === 'oauth' ? 'Continue' : 'Connect'}
+                  {saving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  {activeProvider.authType === "oauth" ? "Continue" : "Connect"}
                 </Button>
               </DialogFooter>
             </DialogContent>

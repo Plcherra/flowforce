@@ -1,9 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, Bell, Share2, CheckCircle2 } from 'lucide-react';
-import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, Clock, Bell, Share2, CheckCircle2 } from "lucide-react";
+import { format, addDays, startOfWeek, isSameDay } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkflowStep {
   day: string;
@@ -21,7 +27,7 @@ export function SchedulingWorkflow() {
   const { toast } = useToast();
   const today = new Date();
   const weekStart = startOfWeek(today);
-  
+
   const getWorkflowSteps = (): WorkflowStep[] => {
     const thursday = addDays(weekStart, 4);
     const friday = addDays(weekStart, 5);
@@ -30,43 +36,51 @@ export function SchedulingWorkflow() {
 
     return [
       {
-        day: format(thursday, 'MMM d'),
-        dayName: 'Thursday',
+        day: format(thursday, "MMM d"),
+        dayName: "Thursday",
         icon: <Bell className="h-4 w-4" />,
-        title: 'Send Availability Reminder',
-        description: 'Notify staff to update their availability',
-        actions: ['Send reminder to all staff', 'Set deadline for tonight'],
-        color: 'bg-blue-500',
+        title: "Send Availability Reminder",
+        description: "Notify staff to update their availability",
+        actions: ["Send reminder to all staff", "Set deadline for tonight"],
+        color: "bg-blue-500",
         isToday: isSameDay(today, thursday),
       },
       {
-        day: format(friday, 'MMM d'),
-        dayName: 'Friday',
+        day: format(friday, "MMM d"),
+        dayName: "Friday",
         icon: <CalendarDays className="h-4 w-4" />,
-        title: 'Collect Updates & Build Draft',
-        description: 'Gather availability updates and create draft schedule',
-        actions: ['Collect availability updates', 'Build draft schedule', 'Review conflicts'],
-        color: 'bg-orange-500',
+        title: "Collect Updates & Build Draft",
+        description: "Gather availability updates and create draft schedule",
+        actions: [
+          "Collect availability updates",
+          "Build draft schedule",
+          "Review conflicts",
+        ],
+        color: "bg-orange-500",
         isToday: isSameDay(today, friday),
       },
       {
-        day: format(saturday, 'MMM d'),
-        dayName: 'Saturday',
+        day: format(saturday, "MMM d"),
+        dayName: "Saturday",
         icon: <CheckCircle2 className="h-4 w-4" />,
-        title: 'Review & Finalize',
-        description: 'Morning review and afternoon publication',
-        actions: ['Review draft (morning)', 'Finalize schedule', 'Post to channels (afternoon)'],
-        color: 'bg-green-500',
+        title: "Review & Finalize",
+        description: "Morning review and afternoon publication",
+        actions: [
+          "Review draft (morning)",
+          "Finalize schedule",
+          "Post to channels (afternoon)",
+        ],
+        color: "bg-green-500",
         isToday: isSameDay(today, saturday),
       },
       {
-        day: format(sunday, 'MMM d'),
-        dayName: 'Sunday',
+        day: format(sunday, "MMM d"),
+        dayName: "Sunday",
         icon: <Share2 className="h-4 w-4" />,
-        title: 'Schedule Reminder',
-        description: 'Final reminder before week starts',
-        actions: ['Send schedule reminder', 'Confirm all shifts covered'],
-        color: 'bg-purple-500',
+        title: "Schedule Reminder",
+        description: "Final reminder before week starts",
+        actions: ["Send schedule reminder", "Confirm all shifts covered"],
+        color: "bg-purple-500",
         isToday: isSameDay(today, sunday),
       },
     ];
@@ -92,23 +106,23 @@ export function SchedulingWorkflow() {
           Automated workflow for consistent scheduling process
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
         <div className="space-y-4">
           {workflowSteps.map((step, index) => (
             <div
               key={step.dayName}
               className={`relative p-4 rounded-lg border transition-all duration-200 ${
-                step.isToday 
-                  ? 'border-primary bg-primary/5 shadow-sm' 
-                  : 'border-border bg-background hover:bg-muted/20'
+                step.isToday
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-border bg-background hover:bg-muted/20"
               }`}
             >
               {/* Timeline connector */}
               {index < workflowSteps.length - 1 && (
                 <div className="absolute left-8 top-16 h-8 w-px bg-border"></div>
               )}
-              
+
               <div className="flex items-start gap-4">
                 {/* Day indicator */}
                 <div className="flex flex-col items-center">
@@ -124,7 +138,7 @@ export function SchedulingWorkflow() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -135,11 +149,11 @@ export function SchedulingWorkflow() {
                       </Badge>
                     )}
                   </div>
-                  
+
                   <p className="text-sm text-muted-foreground mb-3">
                     {step.description}
                   </p>
-                  
+
                   <div className="space-y-2">
                     {step.actions.map((action, actionIndex) => (
                       <Button
@@ -158,14 +172,16 @@ export function SchedulingWorkflow() {
             </div>
           ))}
         </div>
-        
+
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-primary/10 rounded-full">
               <Bell className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h4 className="font-medium text-sm mb-1">Notification Settings</h4>
+              <h4 className="font-medium text-sm mb-1">
+                Notification Settings
+              </h4>
               <p className="text-xs text-muted-foreground mb-2">
                 Automated reminders will be sent according to this schedule
               </p>

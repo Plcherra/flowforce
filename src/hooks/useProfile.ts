@@ -1,1 +1,1 @@
-export { useProfile, ProfileProvider } from '@/contexts/ProfileContext';
+export { useProfile, ProfileProvider } from "@/contexts/ProfileContext";

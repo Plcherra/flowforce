@@ -1,10 +1,13 @@
-import OpenAI from 'openai';
-import { supabase } from '@/integrations/supabase/client';
-import { OPERATIONS_AUTOMATION_SYSTEM_PROMPT } from '@/server/automation/prompts/operations';
-import { serializeAutomationContext } from '@/server/automation/prompts/automationCommon';
-import { validateAutomationScript, type AutomationScript } from '@/server/automation/validateScript';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import OpenAI from "openai";
+import { supabase } from "@/integrations/supabase/client";
+import { OPERATIONS_AUTOMATION_SYSTEM_PROMPT } from "@/server/automation/prompts/operations";
+import { serializeAutomationContext } from "@/server/automation/prompts/automationCommon";
+import {
+  validateAutomationScript,
+  type AutomationScript,
+} from "@/server/automation/validateScript";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 const apiKey = appEnv.VITE_OPENAI_API_KEY;
 const openai = apiKey
@@ -19,20 +22,23 @@ export interface GenerateAutomationSuggestionInput {
   orgId: string;
 }
 
-export async function generateAutomationSuggestion({ issueId, orgId }: GenerateAutomationSuggestionInput) {
+export async function generateAutomationSuggestion({
+  issueId,
+  orgId,
+}: GenerateAutomationSuggestionInput) {
   if (!openai) {
-    throw new Error('OpenAI key missing');
+    throw new Error("OpenAI key missing");
   }
 
   const { data: issue, error } = await supabase
-    .from('ops_issues')
-    .select('*')
-    .eq('id', issueId)
-    .eq('org_id', orgId)
+    .from("ops_issues")
+    .select("*")
+    .eq("id", issueId)
+    .eq("org_id", orgId)
     .single();
 
   if (error || !issue) {
-    throw new Error('Issue not found');
+    throw new Error("Issue not found");
   }
 
   const context = serializeAutomationContext({
@@ -43,43 +49,47 @@ export async function generateAutomationSuggestion({ issueId, orgId }: GenerateA
   });
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: OPERATIONS_AUTOMATION_SYSTEM_PROMPT,
       },
       {
-        role: 'user',
+        role: "user",
         content: `Design an automation for the following context and return JSON only.\n${context}`,
       },
     ],
   });
 
-  const text = completion.choices[0]?.message?.content ?? '{}';
+  const text = completion.choices[0]?.message?.content ?? "{}";
   let parsed: AutomationScript | null = null;
   try {
     parsed = JSON.parse(text) as AutomationScript;
   } catch (parseError) {
-    logger.error('[generateAutomationSuggestion] invalid JSON', { error: parseError, context: { text }, tags: ['error'] });
-    throw new Error('Automation generator returned invalid JSON');
+    logger.error("[generateAutomationSuggestion] invalid JSON", {
+      error: parseError,
+      context: { text },
+      tags: ["error"],
+    });
+    throw new Error("Automation generator returned invalid JSON");
   }
 
   if (!validateAutomationScript(parsed)) {
-    throw new Error('Generated script failed schema validation');
+    throw new Error("Generated script failed schema validation");
   }
 
   const { data: suggestion, error: insertError } = await supabase
-    .from('ops_automation_suggestions')
+    .from("ops_automation_suggestions")
     .insert({
       org_id: orgId,
       issue_id: issueId,
       suggestion_title: issue.title,
-      suggestion_summary: `Automation for ${issue.issue_type ?? 'ops'} (${issue.severity ?? 'normal'})`,
+      suggestion_summary: `Automation for ${issue.issue_type ?? "ops"} (${issue.severity ?? "normal"})`,
       script: parsed,
-      status: 'pending',
+      status: "pending",
     })
-    .select('*')
+    .select("*")
     .single();
 
   if (insertError) {

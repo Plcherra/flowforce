@@ -1,13 +1,41 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CustomReport, useReportData } from '@/hooks/useReports';
-import { Download, FileSpreadsheet, FileText, Filter, ArrowLeft } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CustomReport, useReportData } from "@/hooks/useReports";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Filter,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
 
 interface ReportViewerProps {
   report: CustomReport;
@@ -15,23 +43,28 @@ interface ReportViewerProps {
 }
 
 export default function ReportViewer({ report, onBack }: ReportViewerProps) {
-  const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+  const [viewMode, setViewMode] = useState<"table" | "chart">("table");
   const [filters, setFilters] = useState({});
-  
-  const { data: reportData, isLoading } = useReportData(report.report_type, filters);
+
+  const { data: reportData, isLoading } = useReportData(
+    report.report_type,
+    filters,
+  );
 
   const exportToCSV = () => {
     if (!reportData?.length) return;
 
-    const headers = report.columns.join(',');
-    const rows = reportData.map(row => 
-      report.columns.map(col => `"${row[col] || ''}"`).join(',')
-    ).join('\n');
-    
+    const headers = report.columns.join(",");
+    const rows = reportData
+      .map((row) =>
+        report.columns.map((col) => `"${row[col] || ""}"`).join(","),
+      )
+      .join("\n");
+
     const csv = `${headers}\n${rows}`;
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${report.name}.csv`;
     document.body.appendChild(a);
@@ -92,21 +125,26 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
             <div>
               <CardTitle>{report.name}</CardTitle>
               {report.description && (
-                <p className="text-sm text-muted-foreground mt-1">{report.description}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {report.description}
+                </p>
               )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge variant={report.is_public ? 'default' : 'secondary'}>
-              {report.is_public ? 'Public' : 'Private'}
+            <Badge variant={report.is_public ? "default" : "secondary"}>
+              {report.is_public ? "Public" : "Private"}
             </Badge>
             <Badge variant="outline">{report.report_type}</Badge>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between pt-4">
           <div className="flex items-center space-x-2">
-            <Select value={viewMode} onValueChange={(value: 'table' | 'chart') => setViewMode(value)}>
+            <Select
+              value={viewMode}
+              onValueChange={(value: "table" | "chart") => setViewMode(value)}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -120,7 +158,7 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
               Filters
             </Button>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <FileSpreadsheet className="h-4 w-4 mr-2" />
@@ -133,16 +171,16 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
-        {viewMode === 'table' ? (
+        {viewMode === "table" ? (
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {report.columns.map(column => (
+                  {report.columns.map((column) => (
                     <TableHead key={column} className="capitalize">
-                      {column.replace('_', ' ')}
+                      {column.replace("_", " ")}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -150,10 +188,8 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
               <TableBody>
                 {reportData?.map((row, index) => (
                   <TableRow key={index}>
-                    {report.columns.map(column => (
-                      <TableCell key={column}>
-                        {row[column] || '-'}
-                      </TableCell>
+                    {report.columns.map((column) => (
+                      <TableCell key={column}>{row[column] || "-"}</TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -161,11 +197,9 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
             </Table>
           </div>
         ) : (
-          <div className="h-80">
-            {renderChart()}
-          </div>
+          <div className="h-80">{renderChart()}</div>
         )}
-        
+
         {reportData?.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             No data available for this report.

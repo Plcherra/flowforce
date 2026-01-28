@@ -9,20 +9,46 @@ const normalizeId = (value?: string | null) => value ?? null;
 
 export const queryKeys = {
   shifts: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
-    ['shifts', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
+    [
+      "shifts",
+      normalizeId(companyId),
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+    ] as const,
   assignments: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
-    ['assignments', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
+    [
+      "assignments",
+      normalizeId(companyId),
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+    ] as const,
   timeOff: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
-    ['time-off', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
+    [
+      "time-off",
+      normalizeId(companyId),
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+    ] as const,
   unavailability: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
-    ['unavailability', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
+    [
+      "unavailability",
+      normalizeId(companyId),
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+    ] as const,
   vendorEvents: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
-    ['vendor-events', normalizeId(companyId), normalizeDateArg(start), normalizeDateArg(end)] as const,
-  orgPrefs: (companyId?: string | null) => ['org-prefs', normalizeId(companyId)] as const,
+    [
+      "vendor-events",
+      normalizeId(companyId),
+      normalizeDateArg(start),
+      normalizeDateArg(end),
+    ] as const,
+  orgPrefs: (companyId?: string | null) =>
+    ["org-prefs", normalizeId(companyId)] as const,
   calendarEventsCompany: (companyId?: string | null) =>
-    ['calendar-events', normalizeId(companyId)] as const,
+    ["calendar-events", normalizeId(companyId)] as const,
   calendarEventsList: (companyId?: string | null) =>
-    ['calendar-events', normalizeId(companyId), 'list'] as const,
+    ["calendar-events", normalizeId(companyId), "list"] as const,
   calendarEventsRange: (
     companyId?: string | null,
     start?: DateArg,
@@ -30,14 +56,14 @@ export const queryKeys = {
     storeId?: string | null,
   ) =>
     [
-      'calendar-events',
+      "calendar-events",
       normalizeId(companyId),
-      'range',
+      "range",
       normalizeDateArg(start),
       normalizeDateArg(end),
       normalizeId(storeId),
     ] as const,
-  calendarEventsDisabled: ['calendar-events', 'disabled'] as const,
+  calendarEventsDisabled: ["calendar-events", "disabled"] as const,
 };
 
 export type QueryKey = ReturnType<(typeof queryKeys)[keyof typeof queryKeys]>;

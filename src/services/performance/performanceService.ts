@@ -1,8 +1,12 @@
-import dayjs from 'dayjs';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import dayjs from "dayjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 import {
   fetchActivePerformanceProfiles,
   fetchGoalParticipantsByGoalIds,
@@ -16,7 +20,7 @@ import {
   type PerformanceProfileRow,
   type PerformanceReviewRow as PerformanceReviewRecord,
   type StaffPerformanceRow,
-} from '@/repositories/performanceRepository';
+} from "@/repositories/performanceRepository";
 import {
   goalStatusSchema,
   performanceReviewStatusSchema,
@@ -28,7 +32,7 @@ import {
   type PerformanceReviewStatus,
   type PerformanceRadarMetric,
   type GoalStatus,
-} from './performanceTypes';
+} from "./performanceTypes";
 
 const REVIEW_STATUS_WEIGHTS: Record<PerformanceReviewStatus, number> = {
   on_track: 100,
@@ -47,7 +51,10 @@ async function resolveActiveCompanyId(
   try {
     const { data: authData, error: authError } = await client.auth.getUser();
     if (authError) {
-      logger.warn('[performance] Failed to resolve authenticated user', { error: authError, tags: ['warning'] });
+      logger.warn("[performance] Failed to resolve authenticated user", {
+        error: authError,
+        tags: ["warning"],
+      });
       return null;
     }
 
@@ -57,19 +64,25 @@ async function resolveActiveCompanyId(
     }
 
     const { data, error } = await client
-      .from('profiles')
-      .select('company_id')
-      .eq('id', userId)
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userId)
       .maybeSingle();
 
     if (error) {
-      logger.warn('[performance] Failed to resolve company id', { error, tags: ['warning'] });
+      logger.warn("[performance] Failed to resolve company id", {
+        error,
+        tags: ["warning"],
+      });
       return null;
     }
 
     return data?.company_id ?? null;
   } catch (error) {
-    logger.warn('[performance] Unexpected error resolving company id', { error, tags: ['warning'] });
+    logger.warn("[performance] Unexpected error resolving company id", {
+      error,
+      tags: ["warning"],
+    });
     return null;
   }
 }
@@ -80,27 +93,31 @@ export function determineReviewStatus(
   referenceDate: dayjs.Dayjs = dayjs(),
 ): PerformanceReviewStatus {
   if (!reviewDate) {
-    return performanceReviewStatusSchema.parse('due_soon');
+    return performanceReviewStatusSchema.parse("due_soon");
   }
 
-  const diff = referenceDate.diff(dayjs(reviewDate), 'day');
+  const diff = referenceDate.diff(dayjs(reviewDate), "day");
   if (diff > 180) {
-    return performanceReviewStatusSchema.parse('overdue');
+    return performanceReviewStatusSchema.parse("overdue");
   }
   if (diff > 90) {
-    return performanceReviewStatusSchema.parse('due_soon');
+    return performanceReviewStatusSchema.parse("due_soon");
   }
 
   if ((score ?? 3) <= 2) {
-    return performanceReviewStatusSchema.parse('needs_coaching');
+    return performanceReviewStatusSchema.parse("needs_coaching");
   }
 
-  return performanceReviewStatusSchema.parse('on_track');
+  return performanceReviewStatusSchema.parse("on_track");
 }
 
-function buildReviewEntries(rows: PerformanceReviewRecord[]): PerformanceReview[] {
+function buildReviewEntries(
+  rows: PerformanceReviewRecord[],
+): PerformanceReview[] {
   return rows
-    .sort((a, b) => dayjs(b.review_date).valueOf() - dayjs(a.review_date).valueOf())
+    .sort(
+      (a, b) => dayjs(b.review_date).valueOf() - dayjs(a.review_date).valueOf(),
+    )
     .map((row) => {
       const status = determineReviewStatus(row.review_date, row.score);
       return {
@@ -113,7 +130,8 @@ function buildReviewEntries(rows: PerformanceReviewRecord[]): PerformanceReview[
         status,
         aiSummary: row.ai_summary,
         aiInsightId: row.ai_insight_id,
-        actionItems: (row.action_items ?? []) as PerformanceReview['actionItems'],
+        actionItems: (row.action_items ??
+          []) as PerformanceReview["actionItems"],
         reviewCycle: row.review_cycle,
       };
     });
@@ -147,18 +165,27 @@ function buildPerformanceGoals(
 
 function calculateAttendanceReliability(rows: StaffPerformanceRow[]): number {
   if (!rows.length) return 75;
-  const lateCount = rows.filter((row) => row.attendance_status === 'late').length;
-  const absentCount = rows.filter((row) => row.attendance_status === 'absent').length;
+  const lateCount = rows.filter(
+    (row) => row.attendance_status === "late",
+  ).length;
+  const absentCount = rows.filter(
+    (row) => row.attendance_status === "absent",
+  ).length;
   const deductions = lateCount * 5 + absentCount * 12;
 
   return clampPercentage(100 - deductions);
 }
 
 function calculatePerformanceScore(rows: StaffPerformanceRow[]): number {
-  const scored = rows.filter((row) => typeof row.performance_score === 'number');
+  const scored = rows.filter(
+    (row) => typeof row.performance_score === "number",
+  );
   if (!scored.length) return 70;
 
-  const total = scored.reduce((sum, row) => sum + (row.performance_score ?? 0), 0);
+  const total = scored.reduce(
+    (sum, row) => sum + (row.performance_score ?? 0),
+    0,
+  );
   const averageScore = total / scored.length;
   return clampPercentage((averageScore / 5) * 100);
 }
@@ -205,22 +232,27 @@ function buildEmployeePerformance(
     reviews,
     latestReviewStatus: latestReview
       ? latestReview.status
-      : performanceReviewStatusSchema.parse('due_soon'),
+      : performanceReviewStatusSchema.parse("due_soon"),
     latestReviewDate: latestReview?.date ?? null,
   };
 }
 
-function buildRadarMetrics(employees: EmployeePerformance[]): PerformanceRadarMetric[] {
-  const metricKeys: (keyof EmployeePerformance['metrics'])[] = [
-    'performanceScore',
-    'goalProgress',
-    'attendanceReliability',
-    'reviewHealth',
+function buildRadarMetrics(
+  employees: EmployeePerformance[],
+): PerformanceRadarMetric[] {
+  const metricKeys: (keyof EmployeePerformance["metrics"])[] = [
+    "performanceScore",
+    "goalProgress",
+    "attendanceReliability",
+    "reviewHealth",
   ];
 
   const averages = metricKeys.map((metric) => {
     if (!employees.length) return 0;
-    const total = employees.reduce((sum, employee) => sum + employee.metrics[metric], 0);
+    const total = employees.reduce(
+      (sum, employee) => sum + employee.metrics[metric],
+      0,
+    );
     return Math.round(total / employees.length);
   });
 
@@ -228,25 +260,25 @@ function buildRadarMetrics(employees: EmployeePerformance[]): PerformanceRadarMe
 
   return [
     {
-      metric: 'Performance Score',
+      metric: "Performance Score",
       actual: performanceScore,
       target: 90,
       fullMark: 100,
     },
     {
-      metric: 'Goal Progress',
+      metric: "Goal Progress",
       actual: goalProgress,
       target: 85,
       fullMark: 100,
     },
     {
-      metric: 'Attendance',
+      metric: "Attendance",
       actual: attendance,
       target: 90,
       fullMark: 100,
     },
     {
-      metric: 'Review Health',
+      metric: "Review Health",
       actual: reviewHealth,
       target: 95,
       fullMark: 100,
@@ -258,15 +290,19 @@ function buildGoalSummary(employees: EmployeePerformance[]) {
   const goals = employees.flatMap((employee) => employee.goals);
   return {
     total: goals.length,
-    active: goals.filter((goal) => goal.status === 'active').length,
-    completed: goals.filter((goal) => goal.status === 'completed').length,
+    active: goals.filter((goal) => goal.status === "active").length,
+    completed: goals.filter((goal) => goal.status === "completed").length,
     averageProgress: goals.length
-      ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length)
+      ? Math.round(
+          goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length,
+        )
       : 0,
   };
 }
 
-function mapGoalReviewRow(row: PerformanceGoalReviewRecord): PerformanceGoalReview {
+function mapGoalReviewRow(
+  row: PerformanceGoalReviewRecord,
+): PerformanceGoalReview {
   return {
     reviewId: row.review_id,
     companyId: row.company_id,
@@ -284,7 +320,8 @@ function mapGoalReviewRow(row: PerformanceGoalReviewRecord): PerformanceGoalRevi
     score: row.score,
     summary: row.summary,
     aiSummary: row.ai_summary,
-    actionItems: (row.action_items ?? []) as PerformanceGoalReview['actionItems'],
+    actionItems: (row.action_items ??
+      []) as PerformanceGoalReview["actionItems"],
     reviewPeriodStart: row.review_period_start,
     reviewPeriodEnd: row.review_period_end,
     aiInsightId: row.ai_insight_id,
@@ -303,15 +340,16 @@ export async function fetchPerformanceDataset(
 ): Promise<PerformanceDataset> {
   const companyId = await resolveActiveCompanyId(client);
 
-  const performanceSince = dayjs().subtract(180, 'day').format('YYYY-MM-DD');
-  const reviewsSince = dayjs().subtract(365, 'day').format('YYYY-MM-DD');
+  const performanceSince = dayjs().subtract(180, "day").format("YYYY-MM-DD");
+  const reviewsSince = dayjs().subtract(365, "day").format("YYYY-MM-DD");
 
-  const [profiles, performanceRowsRaw, reviewRowsRaw, goals] = await Promise.all([
-    fetchActivePerformanceProfiles(client, companyId),
-    fetchStaffPerformanceRowsSince(client, performanceSince),
-    fetchPerformanceReviewsSince(client, reviewsSince, companyId),
-    fetchPerformanceGoals(client, companyId),
-  ]);
+  const [profiles, performanceRowsRaw, reviewRowsRaw, goals] =
+    await Promise.all([
+      fetchActivePerformanceProfiles(client, companyId),
+      fetchStaffPerformanceRowsSince(client, performanceSince),
+      fetchPerformanceReviewsSince(client, reviewsSince, companyId),
+      fetchPerformanceGoals(client, companyId),
+    ]);
 
   const goalIds = goals.map((goal) => goal.id);
   const [participantRowsRaw, goalReviewRowsRaw] = await Promise.all([
@@ -344,7 +382,8 @@ export async function fetchPerformanceDataset(
   const goalIdsSet = new Set(goals.map((goal) => goal.id));
   const participantRows = participantRowsRaw.filter((row) => {
     const isCompanyGoal = goalIdsSet.has(row.goal_id);
-    const isCompanyParticipant = !companyId || (row.user_id ? employeeIds.has(row.user_id) : false);
+    const isCompanyParticipant =
+      !companyId || (row.user_id ? employeeIds.has(row.user_id) : false);
     return isCompanyGoal && isCompanyParticipant;
   });
 
@@ -368,11 +407,15 @@ export async function fetchPerformanceDataset(
 
   const scopedGoalReviewRows = goalReviewRowsRaw.filter((row) => {
     const matchesCompany = !companyId || row.company_id === companyId;
-    return matchesCompany && row.employee_id && employeeIds.has(row.employee_id);
+    return (
+      matchesCompany && row.employee_id && employeeIds.has(row.employee_id)
+    );
   });
   const goalReviews = scopedGoalReviewRows
     .map(mapGoalReviewRow)
-    .sort((a, b) => dayjs(b.reviewDate).valueOf() - dayjs(a.reviewDate).valueOf());
+    .sort(
+      (a, b) => dayjs(b.reviewDate).valueOf() - dayjs(a.reviewDate).valueOf(),
+    );
 
   return {
     employees,
@@ -384,8 +427,8 @@ export async function fetchPerformanceDataset(
 
 export function assertGoalIsLinkable(status: GoalStatus) {
   const parsed = goalStatusSchema.parse(status);
-  if (parsed === 'completed' || parsed === 'cancelled') {
-    throw new Error('Tasks can only be linked to draft or active goals.');
+  if (parsed === "completed" || parsed === "cancelled") {
+    throw new Error("Tasks can only be linked to draft or active goals.");
   }
 }
 
@@ -394,160 +437,184 @@ export function assertReviewStatus(status: PerformanceReviewStatus) {
 }
 
 export async function createPerformanceRecord(
-  record: TablesInsert<'staff_performance'>,
+  record: TablesInsert<"staff_performance">,
   client: SupabaseClient = supabase,
 ) {
   const { data, error } = await client
-    .from('staff_performance')
+    .from("staff_performance")
     .insert(record)
     .select()
     .single();
-  if (error) throw new Error(`Failed to create performance record: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to create performance record: ${error.message}`);
   return data;
 }
 
 export async function updatePerformanceRecord(
-  id: Tables<'staff_performance'>['id'],
-  updates: TablesUpdate<'staff_performance'>,
+  id: Tables<"staff_performance">["id"],
+  updates: TablesUpdate<"staff_performance">,
   client: SupabaseClient = supabase,
 ) {
   const { data, error } = await client
-    .from('staff_performance')
+    .from("staff_performance")
     .update(updates)
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
-  if (error) throw new Error(`Failed to update performance record: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to update performance record: ${error.message}`);
   return data;
 }
 
 export async function deletePerformanceRecord(
-  id: Tables<'staff_performance'>['id'],
+  id: Tables<"staff_performance">["id"],
   client: SupabaseClient = supabase,
 ) {
-  const { error } = await client.from('staff_performance').delete().eq('id', id);
-  if (error) throw new Error(`Failed to delete performance record: ${error.message}`);
+  const { error } = await client
+    .from("staff_performance")
+    .delete()
+    .eq("id", id);
+  if (error)
+    throw new Error(`Failed to delete performance record: ${error.message}`);
 }
 
 export async function createPerformanceReview(
-  review: TablesInsert<'performance_reviews'>,
+  review: TablesInsert<"performance_reviews">,
   client: SupabaseClient = supabase,
 ) {
-  const payload: TablesInsert<'performance_reviews'> = {
-    review_cycle: 'Quarterly',
+  const payload: TablesInsert<"performance_reviews"> = {
+    review_cycle: "Quarterly",
     action_items: [],
     ...review,
   };
   const { data, error } = await client
-    .from('performance_reviews')
+    .from("performance_reviews")
     .insert(payload)
     .select()
     .single();
-  if (error) throw new Error(`Failed to create performance review: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to create performance review: ${error.message}`);
   return data;
 }
 
 export async function updatePerformanceReview(
-  id: Tables<'performance_reviews'>['id'],
-  updates: TablesUpdate<'performance_reviews'>,
+  id: Tables<"performance_reviews">["id"],
+  updates: TablesUpdate<"performance_reviews">,
   client: SupabaseClient = supabase,
 ) {
   const { data, error } = await client
-    .from('performance_reviews')
+    .from("performance_reviews")
     .update(updates)
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
-  if (error) throw new Error(`Failed to update performance review: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to update performance review: ${error.message}`);
   return data;
 }
 
 export async function deletePerformanceReview(
-  id: Tables<'performance_reviews'>['id'],
+  id: Tables<"performance_reviews">["id"],
   client: SupabaseClient = supabase,
 ) {
-  const { error } = await client.from('performance_reviews').delete().eq('id', id);
-  if (error) throw new Error(`Failed to delete performance review: ${error.message}`);
+  const { error } = await client
+    .from("performance_reviews")
+    .delete()
+    .eq("id", id);
+  if (error)
+    throw new Error(`Failed to delete performance review: ${error.message}`);
 }
 
 export async function createPerformanceGoal(
-  goal: TablesInsert<'goals'>,
+  goal: TablesInsert<"goals">,
   client: SupabaseClient = supabase,
 ) {
-  const payload: TablesInsert<'goals'> = {
-    status: 'draft',
-    priority: 'medium',
+  const payload: TablesInsert<"goals"> = {
+    status: "draft",
+    priority: "medium",
     progress: 0,
     ...goal,
   };
-  
+
   // Validate company_id is present for tenant isolation
   if (!payload.company_id) {
-    throw new Error('company_id is required when creating a performance goal');
+    throw new Error("company_id is required when creating a performance goal");
   }
-  
-  const { data, error } = await client.from('goals').insert(payload).select().single();
-  if (error) throw new Error(`Failed to create performance goal: ${error.message}`);
+
+  const { data, error } = await client
+    .from("goals")
+    .insert(payload)
+    .select()
+    .single();
+  if (error)
+    throw new Error(`Failed to create performance goal: ${error.message}`);
   return data;
 }
 
 export async function updatePerformanceGoal(
-  id: Tables<'goals'>['id'],
-  updates: TablesUpdate<'goals'>,
+  id: Tables<"goals">["id"],
+  updates: TablesUpdate<"goals">,
   companyId?: string,
   client: SupabaseClient = supabase,
 ) {
-  let query = client.from('goals').update(updates).eq('id', id);
-  
+  let query = client.from("goals").update(updates).eq("id", id);
+
   // Add company_id filter if provided for tenant isolation
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
-  
+
   const { data, error } = await query.select().single();
-  if (error) throw new Error(`Failed to update performance goal: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to update performance goal: ${error.message}`);
   return data;
 }
 
 export async function deletePerformanceGoal(
-  id: Tables<'goals'>['id'],
+  id: Tables<"goals">["id"],
   companyId?: string,
   client: SupabaseClient = supabase,
 ) {
-  let query = client.from('goals').delete().eq('id', id);
-  
+  let query = client.from("goals").delete().eq("id", id);
+
   // Add company_id filter if provided for tenant isolation
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
-  
+
   const { error } = await query;
-  if (error) throw new Error(`Failed to delete performance goal: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to delete performance goal: ${error.message}`);
 }
 
 export async function createGoalParticipant(
-  participant: TablesInsert<'goal_participants'>,
+  participant: TablesInsert<"goal_participants">,
   client: SupabaseClient = supabase,
 ) {
-  const payload: TablesInsert<'goal_participants'> = {
-    role: 'owner',
+  const payload: TablesInsert<"goal_participants"> = {
+    role: "owner",
     ...participant,
   };
   const { data, error } = await client
-    .from('goal_participants')
+    .from("goal_participants")
     .insert(payload)
     .select()
     .single();
-  if (error) throw new Error(`Failed to add goal participant: ${error.message}`);
+  if (error)
+    throw new Error(`Failed to add goal participant: ${error.message}`);
   return data;
 }
 
 export async function deleteGoalParticipant(
-  id: Tables<'goal_participants'>['id'],
+  id: Tables<"goal_participants">["id"],
   client: SupabaseClient = supabase,
 ) {
-  const { error } = await client.from('goal_participants').delete().eq('id', id);
-  if (error) throw new Error(`Failed to remove goal participant: ${error.message}`);
+  const { error } = await client
+    .from("goal_participants")
+    .delete()
+    .eq("id", id);
+  if (error)
+    throw new Error(`Failed to remove goal participant: ${error.message}`);
 }
 
 export interface PerformanceCrudSimulationOptions {
@@ -567,15 +634,15 @@ export interface PerformanceCrudSimulationSnapshot {
 
 export interface PerformanceCrudSimulationResult {
   review: {
-    created: Tables<'performance_reviews'>;
-    updated: Tables<'performance_reviews'>;
+    created: Tables<"performance_reviews">;
+    updated: Tables<"performance_reviews">;
   };
   goal: {
-    created: Tables<'goals'>;
-    updated: Tables<'goals'>;
+    created: Tables<"goals">;
+    updated: Tables<"goals">;
   };
   participant: {
-    created: Tables<'goal_participants'>;
+    created: Tables<"goal_participants">;
   };
   snapshots: PerformanceCrudSimulationSnapshot;
 }
@@ -594,65 +661,79 @@ export async function simulatePerformanceCrud(
   const snapshots: Partial<PerformanceCrudSimulationSnapshot> = {};
 
   const createdResources: {
-    review?: Tables<'performance_reviews'>;
-    goal?: Tables<'goals'>;
-    participant?: Tables<'goal_participants'>;
+    review?: Tables<"performance_reviews">;
+    goal?: Tables<"goals">;
+    participant?: Tables<"goal_participants">;
   } = {};
 
   snapshots.baseline = await fetchPerformanceDataset(client);
 
   try {
-    const reviewPayload: TablesInsert<'performance_reviews'> = {
+    const reviewPayload: TablesInsert<"performance_reviews"> = {
       company_id: companyId,
       employee_id: employeeId,
       reviewer_id: reviewerId,
-      review_cycle: 'Quarterly',
-      review_period_start: referenceDate.subtract(90, 'day').format('YYYY-MM-DD'),
-      review_period_end: referenceDate.format('YYYY-MM-DD'),
-      review_date: referenceDate.format('YYYY-MM-DD'),
+      review_cycle: "Quarterly",
+      review_period_start: referenceDate
+        .subtract(90, "day")
+        .format("YYYY-MM-DD"),
+      review_period_end: referenceDate.format("YYYY-MM-DD"),
+      review_date: referenceDate.format("YYYY-MM-DD"),
       score: 3,
-      summary: 'Simulation: Initial performance check-in.',
+      summary: "Simulation: Initial performance check-in.",
       action_items: [],
     };
     const createdReview = await createPerformanceReview(reviewPayload, client);
     createdResources.review = createdReview;
 
-    const goalPayload: TablesInsert<'goals'> = {
+    const goalPayload: TablesInsert<"goals"> = {
       company_id: companyId,
       created_by: reviewerId,
-      title: `Simulation goal ${referenceDate.format('YYYYMMDDHHmmss')}`,
-      status: 'active',
-      priority: 'medium',
+      title: `Simulation goal ${referenceDate.format("YYYYMMDDHHmmss")}`,
+      status: "active",
+      priority: "medium",
       progress: 20,
-      target_completion_date: referenceDate.add(45, 'day').format('YYYY-MM-DD'),
+      target_completion_date: referenceDate.add(45, "day").format("YYYY-MM-DD"),
     };
     const createdGoal = await createPerformanceGoal(goalPayload, client);
     createdResources.goal = createdGoal;
 
-    const participantPayload: TablesInsert<'goal_participants'> = {
+    const participantPayload: TablesInsert<"goal_participants"> = {
       user_id: employeeId,
       goal_id: createdGoal.id,
-      role: 'owner',
+      role: "owner",
       contribution_score: 75,
     };
-    const createdParticipant = await createGoalParticipant(participantPayload, client);
+    const createdParticipant = await createGoalParticipant(
+      participantPayload,
+      client,
+    );
     createdResources.participant = createdParticipant;
 
     snapshots.postCreate = await fetchPerformanceDataset(client);
 
-    const reviewUpdates: TablesUpdate<'performance_reviews'> = {
+    const reviewUpdates: TablesUpdate<"performance_reviews"> = {
       score: 5,
-      summary: 'Simulation: Elevated to top performer.',
-      review_date: referenceDate.add(7, 'day').format('YYYY-MM-DD'),
+      summary: "Simulation: Elevated to top performer.",
+      review_date: referenceDate.add(7, "day").format("YYYY-MM-DD"),
     };
-    const updatedReview = await updatePerformanceReview(createdReview.id, reviewUpdates, client);
+    const updatedReview = await updatePerformanceReview(
+      createdReview.id,
+      reviewUpdates,
+      client,
+    );
 
-    const goalUpdates: TablesUpdate<'goals'> = {
+    const goalUpdates: TablesUpdate<"goals"> = {
       progress: 85,
-      status: 'active',
-      target_completion_date: referenceDate.add(30, 'day').format('YYYY-MM-DD'),
+      status: "active",
+      target_completion_date: referenceDate.add(30, "day").format("YYYY-MM-DD"),
     };
-    const updatedGoal = await updatePerformanceGoal(createdGoal.id, goalUpdates, companyId, client);
+    const updatedGoal = await updatePerformanceGoal(
+      createdGoal.id,
+      goalUpdates,
+      companyId,
+      client,
+    );
 
     snapshots.postUpdate = await fetchPerformanceDataset(client);
 
@@ -702,7 +783,11 @@ export async function simulatePerformanceCrud(
 
     if (createdResources.goal) {
       try {
-        await deletePerformanceGoal(createdResources.goal.id, companyId, client);
+        await deletePerformanceGoal(
+          createdResources.goal.id,
+          companyId,
+          client,
+        );
       } catch {
         /* ignore cleanup failures */
       }

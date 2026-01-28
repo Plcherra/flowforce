@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { logger } from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import { logger } from "@/utils/logger";
 
 export interface TaskFormAssignee {
   id: string;
@@ -32,9 +32,9 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
 
     try {
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
         .single();
 
       if (profileError) throw profileError;
@@ -49,20 +49,23 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       }
 
       let assigneeQuery = supabase
-        .from('profiles')
-        .select('id, first_name, last_name')
-        .eq('employment_status', 'active')
-        .order('first_name', { ascending: true });
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("employment_status", "active")
+        .order("first_name", { ascending: true });
 
       let goalsQuery = supabase
-        .from('goals')
-        .select('id, title, status, progress, target_completion_date')
-        .order('created_at', { ascending: false });
+        .from("goals")
+        .select("id, title, status, progress, target_completion_date")
+        .order("created_at", { ascending: false });
 
-      assigneeQuery = assigneeQuery.eq('company_id', companyId);
-      goalsQuery = goalsQuery.eq('company_id', companyId);
+      assigneeQuery = assigneeQuery.eq("company_id", companyId);
+      goalsQuery = goalsQuery.eq("company_id", companyId);
 
-      const [assigneesResult, goalsResult] = await Promise.all([assigneeQuery, goalsQuery]);
+      const [assigneesResult, goalsResult] = await Promise.all([
+        assigneeQuery,
+        goalsQuery,
+      ]);
 
       if (assigneesResult.error) throw assigneesResult.error;
       if (goalsResult.error) throw goalsResult.error;
@@ -70,8 +73,15 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       setAssignees((assigneesResult.data ?? []) as TaskFormAssignee[]);
       setGoals((goalsResult.data ?? []) as TaskFormGoal[]);
     } catch (fetchError) {
-      logger.error('Error loading task form options', { error: fetchError, tags: ['error'] });
-      setError(fetchError instanceof Error ? fetchError.message : 'Failed to load options');
+      logger.error("Error loading task form options", {
+        error: fetchError,
+        tags: ["error"],
+      });
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Failed to load options",
+      );
       setAssignees([]);
       setGoals([]);
     } finally {

@@ -1,26 +1,36 @@
-import { useEffect, useMemo, useState } from 'react';
-import { endOfDay, endOfMonth, endOfWeek, startOfDay, startOfMonth, startOfWeek } from 'date-fns';
-import { CalendarGrid } from './CalendarGrid';
-import { ScheduleHeader } from './ScheduleHeader';
-import { ShiftDetailsPanel } from './ShiftDetailsPanel';
-import { ViewSelector } from './ViewSelector';
-import { SchedulingFilters, type SchedulingFilterState } from './SchedulingFilters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { ViewType } from '@/types/scheduling-unified';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
-import { EventDetailsDrawer } from '@/components/events/EventDetailsDrawer';
-import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useEffect, useMemo, useState } from "react";
+import {
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
+import { CalendarGrid } from "./CalendarGrid";
+import { ScheduleHeader } from "./ScheduleHeader";
+import { ShiftDetailsPanel } from "./ShiftDetailsPanel";
+import { ViewSelector } from "./ViewSelector";
+import {
+  SchedulingFilters,
+  type SchedulingFilterState,
+} from "./SchedulingFilters";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ViewType } from "@/types/scheduling-unified";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { EventDetailsDrawer } from "@/components/events/EventDetailsDrawer";
+import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const INITIAL_FILTERS: SchedulingFilterState = {
   positions: [],
   users: [],
-  status: 'all',
-  published: 'all',
+  status: "all",
+  published: "all",
 };
 
-type CalendarMode = 'scheduling' | 'events';
+type CalendarMode = "scheduling" | "events";
 
 interface SchedulingCalendarProps {
   mode?: CalendarMode;
@@ -31,7 +41,7 @@ interface SchedulingCalendarProps {
 }
 
 export function SchedulingCalendar({
-  mode = 'scheduling',
+  mode = "scheduling",
   onCreateShift: _onCreateShift,
   hideShiftActions = false,
   externalDetails = false,
@@ -39,23 +49,32 @@ export function SchedulingCalendar({
 }: SchedulingCalendarProps = {}) {
   const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
-  const [currentView, setCurrentView] = useState<ViewType>(isMobile ? 'day' : 'week');
+  const [currentView, setCurrentView] = useState<ViewType>(
+    isMobile ? "day" : "week",
+  );
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<SchedulingFilterState>(INITIAL_FILTERS);
-  const isSchedulingMode = mode === 'scheduling';
+  const [filters, setFilters] =
+    useState<SchedulingFilterState>(INITIAL_FILTERS);
+  const isSchedulingMode = mode === "scheduling";
   const effectiveHideShiftActions = hideShiftActions || !isSchedulingMode;
 
   const eventRange = useMemo(() => {
-    if (currentView === 'month') {
-      return { start: startOfDay(startOfMonth(selectedDate)), end: endOfDay(endOfMonth(selectedDate)) };
+    if (currentView === "month") {
+      return {
+        start: startOfDay(startOfMonth(selectedDate)),
+        end: endOfDay(endOfMonth(selectedDate)),
+      };
     }
-    if (currentView === 'day') {
+    if (currentView === "day") {
       return { start: startOfDay(selectedDate), end: endOfDay(selectedDate) };
     }
-    return { start: startOfDay(startOfWeek(selectedDate)), end: endOfDay(endOfWeek(selectedDate)) };
+    return {
+      start: startOfDay(startOfWeek(selectedDate)),
+      end: endOfDay(endOfWeek(selectedDate)),
+    };
   }, [currentView, selectedDate]);
 
   const {
@@ -67,37 +86,45 @@ export function SchedulingCalendar({
 
   const filteredShifts = useMemo<ShiftWithAssignments[]>(() => {
     return shifts.filter((shift) => {
-      if (filters.published !== 'all') {
-        if (filters.published === 'published' && !shift.is_published) return false;
-        if (filters.published === 'draft' && shift.is_published) return false;
+      if (filters.published !== "all") {
+        if (filters.published === "published" && !shift.is_published)
+          return false;
+        if (filters.published === "draft" && shift.is_published) return false;
       }
 
-      if (filters.positions.length > 0 && (!shift.position_id || !filters.positions.includes(shift.position_id))) {
+      if (
+        filters.positions.length > 0 &&
+        (!shift.position_id || !filters.positions.includes(shift.position_id))
+      ) {
         return false;
       }
 
       if (filters.users.length > 0) {
-        const assignedUserIds = shift.assignments.map((assignment) => assignment.user_id).filter(Boolean);
+        const assignedUserIds = shift.assignments
+          .map((assignment) => assignment.user_id)
+          .filter(Boolean);
         if (!assignedUserIds.some((id) => filters.users.includes(id))) {
           return false;
         }
       }
 
-      if (filters.status !== 'all') {
+      if (filters.status !== "all") {
         const assignedCount = shift.assignments.length;
         const requiredHeadcount = shift.required_headcount ?? 0;
         switch (filters.status) {
-          case 'assigned':
+          case "assigned":
             if (assignedCount === 0) return false;
             break;
-          case 'unassigned':
+          case "unassigned":
             if (assignedCount > 0) return false;
             break;
-          case 'understaffed':
-            if (requiredHeadcount > 0 && assignedCount >= requiredHeadcount) return false;
+          case "understaffed":
+            if (requiredHeadcount > 0 && assignedCount >= requiredHeadcount)
+              return false;
             break;
-          case 'overstaffed':
-            if (requiredHeadcount > 0 && assignedCount <= requiredHeadcount) return false;
+          case "overstaffed":
+            if (requiredHeadcount > 0 && assignedCount <= requiredHeadcount)
+              return false;
             break;
           default:
             break;
@@ -116,21 +143,27 @@ export function SchedulingCalendar({
   const combinedError = schedulingError || eventsError;
 
   useEffect(() => {
-    if (selectedShift && !filteredShifts.some((shift) => shift.id === selectedShift)) {
+    if (
+      selectedShift &&
+      !filteredShifts.some((shift) => shift.id === selectedShift)
+    ) {
       setSelectedShift(null);
       if (onShiftSelect) onShiftSelect(null);
     }
   }, [filteredShifts, onShiftSelect, selectedShift]);
 
   useEffect(() => {
-    if (selectedEventId && !overlayEvents.some((event) => event.id === selectedEventId)) {
+    if (
+      selectedEventId &&
+      !overlayEvents.some((event) => event.id === selectedEventId)
+    ) {
       setSelectedEventId(null);
     }
   }, [overlayEvents, selectedEventId]);
 
-  const handleDateChange = (direction: 'prev' | 'next') => {
+  const handleDateChange = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate);
-    if (direction === 'prev') {
+    if (direction === "prev") {
       newDate.setDate(newDate.getDate() - 1);
     } else {
       newDate.setDate(newDate.getDate() + 1);
@@ -138,8 +171,9 @@ export function SchedulingCalendar({
     setSelectedDate(newDate);
   };
 
-  const selectedSchedule = selectedShift ?
-    filteredShifts.find(s => s.id === selectedShift) : null;
+  const selectedSchedule = selectedShift
+    ? filteredShifts.find((s) => s.id === selectedShift)
+    : null;
 
   const handleSelectShift = (id: string | null) => {
     setSelectedEventId(null);
@@ -164,12 +198,14 @@ export function SchedulingCalendar({
         </Alert>
       )}
 
-      <ScheduleHeader 
+      <ScheduleHeader
         mode={mode}
-        onPrevDate={() => handleDateChange('prev')}
-        onNextDate={() => handleDateChange('next')}
+        onPrevDate={() => handleDateChange("prev")}
+        onNextDate={() => handleDateChange("next")}
         onToggleFilters={
-          isSchedulingMode ? () => setShowFilters((previous) => !previous) : undefined
+          isSchedulingMode
+            ? () => setShowFilters((previous) => !previous)
+            : undefined
         }
         selectedDate={selectedDate}
         currentView={currentView}
@@ -187,13 +223,10 @@ export function SchedulingCalendar({
       />
 
       {isSchedulingMode && showFilters && (
-        <SchedulingFilters 
-          filters={filters}
-          onFiltersChange={setFilters}
-        />
+        <SchedulingFilters filters={filters} onFiltersChange={setFilters} />
       )}
 
-      <div className={isMobile ? '' : 'flex gap-6'}>
+      <div className={isMobile ? "" : "flex gap-6"}>
         <div className="flex-1">
           <CalendarGrid
             currentView={currentView}
@@ -218,7 +251,6 @@ export function SchedulingCalendar({
             />
           </div>
         )}
-
       </div>
 
       {selectedShift && selectedSchedule && isMobile && !externalDetails && (

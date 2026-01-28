@@ -1,17 +1,23 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { CheckCircle2, ClipboardList, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
-import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
-import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
-import type { useIdeaDiagnostics } from '@/modules/operations/hooks/useIdeaDiagnostics';
-import type { useIdeaActions } from '@/modules/operations/hooks/useIdeaActions';
-import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { CheckCircle2, ClipboardList, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { useIdeaContext } from "@/modules/operations/contexts/IdeaProvider";
+import type { IdeaKpiInsight } from "@/modules/operations/hooks/useIdeaInsights";
+import type { useIdeaDiagnostics } from "@/modules/operations/hooks/useIdeaDiagnostics";
+import type { useIdeaActions } from "@/modules/operations/hooks/useIdeaActions";
+import { formatRangeAsPgDate } from "@/modules/operations/utils/dateRange";
+import { useToast } from "@/hooks/use-toast";
 
 interface ExecutePanelProps {
   insights: IdeaKpiInsight[];
@@ -28,7 +34,8 @@ export function ExecutePanel({
   stageDescription,
   onStageComplete,
 }: ExecutePanelProps) {
-  const { companyId, range, activeCycleId, setActiveCycleId } = useIdeaContext();
+  const { companyId, range, activeCycleId, setActiveCycleId } =
+    useIdeaContext();
   const [creatingCycle, setCreatingCycle] = useState(false);
   const [cycleError, setCycleError] = useState<Error | null>(null);
   const { toast } = useToast();
@@ -46,7 +53,7 @@ export function ExecutePanel({
     try {
       const payload = {
         company_id: companyId,
-        stage: 'execute',
+        stage: "execute",
         range: formatRangeAsPgDate(range),
         insights,
         actions: recommendations,
@@ -54,7 +61,7 @@ export function ExecutePanel({
       };
 
       const { data, error } = await supabase
-        .from('idea_cycles')
+        .from("idea_cycles")
         .insert(payload)
         .select()
         .single();
@@ -71,8 +78,8 @@ export function ExecutePanel({
       const normalized = error as Error;
       setCycleError(normalized);
       toast({
-        variant: 'destructive',
-        title: 'Unable to start IDEA cycle',
+        variant: "destructive",
+        title: "Unable to start IDEA cycle",
         description: normalized.message,
       });
     } finally {
@@ -96,14 +103,18 @@ export function ExecutePanel({
   }, [createCycle]);
 
   const actionsData = Array.isArray(actionsState.data) ? actionsState.data : [];
-  const pendingActions = actionsData.filter((action) => action.status !== 'executed');
-  const executedActions = actionsData.filter((action) => action.status === 'executed');
+  const pendingActions = actionsData.filter(
+    (action) => action.status !== "executed",
+  );
+  const executedActions = actionsData.filter(
+    (action) => action.status === "executed",
+  );
 
   const queuedRecommendationIds = useMemo(() => {
     return new Set(
       actionsData
         .map((action) => action.result?.recommendationId)
-        .filter((value): value is string => typeof value === 'string'),
+        .filter((value): value is string => typeof value === "string"),
     );
   }, [actionsData]);
 
@@ -113,59 +124,65 @@ export function ExecutePanel({
     async (action: string, recommendationId: string) => {
       if (!activeCycleId) {
         toast({
-          variant: 'destructive',
-        title: 'Cycle not ready',
-        description: 'Please wait for the IDEA cycle to initialize before queuing actions.',
-      });
-      return;
-    }
+          variant: "destructive",
+          title: "Cycle not ready",
+          description:
+            "Please wait for the IDEA cycle to initialize before queuing actions.",
+        });
+        return;
+      }
 
-    try {
-      await actionsState.createAction({
-        action,
-        recommendationId,
-        impact: 'AI recommended',
-      });
-    } catch (error) {
-      const normalized = error as Error;
-      setCycleError(normalized);
-      toast({
-        variant: 'destructive',
-        title: 'Unable to queue action',
-        description: normalized.message,
-      });
-    }
-  }, [activeCycleId, actionsState, toast]);
+      try {
+        await actionsState.createAction({
+          action,
+          recommendationId,
+          impact: "AI recommended",
+        });
+      } catch (error) {
+        const normalized = error as Error;
+        setCycleError(normalized);
+        toast({
+          variant: "destructive",
+          title: "Unable to queue action",
+          description: normalized.message,
+        });
+      }
+    },
+    [activeCycleId, actionsState, toast],
+  );
 
   const handleExecuteAction = useCallback(
     async (actionId: string) => {
       if (!activeCycleId) {
         toast({
-          variant: 'destructive',
-        title: 'Cycle not ready',
-        description: 'Create or resume the cycle before executing actions.',
-      });
-      return;
-    }
+          variant: "destructive",
+          title: "Cycle not ready",
+          description: "Create or resume the cycle before executing actions.",
+        });
+        return;
+      }
 
-    try {
-      await actionsState.execute({
-        actionId,
-        result: { executedAt: new Date().toISOString() },
-      });
-    } catch (error) {
-      const normalized = error as Error;
-      setCycleError(normalized);
-      toast({
-        variant: 'destructive',
-        title: 'Unable to execute action',
-        description: normalized.message,
-      });
-    }
-  }, [activeCycleId, actionsState, toast]);
+      try {
+        await actionsState.execute({
+          actionId,
+          result: { executedAt: new Date().toISOString() },
+        });
+      } catch (error) {
+        const normalized = error as Error;
+        setCycleError(normalized);
+        toast({
+          variant: "destructive",
+          title: "Unable to execute action",
+          description: normalized.message,
+        });
+      }
+    },
+    [activeCycleId, actionsState, toast],
+  );
 
   const queueActionHandler = useCallback(
-    (action: string, recommendationId: string) => () => handleCreateAction(action, recommendationId),
+    (action: string, recommendationId: string) => () =>
+      handleCreateAction(action, recommendationId),
     [handleCreateAction],
   );
 
@@ -181,8 +198,8 @@ export function ExecutePanel({
     }
 
     toast({
-      title: 'No cycle selected',
-      description: 'Start or resume a cycle to review assessment results.',
+      title: "No cycle selected",
+      description: "Start or resume a cycle to review assessment results.",
     });
   };
 
@@ -190,10 +207,15 @@ export function ExecutePanel({
     <section className="space-y-6">
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <ClipboardList className="h-4 w-4 text-violet-500" aria-hidden="true" />
+          <ClipboardList
+            className="h-4 w-4 text-violet-500"
+            aria-hidden="true"
+          />
           Execute
         </div>
-        <h2 className="text-xl font-semibold text-foreground">Launch improvement playbooks</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          Launch improvement playbooks
+        </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleCompleteStage} disabled={!activeCycleId}>
@@ -203,7 +225,8 @@ export function ExecutePanel({
         </div>
         {!activeCycleId ? (
           <p className="text-sm text-muted-foreground">
-            Run diagnostics and start a cycle before reviewing or executing actions.
+            Run diagnostics and start a cycle before reviewing or executing
+            actions.
           </p>
         ) : null}
       </header>
@@ -236,7 +259,9 @@ export function ExecutePanel({
               <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground">
                 Pending queue
               </CardTitle>
-              <CardDescription>Confirm or automate AI suggested plays.</CardDescription>
+              <CardDescription>
+                Confirm or automate AI suggested plays.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {pendingActions.length === 0 ? (
@@ -245,10 +270,15 @@ export function ExecutePanel({
                 </p>
               ) : (
                 pendingActions.map((action) => (
-                  <div key={action.id} className="rounded-md border border-border/50 bg-muted/20 p-3">
+                  <div
+                    key={action.id}
+                    className="rounded-md border border-border/50 bg-muted/20 p-3"
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <div>
-                        <div className="text-sm font-medium text-foreground">{action.action_name}</div>
+                        <div className="text-sm font-medium text-foreground">
+                          {action.action_name}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           Created {new Date(action.created_at).toLocaleString()}
                         </div>
@@ -258,7 +288,11 @@ export function ExecutePanel({
                       </Badge>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button size="sm" onClick={executeActionHandler(action.id)} disabled={disableActionControls}>
+                      <Button
+                        size="sm"
+                        onClick={executeActionHandler(action.id)}
+                        disabled={disableActionControls}
+                      >
                         <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
                         Execute now
                       </Button>
@@ -271,34 +305,57 @@ export function ExecutePanel({
 
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Recommended plays</CardTitle>
-              <CardDescription>Queue AI recommendations for execution.</CardDescription>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+                Recommended plays
+              </CardTitle>
+              <CardDescription>
+                Queue AI recommendations for execution.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {recommendations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No AI recommendations yet. Diagnose to generate actions.</p>
+                <p className="text-sm text-muted-foreground">
+                  No AI recommendations yet. Diagnose to generate actions.
+                </p>
               ) : (
                 recommendations.map((recommendation) => {
                   const queued = queuedRecommendationIds.has(recommendation.id);
                   return (
-                    <div key={recommendation.id} className="rounded-md border border-border/50 bg-muted/20 p-3">
+                    <div
+                      key={recommendation.id}
+                      className="rounded-md border border-border/50 bg-muted/20 p-3"
+                    >
                       <div className="flex items-center justify-between gap-2">
-                        <div className="text-sm font-medium text-foreground">{recommendation.action}</div>
+                        <div className="text-sm font-medium text-foreground">
+                          {recommendation.action}
+                        </div>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {queued ? 'Queued' : 'Suggested'}
+                          {queued ? "Queued" : "Suggested"}
                         </Badge>
                       </div>
-                      <div className="mt-2 text-xs text-muted-foreground">{recommendation.impact}</div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {recommendation.impact}
+                      </div>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           disabled={queued || disableActionControls}
-                          onClick={queueActionHandler(recommendation.action, recommendation.id)}
+                          onClick={queueActionHandler(
+                            recommendation.action,
+                            recommendation.id,
+                          )}
                         >
                           Queue action
                         </Button>
-                        <Button size="sm" disabled={disableActionControls} onClick={queueActionHandler(recommendation.action, recommendation.id)}>
+                        <Button
+                          size="sm"
+                          disabled={disableActionControls}
+                          onClick={queueActionHandler(
+                            recommendation.action,
+                            recommendation.id,
+                          )}
+                        >
                           <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
                           Execute now
                         </Button>
@@ -318,17 +375,27 @@ export function ExecutePanel({
           {executedActions.length > 0 ? (
             <Card className="lg:col-span-2 border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
               <CardHeader>
-                <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Executed plays</CardTitle>
-                <CardDescription>Completed actions with recorded outcomes.</CardDescription>
+                <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+                  Executed plays
+                </CardTitle>
+                <CardDescription>
+                  Completed actions with recorded outcomes.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {executedActions.map((action) => (
-                  <div key={action.id} className="rounded-md border border-border/40 bg-muted/20 p-3">
+                  <div
+                    key={action.id}
+                    className="rounded-md border border-border/40 bg-muted/20 p-3"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm font-medium text-foreground">{action.action_name}</div>
+                        <div className="text-sm font-medium text-foreground">
+                          {action.action_name}
+                        </div>
                         <div className="text-xs text-muted-foreground">
-                          Executed {new Date(action.created_at).toLocaleString()}
+                          Executed{" "}
+                          {new Date(action.created_at).toLocaleString()}
                         </div>
                       </div>
                       <Badge variant="outline" className="text-xs capitalize">

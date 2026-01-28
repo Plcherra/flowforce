@@ -1,25 +1,40 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { usePermissions, usePermissionFlags } from '@/hooks/usePermissions';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { usePermissions, usePermissionFlags } from "@/hooks/usePermissions";
 
 type PermissionManagerDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function PermissionManagerDialog({ open, onOpenChange }: PermissionManagerDialogProps) {
-  const { roles, featureKeys, isLoading, updateFlag, isUpdating } = usePermissionFlags();
+export function PermissionManagerDialog({
+  open,
+  onOpenChange,
+}: PermissionManagerDialogProps) {
+  const { roles, featureKeys, isLoading, updateFlag, isUpdating } =
+    usePermissionFlags();
   const { hasRole } = usePermissions();
-  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
 
   const availableRoles = useMemo(() => roles, [roles]);
 
   useEffect(() => {
     if (!open) {
-      setSelectedRoleId('');
+      setSelectedRoleId("");
       return;
     }
     if (availableRoles.length) {
@@ -27,14 +42,19 @@ export function PermissionManagerDialog({ open, onOpenChange }: PermissionManage
     }
   }, [open, availableRoles]);
 
-  const selectedRole = availableRoles.find((role) => role.id === selectedRoleId);
+  const selectedRole = availableRoles.find(
+    (role) => role.id === selectedRoleId,
+  );
 
-  const handleToggle = async (key: (typeof featureKeys)[number]['key'], checked: boolean) => {
+  const handleToggle = async (
+    key: (typeof featureKeys)[number]["key"],
+    checked: boolean,
+  ) => {
     if (!selectedRole) return;
     await updateFlag({ roleId: selectedRole.id, key, value: checked });
   };
 
-  const canManagePermissions = hasRole(['admin', 'owner']);
+  const canManagePermissions = hasRole(["admin", "owner"]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,7 +66,11 @@ export function PermissionManagerDialog({ open, onOpenChange }: PermissionManage
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Role</Label>
-            <Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isLoading}>
+            <Select
+              value={selectedRoleId}
+              onValueChange={setSelectedRoleId}
+              disabled={isLoading}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
@@ -76,12 +100,18 @@ export function PermissionManagerDialog({ open, onOpenChange }: PermissionManage
                 >
                   <div>
                     <p className="text-sm font-medium">{feature.label}</p>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </div>
                   <Switch
                     checked={enabled}
-                    disabled={!selectedRole || !canManagePermissions || isUpdating}
-                    onCheckedChange={(checked) => handleToggle(feature.key, checked)}
+                    disabled={
+                      !selectedRole || !canManagePermissions || isUpdating
+                    }
+                    onCheckedChange={(checked) =>
+                      handleToggle(feature.key, checked)
+                    }
                   />
                 </div>
               );

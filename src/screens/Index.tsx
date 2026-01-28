@@ -1,15 +1,14 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { LandingHeader } from '@/components/landing/LandingHeader';
-import { HeroSection } from '@/components/landing/HeroSection';
-import { FeaturesGrid } from '@/components/landing/FeaturesGrid';
-import { IndustryTemplates } from '@/components/landing/IndustryTemplates';
-import { QuickSetupSteps } from '@/components/landing/QuickSetupSteps';
-import { TestimonialsCarousel } from '@/components/landing/TestimonialsCarousel';
-import { UseCasesSection } from '@/components/landing/UseCasesSection';
-import { LandingFooter } from '@/components/landing/LandingFooter';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
+import { IndustryTemplates } from "@/components/landing/IndustryTemplates";
+import { QuickSetupSteps } from "@/components/landing/QuickSetupSteps";
+import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel";
+import { UseCasesSection } from "@/components/landing/UseCasesSection";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ export default function Index() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [user, loading, navigate]);
 

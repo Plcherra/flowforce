@@ -1,11 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 import {
   computeGuardrailEvidence,
   type ClosedLoopMetrics,
-} from '@/services/intelligence/closedLoopEngine';
+} from "@/services/intelligence/closedLoopEngine";
 
-describe('computeGuardrailEvidence', () => {
-  it('maps operational metrics into guardrail criteria and approvals', () => {
+describe("computeGuardrailEvidence", () => {
+  it("maps operational metrics into guardrail criteria and approvals", () => {
     const metrics: ClosedLoopMetrics = {
       pendingPto: 2,
       pendingShiftSwaps: 1,
@@ -25,26 +25,34 @@ describe('computeGuardrailEvidence', () => {
 
     const evidence = computeGuardrailEvidence(metrics);
 
-    expect(evidence.completedCriteria['pto-reviewed']).toBe(false);
-    expect(evidence.pendingApprovals['pto-reviewed']).toBe(false);
+    expect(evidence.completedCriteria["pto-reviewed"]).toBe(false);
+    expect(evidence.pendingApprovals["pto-reviewed"]).toBe(false);
 
-    expect(evidence.completedCriteria['labor-budget-loaded']).toBe(metrics.laborTargetConfidence);
-    expect(evidence.completedCriteria['roster-updated']).toBe(true);
+    expect(evidence.completedCriteria["labor-budget-loaded"]).toBe(
+      metrics.laborTargetConfidence,
+    );
+    expect(evidence.completedCriteria["roster-updated"]).toBe(true);
 
-    expect(evidence.completedCriteria['coverage-targets-met']).toBe(metrics.coverageScore);
-    expect(evidence.completedCriteria['skill-mix-validated']).toBe(true);
-    expect(evidence.completedCriteria['compliance-check-passed']).toBe(false);
+    expect(evidence.completedCriteria["coverage-targets-met"]).toBe(
+      metrics.coverageScore,
+    );
+    expect(evidence.completedCriteria["skill-mix-validated"]).toBe(true);
+    expect(evidence.completedCriteria["compliance-check-passed"]).toBe(false);
 
-    expect(evidence.pendingApprovals['gm-approval']).toBe(true);
-    expect(evidence.completedCriteria['gm-approval']).toBe(true);
+    expect(evidence.pendingApprovals["gm-approval"]).toBe(true);
+    expect(evidence.completedCriteria["gm-approval"]).toBe(true);
 
-    expect(evidence.completedCriteria['swap-requests-addressed']).toBe(false);
+    expect(evidence.completedCriteria["swap-requests-addressed"]).toBe(false);
 
-    expect(evidence.completedCriteria['schedule-published']).toBe(metrics.publishedShare);
-    expect(evidence.completedCriteria['ack-rate']).toBe(metrics.acknowledgmentRate);
+    expect(evidence.completedCriteria["schedule-published"]).toBe(
+      metrics.publishedShare,
+    );
+    expect(evidence.completedCriteria["ack-rate"]).toBe(
+      metrics.acknowledgmentRate,
+    );
   });
 
-  it('marks approvals complete when metrics show zero pendings', () => {
+  it("marks approvals complete when metrics show zero pendings", () => {
     const metrics: ClosedLoopMetrics = {
       pendingPto: 0,
       pendingShiftSwaps: 0,
@@ -64,9 +72,8 @@ describe('computeGuardrailEvidence', () => {
 
     const evidence = computeGuardrailEvidence(metrics);
 
-    expect(evidence.completedCriteria['pto-reviewed']).toBe(true);
-    expect(evidence.pendingApprovals['pto-reviewed']).toBe(true);
-    expect(evidence.completedCriteria['swap-requests-addressed']).toBe(true);
+    expect(evidence.completedCriteria["pto-reviewed"]).toBe(true);
+    expect(evidence.pendingApprovals["pto-reviewed"]).toBe(true);
+    expect(evidence.completedCriteria["swap-requests-addressed"]).toBe(true);
   });
 });
-

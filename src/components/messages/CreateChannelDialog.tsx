@@ -1,30 +1,44 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useMessageChannels } from '@/hooks/messages/useMessageChannels';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useMessageChannels } from "@/hooks/messages/useMessageChannels";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface CreateChannelDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps) {
+export function CreateChannelDialog({
+  open,
+  onClose,
+}: CreateChannelDialogProps) {
   const { createChannel } = useMessageChannels();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: 'group',
-    is_private: false
+    name: "",
+    description: "",
+    type: "group",
+    is_private: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,29 +51,29 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         type: formData.type,
-        is_private: formData.is_private
+        is_private: formData.is_private,
       });
 
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Channel created successfully',
+        title: "Success",
+        description: "Channel created successfully",
       });
 
       setFormData({
-        name: '',
-        description: '',
-        type: 'group',
-        is_private: false
+        name: "",
+        description: "",
+        type: "group",
+        is_private: false,
       });
       onClose();
     } catch (error) {
-      logger.error('Error creating channel:', { error, tags: ['error'] });
+      logger.error("Error creating channel:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to create channel',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to create channel",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -82,7 +96,9 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="e.g. general, project-updates"
               required
             />
@@ -93,7 +109,9 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="What's this channel about?"
               rows={3}
             />
@@ -103,7 +121,9 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
             <Label htmlFor="type">Channel Type</Label>
             <Select
               value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, type: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -121,7 +141,9 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
             <Switch
               id="private"
               checked={formData.is_private}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_private: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_private: checked })
+              }
             />
             <Label htmlFor="private">Private Channel</Label>
           </div>
@@ -131,7 +153,7 @@ export function CreateChannelDialog({ open, onClose }: CreateChannelDialogProps)
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? 'Creating...' : 'Create Channel'}
+              {loading ? "Creating..." : "Create Channel"}
             </Button>
           </div>
         </form>

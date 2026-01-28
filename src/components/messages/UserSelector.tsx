@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, MessageCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search, MessageCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface User {
   id: string;
@@ -27,12 +33,16 @@ interface UserSelectorProps {
   onUserSelect: (user: User) => void;
 }
 
-export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps) {
+export function UserSelector({
+  open,
+  onClose,
+  onUserSelect,
+}: UserSelectorProps) {
   const { user: currentUser } = useAuth();
   const { profile: currentProfile } = useProfile();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
@@ -44,11 +54,12 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
 
   useEffect(() => {
     const loweredQuery = searchQuery.toLowerCase();
-    const filtered = users.filter(user => {
-      const fields = [user.first_name, user.last_name, user.email]
-        .filter((value): value is string => Boolean(value));
+    const filtered = users.filter((user) => {
+      const fields = [user.first_name, user.last_name, user.email].filter(
+        (value): value is string => Boolean(value),
+      );
       if (fields.length === 0) {
-        return 'unknown user'.includes(loweredQuery);
+        return "unknown user".includes(loweredQuery);
       }
       return fields.some((value) => value.toLowerCase().includes(loweredQuery));
     });
@@ -59,11 +70,13 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
     if (!currentUser) return;
 
     setLoading(true);
-    const includeSelf = currentProfile?.role === 'admin';
-    const currentProfileId = currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
-    const companyId = currentProfile?.companyId ?? currentProfile?.company_id ?? null;
+    const includeSelf = currentProfile?.role === "admin";
+    const currentProfileId =
+      currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
+    const companyId =
+      currentProfile?.companyId ?? currentProfile?.company_id ?? null;
     const selectFields =
-      'id, first_name, last_name, email, avatar_url, employment_status, role';
+      "id, first_name, last_name, email, avatar_url, employment_status, role";
 
     const applySelfVisibility = (list: User[] | null | undefined) => {
       const entries = list ?? [];
@@ -75,15 +88,15 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
 
     try {
       if (!companyId) {
-        throw new Error('Company context required to load users');
+        throw new Error("Company context required to load users");
       }
 
-      let query = supabase
-        .from('profiles')
+      const query = supabase
+        .from("profiles")
         .select(selectFields)
-        .eq('company_id', companyId)
-        .eq('employment_status', 'active')
-        .order('first_name');
+        .eq("company_id", companyId)
+        .eq("employment_status", "active")
+        .order("first_name");
 
       const { data: activeData, error: activeError } = await query;
 
@@ -94,26 +107,26 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
       if (visibleUsers.length === 0) {
         // Fallback: still filter by company_id
         const { data: fallbackData, error: fallbackError } = await supabase
-          .from('profiles')
+          .from("profiles")
           .select(selectFields)
-          .eq('company_id', companyId)
-          .order('first_name');
+          .eq("company_id", companyId)
+          .order("first_name");
 
         if (fallbackError) throw fallbackError;
         visibleUsers = applySelfVisibility(fallbackData);
       }
 
       const deduped = Array.from(
-        new Map(visibleUsers.map((entry) => [entry.id, entry])).values()
+        new Map(visibleUsers.map((entry) => [entry.id, entry])).values(),
       );
 
       setUsers(deduped);
     } catch (error) {
-      logger.error('Error fetching users:', { error, tags: ['error'] });
+      logger.error("Error fetching users:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to load users',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load users",
+        variant: "destructive",
       });
       setUsers([]);
     } finally {
@@ -124,12 +137,12 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
   const handleUserSelect = (user: User) => {
     onUserSelect({
       ...user,
-      first_name: user.first_name ?? 'Unknown',
-      last_name: user.last_name ?? '',
-      email: user.email ?? 'Profile not available',
+      first_name: user.first_name ?? "Unknown",
+      last_name: user.last_name ?? "",
+      email: user.email ?? "Profile not available",
     });
     onClose();
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   return (
@@ -163,19 +176,27 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? 'No users found matching your search.' : 'No users available.'}
+                {searchQuery
+                  ? "No users found matching your search."
+                  : "No users available."}
               </div>
             ) : (
               <div className="space-y-2">
                 {filteredUsers.map((user) => {
                   const firstName = user.first_name ?? undefined;
                   const lastName = user.last_name ?? undefined;
-                  const hasProfile = Boolean(firstName || lastName || user.email);
-                  const displayName = [firstName, lastName].filter(Boolean).join(' ').trim() || 'Unknown user';
-                  const email = user.email ?? 'Profile not available';
-                  const initial = firstName?.[0] ?? lastName?.[0] ?? 'U';
-                  const secondInitial = lastName?.[0] ?? firstName?.[1] ?? '';
-                  const initials = `${initial}${secondInitial}`.trim() || displayName.slice(0, 2).toUpperCase();
+                  const hasProfile = Boolean(
+                    firstName || lastName || user.email,
+                  );
+                  const displayName =
+                    [firstName, lastName].filter(Boolean).join(" ").trim() ||
+                    "Unknown user";
+                  const email = user.email ?? "Profile not available";
+                  const initial = firstName?.[0] ?? lastName?.[0] ?? "U";
+                  const secondInitial = lastName?.[0] ?? firstName?.[1] ?? "";
+                  const initials =
+                    `${initial}${secondInitial}`.trim() ||
+                    displayName.slice(0, 2).toUpperCase();
                   const isSelectable = hasProfile;
 
                   return (
@@ -185,19 +206,19 @@ export function UserSelector({ open, onClose, onUserSelect }: UserSelectorProps)
                       className="w-full justify-start h-auto p-3 rounded-xl hover:bg-primary/10"
                       onClick={() => isSelectable && handleUserSelect(user)}
                       disabled={!isSelectable}
-                      title={isSelectable ? undefined : 'Profile not available'}
+                      title={isSelectable ? undefined : "Profile not available"}
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <Avatar className="h-10 w-10">
-                          {user.avatar_url ? <AvatarImage src={user.avatar_url || undefined} /> : null}
+                          {user.avatar_url ? (
+                            <AvatarImage src={user.avatar_url || undefined} />
+                          ) : null}
                           <AvatarFallback className="bg-primary/20 text-primary">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 text-left">
-                          <p className="font-medium text-sm">
-                            {displayName}
-                          </p>
+                          <p className="font-medium text-sm">{displayName}</p>
                           <p className="text-xs text-muted-foreground">
                             {email}
                           </p>

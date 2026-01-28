@@ -1,15 +1,25 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
-import { AvailabilityToggle } from '@/components/AvailabilityToggle';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, Paperclip, Image, Smile, Users as UsersIcon } from 'lucide-react';
-import ErrorBoundary from '@/components/ui/error-boundary';
-import { cn } from '@/lib/utils';
-import { getConversationName, type Conversation, type ChatMessage } from '@/components/messages/conversations';
-import type { ChatUser } from '@/components/messages/users';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { AvailabilityToggle } from "@/components/AvailabilityToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  MessageSquare,
+  Paperclip,
+  Image,
+  Smile,
+  Users as UsersIcon,
+} from "lucide-react";
+import ErrorBoundary from "@/components/ui/error-boundary";
+import { cn } from "@/lib/utils";
+import {
+  getConversationName,
+  type Conversation,
+  type ChatMessage,
+} from "@/components/messages/conversations";
+import type { ChatUser } from "@/components/messages/users";
 
 interface ChatPanelProps {
   conversation: Conversation | null;
@@ -30,30 +40,48 @@ export function ChatPanel({
   onSendMessage,
   hasTeammates,
 }: ChatPanelProps) {
-  const renderMessageBubble = (message: ChatMessage, previous?: ChatMessage) => {
+  const renderMessageBubble = (
+    message: ChatMessage,
+    previous?: ChatMessage,
+  ) => {
     const author = usersById.get(message.authorId);
     const isMine = message.authorId === currentUserId;
     const showAvatar = !isMine && previous?.authorId !== message.authorId;
 
     return (
-      <div key={message.id} className={cn('flex gap-2 sm:gap-3', isMine ? 'justify-end' : 'justify-start')}>
+      <div
+        key={message.id}
+        className={cn(
+          "flex gap-2 sm:gap-3",
+          isMine ? "justify-end" : "justify-start",
+        )}
+      >
         {!isMine && showAvatar && (
           <Avatar className="h-8 w-8">
             <AvatarImage src={author?.avatar} alt={author?.name} />
-            <AvatarFallback>{author?.name?.[0] ?? 'U'}</AvatarFallback>
+            <AvatarFallback>{author?.name?.[0] ?? "U"}</AvatarFallback>
           </Avatar>
         )}
         <div
           className={cn(
-            'allow-text-selection max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm',
-            isMine ? 'bg-primary text-primary-foreground' : 'bg-muted'
+            "allow-text-selection max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm",
+            isMine ? "bg-primary text-primary-foreground" : "bg-muted",
           )}
         >
-          {!isMine && <div className="mb-1 text-xs font-medium text-foreground/80">{author?.name ?? 'Someone'}</div>}
-          <div className="allow-text-selection whitespace-pre-line leading-relaxed">{message.content}</div>
+          {!isMine && (
+            <div className="mb-1 text-xs font-medium text-foreground/80">
+              {author?.name ?? "Someone"}
+            </div>
+          )}
+          <div className="allow-text-selection whitespace-pre-line leading-relaxed">
+            {message.content}
+          </div>
           <div className="mt-1 text-[11px] text-right opacity-70">
-            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            {message.edited && ' · edited'}
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            {message.edited && " · edited"}
           </div>
         </div>
       </div>
@@ -66,7 +94,11 @@ export function ChatPanel({
         <CardContent className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
           <div className="allow-text-selection space-y-2">
             <MessageSquare className="mx-auto h-10 w-10" />
-            <p>{hasTeammates ? 'Select a conversation to view the chat history.' : 'Invite teammates to start your first conversation.'}</p>
+            <p>
+              {hasTeammates
+                ? "Select a conversation to view the chat history."
+                : "Invite teammates to start your first conversation."}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -75,15 +107,18 @@ export function ChatPanel({
 
   const participantNames = conversation.participantIds
     .filter((id) => id !== currentUserId)
-    .map((id) => usersById.get(id)?.name ?? 'Unknown')
-    .join(', ');
+    .map((id) => usersById.get(id)?.name ?? "Unknown")
+    .join(", ");
 
   return (
     <Card className="chat-panel flex flex-1 flex-col">
       <CardHeader className="flex flex-col gap-2 border-b">
         <div className="flex items-center justify-between gap-3">
           <div className="allow-text-selection">
-            <CardTitle>{getConversationName(conversation, usersById, currentUserId) || 'Conversation'}</CardTitle>
+            <CardTitle>
+              {getConversationName(conversation, usersById, currentUserId) ||
+                "Conversation"}
+            </CardTitle>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <UsersIcon className="h-3.5 w-3.5" />
               <span>{participantNames}</span>
@@ -110,7 +145,10 @@ export function ChatPanel({
               >
                 <>
                   {conversation.messages.map((message, index) =>
-                    renderMessageBubble(message, conversation.messages[index - 1])
+                    renderMessageBubble(
+                      message,
+                      conversation.messages[index - 1],
+                    ),
                   )}
                 </>
               </ErrorBoundary>
@@ -128,13 +166,28 @@ export function ChatPanel({
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Attach file">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full"
+                  title="Attach file"
+                >
                   <Paperclip className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add image">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full"
+                  title="Add image"
+                >
                   <Image className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" title="Add emoji">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full"
+                  title="Add emoji"
+                >
                   <Smile className="h-4 w-4" />
                 </Button>
               </div>

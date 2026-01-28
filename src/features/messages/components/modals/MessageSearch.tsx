@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Search, X, MessageSquare, Hash, Users, Lock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { format } from 'date-fns';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect, useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Search, X, MessageSquare, Hash, Users, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { format } from "date-fns";
+import { logger } from "@/utils/logger";
 
 interface SearchResult {
-  type: 'message' | 'channel';
+  type: "message" | "channel";
   id: string;
   content?: string;
   name?: string;
@@ -38,19 +38,28 @@ interface MessageSearchProps {
   onResultSelect?: (result: SearchResult) => void;
 }
 
-export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchProps) {
+export function MessageSearch({
+  open,
+  onClose,
+  onResultSelect,
+}: MessageSearchProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
-  const escapeRegExp = useCallback((value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), []);
+  const escapeRegExp = useCallback(
+    (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+    [],
+  );
 
   useEffect(() => {
     if (!open) {
-      setSearchQuery('');
+      setSearchQuery("");
       setResults([]);
     }
   }, [open]);
@@ -81,81 +90,93 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
 
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
-      logger.warn('Company context required for message search', { tags: ['warning'] });
+      logger.warn("Company context required for message search", {
+        tags: ["warning"],
+      });
       setResults([]);
       return;
     }
 
     setLoading(true);
     try {
-      // Search messages - filter by channels that belong to the company
-      // Messages are scoped through channel membership, but we add an extra layer of security
+      // Search messages - filter by channels user has access to
+      // Messages are scoped through channel membership via RLS
       const { data: messageResults, error: messageError } = await supabase
-        .from('messages')
-        .select(`
+        .from("messages")
+        .select(
+          `
           id,
           content,
           created_at,
           sender_profile:profiles!messages_sender_id_fkey(
             first_name,
             last_name,
-            avatar_url,
-            company_id
+            avatar_url
           ),
           channel:message_channels!messages_channel_id_fkey(
             id,
             name,
             type,
-            is_private,
-            company_id
+            is_private
           )
-        `)
-        .eq('channel.company_id', companyId)
-        .textSearch('content', query)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .ilike("content", `%${query}%`)
+        .order("created_at", { ascending: false })
         .limit(10);
 
-      // Search channels - filter by company_id
+      // Search channels - RLS will filter by membership
+      // Filter by creator's company_id via created_profile
       const { data: channelResults, error: channelError } = await supabase
-        .from('message_channels')
-        .select(`
+        .from("message_channels")
+        .select(
+          `
           id,
           name,
           description,
           type,
           is_private,
           created_at,
-          company_id
-        `)
-        .eq('company_id', companyId)
+          created_profile:profiles!created_by(company_id)
+        `,
+        )
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-        .order('created_at', { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(5);
 
       if (messageError) throw messageError;
       if (channelError) throw channelError;
 
+      // Filter channels by company_id from created_profile
+      const filteredChannels = (channelResults || []).filter((channel) => {
+        const createdProfile = channel.created_profile as
+          | { company_id?: string }
+          | null
+          | undefined;
+        return createdProfile?.company_id === companyId;
+      });
+
       const formattedResults: SearchResult[] = [
-        ...(messageResults || []).map(msg => ({
-          type: 'message' as const,
+        ...(messageResults || []).map((msg) => ({
+          type: "message" as const,
           id: msg.id,
           content: msg.content,
           created_at: msg.created_at,
           sender_profile: msg.sender_profile,
-          channel: msg.channel
+          channel: msg.channel,
         })),
-        ...(channelResults || []).map(channel => ({
-          type: 'channel' as const,
+        ...filteredChannels.map((channel) => ({
+          type: "channel" as const,
           id: channel.id,
           name: channel.name,
           description: channel.description,
-          created_at: channel.created_at
-        }))
+          created_at: channel.created_at,
+        })),
       ];
 
       setResults(formattedResults);
     } catch (error) {
-      logger.error('Search error:', { error, tags: ['error'] });
+      logger.error("Search error:", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
@@ -163,7 +184,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
 
   const getChannelIcon = (type: string, isPrivate: boolean) => {
     if (isPrivate) return <Lock className="h-4 w-4" />;
-    if (type === 'direct') return <Users className="h-4 w-4" />;
+    if (type === "direct") return <Users className="h-4 w-4" />;
     return <Hash className="h-4 w-4" />;
   };
 
@@ -171,11 +192,14 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
     (text: string, query: string) => {
       if (!query) return text;
       const safeQuery = escapeRegExp(query);
-      const regex = new RegExp(`(${safeQuery})`, 'gi');
+      const regex = new RegExp(`(${safeQuery})`, "gi");
       const parts = text.split(regex);
       return parts.map((part, index) =>
         index % 2 === 1 ? (
-          <mark key={`${part}-${index}`} className="rounded px-1 bg-yellow-200 dark:bg-yellow-800">
+          <mark
+            key={`${part}-${index}`}
+            className="rounded px-1 bg-yellow-200 dark:bg-yellow-800"
+          >
             {part}
           </mark>
         ) : (
@@ -207,7 +231,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                   variant="ghost"
                   size="sm"
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setSearchQuery("")}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -242,7 +266,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                       onClose();
                     }}
                   >
-                    {result.type === 'message' ? (
+                    {result.type === "message" ? (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <MessageSquare className="h-4 w-4 text-primary" />
@@ -251,31 +275,48 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                           </Badge>
                           {result.channel && (
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              {getChannelIcon(result.channel.type, result.channel.is_private)}
+                              {getChannelIcon(
+                                result.channel.type,
+                                result.channel.is_private,
+                              )}
                               <span>#{result.channel.name}</span>
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="flex items-start gap-3">
                           {(() => {
-                            const firstName = result.sender_profile?.first_name?.trim() ?? '';
-                            const lastName = result.sender_profile?.last_name?.trim() ?? '';
-                            const displayName = [firstName, lastName].filter(Boolean).join(' ') || 'Hidden user';
-                            const firstInitial = firstName.charAt(0) || lastName.charAt(0) || 'U';
-                            const secondInitial = lastName.charAt(0) || firstName.charAt(1) || '';
-                            const initials = `${firstInitial}${secondInitial}`.toUpperCase().slice(0, 2) || 'U';
+                            const firstName =
+                              result.sender_profile?.first_name?.trim() ?? "";
+                            const lastName =
+                              result.sender_profile?.last_name?.trim() ?? "";
+                            const displayName =
+                              [firstName, lastName].filter(Boolean).join(" ") ||
+                              "Hidden user";
+                            const firstInitial =
+                              firstName.charAt(0) || lastName.charAt(0) || "U";
+                            const secondInitial =
+                              lastName.charAt(0) || firstName.charAt(1) || "";
+                            const initials =
+                              `${firstInitial}${secondInitial}`
+                                .toUpperCase()
+                                .slice(0, 2) || "U";
                             const createdAt = new Date(result.created_at);
-                            const createdAtLabel = Number.isNaN(createdAt.getTime())
-                              ? ''
-                              : format(createdAt, 'MMM dd, yyyy');
+                            const createdAtLabel = Number.isNaN(
+                              createdAt.getTime(),
+                            )
+                              ? ""
+                              : format(createdAt, "MMM dd, yyyy");
 
                             return (
                               <>
                                 <Avatar className="h-8 w-8">
                                   {result.sender_profile?.avatar_url ? (
                                     <AvatarImage
-                                      src={result.sender_profile.avatar_url ?? undefined}
+                                      src={
+                                        result.sender_profile.avatar_url ??
+                                        undefined
+                                      }
                                       alt={displayName}
                                     />
                                   ) : null}
@@ -285,13 +326,22 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
                                   <div className="mb-1 flex items-center gap-2">
-                                    <span className="text-sm font-medium">{displayName}</span>
+                                    <span className="text-sm font-medium">
+                                      {displayName}
+                                    </span>
                                     {createdAtLabel && (
-                                      <span className="text-xs text-muted-foreground">{createdAtLabel}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {createdAtLabel}
+                                      </span>
                                     )}
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    {result.content ? highlightQuery(result.content, searchQuery) : null}
+                                    {result.content
+                                      ? highlightQuery(
+                                          result.content,
+                                          searchQuery,
+                                        )
+                                      : null}
                                   </p>
                                 </div>
                               </>
@@ -307,10 +357,11 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
                             Channel
                           </Badge>
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium text-sm">
-                            {result.name && highlightQuery(result.name, searchQuery)}
+                            {result.name &&
+                              highlightQuery(result.name, searchQuery)}
                           </h4>
                           {result.description && (
                             <p className="text-xs text-muted-foreground mt-1">
@@ -328,7 +379,7 @@ export function MessageSearch({ open, onClose, onResultSelect }: MessageSearchPr
 
           {searchQuery.length >= 2 && (
             <div className="mt-4 text-xs text-muted-foreground text-center">
-              {results.length} result{results.length !== 1 ? 's' : ''} found
+              {results.length} result{results.length !== 1 ? "s" : ""} found
             </div>
           )}
         </CardContent>

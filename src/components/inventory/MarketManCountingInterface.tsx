@@ -1,15 +1,22 @@
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import { recordInventoryCountScan } from '@/features/inventory/repositories/countsRepository';
-import type { InventoryCountLine } from '@/features/inventory/hooks/types';
-import { Barcode, Trash } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import { useFeatureFlag } from "@/hooks/useFeatureFlags";
+import { recordInventoryCountScan } from "@/features/inventory/repositories/countsRepository";
+import type { InventoryCountLine } from "@/features/inventory/hooks/types";
+import { Barcode, Trash } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface MarketManCountingInterfaceProps {
   countId: string;
@@ -29,9 +36,9 @@ export function MarketManCountingInterface({
   readOnly = false,
 }: MarketManCountingInterfaceProps) {
   const { toast } = useToast();
-  const barcodeEnabled = useFeatureFlag('inventory.barcodeScanning');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const barcodeEnabled = useFeatureFlag("inventory.barcodeScanning");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [showUnsavedOnly, setShowUnsavedOnly] = useState(false);
 
   const categories = useMemo(() => {
@@ -39,24 +46,35 @@ export function MarketManCountingInterface({
       new Set(
         lines
           .map((line) => line.item?.category)
-          .filter((category): category is string => Boolean(category))
-      )
+          .filter((category): category is string => Boolean(category)),
+      ),
     );
   }, [lines]);
 
   const filteredLines = useMemo(() => {
     return lines.filter((line) => {
-      const itemName = line.item?.name?.toLowerCase() || '';
-      const sku = line.item?.sku?.toLowerCase() || '';
-      const unitLabel = line.unit?.abbreviation?.toLowerCase() || line.unit?.name?.toLowerCase() || '';
+      const itemName = line.item?.name?.toLowerCase() || "";
+      const sku = line.item?.sku?.toLowerCase() || "";
+      const unitLabel =
+        line.unit?.abbreviation?.toLowerCase() ||
+        line.unit?.name?.toLowerCase() ||
+        "";
       const term = searchTerm.toLowerCase();
 
-      const matchesSearch = !term || itemName.includes(term) || sku.includes(term) || unitLabel.includes(term);
-      const matchesCategory = categoryFilter === 'all' || line.item?.category === categoryFilter;
+      const matchesSearch =
+        !term ||
+        itemName.includes(term) ||
+        sku.includes(term) ||
+        unitLabel.includes(term);
+      const matchesCategory =
+        categoryFilter === "all" || line.item?.category === categoryFilter;
 
       const currentQuantity = quantities[line.id];
       const originalQuantity = line.counted_quantity ?? 0;
-      const isDirty = currentQuantity !== undefined ? currentQuantity !== originalQuantity : false;
+      const isDirty =
+        currentQuantity !== undefined
+          ? currentQuantity !== originalQuantity
+          : false;
       const isSaved = Boolean(line.counted_at);
       const matchesUnsaved = !showUnsavedOnly || isDirty || !isSaved;
 
@@ -85,7 +103,9 @@ export function MarketManCountingInterface({
   };
 
   const handleBarcodeLog = async (line: InventoryCountLine) => {
-    const scannedCode = window.prompt('Scan or enter the barcode to log for this item:');
+    const scannedCode = window.prompt(
+      "Scan or enter the barcode to log for this item:",
+    );
     if (!scannedCode) {
       return;
     }
@@ -93,18 +113,18 @@ export function MarketManCountingInterface({
     try {
       await recordInventoryCountScan(countId, scannedCode, {
         itemId: line.item_id,
-        scanType: 'barcode',
+        scanType: "barcode",
       });
       toast({
-        title: 'Scan Logged',
-        description: 'Barcode has been recorded for this count.',
+        title: "Scan Logged",
+        description: "Barcode has been recorded for this count.",
       });
     } catch (error) {
-      logger.error('Error logging barcode scan:', { error, tags: ['error'] });
+      logger.error("Error logging barcode scan:", { error, tags: ["error"] });
       toast({
-        title: 'Scan Failed',
-        description: 'Unable to record the barcode scan.',
-        variant: 'destructive',
+        title: "Scan Failed",
+        description: "Unable to record the barcode scan.",
+        variant: "destructive",
       });
     }
   };
@@ -167,25 +187,34 @@ export function MarketManCountingInterface({
           </TableHeader>
           <TableBody>
             {filteredLines.map((line) => {
-              const currentQuantity = quantities[line.id] ?? line.counted_quantity ?? 0;
+              const currentQuantity =
+                quantities[line.id] ?? line.counted_quantity ?? 0;
               const expectedQuantity = line.expected_quantity ?? 0;
               const variance = currentQuantity - expectedQuantity;
-              const isDirty = quantities[line.id] !== undefined && currentQuantity !== (line.counted_quantity ?? 0);
+              const isDirty =
+                quantities[line.id] !== undefined &&
+                currentQuantity !== (line.counted_quantity ?? 0);
 
               return (
                 <TableRow key={line.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{line.item?.name ?? 'Unknown item'}</div>
+                      <div className="font-medium">
+                        {line.item?.name ?? "Unknown item"}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {line.item?.sku && <span>SKU: {line.item.sku}</span>}
-                        {line.item?.category && <span className="ml-2">Category: {line.item.category}</span>}
+                        {line.item?.category && (
+                          <span className="ml-2">
+                            Category: {line.item.category}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {line.unit?.abbreviation || line.unit?.name || 'Unit'}
+                      {line.unit?.abbreviation || line.unit?.name || "Unit"}
                     </div>
                     {line.conversion_factor && line.conversion_factor !== 1 && (
                       <div className="text-xs text-muted-foreground">
@@ -203,11 +232,15 @@ export function MarketManCountingInterface({
                       step="0.01"
                       value={currentQuantity}
                       disabled={readOnly}
-                      onChange={(event) => handleQuantityInput(line.id, event.target.value)}
+                      onChange={(event) =>
+                        handleQuantityInput(line.id, event.target.value)
+                      }
                       className="text-right"
                     />
                   </TableCell>
-                  <TableCell className={`text-right font-mono text-sm ${variance > 0 ? 'text-emerald-600' : variance < 0 ? 'text-destructive' : ''}`}>
+                  <TableCell
+                    className={`text-right font-mono text-sm ${variance > 0 ? "text-emerald-600" : variance < 0 ? "text-destructive" : ""}`}
+                  >
                     {variance.toFixed(2)}
                   </TableCell>
                   <TableCell>{renderStatusBadge(line, isDirty)}</TableCell>
@@ -242,7 +275,10 @@ export function MarketManCountingInterface({
             })}
             {filteredLines.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
+                <TableCell
+                  colSpan={7}
+                  className="py-6 text-center text-sm text-muted-foreground"
+                >
                   No count lines match your filters.
                 </TableCell>
               </TableRow>
@@ -256,7 +292,15 @@ export function MarketManCountingInterface({
           Total items: <strong>{lines.length}</strong>
         </span>
         <span>
-          Counted items: <strong>{lines.filter((line) => (quantities[line.id] ?? line.counted_quantity ?? 0) > 0).length}</strong>
+          Counted items:{" "}
+          <strong>
+            {
+              lines.filter(
+                (line) =>
+                  (quantities[line.id] ?? line.counted_quantity ?? 0) > 0,
+              ).length
+            }
+          </strong>
         </span>
         <span>
           Unsaved changes: <strong>{unsavedCount}</strong>

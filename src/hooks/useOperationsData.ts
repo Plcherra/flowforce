@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
-import { appEnv } from '@/lib/env';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import { appEnv } from "@/lib/env";
 
 export type OperationsInsightRecord = {
   id?: string;
@@ -16,7 +16,7 @@ export type OperationsInsightRecord = {
 };
 
 const normalizeCompanyId = (value: string | null | undefined) => {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return undefined;
   }
   const trimmed = value.trim();
@@ -35,17 +35,19 @@ export function useOperationsData() {
   }, [profile?.companyId, profile?.company_id]);
 
   const query = useQuery({
-    queryKey: ['kpi-insights', companyId],
+    queryKey: ["kpi-insights", companyId],
     enabled: Boolean(companyId),
+    throwOnError: false,
+    retry: 1,
     queryFn: async () => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
       const { data, error } = await supabase
-        .from('kpi_insights')
-        .select('*')
-        .eq('company_id', companyId);
+        .from("kpi_insights")
+        .select("*")
+        .eq("company_id", companyId);
 
       if (error) {
         throw error;

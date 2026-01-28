@@ -2,8 +2,22 @@
 -- Step 2: Fix function conflicts and optimize RLS policies (corrected)
 -- Handle existing policies by dropping them first
 
--- Drop the conflicting get_user_role function that doesn't have parameters
-DROP FUNCTION IF EXISTS public.get_user_role();
+-- Drop all variants of get_user_role first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'get_user_role'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 -- Ensure we have the correct version with parameters
 CREATE OR REPLACE FUNCTION public.get_user_role(user_uuid UUID DEFAULT auth.uid())

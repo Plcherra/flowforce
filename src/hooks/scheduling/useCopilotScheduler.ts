@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { PostgrestError } from '@supabase/supabase-js';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
-import ForecastAPI from '@/services/analytics/ForecastAPI';
-import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
-import { computeExistingHours, generateDraftSchedulePlan } from '@/hooks/scheduling/copilotSchedulerPlan';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { PostgrestError } from "@supabase/supabase-js";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import ForecastAPI from "@/services/analytics/ForecastAPI";
+import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
+import {
+  computeExistingHours,
+  generateDraftSchedulePlan,
+} from "@/hooks/scheduling/copilotSchedulerPlan";
 import type {
   CoverageGap,
   CoverageTemplatePlan,
@@ -13,21 +16,27 @@ import type {
   SchedulerEmployee,
   ScheduleSummary,
   SwapSuggestion,
-} from '@/hooks/scheduling/copilotSchedulerTypes';
+} from "@/hooks/scheduling/copilotSchedulerTypes";
 import {
   buildCoverageGapActions,
   buildSwapActions,
   mapCoverageTemplateRow,
   mapEmployeeRow,
-} from '@/hooks/scheduling/copilotSchedulerUtils';
+} from "@/hooks/scheduling/copilotSchedulerUtils";
 import {
   INITIAL_STATE,
   type CopilotSchedulerState,
   type UseCopilotSchedulerOptions,
-} from '@/hooks/scheduling/copilotSchedulerState';
-import { listCompanyEmployees, listCoverageTemplates } from '@/repositories/copilotRepository';
-import { insertSchedules, insertScheduleAssignments } from '@/repositories/schedulingRepository';
-import { supabase } from '@/integrations/supabase/client';
+} from "@/hooks/scheduling/copilotSchedulerState";
+import {
+  listCompanyEmployees,
+  listCoverageTemplates,
+} from "@/repositories/copilotRepository";
+import {
+  insertSchedules,
+  insertScheduleAssignments,
+} from "@/repositories/schedulingRepository";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useCopilotScheduler({
   weekStart,
@@ -63,7 +72,8 @@ export function useCopilotScheduler({
       const employees = employeeRows.map(mapEmployeeRow);
       const templates = templateRows
         .sort((a, b) => {
-          if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+          if (a.day_of_week !== b.day_of_week)
+            return a.day_of_week - b.day_of_week;
           return a.start_time.localeCompare(b.start_time);
         })
         .map(mapCoverageTemplateRow);
@@ -85,8 +95,18 @@ export function useCopilotScheduler({
         existingHoursByStore: existing.perStore,
       });
 
-      const coverageGapActions = buildCoverageGapActions(companyId, actorUserId, timeframe, plan.coverageGaps);
-      const swapActions = buildSwapActions(companyId, actorUserId, timeframe, plan.swapSuggestions);
+      const coverageGapActions = buildCoverageGapActions(
+        companyId,
+        actorUserId,
+        timeframe,
+        plan.coverageGaps,
+      );
+      const swapActions = buildSwapActions(
+        companyId,
+        actorUserId,
+        timeframe,
+        plan.swapSuggestions,
+      );
 
       setState({
         loading: false,
@@ -103,15 +123,26 @@ export function useCopilotScheduler({
       });
     } catch (error) {
       const message =
-        (error as PostgrestError)?.message ?? (error instanceof Error ? error.message : 'Failed to build schedule');
+        (error as PostgrestError)?.message ??
+        (error instanceof Error ? error.message : "Failed to build schedule");
       setState((prev) => ({ ...prev, loading: false, error: message }));
       toast({
-        title: 'Copilot scheduling failed',
+        title: "Copilot scheduling failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
-  }, [actorUserId, companyId, existingShifts, forecastApi, location, timeframe, toast, weekEnd, weekStart]);
+  }, [
+    actorUserId,
+    companyId,
+    existingShifts,
+    forecastApi,
+    location,
+    timeframe,
+    toast,
+    weekEnd,
+    weekStart,
+  ]);
 
   useEffect(() => {
     if (!autoGenerate || !companyId || !actorUserId) return;
@@ -122,17 +153,20 @@ export function useCopilotScheduler({
     async (actions: CopilotActionPayload[], label: string) => {
       if (!companyId || !actorUserId) return { success: false };
       if (actions.length === 0) {
-        toast({ title: `No ${label}`, description: 'There are no Copilot actions to queue.' });
+        toast({
+          title: `No ${label}`,
+          description: "There are no Copilot actions to queue.",
+        });
         return { success: true };
       }
 
-      const { error } = await supabase.functions.invoke('copilot-service', {
+      const { error } = await supabase.functions.invoke("copilot-service", {
         body: {
           companyId,
           actorUserId,
-          source: 'scheduler',
+          source: "scheduler",
           timeframe,
-          mode: 'enqueue',
+          mode: "enqueue",
           actions,
         },
       });
@@ -140,35 +174,39 @@ export function useCopilotScheduler({
       if (error) {
         toast({
           title: `Failed to queue ${label}`,
-          description: error.message ?? 'Unknown error while invoking Copilot service.',
-          variant: 'destructive',
+          description:
+            error.message ?? "Unknown error while invoking Copilot service.",
+          variant: "destructive",
         });
         return { success: false, error };
       }
 
       toast({
         title: `Queued ${label}`,
-        description: `${actions.length} action${actions.length === 1 ? '' : 's'} sent to Copilot dispatcher.`,
+        description: `${actions.length} action${actions.length === 1 ? "" : "s"} sent to Copilot dispatcher.`,
       });
       return { success: true };
     },
     [actorUserId, companyId, timeframe, toast],
   );
 
-  const enqueueCoverageGaps = useCallback(() => enqueueActions(state.coverageGapActions, 'coverage gaps'), [
-    enqueueActions,
-    state.coverageGapActions,
-  ]);
+  const enqueueCoverageGaps = useCallback(
+    () => enqueueActions(state.coverageGapActions, "coverage gaps"),
+    [enqueueActions, state.coverageGapActions],
+  );
 
-  const enqueueSwapSuggestions = useCallback(() => enqueueActions(state.swapActions, 'swap suggestions'), [
-    enqueueActions,
-    state.swapActions,
-  ]);
+  const enqueueSwapSuggestions = useCallback(
+    () => enqueueActions(state.swapActions, "swap suggestions"),
+    [enqueueActions, state.swapActions],
+  );
 
   const publishDraftSchedule = useCallback(async () => {
     if (!companyId || !actorUserId) return;
     if (state.draftShifts.length === 0) {
-      toast({ title: 'No draft shifts', description: 'Generate a draft schedule before publishing.' });
+      toast({
+        title: "No draft shifts",
+        description: "Generate a draft schedule before publishing.",
+      });
       return;
     }
 
@@ -180,11 +218,13 @@ export function useCopilotScheduler({
       location: shift.location,
       role: shift.role,
       required_headcount: 1,
-      status: 'draft',
+      status: "draft",
       is_published: false,
       company_id: companyId,
       created_by: actorUserId,
-      notes: shift.employeeName ? `Drafted for ${shift.employeeName}` : 'Open shift',
+      notes: shift.employeeName
+        ? `Drafted for ${shift.employeeName}`
+        : "Open shift",
       requirements: {
         copilot: {
           runId: state.lastGeneratedAt ?? `manual-${timestamp}`,
@@ -193,7 +233,7 @@ export function useCopilotScheduler({
           slotId: shift.dedupeKey,
           slotRole: shift.role,
           weekStart: weekStart.toISOString(),
-          status: 'draft',
+          status: "draft",
         },
       },
     }));
@@ -208,7 +248,7 @@ export function useCopilotScheduler({
           {
             schedule_id: row.id,
             user_id: shift.employeeId,
-            status: 'draft',
+            status: "draft",
             assigned_by: actorUserId,
             assigned_at: timestamp,
           },
@@ -220,14 +260,23 @@ export function useCopilotScheduler({
     }
 
     toast({
-      title: 'Draft schedule saved',
-      description: 'All Copilot-generated shifts have been stored as draft entries.',
+      title: "Draft schedule saved",
+      description:
+        "All Copilot-generated shifts have been stored as draft entries.",
     });
 
-    if (typeof onPublished === 'function') {
+    if (typeof onPublished === "function") {
       await onPublished();
     }
-  }, [actorUserId, companyId, onPublished, state.draftShifts, state.lastGeneratedAt, toast, weekStart]);
+  }, [
+    actorUserId,
+    companyId,
+    onPublished,
+    state.draftShifts,
+    state.lastGeneratedAt,
+    toast,
+    weekStart,
+  ]);
 
   return {
     ...state,
@@ -239,4 +288,4 @@ export function useCopilotScheduler({
 }
 
 export type UseCopilotSchedulerReturn = ReturnType<typeof useCopilotScheduler>;
-export type { UseCopilotSchedulerOptions } from '@/hooks/scheduling/copilotSchedulerState';
+export type { UseCopilotSchedulerOptions } from "@/hooks/scheduling/copilotSchedulerState";

@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 interface PasswordResetFormProps {
   onSubmit: (password: string) => Promise<void>;
@@ -13,23 +19,27 @@ interface PasswordResetFormProps {
   isLoading: boolean;
 }
 
-export default function PasswordResetForm({ onSubmit, onBack, isLoading }: PasswordResetFormProps) {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+export default function PasswordResetForm({
+  onSubmit,
+  onBack,
+  isLoading,
+}: PasswordResetFormProps) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       return;
     }
-    
+
     if (password.length < 6) {
       return;
     }
-    
+
     await onSubmit(password);
   };
 
@@ -38,9 +48,12 @@ export default function PasswordResetForm({ onSubmit, onBack, isLoading }: Passw
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Set New Password</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Set New Password
+        </CardTitle>
         <CardDescription className="text-center">
-          Enter your new password below. Make sure it's at least 6 characters long.
+          Enter your new password below. Make sure it's at least 6 characters
+          long.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -50,7 +63,7 @@ export default function PasswordResetForm({ onSubmit, onBack, isLoading }: Passw
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter new password"
@@ -74,13 +87,13 @@ export default function PasswordResetForm({ onSubmit, onBack, isLoading }: Passw
               </Button>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm New Password</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
@@ -107,15 +120,15 @@ export default function PasswordResetForm({ onSubmit, onBack, isLoading }: Passw
               <p className="text-sm text-red-600">Passwords do not match</p>
             )}
           </div>
-          
+
           <Button
             type="submit"
             className="w-full"
             disabled={isLoading || !isFormValid}
           >
-            {isLoading ? 'Updating...' : 'Update Password'}
+            {isLoading ? "Updating..." : "Update Password"}
           </Button>
-          
+
           <Button
             type="button"
             variant="ghost"

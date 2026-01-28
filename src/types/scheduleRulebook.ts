@@ -19,7 +19,7 @@ export interface RulebookStep {
   title: string;
   purpose: string;
   // Some steps are manual, others can be automated.
-  mode: 'manual' | 'assisted' | 'automated';
+  mode: "manual" | "assisted" | "automated";
   // Which roles are allowed to complete this step.
   allowedRoles: string[];
   // What information must be present before the step is considered satisfied.
@@ -35,7 +35,7 @@ export interface StepCriterion {
   recordId?: string; // UUID from Supabase
   label: string;
   description?: string;
-  evidenceType: 'checkbox' | 'numeric' | 'document' | 'approval' | 'external';
+  evidenceType: "checkbox" | "numeric" | "document" | "approval" | "external";
   // If evidenceType is numeric, define acceptable threshold.
   targetValue?: number;
   // Optional role required to approve/confirm the criterion.
@@ -68,8 +68,8 @@ export interface RulebookConstraint {
   label: string;
   description: string;
   // Constraint applies either globally or to specific steps/actions.
-  scope: 'global' | 'action';
+  scope: "global" | "action";
   actions?: string[];
   validatorKey: string;
-  severity: 'warning' | 'blocking';
+  severity: "warning" | "blocking";
 }

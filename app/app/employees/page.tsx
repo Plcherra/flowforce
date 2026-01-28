@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import EmployeesPage from '@/screens/Employees';
+import EmployeesPage from "@/screens/Employees";
 
 export default function Employees() {
   return <EmployeesPage />;

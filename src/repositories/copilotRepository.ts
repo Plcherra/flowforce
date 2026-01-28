@@ -1,8 +1,15 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const jsonSchema: z.ZodType<unknown> = z.lazy(() =>
-  z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.record(jsonSchema),
+    z.array(jsonSchema),
+  ]),
 );
 
 const coverageTemplateSchema = z
@@ -38,18 +45,29 @@ const employeeSchema = z
 export type CoverageTemplateRecord = z.infer<typeof coverageTemplateSchema>;
 export type EmployeeRecord = z.infer<typeof employeeSchema>;
 
-export async function listCoverageTemplates(companyId: string, locationId?: string): Promise<CoverageTemplateRecord[]> {
-  let query = supabase.from('coverage_templates').select('*').eq('company_id', companyId);
+export async function listCoverageTemplates(
+  companyId: string,
+  locationId?: string,
+): Promise<CoverageTemplateRecord[]> {
+  let query = supabase
+    .from("coverage_templates")
+    .select("*")
+    .eq("company_id", companyId);
   if (locationId) {
-    query = query.eq('location', locationId);
+    query = query.eq("location", locationId);
   }
   const { data, error } = await query;
   if (error) throw error;
   return z.array(coverageTemplateSchema).parse(data ?? []);
 }
 
-export async function listCompanyEmployees(companyId: string): Promise<EmployeeRecord[]> {
-  const { data, error } = await supabase.from('employees').select('*').eq('company_id', companyId);
+export async function listCompanyEmployees(
+  companyId: string,
+): Promise<EmployeeRecord[]> {
+  const { data, error } = await supabase
+    .from("employees")
+    .select("*")
+    .eq("company_id", companyId);
   if (error) throw error;
   return z.array(employeeSchema).parse(data ?? []);
 }
@@ -64,10 +82,17 @@ export async function listCoverageLocations(companyId: string): Promise<
   const templates = await listCoverageTemplates(companyId);
   const locationMap = new Map<string, { count: number; timezone?: string }>();
   templates.forEach((template) => {
-    const metadata = (template.metadata as { timezone?: string } | null) ?? null;
+    const metadata =
+      (template.metadata as { timezone?: string } | null) ?? null;
     const timezone =
-      typeof metadata?.timezone === 'string' && metadata.timezone.trim().length > 0 ? metadata.timezone : undefined;
-    const current = locationMap.get(template.location) ?? { count: 0, timezone };
+      typeof metadata?.timezone === "string" &&
+      metadata.timezone.trim().length > 0
+        ? metadata.timezone
+        : undefined;
+    const current = locationMap.get(template.location) ?? {
+      count: 0,
+      timezone,
+    };
     locationMap.set(template.location, {
       count: current.count + 1,
       timezone: current.timezone ?? timezone,

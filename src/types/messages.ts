@@ -1,6 +1,6 @@
-import type { Tables } from '@/integrations/supabase/public-types';
+import type { Tables } from "@/integrations/supabase/public-types";
 
-export type MessageChannel = Tables<'message_channels'> & {
+export type MessageChannel = Tables<"message_channels"> & {
   channel_members?: {
     user_id: string;
     role: string;
@@ -16,7 +16,7 @@ export type MessageChannel = Tables<'message_channels'> & {
   unread_count?: number;
 };
 
-export type Message = Tables<'messages'> & {
+export type Message = Tables<"messages"> & {
   sender_profile: {
     first_name: string;
     last_name: string;

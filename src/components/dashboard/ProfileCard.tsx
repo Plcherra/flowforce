@@ -1,11 +1,16 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { User } from 'lucide-react';
-import { useProfile } from '@/hooks/useProfile';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 
 interface ProfileCardProps {
   className?: string;
@@ -25,7 +30,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
         <CardHeader>
           <CardTitle className="flex items-center">
             <User className="mr-2 h-5 w-5" />
-            {t('dashboard.profile.title')}
+            {t("dashboard.profile.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -45,7 +50,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
         <CardHeader>
           <CardTitle className="flex items-center">
             <User className="mr-2 h-5 w-5" />
-            {t('dashboard.profile.title')}
+            {t("dashboard.profile.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -63,43 +68,56 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center text-lg">
           <User className="mr-2 h-5 w-5" />
-          {t('dashboard.profile.title')}
+          {t("dashboard.profile.title")}
         </CardTitle>
-        <CardDescription>
-          {t('dashboard.profile.description')}
-        </CardDescription>
+        <CardDescription>{t("dashboard.profile.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex justify-between">
-          <span className="text-sm font-medium">{t('dashboard.profile.position')}:</span>
+          <span className="text-sm font-medium">
+            {t("dashboard.profile.position")}:
+          </span>
           <span className="text-sm text-muted-foreground">{displayRole}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm font-medium">{t('dashboard.profile.employeeId')}:</span>
-          <span className="text-sm text-muted-foreground">{profile?.employee_id || 'N/A'}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm font-medium">{t('dashboard.profile.department')}:</span>
+          <span className="text-sm font-medium">
+            {t("dashboard.profile.employeeId")}:
+          </span>
           <span className="text-sm text-muted-foreground">
-            {profile?.department_id ? t('dashboard.profile.assigned') : t('dashboard.profile.unassigned')}
+            {profile?.employee_id || "N/A"}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm font-medium">{t('dashboard.profile.employmentStatus')}:</span>
-          <Badge 
-            variant={profile?.employment_status === 'active' ? 'default' : 'secondary'}
+          <span className="text-sm font-medium">
+            {t("dashboard.profile.department")}:
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {profile?.department_id
+              ? t("dashboard.profile.assigned")
+              : t("dashboard.profile.unassigned")}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm font-medium">
+            {t("dashboard.profile.employmentStatus")}:
+          </span>
+          <Badge
+            variant={
+              profile?.employment_status === "active" ? "default" : "secondary"
+            }
             className="text-xs"
           >
-            {profile?.employment_status || 'active'}
+            {profile?.employment_status || "active"}
           </Badge>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm font-medium">{t('dashboard.profile.hireDate')}:</span>
+          <span className="text-sm font-medium">
+            {t("dashboard.profile.hireDate")}:
+          </span>
           <span className="text-sm text-muted-foreground">
-            {profile?.hire_date 
-              ? new Date(profile.hire_date).toLocaleDateString() 
-              : t('dashboard.profile.notSet')
-            }
+            {profile?.hire_date
+              ? new Date(profile.hire_date).toLocaleDateString()
+              : t("dashboard.profile.notSet")}
           </span>
         </div>
       </CardContent>

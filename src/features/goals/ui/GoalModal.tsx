@@ -1,13 +1,23 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import type { Goal } from '@/hooks/useGoals';
-import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
-import { GoalTasksSelector, type TaskWeightMap } from '@/features/goals/ui/GoalTasksSelector';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import type { Goal } from "@/hooks/useGoals";
+import { parseRewardDetails } from "@/features/goals/utils/rewardUtils";
+import {
+  GoalTasksSelector,
+  type TaskWeightMap,
+} from "@/features/goals/ui/GoalTasksSelector";
 
 export interface GoalModalSubmitPayload {
   goalId?: string;
@@ -34,13 +44,21 @@ interface GoalModalProps {
 }
 
 const emptyForm = {
-  title: '',
-  description: '',
-  xpReward: '',
-  targetDate: '',
+  title: "",
+  description: "",
+  xpReward: "",
+  targetDate: "",
 };
 
-export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, onDelete }: GoalModalProps) {
+export function GoalModal({
+  open,
+  goal,
+  suggestion,
+  saving,
+  onClose,
+  onSubmit,
+  onDelete,
+}: GoalModalProps) {
   const [formValues, setFormValues] = useState(emptyForm);
   const [selectedTasks, setSelectedTasks] = useState<TaskWeightMap>({});
   const [error, setError] = useState<string | null>(null);
@@ -53,36 +71,39 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
     if (goal) {
       const rewardDetails = parseRewardDetails(goal.reward_details);
       setFormValues({
-        title: goal.title ?? '',
-        description: goal.description ?? '',
-        xpReward: rewardDetails.xp != null ? String(rewardDetails.xp) : '',
+        title: goal.title ?? "",
+        description: goal.description ?? "",
+        xpReward: rewardDetails.xp != null ? String(rewardDetails.xp) : "",
         targetDate: goal.target_completion_date
-          ? goal.target_completion_date.split('T')[0]
-          : '',
+          ? goal.target_completion_date.split("T")[0]
+          : "",
       });
 
-      const nextSelections = goal.tasks.reduce<TaskWeightMap>((acc, taskLink) => {
-        if (taskLink.task?.id) {
-          acc[taskLink.task.id] = taskLink.weight ?? 1;
-        }
-        return acc;
-      }, {});
+      const nextSelections = goal.tasks.reduce<TaskWeightMap>(
+        (acc, taskLink) => {
+          if (taskLink.task?.id) {
+            acc[taskLink.task.id] = taskLink.weight ?? 1;
+          }
+          return acc;
+        },
+        {},
+      );
       setSelectedTasks(nextSelections);
       setError(null);
       return;
     }
 
     setFormValues({
-      title: suggestion?.title ?? '',
-      description: suggestion?.description ?? '',
-      xpReward: '',
-      targetDate: '',
+      title: suggestion?.title ?? "",
+      description: suggestion?.description ?? "",
+      xpReward: "",
+      targetDate: "",
     });
     setSelectedTasks({});
     setError(null);
   }, [goal, open, suggestion]);
 
-  const modeLabel = goal ? 'Update goal' : 'Create goal';
+  const modeLabel = goal ? "Update goal" : "Create goal";
 
   const handleSelectionChange = (taskId: string, weight: number | null) => {
     setSelectedTasks((prev) => {
@@ -104,17 +125,17 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
       : null;
 
     if (Number.isNaN(xpReward ?? 0)) {
-      setError('XP reward must be a number.');
+      setError("XP reward must be a number.");
       return;
     }
 
     if (xpReward != null && xpReward < 0) {
-      setError('XP reward cannot be negative.');
+      setError("XP reward cannot be negative.");
       return;
     }
 
     if (!formValues.title.trim()) {
-      setError('A title is required.');
+      setError("A title is required.");
       return;
     }
 
@@ -145,8 +166,8 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
             <DialogTitle>{modeLabel}</DialogTitle>
             <DialogDescription>
               {goal
-                ? 'Update goal details, XP reward, and linked tasks.'
-                : 'Define a goal, assign XP reward, and attach tasks to track progress.'}
+                ? "Update goal details, XP reward, and linked tasks."
+                : "Define a goal, assign XP reward, and attach tasks to track progress."}
             </DialogDescription>
           </DialogHeader>
 
@@ -158,7 +179,10 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
                   id="goal-title"
                   value={formValues.title}
                   onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, title: event.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      title: event.target.value,
+                    }))
                   }
                   placeholder="Launch new training program"
                 />
@@ -170,7 +194,10 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
                   rows={6}
                   value={formValues.description}
                   onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, description: event.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      description: event.target.value,
+                    }))
                   }
                   placeholder="Describe the desired outcome and how it will be measured."
                 />
@@ -182,7 +209,10 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
                   type="date"
                   value={formValues.targetDate}
                   onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, targetDate: event.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      targetDate: event.target.value,
+                    }))
                   }
                 />
               </div>
@@ -194,7 +224,10 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
                   min={0}
                   value={formValues.xpReward}
                   onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, xpReward: event.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      xpReward: event.target.value,
+                    }))
                   }
                   placeholder="110"
                 />
@@ -226,11 +259,16 @@ export function GoalModal({ open, goal, suggestion, saving, onClose, onSubmit, o
               <span />
             )}
             <div className="flex flex-1 justify-end gap-2 sm:flex-initial">
-              <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={saving}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? 'Saving...' : goal ? 'Save changes' : 'Create goal'}
+                {saving ? "Saving..." : goal ? "Save changes" : "Create goal"}
               </Button>
             </div>
           </DialogFooter>

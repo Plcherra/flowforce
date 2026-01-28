@@ -12,7 +12,15 @@ export interface CustomPage {
 
 export interface CustomPageContent {
   id: string;
-  type: 'text' | 'form' | 'chart' | 'table' | 'image' | 'video' | 'calendar' | 'kanban';
+  type:
+    | "text"
+    | "form"
+    | "chart"
+    | "table"
+    | "image"
+    | "video"
+    | "calendar"
+    | "kanban";
   title: string;
   content: unknown; // Flexible content based on type (JSON)
   position: { x: number; y: number; width: number; height: number };
@@ -31,7 +39,15 @@ export interface CustomSection {
   name: string;
   description: string;
   icon: string;
-  category: 'communication' | 'operations' | 'hr' | 'analytics' | 'admin' | 'custom' | 'other' | string;
+  category:
+    | "communication"
+    | "operations"
+    | "hr"
+    | "analytics"
+    | "admin"
+    | "custom"
+    | "other"
+    | string;
   pages: CustomPage[];
   permissions: string[];
   isDefault: boolean;
@@ -60,10 +76,10 @@ export interface CustomBranding {
   secondaryColor: string;
   accentColor: string;
   fontFamily: string;
-  headerStyle: 'modern' | 'classic' | 'minimal' | 'bold';
-  sidebarStyle: 'expanded' | 'collapsed' | 'floating';
-  cardStyle: 'rounded' | 'sharp' | 'elevated';
-  backgroundPattern?: 'none' | 'dots' | 'lines' | 'gradient';
+  headerStyle: "modern" | "classic" | "minimal" | "bold";
+  sidebarStyle: "expanded" | "collapsed" | "floating";
+  cardStyle: "rounded" | "sharp" | "elevated";
+  backgroundPattern?: "none" | "dots" | "lines" | "gradient";
   customCSS?: string;
 }
 

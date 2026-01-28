@@ -1,5 +1,4 @@
-export * from './XPBar';
-export * from './BadgesGallery';
-export * from './RecognitionFeed';
-export * from './GamificationLeaderboard';
-
+export * from "./XPBar";
+export * from "./BadgesGallery";
+export * from "./RecognitionFeed";
+export * from "./GamificationLeaderboard";

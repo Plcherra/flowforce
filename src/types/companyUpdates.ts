@@ -1,11 +1,19 @@
-import type { BackgroundStyle, PublishingSettings, UpdateRecipient } from '@/types/updateTemplates';
-import type { Tables } from '@/integrations/supabase/public-types';
+import type {
+  BackgroundStyle,
+  PublishingSettings,
+  UpdateRecipient,
+} from "@/types/updateTemplates";
+import type { Tables } from "@/integrations/supabase/public-types";
 
-export type CompanyUpdateRow = Tables<'company_updates'>;
+export type CompanyUpdateRow = Tables<"company_updates">;
 
-export type CompanyUpdateType = 'announcement' | 'news' | 'event' | 'policy';
-export type CompanyUpdatePriority = 'high' | 'medium' | 'low';
-export type CompanyUpdateStatus = 'published' | 'draft' | 'scheduled' | 'archived';
+export type CompanyUpdateType = "announcement" | "news" | "event" | "policy";
+export type CompanyUpdatePriority = "high" | "medium" | "low";
+export type CompanyUpdateStatus =
+  | "published"
+  | "draft"
+  | "scheduled"
+  | "archived";
 
 export interface CompanyUpdate {
   id: string;

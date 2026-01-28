@@ -1,21 +1,33 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { Json, Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Json,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
-  z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.record(jsonSchema),
+    z.array(jsonSchema),
+  ]),
 );
 
-export type FormRow = Tables<'forms'>;
-export type FormFieldRow = Tables<'form_fields'>;
-export type FormSubmissionRow = Tables<'form_submissions'>;
+export type FormRow = Tables<"forms">;
+export type FormFieldRow = Tables<"form_fields">;
+export type FormSubmissionRow = Tables<"form_submissions">;
 
 const formRowSchema: z.ZodType<FormRow> = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().nullable(),
-  status: z.string() as z.ZodType<FormRow['status']>,
+  status: z.string() as z.ZodType<FormRow["status"]>,
   created_at: z.string(),
   updated_at: z.string(),
   created_by: z.string(),
@@ -31,7 +43,7 @@ const formFieldRowSchema: z.ZodType<FormFieldRow> = z.object({
   id: z.string(),
   form_id: z.string(),
   field_order: z.number(),
-  field_type: z.string() as z.ZodType<FormFieldRow['field_type']>,
+  field_type: z.string() as z.ZodType<FormFieldRow["field_type"]>,
   label: z.string(),
   description: z.string().nullable(),
   placeholder: z.string().nullable(),
@@ -114,31 +126,39 @@ const formSubmissionWithProfileSchema = formSubmissionRowSchema.extend({
     .optional(),
 });
 
-export type FormSubmissionWithProfile = z.infer<typeof formSubmissionWithProfileSchema>;
+export type FormSubmissionWithProfile = z.infer<
+  typeof formSubmissionWithProfileSchema
+>;
 
 async function ensureCompanyScope(companyId: string): Promise<void> {
   if (!companyId) {
-    throw new Error('Company context is required for forms operations.');
+    throw new Error("Company context is required for forms operations.");
   }
-  const { error } = await supabase.rpc('assert_company_membership', {
+  const { error } = await supabase.rpc("assert_company_membership", {
     p_company_id: companyId,
   });
   if (error) {
-    const lowerMessage = error.message?.toLowerCase() ?? '';
+    const lowerMessage = error.message?.toLowerCase() ?? "";
     const isMissingGuard =
-      lowerMessage.includes('assert_company_membership') || lowerMessage.includes('schema cache');
+      lowerMessage.includes("assert_company_membership") ||
+      lowerMessage.includes("schema cache");
     if (!isMissingGuard) {
       throw error;
     }
-    logger.warn('[formsRepository] Skipping company guard RPC because function is unavailable.', { tags: ['warning'] });
+    logger.warn(
+      "[formsRepository] Skipping company guard RPC because function is unavailable.",
+      { tags: ["warning"] },
+    );
   }
 }
 
-export async function fetchFormsWithRelations(companyId: string): Promise<FormQueryRow[]> {
+export async function fetchFormsWithRelations(
+  companyId: string,
+): Promise<FormQueryRow[]> {
   await ensureCompanyScope(companyId);
 
   const { data, error } = await supabase
-    .from('forms')
+    .from("forms")
     .select(
       `
         *,
@@ -148,10 +168,13 @@ export async function fetchFormsWithRelations(companyId: string): Promise<FormQu
         latest_submission:form_submissions(submitted_at)
       `,
     )
-    .eq('created_profile.company_id', companyId)
-    .order('created_at', { ascending: false })
-    .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
-    .limit(1, { foreignTable: 'latest_submission' });
+    .eq("created_profile.company_id", companyId)
+    .order("created_at", { ascending: false })
+    .order("submitted_at", {
+      foreignTable: "latest_submission",
+      ascending: false,
+    })
+    .limit(1, { foreignTable: "latest_submission" });
 
   if (error) {
     throw error;
@@ -160,10 +183,13 @@ export async function fetchFormsWithRelations(companyId: string): Promise<FormQu
   return z.array(formQueryRowSchema).parse(data ?? []);
 }
 
-export async function fetchFormWithRelations(companyId: string, formId: string): Promise<FormQueryRow | null> {
+export async function fetchFormWithRelations(
+  companyId: string,
+  formId: string,
+): Promise<FormQueryRow | null> {
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
-    .from('forms')
+    .from("forms")
     .select(
       `
         *,
@@ -173,10 +199,13 @@ export async function fetchFormWithRelations(companyId: string, formId: string):
         latest_submission:form_submissions(submitted_at)
       `,
     )
-    .eq('id', formId)
-    .eq('created_profile.company_id', companyId)
-    .order('submitted_at', { foreignTable: 'latest_submission', ascending: false })
-    .limit(1, { foreignTable: 'latest_submission' })
+    .eq("id", formId)
+    .eq("created_profile.company_id", companyId)
+    .order("submitted_at", {
+      foreignTable: "latest_submission",
+      ascending: false,
+    })
+    .limit(1, { foreignTable: "latest_submission" })
     .maybeSingle();
 
   if (error) {
@@ -186,9 +215,16 @@ export async function fetchFormWithRelations(companyId: string, formId: string):
   return data ? formQueryRowSchema.parse(data) : null;
 }
 
-export async function insertFormRow(companyId: string, payload: TablesInsert<'forms'>): Promise<FormRow> {
+export async function insertFormRow(
+  companyId: string,
+  payload: TablesInsert<"forms">,
+): Promise<FormRow> {
   await ensureCompanyScope(companyId);
-  const { data, error } = await supabase.from('forms').insert(payload).select('*').single();
+  const { data, error } = await supabase
+    .from("forms")
+    .insert(payload)
+    .select("*")
+    .single();
   if (error) {
     throw error;
   }
@@ -198,31 +234,42 @@ export async function insertFormRow(companyId: string, payload: TablesInsert<'fo
 export async function updateFormRow(
   companyId: string,
   formId: string,
-  updates: TablesUpdate<'forms'>,
+  updates: TablesUpdate<"forms">,
 ): Promise<FormRow | null> {
   await ensureCompanyScope(companyId);
-  const { data, error } = await supabase.from('forms').update(updates).eq('id', formId).select('*').maybeSingle();
+  const { data, error } = await supabase
+    .from("forms")
+    .update(updates)
+    .eq("id", formId)
+    .select("*")
+    .maybeSingle();
   if (error) {
     throw error;
   }
   return data ? formRowSchema.parse(data) : null;
 }
 
-export async function deleteFormRow(companyId: string, formId: string): Promise<void> {
+export async function deleteFormRow(
+  companyId: string,
+  formId: string,
+): Promise<void> {
   await ensureCompanyScope(companyId);
-  const { error } = await supabase.from('forms').delete().eq('id', formId);
+  const { error } = await supabase.from("forms").delete().eq("id", formId);
   if (error) {
     throw error;
   }
 }
 
-export async function fetchFormFields(companyId: string, formId: string): Promise<FormFieldRow[]> {
+export async function fetchFormFields(
+  companyId: string,
+  formId: string,
+): Promise<FormFieldRow[]> {
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
-    .from('form_fields')
-    .select('*')
-    .eq('form_id', formId)
-    .order('field_order', { ascending: true });
+    .from("form_fields")
+    .select("*")
+    .eq("form_id", formId)
+    .order("field_order", { ascending: true });
 
   if (error) {
     throw error;
@@ -231,7 +278,10 @@ export async function fetchFormFields(companyId: string, formId: string): Promis
   return z.array(formFieldRowSchema).parse(data ?? []);
 }
 
-type SaveableFormField = Omit<FormFieldRow, 'id' | 'form_id' | 'created_at' | 'updated_at'>;
+type SaveableFormField = Omit<
+  FormFieldRow,
+  "id" | "form_id" | "created_at" | "updated_at"
+>;
 
 export async function replaceFormFields(
   companyId: string,
@@ -239,7 +289,10 @@ export async function replaceFormFields(
   fields: SaveableFormField[],
 ): Promise<void> {
   await ensureCompanyScope(companyId);
-  const { error: deleteError } = await supabase.from('form_fields').delete().eq('form_id', formId);
+  const { error: deleteError } = await supabase
+    .from("form_fields")
+    .delete()
+    .eq("form_id", formId);
   if (deleteError) {
     throw deleteError;
   }
@@ -254,7 +307,7 @@ export async function replaceFormFields(
     field_order: index + 1,
   }));
 
-  const { error } = await supabase.from('form_fields').insert(fieldsToInsert);
+  const { error } = await supabase.from("form_fields").insert(fieldsToInsert);
   if (error) {
     throw error;
   }
@@ -266,15 +319,15 @@ export async function fetchFormSubmissions(
 ): Promise<FormSubmissionWithProfile[]> {
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
-    .from('form_submissions')
+    .from("form_submissions")
     .select(
       `
         *,
         submitted_profile:profiles(first_name, last_name)
       `,
     )
-    .eq('form_id', formId)
-    .order('submitted_at', { ascending: false });
+    .eq("form_id", formId)
+    .order("submitted_at", { ascending: false });
 
   if (error) {
     throw error;
@@ -285,10 +338,14 @@ export async function fetchFormSubmissions(
 
 export async function insertFormSubmission(
   companyId: string,
-  payload: TablesInsert<'form_submissions'>,
+  payload: TablesInsert<"form_submissions">,
 ): Promise<FormSubmissionRow> {
   await ensureCompanyScope(companyId);
-  const { data, error } = await supabase.from('form_submissions').insert(payload).select('*').single();
+  const { data, error } = await supabase
+    .from("form_submissions")
+    .insert(payload)
+    .select("*")
+    .single();
   if (error) {
     throw error;
   }

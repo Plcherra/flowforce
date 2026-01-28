@@ -1,9 +1,15 @@
-import { Search, Filter, Eye, EyeOff } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { InventoryCategory } from '@/features/inventory/hooks/types';
+import { Search, Filter, Eye, EyeOff } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { InventoryCategory } from "@/features/inventory/hooks/types";
 
 interface CountingFiltersProps {
   searchTerm: string;
@@ -28,7 +34,7 @@ export function CountingFilters({
   onSearchChange,
   onCategoryChange,
   onLocationChange,
-  onUncountedOnlyChange
+  onUncountedOnlyChange,
 }: CountingFiltersProps) {
   return (
     <Card>
@@ -37,7 +43,7 @@ export function CountingFilters({
           <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">Filters</span>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div className="relative">
@@ -87,8 +93,15 @@ export function CountingFilters({
               checked={showUncountedOnly}
               onCheckedChange={(checked) => onUncountedOnlyChange(!!checked)}
             />
-            <label htmlFor="uncounted-only" className="text-sm font-medium flex items-center gap-2">
-              {showUncountedOnly ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            <label
+              htmlFor="uncounted-only"
+              className="text-sm font-medium flex items-center gap-2"
+            >
+              {showUncountedOnly ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
               Uncounted Only
             </label>
           </div>

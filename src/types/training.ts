@@ -1,4 +1,8 @@
-export type TrainingStatus = 'not_started' | 'in_progress' | 'completed' | 'expired';
+export type TrainingStatus =
+  | "not_started"
+  | "in_progress"
+  | "completed"
+  | "expired";
 
 export interface TrainingModule {
   id: string;

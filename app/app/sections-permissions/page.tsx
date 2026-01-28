@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import SectionsPermissionsPage from '@/screens/SectionsPermissions';
+import SectionsPermissionsPage from "@/screens/SectionsPermissions";
 
 export default function SectionsPermissions() {
   return <SectionsPermissionsPage />;

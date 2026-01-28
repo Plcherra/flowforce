@@ -1,3 +1,3 @@
-export async function runTimeOffRiskDetector(orgId: string) {
+export async function runTimeOffRiskDetector(_orgId: string) {
   return [];
 }

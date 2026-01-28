@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 
 interface CourseWizardFooterProps {
   currentStep: number;
@@ -24,12 +24,21 @@ export function CourseWizardFooter({
 
   return (
     <div className="flex items-center justify-between border-t bg-muted/40 px-6 py-4">
-      <Button type="button" variant="ghost" onClick={onBack} disabled={currentStep === 0 || submitting}>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onBack}
+        disabled={currentStep === 0 || submitting}
+      >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
       {isLastStep ? (
-        <Button type="button" onClick={onSubmit} disabled={!canContinue || submitting}>
+        <Button
+          type="button"
+          onClick={onSubmit}
+          disabled={!canContinue || submitting}
+        >
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -43,7 +52,11 @@ export function CourseWizardFooter({
           )}
         </Button>
       ) : (
-        <Button type="button" onClick={onNext} disabled={!canContinue || submitting}>
+        <Button
+          type="button"
+          onClick={onNext}
+          disabled={!canContinue || submitting}
+        >
           Next
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

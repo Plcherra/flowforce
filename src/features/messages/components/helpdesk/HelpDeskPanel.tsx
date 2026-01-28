@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { LifeBuoy, RefreshCw, AlertCircle, X, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useTickets } from '@/hooks/useTickets';
-import { CreateTicketDialog } from '@/features/helpdesk/components/CreateTicketDialog';
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { LifeBuoy, RefreshCw, AlertCircle, X, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTickets } from "@/hooks/useTickets";
+import { CreateTicketDialog } from "@/features/helpdesk/components/CreateTicketDialog";
 
 interface HelpDeskPanelProps {
   companyId?: string | null;
@@ -16,20 +16,24 @@ interface HelpDeskPanelProps {
 }
 
 const STATUS_TEXT: Record<string, string> = {
-  open: 'Open',
-  in_progress: 'In progress',
-  resolved: 'Resolved',
-  closed: 'Closed',
+  open: "Open",
+  in_progress: "In progress",
+  resolved: "Resolved",
+  closed: "Closed",
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'text-muted-foreground',
-  medium: 'text-foreground',
-  high: 'text-amber-600',
-  urgent: 'text-red-600',
+  low: "text-muted-foreground",
+  medium: "text-foreground",
+  high: "text-amber-600",
+  urgent: "text-red-600",
 };
 
-export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDeskPanelProps) {
+export function HelpDeskPanel({
+  companyId,
+  organizationName,
+  onClose,
+}: HelpDeskPanelProps) {
   const hasCompany = Boolean(companyId);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { tickets, loading, error, refresh, usingFallback } = useTickets({
@@ -39,7 +43,10 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
 
   const topTickets = useMemo(() => tickets.slice(0, 4), [tickets]);
   const openCount = useMemo(
-    () => tickets.filter((ticket) => ticket.status === 'open' || ticket.status === 'in_progress').length,
+    () =>
+      tickets.filter(
+        (ticket) => ticket.status === "open" || ticket.status === "in_progress",
+      ).length,
     [tickets],
   );
 
@@ -53,13 +60,20 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
           </div>
           <h3 className="mt-2 text-lg font-semibold">Support flow</h3>
           <p className="text-sm text-muted-foreground">
-            {organizationName ? `${organizationName} help queue` : 'Route internal requests alongside chat.'}
+            {organizationName
+              ? `${organizationName} help queue`
+              : "Route internal requests alongside chat."}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline">{openCount} active</Badge>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close help desk panel">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              aria-label="Close help desk panel"
+            >
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -83,7 +97,7 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
           onClick={() => void refresh()}
           disabled={loading || !hasCompany}
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>
         {usingFallback && (
@@ -108,7 +122,10 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
         ) : loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={`helpdesk-skeleton-${index}`} className="h-20 w-full rounded-2xl" />
+              <Skeleton
+                key={`helpdesk-skeleton-${index}`}
+                className="h-20 w-full rounded-2xl"
+              />
             ))}
           </div>
         ) : topTickets.length === 0 ? (
@@ -125,7 +142,7 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
                   className="rounded-2xl border border-border/70 bg-background/80 p-3 cursor-pointer hover:bg-background/90 transition-colors"
                   onClick={() => {
                     // Could open ticket details dialog here if needed
-                    window.location.href = '/app/help-desk';
+                    window.location.href = "/app/help-desk";
                   }}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -135,15 +152,29 @@ export function HelpDeskPanel({ companyId, organizationName, onClose }: HelpDesk
                     </Badge>
                   </div>
                   {ticket.description && (
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{ticket.description}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                      {ticket.description}
+                    </p>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
-                    <span className={PRIORITY_COLORS[ticket.priority] ?? 'text-muted-foreground'}>
+                    <span
+                      className={
+                        PRIORITY_COLORS[ticket.priority] ??
+                        "text-muted-foreground"
+                      }
+                    >
                       Priority: {ticket.priority}
                     </span>
-                    <span className="text-muted-foreground">Updated {new Date(ticket.updatedAt ?? ticket.createdAt).toLocaleDateString()}</span>
                     <span className="text-muted-foreground">
-                      {ticket.category ? `Category: ${ticket.category}` : 'General'}
+                      Updated{" "}
+                      {new Date(
+                        ticket.updatedAt ?? ticket.createdAt,
+                      ).toLocaleDateString()}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {ticket.category
+                        ? `Category: ${ticket.category}`
+                        : "General"}
                     </span>
                   </div>
                 </motion.div>

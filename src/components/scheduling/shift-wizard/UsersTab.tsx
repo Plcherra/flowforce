@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Plus, X } from 'lucide-react';
-import { getReplacementCandidates } from '@/services/scheduling/replacement';
-import type { Employee } from '@/hooks/useEmployees';
-import type { ShiftWizardFormData } from './types';
+import { useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X } from "lucide-react";
+import { getReplacementCandidates } from "@/features/scheduling/services/replacement";
+import type { Employee } from "@/hooks/useEmployees";
+import type { ShiftWizardFormData } from "./types";
 
 type UsersTabProps = {
   employees: Employee[];
@@ -28,12 +28,17 @@ export function UsersTab({
   setFormData,
   isUserAvailableForWindow,
 }: UsersTabProps) {
-  const [userViews, setUserViews] = useState<{ time: boolean; qualified: boolean }>({ time: true, qualified: false });
+  const [userViews, setUserViews] = useState<{
+    time: boolean;
+    qualified: boolean;
+  }>({ time: true, qualified: false });
 
   const filteredCandidates = () => {
     let list = employees.slice();
     if (userViews.qualified) {
-      list = formData.job_position_id ? getEmployeesByPosition(formData.job_position_id) : [];
+      list = formData.job_position_id
+        ? getEmployeesByPosition(formData.job_position_id)
+        : [];
     }
     if (userViews.time) {
       list = list.filter((emp) => isUserAvailableForWindow(emp.id));
@@ -56,7 +61,7 @@ export function UsersTab({
         <div className="inline-flex gap-1">
           <Button
             type="button"
-            variant={userViews.time ? 'default' : 'ghost'}
+            variant={userViews.time ? "default" : "ghost"}
             size="sm"
             className="h-8"
             onClick={() => setUserViews((v) => ({ ...v, time: !v.time }))}
@@ -65,10 +70,12 @@ export function UsersTab({
           </Button>
           <Button
             type="button"
-            variant={userViews.qualified ? 'default' : 'ghost'}
+            variant={userViews.qualified ? "default" : "ghost"}
             size="sm"
             className="h-8"
-            onClick={() => setUserViews((v) => ({ ...v, qualified: !v.qualified }))}
+            onClick={() =>
+              setUserViews((v) => ({ ...v, qualified: !v.qualified }))
+            }
           >
             Qualified
           </Button>
@@ -82,37 +89,60 @@ export function UsersTab({
             <CardHeader>
               <CardTitle className="text-base flex items-center justify-between">
                 <span>Users</span>
-                {employeesLoading && <span className="text-sm text-muted-foreground">Loading...</span>}
+                {employeesLoading && (
+                  <span className="text-sm text-muted-foreground">
+                    Loading...
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="max-h-40 overflow-y-auto">
               {!employeesLoading && (
                 <div className="space-y-2">
                   {filteredCandidates().map((employee) => (
-                    <div key={employee.id} className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50">
+                    <div
+                      key={employee.id}
+                      className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50"
+                    >
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-primary">
-                            {employee.first_name?.[0] ?? '?'}
-                            {employee.last_name?.[0] ?? ''}
+                            {employee.first_name?.[0] ?? "?"}
+                            {employee.last_name?.[0] ?? ""}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-sm">{getEmployeeFullName(employee)}</p>
-                          <p className="text-xs text-muted-foreground">{employee.position?.name || employee.role}</p>
+                          <p className="font-medium text-sm">
+                            {getEmployeeFullName(employee)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {employee.position?.name || employee.role}
+                          </p>
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                             <Badge
-                              variant={employee.reliability && employee.reliability >= 70 ? 'default' : 'outline'}
+                              variant={
+                                employee.reliability &&
+                                employee.reliability >= 70
+                                  ? "default"
+                                  : "outline"
+                              }
                               className="text-[10px]"
                             >
-                              Reliability {(employee.reliability ?? 0).toFixed(0)}%
+                              Reliability{" "}
+                              {(employee.reliability ?? 0).toFixed(0)}%
                             </Badge>
-                            <Badge variant="secondary" className="text-[10px]">Level {employee.skillLevel ?? 1}</Badge>
+                            <Badge variant="secondary" className="text-[10px]">
+                              Level {employee.skillLevel ?? 1}
+                            </Badge>
                           </div>
                           {employee.badges && employee.badges.length > 0 && (
                             <div className="mt-1 flex flex-wrap gap-1">
                               {employee.badges.slice(0, 3).map((badgeCode) => (
-                                <Badge key={badgeCode} variant="outline" className="text-[10px]">
+                                <Badge
+                                  key={badgeCode}
+                                  variant="outline"
+                                  className="text-[10px]"
+                                >
                                   {badgeCode}
                                 </Badge>
                               ))}
@@ -127,7 +157,10 @@ export function UsersTab({
                         onClick={() => {
                           setFormData((prev) => ({
                             ...prev,
-                            assigned_users: [...prev.assigned_users, employee.id],
+                            assigned_users: [
+                              ...prev.assigned_users,
+                              employee.id,
+                            ],
                           }));
                         }}
                       >
@@ -138,10 +171,10 @@ export function UsersTab({
                   {noCandidates && (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       {userViews.qualified && !formData.job_position_id
-                        ? 'Pick a position to see qualified users'
+                        ? "Pick a position to see qualified users"
                         : userViews.time
-                        ? 'No available users for this time window'
-                        : 'No users found'}
+                          ? "No available users for this time window"
+                          : "No users found"}
                     </p>
                   )}
                 </div>
@@ -152,7 +185,9 @@ export function UsersTab({
           {formData.assigned_users.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Selected Users ({formData.assigned_users.length})</CardTitle>
+                <CardTitle className="text-base">
+                  Selected Users ({formData.assigned_users.length})
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -160,7 +195,10 @@ export function UsersTab({
                     const employee = employees.find((emp) => emp.id === userId);
                     if (!employee) return null;
                     return (
-                      <div key={userId} className="flex items-center justify-between p-2 border rounded-lg bg-blue-50">
+                      <div
+                        key={userId}
+                        className="flex items-center justify-between p-2 border rounded-lg bg-blue-50"
+                      >
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-700">
@@ -169,8 +207,12 @@ export function UsersTab({
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-sm">{getEmployeeFullName(employee)}</p>
-                            <p className="text-xs text-muted-foreground">{employee.position?.name || employee.role}</p>
+                            <p className="font-medium text-sm">
+                              {getEmployeeFullName(employee)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {employee.position?.name || employee.role}
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -180,7 +222,9 @@ export function UsersTab({
                           onClick={() =>
                             setFormData((prev) => ({
                               ...prev,
-                              assigned_users: prev.assigned_users.filter((id) => id !== userId),
+                              assigned_users: prev.assigned_users.filter(
+                                (id) => id !== userId,
+                              ),
                             }))
                           }
                         >

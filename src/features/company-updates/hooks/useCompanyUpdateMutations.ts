@@ -1,18 +1,24 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { companyUpdatesRepository, type CompanyUpdateRow, type CommentRow } from '@/repositories/companyUpdatesRepository';
-import type { CreateCompanyUpdateInput } from '@/types/companyUpdates';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  companyUpdatesRepository,
+  type CompanyUpdateRow,
+  type CommentRow,
+} from "@/repositories/companyUpdatesRepository";
+import type { CreateCompanyUpdateInput } from "@/types/companyUpdates";
 
-const UPDATES_QUERY_KEY = 'company-updates';
-const COMMENTS_QUERY_KEY = 'company-update-comments';
+const UPDATES_QUERY_KEY = "company-updates";
+const COMMENTS_QUERY_KEY = "company-update-comments";
 
 type CachedUpdateRow = CompanyUpdateRow & {
   viewerHasLiked?: boolean;
   viewerHasViewed?: boolean;
 };
 
-type UpdatesQueryData = { records: CachedUpdateRow[]; total: number } | undefined;
+type UpdatesQueryData =
+  | { records: CachedUpdateRow[]; total: number }
+  | undefined;
 
 type ToggleLikeVariables = {
   updateId: string;
@@ -28,7 +34,7 @@ type CommentVariables = {
   content: string;
 };
 
-const clone = <T,>(value: T): T => structuredClone(value);
+const clone = <T>(value: T): T => structuredClone(value);
 
 export function useCompanyUpdateMutations() {
   const { toast } = useToast();
@@ -41,8 +47,12 @@ export function useCompanyUpdateMutations() {
     queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY] });
   };
 
-  const applyUpdateToQueries = (updater: (data: UpdatesQueryData) => UpdatesQueryData) => {
-    const queries = queryClient.getQueriesData<UpdatesQueryData>({ queryKey: [UPDATES_QUERY_KEY] });
+  const applyUpdateToQueries = (
+    updater: (data: UpdatesQueryData) => UpdatesQueryData,
+  ) => {
+    const queries = queryClient.getQueriesData<UpdatesQueryData>({
+      queryKey: [UPDATES_QUERY_KEY],
+    });
     queries.forEach(([key, data]) => {
       queryClient.setQueryData(key, updater(clone(data)));
     });
@@ -50,56 +60,95 @@ export function useCompanyUpdateMutations() {
 
   const createUpdateMutation = useMutation({
     mutationFn: async (input: CreateCompanyUpdateInput) => {
-      if (!companyId) throw new Error('Missing company context.');
-      await companyUpdatesRepository.createUpdate({ companyId, payload: input });
+      if (!companyId) throw new Error("Missing company context.");
+      await companyUpdatesRepository.createUpdate({
+        companyId,
+        payload: input,
+      });
     },
     onSuccess: () => {
       invalidateUpdates();
-      toast({ title: 'Update created', description: 'Your announcement is now live.' });
+      toast({
+        title: "Update created",
+        description: "Your announcement is now live.",
+      });
     },
     onError: (error) => {
-      toast({ title: 'Unable to create update', description: error instanceof Error ? error.message : 'Please try again.', variant: 'destructive' });
+      toast({
+        title: "Unable to create update",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
   const archiveMutation = useMutation({
     mutationFn: async (updateId: string) => {
-      if (!companyId) throw new Error('Missing company context.');
-      await companyUpdatesRepository.updateStatus({ companyId, updateId, status: 'archived' });
+      if (!companyId) throw new Error("Missing company context.");
+      await companyUpdatesRepository.updateStatus({
+        companyId,
+        updateId,
+        status: "archived",
+      });
     },
     onSuccess: invalidateUpdates,
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ updateId, payload }: { updateId: string; payload: Partial<Record<string, unknown>> }) => {
-      if (!companyId) throw new Error('Missing company context.');
-      await companyUpdatesRepository.updateUpdate({ companyId, updateId, payload });
+    mutationFn: async ({
+      updateId,
+      payload,
+    }: {
+      updateId: string;
+      payload: Partial<Record<string, unknown>>;
+    }) => {
+      if (!companyId) throw new Error("Missing company context.");
+      await companyUpdatesRepository.updateUpdate({
+        companyId,
+        updateId,
+        payload,
+      });
     },
     onSuccess: () => {
       invalidateUpdates();
-      toast({ title: 'Update updated', description: 'Your changes have been saved.' });
+      toast({
+        title: "Update updated",
+        description: "Your changes have been saved.",
+      });
     },
     onError: (error) => {
       toast({
-        title: 'Unable to update',
-        description: error instanceof Error ? error.message : 'Please try again.',
-        variant: 'destructive',
+        title: "Unable to update",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
       });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (updateId: string) => {
-      if (!companyId) throw new Error('Missing company context.');
+      if (!companyId) throw new Error("Missing company context.");
       await companyUpdatesRepository.deleteUpdate({ companyId, updateId });
     },
     onSuccess: invalidateUpdates,
   });
 
   const togglePinMutation = useMutation({
-    mutationFn: async ({ updateId, isPinned }: { updateId: string; isPinned: boolean }) => {
-      if (!companyId) throw new Error('Missing company context.');
-      await companyUpdatesRepository.togglePin({ companyId, updateId, isPinned });
+    mutationFn: async ({
+      updateId,
+      isPinned,
+    }: {
+      updateId: string;
+      isPinned: boolean;
+    }) => {
+      if (!companyId) throw new Error("Missing company context.");
+      await companyUpdatesRepository.togglePin({
+        companyId,
+        updateId,
+        isPinned,
+      });
     },
     onMutate: async ({ updateId, isPinned }) => {
       applyUpdateToQueries((data) => {
@@ -107,7 +156,9 @@ export function useCompanyUpdateMutations() {
         return {
           ...data,
           records: data.records.map((record) =>
-            record.id === updateId ? { ...record, is_pinned: isPinned } : record,
+            record.id === updateId
+              ? { ...record, is_pinned: isPinned }
+              : record,
           ),
         };
       });
@@ -119,20 +170,20 @@ export function useCompanyUpdateMutations() {
 
   const likeMutation = useMutation({
     mutationFn: async ({ updateId, currentlyLiked }: ToggleLikeVariables) => {
-      if (!companyId || !profile?.id) throw new Error('Missing user context.');
+      if (!companyId || !profile?.id) throw new Error("Missing user context.");
       if (currentlyLiked) {
         await companyUpdatesRepository.deleteReaction({
           companyId,
           updateId,
           userId: profile.id,
-          reactionType: 'like',
+          reactionType: "like",
         });
       } else {
         await companyUpdatesRepository.upsertReaction({
           companyId,
           updateId,
           userId: profile.id,
-          reactionType: 'like',
+          reactionType: "like",
         });
       }
     },
@@ -166,7 +217,7 @@ export function useCompanyUpdateMutations() {
         companyId,
         updateId,
         userId: profile.id,
-        reactionType: 'view',
+        reactionType: "view",
       });
     },
     onMutate: async ({ updateId }) => {
@@ -179,7 +230,9 @@ export function useCompanyUpdateMutations() {
               ? {
                   ...record,
                   viewerHasViewed: true,
-                  views_count: (record.views_count ?? 0) + (record.viewerHasViewed ? 0 : 1),
+                  views_count:
+                    (record.views_count ?? 0) +
+                    (record.viewerHasViewed ? 0 : 1),
                 }
               : record,
           ),
@@ -190,7 +243,7 @@ export function useCompanyUpdateMutations() {
 
   const commentMutation = useMutation({
     mutationFn: async ({ updateId, content }: CommentVariables) => {
-      if (!companyId || !profile?.id) throw new Error('Missing user context.');
+      if (!companyId || !profile?.id) throw new Error("Missing user context.");
       await companyUpdatesRepository.createComment({
         companyId,
         updateId,
@@ -204,21 +257,23 @@ export function useCompanyUpdateMutations() {
       const optimisticComment: CommentRow = {
         id: tempId,
         update_id: updateId,
-        company_id: companyId ?? '',
-        author_id: profile?.id ?? 'me',
+        company_id: companyId ?? "",
+        author_id: profile?.id ?? "me",
         content,
         likes_count: 0,
         created_at: now,
         updated_at: now,
         author: {
-          id: profile?.id ?? 'me',
-          first_name: profile?.first_name ?? profile?.firstName ?? '',
-          last_name: profile?.last_name ?? profile?.lastName ?? '',
+          id: profile?.id ?? "me",
+          first_name: profile?.first_name ?? profile?.firstName ?? "",
+          last_name: profile?.last_name ?? profile?.lastName ?? "",
           avatar_url: profile?.avatar_url ?? null,
         },
       };
 
-      const queries = queryClient.getQueriesData<CommentRow[]>({ queryKey: [COMMENTS_QUERY_KEY] });
+      const queries = queryClient.getQueriesData<CommentRow[]>({
+        queryKey: [COMMENTS_QUERY_KEY],
+      });
       queries.forEach(([key, data]) => {
         if (!data) {
           queryClient.setQueryData(key, [optimisticComment]);
@@ -250,13 +305,13 @@ export function useCompanyUpdateMutations() {
 
   const ensureCompany = () => {
     if (!companyId) {
-      throw new Error('Missing company context.');
+      throw new Error("Missing company context.");
     }
   };
 
   const ensureUser = () => {
     if (!companyId || !profile?.id) {
-      throw new Error('Missing user context.');
+      throw new Error("Missing user context.");
     }
   };
 
@@ -265,7 +320,10 @@ export function useCompanyUpdateMutations() {
       ensureCompany();
       return createUpdateMutation.mutateAsync(input);
     },
-    updateUpdate: (updateId: string, payload: Partial<Record<string, unknown>>) => {
+    updateUpdate: (
+      updateId: string,
+      payload: Partial<Record<string, unknown>>,
+    ) => {
       ensureCompany();
       return updateMutation.mutateAsync({ updateId, payload });
     },
@@ -277,7 +335,13 @@ export function useCompanyUpdateMutations() {
       ensureCompany();
       return deleteMutation.mutateAsync(updateId);
     },
-    togglePin: ({ updateId, isPinned }: { updateId: string; isPinned: boolean }) => {
+    togglePin: ({
+      updateId,
+      isPinned,
+    }: {
+      updateId: string;
+      isPinned: boolean;
+    }) => {
       ensureCompany();
       return togglePinMutation.mutateAsync({ updateId, isPinned });
     },

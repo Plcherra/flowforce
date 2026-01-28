@@ -1,10 +1,14 @@
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Layers, Plus } from 'lucide-react';
-import { CustomSection } from '@/types/templates';
-import SectionCard from './SectionCard';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Layers, Plus } from "lucide-react";
+import { CustomSection } from "@/types/templates";
+import SectionCard from "./SectionCard";
 
 interface SectionCategoryGroupProps {
   category: string;
@@ -33,25 +37,35 @@ export default function SectionCategoryGroup({
   onDeleteSection,
   onAddSection,
   onAddFromTemplate,
-  canManageSections = false
+  canManageSections = false,
 }: SectionCategoryGroupProps) {
   const getCategoryTitle = (category: string) => {
     switch (category) {
-      case 'core': return 'Core Features';
-      case 'industry': return 'Industry-Specific';
-      case 'custom': return 'Custom Sections';
-      case 'operations': return 'Operations';
-      default: return 'Other';
+      case "core":
+        return "Core Features";
+      case "industry":
+        return "Industry-Specific";
+      case "custom":
+        return "Custom Sections";
+      case "operations":
+        return "Operations";
+      default:
+        return "Other";
     }
   };
 
   const getCategoryDescription = (category: string) => {
     switch (category) {
-      case 'core': return 'Essential features available to all businesses';
-      case 'industry': return 'Specialized features for your industry';
-      case 'custom': return 'Custom sections created for your business';
-      case 'operations': return 'Business operations and workflow management';
-      default: return '';
+      case "core":
+        return "Essential features available to all businesses";
+      case "industry":
+        return "Specialized features for your industry";
+      case "custom":
+        return "Custom sections created for your business";
+      case "operations":
+        return "Business operations and workflow management";
+      default:
+        return "";
     }
   };
 
@@ -84,8 +98,16 @@ export default function SectionCategoryGroup({
               isOnboarding={isOnboarding}
               onToggle={(enabled) => onSectionToggle(section.id, enabled)}
               getSectionBadgeColor={getSectionBadgeColor}
-              onEdit={section.isCustom && onEditSection ? () => onEditSection(section) : undefined}
-              onDelete={section.isCustom && onDeleteSection ? () => onDeleteSection(section.id) : undefined}
+              onEdit={
+                section.isCustom && onEditSection
+                  ? () => onEditSection(section)
+                  : undefined
+              }
+              onDelete={
+                section.isCustom && onDeleteSection
+                  ? () => onDeleteSection(section.id)
+                  : undefined
+              }
             />
           );
         })}

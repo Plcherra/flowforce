@@ -1,13 +1,16 @@
-import type { Tables } from '@/integrations/supabase/public-types';
+import type { Tables } from "@/integrations/supabase/public-types";
 
-export type ScheduleRow = Tables<'schedules'>;
-export type ScheduleAssignmentRow = Tables<'schedule_assignments'>;
-export type TimeOffRequestRow = Tables<'time_off_requests'>;
-export type UnavailabilityRow = Tables<'user_unavailability'>;
-export type VendorEventRow = Tables<'vendor_event'>;
-export type ProfileRow = Tables<'profiles'>;
+export type ScheduleRow = Tables<"schedules">;
+export type ScheduleAssignmentRow = Tables<"schedule_assignments">;
+export type TimeOffRequestRow = Tables<"time_off_requests">;
+export type UnavailabilityRow = Tables<"user_unavailability">;
+export type VendorEventRow = Tables<"vendor_event">;
+export type ProfileRow = Tables<"profiles">;
 
-export type ProfileSummary = Pick<ProfileRow, 'id' | 'first_name' | 'last_name' | 'email' | 'avatar_url'>;
+export type ProfileSummary = Pick<
+  ProfileRow,
+  "id" | "first_name" | "last_name" | "email" | "avatar_url"
+>;
 
 export interface SchedulingQueryParams {
   companyId?: string | null;

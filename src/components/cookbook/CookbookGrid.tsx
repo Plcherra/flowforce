@@ -1,9 +1,15 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Heart, HeartOff, Leaf, Scissors, FileDown } from 'lucide-react';
-import type { CookbookRecipe } from '@/services/cookbook';
+import { useMemo } from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Heart, HeartOff, Leaf, Scissors, FileDown } from "lucide-react";
+import type { CookbookRecipe } from "@/services/cookbook";
 
 interface CookbookGridProps {
   recipes: CookbookRecipe[];
@@ -29,18 +35,21 @@ export function CookbookGrid({
         const costB = b.costPerUnit ?? 0;
         return costA - costB;
       }),
-    [recipes]
+    [recipes],
   );
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading recipes…</div>;
+    return (
+      <div className="text-sm text-muted-foreground">Loading recipes…</div>
+    );
   }
 
   if (!sortedRecipes.length) {
     return (
       <Card>
         <CardContent className="p-6 text-center text-sm text-muted-foreground">
-          No recipes linked yet. Use “New Recipe” to connect Items &amp; Setup ingredients.
+          No recipes linked yet. Use “New Recipe” to connect Items &amp; Setup
+          ingredients.
         </CardContent>
       </Card>
     );
@@ -50,7 +59,8 @@ export function CookbookGrid({
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {sortedRecipes.map((recipe) => {
         const isFavorite = favoriteIds.includes(recipe.item.id);
-        const primaryUnit = recipe.yieldUnit?.abbreviation || recipe.yieldUnit?.name || 'unit';
+        const primaryUnit =
+          recipe.yieldUnit?.abbreviation || recipe.yieldUnit?.name || "unit";
         const topIngredients = recipe.lines.slice(0, 3);
 
         return (
@@ -63,11 +73,19 @@ export function CookbookGrid({
                 <Button
                   size="icon"
                   variant="ghost"
-                  className={isFavorite ? 'text-amber-500' : 'text-muted-foreground'}
+                  className={
+                    isFavorite ? "text-amber-500" : "text-muted-foreground"
+                  }
                   onClick={() => onToggleFavorite(recipe.item.id)}
-                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label={
+                    isFavorite ? "Remove from favorites" : "Add to favorites"
+                  }
                 >
-                  {isFavorite ? <HeartOff className="h-4 w-4" /> : <Heart className="h-4 w-4" />}
+                  {isFavorite ? (
+                    <HeartOff className="h-4 w-4" />
+                  ) : (
+                    <Heart className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 text-xs">
@@ -89,10 +107,11 @@ export function CookbookGrid({
                   {topIngredients.map((line) => (
                     <li key={line.id} className="flex justify-between gap-4">
                       <span className="truncate">
-                        {line.ingredient?.name ?? 'Unknown ingredient'}
+                        {line.ingredient?.name ?? "Unknown ingredient"}
                       </span>
                       <span className="text-muted-foreground">
-                        {line.quantity_needed} {line.unit?.abbreviation || line.unit?.name || ''}
+                        {line.quantity_needed}{" "}
+                        {line.unit?.abbreviation || line.unit?.name || ""}
                       </span>
                     </li>
                   ))}
@@ -107,19 +126,25 @@ export function CookbookGrid({
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   {recipe.nutrition.calories && (
                     <span className="flex items-center gap-1">
-                      <Leaf className="h-3 w-3" /> {recipe.nutrition.calories} cal
+                      <Leaf className="h-3 w-3" /> {recipe.nutrition.calories}{" "}
+                      cal
                     </span>
                   )}
                   {recipe.nutrition.protein && (
                     <span className="flex items-center gap-1">
-                      <Scissors className="h-3 w-3" /> {recipe.nutrition.protein}g protein
+                      <Scissors className="h-3 w-3" />{" "}
+                      {recipe.nutrition.protein}g protein
                     </span>
                   )}
                 </div>
               )}
             </CardContent>
             <CardFooter className="flex items-center gap-2">
-              <Button size="sm" onClick={() => onSelect(recipe)} className="flex-1">
+              <Button
+                size="sm"
+                onClick={() => onSelect(recipe)}
+                className="flex-1"
+              >
                 View Recipe
               </Button>
               <Button
@@ -138,4 +163,3 @@ export function CookbookGrid({
     </div>
   );
 }
-

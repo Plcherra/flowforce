@@ -1,33 +1,54 @@
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sparkles, RefreshCw, Brain, TrendingUp, Settings, Lock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useCan } from '@/hooks/useCan';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { useFeatureFlag } from '@/hooks/useFeatureFlags';
-import AIActionsFeed from '@/components/ai/AIActionsFeed';
-import { ClosedLoopSummary } from '@/components/ai/ClosedLoopSummary';
-import { useClosedLoopState } from '@/hooks/useClosedLoopState';
-import { cn } from '@/lib/utils';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sparkles,
+  RefreshCw,
+  Brain,
+  TrendingUp,
+  Settings,
+  Lock,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCan } from "@/hooks/useCan";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useFeatureFlag } from "@/hooks/useFeatureFlags";
+import AIActionsFeed from "@/components/ai/AIActionsFeed";
+import { ClosedLoopSummary } from "@/components/ai/ClosedLoopSummary";
+import { useClosedLoopState } from "@/hooks/useClosedLoopState";
+import { cn } from "@/lib/utils";
+import { logger } from "@/utils/logger";
 
 interface AIInsightsPanelProps {
-  type: 'dashboard' | 'scheduler' | 'expenses' | 'reports';
+  type: "dashboard" | "scheduler" | "expenses" | "reports";
   context?: string;
   className?: string;
 }
 
-export default function AIInsightsPanel({ type, context, className }: AIInsightsPanelProps) {
+export default function AIInsightsPanel({
+  type,
+  context,
+  className,
+}: AIInsightsPanelProps) {
   const { can } = useCan();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const actionsFeedEnabled = useFeatureFlag('intelligence.oodaLoop');
-  const [insights, setInsights] = useState<string>('');
+  const actionsFeedEnabled = useFeatureFlag("intelligence.oodaLoop");
+  const [insights, setInsights] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = manual, 30, 60, 300 seconds
@@ -39,34 +60,39 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     isError: closedLoopErrorFlag,
     error: closedLoopError,
     refetch: refetchClosedLoop,
-  } = useClosedLoopState({ rangeDays: type === 'dashboard' ? 14 : 7, aiType: type });
+  } = useClosedLoopState({
+    rangeDays: type === "dashboard" ? 14 : 7,
+    aiType: type,
+  });
   const closedLoopLoadingState = closedLoopLoading && !closedLoopState;
   const closedLoopErrorInstance = closedLoopErrorFlag ? closedLoopError : null;
-  const containerClass = cn('space-y-4', className);
+  const containerClass = cn("space-y-4", className);
 
   const handleClosedLoopRefresh = useCallback(() => {
     void refetchClosedLoop();
   }, [refetchClosedLoop]);
 
   const fetchInsights = useCallback(async () => {
-    if (!mountedRef.current || !can('viewAIInsights')) return;
-    
+    if (!mountedRef.current || !can("viewAIInsights")) return;
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('ai-insights', {
-        body: { type, context }
+      const { data, error } = await supabase.functions.invoke("ai-insights", {
+        body: { type, context },
       });
 
       if (error) throw error;
-      
+
       if (mountedRef.current) {
         setInsights(data.insights);
         setLastUpdated(new Date());
       }
     } catch (error) {
-      logger.error('Failed to fetch AI insights:', { error, tags: ['error'] });
+      logger.error("Failed to fetch AI insights:", { error, tags: ["error"] });
       if (mountedRef.current) {
-        setInsights('Unable to generate insights at this time. Please try again later.');
+        setInsights(
+          "Unable to generate insights at this time. Please try again later.",
+        );
       }
     } finally {
       if (mountedRef.current) {
@@ -84,7 +110,7 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     }
 
     // Only set interval if refreshInterval > 0 and user has permission
-    if (can('viewAIInsights') && refreshInterval > 0) {
+    if (can("viewAIInsights") && refreshInterval > 0) {
       intervalRef.current = setInterval(() => {
         fetchInsights();
       }, refreshInterval * 1000);
@@ -115,65 +141,73 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
 
   const handleCardClick = (cardType: string) => {
     switch (cardType) {
-      case 'performance':
-        navigate('/analytics');
+      case "performance":
+        navigate("/analytics");
         toast({
           title: "Performance Analytics",
-          description: "Opening performance dashboard..."
+          description: "Opening performance dashboard...",
         });
         break;
-      case 'efficiency':
-        navigate('/reports');
+      case "efficiency":
+        navigate("/reports");
         toast({
           title: "Efficiency Reports",
-          description: "Viewing efficiency metrics..."
+          description: "Viewing efficiency metrics...",
         });
         break;
-      case 'issues':
-        navigate('/tasks');
+      case "issues":
+        navigate("/tasks");
         toast({
           title: "Task Management",
-          description: "Found 3 areas to improve - opening task management..."
+          description: "Found 3 areas to improve - opening task management...",
         });
         break;
-      case 'trending':
-        navigate('/analytics');
+      case "trending":
+        navigate("/analytics");
         toast({
           title: "Trending Analytics",
-          description: "Viewing trending data and insights..."
+          description: "Viewing trending data and insights...",
         });
         break;
     }
   };
 
   const handleViewDetailedAnalysis = () => {
-    navigate('/ai-insights');
+    navigate("/ai-insights");
     toast({
       title: "AI Insights",
-      description: "Opening detailed AI analysis..."
+      description: "Opening detailed AI analysis...",
     });
   };
 
   const getTypeLabel = () => {
     switch (type) {
-      case 'dashboard': return 'Operations Overview';
-      case 'scheduler': return 'Scheduling Insights';
-      case 'expenses': return 'Financial Analysis';
-      case 'reports': return 'Report Intelligence';
-      default: return 'AI Insights';
+      case "dashboard":
+        return "Operations Overview";
+      case "scheduler":
+        return "Scheduling Insights";
+      case "expenses":
+        return "Financial Analysis";
+      case "reports":
+        return "Report Intelligence";
+      default:
+        return "AI Insights";
     }
   };
 
   const getTypeIcon = () => {
     switch (type) {
-      case 'dashboard': return <TrendingUp className="h-4 w-4" />;
-      case 'scheduler': return <Brain className="h-4 w-4" />;
-      default: return <Sparkles className="h-4 w-4" />;
+      case "dashboard":
+        return <TrendingUp className="h-4 w-4" />;
+      case "scheduler":
+        return <Brain className="h-4 w-4" />;
+      default:
+        return <Sparkles className="h-4 w-4" />;
     }
   };
 
   // Only show AI insights if user has permission - but do this AFTER all hooks
-  if (!can('viewAIInsights')) {
+  if (!can("viewAIInsights")) {
     return (
       <div className={containerClass}>
         <Card className="h-full border-dashed">
@@ -183,13 +217,17 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               AI Insights restricted
             </CardTitle>
             <CardDescription>
-              Request access from an admin to view AI recommendations and closed-loop analytics.
+              Request access from an admin to view AI recommendations and
+              closed-loop analytics.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
             <p>Your current role is missing the `viewAIInsights` permission.</p>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" onClick={() => navigate('/settings/permissions')}>
+              <Button
+                size="sm"
+                onClick={() => navigate("/settings/permissions")}
+              >
                 View permissions
               </Button>
               <Button
@@ -197,8 +235,9 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
                 variant="outline"
                 onClick={() =>
                   toast({
-                    title: 'Access requested',
-                    description: 'We let your workspace admins know you need AI insights.',
+                    title: "Access requested",
+                    description:
+                      "We let your workspace admins know you need AI insights.",
                   })
                 }
               >
@@ -211,7 +250,8 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
     );
   }
 
-  const showActionsFeed = actionsFeedEnabled && (type === 'reports' || type === 'dashboard');
+  const showActionsFeed =
+    actionsFeedEnabled && (type === "reports" || type === "dashboard");
 
   const insightsCard = (
     <Card className="h-fit">
@@ -236,19 +276,27 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               <DropdownMenuContent align="end" className="w-36">
                 <DropdownMenuItem onClick={() => setRefreshInterval(0)}>
                   <span className="flex-1">Manual</span>
-                  {refreshInterval === 0 && <div className="w-2 h-2 bg-primary rounded-full" />}
+                  {refreshInterval === 0 && (
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(30)}>
                   <span className="flex-1">30 seconds</span>
-                  {refreshInterval === 30 && <div className="w-2 h-2 bg-primary rounded-full" />}
+                  {refreshInterval === 30 && (
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(60)}>
                   <span className="flex-1">1 minute</span>
-                  {refreshInterval === 60 && <div className="w-2 h-2 bg-primary rounded-full" />}
+                  {refreshInterval === 60 && (
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(300)}>
                   <span className="flex-1">5 minutes</span>
-                  {refreshInterval === 300 && <div className="w-2 h-2 bg-primary rounded-full" />}
+                  {refreshInterval === 300 && (
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -259,7 +307,9 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
               disabled={loading}
               className="h-8 w-8 p-0"
             >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </div>
@@ -276,50 +326,72 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
           <div className="space-y-4">
             {/* Key Metrics Grid */}
             <div className="grid grid-cols-2 gap-3">
-              <button 
-                onClick={() => handleCardClick('performance')}
+              <button
+                onClick={() => handleCardClick("performance")}
                 className="p-3 bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary">Performance</span>
-                  <Badge variant="secondary" className="text-xs">88%</Badge>
+                  <span className="text-xs font-medium text-primary">
+                    Performance
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    88%
+                  </Badge>
                 </div>
                 <div className="mt-2 w-full bg-primary/10 rounded-full h-1.5">
-                  <div className="bg-primary h-1.5 rounded-full" style={{ width: '88%' }}></div>
+                  <div
+                    className="bg-primary h-1.5 rounded-full"
+                    style={{ width: "88%" }}
+                  ></div>
                 </div>
               </button>
-              
-              <button 
-                onClick={() => handleCardClick('efficiency')}
+
+              <button
+                onClick={() => handleCardClick("efficiency")}
                 className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-green-700">Efficiency</span>
-                  <Badge variant="secondary" className="text-xs">92%</Badge>
+                  <span className="text-xs font-medium text-green-700">
+                    Efficiency
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    92%
+                  </Badge>
                 </div>
                 <div className="mt-2 w-full bg-green-100 rounded-full h-1.5">
-                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '92%' }}></div>
+                  <div
+                    className="bg-green-500 h-1.5 rounded-full"
+                    style={{ width: "92%" }}
+                  ></div>
                 </div>
               </button>
-              
-              <button 
-                onClick={() => handleCardClick('issues')}
+
+              <button
+                onClick={() => handleCardClick("issues")}
                 className="p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-orange-700">Areas to Improve</span>
-                  <Badge variant="outline" className="text-xs">3</Badge>
+                  <span className="text-xs font-medium text-orange-700">
+                    Areas to Improve
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    3
+                  </Badge>
                 </div>
                 <p className="text-xs text-orange-600 mt-1">Focus needed</p>
               </button>
-              
-              <button 
-                onClick={() => handleCardClick('trending')}
+
+              <button
+                onClick={() => handleCardClick("trending")}
                 className="p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-blue-700">Trending</span>
-                  <Badge variant="secondary" className="text-xs">↗ +5%</Badge>
+                  <span className="text-xs font-medium text-blue-700">
+                    Trending
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    ↗ +5%
+                  </Badge>
                 </div>
                 <p className="text-xs text-blue-600 mt-1">This week</p>
               </button>
@@ -329,15 +401,21 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-muted-foreground">Schedule adherence is strong</span>
+                <span className="text-muted-foreground">
+                  Schedule adherence is strong
+                </span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span className="text-muted-foreground">Task completion could improve</span>
+                <span className="text-muted-foreground">
+                  Task completion could improve
+                </span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-muted-foreground">Team productivity is on track</span>
+                <span className="text-muted-foreground">
+                  Team productivity is on track
+                </span>
               </div>
             </div>
 
@@ -348,9 +426,9 @@ export default function AIInsightsPanel({ type, context, className }: AIInsights
             )}
 
             {/* Action Button */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="w-full text-xs h-7"
               onClick={handleViewDetailedAnalysis}
             >

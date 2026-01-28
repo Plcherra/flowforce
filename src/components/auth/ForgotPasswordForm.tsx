@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 
 interface ForgotPasswordFormProps {
   onSubmit: (email: string) => Promise<void>;
@@ -13,8 +19,12 @@ interface ForgotPasswordFormProps {
   isLoading: boolean;
 }
 
-export default function ForgotPasswordForm({ onSubmit, onBack, isLoading }: ForgotPasswordFormProps) {
-  const [email, setEmail] = useState('');
+export default function ForgotPasswordForm({
+  onSubmit,
+  onBack,
+  isLoading,
+}: ForgotPasswordFormProps) {
+  const [email, setEmail] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +36,12 @@ export default function ForgotPasswordForm({ onSubmit, onBack, isLoading }: Forg
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Reset Password
+        </CardTitle>
         <CardDescription className="text-center">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we'll send you a link to reset your
+          password.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -45,15 +58,15 @@ export default function ForgotPasswordForm({ onSubmit, onBack, isLoading }: Forg
               disabled={isLoading}
             />
           </div>
-          
+
           <Button
             type="submit"
             className="w-full"
             disabled={isLoading || !email}
           >
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
+            {isLoading ? "Sending..." : "Send Reset Link"}
           </Button>
-          
+
           <Button
             type="button"
             variant="ghost"

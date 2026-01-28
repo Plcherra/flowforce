@@ -1,21 +1,34 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { CheckSquare, Calendar, User, AlertCircle, Plus, X } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckSquare,
+  Calendar,
+  User,
+  AlertCircle,
+  Plus,
+  X,
+} from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface TaskData {
   task_id?: string;
   task_title: string;
   due_date?: string;
   assigned_to?: string[];
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   created_at: string;
 }
 
@@ -36,13 +49,13 @@ export function TaskField({
   onChange,
   required = false,
   availableUsers = [],
-  className = ""
+  className = "",
 }: TaskFieldProps) {
   const [isCreating, setIsCreating] = useState(false);
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [assignedUsers, setAssignedUsers] = useState<string[]>([]);
 
   const createTask = () => {
@@ -62,7 +75,7 @@ export function TaskField({
       due_date: dueDate || undefined,
       assigned_to: assignedUsers.length > 0 ? assignedUsers : undefined,
       priority,
-      status: 'pending',
+      status: "pending",
       created_at: new Date().toISOString(),
     };
 
@@ -77,10 +90,10 @@ export function TaskField({
   };
 
   const resetForm = () => {
-    setTaskTitle('');
-    setTaskDescription('');
-    setDueDate('');
-    setPriority('medium');
+    setTaskTitle("");
+    setTaskDescription("");
+    setDueDate("");
+    setPriority("medium");
     setAssignedUsers([]);
   };
 
@@ -94,36 +107,36 @@ export function TaskField({
   };
 
   const toggleUserAssignment = (userId: string) => {
-    setAssignedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+    setAssignedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low':
-        return 'bg-green-100 text-green-800 border-green-200';
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'pending':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "pending":
+        return "bg-gray-100 text-gray-800 border-gray-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -132,7 +145,7 @@ export function TaskField({
   };
 
   const getUserName = (userId: string) => {
-    const user = availableUsers.find(u => u.id === userId);
+    const user = availableUsers.find((u) => u.id === userId);
     return user ? user.name : userId;
   };
 
@@ -154,7 +167,9 @@ export function TaskField({
             <div className="space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">{value.task_title}</h4>
+                  <h4 className="font-semibold text-foreground">
+                    {value.task_title}
+                  </h4>
                   {value.description && (
                     <p className="text-sm text-muted-foreground mt-1">
                       {value.description}
@@ -172,14 +187,24 @@ export function TaskField({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className={getPriorityColor(value.priority)}>
+                <Badge
+                  variant="outline"
+                  className={getPriorityColor(value.priority)}
+                >
                   <AlertCircle className="h-3 w-3 mr-1" />
-                  {value.priority.charAt(0).toUpperCase() + value.priority.slice(1)} Priority
+                  {value.priority.charAt(0).toUpperCase() +
+                    value.priority.slice(1)}{" "}
+                  Priority
                 </Badge>
-                
-                <Badge variant="outline" className={getStatusColor(value.status)}>
+
+                <Badge
+                  variant="outline"
+                  className={getStatusColor(value.status)}
+                >
                   <CheckSquare className="h-3 w-3 mr-1" />
-                  {value.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  {value.status
+                    .replace("_", " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())}
                 </Badge>
 
                 {value.due_date && (
@@ -194,7 +219,7 @@ export function TaskField({
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <div className="flex flex-wrap gap-1">
-                    {value.assigned_to.map(userId => (
+                    {value.assigned_to.map((userId) => (
                       <Badge key={userId} variant="secondary">
                         {getUserName(userId)}
                       </Badge>
@@ -215,12 +240,16 @@ export function TaskField({
             <div className="space-y-4">
               <div className="text-center mb-4">
                 <CheckSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">Create New Task</p>
+                <p className="text-sm font-medium text-foreground">
+                  Create New Task
+                </p>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-foreground">Title *</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Title *
+                  </label>
                   <Input
                     placeholder="Enter task title"
                     value={taskTitle}
@@ -229,7 +258,9 @@ export function TaskField({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-foreground">Description</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Description
+                  </label>
                   <Textarea
                     placeholder="Enter task description (optional)"
                     value={taskDescription}
@@ -240,7 +271,9 @@ export function TaskField({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-foreground">Due Date</label>
+                    <label className="text-sm font-medium text-foreground">
+                      Due Date
+                    </label>
                     <Input
                       type="date"
                       value={dueDate}
@@ -249,8 +282,15 @@ export function TaskField({
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-foreground">Priority</label>
-                    <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}>
+                    <label className="text-sm font-medium text-foreground">
+                      Priority
+                    </label>
+                    <Select
+                      value={priority}
+                      onValueChange={(value: "low" | "medium" | "high") =>
+                        setPriority(value)
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -269,16 +309,23 @@ export function TaskField({
                       Assign To (optional)
                     </label>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
-                      {availableUsers.map(user => (
-                        <label key={user.id} className="flex items-center space-x-2 cursor-pointer">
+                      {availableUsers.map((user) => (
+                        <label
+                          key={user.id}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
                           <input
                             type="checkbox"
                             checked={assignedUsers.includes(user.id)}
                             onChange={() => toggleUserAssignment(user.id)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm text-foreground">{user.name}</span>
-                          <span className="text-xs text-muted-foreground">({user.email})</span>
+                          <span className="text-sm text-foreground">
+                            {user.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            ({user.email})
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -332,7 +379,7 @@ export function TaskField({
 export function TaskFieldPreview({
   label = "Task",
   description = "Create and assign a task",
-  className = ""
+  className = "",
 }: Partial<TaskFieldProps>) {
   return (
     <TaskField
@@ -341,8 +388,8 @@ export function TaskFieldPreview({
       value={undefined}
       onChange={() => {}}
       availableUsers={[
-        { id: '1', name: 'John Doe', email: 'john@example.com' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com' }
+        { id: "1", name: "John Doe", email: "john@example.com" },
+        { id: "2", name: "Jane Smith", email: "jane@example.com" },
       ]}
       className={className}
     />

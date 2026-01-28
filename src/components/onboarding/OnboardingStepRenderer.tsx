@@ -1,12 +1,12 @@
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
-import { CustomSection } from '@/types/customTemplate';
-import { UserInfo, CompanyInfo, OnboardingRole } from '@/types/onboarding';
-import UserInfoStep from './UserInfoStep';
-import TemplateSelectionStep from './TemplateSelectionStep';
-import CustomTemplateBuilder from './CustomTemplateBuilder';
-import SectionCustomizationStep from './SectionCustomizationStep';
-import RoleSetupStep from './RoleSetupStep';
-import ReviewStep from './ReviewStep';
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import { CustomSection } from "@/types/customTemplate";
+import { UserInfo, CompanyInfo, OnboardingRole } from "@/types/onboarding";
+import UserInfoStep from "./UserInfoStep";
+import TemplateSelectionStep from "./TemplateSelectionStep";
+import CustomTemplateBuilder from "./CustomTemplateBuilder";
+import SectionCustomizationStep from "./SectionCustomizationStep";
+import RoleSetupStep from "./RoleSetupStep";
+import ReviewStep from "./ReviewStep";
 
 interface OnboardingStepRendererProps {
   currentStep: number;
@@ -47,9 +47,8 @@ export default function OnboardingStepRenderer({
   onSectionToggle,
   onCustomSectionsChange,
   onRolesChange,
-  onPositionsChange
+  onPositionsChange,
 }: OnboardingStepRendererProps) {
-  
   if (isCustomTemplate) {
     switch (currentStep) {
       case 1:

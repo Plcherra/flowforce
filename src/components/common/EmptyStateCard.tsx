@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateCardProps {
   icon?: ReactNode;
@@ -9,7 +9,7 @@ interface EmptyStateCardProps {
   action?: ReactNode;
   className?: string;
   contentClassName?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
 export function EmptyStateCard({
@@ -19,13 +19,19 @@ export function EmptyStateCard({
   action,
   className,
   contentClassName,
-  'data-testid': dataTestId,
+  "data-testid": dataTestId,
 }: EmptyStateCardProps) {
   return (
-    <Card data-testid={dataTestId} className={cn('border-dashed border-muted-foreground/30 bg-muted/10', className)}>
+    <Card
+      data-testid={dataTestId}
+      className={cn(
+        "border-dashed border-muted-foreground/30 bg-muted/10",
+        className,
+      )}
+    >
       <CardContent
         className={cn(
-          'flex flex-col gap-4 py-6 text-center sm:flex-row sm:text-left sm:items-center sm:justify-between',
+          "flex flex-col gap-4 py-6 text-center sm:flex-row sm:text-left sm:items-center sm:justify-between",
           contentClassName,
         )}
       >

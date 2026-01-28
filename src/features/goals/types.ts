@@ -1,8 +1,11 @@
-import type { Tables, TablesUpdate } from '@/integrations/supabase/public-types';
+import type {
+  Tables,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
 
-export type GoalStatus = 'active' | 'completed' | 'draft' | 'cancelled';
+export type GoalStatus = "active" | "completed" | "draft" | "cancelled";
 
-export type GoalRow = Tables<'goals'>;
+export type GoalRow = Tables<"goals">;
 
 export type OwnerProfile = {
   id: string;
@@ -65,4 +68,4 @@ export interface CreateGoalInput {
   reward_details?: Record<string, unknown> | null;
 }
 
-export type UpdateGoalInput = TablesUpdate<'goals'>;
+export type UpdateGoalInput = TablesUpdate<"goals">;

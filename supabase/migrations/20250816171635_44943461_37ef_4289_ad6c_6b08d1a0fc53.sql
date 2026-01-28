@@ -77,4 +77,5 @@ CREATE INDEX IF NOT EXISTS idx_analytics_cache_expires ON public.analytics_cache
 -- Add partial indexes for better performance on filtered queries
 CREATE INDEX IF NOT EXISTS idx_profiles_active_company ON public.profiles(company_id) WHERE employment_status = 'active';
 CREATE INDEX IF NOT EXISTS idx_forms_published ON public.forms(created_by) WHERE status = 'published';
-CREATE INDEX IF NOT EXISTS idx_schedules_future ON public.schedules(user_id, start_time) WHERE start_time > now();
+-- Note: Removed idx_schedules_future index because now() is not IMMUTABLE and cannot be used in index predicates
+-- Consider creating this index manually after migration if needed, or use a different approach

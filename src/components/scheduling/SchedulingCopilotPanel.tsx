@@ -1,40 +1,71 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { useScheduleCopilot, type StepProgressState } from '@/hooks/scheduling/useScheduleCopilot';
-import { CheckCircle, Circle, Info, PlayCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import {
+  useScheduleCopilot,
+  type StepProgressState,
+} from "@/hooks/scheduling/useScheduleCopilot";
+import {
+  CheckCircle,
+  Circle,
+  Info,
+  PlayCircle,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
 
-const ACTION_LIBRARY: Record<string, { action: string; label: string; intent: 'primary' | 'secondary' }[]> = {
-  'collect-staffing-signals': [
-    { action: 'start_schedule_draft', label: 'Start schedule draft', intent: 'primary' },
+const ACTION_LIBRARY: Record<
+  string,
+  { action: string; label: string; intent: "primary" | "secondary" }[]
+> = {
+  "collect-staffing-signals": [
+    {
+      action: "start_schedule_draft",
+      label: "Start schedule draft",
+      intent: "primary",
+    },
   ],
-  'build-shift-draft': [
-    { action: 'publish_schedule', label: 'Attempt publish (demo)', intent: 'primary' },
-    { action: 'notify_team', label: 'Notify team (demo)', intent: 'secondary' },
+  "build-shift-draft": [
+    {
+      action: "publish_schedule",
+      label: "Attempt publish (demo)",
+      intent: "primary",
+    },
+    { action: "notify_team", label: "Notify team (demo)", intent: "secondary" },
   ],
-  'gm-review-approval': [
-    { action: 'publish_schedule', label: 'Publish schedule', intent: 'primary' },
+  "gm-review-approval": [
+    {
+      action: "publish_schedule",
+      label: "Publish schedule",
+      intent: "primary",
+    },
   ],
-  'publish-and-acknowledge': [
-    { action: 'notify_team', label: 'Send notifications', intent: 'primary' },
+  "publish-and-acknowledge": [
+    { action: "notify_team", label: "Send notifications", intent: "primary" },
   ],
 };
 
 const ROLE_OPTIONS = [
-  { value: 'operations_manager', label: 'Operations Manager' },
-  { value: 'schedule_admin', label: 'Schedule Admin' },
-  { value: 'general_manager', label: 'General Manager' },
-  { value: 'people_ops', label: 'People Ops' },
-  { value: 'shift_lead', label: 'Shift Lead' },
+  { value: "operations_manager", label: "Operations Manager" },
+  { value: "schedule_admin", label: "Schedule Admin" },
+  { value: "general_manager", label: "General Manager" },
+  { value: "people_ops", label: "People Ops" },
+  { value: "shift_lead", label: "Shift Lead" },
 ];
 
 export function SchedulingCopilotPanel() {
@@ -53,25 +84,40 @@ export function SchedulingCopilotPanel() {
     setCriterionApproval,
     runAction,
     lastEvaluation,
-  } = useScheduleCopilot({ source: 'supabase', rulebookId: 'restaurant-weekly-schedule' });
+  } = useScheduleCopilot({
+    source: "supabase",
+    rulebookId: "restaurant-weekly-schedule",
+  });
 
-  const actionButtons = useMemo(() => ACTION_LIBRARY[currentStep?.id ?? ''] ?? [], [currentStep?.id]);
+  const actionButtons = useMemo(
+    () => ACTION_LIBRARY[currentStep?.id ?? ""] ?? [],
+    [currentStep?.id],
+  );
 
   return (
     <Card className="h-full">
       <CardHeader className="border-b border-border/60">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle className="flex items-center gap-2 text-lg">Copilot</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              Copilot
+            </CardTitle>
             <p className="text-sm text-muted-foreground">
               Guided checklist enforcing the {rulebook.name} rulebook.
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Label htmlFor="actor-role" className="text-xs uppercase tracking-wide text-muted-foreground">
+            <Label
+              htmlFor="actor-role"
+              className="text-xs uppercase tracking-wide text-muted-foreground"
+            >
               Acting as
             </Label>
-            <Select value={actorRole} onValueChange={setActorRole} disabled={loading}>
+            <Select
+              value={actorRole}
+              onValueChange={setActorRole}
+              disabled={loading}
+            >
               <SelectTrigger id="actor-role" className="h-9 w-[180px]">
                 <SelectValue />
               </SelectTrigger>
@@ -96,8 +142,8 @@ export function SchedulingCopilotPanel() {
                   <li
                     key={status.step.id}
                     className={cn(
-                      'p-4 cursor-pointer transition-colors hover:bg-muted/40',
-                      currentStepId === status.step.id && 'bg-muted/40'
+                      "p-4 cursor-pointer transition-colors hover:bg-muted/40",
+                      currentStepId === status.step.id && "bg-muted/40",
                     )}
                     onClick={() => setCurrentStepId(status.step.id)}
                   >
@@ -111,7 +157,10 @@ export function SchedulingCopilotPanel() {
                       {status.step.purpose}
                     </p>
                     <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                      <Progress value={(status.completed / status.total) * 100} className="h-1 flex-1" />
+                      <Progress
+                        value={(status.completed / status.total) * 100}
+                        className="h-1 flex-1"
+                      />
                       <span>
                         {status.completed}/{status.total}
                       </span>
@@ -132,9 +181,16 @@ export function SchedulingCopilotPanel() {
                     <CardTitle className="text-base font-semibold">
                       {currentStep.title}
                     </CardTitle>
-                    <Badge variant="secondary">Step {rulebook.steps.findIndex((step) => step.id === currentStep.id) + 1}</Badge>
+                    <Badge variant="secondary">
+                      Step{" "}
+                      {rulebook.steps.findIndex(
+                        (step) => step.id === currentStep.id,
+                      ) + 1}
+                    </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{currentStep.purpose}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {currentStep.purpose}
+                  </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Allowed roles
@@ -148,26 +204,36 @@ export function SchedulingCopilotPanel() {
                 </header>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Completion criteria</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Completion criteria
+                  </h4>
                   <div className="space-y-3">
                     {currentStep.completionCriteria.map((criterion) => {
-                      const state = criterionState[currentStep.id]?.[criterion.id];
-                      const isNumeric = criterion.evidenceType === 'numeric';
+                      const state =
+                        criterionState[currentStep.id]?.[criterion.id];
+                      const isNumeric = criterion.evidenceType === "numeric";
                       const requiresApproval = Boolean(criterion.approverRole);
 
                       return (
                         <div
                           key={criterion.id}
                           className={cn(
-                            'rounded-lg border border-border/70 bg-muted/20 px-4 py-3',
-                            state?.completed ? 'border-primary/60 bg-primary/5' : ''
+                            "rounded-lg border border-border/70 bg-muted/20 px-4 py-3",
+                            state?.completed
+                              ? "border-primary/60 bg-primary/5"
+                              : "",
                           )}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-foreground">{criterion.label}</span>
-                                <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                                <span className="text-sm font-medium text-foreground">
+                                  {criterion.label}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] uppercase tracking-wide"
+                                >
                                   {criterion.evidenceType}
                                 </Badge>
                               </div>
@@ -179,25 +245,34 @@ export function SchedulingCopilotPanel() {
                             </div>
                             <Switch
                               checked={state?.completed}
-                              onCheckedChange={() => toggleCriterion(currentStep.id, criterion)}
+                              onCheckedChange={() =>
+                                toggleCriterion(currentStep.id, criterion)
+                              }
                             />
                           </div>
 
                           {isNumeric && (
                             <div className="mt-3 grid gap-2 sm:flex sm:items-center sm:gap-3">
-                              <Label htmlFor={`${criterion.id}-value`} className="text-xs text-muted-foreground">
+                              <Label
+                                htmlFor={`${criterion.id}-value`}
+                                className="text-xs text-muted-foreground"
+                              >
                                 Actual value
                               </Label>
                               <Input
                                 id={`${criterion.id}-value`}
                                 type="number"
                                 className="h-8 w-24"
-                                value={state?.value ?? ''}
+                                value={state?.value ?? ""}
                                 onChange={(event) =>
-                                  setCriterionValue(currentStep.id, criterion.id, Number(event.target.value))
+                                  setCriterionValue(
+                                    currentStep.id,
+                                    criterion.id,
+                                    Number(event.target.value),
+                                  )
                                 }
                               />
-                              {typeof criterion.targetValue === 'number' && (
+                              {typeof criterion.targetValue === "number" && (
                                 <span className="text-xs text-muted-foreground">
                                   Target ≥ {criterion.targetValue}
                                 </span>
@@ -213,7 +288,11 @@ export function SchedulingCopilotPanel() {
                               <Switch
                                 checked={state?.approved ?? false}
                                 onCheckedChange={(value) =>
-                                  setCriterionApproval(currentStep.id, criterion.id, value)
+                                  setCriterionApproval(
+                                    currentStep.id,
+                                    criterion.id,
+                                    value,
+                                  )
                                 }
                               />
                             </div>
@@ -225,16 +304,22 @@ export function SchedulingCopilotPanel() {
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Copilot actions</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Copilot actions
+                  </h4>
                   <div className="flex flex-wrap gap-3">
                     {actionButtons.length === 0 && (
-                      <p className="text-xs text-muted-foreground">No automated actions configured for this step yet.</p>
+                      <p className="text-xs text-muted-foreground">
+                        No automated actions configured for this step yet.
+                      </p>
                     )}
                     {actionButtons.map((button) => (
                       <Button
                         key={button.action}
                         onClick={() => runAction(button.action, currentStep.id)}
-                        variant={button.intent === 'primary' ? 'default' : 'outline'}
+                        variant={
+                          button.intent === "primary" ? "default" : "outline"
+                        }
                         className="flex items-center gap-2"
                       >
                         <PlayCircle className="h-4 w-4" />
@@ -250,7 +335,9 @@ export function SchedulingCopilotPanel() {
 
                 {rulebook.constraints && rulebook.constraints.length > 0 && (
                   <div className="space-y-3">
-                    <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Global guardrails</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Global guardrails
+                    </h4>
                     <div className="grid gap-3">
                       {rulebook.constraints.map((constraint) => (
                         <div
@@ -258,14 +345,18 @@ export function SchedulingCopilotPanel() {
                           className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3"
                         >
                           <div className="flex items-start gap-2">
-                            {constraint.severity === 'blocking' ? (
+                            {constraint.severity === "blocking" ? (
                               <ShieldAlert className="h-4 w-4 text-destructive mt-1" />
                             ) : (
                               <ShieldCheck className="h-4 w-4 text-warning mt-1" />
                             )}
                             <div>
-                              <p className="text-sm font-medium text-foreground">{constraint.label}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{constraint.description}</p>
+                              <p className="text-sm font-medium text-foreground">
+                                {constraint.label}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {constraint.description}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -275,7 +366,9 @@ export function SchedulingCopilotPanel() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No steps defined in the rulebook.</p>
+              <p className="text-sm text-muted-foreground">
+                No steps defined in the rulebook.
+              </p>
             )}
           </section>
         </div>
@@ -286,15 +379,21 @@ export function SchedulingCopilotPanel() {
 
 function StepStatusBadge({ state }: { state: StepProgressState }) {
   switch (state) {
-    case 'complete':
+    case "complete":
       return (
-        <Badge variant="outline" className="flex items-center gap-1 text-xs text-primary border-primary/60">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-xs text-primary border-primary/60"
+        >
           <CheckCircle className="h-3 w-3" /> Complete
         </Badge>
       );
-    case 'inProgress':
+    case "inProgress":
       return (
-        <Badge variant="outline" className="flex items-center gap-1 text-xs text-warning border-warning">
+        <Badge
+          variant="outline"
+          className="flex items-center gap-1 text-xs text-warning border-warning"
+        >
           <Circle className="h-3 w-3" /> In progress
         </Badge>
       );
@@ -307,14 +406,20 @@ function StepStatusBadge({ state }: { state: StepProgressState }) {
   }
 }
 
-function CopilotEvaluationAlert({ evaluation }: { evaluation: CopilotEvaluation }) {
+function CopilotEvaluationAlert({
+  evaluation,
+}: {
+  evaluation: CopilotEvaluation;
+}) {
   const { result, action } = evaluation;
 
-  if (result.status === 'allowed') {
+  if (result.status === "allowed") {
     return (
       <Alert variant="default" className="border-primary/40 bg-primary/10">
         <Info className="h-4 w-4" />
-        <AlertTitle className="text-sm font-semibold">Action allowed</AlertTitle>
+        <AlertTitle className="text-sm font-semibold">
+          Action allowed
+        </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           `{action}` passed all guardrails.
         </AlertDescription>
@@ -322,11 +427,16 @@ function CopilotEvaluationAlert({ evaluation }: { evaluation: CopilotEvaluation 
     );
   }
 
-  if (result.status === 'warning') {
+  if (result.status === "warning") {
     return (
-      <Alert variant="default" className="border-warning bg-warning/10 text-warning-foreground">
+      <Alert
+        variant="default"
+        className="border-warning bg-warning/10 text-warning-foreground"
+      >
         <Info className="h-4 w-4" />
-        <AlertTitle className="text-sm font-semibold">Action needs attention</AlertTitle>
+        <AlertTitle className="text-sm font-semibold">
+          Action needs attention
+        </AlertTitle>
         <AlertDescription className="text-xs">
           {result.message}
         </AlertDescription>
@@ -338,9 +448,7 @@ function CopilotEvaluationAlert({ evaluation }: { evaluation: CopilotEvaluation 
     <Alert variant="destructive">
       <Info className="h-4 w-4" />
       <AlertTitle className="text-sm font-semibold">Action blocked</AlertTitle>
-      <AlertDescription className="text-xs">
-        {result.message}
-      </AlertDescription>
+      <AlertDescription className="text-xs">{result.message}</AlertDescription>
     </Alert>
   );
 }

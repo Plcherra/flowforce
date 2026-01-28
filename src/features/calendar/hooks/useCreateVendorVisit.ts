@@ -1,4 +1,4 @@
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents } from "@/hooks/useEvents";
 
 export function useCreateVendorVisit() {
   const { createVendorVisit } = useEvents();

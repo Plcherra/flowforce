@@ -2,7 +2,7 @@ export interface ShiftTask {
   id: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   estimated_minutes: number;
 }
 

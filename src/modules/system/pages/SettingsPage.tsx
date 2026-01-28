@@ -1,41 +1,41 @@
-import { lazy, Suspense } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import ErrorBoundary from '@/components/ui/error-boundary';
-import { SystemSettingsLayout } from '../components/SystemSettingsLayout';
-import { ErrorState } from '../components/ErrorState';
+import { lazy, Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import ErrorBoundary from "@/components/ui/error-boundary";
+import { SystemSettingsLayout } from "../components/SystemSettingsLayout";
+import { ErrorState } from "../components/ErrorState";
 
 const GeneralSettingsPanel = lazy(async () => {
-  const mod = await import('../components/GeneralSettingsPanel');
+  const mod = await import("../components/GeneralSettingsPanel");
   return { default: mod.GeneralSettingsPanel };
 });
 
 const SecuritySettingsPanel = lazy(async () => {
-  const mod = await import('../components/SecuritySettingsPanel');
+  const mod = await import("../components/SecuritySettingsPanel");
   return { default: mod.SecuritySettingsPanel };
 });
 
 const LocalizationSettingsPanel = lazy(async () => {
-  const mod = await import('../components/LocalizationSettingsPanel');
+  const mod = await import("../components/LocalizationSettingsPanel");
   return { default: mod.LocalizationSettingsPanel };
 });
 
 const NotificationSettingsPanel = lazy(async () => {
-  const mod = await import('../components/NotificationSettingsPanel');
+  const mod = await import("../components/NotificationSettingsPanel");
   return { default: mod.NotificationSettingsPanel };
 });
 
 const AICopilotSettingsPanel = lazy(async () => {
-  const mod = await import('../components/AICopilotSettingsPanel');
+  const mod = await import("../components/AICopilotSettingsPanel");
   return { default: mod.AICopilotSettingsPanel };
 });
 
 const IntegrationSettingsPanel = lazy(async () => {
-  const mod = await import('../components/IntegrationSettingsPanel');
+  const mod = await import("../components/IntegrationSettingsPanel");
   return { default: mod.IntegrationSettingsPanel };
 });
 
 const AdminSettingsPanel = lazy(async () => {
-  const mod = await import('../components/AdminSettingsPanel');
+  const mod = await import("../components/AdminSettingsPanel");
   return { default: mod.AdminSettingsPanel };
 });
 
@@ -53,10 +53,14 @@ export default function SettingsPage() {
     <SystemSettingsLayout
       tabs={[
         {
-          key: 'general',
-          label: 'General',
+          key: "general",
+          label: "General",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <GeneralSettingsPanel />
               </Suspense>
@@ -64,10 +68,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'security',
-          label: 'Security',
+          key: "security",
+          label: "Security",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <SecuritySettingsPanel />
               </Suspense>
@@ -75,10 +83,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'localization',
-          label: 'Localization',
+          key: "localization",
+          label: "Localization",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <LocalizationSettingsPanel />
               </Suspense>
@@ -86,10 +98,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'notifications',
-          label: 'Notifications',
+          key: "notifications",
+          label: "Notifications",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <NotificationSettingsPanel />
               </Suspense>
@@ -97,10 +113,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'copilot',
-          label: 'AI Co-Pilot',
+          key: "copilot",
+          label: "AI Co-Pilot",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <AICopilotSettingsPanel />
               </Suspense>
@@ -108,10 +128,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'integrations',
-          label: 'Integrations',
+          key: "integrations",
+          label: "Integrations",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <IntegrationSettingsPanel />
               </Suspense>
@@ -119,10 +143,14 @@ export default function SettingsPage() {
           ),
         },
         {
-          key: 'admin',
-          label: 'Admin',
+          key: "admin",
+          label: "Admin",
           content: (
-            <ErrorBoundary FallbackComponent={({ error }) => <ErrorState message={error.message} />}>
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
               <Suspense fallback={<PanelFallback />}>
                 <AdminSettingsPanel />
               </Suspense>

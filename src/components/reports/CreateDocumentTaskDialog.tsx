@@ -1,19 +1,36 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { useTasks } from '@/hooks/useTasks';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import type { DocumentWithRelations } from '@/types/ingestion';
-import { logger } from '@/utils/logger';
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { useTasks } from "@/hooks/useTasks";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import type { DocumentWithRelations } from "@/types/ingestion";
+import { logger } from "@/utils/logger";
 
 interface CreateDocumentTaskDialogProps {
   document: DocumentWithRelations | null;
@@ -22,27 +39,31 @@ interface CreateDocumentTaskDialogProps {
 }
 
 const PRIORITY_OPTIONS = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'urgent', label: 'Urgent' },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "urgent", label: "Urgent" },
 ] as const;
 
-export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocumentTaskDialogProps) {
+export function CreateDocumentTaskDialog({
+  document,
+  open,
+  onClose,
+}: CreateDocumentTaskDialogProps) {
   const { user } = useAuth();
   const { createTask } = useTasks();
   const { toast } = useToast();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<string>('medium');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<string>("medium");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setPriority('medium');
+    setTitle("");
+    setDescription("");
+    setPriority("medium");
     setDueDate(undefined);
   };
 
@@ -61,14 +82,16 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
     try {
       const links = [
         {
-          type: 'document',
+          type: "document",
           documentId: document.id,
           storagePath: document.file?.storage_path ?? null,
         },
       ];
 
       const { error } = await createTask({
-        title: title.trim() || `Follow up: ${document.title ?? document.file?.filename ?? 'Report'}`,
+        title:
+          title.trim() ||
+          `Follow up: ${document.title ?? document.file?.filename ?? "Report"}`,
         description: description.trim() || null,
         priority: priority as any,
         created_by: user.id,
@@ -81,7 +104,7 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
         workflow_id: null,
         estimated_hours: null,
         actual_hours: null,
-        source: 'from_report',
+        source: "from_report",
         origin_document_id: document.id,
         links,
       });
@@ -91,18 +114,22 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
       }
 
       toast({
-        title: 'Task created',
-        description: 'The follow-up task is now in your task list.',
+        title: "Task created",
+        description: "The follow-up task is now in your task list.",
       });
       resetForm();
       onClose();
     } catch (err) {
-      logger.error('Failed to create document task', { error: err, tags: ['error'] });
-      const message = err instanceof Error ? err.message : 'Unable to create task.';
+      logger.error("Failed to create document task", {
+        error: err,
+        tags: ["error"],
+      });
+      const message =
+        err instanceof Error ? err.message : "Unable to create task.";
       toast({
-        title: 'Task creation failed',
+        title: "Task creation failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -110,8 +137,8 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
   };
 
   const suggestedTitle = document
-    ? `Follow up: ${document.title ?? document.file?.filename ?? 'Report'}`
-    : 'Follow up task';
+    ? `Follow up: ${document.title ?? document.file?.filename ?? "Report"}`
+    : "Follow up task";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -171,7 +198,7 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, 'PPP') : 'Pick a date'}
+                    {dueDate ? format(dueDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -187,11 +214,16 @@ export function CreateDocumentTaskDialog({ document, open, onClose }: CreateDocu
           </div>
 
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !document}>
-              {loading ? 'Creating…' : 'Create Task'}
+              {loading ? "Creating…" : "Create Task"}
             </Button>
           </DialogFooter>
         </form>

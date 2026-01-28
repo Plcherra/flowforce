@@ -1,9 +1,17 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { MessagesHeader } from './MessagesHeader';
-import { MessagesList, MessageInput } from '@/features/messages/components/conversations';
-import type { MessageChannel, Message, ThreadMessage, MessageAttachment } from '@/types/messages';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { MessagesHeader } from "./MessagesHeader";
+import {
+  MessagesList,
+  MessageInput,
+} from "@/features/messages/components/conversations";
+import type {
+  MessageChannel,
+  Message,
+  ThreadMessage,
+  MessageAttachment,
+} from "@/types/messages";
 
 interface MessagesMainAreaProps {
   channel: MessageChannel | null;
@@ -12,9 +20,12 @@ interface MessagesMainAreaProps {
   isChannelAdmin: boolean;
   onShowChannelMembers: () => void;
   onShowChannelSettings: () => void;
-  onStartVideoCall: (type: 'video' | 'audio') => void;
+  onStartVideoCall: (type: "video" | "audio") => void;
   onScheduleMessage: (content: string, scheduledFor: Date) => void;
-  onSendMessage: (content: string, attachments: MessageAttachment[]) => Promise<void>;
+  onSendMessage: (
+    content: string,
+    attachments: MessageAttachment[],
+  ) => Promise<void>;
   onThreadMessage: (message: ThreadMessage) => void;
   onShowCreateDialog: () => void;
   isMobile?: boolean;

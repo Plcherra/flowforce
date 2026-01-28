@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/ui/loading-states';
-import { useEngagementAnalytics } from '@/hooks/useEngagementAnalytics';
-import { formatDistanceToNow } from 'date-fns';
-import { logger } from '@/utils/logger';
+import React, { useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { useEngagementAnalytics } from "@/hooks/useEngagementAnalytics";
+import { formatDistanceToNow } from "date-fns";
+import { logger } from "@/utils/logger";
 
 function Sparkline({ data }: { data: number[] }) {
   const max = Math.max(...data, 1);
@@ -15,7 +15,7 @@ function Sparkline({ data }: { data: number[] }) {
       const y = 100 - value;
       return `${x},${y}`;
     })
-    .join(' ');
+    .join(" ");
 
   return (
     <svg viewBox="0 0 100 100" className="h-8 w-16 text-primary">
@@ -25,7 +25,7 @@ function Sparkline({ data }: { data: number[] }) {
         strokeWidth="4"
         strokeLinejoin="round"
         strokeLinecap="round"
-        points={points || '0,100 100,100'}
+        points={points || "0,100 100,100"}
       />
     </svg>
   );
@@ -43,7 +43,10 @@ export default function EngagementOverview() {
       .filter((update) => !update.aiSummary && !isAnalyzing)
       .forEach((update) => {
         analyze(update).catch((error) => {
-          logger.warn('Failed to analyze engagement', { error, tags: ['warning'] });
+          logger.warn("Failed to analyze engagement", {
+            error,
+            tags: ["warning"],
+          });
         });
       });
   }, [updates, analyze, isAnalyzing]);
@@ -74,19 +77,25 @@ export default function EngagementOverview() {
               <p className="text-xs text-muted-foreground">
                 {update.lastAnalyzed
                   ? `Last analyzed ${formatDistanceToNow(new Date(update.lastAnalyzed), { addSuffix: true })}`
-                  : 'Awaiting AI analysis'}
+                  : "Awaiting AI analysis"}
               </p>
             </div>
-            <Sparkline data={[update.metrics.likes, update.metrics.comments, update.metrics.views]} />
+            <Sparkline
+              data={[
+                update.metrics.likes,
+                update.metrics.comments,
+                update.metrics.views,
+              ]}
+            />
           </div>
 
           <p className="text-sm text-muted-foreground">
-            {update.aiSummary ?? 'Analyzing engagement intelligence…'}
+            {update.aiSummary ?? "Analyzing engagement intelligence…"}
           </p>
 
           <div className="text-xs text-muted-foreground flex flex-wrap gap-4">
-            <span>Engagement: {update.engagementScore ?? '–'}</span>
-            <span>Sentiment: {update.sentimentScore ?? '–'}</span>
+            <span>Engagement: {update.engagementScore ?? "–"}</span>
+            <span>Sentiment: {update.sentimentScore ?? "–"}</span>
             <span>Likes: {update.metrics.likes}</span>
             <span>Comments: {update.metrics.comments}</span>
             <span>Views: {update.metrics.views}</span>

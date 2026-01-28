@@ -1,6 +1,6 @@
-import { logger } from '@/utils/logger';
+import { logger } from "@/utils/logger";
 
-export type PresenceStatus = 'online' | 'offline' | 'away';
+export type PresenceStatus = "online" | "offline" | "away";
 
 export interface ChatUser {
   id: string;
@@ -11,23 +11,26 @@ export interface ChatUser {
   avatar?: string;
 }
 
-const STORAGE_KEY = 'connectflow:chat-users';
+const STORAGE_KEY = "connectflow:chat-users";
 
 export function loadUsers(): ChatUser[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    logger.warn('Failed to parse stored chat users', { error, tags: ['warning'] });
+    logger.warn("Failed to parse stored chat users", {
+      error,
+      tags: ["warning"],
+    });
     return [];
   }
 }
 
 export function saveUsers(users: ChatUser[]) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
 }
 

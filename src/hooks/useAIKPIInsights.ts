@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { MOCK_KPI_INSIGHTS } from '@/mock/kpi_insights';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { MOCK_KPI_INSIGHTS } from "@/mock/kpi_insights";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 export interface AIKpiInsight {
   metric: string;
@@ -22,7 +22,7 @@ type RangeInput =
   | undefined;
 
 const normalizeCompanyId = (companyId?: string | null) => {
-  if (typeof companyId !== 'string') {
+  if (typeof companyId !== "string") {
     return undefined;
   }
   const trimmed = companyId.trim();
@@ -34,7 +34,7 @@ const normalizeRange = (range: RangeInput) => {
     return undefined;
   }
 
-  if (typeof range === 'string') {
+  if (typeof range === "string") {
     const trimmed = range.trim();
     return trimmed.length > 0 ? trimmed : undefined;
   }
@@ -52,20 +52,28 @@ const normalizeRange = (range: RangeInput) => {
   };
 };
 
-export function useAIKPIInsights(companyId?: string | null, range?: RangeInput) {
+export function useAIKPIInsights(
+  companyId?: string | null,
+  range?: RangeInput,
+) {
   const cleanCompanyId = normalizeCompanyId(companyId);
   const cleanRange = normalizeRange(range);
 
   const queryKey = useMemo(() => {
-    if (typeof cleanRange === 'string') {
-      return ['ai-kpi-insights', cleanCompanyId, cleanRange];
+    if (typeof cleanRange === "string") {
+      return ["ai-kpi-insights", cleanCompanyId, cleanRange];
     }
 
     if (cleanRange) {
-      return ['ai-kpi-insights', cleanCompanyId, cleanRange.start, cleanRange.end];
+      return [
+        "ai-kpi-insights",
+        cleanCompanyId,
+        cleanRange.start,
+        cleanRange.end,
+      ];
     }
 
-    return ['ai-kpi-insights', cleanCompanyId, null];
+    return ["ai-kpi-insights", cleanCompanyId, null];
   }, [cleanCompanyId, cleanRange]);
 
   return useQuery({
@@ -74,31 +82,36 @@ export function useAIKPIInsights(companyId?: string | null, range?: RangeInput) 
     staleTime: 60_000,
     queryFn: async () => {
       if (!cleanCompanyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
       if (!cleanRange) {
-        throw new Error('Missing date range');
+        throw new Error("Missing date range");
       }
 
       const rpcPayload =
-        typeof cleanRange === 'string'
+        typeof cleanRange === "string"
           ? { range_start: cleanRange, range_end: null }
           : cleanRange
             ? { range_start: cleanRange.start, range_end: cleanRange.end }
             : {};
 
-      const { data, error } = await supabase.rpc('get_ai_kpi_insights', {
+      const { data, error } = await supabase.rpc("get_ai_kpi_insights", {
         company_id: cleanCompanyId,
         ...rpcPayload,
       });
 
       if (error) {
-        if (error.message?.includes('get_ai_kpi_insights')) {
+        if (error.message?.includes("get_ai_kpi_insights")) {
           if (appEnv.DEV) {
-            logger.warn('[useAIKPIInsights] RPC get_ai_kpi_insights unavailable, returning mock data', { error: error.message, tags: ['warning'] });
+            logger.warn(
+              "[useAIKPIInsights] RPC get_ai_kpi_insights unavailable, returning mock data",
+              { error: error.message, tags: ["warning"] },
+            );
           }
-          return MOCK_KPI_INSIGHTS.map((item) => ({ ...item })) as AIKpiInsight[];
+          return MOCK_KPI_INSIGHTS.map((item) => ({
+            ...item,
+          })) as AIKpiInsight[];
         }
         throw error;
       }

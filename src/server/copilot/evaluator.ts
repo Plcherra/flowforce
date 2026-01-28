@@ -1,4 +1,4 @@
-import type { Tables } from '../../integrations/supabase/public-types';
+import type { Tables } from "../../integrations/supabase/public-types";
 
 export interface BadgeSuggestion {
   badgeCode: string;
@@ -49,7 +49,7 @@ export interface StaffPerformanceEntry {
   hoursWorked?: number | null;
 }
 
-type CertificationStatus = Tables<'certification_progress'>['status'];
+type CertificationStatus = Tables<"certification_progress">["status"];
 
 export interface CertificationSummary {
   code: string;
@@ -92,7 +92,10 @@ const isWithinDays = (dateISO: string, days: number, now = new Date()) => {
   return diff >= 0 && diff <= days * MS_PER_DAY;
 };
 
-export function evaluateEmployeeContext(context: EmployeeContext, now: Date = new Date()): CopilotDecision {
+export function evaluateEmployeeContext(
+  context: EmployeeContext,
+  now: Date = new Date(),
+): CopilotDecision {
   const badges: BadgeSuggestion[] = [];
   const skillUpdates: SkillUpdate[] = [];
   const coachingNotes: string[] = [];
@@ -109,18 +112,19 @@ export function evaluateEmployeeContext(context: EmployeeContext, now: Date = ne
 
   const positivePerformanceReports = reports.filter(
     (report) =>
-      report.category === 'performance' &&
+      report.category === "performance" &&
       report.severity >= POSITIVE_SEVERITY &&
       isWithinDays(report.date, 30, now),
   );
 
   const noShowCount = performance.filter(
-    (entry) => entry.attendanceStatus === 'absent' && isWithinDays(entry.date, 30, now),
+    (entry) =>
+      entry.attendanceStatus === "absent" && isWithinDays(entry.date, 30, now),
   ).length;
 
   if (positivePerformanceReports.length >= 3 && noShowCount === 0) {
     badges.push({
-      badgeCode: 'CONSISTENCY_STAR',
+      badgeCode: "CONSISTENCY_STAR",
       reason: `${positivePerformanceReports.length} positive performance reports in the last month with zero no-shows`,
       confidence: Math.min(1, positivePerformanceReports.length / 5),
     });
@@ -128,28 +132,31 @@ export function evaluateEmployeeContext(context: EmployeeContext, now: Date = ne
 
   const mentorShiftCount = performance.filter(
     (entry) =>
-      entry.role?.toLowerCase().includes('mentor') &&
-      entry.attendanceStatus === 'present' &&
+      entry.role?.toLowerCase().includes("mentor") &&
+      entry.attendanceStatus === "present" &&
       isWithinDays(entry.date, 90, now),
   ).length;
   if (mentorShiftCount >= 10) {
     badges.push({
-      badgeCode: 'MENTOR',
+      badgeCode: "MENTOR",
       reason: `Completed ${mentorShiftCount} mentor shifts`,
       confidence: Math.min(1, mentorShiftCount / 12),
     });
   }
 
   const lateCount14 = performance.filter(
-    (entry) => entry.attendanceStatus === 'late' && isWithinDays(entry.date, 14, now),
+    (entry) =>
+      entry.attendanceStatus === "late" && isWithinDays(entry.date, 14, now),
   ).length;
   if (lateCount14 >= 2) {
     skillUpdates.push({
-      role: profile.role ?? 'general',
+      role: profile.role ?? "general",
       deltaXP: -20,
-      note: 'Attendance issues: 2+ late arrivals in the last 14 days.',
+      note: "Attendance issues: 2+ late arrivals in the last 14 days.",
     });
-    coachingNotes.push('Coach employee on punctuality (2+ lates in two weeks).');
+    coachingNotes.push(
+      "Coach employee on punctuality (2+ lates in two weeks).",
+    );
   }
 
   skills.forEach((skill) => {
@@ -167,12 +174,13 @@ export function evaluateEmployeeContext(context: EmployeeContext, now: Date = ne
 
   const customerPositive = reports.filter(
     (report) =>
-      report.category === 'customer' &&
+      report.category === "customer" &&
       report.severity >= POSITIVE_SEVERITY &&
       isWithinDays(report.date, 30, now),
   ).length;
   const lateCount30 = performance.filter(
-    (entry) => entry.attendanceStatus === 'late' && isWithinDays(entry.date, 30, now),
+    (entry) =>
+      entry.attendanceStatus === "late" && isWithinDays(entry.date, 30, now),
   ).length;
 
   const reliabilityHigh = noShowCount === 0 && lateCount30 <= 1;
@@ -181,7 +189,10 @@ export function evaluateEmployeeContext(context: EmployeeContext, now: Date = ne
 
   if (promotableSkill && reliabilityHigh && customerPositive >= 2) {
     const currentRole = promotableSkill.role;
-    const proposedRole = currentRole.toLowerCase() === 'barista' ? 'Shift Lead' : `Senior ${currentRole}`;
+    const proposedRole =
+      currentRole.toLowerCase() === "barista"
+        ? "Shift Lead"
+        : `Senior ${currentRole}`;
     promotion = {
       role: proposedRole,
       level: promotableSkill.level + 1,
@@ -193,7 +204,7 @@ export function evaluateEmployeeContext(context: EmployeeContext, now: Date = ne
   certifications
     .filter(
       (cert) =>
-        cert.status === 'earned' &&
+        cert.status === "earned" &&
         cert.badgeCode &&
         !awardedBadges.includes(cert.badgeCode) &&
         !badges.some((suggestion) => suggestion.badgeCode === cert.badgeCode),

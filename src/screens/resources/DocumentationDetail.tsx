@@ -1,9 +1,9 @@
-import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import Breadcrumbs from '@/components/resources/Breadcrumbs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Clock, BookOpen } from 'lucide-react';
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "@/components/resources/Breadcrumbs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, Clock, BookOpen } from "lucide-react";
 
 export default function DocumentationDetail() {
   const { id } = useParams();
@@ -11,23 +11,26 @@ export default function DocumentationDetail() {
 
   const doc = {
     id: 1,
-    title: 'API Documentation',
-    description: 'Complete guide to FlowForce API endpoints and authentication.',
-    content: 'This is the full documentation content...',
-    lastUpdated: '2024-01-20',
-    readTime: '10 min read',
-    category: 'Developer Guide',
-    version: 'v2.1'
+    title: "API Documentation",
+    description:
+      "Complete guide to FlowForce API endpoints and authentication.",
+    content: "This is the full documentation content...",
+    lastUpdated: "2024-01-20",
+    readTime: "10 min read",
+    category: "Developer Guide",
+    version: "v2.1",
   };
 
   if (!doc) {
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          {t('resources.documentation.title')} {t('resources.details.notFound')}
+          {t("resources.documentation.title")} {t("resources.details.notFound")}
         </h1>
         <p className="text-gray-600">
-          {t('resources.details.requestedNotFound', { type: t('resources.documentation.title').toLowerCase() })}
+          {t("resources.details.requestedNotFound", {
+            type: t("resources.documentation.title").toLowerCase(),
+          })}
         </p>
       </div>
     );
@@ -37,9 +40,12 @@ export default function DocumentationDetail() {
     <div className="p-8">
       <Breadcrumbs
         items={[
-          { label: t('resources.title'), href: '/resources' },
-          { label: t('resources.documentation.title'), href: '/resources/documentation' },
-          { label: doc.title }
+          { label: t("resources.title"), href: "/resources" },
+          {
+            label: t("resources.documentation.title"),
+            href: "/resources/documentation",
+          },
+          { label: doc.title },
         ]}
       />
 
@@ -57,7 +63,8 @@ export default function DocumentationDetail() {
           <div className="flex items-center text-sm text-gray-600 space-x-4">
             <div className="flex items-center">
               <CalendarDays className="h-4 w-4 mr-1" />
-              {t('resources.details.lastUpdated')}: {new Date(doc.lastUpdated).toLocaleDateString()}
+              {t("resources.details.lastUpdated")}:{" "}
+              {new Date(doc.lastUpdated).toLocaleDateString()}
             </div>
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
@@ -69,8 +76,8 @@ export default function DocumentationDetail() {
           <div className="prose max-w-none">
             <p>{doc.content}</p>
             <p className="mt-4 text-gray-600">
-              This is a placeholder for the actual documentation content. 
-              The full documentation would be loaded here.
+              This is a placeholder for the actual documentation content. The
+              full documentation would be loaded here.
             </p>
           </div>
         </CardContent>

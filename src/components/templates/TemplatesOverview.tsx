@@ -1,16 +1,15 @@
-
-import { useNavigate, Link } from 'react-router-dom';
-import { BackButton } from '@/components/ui/back-button';
-import { 
+import { useNavigate, Link } from "react-router-dom";
+import { BackButton } from "@/components/ui/back-button";
+import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbSeparator,
-  BreadcrumbPage
-} from '@/components/ui/breadcrumb';
-import { templates } from '@/data/templateData';
-import { TemplateCard } from './TemplateCard';
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import { templates } from "@/data/templateData";
+import { TemplateCard } from "./TemplateCard";
 
 export function TemplatesOverview() {
   const navigate = useNavigate();
@@ -46,17 +45,18 @@ export function TemplatesOverview() {
             Industry Templates
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Get started faster with pre-configured templates designed specifically for your business vertical.
+            Get started faster with pre-configured templates designed
+            specifically for your business vertical.
           </p>
         </div>
 
         {/* Templates Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {Object.entries(templates).map(([key, template]) => (
-            <TemplateCard 
-              key={key} 
-              templateKey={key as keyof typeof templates} 
-              template={template} 
+            <TemplateCard
+              key={key}
+              templateKey={key as keyof typeof templates}
+              template={template}
             />
           ))}
         </div>

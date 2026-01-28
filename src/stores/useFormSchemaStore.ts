@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow';
-import type { FormField, FormFieldType } from '@/types/forms';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { shallow } from "zustand/shallow";
+import type { FormField, FormFieldType } from "@/types/forms";
 
 export interface FormulaDef {
   id: string;
@@ -35,16 +35,23 @@ interface FormSchemaState {
   reset: () => void;
   addSection: (title?: string) => void;
   addField: (sectionId: string, field: Partial<FormField>) => void;
-  updateField: (sectionId: string, fieldId: string, updates: Partial<FormField>) => void;
+  updateField: (
+    sectionId: string,
+    fieldId: string,
+    updates: Partial<FormField>,
+  ) => void;
   removeField: (sectionId: string, fieldId: string) => void;
   reorderField: (sectionId: string, fromIndex: number, toIndex: number) => void;
   upsertFormula: (formula: FormulaDef) => void;
   removeFormula: (formulaId: string) => void;
-  setMetadata: (metadata: NonNullable<FormSchema['metadata']>) => void;
+  setMetadata: (metadata: NonNullable<FormSchema["metadata"]>) => void;
 }
 
 const randomId = () => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return Math.random().toString(36).slice(2, 10);
@@ -63,10 +70,11 @@ export const useFormSchemaStore = create<FormSchemaState>()(
           activeFieldId: schema.sections[0]?.fields[0]?.id ?? null,
         });
       },
-      reset: () => set({ schema: null, activeSectionId: null, activeFieldId: null }),
+      reset: () =>
+        set({ schema: null, activeSectionId: null, activeFieldId: null }),
       setActiveSection: (sectionId) => set({ activeSectionId: sectionId }),
       setActiveField: (fieldId) => set({ activeFieldId: fieldId }),
-      addSection: (title = 'New Section') => {
+      addSection: (title = "New Section") => {
         const current = get().schema;
         if (!current) return;
         const newSection: FormSchemaSection = {
@@ -97,8 +105,8 @@ export const useFormSchemaStore = create<FormSchemaState>()(
               }
               const newField: FormField = {
                 id: randomId(),
-                type: (field.type as FormFieldType) ?? 'text',
-                label: field.label ?? 'New field',
+                type: (field.type as FormFieldType) ?? "text",
+                label: field.label ?? "New field",
                 placeholder: field.placeholder,
                 required: field.required ?? false,
                 options: field.options ?? [],
@@ -158,7 +166,9 @@ export const useFormSchemaStore = create<FormSchemaState>()(
               if (section.id !== sectionId) {
                 return section;
               }
-              const remaining = section.fields.filter((field) => field.id !== fieldId);
+              const remaining = section.fields.filter(
+                (field) => field.id !== fieldId,
+              );
               if (get().activeFieldId === fieldId) {
                 nextActiveField = remaining[0]?.id ?? null;
               }
@@ -195,9 +205,13 @@ export const useFormSchemaStore = create<FormSchemaState>()(
       upsertFormula: (formula) => {
         const current = get().schema;
         if (!current) return;
-        const existingIndex = current.formulas.findIndex((item) => item.id === formula.id);
+        const existingIndex = current.formulas.findIndex(
+          (item) => item.id === formula.id,
+        );
         if (existingIndex === -1) {
-          set({ schema: { ...current, formulas: [...current.formulas, formula] } });
+          set({
+            schema: { ...current, formulas: [...current.formulas, formula] },
+          });
         } else {
           const formulas = [...current.formulas];
           formulas[existingIndex] = formula;
@@ -208,7 +222,10 @@ export const useFormSchemaStore = create<FormSchemaState>()(
         const current = get().schema;
         if (!current) return;
         set({
-          schema: { ...current, formulas: current.formulas.filter((item) => item.id !== formulaId) },
+          schema: {
+            ...current,
+            formulas: current.formulas.filter((item) => item.id !== formulaId),
+          },
         });
       },
       setMetadata: (metadata) => {
@@ -218,10 +235,11 @@ export const useFormSchemaStore = create<FormSchemaState>()(
       },
     }),
     {
-      name: 'form-schema-store',
+      name: "form-schema-store",
       partialize: (state) => ({ schema: state.schema }),
     },
   ),
 );
 
-export const useFormSchema = () => useFormSchemaStore((state) => state.schema, shallow);
+export const useFormSchema = () =>
+  useFormSchemaStore((state) => state.schema, shallow);

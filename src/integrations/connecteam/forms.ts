@@ -5,11 +5,12 @@
  * simply return empty datasets so the rest of the analytics pipeline keeps working.
  */
 
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
-const CONNECTEAM_API_BASE = appEnv.VITE_CONNECTEAM_API_BASE ?? 'https://api.connecteam.com/v1';
-const CONNECTEAM_API_KEY = appEnv.VITE_CONNECTEAM_API_KEY ?? '';
+const CONNECTEAM_API_BASE =
+  appEnv.VITE_CONNECTEAM_API_BASE ?? "https://api.connecteam.com/v1";
+const CONNECTEAM_API_KEY = appEnv.VITE_CONNECTEAM_API_KEY ?? "";
 
 export interface ConnecteamForm {
   id: string;
@@ -30,39 +31,51 @@ interface FetchParams {
   end?: string;
 }
 
-async function callConnecteam<T>(path: string, params: FetchParams = {}): Promise<T> {
+async function callConnecteam<T>(
+  path: string,
+  params: FetchParams = {},
+): Promise<T> {
   if (!CONNECTEAM_API_KEY) {
     // Integration not configured – return empty data
     return Promise.resolve([] as unknown as T);
   }
 
-  const url = new URL(`${CONNECTEAM_API_BASE.replace(/\/$/, '')}/${path.replace(/^\//, '')}`);
-  if (params.start) url.searchParams.set('start', params.start);
-  if (params.end) url.searchParams.set('end', params.end);
+  const url = new URL(
+    `${CONNECTEAM_API_BASE.replace(/\/$/, "")}/${path.replace(/^\//, "")}`,
+  );
+  if (params.start) url.searchParams.set("start", params.start);
+  if (params.end) url.searchParams.set("end", params.end);
 
   const response = await fetch(url.toString(), {
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-KEY': CONNECTEAM_API_KEY,
+      "Content-Type": "application/json",
+      "X-API-KEY": CONNECTEAM_API_KEY,
     },
   });
 
   if (!response.ok) {
-    throw new Error(`Connecteam request failed: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Connecteam request failed: ${response.status} ${response.statusText}`,
+    );
   }
 
   return (await response.json()) as T;
 }
 
-export async function fetchConnecteamForms(params: FetchParams = {}): Promise<ConnecteamForm[]> {
+export async function fetchConnecteamForms(
+  params: FetchParams = {},
+): Promise<ConnecteamForm[]> {
   try {
-    const data = await callConnecteam<{ data: ConnecteamForm[] }>('forms', params);
+    const data = await callConnecteam<{ data: ConnecteamForm[] }>(
+      "forms",
+      params,
+    );
     if (Array.isArray((data as any).data)) {
       return (data as any).data as ConnecteamForm[];
     }
     return data as unknown as ConnecteamForm[];
   } catch (error) {
-    logger.warn('Connecteam forms fetch failed', { error, tags: ['warning'] });
+    logger.warn("Connecteam forms fetch failed", { error, tags: ["warning"] });
     return [];
   }
 }
@@ -73,13 +86,20 @@ export async function fetchConnecteamFormSubmissions(
 ): Promise<ConnecteamFormSubmission[]> {
   if (!formId) return [];
   try {
-    const data = await callConnecteam<{ data: ConnecteamFormSubmission[] }>(`forms/${formId}/submissions`, params);
+    const data = await callConnecteam<{ data: ConnecteamFormSubmission[] }>(
+      `forms/${formId}/submissions`,
+      params,
+    );
     if (Array.isArray((data as any).data)) {
       return (data as any).data as ConnecteamFormSubmission[];
     }
     return data as unknown as ConnecteamFormSubmission[];
   } catch (error) {
-    logger.warn(`Connecteam submissions fetch failed for form ${formId}`, { context: { formId }, error, tags: ['warning'] });
+    logger.warn(`Connecteam submissions fetch failed for form ${formId}`, {
+      context: { formId },
+      error,
+      tags: ["warning"],
+    });
     return [];
   }
 }

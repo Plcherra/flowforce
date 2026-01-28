@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -7,39 +7,46 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useInventoryProductionEvents } from '@/features/inventory/hooks/useInventoryProductionEvents';
-import type { ProductionEvent, ProductionMaterialUsage } from '@/features/inventory/hooks/types';
-import { AlertCircle } from 'lucide-react';
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useInventoryProductionEvents } from "@/features/inventory/hooks/useInventoryProductionEvents";
+import type {
+  ProductionEvent,
+  ProductionMaterialUsage,
+} from "@/features/inventory/hooks/types";
+import { AlertCircle } from "lucide-react";
 
 const currencyFormatter = new Intl.NumberFormat(undefined, {
-  style: 'currency',
-  currency: 'USD',
+  style: "currency",
+  currency: "USD",
 });
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
 });
 
-const unitLabel = (unit?: { name?: string | null; abbreviation?: string | null } | null) => {
-  if (!unit) return 'units';
+const unitLabel = (
+  unit?: { name?: string | null; abbreviation?: string | null } | null,
+) => {
+  if (!unit) return "units";
   const { name, abbreviation } = unit;
-  return abbreviation ? `${name ?? abbreviation} (${abbreviation})` : name ?? 'units';
+  return abbreviation
+    ? `${name ?? abbreviation} (${abbreviation})`
+    : (name ?? "units");
 };
 
-const approvalBadgeVariant = (status: ProductionEvent['approval_status']) => {
+const approvalBadgeVariant = (status: ProductionEvent["approval_status"]) => {
   switch (status) {
-    case 'approved':
-      return 'secondary';
-    case 'rejected':
-      return 'destructive';
+    case "approved":
+      return "secondary";
+    case "rejected":
+      return "destructive";
     default:
-      return 'outline';
+      return "outline";
   }
 };
 
@@ -72,9 +79,12 @@ export function ProductionEventList() {
     return (
       <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-8 text-center">
         <AlertCircle className="mb-2 h-6 w-6 text-muted-foreground" />
-        <p className="mb-1 text-sm font-medium">No production events recorded yet</p>
+        <p className="mb-1 text-sm font-medium">
+          No production events recorded yet
+        </p>
         <p className="text-xs text-muted-foreground">
-          Record your first production run to see material usage, yield, and cost summaries here.
+          Record your first production run to see material usage, yield, and
+          cost summaries here.
         </p>
       </div>
     );
@@ -93,18 +103,23 @@ export function ProductionEventList() {
             <CardHeader className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle className="flex flex-wrap items-center gap-2">
-                  {event.item?.name ?? 'Production Event'}
+                  {event.item?.name ?? "Production Event"}
                   <Badge variant="outline">{event.production_type}</Badge>
                   <Badge variant={approvalBadgeVariant(event.approval_status)}>
                     {event.approval_status}
                   </Badge>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Recorded on {event.produced_at ? dateFormatter.format(new Date(event.produced_at)) : 'N/A'}
+                  Recorded on{" "}
+                  {event.produced_at
+                    ? dateFormatter.format(new Date(event.produced_at))
+                    : "N/A"}
                 </p>
               </div>
               <div className="flex flex-col items-end text-right">
-                <span className="text-xs uppercase text-muted-foreground">Total Output Cost</span>
+                <span className="text-xs uppercase text-muted-foreground">
+                  Total Output Cost
+                </span>
                 <span className="text-lg font-semibold">
                   {currencyFormatter.format(totalCost)}
                 </span>
@@ -113,26 +128,36 @@ export function ProductionEventList() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-4">
                 <div>
-                  <p className="text-xs uppercase text-muted-foreground">Output</p>
+                  <p className="text-xs uppercase text-muted-foreground">
+                    Output
+                  </p>
                   <p className="text-sm font-semibold">
-                    {producedQuantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
+                    {producedQuantity.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}{" "}
                     {unitLabel(event.produced_unit)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase text-muted-foreground">Material Cost</p>
+                  <p className="text-xs uppercase text-muted-foreground">
+                    Material Cost
+                  </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(totalMaterialCost)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase text-muted-foreground">Labor</p>
+                  <p className="text-xs uppercase text-muted-foreground">
+                    Labor
+                  </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(event.labor_cost ?? 0)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase text-muted-foreground">Cost per Unit</p>
+                  <p className="text-xs uppercase text-muted-foreground">
+                    Cost per Unit
+                  </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(event.unit_output_cost ?? 0)}
                   </p>
@@ -145,15 +170,21 @@ export function ProductionEventList() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Ingredient</TableHead>
-                        <TableHead className="text-right">Quantity Used</TableHead>
+                        <TableHead className="text-right">
+                          Quantity Used
+                        </TableHead>
                         <TableHead>Unit</TableHead>
                         <TableHead className="text-right">Cost</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {materials.map((material) => (
-                        <TableRow key={`${event.id}-${material.ingredient_item_id}`}>
-                          <TableCell>{material.ingredient?.name ?? 'Ingredient'}</TableCell>
+                        <TableRow
+                          key={`${event.id}-${material.ingredient_item_id}`}
+                        >
+                          <TableCell>
+                            {material.ingredient?.name ?? "Ingredient"}
+                          </TableCell>
                           <TableCell className="text-right">
                             {material.quantity_used?.toLocaleString(undefined, {
                               maximumFractionDigits: 3,

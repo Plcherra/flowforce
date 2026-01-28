@@ -1,3 +1,3 @@
-export async function runCoverageDetector(orgId: string) {
+export async function runCoverageDetector(_orgId: string) {
   return [];
 }

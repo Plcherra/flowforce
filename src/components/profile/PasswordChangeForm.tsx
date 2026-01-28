@@ -1,25 +1,26 @@
-import { FormEvent, useMemo, useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, Lock } from 'lucide-react';
-import { usePasswordValidation } from '@/hooks/usePasswordValidation';
-import { getPasswordStrengthColor } from '@/utils/passwordValidation';
-import { useAuth } from '@/hooks/useAuth';
+import { FormEvent, useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, CheckCircle2, Lock } from "lucide-react";
+import { usePasswordValidation } from "@/hooks/usePasswordValidation";
+import { getPasswordStrengthColor } from "@/utils/passwordValidation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PasswordChangeForm() {
   const { updatePassword } = useAuth();
-  const { validationResult, validatePassword, hasErrors } = usePasswordValidation();
+  const { validationResult, validatePassword, hasErrors } =
+    usePasswordValidation();
 
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmTouched, setConfirmTouched] = useState(false);
 
   const passwordsMatch = useMemo(
     () => !confirmTouched || confirmPassword === newPassword,
-    [confirmTouched, confirmPassword, newPassword]
+    [confirmTouched, confirmPassword, newPassword],
   );
 
   const canSubmit = useMemo(() => {
@@ -42,11 +43,11 @@ export default function PasswordChangeForm() {
       setIsSubmitting(true);
       const { error } = await updatePassword(newPassword);
       if (!error) {
-        setNewPassword('');
-        setConfirmPassword('');
+        setNewPassword("");
+        setConfirmPassword("");
         setPasswordTouched(false);
         setConfirmTouched(false);
-        validatePassword('');
+        validatePassword("");
       }
     } finally {
       setIsSubmitting(false);
@@ -86,7 +87,9 @@ export default function PasswordChangeForm() {
             autoComplete="new-password"
           />
           {strengthLabel && (
-            <p className={`text-xs ${getPasswordStrengthColor(validationResult.strength)}`}>
+            <p
+              className={`text-xs ${getPasswordStrengthColor(validationResult.strength)}`}
+            >
               Strength: {strengthLabel}
             </p>
           )}
@@ -131,7 +134,7 @@ export default function PasswordChangeForm() {
 
         <div className="flex justify-end">
           <Button type="submit" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? 'Updating...' : 'Update Password'}
+            {isSubmitting ? "Updating..." : "Update Password"}
           </Button>
         </div>
       </form>

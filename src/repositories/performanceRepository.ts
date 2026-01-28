@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { goalStatusSchema } from '@/services/performance/performanceTypes';
+import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { goalStatusSchema } from "@/services/performance/performanceTypes";
 
 const profileRowSchema = z
   .object({
@@ -105,19 +105,23 @@ export type StaffPerformanceRow = z.infer<typeof staffPerformanceRowSchema>;
 export type PerformanceReviewRow = z.infer<typeof performanceReviewRowSchema>;
 export type PerformanceGoalRow = z.infer<typeof goalRowSchema>;
 export type GoalParticipantRow = z.infer<typeof goalParticipantRowSchema>;
-export type PerformanceGoalReviewRow = z.infer<typeof performanceGoalReviewRowSchema>;
+export type PerformanceGoalReviewRow = z.infer<
+  typeof performanceGoalReviewRowSchema
+>;
 
 export async function fetchActivePerformanceProfiles(
   client: SupabaseClient = supabase,
   companyId: string | null = null,
 ): Promise<PerformanceProfileRow[]> {
   let query = client
-    .from('profiles')
-    .select('id, first_name, last_name, role, avatar_url, employment_status, company_id')
-    .eq('employment_status', 'active');
+    .from("profiles")
+    .select(
+      "id, first_name, last_name, role, avatar_url, employment_status, company_id",
+    )
+    .eq("employment_status", "active");
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;
@@ -130,9 +134,9 @@ export async function fetchStaffPerformanceRowsSince(
   sinceDate: string,
 ): Promise<StaffPerformanceRow[]> {
   const { data, error } = await client
-    .from('staff_performance')
-    .select('id, user_id, performance_score, attendance_status, date')
-    .gte('date', sinceDate);
+    .from("staff_performance")
+    .select("id, user_id, performance_score, attendance_status, date")
+    .gte("date", sinceDate);
   if (error) throw error;
   return staffPerformanceRowSchema.array().parse(data ?? []);
 }
@@ -143,31 +147,31 @@ export async function fetchPerformanceReviewsSince(
   companyId: string | null = null,
 ): Promise<PerformanceReviewRow[]> {
   let query = client
-    .from('performance_reviews')
+    .from("performance_reviews")
     .select(
       [
-        'id',
-        'company_id',
-        'employee_id',
-        'goal_id',
-        'review_cycle',
-        'review_period_start',
-        'review_period_end',
-        'review_date',
-        'reviewer_id',
-        'score',
-        'summary',
-        'ai_summary',
-        'action_items',
-        'ai_insight_id',
-        'created_at',
-        'updated_at',
-      ].join(','),
+        "id",
+        "company_id",
+        "employee_id",
+        "goal_id",
+        "review_cycle",
+        "review_period_start",
+        "review_period_end",
+        "review_date",
+        "reviewer_id",
+        "score",
+        "summary",
+        "ai_summary",
+        "action_items",
+        "ai_insight_id",
+        "created_at",
+        "updated_at",
+      ].join(","),
     )
-    .gte('review_date', sinceDate);
+    .gte("review_date", sinceDate);
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;
@@ -180,11 +184,13 @@ export async function fetchPerformanceGoals(
   companyId: string | null = null,
 ): Promise<PerformanceGoalRow[]> {
   let query = client
-    .from('goals')
-    .select('id, title, status, progress, target_completion_date, created_at, company_id');
+    .from("goals")
+    .select(
+      "id, title, status, progress, target_completion_date, created_at, company_id",
+    );
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;
@@ -201,9 +207,9 @@ export async function fetchGoalParticipantsByGoalIds(
   }
 
   const { data, error } = await client
-    .from('goal_participants')
-    .select('id, goal_id, user_id, role, contribution_score')
-    .in('goal_id', goalIds);
+    .from("goal_participants")
+    .select("id, goal_id, user_id, role, contribution_score")
+    .in("goal_id", goalIds);
 
   if (error) throw error;
   return goalParticipantRowSchema.array().parse(data ?? []);
@@ -215,13 +221,13 @@ export async function fetchPerformanceGoalReviewRows(
   limit = 200,
 ): Promise<PerformanceGoalReviewRow[]> {
   let query = client
-    .from('performance_goal_reviews')
-    .select('*')
-    .order('review_date', { ascending: false })
+    .from("performance_goal_reviews")
+    .select("*")
+    .order("review_date", { ascending: false })
     .limit(limit);
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;

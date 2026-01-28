@@ -1,26 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
-import { CookbookService, type CookbookRecipe } from '@/services/cookbook';
-import type { InventoryItem, InventoryUnit } from './inventory/types';
-import type { InventoryWaste } from '@/features/inventory/hooks/useInventoryWaste';
-import { useToast } from './use-toast';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
+import { CookbookService, type CookbookRecipe } from "@/services/cookbook";
+import type { InventoryItem, InventoryUnit } from "./inventory/types";
+import type { InventoryWaste } from "@/features/inventory/hooks/useInventoryWaste";
+import { useToast } from "./use-toast";
+import { logger } from "@/utils/logger";
 
 export type UOM =
-  | 'each'
-  | 'lb'
-  | 'oz'
-  | 'kg'
-  | 'g'
-  | 'liter'
-  | 'ml'
-  | 'gal'
-  | 'qt'
-  | 'cup'
-  | 'tbsp'
-  | 'tsp';
+  | "each"
+  | "lb"
+  | "oz"
+  | "kg"
+  | "g"
+  | "liter"
+  | "ml"
+  | "gal"
+  | "qt"
+  | "cup"
+  | "tbsp"
+  | "tsp";
 
 export interface MenuItem {
   id: string;
@@ -58,7 +58,14 @@ interface ProductionEventInput {
 interface WasteEventInput {
   item_id: string;
   quantity: number;
-  waste_type: 'spoilage' | 'prep_error' | 'accident' | 'theft' | 'expired' | 'damaged' | 'other';
+  waste_type:
+    | "spoilage"
+    | "prep_error"
+    | "accident"
+    | "theft"
+    | "expired"
+    | "damaged"
+    | "other";
   reason?: string;
 }
 
@@ -82,9 +89,9 @@ export function useCookbook() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     try {
-      const stored = window.localStorage.getItem('cookbook:favorites');
+      const stored = window.localStorage.getItem("cookbook:favorites");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -92,44 +99,57 @@ export function useCookbook() {
         }
       }
     } catch (err) {
-      logger.warn('Failed to load favorites from storage', { error: err, tags: ['warning'] });
+      logger.warn("Failed to load favorites from storage", {
+        error: err,
+        tags: ["warning"],
+      });
     }
   }, []);
 
   const itemsQuery = useQuery({
-    queryKey: ['inventory-items', user?.id],
+    queryKey: ["inventory-items", user?.id],
     queryFn: () => InventoryService.listItems(),
     staleTime: 5 * 60 * 1000,
+    throwOnError: false,
+    retry: 1,
   });
 
   const recipesQuery = useQuery({
-    queryKey: ['cookbook-recipes', user?.id],
+    queryKey: ["cookbook-recipes", user?.id],
     queryFn: () => CookbookService.listRecipes(),
     staleTime: 5 * 60 * 1000,
     enabled: !!user,
+    throwOnError: false,
+    retry: 1,
   });
 
   const productionQuery = useQuery<ProductionEventRecord[]>({
-    queryKey: ['cookbook-production', user?.id],
+    queryKey: ["cookbook-production", user?.id],
     queryFn: () => CookbookService.listProductionEvents(7),
     staleTime: 2 * 60 * 1000,
     enabled: !!user,
+    throwOnError: false,
+    retry: 1,
   });
 
   const wasteQuery = useQuery<InventoryWaste[]>({
-    queryKey: ['inventory-waste', user?.id],
+    queryKey: ["inventory-waste", user?.id],
     queryFn: () => InventoryService.getWasteEvents(),
     staleTime: 5 * 60 * 1000,
     enabled: !!user,
+    throwOnError: false,
+    retry: 1,
   });
 
   const items = useMemo<InventoryItem[]>(() => {
-    if (Array.isArray(itemsQuery.data) && itemsQuery.data.length > 0) return itemsQuery.data;
+    if (Array.isArray(itemsQuery.data) && itemsQuery.data.length > 0)
+      return itemsQuery.data;
     return getDemoItems();
   }, [itemsQuery.data]);
 
   const recipes = useMemo<CookbookRecipe[]>(() => {
-    if (Array.isArray(recipesQuery.data) && recipesQuery.data.length > 0) return recipesQuery.data;
+    if (Array.isArray(recipesQuery.data) && recipesQuery.data.length > 0)
+      return recipesQuery.data;
     return buildDemoRecipes(items);
   }, [recipesQuery.data, items]);
 
@@ -143,7 +163,7 @@ export function useCookbook() {
 
   const favorites = useMemo(
     () => recipes.filter((recipe) => favoriteIds.includes(recipe.item.id)),
-    [recipes, favoriteIds]
+    [recipes, favoriteIds],
   );
 
   const menuItems = useMemo<MenuItem[]>(() => {
@@ -151,7 +171,7 @@ export function useCookbook() {
       id: `menu-${recipe.item.id}`,
       name: recipe.item.name,
       description: recipe.item.description || recipe.item.category || undefined,
-      category: recipe.item.category || 'recipe',
+      category: recipe.item.category || "recipe",
       pos_code: recipe.item.sku,
       recipe_id: recipe.item.id,
       cost_per_serving: Number.isFinite(recipe.costPerUnit)
@@ -169,8 +189,10 @@ export function useCookbook() {
         id: item.id,
         name: item.name,
         par_min: Number(item.min_stock_level ?? 0),
-        par_max: Number(item.max_stock_level ?? Math.max(0, (item.min_stock_level ?? 0) * 2)),
-        uom: (item.unit?.abbreviation as UOM) || 'each',
+        par_max: Number(
+          item.max_stock_level ?? Math.max(0, (item.min_stock_level ?? 0) * 2),
+        ),
+        uom: (item.unit?.abbreviation as UOM) || "each",
         recipe: recipeMap.get(item.id) ?? null,
       }));
   }, [items, recipeMap]);
@@ -180,7 +202,7 @@ export function useCookbook() {
       const latest = counts.find((row) => row.item_id === itemId);
       return latest?.on_hand ?? 0;
     },
-    [counts]
+    [counts],
   );
 
   const suggestToMake = useCallback(
@@ -189,7 +211,7 @@ export function useCookbook() {
       const needed = Math.max(0, item.par_max - onHand);
       return { onHand, needed };
     },
-    [getOnHand]
+    [getOnHand],
   );
 
   const toggleFavorite = useCallback((recipeId: string) => {
@@ -197,8 +219,8 @@ export function useCookbook() {
       const next = prev.includes(recipeId)
         ? prev.filter((id) => id !== recipeId)
         : [...prev, recipeId];
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('cookbook:favorites', JSON.stringify(next));
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("cookbook:favorites", JSON.stringify(next));
       }
       return next;
     });
@@ -213,12 +235,12 @@ export function useCookbook() {
       }));
       setCounts((prev) => [...payload, ...prev]);
       toast({
-        title: 'Daily count saved',
-        description: 'Inventory counts have been recorded for today',
+        title: "Daily count saved",
+        description: "Inventory counts have been recorded for today",
       });
       return payload;
     },
-    [toast]
+    [toast],
   );
 
   const createProduction = useCallback(
@@ -226,9 +248,9 @@ export function useCookbook() {
       const recipe = recipeMap.get(item_id);
       if (!recipe) {
         toast({
-          title: 'Recipe not linked',
-          description: 'This prep item is not linked to a cookbook recipe yet.',
-          variant: 'destructive',
+          title: "Recipe not linked",
+          description: "This prep item is not linked to a cookbook recipe yet.",
+          variant: "destructive",
         });
         return null;
       }
@@ -241,24 +263,27 @@ export function useCookbook() {
           note,
         });
         await CookbookService.deductIngredients(recipe, qty);
-        queryClient.invalidateQueries({ queryKey: ['cookbook-production'] });
-        queryClient.invalidateQueries({ queryKey: ['inventory-adjustments'] });
+        queryClient.invalidateQueries({ queryKey: ["cookbook-production"] });
+        queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
         toast({
-          title: 'Production logged',
+          title: "Production logged",
           description: `${recipe.item.name} production recorded with smart inventory deduction.`,
         });
       } catch (err) {
-        logger.warn('Failed to log production, falling back to demo mode', { error: err, tags: ['warning'] });
+        logger.warn("Failed to log production, falling back to demo mode", {
+          error: err,
+          tags: ["warning"],
+        });
         toast({
-          title: 'Demo mode: production simulated',
+          title: "Demo mode: production simulated",
           description:
-            'Production events will be tracked locally until Supabase tables are available.',
+            "Production events will be tracked locally until Supabase tables are available.",
         });
       }
 
       return;
     },
-    [toast, recipeMap, queryClient]
+    [toast, recipeMap, queryClient],
   );
 
   const exportRecipeSheet = useCallback(
@@ -269,7 +294,7 @@ export function useCookbook() {
       const filename = `${slugify(recipe.item.name)}-recipe-sheet.csv`;
       return { csv, filename };
     },
-    [recipeMap]
+    [recipeMap],
   );
 
   const exportDailyPrepSummary = useCallback(() => {
@@ -284,16 +309,16 @@ export function useCookbook() {
           scheduledQty: suggested.needed,
           uom: prepItem.uom,
           ingredients: recipe.lines.map((line) => ({
-            name: line.ingredient?.name ?? 'Unknown',
+            name: line.ingredient?.name ?? "Unknown",
             quantity: line.quantity_needed * Math.max(1, suggested.needed || 1),
-            unit: line.unit?.abbreviation || line.unit?.name || '',
+            unit: line.unit?.abbreviation || line.unit?.name || "",
           })),
         };
       })
       .filter((entry): entry is NonNullable<typeof entry> => !!entry);
 
     const csv = CookbookService.buildPrepSummaryCsv(summary);
-    const filename = `daily-prep-summary-${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = `daily-prep-summary-${new Date().toISOString().split("T")[0]}.csv`;
     return { csv, filename };
   }, [prepItems, suggestToMake]);
 
@@ -312,20 +337,24 @@ export function useCookbook() {
           waste_type,
           reason,
         });
-        queryClient.invalidateQueries({ queryKey: ['inventory-waste'] });
+        queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
         toast({
-          title: 'Waste recorded',
-          description: 'Waste event captured and inventory updated.',
+          title: "Waste recorded",
+          description: "Waste event captured and inventory updated.",
         });
       } catch (err) {
-        logger.warn('Failed to record waste, falling back to demo mode', { error: err, tags: ['warning'] });
+        logger.warn("Failed to record waste, falling back to demo mode", {
+          error: err,
+          tags: ["warning"],
+        });
         toast({
-          title: 'Demo mode: waste logged locally',
-          description: 'Waste tracking will sync once Supabase tables are available.',
+          title: "Demo mode: waste logged locally",
+          description:
+            "Waste tracking will sync once Supabase tables are available.",
         });
       }
     },
-    [queryClient, toast]
+    [queryClient, toast],
   );
 
   return {
@@ -341,7 +370,7 @@ export function useCookbook() {
     productionEvents: productionQuery.data ?? [],
     createCount,
     createProduction,
-     logWaste,
+    logWaste,
     suggestToMake,
     toggleFavorite,
     exportRecipeSheet,
@@ -353,34 +382,36 @@ export function useCookbook() {
 function slugify(value: string) {
   return value
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function generateId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return Math.random().toString(36).slice(2);
 }
 
-
 function getDemoItems(): InventoryItem[] {
   const unitEach: InventoryUnit = {
-    id: 'demo-unit-each',
-    name: 'Each',
-    abbreviation: 'ea',
-    unit_type: 'count',
+    id: "demo-unit-each",
+    name: "Each",
+    abbreviation: "ea",
+    unit_type: "count",
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
 
   const unitLb: InventoryUnit = {
-    id: 'demo-unit-lb',
-    name: 'Pound',
-    abbreviation: 'lb',
-    unit_type: 'weight',
+    id: "demo-unit-lb",
+    name: "Pound",
+    abbreviation: "lb",
+    unit_type: "weight",
     conversion_factor: 1,
     is_active: true,
     created_at: new Date().toISOString(),
@@ -391,12 +422,12 @@ function getDemoItems(): InventoryItem[] {
 
   return [
     {
-      id: 'demo-recipe-classic-burger',
-      company_id: 'demo-company',
-      name: 'Classic Burger',
-      description: 'Calories: 520; Protein: 28g; Carbs: 32g; Fat: 30g',
-      sku: 'CB-001',
-      category: 'Entree',
+      id: "demo-recipe-classic-burger",
+      company_id: "demo-company",
+      name: "Classic Burger",
+      description: "Calories: 520; Protein: 28g; Carbs: 32g; Fat: 30g",
+      sku: "CB-001",
+      category: "Entree",
       unit_id: unitEach.id,
       unit: unitEach,
       unit_quantity: 1,
@@ -406,16 +437,16 @@ function getDemoItems(): InventoryItem[] {
       shelf_life_days: 3,
       is_prep_item: true,
       is_active: true,
-      created_by: 'demo-user',
+      created_by: "demo-user",
       created_at: now,
       updated_at: now,
     } as InventoryItem,
     {
-      id: 'demo-ingredient-buns',
-      company_id: 'demo-company',
-      name: 'Burger Buns',
-      sku: 'ING-001',
-      category: 'Bread',
+      id: "demo-ingredient-buns",
+      company_id: "demo-company",
+      name: "Burger Buns",
+      sku: "ING-001",
+      category: "Bread",
       unit_id: unitEach.id,
       unit: unitEach,
       unit_quantity: 12,
@@ -425,17 +456,17 @@ function getDemoItems(): InventoryItem[] {
       shelf_life_days: 5,
       is_prep_item: false,
       is_active: true,
-      description: 'Soft brioche buns for burgers',
-      created_by: 'demo-user',
+      description: "Soft brioche buns for burgers",
+      created_by: "demo-user",
       created_at: now,
       updated_at: now,
     } as InventoryItem,
     {
-      id: 'demo-ingredient-beef',
-      company_id: 'demo-company',
-      name: 'Ground Beef 80/20',
-      sku: 'ING-002',
-      category: 'Protein',
+      id: "demo-ingredient-beef",
+      company_id: "demo-company",
+      name: "Ground Beef 80/20",
+      sku: "ING-002",
+      category: "Protein",
       unit_id: unitLb.id,
       unit: unitLb,
       unit_quantity: 10,
@@ -445,8 +476,8 @@ function getDemoItems(): InventoryItem[] {
       shelf_life_days: 4,
       is_prep_item: false,
       is_active: true,
-      description: 'Premium ground beef for burgers',
-      created_by: 'demo-user',
+      description: "Premium ground beef for burgers",
+      created_by: "demo-user",
       created_at: now,
       updated_at: now,
     } as InventoryItem,
@@ -462,12 +493,12 @@ function buildDemoRecipes(items: InventoryItem[]): CookbookRecipe[] {
 
   const lines = [
     {
-      id: 'demo-line-buns',
+      id: "demo-line-buns",
       item_id: recipeItem.id,
       ingredient_id: bun.id,
       quantity_needed: 4,
       unit_id: bun.unit_id,
-      notes: 'Ensure buns are toasted',
+      notes: "Ensure buns are toasted",
       yield_amount: 4,
       ingredient: bun,
       unit: bun.unit,
@@ -475,12 +506,12 @@ function buildDemoRecipes(items: InventoryItem[]): CookbookRecipe[] {
       updated_at: new Date().toISOString(),
     },
     {
-      id: 'demo-line-beef',
+      id: "demo-line-beef",
       item_id: recipeItem.id,
       ingredient_id: beef.id,
       quantity_needed: 1.5,
       unit_id: beef.unit_id,
-      notes: 'Season with salt and pepper',
+      notes: "Season with salt and pepper",
       yield_amount: 4,
       ingredient: beef,
       unit: beef.unit,

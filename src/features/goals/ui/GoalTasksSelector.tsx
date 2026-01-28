@@ -1,22 +1,25 @@
-import { useMemo, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { useTasks, type TaskWithRelations, labelFor } from '@/hooks/useTasks';
-import { useToast } from '@/hooks/use-toast';
-import { linkTaskToGoal, unlinkTask } from '@/features/goals/services/goalTaskLinks';
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useTasks, type TaskWithRelations, labelFor } from "@/hooks/useTasks";
+import { useToast } from "@/hooks/use-toast";
+import {
+  linkTaskToGoal,
+  unlinkTask,
+} from "@/features/goals/services/goalTaskLinks";
 
 const WEIGHT_OPTIONS = [1, 2, 3, 4, 5];
 
@@ -28,10 +31,14 @@ interface GoalTasksSelectorProps {
   onSelectionChange: (taskId: string, weight: number | null) => void;
 }
 
-export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }: GoalTasksSelectorProps) {
+export function GoalTasksSelector({
+  goalId,
+  selectedWeights,
+  onSelectionChange,
+}: GoalTasksSelectorProps) {
   const { tasks, loading } = useTasks();
   const { toast } = useToast();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
 
   const filteredTasks = useMemo(() => {
@@ -41,7 +48,8 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
 
     const normalized = search.trim().toLowerCase();
     return tasks.filter((task) => {
-      const haystack = `${task.title ?? ''} ${task.description ?? ''}`.toLowerCase();
+      const haystack =
+        `${task.title ?? ""} ${task.description ?? ""}`.toLowerCase();
       return haystack.includes(normalized);
     });
   }, [search, tasks]);
@@ -67,9 +75,10 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
     } catch (error) {
       onSelectionChange(taskId, nextChecked ? null : previousWeight);
       toast({
-        title: 'Unable to update goal tasks',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
-        variant: 'destructive',
+        title: "Unable to update goal tasks",
+        description:
+          error instanceof Error ? error.message : "Try again shortly.",
+        variant: "destructive",
       });
     } finally {
       setPendingTaskId((current) => (current === taskId ? null : current));
@@ -95,9 +104,10 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
     } catch (error) {
       onSelectionChange(taskId, currentWeight);
       toast({
-        title: 'Unable to update task weight',
-        description: error instanceof Error ? error.message : 'Try again shortly.',
-        variant: 'destructive',
+        title: "Unable to update task weight",
+        description:
+          error instanceof Error ? error.message : "Try again shortly.",
+        variant: "destructive",
       });
     } finally {
       setPendingTaskId((current) => (current === taskId ? null : current));
@@ -110,7 +120,9 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
     <div className="space-y-3 rounded-xl border border-border/70 bg-muted/30 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <Label className="text-sm font-semibold text-foreground">Linked tasks</Label>
+          <Label className="text-sm font-semibold text-foreground">
+            Linked tasks
+          </Label>
           <p className="text-xs text-muted-foreground">
             Select tasks that contribute to this goal and assign their weight.
           </p>
@@ -132,7 +144,9 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
           </div>
         ) : filteredTasks.length === 0 ? (
           <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-            {search.trim() ? 'No tasks match your search.' : 'No tasks available yet.'}
+            {search.trim()
+              ? "No tasks match your search."
+              : "No tasks available yet."}
           </div>
         ) : (
           <ul className="divide-y divide-border/60">
@@ -145,8 +159,8 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
                 <li
                   key={task.id}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2 transition',
-                    isSelected ? 'bg-muted/40' : 'bg-background',
+                    "flex items-center gap-3 px-3 py-2 transition",
+                    isSelected ? "bg-muted/40" : "bg-background",
                   )}
                 >
                   <Checkbox
@@ -160,14 +174,16 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
                   <div className="flex flex-1 flex-col overflow-hidden">
                     <div className="flex items-center gap-2">
                       <p className="flex-1 truncate font-medium text-foreground">
-                        {task.title ?? 'Untitled task'}
+                        {task.title ?? "Untitled task"}
                       </p>
-                    <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs">
                         {labelFor(task.status)}
                       </Badge>
                     </div>
                     {task.description && (
-                      <p className="truncate text-xs text-muted-foreground">{task.description}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {task.description}
+                      </p>
                     )}
                   </div>
                   <Select
@@ -191,7 +207,9 @@ export function GoalTasksSelector({ goalId, selectedWeights, onSelectionChange }
                       ))}
                     </SelectContent>
                   </Select>
-                  {disabled && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  {disabled && (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
                 </li>
               );
             })}

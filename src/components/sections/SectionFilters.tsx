@@ -1,20 +1,21 @@
-
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search } from "lucide-react";
 
 interface SectionFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  categoryFilter: 'all' | 'core' | 'industry' | 'custom' | 'operations';
-  onCategoryChange: (value: 'all' | 'core' | 'industry' | 'custom' | 'operations') => void;
+  categoryFilter: "all" | "core" | "industry" | "custom" | "operations";
+  onCategoryChange: (
+    value: "all" | "core" | "industry" | "custom" | "operations",
+  ) => void;
 }
 
 export default function SectionFilters({
   searchTerm,
   onSearchChange,
   categoryFilter,
-  onCategoryChange
+  onCategoryChange,
 }: SectionFiltersProps) {
   return (
     <div className="flex items-center space-x-4">
@@ -27,7 +28,10 @@ export default function SectionFilters({
           className="pl-10"
         />
       </div>
-      <Tabs value={categoryFilter} onValueChange={(value: any) => onCategoryChange(value)}>
+      <Tabs
+        value={categoryFilter}
+        onValueChange={(value: any) => onCategoryChange(value)}
+      >
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="core">Core</TabsTrigger>

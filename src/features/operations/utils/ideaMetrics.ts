@@ -1,5 +1,5 @@
-import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
-import type { DateRange } from '@/modules/operations/hooks/useIdeaInsights';
+import type { IdeaKpiInsight } from "@/modules/operations/hooks/useIdeaInsights";
+import type { DateRange } from "@/modules/operations/hooks/useIdeaInsights";
 
 export type MetricsPayload = Array<{
   metric: string | undefined;
@@ -19,17 +19,20 @@ export const severityConfidence: Record<string, number> = {
 
 export function resolveSeverity(delta: number) {
   const absolute = Math.abs(delta);
-  if (absolute >= 10) return 'critical';
-  if (absolute >= 5) return 'warning';
-  return 'info';
+  if (absolute >= 10) return "critical";
+  if (absolute >= 5) return "warning";
+  return "info";
 }
 
-export function buildMetricsPayload(insights: IdeaKpiInsight[], observedAtISO: string): MetricsPayload {
+export function buildMetricsPayload(
+  insights: IdeaKpiInsight[],
+  observedAtISO: string,
+): MetricsPayload {
   return insights.map((insight) => ({
     metric: insight.label ?? insight.id,
     value: insight.value,
     change: insight.delta ?? 0,
-    trend: insight.trend ?? 'flat',
+    trend: insight.trend ?? "flat",
     unit: insight.unit ?? undefined,
     observedAt: observedAtISO,
     metadata: {
@@ -44,12 +47,12 @@ export function buildSignalsFromMetrics(metrics: MetricsPayload) {
     .map((metric) => {
       const severity = resolveSeverity(metric.change ?? 0);
       return {
-        type: 'kpi',
+        type: "kpi",
         severity,
         message:
           metric.change && metric.change < 0
-            ? `${metric.metric} decreased by ${Math.abs(metric.change).toFixed(1)}${metric.unit ?? ''}`
-            : `${metric.metric} increased by ${Math.abs(metric.change ?? 0).toFixed(1)}${metric.unit ?? ''}`,
+            ? `${metric.metric} decreased by ${Math.abs(metric.change).toFixed(1)}${metric.unit ?? ""}`
+            : `${metric.metric} increased by ${Math.abs(metric.change ?? 0).toFixed(1)}${metric.unit ?? ""}`,
         metric: metric.metric,
         observedAt: metric.observedAt,
         metadata: {

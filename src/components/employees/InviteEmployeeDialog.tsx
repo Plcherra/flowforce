@@ -1,12 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { useInvites } from '@/hooks/useInvites';
-import { useTeamManagement } from '@/hooks/useTeamManagement';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useInvites } from "@/hooks/useInvites";
+import { useTeamManagement } from "@/hooks/useTeamManagement";
+import { useToast } from "@/hooks/use-toast";
 
 type InviteEmployeeDialogProps = {
   open: boolean;
@@ -22,13 +33,17 @@ type InviteFormState = {
 };
 
 const DEFAULT_FORM: InviteFormState = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  role: 'staff',
+  firstName: "",
+  lastName: "",
+  email: "",
+  role: "staff",
 };
 
-export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEmployeeDialogProps) {
+export function InviteEmployeeDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: InviteEmployeeDialogProps) {
   const [form, setForm] = useState<InviteFormState>(DEFAULT_FORM);
   const { sendInvite, isSending } = useInvites();
   const { roles, isLoading } = useTeamManagement();
@@ -37,9 +52,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
   const roleOptions = useMemo(() => {
     if (!roles.length) {
       return [
-        { id: 'staff', name: 'Staff' },
-        { id: 'manager', name: 'Manager' },
-        { id: 'supervisor', name: 'Supervisor' },
+        { id: "staff", name: "Staff" },
+        { id: "manager", name: "Manager" },
+        { id: "supervisor", name: "Supervisor" },
       ];
     }
     return roles.map((role) => ({ id: role.id, name: role.name }));
@@ -64,9 +79,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
     event.preventDefault();
     if (!form.email) {
       toast({
-        variant: 'destructive',
-        title: 'Email required',
-        description: 'Add an email address before sending an invitation.',
+        variant: "destructive",
+        title: "Email required",
+        description: "Add an email address before sending an invitation.",
       });
       return;
     }
@@ -79,8 +94,8 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
 
     if (result.success) {
       toast({
-        title: 'Invitation sent',
-        description: 'We emailed the invite and let the teammate know.',
+        title: "Invitation sent",
+        description: "We emailed the invite and let the teammate know.",
       });
       onOpenChange(false);
       onSuccess?.();
@@ -89,9 +104,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
     }
 
     toast({
-      variant: 'destructive',
-      title: 'Unable to send invite',
-      description: result.message,
+      variant: "destructive",
+      title: "Unable to send invite",
+      description: result.success === false && 'message' in result ? result.message : "Failed to send invitation. Please try again.",
     });
   };
 
@@ -108,7 +123,12 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
               <Input
                 id="invite-first-name"
                 value={form.firstName}
-                onChange={(event) => setForm((prev) => ({ ...prev, firstName: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    firstName: event.target.value,
+                  }))
+                }
                 placeholder="Taylor"
               />
             </div>
@@ -117,7 +137,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
               <Input
                 id="invite-last-name"
                 value={form.lastName}
-                onChange={(event) => setForm((prev) => ({ ...prev, lastName: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, lastName: event.target.value }))
+                }
                 placeholder="Rivera"
               />
             </div>
@@ -130,7 +152,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
               type="email"
               required
               value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, email: event.target.value }))
+              }
               placeholder="taylor@example.com"
             />
           </div>
@@ -139,7 +163,9 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
             <Label>Role</Label>
             <Select
               value={form.role}
-              onValueChange={(value) => setForm((prev) => ({ ...prev, role: value }))}
+              onValueChange={(value) =>
+                setForm((prev) => ({ ...prev, role: value }))
+              }
               disabled={isLoading}
             >
               <SelectTrigger>
@@ -156,11 +182,15 @@ export function InviteEmployeeDialog({ open, onOpenChange, onSuccess }: InviteEm
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSending}>
-              {isSending ? 'Sending…' : 'Send invite'}
+              {isSending ? "Sending…" : "Send invite"}
             </Button>
           </div>
         </form>

@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import dayjs from 'dayjs';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import { describe, it, expect } from "vitest";
+import dayjs from "dayjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type {
+  TablesInsert,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
 import {
   determineReviewStatus,
   fetchPerformanceDataset,
@@ -9,8 +12,8 @@ import {
   updatePerformanceRecord,
   deletePerformanceRecord,
   simulatePerformanceCrud,
-} from '@/services/performance/performanceService';
-import { generateMockPerformanceDataset } from '@/services/performance/performanceMocks';
+} from "@/services/performance/performanceService";
+import { generateMockPerformanceDataset } from "@/services/performance/performanceMocks";
 
 type QueryResult = { data: any; error: any };
 
@@ -23,7 +26,9 @@ function createQueryBuilder(result: QueryResult) {
     limit: () => builder,
     single: () =>
       createQueryBuilder({
-        data: Array.isArray(result.data) ? result.data[0] ?? null : result.data,
+        data: Array.isArray(result.data)
+          ? (result.data[0] ?? null)
+          : result.data,
         error: result.error,
       }),
     then: (onFulfilled: any, onRejected: any) =>
@@ -50,19 +55,19 @@ function createDatasetSupabaseStub(responses: Record<string, QueryResult>) {
 
 function createCrudSupabaseStub() {
   const state = {
-    insertPayload: null as TablesInsert<'staff_performance'> | null,
-    updatePayload: null as TablesUpdate<'staff_performance'> | null,
+    insertPayload: null as TablesInsert<"staff_performance"> | null,
+    updatePayload: null as TablesUpdate<"staff_performance"> | null,
     updateFilter: null as { column: string; value: unknown } | null,
     deleteFilter: null as { column: string; value: unknown } | null,
   };
 
   const insertedRecord = {
-    id: 'perf-record-1',
-    user_id: 'emp-1',
-    date: '2025-01-01',
-    role: 'Barista',
+    id: "perf-record-1",
+    user_id: "emp-1",
+    date: "2025-01-01",
+    role: "Barista",
     performance_score: 4,
-    attendance_status: 'present',
+    attendance_status: "present",
     created_at: dayjs().toISOString(),
     notes: null,
     overtime_hours: null,
@@ -80,22 +85,23 @@ function createCrudSupabaseStub() {
       getUser: () => Promise.resolve({ data: { user: null }, error: null }),
     },
     from(table: string) {
-      if (table !== 'staff_performance') {
+      if (table !== "staff_performance") {
         throw new Error(`Unexpected table requested: ${table}`);
       }
       return {
-        insert(payload: TablesInsert<'staff_performance'>) {
+        insert(payload: TablesInsert<"staff_performance">) {
           state.insertPayload = payload;
           const result = { data: insertedRecord, error: null };
           return {
             select: () => ({
               single: () => ({
-                then: (resolve: any, reject: any) => Promise.resolve(result).then(resolve, reject),
+                then: (resolve: any, reject: any) =>
+                  Promise.resolve(result).then(resolve, reject),
               }),
             }),
           };
         },
-        update(payload: TablesUpdate<'staff_performance'>) {
+        update(payload: TablesUpdate<"staff_performance">) {
           state.updatePayload = payload;
           return {
             eq(column: string, value: unknown) {
@@ -104,7 +110,8 @@ function createCrudSupabaseStub() {
               return {
                 select: () => ({
                   single: () => ({
-                    then: (resolve: any, reject: any) => Promise.resolve(result).then(resolve, reject),
+                    then: (resolve: any, reject: any) =>
+                      Promise.resolve(result).then(resolve, reject),
                   }),
                 }),
               };
@@ -117,7 +124,8 @@ function createCrudSupabaseStub() {
               state.deleteFilter = { column, value };
               const result = { error: null };
               return {
-                then: (resolve: any, reject: any) => Promise.resolve(result).then(resolve, reject),
+                then: (resolve: any, reject: any) =>
+                  Promise.resolve(result).then(resolve, reject),
               };
             },
           };
@@ -135,12 +143,12 @@ function createCrudSupabaseStub() {
 }
 
 type SimulationTable =
-  | 'profiles'
-  | 'staff_performance'
-  | 'performance_reviews'
-  | 'performance_goal_reviews'
-  | 'goals'
-  | 'goal_participants';
+  | "profiles"
+  | "staff_performance"
+  | "performance_reviews"
+  | "performance_goal_reviews"
+  | "goals"
+  | "goal_participants";
 
 interface SimulationState {
   profiles: Record<string, any>[];
@@ -168,13 +176,15 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
 
   function rebuildPerformanceGoalReviews() {
     state.performance_goal_reviews = state.performance_reviews.map((review) => {
-      const goal = state.goals.find((candidate) => candidate.id === review.goal_id);
+      const goal = state.goals.find(
+        (candidate) => candidate.id === review.goal_id,
+      );
       return {
         review_id: review.id,
         company_id: review.company_id ?? null,
         employee_id: review.employee_id ?? null,
         goal_id: review.goal_id ?? null,
-        review_cycle: review.review_cycle ?? 'Quarterly',
+        review_cycle: review.review_cycle ?? "Quarterly",
         review_period_start: review.review_period_start ?? null,
         review_period_end: review.review_period_end ?? null,
         review_date: review.review_date ?? null,
@@ -182,7 +192,9 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
         score: review.score ?? null,
         summary: review.summary ?? null,
         ai_summary: review.ai_summary ?? null,
-        action_items: Array.isArray(review.action_items) ? review.action_items : [],
+        action_items: Array.isArray(review.action_items)
+          ? review.action_items
+          : [],
         created_at: review.created_at ?? dayjs().toISOString(),
         updated_at: review.updated_at ?? dayjs().toISOString(),
         goal_title: goal?.title ?? null,
@@ -213,7 +225,9 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
 
     const execute = () => {
       const rows = state[table] ?? [];
-      let filtered = rows.filter((row) => filters.every((predicate) => predicate(row)));
+      let filtered = rows.filter((row) =>
+        filters.every((predicate) => predicate(row)),
+      );
       if (orderColumn) {
         filtered = [...filtered].sort((a, b) => {
           const aVal = a[orderColumn];
@@ -273,7 +287,10 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
     };
   }
 
-  function createInsertBuilder(table: SimulationTable, payload: Record<string, any>) {
+  function createInsertBuilder(
+    table: SimulationTable,
+    payload: Record<string, any>,
+  ) {
     const nextId = (counters.get(table) ?? 0) + 1;
     counters.set(table, nextId);
 
@@ -282,34 +299,41 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
       id: payload.id ?? `${table}-${nextId}`,
     };
 
-    if ('created_at' in record && !record.created_at) {
+    if ("created_at" in record && !record.created_at) {
       record.created_at = dayjs().toISOString();
     }
-    if ('updated_at' in record && !record.updated_at) {
+    if ("updated_at" in record && !record.updated_at) {
       record.updated_at = dayjs().toISOString();
     }
-    if (table === 'goal_participants' && !record.joined_at) {
+    if (table === "goal_participants" && !record.joined_at) {
       record.joined_at = dayjs().toISOString();
     }
 
     state[table] = [...state[table], record];
-    if (table === 'performance_reviews' || table === 'goals') {
+    if (table === "performance_reviews" || table === "goals") {
       rebuildPerformanceGoalReviews();
     }
 
     return {
       select() {
         return {
-          single: () => Promise.resolve({ data: deepClone(record), error: null }),
+          single: () =>
+            Promise.resolve({ data: deepClone(record), error: null }),
         };
       },
       then(onFulfilled: any, onRejected: any) {
-        return Promise.resolve({ data: deepClone(record), error: null }).then(onFulfilled, onRejected);
+        return Promise.resolve({ data: deepClone(record), error: null }).then(
+          onFulfilled,
+          onRejected,
+        );
       },
     };
   }
 
-  function createUpdateBuilder(table: SimulationTable, updates: Record<string, any>) {
+  function createUpdateBuilder(
+    table: SimulationTable,
+    updates: Record<string, any>,
+  ) {
     return {
       eq(column: string, value: unknown) {
         const rows = state[table];
@@ -324,16 +348,17 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
         }
 
         Object.assign(record, updates);
-        if ('updated_at' in record) {
+        if ("updated_at" in record) {
           record.updated_at = dayjs().toISOString();
         }
-        if (table === 'performance_reviews' || table === 'goals') {
+        if (table === "performance_reviews" || table === "goals") {
           rebuildPerformanceGoalReviews();
         }
 
         return {
           select: () => ({
-            single: () => Promise.resolve({ data: deepClone(record), error: null }),
+            single: () =>
+              Promise.resolve({ data: deepClone(record), error: null }),
           }),
         };
       },
@@ -348,7 +373,7 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
         if (index !== -1) {
           rows.splice(index, 1);
         }
-        if (table === 'performance_reviews' || table === 'goals') {
+        if (table === "performance_reviews" || table === "goals") {
           rebuildPerformanceGoalReviews();
         }
         return Promise.resolve({ error: null });
@@ -367,8 +392,10 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
 
       return {
         select: () => createSelectBuilder(table),
-        insert: (payload: Record<string, any>) => createInsertBuilder(table, payload),
-        update: (updates: Record<string, any>) => createUpdateBuilder(table, updates),
+        insert: (payload: Record<string, any>) =>
+          createInsertBuilder(table, payload),
+        update: (updates: Record<string, any>) =>
+          createUpdateBuilder(table, updates),
         delete: () => createDeleteBuilder(table),
       };
     },
@@ -380,8 +407,8 @@ function createSimulationSupabaseStub(initialState?: Partial<SimulationState>) {
   };
 }
 
-describe('performance service utilities', () => {
-  it('generates mock performance dataset with radar metrics', () => {
+describe("performance service utilities", () => {
+  it("generates mock performance dataset with radar metrics", () => {
     const dataset = generateMockPerformanceDataset();
     expect(dataset.employees.length).toBeGreaterThan(0);
     expect(dataset.goalSummary.total).toBeGreaterThan(0);
@@ -393,30 +420,41 @@ describe('performance service utilities', () => {
     expect(totalGoalsFromEmployees).toBe(dataset.goalSummary.total);
   });
 
-  it('determines review status based on recency and severity', () => {
-    expect(determineReviewStatus(dayjs().format('YYYY-MM-DD'), 5)).toBe('on_track');
-    expect(determineReviewStatus(dayjs().subtract(120, 'day').format('YYYY-MM-DD'), 4)).toBe(
-      'due_soon',
+  it("determines review status based on recency and severity", () => {
+    expect(determineReviewStatus(dayjs().format("YYYY-MM-DD"), 5)).toBe(
+      "on_track",
     );
-    expect(determineReviewStatus(dayjs().subtract(200, 'day').format('YYYY-MM-DD'), 4)).toBe(
-      'overdue',
-    );
-    expect(determineReviewStatus(dayjs().subtract(30, 'day').format('YYYY-MM-DD'), 2)).toBe(
-      'needs_coaching',
-    );
+    expect(
+      determineReviewStatus(
+        dayjs().subtract(120, "day").format("YYYY-MM-DD"),
+        4,
+      ),
+    ).toBe("due_soon");
+    expect(
+      determineReviewStatus(
+        dayjs().subtract(200, "day").format("YYYY-MM-DD"),
+        4,
+      ),
+    ).toBe("overdue");
+    expect(
+      determineReviewStatus(
+        dayjs().subtract(30, "day").format("YYYY-MM-DD"),
+        2,
+      ),
+    ).toBe("needs_coaching");
   });
 
-  it('aggregates performance dataset across profiles, goals, and reviews', async () => {
+  it("aggregates performance dataset across profiles, goals, and reviews", async () => {
     const responses: Record<string, QueryResult> = {
       profiles: {
         data: [
           {
-            id: 'emp-1',
-            first_name: 'Alex',
-            last_name: 'Rivera',
-            role: 'Manager',
+            id: "emp-1",
+            first_name: "Alex",
+            last_name: "Rivera",
+            role: "Manager",
             avatar_url: null,
-            employment_status: 'active',
+            employment_status: "active",
           },
         ],
         error: null,
@@ -424,12 +462,12 @@ describe('performance service utilities', () => {
       staff_performance: {
         data: [
           {
-            id: 'perf-1',
-            user_id: 'emp-1',
-            date: dayjs().subtract(10, 'day').format('YYYY-MM-DD'),
+            id: "perf-1",
+            user_id: "emp-1",
+            date: dayjs().subtract(10, "day").format("YYYY-MM-DD"),
             performance_score: 4,
-            attendance_status: 'present',
-            role: 'Manager',
+            attendance_status: "present",
+            role: "Manager",
             hours_worked: null,
             overtime_hours: null,
             notes: null,
@@ -442,22 +480,24 @@ describe('performance service utilities', () => {
       performance_reviews: {
         data: [
           {
-            id: 'review-1',
+            id: "review-1",
             company_id: null,
-            employee_id: 'emp-1',
-            goal_id: 'goal-1',
-            review_cycle: 'Quarterly',
-            review_period_start: dayjs().subtract(90, 'day').format('YYYY-MM-DD'),
-            review_period_end: dayjs().format('YYYY-MM-DD'),
-            review_date: dayjs().subtract(20, 'day').format('YYYY-MM-DD'),
-            reviewer_id: 'mgr-1',
+            employee_id: "emp-1",
+            goal_id: "goal-1",
+            review_cycle: "Quarterly",
+            review_period_start: dayjs()
+              .subtract(90, "day")
+              .format("YYYY-MM-DD"),
+            review_period_end: dayjs().format("YYYY-MM-DD"),
+            review_date: dayjs().subtract(20, "day").format("YYYY-MM-DD"),
+            reviewer_id: "mgr-1",
             score: 4,
-            summary: 'Great leadership on recent launch.',
-            ai_summary: 'AI highlighted positive coaching momentum.',
+            summary: "Great leadership on recent launch.",
+            ai_summary: "AI highlighted positive coaching momentum.",
             action_items: [],
             ai_insight_id: null,
-            created_at: dayjs().subtract(19, 'day').toISOString(),
-            updated_at: dayjs().subtract(19, 'day').toISOString(),
+            created_at: dayjs().subtract(19, "day").toISOString(),
+            updated_at: dayjs().subtract(19, "day").toISOString(),
           },
         ],
         error: null,
@@ -465,28 +505,30 @@ describe('performance service utilities', () => {
       performance_goal_reviews: {
         data: [
           {
-            review_id: 'review-1',
+            review_id: "review-1",
             company_id: null,
-            employee_id: 'emp-1',
-            goal_id: 'goal-1',
-            review_cycle: 'Quarterly',
-            review_period_start: dayjs().subtract(90, 'day').format('YYYY-MM-DD'),
-            review_period_end: dayjs().format('YYYY-MM-DD'),
-            review_date: dayjs().subtract(20, 'day').format('YYYY-MM-DD'),
-            reviewer_id: 'mgr-1',
+            employee_id: "emp-1",
+            goal_id: "goal-1",
+            review_cycle: "Quarterly",
+            review_period_start: dayjs()
+              .subtract(90, "day")
+              .format("YYYY-MM-DD"),
+            review_period_end: dayjs().format("YYYY-MM-DD"),
+            review_date: dayjs().subtract(20, "day").format("YYYY-MM-DD"),
+            reviewer_id: "mgr-1",
             score: 4,
-            summary: 'Great leadership on recent launch.',
-            ai_summary: 'AI highlighted positive coaching momentum.',
+            summary: "Great leadership on recent launch.",
+            ai_summary: "AI highlighted positive coaching momentum.",
             action_items: [],
-            created_at: dayjs().subtract(19, 'day').toISOString(),
-            updated_at: dayjs().subtract(19, 'day').toISOString(),
-            goal_title: 'Boost launch readiness',
-            goal_status: 'active',
+            created_at: dayjs().subtract(19, "day").toISOString(),
+            updated_at: dayjs().subtract(19, "day").toISOString(),
+            goal_title: "Boost launch readiness",
+            goal_status: "active",
             goal_progress: 80,
-            target_completion_date: dayjs().add(30, 'day').format('YYYY-MM-DD'),
+            target_completion_date: dayjs().add(30, "day").format("YYYY-MM-DD"),
             goal_completed_at: null,
-            goal_priority: 'high',
-            goal_owner_id: 'emp-1',
+            goal_priority: "high",
+            goal_owner_id: "emp-1",
             ai_insight_id: null,
             insight_type: null,
             insight_data: null,
@@ -499,12 +541,12 @@ describe('performance service utilities', () => {
       goals: {
         data: [
           {
-            id: 'goal-1',
-            title: 'Boost launch readiness',
-            status: 'active',
+            id: "goal-1",
+            title: "Boost launch readiness",
+            status: "active",
             progress: 80,
-            target_completion_date: dayjs().add(30, 'day').format('YYYY-MM-DD'),
-            created_at: dayjs().subtract(5, 'day').toISOString(),
+            target_completion_date: dayjs().add(30, "day").format("YYYY-MM-DD"),
+            created_at: dayjs().subtract(5, "day").toISOString(),
           },
         ],
         error: null,
@@ -512,10 +554,10 @@ describe('performance service utilities', () => {
       goal_participants: {
         data: [
           {
-            id: 'participant-1',
-            goal_id: 'goal-1',
-            user_id: 'emp-1',
-            role: 'owner',
+            id: "participant-1",
+            goal_id: "goal-1",
+            user_id: "emp-1",
+            role: "owner",
             contribution_score: 90,
           },
         ],
@@ -528,41 +570,44 @@ describe('performance service utilities', () => {
 
     expect(calls).toEqual(
       expect.arrayContaining([
-        'profiles',
-        'staff_performance',
-        'performance_reviews',
-        'performance_goal_reviews',
-        'goals',
-        'goal_participants',
+        "profiles",
+        "staff_performance",
+        "performance_reviews",
+        "performance_goal_reviews",
+        "goals",
+        "goal_participants",
       ]),
     );
     expect(dataset.employees).toHaveLength(1);
     const employee = dataset.employees[0];
     expect(employee.metrics.performanceScore).toBeGreaterThan(0);
     expect(employee.goals).toHaveLength(1);
-    expect(employee.reviews[0].status).toBe('on_track');
+    expect(employee.reviews[0].status).toBe("on_track");
     expect(dataset.goalSummary.total).toBe(1);
-    expect(dataset.radar[0].metric).toBe('Performance Score');
+    expect(dataset.radar[0].metric).toBe("Performance Score");
   });
 
-  it('propagates supabase errors when building dataset', async () => {
+  it("propagates supabase errors when building dataset", async () => {
     const failingResponses: Record<string, QueryResult> = {
       profiles: {
         data: null,
-        error: { message: 'profiles failure' },
+        error: { message: "profiles failure" },
       },
     };
     const { client } = createDatasetSupabaseStub(failingResponses);
-    await expect(fetchPerformanceDataset(client)).rejects.toThrow('profiles failure');
+    await expect(fetchPerformanceDataset(client)).rejects.toThrow(
+      "profiles failure",
+    );
   });
 
-  it('performs CRUD operations for staff performance records', async () => {
-    const { client, state, insertedRecord, updatedRecord } = createCrudSupabaseStub();
+  it("performs CRUD operations for staff performance records", async () => {
+    const { client, state, insertedRecord, updatedRecord } =
+      createCrudSupabaseStub();
 
-    const insertPayload: TablesInsert<'staff_performance'> = {
-      user_id: 'emp-1',
-      date: '2025-01-01',
-      role: 'Barista',
+    const insertPayload: TablesInsert<"staff_performance"> = {
+      user_id: "emp-1",
+      date: "2025-01-01",
+      role: "Barista",
       performance_score: 4,
     };
 
@@ -570,38 +615,50 @@ describe('performance service utilities', () => {
     expect(created).toEqual(insertedRecord);
     expect(state.insertPayload).toEqual(insertPayload);
 
-    const updatePayload: TablesUpdate<'staff_performance'> = {
+    const updatePayload: TablesUpdate<"staff_performance"> = {
       performance_score: 5,
     };
-    const updated = await updatePerformanceRecord(insertedRecord.id, updatePayload, client);
+    const updated = await updatePerformanceRecord(
+      insertedRecord.id,
+      updatePayload,
+      client,
+    );
     expect(updated).toEqual(updatedRecord);
     expect(state.updatePayload).toEqual(updatePayload);
-    expect(state.updateFilter).toEqual({ column: 'id', value: insertedRecord.id });
+    expect(state.updateFilter).toEqual({
+      column: "id",
+      value: insertedRecord.id,
+    });
 
-    await expect(deletePerformanceRecord(insertedRecord.id, client)).resolves.toBeUndefined();
-    expect(state.deleteFilter).toEqual({ column: 'id', value: insertedRecord.id });
+    await expect(
+      deletePerformanceRecord(insertedRecord.id, client),
+    ).resolves.toBeUndefined();
+    expect(state.deleteFilter).toEqual({
+      column: "id",
+      value: insertedRecord.id,
+    });
   });
 
-  it('simulates CRUD lifecycle for performance reviews and goals', async () => {
+  it("simulates CRUD lifecycle for performance reviews and goals", async () => {
     const { client } = createSimulationSupabaseStub({
       profiles: [
         {
-          id: 'emp-sim-1',
-          first_name: 'Sky',
-          last_name: 'Rowe',
-          role: 'Shift Lead',
+          id: "emp-sim-1",
+          first_name: "Sky",
+          last_name: "Rowe",
+          role: "Shift Lead",
           avatar_url: null,
-          employment_status: 'active',
+          employment_status: "active",
         },
       ],
     });
 
     const result = await simulatePerformanceCrud({
-      employeeId: 'emp-sim-1',
-      reviewerId: 'mgr-1',
-      companyId: 'company-1',
+      employeeId: "emp-sim-1",
+      reviewerId: "mgr-1",
+      companyId: "company-1",
       client,
-      referenceDate: dayjs('2025-03-15'),
+      referenceDate: dayjs("2025-03-15"),
     });
 
     const { baseline, postCreate, postUpdate, postCleanup } = result.snapshots;
@@ -610,7 +667,7 @@ describe('performance service utilities', () => {
 
     expect(postCreate.employees[0].reviews).toHaveLength(1);
     expect(postCreate.employees[0].goals).toHaveLength(1);
-    expect(postCreate.employees[0].goals[0].title).toContain('Simulation goal');
+    expect(postCreate.employees[0].goals[0].title).toContain("Simulation goal");
 
     expect(postUpdate.employees[0].reviews[0].score).toBe(5);
     expect(postUpdate.employees[0].goals[0].progress).toBe(85);
@@ -618,7 +675,7 @@ describe('performance service utilities', () => {
     expect(postCleanup.employees[0].reviews).toHaveLength(0);
     expect(postCleanup.employees[0].goals).toHaveLength(0);
 
-    expect(result.goal.created.company_id).toBe('company-1');
+    expect(result.goal.created.company_id).toBe("company-1");
     expect(result.participant.created.goal_id).toBe(result.goal.created.id);
   });
 });

@@ -1,9 +1,8 @@
-
 export interface InventoryUnit {
   id: string;
   name: string;
   abbreviation: string;
-  unit_type: 'weight' | 'volume' | 'count';
+  unit_type: "weight" | "volume" | "count";
   conversion_factor?: number;
   base_unit_id?: string;
   parent_unit_id?: string | null;
@@ -66,18 +65,18 @@ export interface InventoryItem {
 
 export type InventoryItemInsert = Omit<
   InventoryItem,
-  | 'id'
-  | 'unit'
-  | 'location'
-  | 'units'
-  | 'recipes'
-  | 'category_details'
-  | 'preferred_supplier'
-  | 'recipe_yield_unit'
-  | 'calculated_cost_per_unit'
-  | 'recipe_cost_per_unit'
-  | 'created_at'
-  | 'updated_at'
+  | "id"
+  | "unit"
+  | "location"
+  | "units"
+  | "recipes"
+  | "category_details"
+  | "preferred_supplier"
+  | "recipe_yield_unit"
+  | "calculated_cost_per_unit"
+  | "recipe_cost_per_unit"
+  | "created_at"
+  | "updated_at"
 >;
 
 export type InventoryItemUpdate = Partial<InventoryItemInsert>;
@@ -133,10 +132,10 @@ export interface InventoryTransaction {
 }
 
 export interface SupplierIntegrationDetails {
-  provider: 'marketman' | 'us_foods' | 'baldor' | 'sysco' | 'other';
+  provider: "marketman" | "us_foods" | "baldor" | "sysco" | "other";
   account_id?: string;
   api_key?: string;
-  status?: 'connected' | 'pending' | 'error' | 'disabled';
+  status?: "connected" | "pending" | "error" | "disabled";
   last_synced_at?: string;
   sync_notes?: string;
 }
@@ -165,7 +164,14 @@ export interface PurchaseOrder {
     supplier_id?: string;
     integration?: SupplierIntegrationDetails;
   } | null;
-  status: 'draft' | 'pending' | 'ordered' | 'partial' | 'received' | 'cancelled' | string;
+  status:
+    | "draft"
+    | "pending"
+    | "ordered"
+    | "partial"
+    | "received"
+    | "cancelled"
+    | string;
   order_date: string;
   expected_delivery_date?: string | null;
   actual_delivery_date?: string | null;
@@ -210,7 +216,7 @@ export interface InventoryCount {
   notes?: string;
   counted_by: string;
   submitted_at?: string | null;
-  review_status: 'pending' | 'under_review' | 'approved' | 'rejected';
+  review_status: "pending" | "under_review" | "approved" | "rejected";
   reviewed_by?: string | null;
   reviewed_at?: string | null;
   review_notes?: string | null;
@@ -262,7 +268,7 @@ export interface InventorySupplier {
   updated_at: string;
 }
 
-export type ProductionType = 'prep' | 'batch' | 'cooked' | 'baked' | 'other';
+export type ProductionType = "prep" | "batch" | "cooked" | "baked" | "other";
 
 export interface ProductionMaterialUsage {
   id?: string;
@@ -285,7 +291,7 @@ export interface ProductionMaterialUsage {
 export interface ProductionApproval {
   id: string;
   production_id: string;
-  action: 'submitted' | 'approved' | 'rejected' | 'resubmitted';
+  action: "submitted" | "approved" | "rejected" | "resubmitted";
   action_by: string;
   action_at: string;
   notes?: string | null;
@@ -313,7 +319,7 @@ export interface ProductionEvent {
   unit_output_cost?: number | null;
   batch_reference?: string | null;
   notes?: string | null;
-  approval_status: 'pending' | 'approved' | 'rejected';
+  approval_status: "pending" | "approved" | "rejected";
   produced_at: string;
   created_at: string;
   updated_at: string;
@@ -353,7 +359,11 @@ export interface ProductionEventInput {
   submission_note?: string | null;
 }
 
-export type InventoryTransferStatus = 'requested' | 'sent' | 'received' | 'rejected';
+export type InventoryTransferStatus =
+  | "requested"
+  | "sent"
+  | "received"
+  | "rejected";
 
 export interface InventoryTransferItem {
   id: string;
@@ -371,7 +381,7 @@ export interface InventoryTransferItem {
 export interface InventoryTransferAudit {
   id: string;
   transfer_id: string;
-  action: 'created' | 'updated' | 'status_changed' | 'deleted';
+  action: "created" | "updated" | "status_changed" | "deleted";
   old_status?: InventoryTransferStatus | null;
   new_status?: InventoryTransferStatus | null;
   note?: string | null;

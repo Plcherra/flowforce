@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { AdminConfigurationSettings, BusinessStructureSettings } from '@/types/system-settings';
-import { DEFAULT_ADMIN_CONFIG } from './systemSettingsDefaults';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  AdminConfigurationSettings,
+  BusinessStructureSettings,
+} from "@/types/system-settings";
+import { DEFAULT_ADMIN_CONFIG } from "./systemSettingsDefaults";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useAdminSettings(source: SystemSettingsHook) {
   const { settings, updateSettings, company, loading, error, canEdit } = source;
@@ -18,7 +21,10 @@ export function useAdminSettings(source: SystemSettingsHook) {
     setState(base);
   }, [base]);
 
-  const dirty = useMemo(() => JSON.stringify(state) !== JSON.stringify(base), [state, base]);
+  const dirty = useMemo(
+    () => JSON.stringify(state) !== JSON.stringify(base),
+    [state, base],
+  );
 
   const save = useCallback(async () => {
     if (!dirty) return;
@@ -49,23 +55,26 @@ export function useAdminSettings(source: SystemSettingsHook) {
     try {
       const [companyResult, locationsResult, rolesResult] = await Promise.all([
         supabase
-          .from('companies')
-          .select('working_hours')
-          .eq('id', company.id)
+          .from("companies")
+          .select("working_hours")
+          .eq("id", company.id)
           .single(),
         supabase
-          .from('inv_locations')
-          .select('id, name, location_type, temperature_controlled, is_active')
-          .eq('company_id', company.id)
-          .order('created_at', { ascending: true }),
+          .from("inv_locations")
+          .select("id, name, location_type, temperature_controlled, is_active")
+          .eq("company_id", company.id)
+          .order("created_at", { ascending: true }),
         supabase
-          .from('company_roles')
-          .select('id, name, description, color, icon, hierarchy_level, permissions, is_system_role, is_active')
-          .eq('company_id', company.id),
+          .from("company_roles")
+          .select(
+            "id, name, description, color, icon, hierarchy_level, permissions, is_system_role, is_active",
+          )
+          .eq("company_id", company.id),
       ]);
 
       const workingHours =
-        (companyResult.data?.working_hours as BusinessStructureSettings['workingHours']) ??
+        (companyResult.data
+          ?.working_hours as BusinessStructureSettings["workingHours"]) ??
         state.businessStructure.workingHours;
 
       const locationsSnapshot =
@@ -82,11 +91,11 @@ export function useAdminSettings(source: SystemSettingsHook) {
           id: role.id,
           name: role.name,
           description: role.description ?? undefined,
-          color: role.color ?? '#6b7280',
-          icon: role.icon ?? 'Users',
+          color: role.color ?? "#6b7280",
+          icon: role.icon ?? "Users",
           hierarchy_level: role.hierarchy_level ?? 1,
           permissions:
-            typeof role.permissions === 'object'
+            typeof role.permissions === "object"
               ? (role.permissions as Record<string, boolean>)
               : {},
           is_system_role: Boolean(role.is_system_role),

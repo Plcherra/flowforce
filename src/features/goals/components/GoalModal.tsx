@@ -1,6 +1,9 @@
-import { CreateGoalModal, type GoalFormValues } from '@/features/goals/components/CreateGoalModal';
-import type { Goal } from '@/hooks/useGoals';
-import type { GoalDialogs } from '@/hooks/useGoalDialogs';
+import {
+  CreateGoalModal,
+  type GoalFormValues,
+} from "@/features/goals/components/CreateGoalModal";
+import type { Goal } from "@/hooks/useGoals";
+import type { GoalDialogs } from "@/hooks/useGoalDialogs";
 
 interface GoalModalProps {
   dialogs: GoalDialogs;
@@ -9,7 +12,12 @@ interface GoalModalProps {
   onUpdate: (goal: Goal, values: GoalFormValues) => Promise<void>;
 }
 
-export function GoalModal({ dialogs, saving, onCreate, onUpdate }: GoalModalProps) {
+export function GoalModal({
+  dialogs,
+  saving,
+  onCreate,
+  onUpdate,
+}: GoalModalProps) {
   const handleSubmit = async (values: GoalFormValues) => {
     if (dialogs.selectedGoal) {
       await onUpdate(dialogs.selectedGoal, values);

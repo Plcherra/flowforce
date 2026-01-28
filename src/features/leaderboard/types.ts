@@ -1,6 +1,6 @@
-export type LeaderboardPeriod = 'weekly' | 'monthly' | 'all_time';
+export type LeaderboardPeriod = "weekly" | "monthly" | "all_time";
 
-export type LeaderboardBadgeTier = 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+export type LeaderboardBadgeTier = "Bronze" | "Silver" | "Gold" | "Platinum";
 
 export interface XPBreakdown {
   tasks: number;
@@ -17,14 +17,14 @@ export interface LeaderboardAchievement {
 }
 
 export interface LeaderboardInsight {
-  type: 'growth' | 'strength' | 'risk';
+  type: "growth" | "strength" | "risk";
   message: string;
   value?: number;
 }
 
 export interface LeaderboardChallenge {
   employeeId: string;
-  focus: 'skills' | 'recognition' | 'training' | 'promotion' | 'goals';
+  focus: "skills" | "recognition" | "training" | "promotion" | "goals";
   title: string;
   description: string;
   reward: string;
@@ -113,4 +113,3 @@ export interface LeaderboardSyncRow {
   created_at?: string;
   updated_at?: string;
 }
-

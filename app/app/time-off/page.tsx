@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function TimeOffRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/app/scheduling/timeoff');
+    router.replace("/app/scheduling/timeoff");
   }, [router]);
 
   return null;

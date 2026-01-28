@@ -1,16 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
-import { getScheduleRulebook } from '@/services/scheduleRulebookService';
-import { fetchRulebookFromSupabase } from '@/services/guardrail/supabaseScheduleRulebookRepository';
-import { ScheduleGuardrailEngine, type GuardrailAction, type GuardrailResult } from '@/services/guardrail/scheduleGuardrailEngine';
-import type { RulebookStep, ScheduleRulebook, StepCriterion } from '@/types/scheduleRulebook';
-import { logger } from '@/utils/logger';
+import { useEffect, useMemo, useState } from "react";
+import { getScheduleRulebook } from "@/features/scheduling/services/scheduleRulebookService";
+import { fetchRulebookFromSupabase } from "@/features/scheduling/services/guardrail/supabaseScheduleRulebookRepository";
+import {
+  ScheduleGuardrailEngine,
+  type GuardrailAction,
+  type GuardrailResult,
+} from "@/features/scheduling/services/guardrail/scheduleGuardrailEngine";
+import type {
+  RulebookStep,
+  ScheduleRulebook,
+  StepCriterion,
+} from "@/types/scheduleRulebook";
+import { logger } from "@/utils/logger";
 import {
   fetchWorkflowSnapshot as fetchWorkflowSnapshotFromSupabase,
   upsertWorkflowCriterionState,
   setWorkflowCriterionApproval,
   deriveDefaultValue,
   type WorkflowSnapshot,
-} from '@/services/guardrail/scheduleWorkflowService';
+} from "@/features/scheduling/services/guardrail/scheduleWorkflowService";
 
 type CriterionState = {
   completed: boolean;
@@ -25,7 +33,7 @@ type StepState = Record<string, CriterionState>;
 
 type StepsState = Record<string, StepState>;
 
-export type StepProgressState = 'notStarted' | 'inProgress' | 'complete';
+export type StepProgressState = "notStarted" | "inProgress" | "complete";
 
 export interface StepStatus {
   step: RulebookStep;
@@ -42,17 +50,22 @@ export interface CopilotEvaluation {
 
 export interface UseScheduleCopilotOptions {
   rulebookId?: string;
-  source?: 'static' | 'supabase';
+  source?: "static" | "supabase";
   workflowId?: string;
 }
 
 export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
-  const [rulebook, setRulebook] = useState<ScheduleRulebook>(() => getScheduleRulebook(options.rulebookId));
-  const [loading, setLoading] = useState(options.source === 'supabase');
-  const engine = useMemo(() => new ScheduleGuardrailEngine(rulebook.id), [rulebook.id]);
+  const [rulebook, setRulebook] = useState<ScheduleRulebook>(() =>
+    getScheduleRulebook(options.rulebookId),
+  );
+  const [loading, setLoading] = useState(options.source === "supabase");
+  const engine = useMemo(
+    () => new ScheduleGuardrailEngine(rulebook.id),
+    [rulebook.id],
+  );
 
   useEffect(() => {
-    if (options.source !== 'supabase') {
+    if (options.source !== "supabase") {
       setRulebook(getScheduleRulebook(options.rulebookId));
       setLoading(false);
       return;
@@ -61,7 +74,9 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     let isMounted = true;
     setLoading(true);
 
-    fetchRulebookFromSupabase(options.rulebookId ?? 'restaurant-weekly-schedule')
+    fetchRulebookFromSupabase(
+      options.rulebookId ?? "restaurant-weekly-schedule",
+    )
       .then((remoteRulebook) => {
         if (!isMounted) return;
         if (remoteRulebook) {
@@ -71,7 +86,10 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         }
       })
       .catch((error) => {
-        logger.error('Failed to load rulebook from Supabase', { error, tags: ['error'] });
+        logger.error("Failed to load rulebook from Supabase", {
+          error,
+          tags: ["error"],
+        });
         if (!isMounted) return;
         setRulebook(getScheduleRulebook(options.rulebookId));
       })
@@ -86,11 +104,16 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     };
   }, [options.rulebookId, options.source]);
 
-  const [actorRole, setActorRole] = useState('operations_manager');
+  const [actorRole, setActorRole] = useState("operations_manager");
   const [currentStepId, setCurrentStepId] = useState(rulebook.steps[0]?.id);
-  const [criterionState, setCriterionState] = useState<StepsState>(() => initialiseState(rulebook));
-  const [lastEvaluation, setLastEvaluation] = useState<CopilotEvaluation | null>(null);
-  const [workflowLoading, setWorkflowLoading] = useState(Boolean(options.workflowId));
+  const [criterionState, setCriterionState] = useState<StepsState>(() =>
+    initialiseState(rulebook),
+  );
+  const [lastEvaluation, setLastEvaluation] =
+    useState<CopilotEvaluation | null>(null);
+  const [workflowLoading, setWorkflowLoading] = useState(
+    Boolean(options.workflowId),
+  );
   const workflowId = options.workflowId;
 
   useEffect(() => {
@@ -113,7 +136,10 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         setCriterionState(hydrateStateFromSnapshot(rulebook, snapshot));
       })
       .catch((error) => {
-        logger.error('Failed to hydrate workflow state', { error, tags: ['error'] });
+        logger.error("Failed to hydrate workflow state", {
+          error,
+          tags: ["error"],
+        });
       })
       .finally(() => {
         if (active) {
@@ -126,15 +152,28 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     };
   }, [workflowId, rulebook]);
 
-  const completedCriteria = useMemo(() => flattenCriteria(criterionState), [criterionState]);
-  const approvalState = useMemo(() => flattenApprovals(rulebook, criterionState), [rulebook, criterionState]);
+  const completedCriteria = useMemo(
+    () => flattenCriteria(criterionState),
+    [criterionState],
+  );
+  const approvalState = useMemo(
+    () => flattenApprovals(rulebook, criterionState),
+    [rulebook, criterionState],
+  );
 
   const stepStatuses = useMemo<StepStatus[]>(() => {
     return rulebook.steps.map((step) => {
       const stepCriteria = criterionState[step.id];
       const total = step.completionCriteria.length;
-      const completed = step.completionCriteria.filter((criterion) => Boolean(stepCriteria?.[criterion.id]?.completed)).length;
-      const state: StepProgressState = completed === 0 ? 'notStarted' : completed === total ? 'complete' : 'inProgress';
+      const completed = step.completionCriteria.filter((criterion) =>
+        Boolean(stepCriteria?.[criterion.id]?.completed),
+      ).length;
+      const state: StepProgressState =
+        completed === 0
+          ? "notStarted"
+          : completed === total
+            ? "complete"
+            : "inProgress";
 
       return {
         step,
@@ -145,9 +184,18 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     });
   }, [rulebook.steps, criterionState]);
 
-  const currentStep = useMemo(() => rulebook.steps.find((step) => step.id === currentStepId) ?? rulebook.steps[0], [rulebook.steps, currentStepId]);
+  const currentStep = useMemo(
+    () =>
+      rulebook.steps.find((step) => step.id === currentStepId) ??
+      rulebook.steps[0],
+    [rulebook.steps, currentStepId],
+  );
 
-  const updateCriterion = (stepId: string, criterionId: string, updates: Partial<CriterionState>) => {
+  const updateCriterion = (
+    stepId: string,
+    criterionId: string,
+    updates: Partial<CriterionState>,
+  ) => {
     setCriterionState((prev) => {
       const stepState = prev[stepId] ?? {};
       const existing = stepState[criterionId] ?? { completed: false };
@@ -175,7 +223,7 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         recordId: current?.recordId,
         workflowStepId: current.workflowStepId,
         rulebookCriterionId: criterion.recordId,
-        status: completed ? 'satisfied' : 'pending',
+        status: completed ? "satisfied" : "pending",
         value: completed ? (current?.value ?? defaultValue) : undefined,
       });
 
@@ -197,7 +245,11 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     });
   };
 
-  const setCriterionValue = async (stepId: string, criterionId: string, value: number | string) => {
+  const setCriterionValue = async (
+    stepId: string,
+    criterionId: string,
+    value: number | string,
+  ) => {
     const stepState = criterionState[stepId] ?? {};
     const current = stepState[criterionId];
     const criterion = findCriterion(rulebook, stepId, criterionId);
@@ -207,7 +259,7 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
         recordId: current?.recordId,
         workflowStepId: current.workflowStepId,
         rulebookCriterionId: criterion.recordId,
-        status: 'satisfied',
+        status: "satisfied",
         value,
       });
 
@@ -226,7 +278,11 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
     updateCriterion(stepId, criterionId, { value, completed: true });
   };
 
-  const setCriterionApproval = async (stepId: string, criterionId: string, approved: boolean) => {
+  const setCriterionApproval = async (
+    stepId: string,
+    criterionId: string,
+    approved: boolean,
+  ) => {
     const stepState = criterionState[stepId] ?? {};
     const current = stepState[criterionId];
 
@@ -291,22 +347,27 @@ export function useScheduleCopilot(options: UseScheduleCopilotOptions = {}) {
 
 function initialiseState(rulebook: ScheduleRulebook): StepsState {
   return rulebook.steps.reduce<StepsState>((acc, step) => {
-    const criteriaState = step.completionCriteria.reduce<StepState>((criterionAcc, criterion) => {
-      criterionAcc[criterion.id] = {
-        completed: false,
-        value: undefined,
-        approved: criterion.approverRole ? false : undefined,
-        rulebookCriterionId: criterion.recordId,
-      };
-      return criterionAcc;
-    }, {});
+    const criteriaState = step.completionCriteria.reduce<StepState>(
+      (criterionAcc, criterion) => {
+        criterionAcc[criterion.id] = {
+          completed: false,
+          value: undefined,
+          approved: criterion.approverRole ? false : undefined,
+          rulebookCriterionId: criterion.recordId,
+        };
+        return criterionAcc;
+      },
+      {},
+    );
 
     acc[step.id] = criteriaState;
     return acc;
   }, {});
 }
 
-function flattenCriteria(state: StepsState): Record<string, boolean | number | string> {
+function flattenCriteria(
+  state: StepsState,
+): Record<string, boolean | number | string> {
   const result: Record<string, boolean | number | string> = {};
   Object.values(state).forEach((stepState) => {
     Object.entries(stepState).forEach(([criterionId, criterion]) => {
@@ -318,7 +379,10 @@ function flattenCriteria(state: StepsState): Record<string, boolean | number | s
   return result;
 }
 
-function flattenApprovals(rulebook: ScheduleRulebook, state: StepsState): Record<string, boolean> {
+function flattenApprovals(
+  rulebook: ScheduleRulebook,
+  state: StepsState,
+): Record<string, boolean> {
   const approvals: Record<string, boolean> = {};
   rulebook.steps.forEach((step) => {
     step.completionCriteria.forEach((criterion) => {
@@ -333,7 +397,10 @@ function flattenApprovals(rulebook: ScheduleRulebook, state: StepsState): Record
   return approvals;
 }
 
-function hydrateStateFromSnapshot(rulebook: ScheduleRulebook, snapshot: WorkflowSnapshot): StepsState {
+function hydrateStateFromSnapshot(
+  rulebook: ScheduleRulebook,
+  snapshot: WorkflowSnapshot,
+): StepsState {
   const base = initialiseState(rulebook);
 
   rulebook.steps.forEach((step) => {
@@ -344,10 +411,12 @@ function hydrateStateFromSnapshot(rulebook: ScheduleRulebook, snapshot: Workflow
     const stepState = base[step.id] ?? {};
 
     step.completionCriteria.forEach((criterion) => {
-      const state = stepState[criterion.id] ?? {
-        completed: false,
-        rulebookCriterionId: criterion.recordId,
-      } as CriterionState;
+      const state =
+        stepState[criterion.id] ??
+        ({
+          completed: false,
+          rulebookCriterionId: criterion.recordId,
+        } as CriterionState);
 
       const snapshotCriterion = criteriaSnapshot[criterion.id];
 
@@ -356,7 +425,7 @@ function hydrateStateFromSnapshot(rulebook: ScheduleRulebook, snapshot: Workflow
 
       if (snapshotCriterion) {
         state.recordId = snapshotCriterion.recordId;
-        state.completed = snapshotCriterion.status === 'satisfied';
+        state.completed = snapshotCriterion.status === "satisfied";
         state.value = snapshotCriterion.value;
         state.approved = Boolean(snapshotCriterion.approvedAt);
       }
@@ -370,7 +439,13 @@ function hydrateStateFromSnapshot(rulebook: ScheduleRulebook, snapshot: Workflow
   return base;
 }
 
-function findCriterion(rulebook: ScheduleRulebook, stepId: string, criterionId: string): StepCriterion | undefined {
+function findCriterion(
+  rulebook: ScheduleRulebook,
+  stepId: string,
+  criterionId: string,
+): StepCriterion | undefined {
   const step = rulebook.steps.find((item) => item.id === stepId);
-  return step?.completionCriteria.find((criterion) => criterion.id === criterionId);
+  return step?.completionCriteria.find(
+    (criterion) => criterion.id === criterionId,
+  );
 }

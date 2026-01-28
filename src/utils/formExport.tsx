@@ -1,21 +1,23 @@
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import type { FormReviewLayoutProps } from '@/components/forms/presentation';
-import { FormReviewLayout } from '@/components/forms/presentation';
+import React from "react";
+import { renderToString } from "react-dom/server";
+import type { FormReviewLayoutProps } from "@/components/forms/presentation";
+import { FormReviewLayout } from "@/components/forms/presentation";
 
 export async function exportFormResponseToPdf(layout: FormReviewLayoutProps) {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return;
   }
 
   const html = renderToString(<FormReviewLayout {...layout} />);
-  const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+  const styleTags = Array.from(
+    document.querySelectorAll('style, link[rel="stylesheet"]'),
+  )
     .map((element) => element.outerHTML)
-    .join('\n');
+    .join("\n");
 
-  const printWindow = window.open('', '_blank');
+  const printWindow = window.open("", "_blank");
   if (!printWindow) {
-    throw new Error('Unable to open print window');
+    throw new Error("Unable to open print window");
   }
 
   printWindow.document.write(`

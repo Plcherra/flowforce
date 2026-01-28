@@ -1,13 +1,20 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { Json, Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json, Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
-  z.union([z.string(), z.number(), z.boolean(), z.null(), z.record(jsonSchema), z.array(jsonSchema)]),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.record(jsonSchema),
+    z.array(jsonSchema),
+  ]),
 );
 
-type DepartmentRow = Tables<'departments'> & { color?: string | null };
+type DepartmentRow = Tables<"departments"> & { color?: string | null };
 
 const departmentRowSchema: z.ZodType<DepartmentRow> = z
   .object({
@@ -31,7 +38,7 @@ const positionRowSchema = z
   })
   .passthrough();
 
-const employeeProfileRowSchema: z.ZodType<Tables<'profiles'>> = z
+const employeeProfileRowSchema: z.ZodType<Tables<"profiles">> = z
   .object({
     id: z.string(),
     first_name: z.string().nullable(),
@@ -73,7 +80,7 @@ const profileCompanyContextSchema = z
   })
   .passthrough();
 
-const skillMatrixRowSchema: z.ZodType<Tables<'skill_matrix'>> = z
+const skillMatrixRowSchema: z.ZodType<Tables<"skill_matrix">> = z
   .object({
     created_at: z.string(),
     employee_id: z.string(),
@@ -86,7 +93,7 @@ const skillMatrixRowSchema: z.ZodType<Tables<'skill_matrix'>> = z
   })
   .passthrough();
 
-const employeeBadgeRowSchema: z.ZodType<Tables<'employee_badge'>> = z
+const employeeBadgeRowSchema: z.ZodType<Tables<"employee_badge">> = z
   .object({
     awarded_at: z.string(),
     awarded_by: z.string().nullable(),
@@ -98,7 +105,7 @@ const employeeBadgeRowSchema: z.ZodType<Tables<'employee_badge'>> = z
   })
   .passthrough();
 
-const employeeReportRowSchema: z.ZodType<Tables<'employee_report'>> = z
+const employeeReportRowSchema: z.ZodType<Tables<"employee_report">> = z
   .object({
     category: z.string(),
     created_at: z.string(),
@@ -112,7 +119,7 @@ const employeeReportRowSchema: z.ZodType<Tables<'employee_report'>> = z
   })
   .passthrough();
 
-const staffPerformanceRowSchema: z.ZodType<Tables<'staff_performance'>> = z
+const staffPerformanceRowSchema: z.ZodType<Tables<"staff_performance">> = z
   .object({
     attendance_status: z.string().nullable(),
     break_compliance: z.boolean().nullable(),
@@ -128,10 +135,18 @@ const staffPerformanceRowSchema: z.ZodType<Tables<'staff_performance'>> = z
   })
   .passthrough();
 
-export type EmployeeProfileRow = z.infer<typeof employeeProfileWithRelationsSchema>;
+export type EmployeeProfileRow = z.infer<
+  typeof employeeProfileWithRelationsSchema
+>;
 
-async function fetchProfileCompanyContext(userId: string): Promise<string | null> {
-  const { data, error } = await supabase.from('profiles').select('company_id').eq('id', userId).single();
+async function fetchProfileCompanyContext(
+  userId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .single();
   if (error) {
     throw error;
   }
@@ -140,12 +155,14 @@ async function fetchProfileCompanyContext(userId: string): Promise<string | null
   return parsed.company_id ?? null;
 }
 
-async function fetchDepartmentsByCompany(companyId: string): Promise<DepartmentRow[]> {
+async function fetchDepartmentsByCompany(
+  companyId: string,
+): Promise<DepartmentRow[]> {
   const { data, error } = await supabase
-    .from('departments')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('name', { ascending: true });
+    .from("departments")
+    .select("*")
+    .eq("company_id", companyId)
+    .order("name", { ascending: true });
 
   if (error) {
     throw error;
@@ -154,11 +171,13 @@ async function fetchDepartmentsByCompany(companyId: string): Promise<DepartmentR
   return z.array(departmentRowSchema).parse(data ?? []);
 }
 
-async function fetchRosterSnapshot(companyId: string): Promise<EmployeeProfileRow[] | null> {
+async function fetchRosterSnapshot(
+  companyId: string,
+): Promise<EmployeeProfileRow[] | null> {
   const { data, error } = await supabase
-    .from('hr_roster_cache')
-    .select('snapshot')
-    .eq('company_id', companyId)
+    .from("hr_roster_cache")
+    .select("snapshot")
+    .eq("company_id", companyId)
     .maybeSingle();
 
   if (error) {
@@ -169,10 +188,18 @@ async function fetchRosterSnapshot(companyId: string): Promise<EmployeeProfileRo
     return null;
   }
 
-  const snapshot = rosterCacheRowSchema.parse({ company_id: companyId, snapshot: data.snapshot });
-  const parsed = z.array(employeeProfileWithRelationsSchema).safeParse(snapshot.snapshot);
+  const snapshot = rosterCacheRowSchema.parse({
+    company_id: companyId,
+    snapshot: data.snapshot,
+  });
+  const parsed = z
+    .array(employeeProfileWithRelationsSchema)
+    .safeParse(snapshot.snapshot);
   if (!parsed.success) {
-    logger.warn('[employeesRepository] Invalid roster cache snapshot', { error: parsed.error, tags: ['warning'] });
+    logger.warn("[employeesRepository] Invalid roster cache snapshot", {
+      error: parsed.error,
+      tags: ["warning"],
+    });
     return null;
   }
   return parsed.data;
@@ -184,19 +211,19 @@ async function fetchCompanyEmployees(params: {
 }): Promise<EmployeeProfileRow[]> {
   const { companyId, includeInactive = false } = params;
   let query = supabase
-    .from('profiles')
+    .from("profiles")
     .select(
       `
         *,
-        department:departments(id, name, color, company_id, created_at, updated_at, description, manager_id, type),
+        department:departments!profiles_department_id_fkey(id, name, color, company_id, created_at, updated_at, description, manager_id, type),
         position:positions(id, name, role)
       `,
     )
-    .eq('company_id', companyId)
-    .order('first_name', { ascending: true });
+    .eq("company_id", companyId)
+    .order("first_name", { ascending: true });
 
   if (!includeInactive) {
-    query = query.eq('employment_status', 'active');
+    query = query.eq("employment_status", "active");
   }
 
   const { data, error } = await query;
@@ -208,13 +235,15 @@ async function fetchCompanyEmployees(params: {
   return z.array(employeeProfileWithRelationsSchema).parse(data ?? []);
 }
 
-async function fetchSkillMatrixForEmployees(employeeIds: string[]): Promise<Tables<'skill_matrix'>[]> {
+async function fetchSkillMatrixForEmployees(
+  employeeIds: string[],
+): Promise<Tables<"skill_matrix">[]> {
   if (!employeeIds.length) return [];
 
   const { data, error } = await supabase
-    .from('skill_matrix')
-    .select('*')
-    .in('employee_id', employeeIds);
+    .from("skill_matrix")
+    .select("*")
+    .in("employee_id", employeeIds);
 
   if (error) {
     throw error;
@@ -223,13 +252,15 @@ async function fetchSkillMatrixForEmployees(employeeIds: string[]): Promise<Tabl
   return z.array(skillMatrixRowSchema).parse(data ?? []);
 }
 
-async function fetchEmployeeBadges(employeeIds: string[]): Promise<Tables<'employee_badge'>[]> {
+async function fetchEmployeeBadges(
+  employeeIds: string[],
+): Promise<Tables<"employee_badge">[]> {
   if (!employeeIds.length) return [];
 
   const { data, error } = await supabase
-    .from('employee_badge')
-    .select('*')
-    .in('employee_id', employeeIds);
+    .from("employee_badge")
+    .select("*")
+    .in("employee_id", employeeIds);
 
   if (error) {
     throw error;
@@ -238,17 +269,18 @@ async function fetchEmployeeBadges(employeeIds: string[]): Promise<Tables<'emplo
   return z.array(employeeBadgeRowSchema).parse(data ?? []);
 }
 
-async function fetchEmployeeReports(params: { employeeIds: string[]; since: string }): Promise<
-  Tables<'employee_report'>[]
-> {
+async function fetchEmployeeReports(params: {
+  employeeIds: string[];
+  since: string;
+}): Promise<Tables<"employee_report">[]> {
   const { employeeIds, since } = params;
   if (!employeeIds.length) return [];
 
   const { data, error } = await supabase
-    .from('employee_report')
-    .select('*')
-    .in('employee_id', employeeIds)
-    .gte('date', since);
+    .from("employee_report")
+    .select("*")
+    .in("employee_id", employeeIds)
+    .gte("date", since);
 
   if (error) {
     throw error;
@@ -257,17 +289,18 @@ async function fetchEmployeeReports(params: { employeeIds: string[]; since: stri
   return z.array(employeeReportRowSchema).parse(data ?? []);
 }
 
-async function fetchStaffPerformance(params: { employeeIds: string[]; since: string }): Promise<
-  Tables<'staff_performance'>[]
-> {
+async function fetchStaffPerformance(params: {
+  employeeIds: string[];
+  since: string;
+}): Promise<Tables<"staff_performance">[]> {
   const { employeeIds, since } = params;
   if (!employeeIds.length) return [];
 
   const { data, error } = await supabase
-    .from('staff_performance')
-    .select('*')
-    .in('user_id', employeeIds)
-    .gte('date', since);
+    .from("staff_performance")
+    .select("*")
+    .in("user_id", employeeIds)
+    .gte("date", since);
 
   if (error) {
     throw error;

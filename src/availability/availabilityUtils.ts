@@ -1,4 +1,4 @@
-import type { AvailabilityGrid } from '@/components/availability/AvailabilityRequestForm';
+import type { AvailabilityGrid } from "@/components/availability/AvailabilityRequestForm";
 
 export interface StaffAvailabilityRow {
   id: string;
@@ -17,18 +17,22 @@ export const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {
   return next;
 };
 
-export const gridFromAvailabilityRows = (rows: StaffAvailabilityRow[]): AvailabilityGrid => {
+export const gridFromAvailabilityRows = (
+  rows: StaffAvailabilityRow[],
+): AvailabilityGrid => {
   const grid: AvailabilityGrid = {};
   rows.forEach((row) => {
     if (row.day_of_week == null) return;
     const dayIndex = row.day_of_week;
-    const startHour = Number(row.start_time.split(':')[0]);
-    const endHour = Number(row.end_time.split(':')[0]);
+    const startHour = Number(row.start_time.split(":")[0]);
+    const endHour = Number(row.end_time.split(":")[0]);
     const hours: number[] = [];
     for (let hour = startHour; hour < endHour; hour += 1) {
       hours.push(hour);
     }
-    grid[dayIndex] = Array.from(new Set([...(grid[dayIndex] ?? []), ...hours])).sort((a, b) => a - b);
+    grid[dayIndex] = Array.from(
+      new Set([...(grid[dayIndex] ?? []), ...hours]),
+    ).sort((a, b) => a - b);
   });
   return grid;
 };
@@ -36,7 +40,8 @@ export const gridFromAvailabilityRows = (rows: StaffAvailabilityRow[]): Availabi
 export const rangesFromGrid = (
   grid: AvailabilityGrid,
 ): { dayOfWeek: number; startTime: string; endTime: string }[] => {
-  const ranges: { dayOfWeek: number; startTime: string; endTime: string }[] = [];
+  const ranges: { dayOfWeek: number; startTime: string; endTime: string }[] =
+    [];
 
   Object.entries(grid).forEach(([day, hours]) => {
     const sorted = [...(hours ?? [])].sort((a, b) => a - b);
@@ -48,8 +53,8 @@ export const rangesFromGrid = (
       if (current !== prev + 1) {
         ranges.push({
           dayOfWeek: Number(day),
-          startTime: `${String(rangeStart).padStart(2, '0')}:00`,
-          endTime: `${String(prev + 1).padStart(2, '0')}:00`,
+          startTime: `${String(rangeStart).padStart(2, "0")}:00`,
+          endTime: `${String(prev + 1).padStart(2, "0")}:00`,
         });
         rangeStart = current;
       }
@@ -57,21 +62,27 @@ export const rangesFromGrid = (
     }
     ranges.push({
       dayOfWeek: Number(day),
-      startTime: `${String(rangeStart).padStart(2, '0')}:00`,
-      endTime: `${String(prev + 1).padStart(2, '0')}:00`,
+      startTime: `${String(rangeStart).padStart(2, "0")}:00`,
+      endTime: `${String(prev + 1).padStart(2, "0")}:00`,
     });
   });
 
   return ranges;
 };
 
-export const hoursDelta = (original: AvailabilityGrid, desired: AvailabilityGrid): number => {
+export const hoursDelta = (
+  original: AvailabilityGrid,
+  desired: AvailabilityGrid,
+): number => {
   const sum = (grid: AvailabilityGrid) =>
     Object.values(grid).reduce((acc, hours) => acc + (hours?.length ?? 0), 0);
   return sum(desired) - sum(original);
 };
 
-export const computeImpactScore = (original: AvailabilityGrid, desired: AvailabilityGrid): number => {
+export const computeImpactScore = (
+  original: AvailabilityGrid,
+  desired: AvailabilityGrid,
+): number => {
   const delta = Math.abs(hoursDelta(original, desired));
   return Math.min(100, delta * 8);
 };

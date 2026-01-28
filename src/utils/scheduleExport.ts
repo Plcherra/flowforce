@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 
 interface ExportData {
   employee: string;
@@ -9,67 +9,85 @@ interface ExportData {
   hours: number;
 }
 
-export const exportScheduleAsCSV = (scheduleData: ExportData[], weekDate: Date) => {
+export const exportScheduleAsCSV = (
+  scheduleData: ExportData[],
+  weekDate: Date,
+) => {
   const weekStart = startOfWeek(weekDate);
   const weekEnd = endOfWeek(weekDate);
-  const fileName = `schedule-${format(weekStart, 'yyyy-MM-dd')}-to-${format(weekEnd, 'yyyy-MM-dd')}.csv`;
-  
-  const headers = ['Employee', 'Role', 'Day', 'Start Time', 'End Time', 'Hours'];
-  const csvContent = [
-    headers.join(','),
-    ...scheduleData.map(row => 
-      `"${row.employee}","${row.role}","${row.day}","${row.startTime}","${row.endTime}",${row.hours}`
-    )
-  ].join('\n');
+  const fileName = `schedule-${format(weekStart, "yyyy-MM-dd")}-to-${format(weekEnd, "yyyy-MM-dd")}.csv`;
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
+  const headers = [
+    "Employee",
+    "Role",
+    "Day",
+    "Start Time",
+    "End Time",
+    "Hours",
+  ];
+  const csvContent = [
+    headers.join(","),
+    ...scheduleData.map(
+      (row) =>
+        `"${row.employee}","${row.role}","${row.day}","${row.startTime}","${row.endTime}",${row.hours}`,
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', fileName);
-  link.style.visibility = 'hidden';
+  link.setAttribute("href", url);
+  link.setAttribute("download", fileName);
+  link.style.visibility = "hidden";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
 
-export const generateWhatsAppMessage = (scheduleData: ExportData[], weekDate: Date) => {
+export const generateWhatsAppMessage = (
+  scheduleData: ExportData[],
+  weekDate: Date,
+) => {
   const weekStart = startOfWeek(weekDate);
   const weekEnd = endOfWeek(weekDate);
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  
-  let message = `📅 *Schedule for ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}*\n\n`;
-  
-  weekDays.forEach(day => {
-    const dayName = format(day, 'EEEE');
-    const dayShifts = scheduleData.filter(shift => shift.day === dayName);
-    
+
+  let message = `📅 *Schedule for ${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}*\n\n`;
+
+  weekDays.forEach((day) => {
+    const dayName = format(day, "EEEE");
+    const dayShifts = scheduleData.filter((shift) => shift.day === dayName);
+
     if (dayShifts.length > 0) {
-      message += `*${dayName} ${format(day, 'MMM d')}*\n`;
-      dayShifts.forEach(shift => {
+      message += `*${dayName} ${format(day, "MMM d")}*\n`;
+      dayShifts.forEach((shift) => {
         message += `• ${shift.employee} (${shift.role}): ${shift.startTime}-${shift.endTime}\n`;
       });
-      message += '\n';
+      message += "\n";
     }
   });
-  
-  message += '📝 Please confirm your shifts and report any conflicts immediately.';
-  
+
+  message +=
+    "📝 Please confirm your shifts and report any conflicts immediately.";
+
   return encodeURIComponent(message);
 };
 
-export const exportScheduleAsPDF = async (scheduleData: ExportData[], weekDate: Date) => {
+export const exportScheduleAsPDF = async (
+  scheduleData: ExportData[],
+  weekDate: Date,
+) => {
   // This would integrate with a PDF library like jsPDF
   // For now, we'll create a printable HTML version
   const weekStart = startOfWeek(weekDate);
   const weekEnd = endOfWeek(weekDate);
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Weekly Schedule ${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}</title>
+      <title>Weekly Schedule ${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -88,26 +106,34 @@ export const exportScheduleAsPDF = async (scheduleData: ExportData[], weekDate: 
     <body>
       <div class="header">
         <h1>Weekly Schedule</h1>
-        <h2>${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}</h2>
+        <h2>${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}</h2>
       </div>
       
-      ${weekDays.map(day => {
-        const dayName = format(day, 'EEEE');
-        const dayShifts = scheduleData.filter(shift => shift.day === dayName);
-        
-        if (dayShifts.length === 0) return '';
-        
-        return `
+      ${weekDays
+        .map((day) => {
+          const dayName = format(day, "EEEE");
+          const dayShifts = scheduleData.filter(
+            (shift) => shift.day === dayName,
+          );
+
+          if (dayShifts.length === 0) return "";
+
+          return `
           <div class="day-section">
-            <div class="day-title">${dayName} ${format(day, 'MMM d')}</div>
-            ${dayShifts.map(shift => `
+            <div class="day-title">${dayName} ${format(day, "MMM d")}</div>
+            ${dayShifts
+              .map(
+                (shift) => `
               <div class="shift">
                 <strong>${shift.employee}</strong> (${shift.role}) - ${shift.startTime} to ${shift.endTime} (${shift.hours}h)
               </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
         `;
-      }).join('')}
+        })
+        .join("")}
       
       <button class="no-print" onclick="window.print()" 
               style="margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
@@ -116,8 +142,8 @@ export const exportScheduleAsPDF = async (scheduleData: ExportData[], weekDate: 
     </body>
     </html>
   `;
-  
-  const printWindow = window.open('', '_blank');
+
+  const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(htmlContent);
     printWindow.document.close();

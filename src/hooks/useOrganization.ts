@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useCompany, getDemoCompany, type Company } from '@/hooks/useCompany';
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCompany, getDemoCompany, type Company } from "@/hooks/useCompany";
 
 export interface UseOrganizationResult {
   organization: Company;
@@ -27,7 +27,9 @@ export function useOrganization(): UseOrganizationResult {
       setRefreshError(null);
     } catch (unknownError) {
       const message =
-        unknownError instanceof Error ? unknownError.message : 'Unable to refresh organization.';
+        unknownError instanceof Error
+          ? unknownError.message
+          : "Unable to refresh organization.";
       setRefreshError(message);
     } finally {
       setRefreshing(false);
@@ -37,9 +39,7 @@ export function useOrganization(): UseOrganizationResult {
   const loading = Boolean(authLoading || companyState.loading || refreshing);
   const error =
     refreshError ??
-    (!authLoading && !user
-      ? 'Sign in to load your organization.'
-      : null);
+    (!authLoading && !user ? "Sign in to load your organization." : null);
 
   return {
     organization,

@@ -8,12 +8,14 @@ export interface CodexAutoTask {
   [key: string]: unknown;
 }
 
-const logger = createServerLogger('codexTaskRunner', { tags: ['codex'] });
+const logger = createServerLogger("codexTaskRunner", { tags: ["codex"] });
 
 export const Codex = {
   async run(task: CodexAutoTask) {
     // Placeholder: hook into the Codex execution pipeline.
-    logger.info('Auto-running task', { context: { taskId: task.id, source: task.generated_by } });
+    logger.info("Auto-running task", {
+      context: { taskId: task.id, source: task.generated_by },
+    });
   },
 };
 
@@ -32,10 +34,16 @@ export async function maybeAutoRunDevTasks(tasks: CodexAutoTask[]) {
         .eq("id", task.id);
 
       if (error) {
-        logger.error('Failed to mark task done', { error, context: { taskId: task.id } });
+        logger.error("Failed to mark task done", {
+          error,
+          context: { taskId: task.id },
+        });
       }
     } catch (err) {
-      logger.error('Failed to auto-run task', { error: err, context: { taskId: task.id } });
+      logger.error("Failed to auto-run task", {
+        error: err,
+        context: { taskId: task.id },
+      });
     }
   }
 }

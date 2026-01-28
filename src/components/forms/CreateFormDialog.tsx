@@ -1,9 +1,14 @@
-
-import React, { useCallback, useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle,
   BookOpen,
@@ -17,22 +22,22 @@ import {
   Users,
   X,
   type LucideIcon,
-} from 'lucide-react';
-import { useForms } from '@/hooks/useForms';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { importFormFromFile } from '@/services/forms/formImportService';
-import { logger } from '@/utils/logger';
+} from "lucide-react";
+import { useForms } from "@/hooks/useForms";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { importFormFromFile } from "@/features/forms/services/formImportService";
+import { logger } from "@/utils/logger";
 
 interface CreateFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onFormCreated?: (formId: string) => void;
-  preferredMethod?: 'blank' | 'template' | 'upload';
+  preferredMethod?: "blank" | "template" | "upload";
   onPreferredMethodHandled?: () => void;
 }
 
-type CreationStep = 'select-method' | 'template-selection' | 'file-upload';
+type CreationStep = "select-method" | "template-selection" | "file-upload";
 
 interface FormTemplate {
   id: string;
@@ -46,52 +51,52 @@ interface FormTemplate {
 
 const formTemplates: FormTemplate[] = [
   {
-    id: 'employee-feedback',
-    name: 'Employee Feedback',
-    description: 'Collect feedback from employees about workplace satisfaction',
-    category: 'HR',
+    id: "employee-feedback",
+    name: "Employee Feedback",
+    description: "Collect feedback from employees about workplace satisfaction",
+    category: "HR",
     icon: Users,
     fields: 8,
     popular: true,
   },
   {
-    id: 'event-registration',
-    name: 'Event Registration',
-    description: 'Register attendees for company events',
-    category: 'Events',
+    id: "event-registration",
+    name: "Event Registration",
+    description: "Register attendees for company events",
+    category: "Events",
     icon: Calendar,
     fields: 6,
   },
   {
-    id: 'incident-report',
-    name: 'Incident Report',
-    description: 'Report workplace incidents and safety concerns',
-    category: 'Safety',
+    id: "incident-report",
+    name: "Incident Report",
+    description: "Report workplace incidents and safety concerns",
+    category: "Safety",
     icon: AlertTriangle,
     fields: 10,
     popular: true,
   },
   {
-    id: 'leave-request',
-    name: 'Leave Request',
-    description: 'Submit time off and leave requests',
-    category: 'HR',
+    id: "leave-request",
+    name: "Leave Request",
+    description: "Submit time off and leave requests",
+    category: "HR",
     icon: Clock,
     fields: 7,
   },
   {
-    id: 'customer-survey',
-    name: 'Customer Survey',
-    description: 'Gather customer feedback and satisfaction ratings',
-    category: 'Customer',
+    id: "customer-survey",
+    name: "Customer Survey",
+    description: "Gather customer feedback and satisfaction ratings",
+    category: "Customer",
     icon: Star,
     fields: 12,
   },
   {
-    id: 'training-evaluation',
-    name: 'Training Evaluation',
-    description: 'Evaluate training effectiveness and gather feedback',
-    category: 'Training',
+    id: "training-evaluation",
+    name: "Training Evaluation",
+    description: "Evaluate training effectiveness and gather feedback",
+    category: "Training",
     icon: BookOpen,
     fields: 9,
   },
@@ -107,13 +112,15 @@ export default function CreateFormDialog({
   const { createForm } = useForms();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState<CreationStep>('select-method');
-  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
+  const [currentStep, setCurrentStep] = useState<CreationStep>("select-method");
+  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(
+    null,
+  );
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
 
   const resetDialog = () => {
-    setCurrentStep('select-method');
+    setCurrentStep("select-method");
     setSelectedTemplate(null);
     setUploadedFile(null);
     setCreating(false);
@@ -126,64 +133,72 @@ export default function CreateFormDialog({
     onOpenChange(open);
   };
 
-  const createFormAndStartBuilder = useCallback(async (
-    title: string = 'New Form',
-    description: string = '',
-    options?: { fromFile?: boolean },
-  ) => {
-    setCreating(true);
-    try {
-      if (options?.fromFile) {
-        if (!uploadedFile) {
-          throw new Error('No file selected for import');
-        }
-        if (!user) {
-          throw new Error('You must be signed in to import forms from files.');
+  const createFormAndStartBuilder = useCallback(
+    async (
+      title: string = "New Form",
+      description: string = "",
+      options?: { fromFile?: boolean },
+    ) => {
+      setCreating(true);
+      try {
+        if (options?.fromFile) {
+          if (!uploadedFile) {
+            throw new Error("No file selected for import");
+          }
+          if (!user) {
+            throw new Error(
+              "You must be signed in to import forms from files.",
+            );
+          }
+
+          const baseName = uploadedFile.name.replace(/\.[^/.]+$/, "");
+          const { form } = await importFormFromFile(uploadedFile, user.id);
+          setUploadedFile(null);
+          onFormCreated?.(form.id);
+          resetDialog();
+          onOpenChange(false);
+          toast({
+            title: "Form imported",
+            description: `${uploadedFile.name} is ready for refinement.`,
+          });
+          return;
         }
 
-        const baseName = uploadedFile.name.replace(/\.[^/.]+$/, '');
-        const { form } = await importFormFromFile(uploadedFile, user.id);
-        setUploadedFile(null);
-        onFormCreated?.(form.id);
+        const formData = {
+          title,
+          description: description || undefined,
+          department_id: undefined,
+          is_anonymous: false,
+        };
+
+        const { data, error } = await createForm(formData);
+        if (error || !data) {
+          throw error ?? new Error("Failed to create form");
+        }
+        onFormCreated?.(data.id);
         resetDialog();
         onOpenChange(false);
+      } catch (error) {
+        logger.error("Unable to create form", { error, tags: ["error"] });
         toast({
-          title: 'Form imported',
-          description: `${uploadedFile.name} is ready for refinement.`,
+          title: "Form creation failed",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Unexpected error occurred.",
+          variant: "destructive",
         });
-        return;
+      } finally {
+        setCreating(false);
       }
-
-      const formData = {
-        title,
-        description: description || undefined,
-        department_id: undefined,
-        is_anonymous: false,
-      };
-
-      const { data, error } = await createForm(formData);
-      if (error || !data) {
-        throw error ?? new Error('Failed to create form');
-      }
-      onFormCreated?.(data.id);
-      resetDialog();
-      onOpenChange(false);
-    } catch (error) {
-      logger.error('Unable to create form', { error, tags: ['error'] });
-      toast({
-        title: 'Form creation failed',
-        description: error instanceof Error ? error.message : 'Unexpected error occurred.',
-        variant: 'destructive',
-      });
-    } finally {
-      setCreating(false);
-    }
-  }, [createForm, onFormCreated, toast, uploadedFile, user]);
+    },
+    [createForm, onFormCreated, toast, uploadedFile, user],
+  );
 
   useEffect(() => {
     if (!open || !preferredMethod || creating) return;
 
-    if (preferredMethod === 'blank') {
+    if (preferredMethod === "blank") {
       void (async () => {
         await createFormAndStartBuilder();
         onPreferredMethodHandled?.();
@@ -191,13 +206,19 @@ export default function CreateFormDialog({
       return;
     }
 
-    if (preferredMethod === 'template') {
-      setCurrentStep('template-selection');
-    } else if (preferredMethod === 'upload') {
-      setCurrentStep('file-upload');
+    if (preferredMethod === "template") {
+      setCurrentStep("template-selection");
+    } else if (preferredMethod === "upload") {
+      setCurrentStep("file-upload");
     }
     onPreferredMethodHandled?.();
-  }, [open, preferredMethod, creating, createFormAndStartBuilder, onPreferredMethodHandled]);
+  }, [
+    open,
+    preferredMethod,
+    creating,
+    createFormAndStartBuilder,
+    onPreferredMethodHandled,
+  ]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (creating) return;
@@ -217,28 +238,28 @@ export default function CreateFormDialog({
       badge?: string;
     }> = [
       {
-        id: 'scratch',
-        title: 'Start from scratch',
-        description: 'Create a custom form from the ground up',
+        id: "scratch",
+        title: "Start from scratch",
+        description: "Create a custom form from the ground up",
         icon: Edit,
         onSelect: () => {
           void createFormAndStartBuilder();
         },
       },
       {
-        id: 'template',
-        title: 'Use a template',
-        description: 'Choose from pre-built form templates',
+        id: "template",
+        title: "Use a template",
+        description: "Choose from pre-built form templates",
         icon: FileText,
-        onSelect: () => setCurrentStep('template-selection'),
+        onSelect: () => setCurrentStep("template-selection"),
       },
       {
-        id: 'upload',
-        title: 'Create from file',
-        description: 'Upload a document to generate a form',
+        id: "upload",
+        title: "Create from file",
+        description: "Upload a document to generate a form",
         icon: Upload,
-        badge: 'Beta',
-        onSelect: () => setCurrentStep('file-upload'),
+        badge: "Beta",
+        onSelect: () => setCurrentStep("file-upload"),
       },
     ];
 
@@ -247,8 +268,12 @@ export default function CreateFormDialog({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="mb-2 text-lg font-semibold">How would you like to create your form?</h3>
-          <p className="text-sm text-muted-foreground">Choose the method that works best for you.</p>
+          <h3 className="mb-2 text-lg font-semibold">
+            How would you like to create your form?
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Choose the method that works best for you.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -267,13 +292,13 @@ export default function CreateFormDialog({
                 aria-disabled={isDisabled}
                 className={`relative h-full min-h-[220px] border-2 transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
                   isDisabled
-                    ? 'pointer-events-none cursor-not-allowed opacity-60'
-                    : 'hover:border-primary/20 hover:shadow-md'
+                    ? "pointer-events-none cursor-not-allowed opacity-60"
+                    : "hover:border-primary/20 hover:shadow-md"
                 }`}
                 onClick={handleActivate}
                 onKeyDown={(event) => {
                   if (isDisabled) return;
-                  if (event.key === 'Enter' || event.key === ' ') {
+                  if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
                     method.onSelect();
                   }
@@ -288,7 +313,10 @@ export default function CreateFormDialog({
                     <CardDescription>{method.description}</CardDescription>
                   </div>
                   {method.badge && (
-                    <Badge variant="secondary" className="mt-auto text-xs uppercase tracking-wide">
+                    <Badge
+                      variant="secondary"
+                      className="mt-auto text-xs uppercase tracking-wide"
+                    >
                       {method.badge}
                     </Badge>
                   )}
@@ -304,12 +332,19 @@ export default function CreateFormDialog({
   const renderTemplateSelection = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')} disabled={creating}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCurrentStep("select-method")}
+          disabled={creating}
+        >
           ← Back
         </Button>
         <div>
           <h3 className="text-lg font-semibold">Choose a template</h3>
-          <p className="text-muted-foreground">Select a pre-built form to get started quickly</p>
+          <p className="text-muted-foreground">
+            Select a pre-built form to get started quickly
+          </p>
         </div>
       </div>
 
@@ -321,8 +356,8 @@ export default function CreateFormDialog({
             <Card
               key={template.id}
               className={`cursor-pointer border-2 transition-shadow hover:shadow-md ${
-                isSelected ? 'border-primary' : 'hover:border-primary/20'
-              } ${creating ? 'pointer-events-none opacity-60' : ''}`}
+                isSelected ? "border-primary" : "hover:border-primary/20"
+              } ${creating ? "pointer-events-none opacity-60" : ""}`}
               onClick={() => {
                 if (creating) return;
                 setSelectedTemplate(template);
@@ -336,12 +371,20 @@ export default function CreateFormDialog({
                     </div>
                     <div>
                       <h4 className="text-sm font-semibold">{template.name}</h4>
-                      <Badge variant="outline" className="text-xs">{template.category}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {template.category}
+                      </Badge>
                     </div>
                   </div>
-                  {template.popular && <Badge variant="secondary" className="text-xs">Popular</Badge>}
+                  {template.popular && (
+                    <Badge variant="secondary" className="text-xs">
+                      Popular
+                    </Badge>
+                  )}
                 </div>
-                <p className="mb-2 text-sm text-muted-foreground">{template.description}</p>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  {template.description}
+                </p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <FileText className="h-3 w-3" />
@@ -357,10 +400,20 @@ export default function CreateFormDialog({
       {selectedTemplate && (
         <div className="flex justify-end">
           <Button
-            onClick={() => createFormAndStartBuilder(selectedTemplate.name, selectedTemplate.description)}
+            onClick={() =>
+              createFormAndStartBuilder(
+                selectedTemplate.name,
+                selectedTemplate.description,
+              )
+            }
             disabled={creating}
           >
-            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+            {creating && (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            )}
             Use &quot;{selectedTemplate.name}&quot; Template
           </Button>
         </div>
@@ -371,15 +424,22 @@ export default function CreateFormDialog({
   const renderFileUpload = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentStep('select-method')} disabled={creating}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCurrentStep("select-method")}
+          disabled={creating}
+        >
           ← Back
         </Button>
         <div>
           <h3 className="text-lg font-semibold">Upload a file</h3>
-          <p className="text-muted-foreground">Upload a document and we&apos;ll generate a form based on it</p>
+          <p className="text-muted-foreground">
+            Upload a document and we&apos;ll generate a form based on it
+          </p>
         </div>
       </div>
-      
+
       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
         <input
           type="file"
@@ -389,23 +449,28 @@ export default function CreateFormDialog({
           className="hidden"
           disabled={creating}
         />
-        <label htmlFor="file-upload" className={`cursor-pointer ${creating ? 'pointer-events-none opacity-60' : ''}`}>
+        <label
+          htmlFor="file-upload"
+          className={`cursor-pointer ${creating ? "pointer-events-none opacity-60" : ""}`}
+        >
           <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h4 className="font-semibold mb-2">Choose a file to upload</h4>
-          <p className="text-muted-foreground mb-4">Support for PDF, DOC, DOCX, and TXT files</p>
+          <p className="text-muted-foreground mb-4">
+            Support for PDF, DOC, DOCX, and TXT files
+          </p>
           <Button type="button" variant="outline" disabled={creating}>
             Browse Files
           </Button>
         </label>
       </div>
-      
+
       {uploadedFile && (
         <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
           <FileText className="h-5 w-5" />
           <span className="flex-1 text-sm">{uploadedFile.name}</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               setUploadedFile(null);
             }}
@@ -415,16 +480,25 @@ export default function CreateFormDialog({
           </Button>
         </div>
       )}
-      
+
       {uploadedFile && (
         <div className="flex justify-end">
           <Button
             onClick={() =>
-              createFormAndStartBuilder(uploadedFile.name.replace(/\.[^/.]+$/, ''), '', { fromFile: true })
+              createFormAndStartBuilder(
+                uploadedFile.name.replace(/\.[^/.]+$/, ""),
+                "",
+                { fromFile: true },
+              )
             }
             disabled={creating}
           >
-            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+            {creating && (
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+            )}
             Continue with File
           </Button>
         </div>
@@ -444,9 +518,9 @@ export default function CreateFormDialog({
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto px-6 py-6">
-            {currentStep === 'select-method' && renderMethodSelection()}
-            {currentStep === 'template-selection' && renderTemplateSelection()}
-            {currentStep === 'file-upload' && renderFileUpload()}
+            {currentStep === "select-method" && renderMethodSelection()}
+            {currentStep === "template-selection" && renderTemplateSelection()}
+            {currentStep === "file-upload" && renderFileUpload()}
           </div>
         </div>
 

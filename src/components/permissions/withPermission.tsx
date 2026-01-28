@@ -1,11 +1,11 @@
-import React, { ComponentType } from 'react';
-import { useCan } from '@/hooks/useCan';
-import { type PermissionKey } from '@/hooks/useUserPermissions';
+import React, { ComponentType } from "react";
+import { useCan } from "@/hooks/useCan";
+import { type PermissionKey } from "@/hooks/useUserPermissions";
 
 // Props that will be injected by the HOC
 export interface WithPermissionInjectedProps {
   hasPermission: boolean;
-  permissionSource: 'role' | 'allow_override' | 'deny_override';
+  permissionSource: "role" | "allow_override" | "deny_override";
   canCheck: (key: PermissionKey) => boolean;
 }
 
@@ -23,17 +23,16 @@ export interface WithPermissionConfig {
  * @returns HOC function
  */
 export function withPermission<P extends object>(config: WithPermissionConfig) {
-  const { 
-    permissionKey, 
-    fallback = null, 
+  const {
+    permissionKey,
+    fallback = null,
     renderWhenDenied = false,
-    loadingComponent = null
+    loadingComponent = null,
   } = config;
 
   return function WithPermissionHOC(
-    WrappedComponent: ComponentType<P & WithPermissionInjectedProps>
+    WrappedComponent: ComponentType<P & WithPermissionInjectedProps>,
   ): ComponentType<P> {
-    
     const ComponentWithPermission = (props: P) => {
       const { can, getSource, isLoading } = useCan();
 
@@ -53,7 +52,7 @@ export function withPermission<P extends object>(config: WithPermissionConfig) {
       // If no permission and not rendering when denied, show fallback
       if (!hasPermission && !renderWhenDenied) {
         if (fallback === null) return null;
-        
+
         if (React.isValidElement(fallback)) {
           return fallback;
         }
@@ -74,7 +73,7 @@ export function withPermission<P extends object>(config: WithPermissionConfig) {
     };
 
     ComponentWithPermission.displayName = `withPermission(${
-      WrappedComponent.displayName || WrappedComponent.name || 'Component'
+      WrappedComponent.displayName || WrappedComponent.name || "Component"
     })`;
 
     return ComponentWithPermission;
@@ -91,11 +90,11 @@ interface PermissionGuardProps {
   renderWhenDenied?: boolean;
 }
 
-export function PermissionGuard({ 
-  permission, 
-  fallback = null, 
-  children, 
-  renderWhenDenied = false 
+export function PermissionGuard({
+  permission,
+  fallback = null,
+  children,
+  renderWhenDenied = false,
 }: PermissionGuardProps) {
   const { can, isLoading } = useCan();
 
@@ -115,24 +114,23 @@ export function PermissionGuard({
  */
 interface MultiPermissionGuardProps {
   permissions: PermissionKey[];
-  strategy?: 'any' | 'all';
+  strategy?: "any" | "all";
   fallback?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function MultiPermissionGuard({ 
-  permissions, 
-  strategy = 'any', 
-  fallback = null, 
-  children 
+export function MultiPermissionGuard({
+  permissions,
+  strategy = "any",
+  fallback = null,
+  children,
 }: MultiPermissionGuardProps) {
   const { canAny, canAll, isLoading } = useCan();
 
   if (isLoading) return null;
 
-  const hasPermission = strategy === 'any' 
-    ? canAny(permissions) 
-    : canAll(permissions);
+  const hasPermission =
+    strategy === "any" ? canAny(permissions) : canAll(permissions);
 
   if (!hasPermission) {
     return <>{fallback}</>;
@@ -151,11 +149,11 @@ interface RouteGuardProps {
   children: React.ReactNode;
 }
 
-export function RouteGuard({ 
-  permission, 
-  redirectTo = '/unauthorized', 
+export function RouteGuard({
+  permission,
+  redirectTo = "/unauthorized",
   fallbackComponent: FallbackComponent,
-  children 
+  children,
 }: RouteGuardProps) {
   const { can, isLoading } = useCan();
 
@@ -173,14 +171,18 @@ export function RouteGuard({
     if (FallbackComponent) {
       return <FallbackComponent />;
     }
-    
+
     // In a real app, you might want to use React Router's Navigate component
     // For now, just show a simple unauthorized message
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600">
+            You don't have permission to access this page.
+          </p>
         </div>
       </div>
     );

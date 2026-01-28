@@ -1,6 +1,6 @@
-import React from 'react';
-import { InventoryLayout } from '../components/InventoryLayout';
-import { IfCan } from '@/components/permissions/IfCan';
+import React from "react";
+import { InventoryLayout } from "../components/InventoryLayout";
+import { IfCan } from "@/components/permissions/IfCan";
 
 export default function InventoryItems() {
   return (

@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { z } from 'zod';
-import { getAvailability, updateAvailabilityFlag } from '@/features/messages/api/userStatusService';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { z } from "zod";
+import {
+  getAvailability,
+  updateAvailabilityFlag,
+} from "@/features/messages/api/userStatusService";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 interface AvailabilityStatus {
   available: boolean;
@@ -26,14 +29,19 @@ export function useAvailabilityStatus(): AvailabilityStatus {
       try {
         const metadata = await getAvailability();
         const parseResult = AvailabilityMetadataSchema.safeParse(metadata);
-        const availabilityFlag = parseResult.success ? parseResult.data.availability : undefined;
-        if (typeof availabilityFlag === 'boolean' && isMountedRef.current) {
+        const availabilityFlag = parseResult.success
+          ? parseResult.data.availability
+          : undefined;
+        if (typeof availabilityFlag === "boolean" && isMountedRef.current) {
           setAvailable(availabilityFlag);
           previousValueRef.current = availabilityFlag;
         }
       } catch (error) {
         if (appEnv.DEV) {
-          logger.error('Failed to load availability flag', { error, tags: ['error'] });
+          logger.error("Failed to load availability flag", {
+            error,
+            tags: ["error"],
+          });
         }
       } finally {
         if (isMountedRef.current) {
@@ -47,21 +55,27 @@ export function useAvailabilityStatus(): AvailabilityStatus {
     };
   }, []);
 
-  const updateAvailability = useCallback(async (value: boolean): Promise<void> => {
-    previousValueRef.current = available;
-    setAvailable(value);
-    try {
-      await updateAvailabilityFlag(value);
-    } catch (error) {
-      if (appEnv.DEV) {
-        logger.error('Failed to update availability status', { error, tags: ['error'] });
+  const updateAvailability = useCallback(
+    async (value: boolean): Promise<void> => {
+      previousValueRef.current = available;
+      setAvailable(value);
+      try {
+        await updateAvailabilityFlag(value);
+      } catch (error) {
+        if (appEnv.DEV) {
+          logger.error("Failed to update availability status", {
+            error,
+            tags: ["error"],
+          });
+        }
+        if (isMountedRef.current) {
+          setAvailable(previousValueRef.current);
+        }
+        throw error;
       }
-      if (isMountedRef.current) {
-        setAvailable(previousValueRef.current);
-      }
-      throw error;
-    }
-  }, [available]);
+    },
+    [available],
+  );
 
   return {
     available,

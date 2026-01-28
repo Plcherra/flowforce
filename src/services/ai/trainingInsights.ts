@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 
 interface TrainingInsightSummary {
   totalCompletions: number;
@@ -14,7 +14,9 @@ export async function analyzeTrainingProgress(
   options: { lookbackDays?: number; limit?: number } = {},
 ): Promise<TrainingInsightSummary> {
   if (!companyId) {
-    throw new Error('Company context is required to analyze training progress.');
+    throw new Error(
+      "Company context is required to analyze training progress.",
+    );
   }
 
   const lookbackDays = options.lookbackDays ?? DEFAULT_LOOKBACK_DAYS;
@@ -23,11 +25,11 @@ export async function analyzeTrainingProgress(
   cutoffDate.setDate(cutoffDate.getDate() - lookbackDays);
 
   const { data, error } = await supabase
-    .from('learning_completions')
-    .select('xp_earned, passed, completed_at')
-    .eq('company_id', companyId)
-    .gte('completed_at', cutoffDate.toISOString())
-    .order('completed_at', { ascending: false })
+    .from("learning_completions")
+    .select("xp_earned, passed, completed_at")
+    .eq("company_id", companyId)
+    .gte("completed_at", cutoffDate.toISOString())
+    .order("completed_at", { ascending: false })
     .limit(limit);
 
   if (error) {
@@ -36,12 +38,16 @@ export async function analyzeTrainingProgress(
 
   const completions = data ?? [];
   const totalCompletions = completions.length;
-  const totalXp = completions.reduce((sum, record) => sum + (record.xp_earned ?? 0), 0);
+  const totalXp = completions.reduce(
+    (sum, record) => sum + (record.xp_earned ?? 0),
+    0,
+  );
   const avgXP = totalCompletions > 0 ? totalXp / totalCompletions : 0;
 
   let suggestions: string;
   if (totalCompletions === 0) {
-    suggestions = 'No completions logged yet. Encourage managers to assign onboarding pathways to new hires.';
+    suggestions =
+      "No completions logged yet. Encourage managers to assign onboarding pathways to new hires.";
   } else if (avgXP < 200) {
     suggestions = `Encourage blended training for roles with low XP gain (${avgXP.toFixed(0)} avg).`;
   } else {

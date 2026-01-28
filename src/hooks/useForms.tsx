@@ -1,10 +1,10 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
-import { toast } from '@/hooks/use-toast';
-import { useFormSchemaStore } from '@/stores/useFormSchemaStore';
-import { useProfile } from '@/hooks/useProfile';
-import { logger } from '@/utils/logger';
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
+import { toast } from "@/hooks/use-toast";
+import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
+import { useProfile } from "@/hooks/useProfile";
+import { logger } from "@/utils/logger";
 import {
   fetchFormsWithRelations,
   insertFormRow,
@@ -14,49 +14,80 @@ import {
   replaceFormFields as repositoryReplaceFormFields,
   fetchFormSubmissions as repositoryFetchFormSubmissions,
   insertFormSubmission,
-} from '@/repositories/formsRepository';
-import type { FormRow, FormFieldRow, FormSubmissionRow, FormQueryRow } from '@/repositories/formsRepository';
+} from "@/repositories/formsRepository";
+import type {
+  FormRow,
+  FormFieldRow,
+  FormSubmissionRow,
+  FormQueryRow,
+} from "@/repositories/formsRepository";
 
-export type { FormRow, FormFieldRow, FormSubmissionRow } from '@/repositories/formsRepository';
+export type {
+  FormRow,
+  FormFieldRow,
+  FormSubmissionRow,
+} from "@/repositories/formsRepository";
 
-export type FormWithMeta = Omit<FormQueryRow, 'submission_stats' | 'latest_submission'> & {
+export type FormWithMeta = Omit<
+  FormQueryRow,
+  "submission_stats" | "latest_submission"
+> & {
   submissions_count: number;
   latest_submission_at: string | null;
 };
 
-const FORMS_QUERY_SCOPE = ['forms'] as const;
+const FORMS_QUERY_SCOPE = ["forms"] as const;
 
-type FormSchemaSnapshot = ReturnType<typeof useFormSchemaStore.getState>['schema'];
+type FormSchemaSnapshot = ReturnType<
+  typeof useFormSchemaStore.getState
+>["schema"];
 
 type PartialFormMeta = Partial<FormWithMeta>;
 
-const getFallbackSubmissionCount = (schema: FormSchemaSnapshot, formId: string): number => {
+const getFallbackSubmissionCount = (
+  schema: FormSchemaSnapshot,
+  formId: string,
+): number => {
   if (!schema || schema.id !== formId) {
     return 0;
   }
   const metadata = schema.metadata;
-  if (metadata && typeof (metadata as Record<string, unknown>).submissionCount === 'number') {
+  if (
+    metadata &&
+    typeof (metadata as Record<string, unknown>).submissionCount === "number"
+  ) {
     return (metadata as { submissionCount: number }).submissionCount;
   }
   return 0;
 };
 
-const convertQueryRowToMeta = (row: FormQueryRow, schemaFallback: FormSchemaSnapshot): FormWithMeta => {
+const convertQueryRowToMeta = (
+  row: FormQueryRow,
+  schemaFallback: FormSchemaSnapshot,
+): FormWithMeta => {
   const { submission_stats, latest_submission, ...rest } = row;
   const statsEntry = Array.isArray(submission_stats)
-    ? submission_stats.find((item): item is { count: number | null } => Boolean(item && typeof item === 'object'))
+    ? submission_stats.find((item): item is { count: number | null } =>
+        Boolean(item && typeof item === "object"),
+      )
     : undefined;
-  const rawCount = typeof statsEntry?.count === 'number' && Number.isFinite(statsEntry.count) ? statsEntry.count : null;
-  const fallbackCount = schemaFallback ? getFallbackSubmissionCount(schemaFallback, rest.id) : 0;
+  const rawCount =
+    typeof statsEntry?.count === "number" && Number.isFinite(statsEntry.count)
+      ? statsEntry.count
+      : null;
+  const fallbackCount = schemaFallback
+    ? getFallbackSubmissionCount(schemaFallback, rest.id)
+    : 0;
 
   const latestEntry = Array.isArray(latest_submission)
-    ? latest_submission.find(
-        (item): item is { submitted_at?: string | null } => Boolean(item && typeof item === 'object'),
+    ? latest_submission.find((item): item is { submitted_at?: string | null } =>
+        Boolean(item && typeof item === "object"),
       )
     : undefined;
 
   const latestSubmissionAt =
-    typeof latestEntry?.submitted_at === 'string' && latestEntry.submitted_at.length > 0
+    typeof latestEntry?.submitted_at === "string" &&
+    latestEntry.submitted_at.length > 0
       ? latestEntry.submitted_at
       : null;
 
@@ -67,7 +98,10 @@ const convertQueryRowToMeta = (row: FormQueryRow, schemaFallback: FormSchemaSnap
   };
 };
 
-const buildMetaFromRow = (row: FormRow, overrides: PartialFormMeta = {}): FormWithMeta => ({
+const buildMetaFromRow = (
+  row: FormRow,
+  overrides: PartialFormMeta = {},
+): FormWithMeta => ({
   ...row,
   created_profile: overrides.created_profile,
   department: overrides.department ?? null,
@@ -83,40 +117,51 @@ export function useForms() {
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const formsQueryKey = useMemo(
-    () => [...FORMS_QUERY_SCOPE, companyId ?? 'no-company'] as const,
+    () => [...FORMS_QUERY_SCOPE, companyId ?? "no-company"] as const,
     [companyId],
   );
 
   const updateFormsCache = useCallback(
     (updater: (forms: FormWithMeta[]) => FormWithMeta[]) => {
-      queryClient.setQueryData<FormWithMeta[]>(formsQueryKey, (current) => updater(current ?? []));
+      queryClient.setQueryData<FormWithMeta[]>(formsQueryKey, (current) =>
+        updater(current ?? []),
+      );
     },
     [formsQueryKey, queryClient],
   );
 
-  const fetchForms = useCallback(async (tenantCompanyId: string): Promise<FormWithMeta[]> => {
-    const rows = await fetchFormsWithRelations(tenantCompanyId);
-    
-    // Security: Validate that all forms belong to the company (defensive check)
-    // The repository query already filters by created_profile.company_id, but this ensures data integrity
-    const invalidForms = rows.filter((form) => form.created_profile?.company_id !== tenantCompanyId);
-    if (invalidForms.length > 0) {
-      logger.error('SECURITY WARNING: Forms from other companies detected', {
-        context: {
-          tenantCompanyId,
-          invalidCount: invalidForms.length,
-          invalidIds: invalidForms.map(f => f.id),
-        },
-        tags: ['security', 'tenant-isolation'],
-      });
-      // Filter out invalid forms for security
-      // In production, this should trigger an alert/audit log
-    }
-    
-    const validForms = rows.filter((form) => form.created_profile?.company_id === tenantCompanyId);
-    const schemaFallback = useFormSchemaStore.getState().schema;
-    return validForms.map((form) => convertQueryRowToMeta(form, schemaFallback));
-  }, []);
+  const fetchForms = useCallback(
+    async (tenantCompanyId: string): Promise<FormWithMeta[]> => {
+      const rows = await fetchFormsWithRelations(tenantCompanyId);
+
+      // Security: Validate that all forms belong to the company (defensive check)
+      // The repository query already filters by created_profile.company_id, but this ensures data integrity
+      const invalidForms = rows.filter(
+        (form) => form.created_profile?.company_id !== tenantCompanyId,
+      );
+      if (invalidForms.length > 0) {
+        logger.error("SECURITY WARNING: Forms from other companies detected", {
+          context: {
+            tenantCompanyId,
+            invalidCount: invalidForms.length,
+            invalidIds: invalidForms.map((f) => f.id),
+          },
+          tags: ["security", "tenant-isolation"],
+        });
+        // Filter out invalid forms for security
+        // In production, this should trigger an alert/audit log
+      }
+
+      const validForms = rows.filter(
+        (form) => form.created_profile?.company_id === tenantCompanyId,
+      );
+      const schemaFallback = useFormSchemaStore.getState().schema;
+      return validForms.map((form) =>
+        convertQueryRowToMeta(form, schemaFallback),
+      );
+    },
+    [],
+  );
 
   const formsQuery = useQuery<FormWithMeta[]>({
     queryKey: formsQueryKey,
@@ -133,20 +178,21 @@ export function useForms() {
     throwOnError: false,
     retry: 1,
     onError: (error) => {
-      logger.error('Error fetching forms', {
+      logger.error("Error fetching forms", {
         error,
-        tags: ['forms', 'data-fetch'],
+        tags: ["forms", "data-fetch"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to load forms',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load forms",
+        variant: "destructive",
       });
     },
   });
 
   const forms = formsQuery.data ?? [];
-  const isInitialLoading = formsQuery.isLoading || (formsQuery.isFetching && !formsQuery.data);
+  const isInitialLoading =
+    formsQuery.isLoading || (formsQuery.isFetching && !formsQuery.data);
   const loading = user ? isInitialLoading : false;
   const formsError = (formsQuery.error as Error | null) ?? null;
 
@@ -160,13 +206,13 @@ export function useForms() {
     department_id?: string;
     is_anonymous?: boolean;
   }) => {
-    if (!user) return { data: null, error: 'User not authenticated' };
+    if (!user) return { data: null, error: "User not authenticated" };
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { data: null, error };
     }
@@ -186,23 +232,26 @@ export function useForms() {
           }
         : undefined;
 
-      updateFormsCache((current) => [buildMetaFromRow(created, { created_profile: authorProfile }), ...current]);
+      updateFormsCache((current) => [
+        buildMetaFromRow(created, { created_profile: authorProfile }),
+        ...current,
+      ]);
 
       toast({
-        title: 'Success',
-        description: 'Form created successfully',
+        title: "Success",
+        description: "Form created successfully",
       });
 
       return { data: created, error: null };
     } catch (error) {
-      logger.error('Error creating form', {
+      logger.error("Error creating form", {
         error,
-        tags: ['forms', 'create'],
+        tags: ["forms", "create"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to create form',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to create form",
+        variant: "destructive",
       });
       return { data: null, error };
     }
@@ -210,11 +259,11 @@ export function useForms() {
 
   const updateForm = async (formId: string, updates: Partial<FormRow>) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error };
     }
@@ -238,20 +287,20 @@ export function useForms() {
       }
 
       toast({
-        title: 'Success',
-        description: 'Form updated successfully',
+        title: "Success",
+        description: "Form updated successfully",
       });
 
       return { error: null };
     } catch (error) {
-      logger.error('Error updating form', {
+      logger.error("Error updating form", {
         error,
-        tags: ['forms', 'update'],
+        tags: ["forms", "update"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to update form',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update form",
+        variant: "destructive",
       });
       return { error };
     }
@@ -259,34 +308,36 @@ export function useForms() {
 
   const deleteForm = async (formId: string) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error };
     }
 
     try {
       await deleteFormRow(companyId, formId);
-      updateFormsCache((current) => current.filter((form) => form.id !== formId));
+      updateFormsCache((current) =>
+        current.filter((form) => form.id !== formId),
+      );
 
       toast({
-        title: 'Success',
-        description: 'Form deleted successfully',
+        title: "Success",
+        description: "Form deleted successfully",
       });
 
       return { error: null };
     } catch (error) {
-      logger.error('Error deleting form', {
+      logger.error("Error deleting form", {
         error,
-        tags: ['forms', 'delete'],
+        tags: ["forms", "delete"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to delete form',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete form",
+        variant: "destructive",
       });
       return { error };
     }
@@ -294,7 +345,7 @@ export function useForms() {
 
   const getFormFields = async (formId: string) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       return { data: [], error };
     }
 
@@ -303,22 +354,25 @@ export function useForms() {
       if (!rows.length) {
         const fallback = buildFormFieldFallback(formId);
         if (fallback.length) {
-          logger.warn('Supabase returned no form fields; using local schema fallback', {
-            tags: ['forms', 'data-fallback'],
-          });
+          logger.warn(
+            "Supabase returned no form fields; using local schema fallback",
+            {
+              tags: ["forms", "data-fallback"],
+            },
+          );
           return { data: fallback, error: null };
         }
       }
       return { data: rows, error: null };
     } catch (error) {
-      logger.error('Error fetching form fields', {
+      logger.error("Error fetching form fields", {
         error,
-        tags: ['forms', 'data-fetch'],
+        tags: ["forms", "data-fetch"],
       });
       const fallback = buildFormFieldFallback(formId);
       if (fallback.length) {
-        logger.warn('Using locally cached form schema due to Supabase error', {
-          tags: ['forms', 'data-fallback'],
+        logger.warn("Using locally cached form schema due to Supabase error", {
+          tags: ["forms", "data-fallback"],
         });
         return { data: fallback, error: null };
       }
@@ -328,14 +382,17 @@ export function useForms() {
 
   const saveFormFields = async (
     formId: string,
-    fields: Omit<FormFieldRow, 'id' | 'form_id' | 'created_at' | 'updated_at'>[],
+    fields: Omit<
+      FormFieldRow,
+      "id" | "form_id" | "created_at" | "updated_at"
+    >[],
   ) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error };
     }
@@ -343,19 +400,19 @@ export function useForms() {
     try {
       await repositoryReplaceFormFields(companyId, formId, fields);
       toast({
-        title: 'Success',
-        description: 'Form fields saved successfully',
+        title: "Success",
+        description: "Form fields saved successfully",
       });
       return { error: null };
     } catch (error) {
-      logger.error('Error saving form fields', {
+      logger.error("Error saving form fields", {
         error,
-        tags: ['forms', 'save'],
+        tags: ["forms", "save"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to save form fields',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to save form fields",
+        variant: "destructive",
       });
       return { error };
     }
@@ -363,7 +420,7 @@ export function useForms() {
 
   const getFormSubmissions = async (formId: string) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       return { data: [], error };
     }
 
@@ -371,27 +428,31 @@ export function useForms() {
       const data = await repositoryFetchFormSubmissions(companyId, formId);
       return { data, error: null };
     } catch (error) {
-      logger.error('Error fetching form submissions', {
+      logger.error("Error fetching form submissions", {
         error,
-        tags: ['forms', 'submissions'],
+        tags: ["forms", "submissions"],
       });
       return { data: [], error };
     }
   };
 
-  const submitForm = async (formId: string, submissionData: Record<string, unknown>) => {
+  const submitForm = async (
+    formId: string,
+    submissionData: Record<string, unknown>,
+  ) => {
     if (!companyId) {
-      const error = new Error('Company context unavailable');
+      const error = new Error("Company context unavailable");
       toast({
-        title: 'Error',
+        title: "Error",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { data: null, error };
     }
 
     try {
-      const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : null;
+      const userAgent =
+        typeof navigator !== "undefined" ? navigator.userAgent : null;
       const submission = await insertFormSubmission(companyId, {
         form_id: formId,
         submitted_by: user?.id || null,
@@ -406,27 +467,28 @@ export function useForms() {
             ? {
                 ...form,
                 submissions_count: form.submissions_count + 1,
-                latest_submission_at: submission.submitted_at ?? form.latest_submission_at,
+                latest_submission_at:
+                  submission.submitted_at ?? form.latest_submission_at,
               }
             : form,
         ),
       );
 
       toast({
-        title: 'Success',
-        description: 'Form submitted successfully',
+        title: "Success",
+        description: "Form submitted successfully",
       });
 
       return { data: submission, error: null };
     } catch (error) {
-      logger.error('Error submitting form', {
+      logger.error("Error submitting form", {
         error,
-        tags: ['forms', 'submit'],
+        tags: ["forms", "submit"],
       });
       toast({
-        title: 'Error',
-        description: 'Failed to submit form',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to submit form",
+        variant: "destructive",
       });
       return { data: null, error };
     }
@@ -464,7 +526,7 @@ const buildFormFieldFallback = (formId: string): FormFieldRow[] => {
       id: field.id,
       form_id: formId,
       field_order: order++,
-      field_type: field.type as FormFieldRow['field_type'],
+      field_type: field.type as FormFieldRow["field_type"],
       label: field.label,
       placeholder: field.placeholder ?? null,
       description: field.content ?? null,

@@ -1,9 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { logger } from '@/utils/logger';
-
-import type { Announcement, CreateAnnouncementData } from '@/types/announcements';
+// Re-export from feature folder
+export * from "@/features/company-updates/hooks/useAnnouncements";
 
 export function useAnnouncements() {
   const { user } = useAuth();
@@ -25,33 +21,35 @@ export function useAnnouncements() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('announcements')
-        .select(`
+        .from("announcements")
+        .select(
+          `
           *,
           profiles!announcements_created_by_fkey (
             first_name,
             last_name,
             avatar_url
           )
-        `)
-        .eq('is_published', true)
+        `,
+        )
+        .eq("is_published", true)
         .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-        .order('priority', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order("priority", { ascending: false })
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       // Get read status for announcements
       const { data: readData, error: readError } = await supabase
-        .from('announcement_reads')
-        .select('announcement_id')
-        .eq('user_id', user.id);
+        .from("announcement_reads")
+        .select("announcement_id")
+        .eq("user_id", user.id);
 
       if (readError) throw readError;
 
-      const readIds = new Set(readData?.map(r => r.announcement_id) || []);
+      const readIds = new Set(readData?.map((r) => r.announcement_id) || []);
 
-      const announcementsWithReadStatus = (data || []).map(item => {
+      const announcementsWithReadStatus = (data || []).map((item) => {
         // Ensure we only include the fields we need and type them correctly
         const announcement: Announcement = {
           id: item.id,
@@ -66,20 +64,21 @@ export function useAnnouncements() {
           is_published: item.is_published,
           created_at: item.created_at,
           updated_at: item.updated_at,
-          creator_profile: (item.profiles && 
-                              Array.isArray(item.profiles) && 
-                              item.profiles.length > 0 &&
-                              typeof item.profiles[0] === 'object')
-            ? item.profiles[0] 
-            : { first_name: 'Unknown', last_name: 'User' },
-          is_read: readIds.has(item.id)
+          creator_profile:
+            item.profiles &&
+            Array.isArray(item.profiles) &&
+            item.profiles.length > 0 &&
+            typeof item.profiles[0] === "object"
+              ? item.profiles[0]
+              : { first_name: "Unknown", last_name: "User" },
+          is_read: readIds.has(item.id),
         };
         return announcement;
       });
 
       setAnnouncements(announcementsWithReadStatus);
     } catch (error) {
-      logger.error('Error fetching announcements', { error, tags: ['error'] });
+      logger.error("Error fetching announcements", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
@@ -87,17 +86,17 @@ export function useAnnouncements() {
 
   const subscribeToAnnouncements = () => {
     const channel = supabase
-      .channel('announcements')
+      .channel("announcements")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'announcements'
+          event: "*",
+          schema: "public",
+          table: "announcements",
         },
         () => {
           fetchAnnouncements();
-        }
+        },
       )
       .subscribe();
 
@@ -107,23 +106,21 @@ export function useAnnouncements() {
   };
 
   const markAsRead = async (announcementId: string) => {
-    if (!user) return { error: 'User not authenticated' };
+    if (!user) return { error: "User not authenticated" };
 
     try {
-      const { error } = await supabase
-        .from('announcement_reads')
-        .upsert({
-          announcement_id: announcementId,
-          user_id: user.id
-        });
+      const { error } = await supabase.from("announcement_reads").upsert({
+        announcement_id: announcementId,
+        user_id: user.id,
+      });
 
       if (error) throw error;
 
       // Update local state
-      setAnnouncements(prev => 
-        prev.map(a => 
-          a.id === announcementId ? { ...a, is_read: true } : a
-        )
+      setAnnouncements((prev) =>
+        prev.map((a) =>
+          a.id === announcementId ? { ...a, is_read: true } : a,
+        ),
       );
 
       return { error: null };
@@ -132,22 +129,26 @@ export function useAnnouncements() {
     }
   };
 
-  const createAnnouncement = async (announcementData: CreateAnnouncementData) => {
-    if (!user) return { data: null, error: 'User not authenticated' };
+  const createAnnouncement = async (
+    announcementData: CreateAnnouncementData,
+  ) => {
+    if (!user) return { data: null, error: "User not authenticated" };
 
     try {
       const { data, error } = await supabase
-        .from('announcements')
+        .from("announcements")
         .insert({
           title: announcementData.title,
           content: announcementData.content,
-          priority: announcementData.priority || 'normal',
-          target_audience: announcementData.target_audience || 'all',
+          priority: announcementData.priority || "normal",
+          target_audience: announcementData.target_audience || "all",
           target_ids: announcementData.target_ids || [],
           expires_at: announcementData.expires_at || null,
           is_published: announcementData.is_published ?? true,
           created_by: user.id,
-          company_id: user.user_metadata?.company_id || '00000000-0000-0000-0000-000000000000'
+          company_id:
+            user.user_metadata?.company_id ||
+            "00000000-0000-0000-0000-000000000000",
         })
         .select()
         .single();
@@ -161,14 +162,17 @@ export function useAnnouncements() {
     }
   };
 
-  const updateAnnouncement = async (id: string, updates: Partial<Announcement>) => {
-    if (!user) return { error: 'User not authenticated' };
+  const updateAnnouncement = async (
+    id: string,
+    updates: Partial<Announcement>,
+  ) => {
+    if (!user) return { error: "User not authenticated" };
 
     try {
       const { error } = await supabase
-        .from('announcements')
+        .from("announcements")
         .update(updates)
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
 
@@ -180,13 +184,13 @@ export function useAnnouncements() {
   };
 
   const deleteAnnouncement = async (id: string) => {
-    if (!user) return { error: 'User not authenticated' };
+    if (!user) return { error: "User not authenticated" };
 
     try {
       const { error } = await supabase
-        .from('announcements')
+        .from("announcements")
         .delete()
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
 
@@ -198,11 +202,11 @@ export function useAnnouncements() {
   };
 
   const getUnreadCount = () => {
-    return announcements.filter(a => !a.is_read).length;
+    return announcements.filter((a) => !a.is_read).length;
   };
 
   const getUrgentAnnouncements = () => {
-    return announcements.filter(a => a.priority === 'urgent' && !a.is_read);
+    return announcements.filter((a) => a.priority === "urgent" && !a.is_read);
   };
 
   return {
@@ -214,6 +218,6 @@ export function useAnnouncements() {
     deleteAnnouncement,
     refetchAnnouncements: fetchAnnouncements,
     unreadCount: getUnreadCount(),
-    urgentAnnouncements: getUrgentAnnouncements()
+    urgentAnnouncements: getUrgentAnnouncements(),
   };
 }

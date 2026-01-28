@@ -1,15 +1,27 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { Users } from 'lucide-react';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { Users } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -18,9 +30,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 
-export type ConversationType = 'direct' | 'team';
+export type ConversationType = "direct" | "team";
 
 export interface ConversationDraft {
   type: ConversationType;
@@ -34,7 +46,7 @@ export interface ChatUserSummary {
   name: string;
   role?: string;
   avatar?: string;
-  status?: 'online' | 'offline' | 'away';
+  status?: "online" | "offline" | "away";
 }
 
 interface NewConversationDialogProps {
@@ -47,33 +59,33 @@ interface NewConversationDialogProps {
 
 const conversationSchema = z
   .object({
-    type: z.enum(['direct', 'team']),
+    type: z.enum(["direct", "team"]),
     teamName: z.string().optional(),
     participantIds: z.array(z.string()),
-    initialMessage: z.string().min(1, 'Please write the first message.'),
+    initialMessage: z.string().min(1, "Please write the first message."),
   })
   .superRefine((data, ctx) => {
-    if (data.type === 'direct') {
+    if (data.type === "direct") {
       if (data.participantIds.length !== 1) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Select exactly one teammate for a direct message.',
-          path: ['participantIds'],
+          message: "Select exactly one teammate for a direct message.",
+          path: ["participantIds"],
         });
       }
     } else {
       if (!data.teamName?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Team conversations need a name.',
-          path: ['teamName'],
+          message: "Team conversations need a name.",
+          path: ["teamName"],
         });
       }
       if (data.participantIds.length < 2) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Pick at least two teammates for a team chat.',
-          path: ['participantIds'],
+          message: "Pick at least two teammates for a team chat.",
+          path: ["participantIds"],
         });
       }
     }
@@ -81,28 +93,36 @@ const conversationSchema = z
 
 type ConversationFormValues = z.infer<typeof conversationSchema>;
 
-export function NewConversationDialog({ open, onOpenChange, users, currentUserId, onCreate }: NewConversationDialogProps) {
+export function NewConversationDialog({
+  open,
+  onOpenChange,
+  users,
+  currentUserId,
+  onCreate,
+}: NewConversationDialogProps) {
   const form = useForm<ConversationFormValues>({
     resolver: zodResolver(conversationSchema),
     defaultValues: {
-      type: 'direct',
-      teamName: '',
+      type: "direct",
+      teamName: "",
       participantIds: [],
-      initialMessage: '',
+      initialMessage: "",
     },
   });
 
   const selectableUsers = users.filter((user) => user.id !== currentUserId);
   const hasSelectableUsers = selectableUsers.length > 0;
 
-  const type = form.watch('type');
-  const participantIds = form.watch('participantIds');
+  const type = form.watch("type");
+  const participantIds = form.watch("participantIds");
 
   const toggleParticipant = (id: string) => {
-    const current = form.getValues('participantIds');
+    const current = form.getValues("participantIds");
     form.setValue(
-      'participantIds',
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+      "participantIds",
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
       { shouldValidate: true },
     );
   };
@@ -110,7 +130,7 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
   const handleSubmit = form.handleSubmit((values) => {
     const draft: ConversationDraft = {
       type: values.type,
-      name: values.type === 'direct' ? '' : values.teamName?.trim() ?? '',
+      name: values.type === "direct" ? "" : (values.teamName?.trim() ?? ""),
       participantIds: values.participantIds,
       initialMessage: values.initialMessage.trim(),
     };
@@ -125,7 +145,9 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>Start a conversation</DialogTitle>
-          <DialogDescription>Choose who you want to talk with and send the first message.</DialogDescription>
+          <DialogDescription>
+            Choose who you want to talk with and send the first message.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -137,7 +159,12 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
                 <FormItem>
                   <FormLabel>Conversation type</FormLabel>
                   <FormControl>
-                    <Select value={field.value} onValueChange={(value) => field.onChange(value as ConversationType)}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) =>
+                        field.onChange(value as ConversationType)
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -152,7 +179,7 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
               )}
             />
 
-            {type === 'team' && (
+            {type === "team" && (
               <FormField
                 control={form.control}
                 name="teamName"
@@ -184,18 +211,28 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
                               <label
                                 key={user.id}
                                 className={cn(
-                                  'flex items-center gap-3 rounded-md border p-2 text-sm transition',
-                                  checked ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40',
+                                  "flex items-center gap-3 rounded-md border p-2 text-sm transition",
+                                  checked
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border hover:bg-muted/40",
                                 )}
                               >
                                 <Checkbox
                                   checked={checked}
-                                  onCheckedChange={() => toggleParticipant(user.id)}
+                                  onCheckedChange={() =>
+                                    toggleParticipant(user.id)
+                                  }
                                   aria-label={`Select ${user.name}`}
                                 />
                                 <div className="flex flex-col">
-                                  <span className="font-medium">{user.name}</span>
-                                  {user.role && <span className="text-xs text-muted-foreground">{user.role}</span>}
+                                  <span className="font-medium">
+                                    {user.name}
+                                  </span>
+                                  {user.role && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {user.role}
+                                    </span>
+                                  )}
                                 </div>
                               </label>
                             );
@@ -205,7 +242,10 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
                             <Users className="h-8 w-8" />
                             <div>
                               <p>No teammates are available yet.</p>
-                              <p className="text-xs">New chats unlock automatically as colleagues join the workspace.</p>
+                              <p className="text-xs">
+                                New chats unlock automatically as colleagues
+                                join the workspace.
+                              </p>
                             </div>
                           </div>
                         )}
@@ -214,10 +254,10 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
                   </FormControl>
                   <FormDescription>
                     {hasSelectableUsers
-                      ? type === 'direct'
-                        ? 'Select exactly one teammate to start a private chat.'
-                        : 'Select at least two teammates to start a group conversation.'
-                      : 'Ask an administrator to register teammates so you can start chatting.'}
+                      ? type === "direct"
+                        ? "Select exactly one teammate to start a private chat."
+                        : "Select at least two teammates to start a group conversation."
+                      : "Ask an administrator to register teammates so you can start chatting."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -231,7 +271,11 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
                 <FormItem>
                   <FormLabel>First message</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Write the first message..." rows={4} {...field} />
+                    <Textarea
+                      placeholder="Write the first message..."
+                      rows={4}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -249,9 +293,7 @@ export function NewConversationDialog({ open, onOpenChange, users, currentUserId
               >
                 Cancel
               </Button>
-              <Button type="submit">
-                Start conversation
-              </Button>
+              <Button type="submit">Start conversation</Button>
             </div>
           </form>
         </Form>

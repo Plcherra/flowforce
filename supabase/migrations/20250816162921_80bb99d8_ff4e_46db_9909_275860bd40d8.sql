@@ -1,11 +1,15 @@
--- Create the missing user_role enum type
-CREATE TYPE public.user_role AS ENUM (
-  'employee',
-  'manager', 
-  'admin',
-  'owner',
-  'supervisor'
-);
+-- Create the missing user_role enum type if it doesn't exist
+DO $$ BEGIN
+    CREATE TYPE public.user_role AS ENUM (
+      'employee',
+      'manager', 
+      'admin',
+      'owner',
+      'supervisor'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Create employment_status enum type if it doesn't exist
 DO $$ BEGIN

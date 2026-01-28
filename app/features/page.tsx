@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import FeaturesPage from '@/screens/Features';
+import FeaturesPage from "@/screens/Features";
 
 export default function Features() {
   return <FeaturesPage />;

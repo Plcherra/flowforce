@@ -1,15 +1,15 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Sparkles, Layers } from 'lucide-react';
-import { KpiCard } from './KpiCard';
-import { IssuesStream } from './IssuesStream';
-import { AutomationsPanel } from './AutomationsPanel';
-import { InventorySignalWidget } from '@/features/messages/components/ops/InventorySignalWidget';
+import React from "react";
+import { motion } from "framer-motion";
+import { Sparkles, Layers } from "lucide-react";
+import { KpiCard } from "./KpiCard";
+import { IssuesStream } from "./IssuesStream";
+import { AutomationsPanel } from "./AutomationsPanel";
+import { InventorySignalWidget } from "@/features/messages/components/ops/InventorySignalWidget";
 
-const kpiKeys: Array<Parameters<typeof KpiCard>[0]['kpiKey']> = [
-  'tasks_compliance',
-  'inventory_health',
-  'labor_vs_sales',
+const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
+  "tasks_compliance",
+  "inventory_health",
+  "labor_vs_sales",
 ];
 
 export function OperationsHub() {
@@ -29,12 +29,15 @@ export function OperationsHub() {
               </div>
               <h1 className="mt-2 text-3xl font-semibold">Operations Hub</h1>
               <p className="text-sm text-muted-foreground">
-                KPIs, live issues, and automation drafts in one minimalist board.
+                KPIs, live issues, and automation drafts in one minimalist
+                board.
               </p>
             </div>
             <div className="hidden text-sm text-muted-foreground lg:flex lg:flex-col lg:items-end">
               <span>Updated every 15 min</span>
-              <span className="text-xs uppercase tracking-[0.4em]">Chronique + FlowForce</span>
+              <span className="text-xs uppercase tracking-[0.4em]">
+                Chronique + FlowForce
+              </span>
             </div>
           </div>
         </motion.header>
@@ -63,7 +66,9 @@ export function OperationsHub() {
             <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Ops Widgets</p>
+                  <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+                    Ops Widgets
+                  </p>
                   <h3 className="text-lg font-semibold">Realtime Signals</h3>
                 </div>
                 <Layers className="h-5 w-5 text-muted-foreground" />

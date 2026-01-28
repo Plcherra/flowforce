@@ -1,4 +1,4 @@
-export type RuleSeverity = 'info' | 'warning' | 'blocking';
+export type RuleSeverity = "info" | "warning" | "blocking";
 
 export interface AppRule {
   id: string;
@@ -21,7 +21,7 @@ export interface RuleCondition {
   id: string;
   groupIndex: number;
   conditionIndex: number;
-  conjunction: 'AND' | 'OR';
+  conjunction: "AND" | "OR";
   field: string;
   operator: string;
   value?: unknown;
@@ -49,9 +49,8 @@ export interface RuleAuditEntry {
   action: string;
   actorId?: string;
   actorRole?: string;
-  status: 'allowed' | 'warning' | 'blocked';
+  status: "allowed" | "warning" | "blocked";
   message?: string;
   detail?: Record<string, unknown>;
   createdAt: string;
 }
-

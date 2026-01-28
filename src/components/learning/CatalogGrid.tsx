@@ -1,13 +1,35 @@
-import { useId, useMemo, useState } from 'react';
-import { BookMarked, Clock, Layers, Sparkles, Target, Users } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import type { LearningCatalogRecord, LearningEnrollment } from '@/types/learning';
+import { useId, useMemo, useState } from "react";
+import {
+  BookMarked,
+  Clock,
+  Layers,
+  Sparkles,
+  Target,
+  Users,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import type {
+  LearningCatalogRecord,
+  LearningEnrollment,
+} from "@/types/learning";
 
 interface CatalogGridProps {
   courses: LearningCatalogRecord[];
@@ -17,9 +39,15 @@ interface CatalogGridProps {
   highlightCourseIds?: Set<string>;
 }
 
-export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, highlightCourseIds }: CatalogGridProps) {
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+export function CatalogGrid({
+  courses,
+  enrollments,
+  onEnroll,
+  onShowProgress,
+  highlightCourseIds,
+}: CatalogGridProps) {
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const searchInputId = useId();
   const categorySelectId = useId();
 
@@ -36,17 +64,18 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
     courses.forEach((course) => {
       set.add(course.category);
     });
-    return ['all', ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [courses]);
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
-      if (categoryFilter !== 'all' && course.category !== categoryFilter) {
+      if (categoryFilter !== "all" && course.category !== categoryFilter) {
         return false;
       }
       if (search.trim()) {
         const query = search.toLowerCase();
-        const haystack = `${course.title} ${course.description ?? ''} ${course.category} ${course.targetRoles.join(' ')}`.toLowerCase();
+        const haystack =
+          `${course.title} ${course.description ?? ""} ${course.category} ${course.targetRoles.join(" ")}`.toLowerCase();
         if (!haystack.includes(query)) {
           return false;
         }
@@ -74,13 +103,17 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
             Filter by category
           </Label>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger id={categorySelectId} className="h-10 md:w-48" aria-label="Filter by category">
+            <SelectTrigger
+              id={categorySelectId}
+              className="h-10 md:w-48"
+              aria-label="Filter by category"
+            >
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {category === 'all' ? 'All categories' : category}
+                  {category === "all" ? "All categories" : category}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -98,10 +131,18 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
           const enrollment = enrollmentsByCourse.get(course.id);
           const metrics = course.metrics;
           const highlight = highlightCourseIds?.has(course.id);
-          const completionRate = enrollment?.progressPercent ?? metrics?.avgProgress ?? 0;
+          const completionRate =
+            enrollment?.progressPercent ?? metrics?.avgProgress ?? 0;
 
           return (
-            <Card key={course.id} className={highlight ? 'border-primary shadow-sm shadow-primary/10' : undefined}>
+            <Card
+              key={course.id}
+              className={
+                highlight
+                  ? "border-primary shadow-sm shadow-primary/10"
+                  : undefined
+              }
+            >
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
@@ -127,22 +168,29 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
                     <Target className="h-3 w-3" /> {course.xpReward} XP
                   </span>
                   <span className="flex items-center gap-1">
-                    <Layers className="h-3 w-3" /> {course.modules.length} modules
+                    <Layers className="h-3 w-3" /> {course.modules.length}{" "}
+                    modules
                   </span>
                   <span className="flex items-center gap-1">
-                    <Users className="h-3 w-3" /> {course.targetRoles.join(', ')}
+                    <Users className="h-3 w-3" />{" "}
+                    {course.targetRoles.join(", ")}
                   </span>
                   {course.certificationCode && (
                     <span className="flex items-center gap-1">
-                      <BookMarked className="h-3 w-3" /> {course.certificationCode}
+                      <BookMarked className="h-3 w-3" />{" "}
+                      {course.certificationCode}
                     </span>
                   )}
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span>{enrollment ? 'Your progress' : 'Average completion'}</span>
-                    <span className="font-medium">{completionRate.toFixed(0)}%</span>
+                    <span>
+                      {enrollment ? "Your progress" : "Average completion"}
+                    </span>
+                    <span className="font-medium">
+                      {completionRate.toFixed(0)}%
+                    </span>
                   </div>
                   <Progress value={completionRate} />
                 </div>
@@ -159,7 +207,12 @@ export function CatalogGrid({ courses, enrollments, onEnroll, onShowProgress, hi
                     Level {course.levelRequirement}+
                   </div>
                   {enrollment ? (
-                    <Button size="sm" variant="secondary" disabled={!onShowProgress} onClick={() => onShowProgress?.()}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={!onShowProgress}
+                      onClick={() => onShowProgress?.()}
+                    >
                       Continue
                     </Button>
                   ) : (

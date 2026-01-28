@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export type MessageReply = {
   id: string;
@@ -15,27 +15,33 @@ export type Message = {
   content: string;
   sender: string;
   timestamp: string; // ISO string
-  category: 'general' | 'helpdesk' | 'payroll' | 'hr' | 'urgent';
-  status: 'open' | 'closed';
+  category: "general" | "helpdesk" | "payroll" | "hr" | "urgent";
+  status: "open" | "closed";
   unread?: boolean;
   replies?: MessageReply[];
 };
 
-const categoryIcon: Record<Message['category'], string> = {
-  general: '💬',
-  helpdesk: '🛟',
-  payroll: '💵',
-  hr: '🧠',
-  urgent: '⚠️',
+const categoryIcon: Record<Message["category"], string> = {
+  general: "💬",
+  helpdesk: "🛟",
+  payroll: "💵",
+  hr: "🧠",
+  urgent: "⚠️",
 };
 
-export function MessageCard({ message, onClick }: { message: Message; onClick: (m: Message) => void }) {
+export function MessageCard({
+  message,
+  onClick,
+}: {
+  message: Message;
+  onClick: (m: Message) => void;
+}) {
   return (
     <Card
       onClick={() => onClick(message)}
       className={cn(
-        'cursor-pointer transition hover:shadow-sm',
-        message.unread ? 'border-primary/40 bg-primary/5' : 'border-border'
+        "cursor-pointer transition hover:shadow-sm",
+        message.unread ? "border-primary/40 bg-primary/5" : "border-border",
       )}
     >
       <CardContent className="p-4 flex gap-3">
@@ -49,9 +55,14 @@ export function MessageCard({ message, onClick }: { message: Message; onClick: (
               {new Date(message.timestamp).toLocaleString()}
             </div>
           </div>
-          <div className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{message.content}</div>
+          <div className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+            {message.content}
+          </div>
           <div className="flex items-center gap-2 mt-2">
-            <Badge variant={message.status === 'open' ? 'default' : 'secondary'} className="text-xs">
+            <Badge
+              variant={message.status === "open" ? "default" : "secondary"}
+              className="text-xs"
+            >
               {message.status}
             </Badge>
             <Badge variant="outline" className="text-xs capitalize">

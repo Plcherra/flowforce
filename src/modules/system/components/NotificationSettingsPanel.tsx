@@ -1,35 +1,62 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
-import type { ModuleNotificationOverride } from '@/types/system-settings';
-import { ErrorState } from './ErrorState';
-import { useSystemNotifications } from '../hooks/useSystemNotifications';
-import { useSystemSettingsContext } from '../hooks/SystemSettingsContext';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+import type { ModuleNotificationOverride } from "@/types/system-settings";
+import { ErrorState } from "./ErrorState";
+import { useSystemNotifications } from "../hooks/useSystemNotifications";
+import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
+import { cn } from "@/lib/utils";
 
-const NOTIFICATION_CHANNELS: Array<{ key: 'email' | 'in_app' | 'sms' | 'push'; label: string }> = [
-  { key: 'email', label: 'Email' },
-  { key: 'in_app', label: 'In-app' },
-  { key: 'sms', label: 'SMS' },
-  { key: 'push', label: 'Push' },
+const NOTIFICATION_CHANNELS: Array<{
+  key: "email" | "in_app" | "sms" | "push";
+  label: string;
+}> = [
+  { key: "email", label: "Email" },
+  { key: "in_app", label: "In-app" },
+  { key: "sms", label: "SMS" },
+  { key: "push", label: "Push" },
 ];
 
-const MODULE_OPTIONS: Array<{ key: string; label: string; description: string }> = [
-  { key: 'scheduling', label: 'Scheduling', description: 'Shift updates and confirmations' },
-  { key: 'tasks', label: 'Tasks', description: 'Assignments and due reminders' },
-  { key: 'payments', label: 'Payments', description: 'Expense approvals and payouts' },
-  { key: 'inventory', label: 'Inventory', description: 'Counts, orders, and transfers' },
-  { key: 'announcements', label: 'Announcements', description: 'Company-wide updates' },
+const MODULE_OPTIONS: Array<{
+  key: string;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "scheduling",
+    label: "Scheduling",
+    description: "Shift updates and confirmations",
+  },
+  {
+    key: "tasks",
+    label: "Tasks",
+    description: "Assignments and due reminders",
+  },
+  {
+    key: "payments",
+    label: "Payments",
+    description: "Expense approvals and payouts",
+  },
+  {
+    key: "inventory",
+    label: "Inventory",
+    description: "Counts, orders, and transfers",
+  },
+  {
+    key: "announcements",
+    label: "Announcements",
+    description: "Company-wide updates",
+  },
 ];
 
 export function NotificationSettingsPanel() {
@@ -71,7 +98,9 @@ export function NotificationSettingsPanel() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">Delivery channels</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Delivery channels
+          </h3>
           <div className="flex flex-wrap gap-3">
             {NOTIFICATION_CHANNELS.map((channel) => {
               const active = channels.includes(channel.key);
@@ -82,11 +111,11 @@ export function NotificationSettingsPanel() {
                   onClick={() => toggleChannel(channel.key)}
                   disabled={!canEdit || loading}
                   className={cn(
-                    'rounded-full border px-4 py-2 text-sm transition',
+                    "rounded-full border px-4 py-2 text-sm transition",
                     active
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-muted-foreground/30 text-muted-foreground',
-                    (!canEdit || loading) && 'cursor-not-allowed opacity-60',
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-muted-foreground/30 text-muted-foreground",
+                    (!canEdit || loading) && "cursor-not-allowed opacity-60",
                   )}
                 >
                   {channel.label}
@@ -99,7 +128,9 @@ export function NotificationSettingsPanel() {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">Daily digest</span>
+              <span className="text-sm font-medium text-foreground">
+                Daily digest
+              </span>
               <Switch
                 checked={digestEnabled}
                 onCheckedChange={setDigestEnabled}
@@ -111,7 +142,9 @@ export function NotificationSettingsPanel() {
             </p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Digest hour (24h)</label>
+            <label className="text-sm font-medium text-foreground">
+              Digest hour (24h)
+            </label>
             <Input
               type="number"
               min={0}
@@ -122,7 +155,9 @@ export function NotificationSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Reminder window (minutes)</label>
+            <label className="text-sm font-medium text-foreground">
+              Reminder window (minutes)
+            </label>
             <Input
               type="number"
               min={5}
@@ -135,16 +170,24 @@ export function NotificationSettingsPanel() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">Per-module overrides</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Per-module overrides
+          </h3>
           <div className="grid gap-4 md:grid-cols-2">
             {modules.map((module) => {
-              const override = moduleOverrides[module.key] ?? ({} as ModuleNotificationOverride);
+              const override =
+                moduleOverrides[module.key] ??
+                ({} as ModuleNotificationOverride);
               return (
                 <div key={module.key} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-foreground">{module.label}</p>
-                      <p className="text-xs text-muted-foreground">{module.description}</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {module.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {module.description}
+                      </p>
                     </div>
                     <Badge variant="outline">Module</Badge>
                   </div>
@@ -162,11 +205,12 @@ export function NotificationSettingsPanel() {
                           )
                         }
                         className={cn(
-                          'rounded-full border px-3 py-1 text-xs transition',
+                          "rounded-full border px-3 py-1 text-xs transition",
                           override[channel.key]
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-muted-foreground/30 text-muted-foreground',
-                          (!canEdit || loading) && 'cursor-not-allowed opacity-60',
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-muted-foreground/30 text-muted-foreground",
+                          (!canEdit || loading) &&
+                            "cursor-not-allowed opacity-60",
                         )}
                       >
                         {channel.label}
@@ -182,7 +226,11 @@ export function NotificationSettingsPanel() {
         {saveError && <ErrorState message={saveError.message} />}
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" disabled={!dirty || saving || !canEdit} onClick={reset}>
+          <Button
+            variant="outline"
+            disabled={!dirty || saving || !canEdit}
+            onClick={reset}
+          >
             Discard
           </Button>
           <Button onClick={save} disabled={!canEdit || !dirty || saving}>
@@ -191,7 +239,7 @@ export function NotificationSettingsPanel() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
               </>
             ) : (
-              'Save notifications'
+              "Save notifications"
             )}
           </Button>
         </div>

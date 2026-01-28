@@ -1,10 +1,14 @@
-
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import EnhancedOnboardingWizard from '@/components/onboarding/EnhancedOnboardingWizard';
-import { useCompanyRegistration } from '@/hooks/useCompanyRegistration';
-import { UserInfo, CompanyInfo, Branding, OnboardingRole } from '@/types/onboarding';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import EnhancedOnboardingWizard from "@/components/onboarding/EnhancedOnboardingWizard";
+import { useCompanyRegistration } from "@/hooks/useCompanyRegistration";
+import {
+  UserInfo,
+  CompanyInfo,
+  Branding,
+  OnboardingRole,
+} from "@/types/onboarding";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
 
 export default function CompanyRegistration() {
   const { t } = useTranslation();
@@ -24,7 +28,7 @@ export default function CompanyRegistration() {
   };
 
   const handleCancel = () => {
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   };
 
   if (isLoading) {
@@ -33,7 +37,7 @@ export default function CompanyRegistration() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">
-            {t('onboarding.wizard.settingUp')}
+            {t("onboarding.wizard.settingUp")}
           </p>
         </div>
       </div>

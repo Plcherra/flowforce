@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Send, Trash2, Edit } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { format, addMinutes, addHours, addDays } from 'date-fns';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, Send, Trash2, Edit } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { format, addMinutes, addHours, addDays } from "date-fns";
 
 interface ScheduledMessage {
   id: string;
@@ -16,7 +22,7 @@ interface ScheduledMessage {
   channelId: string;
   channelName: string;
   scheduledFor: Date;
-  status: 'pending' | 'sent' | 'cancelled';
+  status: "pending" | "sent" | "cancelled";
   createdAt: Date;
 }
 
@@ -27,36 +33,38 @@ interface MessageSchedulerProps {
   children: React.ReactNode;
 }
 
-export function MessageScheduler({ 
-  channelId, 
-  channelName, 
-  onScheduleMessage, 
-  children 
+export function MessageScheduler({
+  channelId,
+  channelName,
+  onScheduleMessage,
+  children,
 }: MessageSchedulerProps) {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState('');
-  const [scheduledFor, setScheduledFor] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [scheduledMessages, setScheduledMessages] = useState<ScheduledMessage[]>([
+  const [content, setContent] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [scheduledMessages, setScheduledMessages] = useState<
+    ScheduledMessage[]
+  >([
     {
-      id: '1',
-      content: 'Don\'t forget about tomorrow\'s team meeting at 10 AM!',
-      channelId: 'channel-1',
-      channelName: 'General',
+      id: "1",
+      content: "Don't forget about tomorrow's team meeting at 10 AM!",
+      channelId: "channel-1",
+      channelName: "General",
       scheduledFor: addHours(new Date(), 2),
-      status: 'pending',
-      createdAt: new Date()
+      status: "pending",
+      createdAt: new Date(),
     },
     {
-      id: '2',
-      content: 'Weekly report is due by end of day Friday',
-      channelId: 'channel-1',
-      channelName: 'General',
+      id: "2",
+      content: "Weekly report is due by end of day Friday",
+      channelId: "channel-1",
+      channelName: "General",
       scheduledFor: addDays(new Date(), 1),
-      status: 'pending',
-      createdAt: new Date()
-    }
+      status: "pending",
+      createdAt: new Date(),
+    },
   ]);
 
   const handleSchedule = () => {
@@ -70,7 +78,7 @@ export function MessageScheduler({
     }
 
     const scheduledDateTime = new Date(`${scheduledFor}T${scheduledTime}`);
-    
+
     if (scheduledDateTime <= new Date()) {
       toast({
         title: "Invalid Date",
@@ -86,30 +94,30 @@ export function MessageScheduler({
       channelId,
       channelName,
       scheduledFor: scheduledDateTime,
-      status: 'pending',
-      createdAt: new Date()
+      status: "pending",
+      createdAt: new Date(),
     };
 
-    setScheduledMessages(prev => [...prev, newMessage]);
+    setScheduledMessages((prev) => [...prev, newMessage]);
     onScheduleMessage(content, scheduledDateTime);
 
     toast({
       title: "Message Scheduled",
-      description: `Message will be sent on ${format(scheduledDateTime, 'MMM dd, yyyy at h:mm a')}`,
+      description: `Message will be sent on ${format(scheduledDateTime, "MMM dd, yyyy at h:mm a")}`,
     });
 
     // Reset form
-    setContent('');
-    setScheduledFor('');
-    setScheduledTime('');
+    setContent("");
+    setScheduledFor("");
+    setScheduledTime("");
     setIsOpen(false);
   };
 
   const cancelScheduledMessage = (messageId: string) => {
-    setScheduledMessages(prev => 
-      prev.map(msg => 
-        msg.id === messageId ? { ...msg, status: 'cancelled' as const } : msg
-      )
+    setScheduledMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, status: "cancelled" as const } : msg,
+      ),
     );
 
     toast({
@@ -121,25 +129,31 @@ export function MessageScheduler({
   const getQuickScheduleOptions = () => {
     const now = new Date();
     return [
-      { label: 'In 1 hour', date: addHours(now, 1) },
-      { label: 'In 4 hours', date: addHours(now, 4) },
-      { label: 'Tomorrow 9 AM', date: new Date(addDays(now, 1).setHours(9, 0, 0, 0)) },
-      { label: 'Next Monday 9 AM', date: new Date(addDays(now, 7 - now.getDay() + 1).setHours(9, 0, 0, 0)) }
+      { label: "In 1 hour", date: addHours(now, 1) },
+      { label: "In 4 hours", date: addHours(now, 4) },
+      {
+        label: "Tomorrow 9 AM",
+        date: new Date(addDays(now, 1).setHours(9, 0, 0, 0)),
+      },
+      {
+        label: "Next Monday 9 AM",
+        date: new Date(addDays(now, 7 - now.getDay() + 1).setHours(9, 0, 0, 0)),
+      },
     ];
   };
 
   const setQuickSchedule = (date: Date) => {
-    setScheduledFor(format(date, 'yyyy-MM-dd'));
-    setScheduledTime(format(date, 'HH:mm'));
+    setScheduledFor(format(date, "yyyy-MM-dd"));
+    setScheduledTime(format(date, "HH:mm"));
   };
 
-  const pendingMessages = scheduledMessages.filter(msg => msg.status === 'pending');
+  const pendingMessages = scheduledMessages.filter(
+    (msg) => msg.status === "pending",
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -170,7 +184,7 @@ export function MessageScheduler({
                   type="date"
                   value={scheduledFor}
                   onChange={(e) => setScheduledFor(e.target.value)}
-                  min={format(new Date(), 'yyyy-MM-dd')}
+                  min={format(new Date(), "yyyy-MM-dd")}
                 />
               </div>
               <div>
@@ -205,7 +219,10 @@ export function MessageScheduler({
               <Button variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSchedule} className="flex items-center gap-2">
+              <Button
+                onClick={handleSchedule}
+                className="flex items-center gap-2"
+              >
                 <Send className="h-4 w-4" />
                 Schedule Message
               </Button>
@@ -219,7 +236,7 @@ export function MessageScheduler({
                 <Calendar className="h-5 w-5" />
                 Scheduled Messages ({pendingMessages.length})
               </h3>
-              
+
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
                 {pendingMessages.map((message) => (
                   <Card key={message.id}>
@@ -230,7 +247,7 @@ export function MessageScheduler({
                         </CardTitle>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="text-xs">
-                            {format(message.scheduledFor, 'MMM dd, h:mm a')}
+                            {format(message.scheduledFor, "MMM dd, h:mm a")}
                           </Badge>
                           <Button
                             variant="ghost"
@@ -249,10 +266,18 @@ export function MessageScheduler({
                       </p>
                       <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
                         <span>
-                          Scheduled {format(message.createdAt, 'MMM dd, h:mm a')}
+                          Scheduled{" "}
+                          {format(message.createdAt, "MMM dd, h:mm a")}
                         </span>
                         <span>
-                          Sends in {format(new Date(message.scheduledFor.getTime() - new Date().getTime()), 'H:mm')}
+                          Sends in{" "}
+                          {format(
+                            new Date(
+                              message.scheduledFor.getTime() -
+                                new Date().getTime(),
+                            ),
+                            "H:mm",
+                          )}
                         </span>
                       </div>
                     </CardContent>

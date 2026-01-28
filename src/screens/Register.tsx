@@ -1,45 +1,56 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Building2, Users, Mail, Lock, MapPin, Phone } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Building2, Users, Mail, Lock, MapPin, Phone } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 
 const industries = [
-  'Retail',
-  'Hospitality', 
-  'Healthcare',
-  'Manufacturing',
-  'Technology',
-  'Education',
-  'Other'
+  "Retail",
+  "Hospitality",
+  "Healthcare",
+  "Manufacturing",
+  "Technology",
+  "Education",
+  "Other",
 ];
 
 const companySizes = [
-  '1-5 employees',
-  '6-25 employees',
-  '26-50 employees',
-  '51-100 employees',
-  '101-500 employees',
-  '500+ employees'
+  "1-5 employees",
+  "6-25 employees",
+  "26-50 employees",
+  "51-100 employees",
+  "101-500 employees",
+  "500+ employees",
 ];
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    companyName: '',
-    industry: '',
-    companySize: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    agreedToTerms: false
+    companyName: "",
+    industry: "",
+    companySize: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+    agreedToTerms: false,
   });
   const navigate = useNavigate();
 
@@ -47,16 +58,16 @@ export default function Register() {
     e.preventDefault();
     // In a real app, this would submit to the registration API
     // Navigate to company registration with template building flow
-    navigate('/company-registration', { 
-      state: { 
+    navigate("/company-registration", {
+      state: {
         formData,
-        enableCustomTemplates: true 
-      } 
+        enableCustomTemplates: true,
+      },
     });
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -83,39 +94,54 @@ export default function Register() {
                   <Building2 className="h-5 w-5 mr-2 text-[#3F51B5]" />
                   Company Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <Label htmlFor="companyName">Company Name *</Label>
                     <Input
                       id="companyName"
                       value={formData.companyName}
-                      onChange={(e) => handleInputChange('companyName', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("companyName", e.target.value)
+                      }
                       placeholder="Enter your company name"
                       required
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="industry">Industry *</Label>
-                    <Select value={formData.industry} onValueChange={(value) => handleInputChange('industry', value)}>
+                    <Select
+                      value={formData.industry}
+                      onValueChange={(value) =>
+                        handleInputChange("industry", value)
+                      }
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select industry" />
                       </SelectTrigger>
                       <SelectContent>
                         {industries.map((industry) => (
-                          <SelectItem key={industry} value={industry.toLowerCase()}>
+                          <SelectItem
+                            key={industry}
+                            value={industry.toLowerCase()}
+                          >
                             {industry}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="companySize">Company Size *</Label>
-                    <Select value={formData.companySize} onValueChange={(value) => handleInputChange('companySize', value)}>
+                    <Select
+                      value={formData.companySize}
+                      onValueChange={(value) =>
+                        handleInputChange("companySize", value)
+                      }
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
@@ -137,32 +163,36 @@ export default function Register() {
                   <Users className="h-5 w-5 mr-2 text-[#3F51B5]" />
                   Your Information
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name *</Label>
                     <Input
                       id="firstName"
                       value={formData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("firstName", e.target.value)
+                      }
                       placeholder="Enter your first name"
                       required
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="lastName">Last Name *</Label>
                     <Input
                       id="lastName"
                       value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value)
+                      }
                       placeholder="Enter your last name"
                       required
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email">Email Address *</Label>
                     <div className="relative mt-1">
@@ -171,14 +201,16 @@ export default function Register() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         placeholder="Enter your email"
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="phone">Phone Number</Label>
                     <div className="relative mt-1">
@@ -187,13 +219,15 @@ export default function Register() {
                         id="phone"
                         type="tel"
                         value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
                         placeholder="Enter your phone"
                         className="pl-10"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <Label htmlFor="password">Password *</Label>
                     <div className="relative mt-1">
@@ -202,14 +236,16 @@ export default function Register() {
                         id="password"
                         type="password"
                         value={formData.password}
-                        onChange={(e) => handleInputChange('password', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("password", e.target.value)
+                        }
                         placeholder="Create a password"
                         className="pl-10"
                         required
                       />
                     </div>
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <Label htmlFor="address">Company Address</Label>
                     <div className="relative mt-1">
@@ -217,7 +253,9 @@ export default function Register() {
                       <Input
                         id="address"
                         value={formData.address}
-                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("address", e.target.value)
+                        }
                         placeholder="Enter your company address"
                         className="pl-10"
                       />
@@ -231,18 +269,24 @@ export default function Register() {
                 <Checkbox
                   id="terms"
                   checked={formData.agreedToTerms}
-                  onCheckedChange={(checked) => handleInputChange('agreedToTerms', checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("agreedToTerms", checked as boolean)
+                  }
                   required
                 />
                 <Label htmlFor="terms" className="text-sm text-gray-600">
-                  I agree to the{' '}
-                  <Link to="#" className="text-[#3F51B5] hover:underline">Terms of Service</Link>
-                  {' '}and{' '}
-                  <Link to="#" className="text-[#3F51B5] hover:underline">Privacy Policy</Link>
+                  I agree to the{" "}
+                  <Link to="#" className="text-[#3F51B5] hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="#" className="text-[#3F51B5] hover:underline">
+                    Privacy Policy
+                  </Link>
                 </Label>
               </div>
 
-              <Button 
+              <Button
                 type="submit"
                 className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90 text-white py-6 text-lg font-semibold"
                 disabled={!formData.agreedToTerms}
@@ -251,8 +295,11 @@ export default function Register() {
               </Button>
 
               <p className="text-center text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link to="/auth" className="text-[#3F51B5] hover:underline font-medium">
+                Already have an account?{" "}
+                <Link
+                  to="/auth"
+                  className="text-[#3F51B5] hover:underline font-medium"
+                >
                   Sign in here
                 </Link>
               </p>

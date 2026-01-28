@@ -1,15 +1,23 @@
-import { useMemo } from 'react';
-import { subDays } from 'date-fns';
-import type { Employee } from '@/hooks/useEmployees';
-import type { RecognitionRecord, RecognitionSourceType } from '@/types/recognition';
+import { useMemo } from "react";
+import { subDays } from "date-fns";
+import type { Employee } from "@/hooks/useEmployees";
+import type {
+  RecognitionRecord,
+  RecognitionSourceType,
+} from "@/types/recognition";
 
-export type RecognitionFilterKey = 'all' | 'goals' | 'tasks' | 'training' | 'manual';
-export type RecognitionTimelineFilter = '30' | '90' | '365' | 'all';
+export type RecognitionFilterKey =
+  | "all"
+  | "goals"
+  | "tasks"
+  | "training"
+  | "manual";
+export type RecognitionTimelineFilter = "30" | "90" | "365" | "all";
 
 interface UseRecognitionFilteringOptions {
   recognitions: RecognitionRecord[];
   employees: Employee[];
-  departmentFilter: 'all' | string;
+  departmentFilter: "all" | string;
   searchTerm: string;
   timelineFilter: RecognitionTimelineFilter;
   sourceFilter?: RecognitionSourceType[];
@@ -27,7 +35,10 @@ export function useRecognitionFiltering({
     const map = new Map<string, string>();
     employees.forEach((employee) => {
       if (employee.department?.id) {
-        map.set(employee.department.id, employee.department.name ?? 'Unnamed department');
+        map.set(
+          employee.department.id,
+          employee.department.name ?? "Unnamed department",
+        );
       }
     });
     return Array.from(map.entries());
@@ -43,18 +54,21 @@ export function useRecognitionFiltering({
 
   const filteredRecognitions = useMemo(() => {
     const lowered = searchTerm.toLowerCase();
-    const timelineDays = timelineFilter === 'all' ? null : Number(timelineFilter);
-    const timelineCutoff = timelineDays ? subDays(new Date(), timelineDays) : null;
+    const timelineDays =
+      timelineFilter === "all" ? null : Number(timelineFilter);
+    const timelineCutoff = timelineDays
+      ? subDays(new Date(), timelineDays)
+      : null;
 
     return recognitions.filter((record) => {
       const details = record.reward_details;
-      const source = details?.source ?? 'manual';
+      const source = details?.source ?? "manual";
 
       if (sourceFilter && !sourceFilter.includes(source)) {
         return false;
       }
 
-      if (departmentFilter !== 'all') {
+      if (departmentFilter !== "all") {
         const departmentId = departmentIdByUser.get(record.user_id) ?? null;
         if (departmentId !== departmentFilter) {
           return false;
@@ -70,11 +84,13 @@ export function useRecognitionFiltering({
 
       if (!lowered) return true;
 
-      const recipientName = `${record.recipient?.first_name ?? ''} ${record.recipient?.last_name ?? ''}`.toLowerCase();
-      const creatorName = `${record.creator?.first_name ?? ''} ${record.creator?.last_name ?? ''}`.toLowerCase();
-      const goalTitle = record.goal?.title?.toLowerCase() ?? '';
-      const message = details?.message?.toLowerCase() ?? '';
-      const trainingTitle = record.training?.module?.title?.toLowerCase() ?? '';
+      const recipientName =
+        `${record.recipient?.first_name ?? ""} ${record.recipient?.last_name ?? ""}`.toLowerCase();
+      const creatorName =
+        `${record.creator?.first_name ?? ""} ${record.creator?.last_name ?? ""}`.toLowerCase();
+      const goalTitle = record.goal?.title?.toLowerCase() ?? "";
+      const message = details?.message?.toLowerCase() ?? "";
+      const trainingTitle = record.training?.module?.title?.toLowerCase() ?? "";
 
       return (
         recipientName.includes(lowered) ||
@@ -84,7 +100,14 @@ export function useRecognitionFiltering({
         message.includes(lowered)
       );
     });
-  }, [recognitions, searchTerm, departmentFilter, departmentIdByUser, timelineFilter, sourceFilter]);
+  }, [
+    recognitions,
+    searchTerm,
+    departmentFilter,
+    departmentIdByUser,
+    timelineFilter,
+    sourceFilter,
+  ]);
 
   const stats = useMemo(() => {
     const recognitionByType: Record<RecognitionSourceType, number> = {
@@ -97,12 +120,15 @@ export function useRecognitionFiltering({
     };
 
     filteredRecognitions.forEach((record) => {
-      const type = record.reward_details?.source ?? 'manual';
+      const type = record.reward_details?.source ?? "manual";
       recognitionByType[type] = (recognitionByType[type] ?? 0) + 1;
     });
 
-    const trainingCount = recognitionByType.training_completion + recognitionByType.onboarding_completion;
-    const goalCount = recognitionByType.goal_milestone + recognitionByType.goal_completion;
+    const trainingCount =
+      recognitionByType.training_completion +
+      recognitionByType.onboarding_completion;
+    const goalCount =
+      recognitionByType.goal_milestone + recognitionByType.goal_completion;
 
     return {
       total: filteredRecognitions.length,

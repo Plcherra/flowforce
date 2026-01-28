@@ -1,13 +1,16 @@
-import { useMemo, useCallback } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
-import type { DateRange, IdeaKpiInsight } from './useIdeaInsights';
-import { formatRangeAsPgDate } from '@/modules/operations/utils/dateRange';
-import { buildRangeWindows } from '@/features/operations/utils/ideaMetrics';
-import { parseIdeaKpiInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { useMemo, useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { MOCK_IDEA_KPI_SUMMARY } from "@/mock/kpi_insights";
+import type { DateRange, IdeaKpiInsight } from "./useIdeaInsights";
+import { formatRangeAsPgDate } from "@/modules/operations/utils/dateRange";
+import { buildRangeWindows } from "@/features/operations/utils/ideaMetrics";
+import {
+  parseIdeaKpiInsights,
+  type IdeaKpiInsightRecord,
+} from "../data/ideaRepository";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 export interface IdeaAssessmentMetric {
   metric: string;
@@ -26,30 +29,36 @@ interface IdeaAssessmentState {
   saveAssessment: (notes?: string) => Promise<void>;
 }
 
-async function fetchKpiSnapshot(companyId: string, range: { start: string; end: string }): Promise<IdeaKpiInsightRecord[]> {
-  const { data, error } = await supabase.rpc('get_kpi_summary', {
+async function fetchKpiSnapshot(
+  companyId: string,
+  range: { start: string; end: string },
+): Promise<IdeaKpiInsightRecord[]> {
+  const { data, error } = await supabase.rpc("get_kpi_summary", {
     company_id: companyId,
     range_start: range.start,
     range_end: range.end,
   });
 
   if (error) {
-    if (error.message?.includes('function public.get_kpi_summary')) {
+    if (error.message?.includes("function public.get_kpi_summary")) {
       if (appEnv.DEV) {
         logger.warn(
-          '[useIdeaAssessments] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary',
-          { context: { errorMessage: error.message }, tags: ['warning'] },
+          "[useIdeaAssessments] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary",
+          { context: { errorMessage: error.message }, tags: ["warning"] },
         );
       }
-      return MOCK_IDEA_KPI_SUMMARY.map((item) => ({
-        id: item.id,
-        label: item.label,
-        metric: item.label,
-        value: item.value,
-        unit: item.unit,
-        delta: item.delta,
-        trend: item.trend,
-      } satisfies IdeaKpiInsightRecord));
+      return MOCK_IDEA_KPI_SUMMARY.map(
+        (item) =>
+          ({
+            id: item.id,
+            label: item.label,
+            metric: item.label,
+            value: item.value,
+            unit: item.unit,
+            delta: item.delta,
+            trend: item.trend,
+          }) satisfies IdeaKpiInsightRecord,
+      );
     }
     throw error;
   }
@@ -72,19 +81,19 @@ async function persistAssessment(options: {
 
   const targetMutation = options.cycleId
     ? supabase
-        .from('idea_cycles')
+        .from("idea_cycles")
         .update({
-          stage: 'assess',
+          stage: "assess",
           assessments: assessmentsPayload,
         })
-        .eq('id', options.cycleId)
+        .eq("id", options.cycleId)
         .select()
         .single()
     : supabase
-        .from('idea_cycles')
+        .from("idea_cycles")
         .insert({
           company_id: options.companyId,
-          stage: 'assess',
+          stage: "assess",
           range: options.rangeLabel,
           insights: options.latestInsights,
           actions: null,
@@ -107,11 +116,20 @@ export function useIdeaAssessments(
   latestInsights: IdeaKpiInsight[],
   enabled: boolean,
 ): IdeaAssessmentState {
-  const { normalizedRange, previousRange } = useMemo(() => buildRangeWindows(range), [range]);
+  const { normalizedRange, previousRange } = useMemo(
+    () => buildRangeWindows(range),
+    [range],
+  );
 
   const queryClient = useQueryClient();
   const queryKey = useMemo(
-    () => ['idea-assessments', companyId, normalizedRange.start, normalizedRange.end, cycleId ?? 'none'],
+    () => [
+      "idea-assessments",
+      companyId,
+      normalizedRange.start,
+      normalizedRange.end,
+      cycleId ?? "none",
+    ],
     [companyId, cycleId, normalizedRange.end, normalizedRange.start],
   );
 
@@ -122,7 +140,7 @@ export function useIdeaAssessments(
     retry: 1,
     queryFn: async () => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
       const [beforeSnapshot, afterSnapshot] = await Promise.all([
@@ -142,10 +160,16 @@ export function useIdeaAssessments(
 
       return afterSnapshot.map((item, index) => {
         const id = item.id ?? item.metric ?? item.label ?? `metric-${index}`;
-        const before = beforeMap.get(id) ?? { value: 0, unit: item.unit ?? null };
+        const before = beforeMap.get(id) ?? {
+          value: 0,
+          unit: item.unit ?? null,
+        };
         const after = Number(item.value ?? 0);
         const delta = after - before.value;
-        const roi = before.value === 0 ? null : Number(((delta / Math.abs(before.value)) * 100).toFixed(2));
+        const roi =
+          before.value === 0
+            ? null
+            : Number(((delta / Math.abs(before.value)) * 100).toFixed(2));
 
         return {
           metric: item.label ?? item.metric ?? `Metric ${index + 1}`,
@@ -166,7 +190,7 @@ export function useIdeaAssessments(
   const saveMutation = useMutation({
     mutationFn: async (notes?: string) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
       return persistAssessment({

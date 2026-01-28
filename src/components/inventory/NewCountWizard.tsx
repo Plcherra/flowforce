@@ -1,29 +1,46 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { Calculator, MapPin, Package, CheckCircle2, CalendarIcon, Clock } from 'lucide-react';
-import { useInventoryCounts } from '@/features/inventory/hooks/useInventoryCounts';
-import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryCategories';
-import { useInventoryLocations } from '@/features/inventory/hooks/useInventoryLocations';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { logger } from '@/utils/logger';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Calculator,
+  MapPin,
+  Package,
+  CheckCircle2,
+  CalendarIcon,
+  Clock,
+} from "lucide-react";
+import { useInventoryCounts } from "@/features/inventory/hooks/useInventoryCounts";
+import { useInventoryCategories } from "@/features/inventory/hooks/useInventoryCategories";
+import { useInventoryLocations } from "@/features/inventory/hooks/useInventoryLocations";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { logger } from "@/utils/logger";
 
 interface NewCountWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type CountPeriod = 'day_start' | 'day_end' | 'custom';
+type CountPeriod = "day_start" | "day_end" | "custom";
 
 interface CountTypeOption {
   label: string;
@@ -32,23 +49,28 @@ interface CountTypeOption {
   removable?: boolean;
 }
 
-const COUNT_TYPES_STORAGE_KEY = 'inventory-count-types-v2';
+const COUNT_TYPES_STORAGE_KEY = "inventory-count-types-v2";
 
 const DEFAULT_COUNT_TYPES: CountTypeOption[] = [
-  { label: 'Day Start', value: 'day_start', period: 'day_start', removable: false },
-  { label: 'Day End', value: 'day_end', period: 'day_end', removable: false },
-  { label: 'Full Count', value: 'full', period: 'custom', removable: true },
-  { label: 'Cycle Count', value: 'cycle', period: 'custom', removable: true },
-  { label: 'Spot Check', value: 'spot', period: 'custom', removable: true },
+  {
+    label: "Day Start",
+    value: "day_start",
+    period: "day_start",
+    removable: false,
+  },
+  { label: "Day End", value: "day_end", period: "day_end", removable: false },
+  { label: "Full Count", value: "full", period: "custom", removable: true },
+  { label: "Cycle Count", value: "cycle", period: "custom", removable: true },
+  { label: "Spot Check", value: "spot", period: "custom", removable: true },
 ];
 
 const slugifyCountType = (label: string) => {
   const base = label
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return base || 'custom_count';
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return base || "custom_count";
 };
 
 const normalizeCountTypes = (types: CountTypeOption[]): CountTypeOption[] => {
@@ -68,7 +90,7 @@ const normalizeCountTypes = (types: CountTypeOption[]): CountTypeOption[] => {
     map.set(value, {
       label: option.label,
       value,
-      period: option.period ?? 'custom',
+      period: option.period ?? "custom",
       removable: option.removable ?? true,
     });
   });
@@ -76,48 +98,47 @@ const normalizeCountTypes = (types: CountTypeOption[]): CountTypeOption[] => {
   return Array.from(map.values());
 };
 
-
 export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState('type');
+  const [currentStep, setCurrentStep] = useState("type");
   const [countData, setCountData] = useState({
-    type: 'day_start',
-    typeLabel: 'Day Start',
-    period: 'day_start' as CountPeriod,
+    type: "day_start",
+    typeLabel: "Day Start",
+    period: "day_start" as CountPeriod,
     locations: [] as string[],
     categories: [] as string[],
-    notes: '',
-    description: '',
+    notes: "",
+    description: "",
     assignees: [] as string[],
     scheduledDate: undefined as Date | undefined,
-    scheduledTime: '09:00'
+    scheduledTime: "09:00",
   });
   const [isNowModeActive, setIsNowModeActive] = useState(false);
   const { createCount } = useInventoryCounts();
   const { data: categories } = useInventoryCategories();
   const { data: locations } = useInventoryLocations();
   const [creating, setCreating] = useState(false);
-  
+
   // Load count types from localStorage or use defaults
   const [countTypes, setCountTypes] = useState<CountTypeOption[]>([]);
-  const [newCountType, setNewCountType] = useState('');
+  const [newCountType, setNewCountType] = useState("");
 
   // Real-time clock for "now mode"
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (isNowModeActive) {
       interval = setInterval(() => {
         const now = new Date();
         const currentTime = now.toTimeString().slice(0, 5); // Format as HH:MM
-        setCountData(prev => ({ 
-          ...prev, 
+        setCountData((prev) => ({
+          ...prev,
           scheduledTime: currentTime,
-          scheduledDate: now
+          scheduledDate: now,
         }));
       }, 1000); // Update every second
     }
-    
+
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -133,19 +154,21 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         const parsed = JSON.parse(savedTypesRaw);
         if (Array.isArray(parsed)) {
           const normalized = parsed.map((entry: any) => {
-            if (typeof entry === 'string') {
+            if (typeof entry === "string") {
               return {
                 label: entry,
                 value: slugifyCountType(entry),
-                period: 'custom' as CountPeriod,
+                period: "custom" as CountPeriod,
                 removable: true,
               } satisfies CountTypeOption;
             }
 
             return {
-              label: entry.label ?? entry.value ?? 'Custom Count',
-              value: entry.value ? String(entry.value) : slugifyCountType(entry.label ?? 'custom'),
-              period: (entry.period as CountPeriod) ?? 'custom',
+              label: entry.label ?? entry.value ?? "Custom Count",
+              value: entry.value
+                ? String(entry.value)
+                : slugifyCountType(entry.label ?? "custom"),
+              period: (entry.period as CountPeriod) ?? "custom",
               removable: entry.removable ?? true,
             } satisfies CountTypeOption;
           });
@@ -155,7 +178,10 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         }
       }
     } catch (error) {
-      logger.warn('Failed to load stored count types', { error, tags: ['warning'] });
+      logger.warn("Failed to load stored count types", {
+        error,
+        tags: ["warning"],
+      });
     }
 
     setCountTypes(DEFAULT_COUNT_TYPES);
@@ -184,7 +210,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         ...prev,
         type: fallback.value,
         typeLabel: fallback.label,
-        period: fallback.period ?? 'custom',
+        period: fallback.period ?? "custom",
       }));
     }
   }, [countTypes]);
@@ -192,12 +218,12 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   // Save count types to localStorage whenever they change
   useEffect(() => {
     if (countTypes.length > 0) {
-      localStorage.setItem('inventory-count-types', JSON.stringify(countTypes));
+      localStorage.setItem("inventory-count-types", JSON.stringify(countTypes));
     }
   }, [countTypes]);
 
   const handleNext = () => {
-    const steps = ['type', 'locations', 'schedule', 'review'];
+    const steps = ["type", "locations", "schedule", "review"];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
@@ -205,7 +231,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   };
 
   const handleBack = () => {
-    const steps = ['type', 'locations', 'schedule', 'review'];
+    const steps = ["type", "locations", "schedule", "review"];
     const currentIndex = steps.indexOf(currentStep);
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1]);
@@ -213,20 +239,20 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
   };
 
   const handleLocationToggle = (locationId: string) => {
-    setCountData(prev => ({
+    setCountData((prev) => ({
       ...prev,
       locations: prev.locations.includes(locationId)
-        ? prev.locations.filter(id => id !== locationId)
-        : [...prev.locations, locationId]
+        ? prev.locations.filter((id) => id !== locationId)
+        : [...prev.locations, locationId],
     }));
   };
 
   const handleCategoryToggle = (category: string) => {
-    setCountData(prev => ({
+    setCountData((prev) => ({
       ...prev,
       categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
     }));
   };
 
@@ -235,7 +261,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
       ...prev,
       type: option.value,
       typeLabel: option.label,
-      period: option.period ?? 'custom',
+      period: option.period ?? "custom",
     }));
   };
 
@@ -254,7 +280,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         {
           label,
           value,
-          period: 'custom',
+          period: "custom",
           removable: true,
         },
       ]);
@@ -264,10 +290,10 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
       ...prev,
       type: value,
       typeLabel: label,
-      period: 'custom',
+      period: "custom",
     }));
 
-    setNewCountType('');
+    setNewCountType("");
   };
 
   const removeCountType = (value: string) => {
@@ -286,18 +312,20 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         ...prev,
         type: fallback.value,
         typeLabel: fallback.label,
-        period: fallback.period ?? 'custom',
+        period: fallback.period ?? "custom",
       }));
     }
   };
 
   const canProceed = () => {
     switch (currentStep) {
-      case 'type':
+      case "type":
         return countData.type;
-      case 'locations':
-        return countData.locations.length > 0 || countData.categories.length > 0;
-      case 'schedule':
+      case "locations":
+        return (
+          countData.locations.length > 0 || countData.categories.length > 0
+        );
+      case "schedule":
         return true; // Schedule is optional, can always proceed
       default:
         return true;
@@ -319,10 +347,18 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
 
         <Tabs value={currentStep} onValueChange={setCurrentStep}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="type" disabled={false}>Type</TabsTrigger>
-            <TabsTrigger value="locations" disabled={!countData.type}>Scope</TabsTrigger>
-            <TabsTrigger value="schedule" disabled={!canProceed()}>Date/Time</TabsTrigger>
-            <TabsTrigger value="review" disabled={!canProceed()}>Review</TabsTrigger>
+            <TabsTrigger value="type" disabled={false}>
+              Type
+            </TabsTrigger>
+            <TabsTrigger value="locations" disabled={!countData.type}>
+              Scope
+            </TabsTrigger>
+            <TabsTrigger value="schedule" disabled={!canProceed()}>
+              Date/Time
+            </TabsTrigger>
+            <TabsTrigger value="review" disabled={!canProceed()}>
+              Review
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="type" className="space-y-4">
@@ -335,10 +371,10 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                       placeholder="Add new count type..."
                       value={newCountType}
                       onChange={(e) => setNewCountType(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addCountType()}
+                      onKeyPress={(e) => e.key === "Enter" && addCountType()}
                     />
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       onClick={addCountType}
                       disabled={!newCountType}
                       size="sm"
@@ -346,31 +382,33 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                       +
                     </Button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 gap-2">
                     {countTypes.map((option) => {
                       const isSelected = countData.type === option.value;
                       const periodHint =
-                        option.period === 'day_start'
-                          ? 'Opening inventory before service'
-                          : option.period === 'day_end'
-                          ? 'Closing inventory after service'
-                          : 'Custom frequency';
+                        option.period === "day_start"
+                          ? "Opening inventory before service"
+                          : option.period === "day_end"
+                            ? "Closing inventory after service"
+                            : "Custom frequency";
 
                       return (
                         <div
                           key={option.value}
                           className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all hover:bg-accent/50 ${
                             isSelected
-                              ? 'ring-2 ring-primary bg-primary/5 border-primary'
-                              : 'border-border hover:border-primary/50'
+                              ? "ring-2 ring-primary bg-primary/5 border-primary"
+                              : "border-border hover:border-primary/50"
                           }`}
                           onClick={() => handleTypeSelect(option)}
                         >
                           <div className="flex items-center gap-3">
                             <div>
                               <div className="font-medium">{option.label}</div>
-                              <p className="text-xs text-muted-foreground">{periodHint}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {periodHint}
+                              </p>
                             </div>
                             {isSelected && (
                               <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -402,31 +440,44 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
-                    variant={countData.period === 'day_start' ? 'default' : 'outline'}
-                    onClick={() => setCountData(prev => ({ ...prev, period: 'day_start' }))}
+                    variant={
+                      countData.period === "day_start" ? "default" : "outline"
+                    }
+                    onClick={() =>
+                      setCountData((prev) => ({ ...prev, period: "day_start" }))
+                    }
                     size="sm"
                   >
                     Day Start
                   </Button>
                   <Button
                     type="button"
-                    variant={countData.period === 'day_end' ? 'default' : 'outline'}
-                    onClick={() => setCountData(prev => ({ ...prev, period: 'day_end' }))}
+                    variant={
+                      countData.period === "day_end" ? "default" : "outline"
+                    }
+                    onClick={() =>
+                      setCountData((prev) => ({ ...prev, period: "day_end" }))
+                    }
                     size="sm"
                   >
                     Day End
                   </Button>
                   <Button
                     type="button"
-                    variant={countData.period === 'custom' ? 'default' : 'outline'}
-                    onClick={() => setCountData(prev => ({ ...prev, period: 'custom' }))}
+                    variant={
+                      countData.period === "custom" ? "default" : "outline"
+                    }
+                    onClick={() =>
+                      setCountData((prev) => ({ ...prev, period: "custom" }))
+                    }
                     size="sm"
                   >
                     Custom
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Choose the day-part focus that best matches how the count will be reviewed.
+                  Choose the day-part focus that best matches how the count will
+                  be reviewed.
                 </p>
               </div>
             </div>
@@ -441,13 +492,21 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                 </Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   {locations?.map((location) => (
-                    <div key={location.id} className="flex items-center space-x-2">
+                    <div
+                      key={location.id}
+                      className="flex items-center space-x-2"
+                    >
                       <Checkbox
                         id={location.id}
                         checked={countData.locations.includes(location.id)}
-                        onCheckedChange={() => handleLocationToggle(location.id)}
+                        onCheckedChange={() =>
+                          handleLocationToggle(location.id)
+                        }
                       />
-                      <Label htmlFor={location.id} className="text-sm font-normal">
+                      <Label
+                        htmlFor={location.id}
+                        className="text-sm font-normal"
+                      >
                         {location.name}
                       </Label>
                     </div>
@@ -462,13 +521,21 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                 </Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   {categories?.map((category) => (
-                    <div key={category.id} className="flex items-center space-x-2">
+                    <div
+                      key={category.id}
+                      className="flex items-center space-x-2"
+                    >
                       <Checkbox
                         id={category.id}
                         checked={countData.categories.includes(category.id)}
-                        onCheckedChange={() => handleCategoryToggle(category.id)}
+                        onCheckedChange={() =>
+                          handleCategoryToggle(category.id)
+                        }
                       />
-                      <Label htmlFor={category.id} className="text-sm font-normal">
+                      <Label
+                        htmlFor={category.id}
+                        className="text-sm font-normal"
+                      >
                         {category.name}
                       </Label>
                     </div>
@@ -482,7 +549,12 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                   id="description"
                   placeholder="Short description that appears in supervisor review"
                   value={countData.description}
-                  onChange={(e) => setCountData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setCountData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                 />
               </div>
 
@@ -492,7 +564,9 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                   id="notes"
                   placeholder="Add any special instructions or notes for this count..."
                   value={countData.notes}
-                  onChange={(e) => setCountData(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) =>
+                    setCountData((prev) => ({ ...prev, notes: e.target.value }))
+                  }
                 />
               </div>
             </div>
@@ -511,18 +585,27 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal mt-2",
-                        !countData.scheduledDate && "text-muted-foreground"
+                        !countData.scheduledDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {countData.scheduledDate ? format(countData.scheduledDate, "PPP") : <span>Pick a date</span>}
+                      {countData.scheduledDate ? (
+                        format(countData.scheduledDate, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={countData.scheduledDate}
-                      onSelect={(date) => setCountData(prev => ({ ...prev, scheduledDate: date }))}
+                      onSelect={(date) =>
+                        setCountData((prev) => ({
+                          ...prev,
+                          scheduledDate: date,
+                        }))
+                      }
                       disabled={(date) => date < new Date()}
                       initialFocus
                       className="p-3 pointer-events-auto"
@@ -540,7 +623,12 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                   <Input
                     type="time"
                     value={countData.scheduledTime}
-                    onChange={(e) => setCountData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                    onChange={(e) =>
+                      setCountData((prev) => ({
+                        ...prev,
+                        scheduledTime: e.target.value,
+                      }))
+                    }
                     className="flex-1"
                   />
                   <Button
@@ -555,10 +643,10 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                         // Turn on now mode - set current time and date immediately
                         const now = new Date();
                         const currentTime = now.toTimeString().slice(0, 5);
-                        setCountData(prev => ({ 
-                          ...prev, 
+                        setCountData((prev) => ({
+                          ...prev,
                           scheduledTime: currentTime,
-                          scheduledDate: now
+                          scheduledDate: now,
                         }));
                         setIsNowModeActive(true);
                       }
@@ -571,10 +659,9 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
 
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  {countData.scheduledDate 
+                  {countData.scheduledDate
                     ? `Count will start on ${format(countData.scheduledDate, "PPP")} at ${countData.scheduledTime}`
-                    : "Count will start immediately upon creation"
-                  }
+                    : "Count will start immediately upon creation"}
                 </p>
               </div>
             </div>
@@ -595,11 +682,11 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                     <div>
                       <span className="font-medium">Day Part:</span>
                       <p>
-                        {countData.period === 'day_start'
-                          ? 'Day Start (before service)'
-                          : countData.period === 'day_end'
-                          ? 'Day End (after service)'
-                          : 'Custom'}
+                        {countData.period === "day_start"
+                          ? "Day Start (before service)"
+                          : countData.period === "day_end"
+                            ? "Day End (after service)"
+                            : "Custom"}
                       </p>
                     </div>
                     <div>
@@ -607,19 +694,23 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                       <p>
                         {countData.locations.length
                           ? countData.locations
-                              .map(id => locations?.find(l => l.id === id)?.name)
+                              .map(
+                                (id) =>
+                                  locations?.find((l) => l.id === id)?.name,
+                              )
                               .filter(Boolean)
-                              .join(', ')
-                          : 'All locations'}
+                              .join(", ")
+                          : "All locations"}
                       </p>
                     </div>
-                     <div>
-                       <span className="font-medium">Start Time:</span>
-                       <p>{countData.scheduledDate 
-                         ? `${format(countData.scheduledDate, "PPP")} at ${countData.scheduledTime}`
-                         : "Immediately upon creation"
-                       }</p>
-                     </div>
+                    <div>
+                      <span className="font-medium">Start Time:</span>
+                      <p>
+                        {countData.scheduledDate
+                          ? `${format(countData.scheduledDate, "PPP")} at ${countData.scheduledTime}`
+                          : "Immediately upon creation"}
+                      </p>
+                    </div>
                   </div>
 
                   {countData.description && (
@@ -628,14 +719,20 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                       <p className="text-sm">{countData.description}</p>
                     </div>
                   )}
-                  
+
                   {countData.categories.length > 0 && (
                     <div>
                       <span className="font-medium">Categories:</span>
-                      <p className="text-sm">{countData.categories.map(id => categories?.find(c => c.id === id)?.name).join(', ')}</p>
+                      <p className="text-sm">
+                        {countData.categories
+                          .map(
+                            (id) => categories?.find((c) => c.id === id)?.name,
+                          )
+                          .join(", ")}
+                      </p>
                     </div>
                   )}
-                  
+
                   {countData.notes && (
                     <div>
                       <span className="font-medium">Notes:</span>
@@ -652,77 +749,84 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
           <Button
             variant="outline"
             onClick={handleBack}
-            disabled={currentStep === 'type'}
+            disabled={currentStep === "type"}
           >
             Back
           </Button>
-          
+
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            
-            {currentStep === 'review' ? (
-                  <Button 
-                     onClick={async () => {
-                       setCreating(true);
-                         try {
-                           // Create count data with scheduled or current date/time
-                           let scheduledDateTime;
-                           if (isNowModeActive) {
-                             // Use actual current time if in "now mode"
-                             scheduledDateTime = new Date();
-                           } else {
-                             // Use scheduled time
-                             scheduledDateTime = countData.scheduledDate 
-                               ? new Date(`${countData.scheduledDate.toDateString()} ${countData.scheduledTime}`)
-                               : new Date();
-                           }
-                           
-                           const selectedCategoryNames = countData.categories
-                             .map((categoryId) => categories?.find((category) => category.id === categoryId)?.name)
-                             .filter((name): name is string => Boolean(name));
 
-                           const countPayload = {
-                             type: countData.type,
-                             period: countData.period,
-                             locations: countData.locations,
-                             categories: selectedCategoryNames,
-                             scheduleDate: scheduledDateTime.toISOString(),
-                             notes: countData.notes,
-                             description: countData.description,
-                           };
-                           const createdCount = await createCount(countPayload);
-                          onOpenChange(false);
-                           // Reset form
-                           setCountData({
-                             type: 'day_start',
-                             typeLabel: 'Day Start',
-                             period: 'day_start',
-                             locations: [],
-                             categories: [],
-                             notes: '',
-                             description: '',
-                             assignees: [],
-                             scheduledDate: undefined,
-                             scheduledTime: '09:00'
-                           });
-                           setIsNowModeActive(false);
-                         setCurrentStep('type');
-          // Navigate to the count page
-          if (createdCount?.id) {
-            navigate(`/inventory/counts/${createdCount.id}`);
-          }
-                       } catch (error) {
-                         // Error already handled in hook
-                       } finally {
-                         setCreating(false);
-                       }
-                     }}
-                    disabled={creating}
-                  >
-                    {creating ? 'Creating...' : 'Create Count'}
-                  </Button>
+            {currentStep === "review" ? (
+              <Button
+                onClick={async () => {
+                  setCreating(true);
+                  try {
+                    // Create count data with scheduled or current date/time
+                    let scheduledDateTime;
+                    if (isNowModeActive) {
+                      // Use actual current time if in "now mode"
+                      scheduledDateTime = new Date();
+                    } else {
+                      // Use scheduled time
+                      scheduledDateTime = countData.scheduledDate
+                        ? new Date(
+                            `${countData.scheduledDate.toDateString()} ${countData.scheduledTime}`,
+                          )
+                        : new Date();
+                    }
+
+                    const selectedCategoryNames = countData.categories
+                      .map(
+                        (categoryId) =>
+                          categories?.find(
+                            (category) => category.id === categoryId,
+                          )?.name,
+                      )
+                      .filter((name): name is string => Boolean(name));
+
+                    const countPayload = {
+                      type: countData.type,
+                      period: countData.period,
+                      locations: countData.locations,
+                      categories: selectedCategoryNames,
+                      scheduleDate: scheduledDateTime.toISOString(),
+                      notes: countData.notes,
+                      description: countData.description,
+                    };
+                    const createdCount = await createCount(countPayload);
+                    onOpenChange(false);
+                    // Reset form
+                    setCountData({
+                      type: "day_start",
+                      typeLabel: "Day Start",
+                      period: "day_start",
+                      locations: [],
+                      categories: [],
+                      notes: "",
+                      description: "",
+                      assignees: [],
+                      scheduledDate: undefined,
+                      scheduledTime: "09:00",
+                    });
+                    setIsNowModeActive(false);
+                    setCurrentStep("type");
+                    // Navigate to the count page
+                    if (createdCount?.id) {
+                      navigate(`/inventory/counts/${createdCount.id}`);
+                    }
+                  } catch (error) {
+                    // Error already handled in hook
+                  } finally {
+                    setCreating(false);
+                  }
+                }}
+                disabled={creating}
+              >
+                {creating ? "Creating..." : "Create Count"}
+              </Button>
             ) : (
               <Button onClick={handleNext} disabled={!canProceed()}>
                 Next

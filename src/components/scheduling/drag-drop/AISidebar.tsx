@@ -1,8 +1,8 @@
-import { Zap } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { AIRecommendation } from './types';
+import { Zap } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { AIRecommendation } from "./types";
 
 interface AISidebarProps {
   recommendations: AIRecommendation[];
@@ -20,16 +20,29 @@ export function AISidebar({ recommendations, onAssign }: AISidebarProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.slice(0, 5).map((recommendation, index) => (
-          <div key={`${recommendation.name}-${index}`} className="p-3 border rounded-lg">
+          <div
+            key={`${recommendation.name}-${index}`}
+            className="p-3 border rounded-lg"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium text-sm">{recommendation.name}</span>
-              <Badge variant={recommendation.score > 80 ? 'default' : recommendation.score > 60 ? 'secondary' : 'outline'}>
+              <Badge
+                variant={
+                  recommendation.score > 80
+                    ? "default"
+                    : recommendation.score > 60
+                      ? "secondary"
+                      : "outline"
+                }
+              >
                 {recommendation.score}%
               </Badge>
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
               {recommendation.reasons?.map((reason, idx) => (
-                <div key={`${recommendation.name}-reason-${idx}`}>• {reason}</div>
+                <div key={`${recommendation.name}-reason-${idx}`}>
+                  • {reason}
+                </div>
               ))}
             </div>
             <Button

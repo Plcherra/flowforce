@@ -1,8 +1,7 @@
-
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle } from 'lucide-react';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle } from "lucide-react";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
 
 interface OnboardingRole {
   id: string;
@@ -22,11 +21,11 @@ interface ReviewStepProps {
   positions: OnboardingPosition[];
 }
 
-export default function ReviewStep({ 
-  selectedTemplate, 
-  enabledSections, 
-  customRoles, 
-  positions 
+export default function ReviewStep({
+  selectedTemplate,
+  enabledSections,
+  customRoles,
+  positions,
 }: ReviewStepProps) {
   return (
     <div>
@@ -39,7 +38,7 @@ export default function ReviewStep({
           Review your workspace configuration before completing setup
         </CardDescription>
       </CardHeader>
-      
+
       <div className="space-y-6">
         <div className="p-4 border rounded-lg">
           <h4 className="font-medium text-gray-900 mb-2">Business Template</h4>
@@ -60,7 +59,7 @@ export default function ReviewStep({
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {enabledSections.map((sectionId) => (
               <Badge key={sectionId} variant="outline" className="text-xs">
-                {sectionId.replace('-', ' ')}
+                {sectionId.replace("-", " ")}
               </Badge>
             ))}
           </div>

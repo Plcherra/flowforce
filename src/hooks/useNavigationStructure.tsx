@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useCan } from '@/hooks/useCan';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
-import { useCustomSections } from '@/hooks/useCustomSections';
-import { navigationSections } from '@/data/navigationData';
-import { getNavByCategory } from '@/sections/registry';
+import { useMemo } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useCan } from "@/hooks/useCan";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import { useCustomSections } from "@/hooks/useCustomSections";
+import { navigationSections } from "@/data/navigationData";
+import { getNavByCategory } from "@/sections/registry";
 
 export interface NavigationItem {
   id: string;
@@ -23,20 +23,20 @@ export interface NavigationSection {
 
 const canonicalizePath = (href: string) => {
   if (!href) {
-    return '';
+    return "";
   }
 
-  const [path] = href.split('?');
+  const [path] = href.split("?");
   const segments = path
-    .split('/')
-    .map(part => part.trim().toLowerCase())
+    .split("/")
+    .map((part) => part.trim().toLowerCase())
     .filter(Boolean);
 
-  if (segments[0] === 'app') {
+  if (segments[0] === "app") {
     segments.shift();
   }
 
-  return segments.join('/');
+  return segments.join("/");
 };
 
 export function useNavigationStructure() {
@@ -48,7 +48,8 @@ export function useNavigationStructure() {
   const isItemVisible = (item: any) => {
     if (item.roles && !hasRole(item.roles)) return false;
     if (item.permission && !can(item.permission as any)) return false;
-    if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag)) return false;
+    if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag))
+      return false;
     return true;
   };
 
@@ -60,44 +61,56 @@ export function useNavigationStructure() {
 
   // Filter and deduplicate custom sections
   const getFilteredCustomSections = (categoryKey: string) => {
-    return customSections
-      .filter(customSection => 
-        customSection.category === categoryKey && 
-        customSection.is_active
-      )
-      // Remove unwanted sections
-      .filter(cs => {
-        const name = (cs.name || '').toLowerCase();
-        return !name.includes('simple inventory') &&
-               !name.includes('events') && 
-               !name.includes('calendar');
-      })
-      // Deduplicate by path
-      .reduce((unique: any[], curr) => {
-        const exists = unique.some(u => 
-          (u.path || '').toLowerCase() === (curr.path || '').toLowerCase()
-        );
-        return exists ? unique : [...unique, curr];
-      }, []);
+    return (
+      customSections
+        .filter(
+          (customSection) =>
+            customSection.category === categoryKey && customSection.is_active,
+        )
+        // Remove unwanted sections
+        .filter((cs) => {
+          const name = (cs.name || "").toLowerCase();
+          return (
+            !name.includes("simple inventory") &&
+            !name.includes("events") &&
+            !name.includes("calendar")
+          );
+        })
+        // Deduplicate by path
+        .reduce((unique: any[], curr) => {
+          const exists = unique.some(
+            (u) =>
+              (u.path || "").toLowerCase() === (curr.path || "").toLowerCase(),
+          );
+          return exists ? unique : [...unique, curr];
+        }, [])
+    );
   };
 
   // Filter file-based sections to avoid duplicates
-  const getFilteredFileSections = (categoryKey: string, existingPaths: Set<string>) => {
+  const getFilteredFileSections = (
+    categoryKey: string,
+    existingPaths: Set<string>,
+  ) => {
     const dynamic = getNavByCategory()[categoryKey] || [];
     const customSlugs = new Set(
-      customSections.map(cs => (cs.path || '').replace(/^\//, '').split('/')[0])
+      customSections.map(
+        (cs) => (cs.path || "").replace(/^\//, "").split("/")[0],
+      ),
     );
-    
+
     return dynamic.filter((it) => {
-      const slug = (it.href || '').split('/')[2] || '';
-      const path = canonicalizePath(it.href || '');
-      const itemName = (it.name || '').toLowerCase();
-      
-      return !customSlugs.has(slug) && 
-             !existingPaths.has(path) &&
-             !itemName.includes('simple inventory') && 
-             !itemName.includes('events') && 
-             !itemName.includes('calendar');
+      const slug = (it.href || "").split("/")[2] || "";
+      const path = canonicalizePath(it.href || "");
+      const itemName = (it.name || "").toLowerCase();
+
+      return (
+        !customSlugs.has(slug) &&
+        !existingPaths.has(path) &&
+        !itemName.includes("simple inventory") &&
+        !itemName.includes("events") &&
+        !itemName.includes("calendar")
+      );
     });
   };
 
@@ -105,12 +118,12 @@ export function useNavigationStructure() {
     const includedPaths = new Set<string>();
 
     return navigationSections
-      .filter(section => isSectionVisible(section))
-      .map(section => {
+      .filter((section) => isSectionVisible(section))
+      .map((section) => {
         // Process static navigation items
         const staticItems: NavigationItem[] = section.items
-          .filter(item => isItemVisible(item))
-          .map(item => ({
+          .filter((item) => isItemVisible(item))
+          .map((item) => ({
             id: `static-${item.href}`,
             name: item.name,
             href: item.href,
@@ -120,47 +133,61 @@ export function useNavigationStructure() {
 
         const staticNames = new Set(
           staticItems
-            .map(item => (item.name || '').trim().toLowerCase())
-            .filter(Boolean)
+            .map((item) => (item.name || "").trim().toLowerCase())
+            .filter(Boolean),
         );
 
         // Get canonical paths to avoid duplicates
         const canonicalPaths = new Set(
-          section.items.map(item => canonicalizePath(item.href))
+          section.items.map((item) => canonicalizePath(item.href)),
         );
 
         // Process custom sections
-        const customItems: NavigationItem[] = getFilteredCustomSections(section.translationKey)
+        const customItems: NavigationItem[] = getFilteredCustomSections(
+          section.translationKey,
+        )
           .map((customSection) => {
-            const rawPath = (customSection.path || '').trim();
+            const rawPath = (customSection.path || "").trim();
             if (!rawPath) {
               return null;
             }
 
-            const resolvedPath = rawPath.startsWith('/') || rawPath.startsWith('http')
-              ? rawPath
-              : `/${rawPath}`;
+            const resolvedPath =
+              rawPath.startsWith("/") || rawPath.startsWith("http")
+                ? rawPath
+                : `/${rawPath}`;
 
             const canonical = canonicalizePath(resolvedPath);
-            const canonicalTail = canonical.split('/').pop() || '';
-            const normalizedName = (customSection.name || '').trim().toLowerCase();
-            const templateKey = (customSection.template_id || '').toString().toLowerCase();
+            const canonicalTail = canonical.split("/").pop() || "";
+            const normalizedName = (customSection.name || "")
+              .trim()
+              .toLowerCase();
+            const templateKey = (customSection.template_id || "")
+              .toString()
+              .toLowerCase();
 
             const isHelpDeskSection =
-              templateKey === 'help-desk' ||
-              canonical.includes('help-desk') ||
-              normalizedName.includes('help desk');
+              templateKey === "help-desk" ||
+              canonical.includes("help-desk") ||
+              normalizedName.includes("help desk");
 
-            if (!canonical || canonicalPaths.has(canonical) || staticNames.has(normalizedName)) {
+            if (
+              !canonical ||
+              canonicalPaths.has(canonical) ||
+              staticNames.has(normalizedName)
+            ) {
               return null;
             }
 
-            if (canonicalTail === 'company-updates' || normalizedName === 'company updates') {
+            if (
+              canonicalTail === "company-updates" ||
+              normalizedName === "company updates"
+            ) {
               return null;
             }
 
             if (isHelpDeskSection) {
-              const helpDeskHref = '/app/help-desk';
+              const helpDeskHref = "/app/help-desk";
               const helpDeskCanonical = canonicalizePath(helpDeskHref);
 
               if (canonicalPaths.has(helpDeskCanonical)) {
@@ -171,22 +198,25 @@ export function useNavigationStructure() {
 
               return {
                 id: `custom-${customSection.id}`,
-                name: customSection.name || 'Help Desk',
+                name: customSection.name || "Help Desk",
                 href: helpDeskHref,
-                icon: customSection.icon || 'Headphones',
+                icon: customSection.icon || "Headphones",
               };
             }
 
             let href = resolvedPath;
-            if (canonicalTail === 'employee-directory' || normalizedName === 'employee directory') {
-              href = '/employees';
+            if (
+              canonicalTail === "employee-directory" ||
+              normalizedName === "employee directory"
+            ) {
+              href = "/employees";
             }
 
             canonicalPaths.add(canonical);
 
             return {
               id: `custom-${customSection.id}`,
-              name: customSection.name || 'Unnamed Section',
+              name: customSection.name || "Unnamed Section",
               href,
               icon: customSection.icon,
             };
@@ -194,17 +224,29 @@ export function useNavigationStructure() {
           .filter((item): item is NavigationItem => item !== null);
 
         // Process file-based sections
-        const fileItems: NavigationItem[] = getFilteredFileSections(section.translationKey, canonicalPaths)
-          .map(fileSection => {
-            const canonical = canonicalizePath(fileSection.href || '');
-            const canonicalTail = canonical.split('/').pop() || '';
-            const normalizedName = (fileSection.name || '').trim().toLowerCase();
+        const fileItems: NavigationItem[] = getFilteredFileSections(
+          section.translationKey,
+          canonicalPaths,
+        )
+          .map((fileSection) => {
+            const canonical = canonicalizePath(fileSection.href || "");
+            const canonicalTail = canonical.split("/").pop() || "";
+            const normalizedName = (fileSection.name || "")
+              .trim()
+              .toLowerCase();
 
-            if (!canonical || canonicalPaths.has(canonical) || staticNames.has(normalizedName)) {
+            if (
+              !canonical ||
+              canonicalPaths.has(canonical) ||
+              staticNames.has(normalizedName)
+            ) {
               return null;
             }
 
-            if (canonicalTail === 'company-updates' || normalizedName === 'company updates') {
+            if (
+              canonicalTail === "company-updates" ||
+              normalizedName === "company updates"
+            ) {
               return null;
             }
 
@@ -219,7 +261,11 @@ export function useNavigationStructure() {
           })
           .filter((item): item is NavigationItem => item !== null);
 
-        const combinedItems = [...staticItems, ...customItems, ...fileItems].filter((item) => {
+        const combinedItems = [
+          ...staticItems,
+          ...customItems,
+          ...fileItems,
+        ].filter((item) => {
           const canonical = canonicalizePath(item.href);
           if (!canonical) {
             return false;
@@ -238,10 +284,11 @@ export function useNavigationStructure() {
           items: combinedItems,
         };
       })
-      .filter(section => section.items.length > 0); // Only include sections with visible items
+      .filter((section) => section.items.length > 0); // Only include sections with visible items
   }, [customSections, hasRole, can, featureFlags]);
 
-  const canManageSections = can('systemSettings') || hasRole(['company_admin', 'owner', 'admin']);
+  const canManageSections =
+    can("systemSettings") || hasRole(["company_admin", "owner", "admin"]);
 
   return {
     navigationStructure,

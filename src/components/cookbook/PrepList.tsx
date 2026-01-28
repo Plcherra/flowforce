@@ -1,18 +1,35 @@
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { PrepItem } from '@/hooks/useCookbook';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { PrepItem } from "@/hooks/useCookbook";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 
 interface PrepListProps {
   items: PrepItem[];
   suggestToMake: (item: PrepItem) => { onHand: number; needed: number };
-  onLogProduction: (input: { item_id: string; qty: number; note?: string }) => Promise<void>;
+  onLogProduction: (input: {
+    item_id: string;
+    qty: number;
+    note?: string;
+  }) => Promise<void>;
   onLogWaste: (input: {
     item_id: string;
     quantity: number;
-    waste_type: 'spoilage' | 'prep_error' | 'accident' | 'theft' | 'expired' | 'damaged' | 'other';
+    waste_type:
+      | "spoilage"
+      | "prep_error"
+      | "accident"
+      | "theft"
+      | "expired"
+      | "damaged"
+      | "other";
     reason?: string;
   }) => Promise<void>;
   onViewRecipe: (recipeId: string) => void;
@@ -30,7 +47,8 @@ export function PrepList({
   const prioritized = useMemo(() => {
     const rows = items.map((item) => {
       const suggestion = suggestToMake(item);
-      const priority = item.par_min > 0 ? Math.max(0, item.par_min - suggestion.onHand) : 0;
+      const priority =
+        item.par_min > 0 ? Math.max(0, item.par_min - suggestion.onHand) : 0;
       return { item, ...suggestion, priority };
     });
     return rows.sort((a, b) => b.priority - a.priority);
@@ -43,7 +61,7 @@ export function PrepList({
       await onLogProduction({
         item_id: item.id,
         qty,
-        note: 'Prep run from daily planner',
+        note: "Prep run from daily planner",
       });
     } finally {
       setSavingId(null);
@@ -56,8 +74,8 @@ export function PrepList({
       await onLogWaste({
         item_id: item.id,
         quantity: 1,
-        waste_type: 'prep_error',
-        reason: 'Quick waste log via prep planner',
+        waste_type: "prep_error",
+        reason: "Quick waste log via prep planner",
       });
     } finally {
       setSavingId(null);
@@ -68,7 +86,8 @@ export function PrepList({
     return (
       <Card>
         <CardContent className="p-6 text-center text-sm text-muted-foreground">
-          No prep items found. Flag inventory items as prep-ready to populate this planner.
+          No prep items found. Flag inventory items as prep-ready to populate
+          this planner.
         </CardContent>
       </Card>
     );
@@ -82,19 +101,23 @@ export function PrepList({
         const recommendedQty = Math.max(needed, 0);
 
         return (
-          <Card key={item.id} className={priority > 0 ? 'border-amber-400' : ''}>
+          <Card
+            key={item.id}
+            className={priority > 0 ? "border-amber-400" : ""}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between gap-2">
                 <span className="truncate" title={item.name}>
                   {item.name}
                 </span>
-                <Badge variant={priority > 0 ? 'destructive' : 'outline'}>
-                  {priority > 0 ? 'Needs prep' : 'In stock'}
+                <Badge variant={priority > 0 ? "destructive" : "outline"}>
+                  {priority > 0 ? "Needs prep" : "In stock"}
                 </Badge>
               </CardTitle>
               {recipe && (
                 <p className="text-xs text-muted-foreground">
-                  Linked recipe cost ${recipe.costPerUnit.toFixed(2)} / {item.uom}
+                  Linked recipe cost ${recipe.costPerUnit.toFixed(2)} /{" "}
+                  {item.uom}
                 </p>
               )}
             </CardHeader>
@@ -119,14 +142,24 @@ export function PrepList({
               </div>
               {recipe && (
                 <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
-                  <p className="font-medium text-foreground mb-1">Ingredient forecast</p>
+                  <p className="font-medium text-foreground mb-1">
+                    Ingredient forecast
+                  </p>
                   <ul className="space-y-1">
                     {recipe.lines.map((line) => (
-                      <li key={line.id} className="flex items-center justify-between">
-                        <span className="truncate">{line.ingredient?.name ?? 'Unknown'}</span>
+                      <li
+                        key={line.id}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="truncate">
+                          {line.ingredient?.name ?? "Unknown"}
+                        </span>
                         <span>
-                          {(line.quantity_needed * Math.max(1, recommendedQty || 1)).toFixed(2)}{' '}
-                          {line.unit?.abbreviation || line.unit?.name || ''}
+                          {(
+                            line.quantity_needed *
+                            Math.max(1, recommendedQty || 1)
+                          ).toFixed(2)}{" "}
+                          {line.unit?.abbreviation || line.unit?.name || ""}
                         </span>
                       </li>
                     ))}
@@ -135,11 +168,21 @@ export function PrepList({
               )}
             </CardContent>
             <CardFooter className="justify-between gap-2">
-              <Button size="sm" variant="link" className="px-0" onClick={() => onViewRecipe(item.id)}>
+              <Button
+                size="sm"
+                variant="link"
+                className="px-0"
+                onClick={() => onViewRecipe(item.id)}
+              >
                 View recipe
               </Button>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleWaste(item)} disabled={disabled}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleWaste(item)}
+                  disabled={disabled}
+                >
                   {disabled ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                   ) : (
@@ -147,7 +190,11 @@ export function PrepList({
                   )}
                   Waste
                 </Button>
-                <Button size="sm" onClick={() => handleProduction(item, recommendedQty || 1)} disabled={disabled}>
+                <Button
+                  size="sm"
+                  onClick={() => handleProduction(item, recommendedQty || 1)}
+                  disabled={disabled}
+                >
                   {disabled ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                   ) : (

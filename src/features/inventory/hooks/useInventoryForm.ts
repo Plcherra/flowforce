@@ -1,9 +1,11 @@
-import { useCallback, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useCallback, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 type ErrorMap<T> = Partial<Record<keyof T, string>>;
 
-export function useInventoryFormState<T extends Record<string, string>>(initialState: T) {
+export function useInventoryFormState<T extends Record<string, string>>(
+  initialState: T,
+) {
   const { toast } = useToast();
   const [values, setValues] = useState<T>(initialState);
   const [errors, setErrors] = useState<ErrorMap<T>>({});
@@ -25,9 +27,9 @@ export function useInventoryFormState<T extends Record<string, string>>(initialS
 
   const showValidationToast = useCallback(() => {
     toast({
-      title: 'Missing information',
-      description: 'Please review the highlighted fields.',
-      variant: 'destructive',
+      title: "Missing information",
+      description: "Please review the highlighted fields.",
+      variant: "destructive",
     });
   }, [toast]);
 

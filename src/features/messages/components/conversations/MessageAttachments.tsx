@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent } from '@/components/ui/card';
-import { Paperclip, X, File, Image, Download, Eye } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import type { MessageAttachment } from '@/types/messages';
-import { logger } from '@/utils/logger';
+import React, { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
+import { Paperclip, X, File, Image, Download, Eye } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import type { MessageAttachment } from "@/types/messages";
+import { logger } from "@/utils/logger";
 
 interface MessageAttachmentsProps {
   messageId?: string;
@@ -16,11 +16,11 @@ interface MessageAttachmentsProps {
   readOnly?: boolean;
 }
 
-export function MessageAttachments({ 
-  messageId, 
-  attachments = [], 
-  onAttachmentsChange, 
-  readOnly = false 
+export function MessageAttachments({
+  messageId,
+  attachments = [],
+  onAttachmentsChange,
+  readOnly = false,
 }: MessageAttachmentsProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -28,7 +28,9 @@ export function MessageAttachments({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = event.target.files;
     if (!files || !user || !messageId) return;
 
@@ -40,22 +42,22 @@ export function MessageAttachments({
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${user.id}/${messageId}/${crypto.randomUUID()}.${fileExt}`;
 
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
-          .from('message-attachments')
+          .from("message-attachments")
           .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false
+            cacheControl: "3600",
+            upsert: false,
           });
 
         if (error) throw error;
 
         // Get public URL
         const { data: urlData } = supabase.storage
-          .from('message-attachments')
+          .from("message-attachments")
           .getPublicUrl(data.path);
 
         newAttachments.push({
@@ -64,7 +66,7 @@ export function MessageAttachments({
           size: file.size,
           type: file.type,
           url: urlData.publicUrl,
-          path: data.path
+          path: data.path,
         });
 
         setUploadProgress(((i + 1) / files.length) * 100);
@@ -74,21 +76,21 @@ export function MessageAttachments({
       onAttachmentsChange?.(updatedAttachments);
 
       toast({
-        title: 'Success',
+        title: "Success",
         description: `${newAttachments.length} file(s) uploaded successfully`,
       });
     } catch (error) {
-      logger.error('Upload error', { error, tags: ['error'] });
+      logger.error("Upload error", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to upload files',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to upload files",
+        variant: "destructive",
       });
     } finally {
       setUploading(false);
       setUploadProgress(0);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -98,23 +100,25 @@ export function MessageAttachments({
       // Remove from storage if it has a path
       if (attachment.path) {
         await supabase.storage
-          .from('message-attachments')
+          .from("message-attachments")
           .remove([attachment.path]);
       }
 
-      const updatedAttachments = attachments.filter(a => a.id !== attachment.id);
+      const updatedAttachments = attachments.filter(
+        (a) => a.id !== attachment.id,
+      );
       onAttachmentsChange?.(updatedAttachments);
 
       toast({
-        title: 'Success',
-        description: 'File removed successfully',
+        title: "Success",
+        description: "File removed successfully",
       });
     } catch (error) {
-      logger.error('Remove error', { error, tags: ['error'] });
+      logger.error("Remove error", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to remove file',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to remove file",
+        variant: "destructive",
       });
     }
   };
@@ -123,14 +127,14 @@ export function MessageAttachments({
     try {
       if (attachment.path) {
         const { data, error } = await supabase.storage
-          .from('message-attachments')
+          .from("message-attachments")
           .download(attachment.path);
 
         if (error) throw error;
 
         // Create download link
         const url = URL.createObjectURL(data);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = attachment.name;
         document.body.appendChild(a);
@@ -139,24 +143,24 @@ export function MessageAttachments({
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      logger.error('Download error', { error, tags: ['error'] });
+      logger.error("Download error", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to download file',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to download file",
+        variant: "destructive",
       });
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const isImage = (type: string) => type.startsWith('image/');
+  const isImage = (type: string) => type.startsWith("image/");
 
   return (
     <div className="space-y-2">
@@ -179,7 +183,7 @@ export function MessageAttachments({
             className="gap-2"
           >
             <Paperclip className="h-4 w-4" />
-            {uploading ? 'Uploading...' : 'Attach Files'}
+            {uploading ? "Uploading..." : "Attach Files"}
           </Button>
         </div>
       )}
@@ -231,7 +235,7 @@ export function MessageAttachments({
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => window.open(attachment.url, '_blank')}
+                        onClick={() => window.open(attachment.url, "_blank")}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

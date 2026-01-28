@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { isSameDay, parseISO } from 'date-fns';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
+import { useMemo } from "react";
+import { isSameDay, parseISO } from "date-fns";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
 
 export interface OnDutyStaff {
   id: string;
@@ -26,15 +26,17 @@ const matchesStore = (shift: ShiftWithAssignments, storeId?: string | null) => {
   if (!storeId) return true;
 
   const requirementsStore =
-    shift.requirements && typeof shift.requirements === 'object' && !Array.isArray(shift.requirements)
+    shift.requirements &&
+    typeof shift.requirements === "object" &&
+    !Array.isArray(shift.requirements)
       ? (shift.requirements as Record<string, unknown>).store_id
       : null;
 
-  if (typeof requirementsStore === 'string' && requirementsStore) {
+  if (typeof requirementsStore === "string" && requirementsStore) {
     return requirementsStore === storeId;
   }
 
-  if (typeof shift.location === 'string' && shift.location) {
+  if (typeof shift.location === "string" && shift.location) {
     return shift.location === storeId;
   }
 
@@ -50,7 +52,9 @@ const buildStaffMap = (shifts: ShiftWithAssignments[]): OnDutyStaff[] => {
       if (!user?.id) return;
       const key = user.id;
       const displayName =
-        `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email || 'Team member';
+        `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
+        user.email ||
+        "Team member";
       const current = staffMap.get(key);
       if (current) {
         current.shiftIds.push(shift.id);
@@ -69,7 +73,10 @@ const buildStaffMap = (shifts: ShiftWithAssignments[]): OnDutyStaff[] => {
   return Array.from(staffMap.values());
 };
 
-export function useShiftsForDate(date: Date | string, storeId?: string | null): UseShiftsForDateResult {
+export function useShiftsForDate(
+  date: Date | string,
+  storeId?: string | null,
+): UseShiftsForDateResult {
   const targetDate = useMemo(() => normaliseDate(date), [date]);
   const { shifts: allShifts = [], loading } = useScheduling();
 
@@ -89,4 +96,3 @@ export function useShiftsForDate(date: Date | string, storeId?: string | null): 
     loading,
   };
 }
-

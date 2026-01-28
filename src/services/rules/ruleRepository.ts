@@ -1,6 +1,12 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { AppRule, RuleCondition, RuleAction, RuleTarget, RuleAuditEntry } from '@/types/rules';
-import { logger } from '@/utils/logger';
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  AppRule,
+  RuleCondition,
+  RuleAction,
+  RuleTarget,
+  RuleAuditEntry,
+} from "@/types/rules";
+import { logger } from "@/utils/logger";
 
 type DbRule = {
   id: string;
@@ -23,7 +29,7 @@ type DbRuleCondition = {
   id: string;
   group_index: number;
   condition_index: number;
-  conjunction: 'AND' | 'OR';
+  conjunction: "AND" | "OR";
   field: string;
   operator: string;
   value: unknown;
@@ -51,7 +57,7 @@ type DbRuleAudit = {
   action: string;
   actor_id: string | null;
   actor_role: string | null;
-  status: 'allowed' | 'warning' | 'blocked';
+  status: "allowed" | "warning" | "blocked";
   message: string | null;
   detail: unknown;
   created_at: string;
@@ -59,8 +65,9 @@ type DbRuleAudit = {
 
 export async function listRules(): Promise<AppRule[]> {
   const { data, error } = await supabase
-    .from('app_rules')
-    .select(`
+    .from("app_rules")
+    .select(
+      `
       id,
       slug,
       name,
@@ -75,11 +82,12 @@ export async function listRules(): Promise<AppRule[]> {
       app_rule_conditions (*),
       app_rule_actions (*),
       app_rule_targets (*)
-    `)
-    .order('name', { ascending: true });
+    `,
+    )
+    .order("name", { ascending: true });
 
   if (error) {
-    logger.error('Failed to fetch rules', { error, tags: ['error'] });
+    logger.error("Failed to fetch rules", { error, tags: ["error"] });
     return [];
   }
 
@@ -88,8 +96,9 @@ export async function listRules(): Promise<AppRule[]> {
 
 export async function getRuleBySlug(slug: string): Promise<AppRule | null> {
   const { data, error } = await supabase
-    .from('app_rules')
-    .select(`
+    .from("app_rules")
+    .select(
+      `
       id,
       slug,
       name,
@@ -104,28 +113,32 @@ export async function getRuleBySlug(slug: string): Promise<AppRule | null> {
       app_rule_conditions (*),
       app_rule_actions (*),
       app_rule_targets (*)
-    `)
-    .eq('slug', slug)
+    `,
+    )
+    .eq("slug", slug)
     .maybeSingle();
 
   if (error) {
-    logger.error('Failed to fetch rule', { error, tags: ['error'] });
+    logger.error("Failed to fetch rule", { error, tags: ["error"] });
     return null;
   }
 
   return data ? mapRule(data as DbRule) : null;
 }
 
-export async function listRuleAudits(ruleId: string, limit = 50): Promise<RuleAuditEntry[]> {
+export async function listRuleAudits(
+  ruleId: string,
+  limit = 50,
+): Promise<RuleAuditEntry[]> {
   const { data, error } = await supabase
-    .from('app_rule_audits')
-    .select('*')
-    .eq('rule_id', ruleId)
-    .order('created_at', { ascending: false })
+    .from("app_rule_audits")
+    .select("*")
+    .eq("rule_id", ruleId)
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
-    logger.error('Failed to fetch rule audits', { error, tags: ['error'] });
+    logger.error("Failed to fetch rule audits", { error, tags: ["error"] });
     return [];
   }
 
@@ -140,7 +153,7 @@ function mapRule(rule: DbRule): AppRule {
     description: rule.description ?? undefined,
     resource: rule.resource,
     trigger: rule.trigger,
-    severity: rule.severity as AppRule['severity'],
+    severity: rule.severity as AppRule["severity"],
     isEnabled: rule.is_enabled,
     createdBy: rule.created_by ?? undefined,
     createdAt: rule.created_at,
@@ -167,7 +180,10 @@ function mapAction(action: DbRuleAction): RuleAction {
   return {
     id: action.id,
     actionType: action.action_type,
-    config: action.config && typeof action.config === 'object' ? (action.config as Record<string, unknown>) : undefined,
+    config:
+      action.config && typeof action.config === "object"
+        ? (action.config as Record<string, unknown>)
+        : undefined,
     displayOrder: action.display_order,
   };
 }
@@ -177,7 +193,10 @@ function mapTarget(target: DbRuleTarget): RuleTarget {
     id: target.id,
     targetType: target.target_type,
     targetId: target.target_id ?? undefined,
-    metadata: target.metadata && typeof target.metadata === 'object' ? (target.metadata as Record<string, unknown>) : undefined,
+    metadata:
+      target.metadata && typeof target.metadata === "object"
+        ? (target.metadata as Record<string, unknown>)
+        : undefined,
   };
 }
 
@@ -192,8 +211,10 @@ function mapAudit(audit: DbRuleAudit): RuleAuditEntry {
     actorRole: audit.actor_role ?? undefined,
     status: audit.status,
     message: audit.message ?? undefined,
-    detail: audit.detail && typeof audit.detail === 'object' ? (audit.detail as Record<string, unknown>) : undefined,
+    detail:
+      audit.detail && typeof audit.detail === "object"
+        ? (audit.detail as Record<string, unknown>)
+        : undefined,
     createdAt: audit.created_at,
   };
 }
-

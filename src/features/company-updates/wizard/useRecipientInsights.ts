@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import type { WizardFormData } from './types';
-import { logger } from '@/utils/logger';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { WizardFormData } from "./types";
+import { logger } from "@/utils/logger";
 
 export interface RecipientSegment {
   id: string;
   name: string;
   count: number;
-  type: 'departments' | 'roles' | 'groups';
+  type: "departments" | "roles" | "groups";
   coverage?: number;
 }
 
@@ -42,9 +42,12 @@ export function useRecipientInsights(formData: WizardFormData) {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
-        const { data: aggregation, error } = await supabase.rpc('get_recipient_insights', {
-          recipients_filter: formData.recipients,
-        });
+        const { data: aggregation, error } = await supabase.rpc(
+          "get_recipient_insights",
+          {
+            recipients_filter: formData.recipients,
+          },
+        );
 
         if (error) throw error;
 
@@ -65,13 +68,21 @@ export function useRecipientInsights(formData: WizardFormData) {
           error: null,
         });
       } catch (err) {
-        logger.error('Failed to load recipient insights', { error: err, tags: ['error'] });
+        logger.error("Failed to load recipient insights", {
+          error: err,
+          tags: ["error"],
+        });
         if (!cancelled) {
-          setState((prev) => ({ ...prev, loading: false, error: 'Unable to load recipient metrics' }));
+          setState((prev) => ({
+            ...prev,
+            loading: false,
+            error: "Unable to load recipient metrics",
+          }));
           toast({
-            title: 'Recipient metrics unavailable',
-            description: 'We could not fetch the latest recipient counts. Try again soon.',
-            variant: 'destructive',
+            title: "Recipient metrics unavailable",
+            description:
+              "We could not fetch the latest recipient counts. Try again soon.",
+            variant: "destructive",
           });
         }
       }
@@ -87,20 +98,32 @@ export function useRecipientInsights(formData: WizardFormData) {
   const actionItems = useMemo(() => {
     const items: string[] = [];
 
-    if (state.activeFilters === 0 && formData.recipients.type !== 'all') {
-      items.push('Add at least one audience to avoid sending to zero people.');
+    if (state.activeFilters === 0 && formData.recipients.type !== "all") {
+      items.push("Add at least one audience to avoid sending to zero people.");
     }
 
-    if (state.estimatedReach === 0 && formData.recipients.type !== 'all') {
-      items.push('No employees match the current filters. Adjust the selection.');
+    if (state.estimatedReach === 0 && formData.recipients.type !== "all") {
+      items.push(
+        "No employees match the current filters. Adjust the selection.",
+      );
     }
 
-    if (state.estimatedReach > state.totalEmployees * 0.8 && formData.recipients.type !== 'all') {
-      items.push('You are targeting most of the company—consider sending to everyone.');
+    if (
+      state.estimatedReach > state.totalEmployees * 0.8 &&
+      formData.recipients.type !== "all"
+    ) {
+      items.push(
+        "You are targeting most of the company—consider sending to everyone.",
+      );
     }
 
     return items;
-  }, [state.activeFilters, state.estimatedReach, state.totalEmployees, formData.recipients.type]);
+  }, [
+    state.activeFilters,
+    state.estimatedReach,
+    state.totalEmployees,
+    formData.recipients.type,
+  ]);
 
   return {
     ...state,

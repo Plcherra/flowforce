@@ -1,13 +1,23 @@
-import { ScheduleTemplatesPanel } from './ScheduleTemplatesPanel';
-import { AISidebar } from './AISidebar';
-import type { ShiftTemplate, VendorPaletteItem, AIRecommendation } from './types';
+import { ScheduleTemplatesPanel } from "./ScheduleTemplatesPanel";
+import { AISidebar } from "./AISidebar";
+import type {
+  ShiftTemplate,
+  VendorPaletteItem,
+  AIRecommendation,
+} from "./types";
 
 interface AssignmentPanelProps {
   showTemplates: boolean;
   templates: ShiftTemplate[];
   vendors: VendorPaletteItem[];
-  onTemplateDragStart: (event: React.DragEvent, template: ShiftTemplate) => void;
-  onVendorDragStart: (event: React.DragEvent, vendor: VendorPaletteItem) => void;
+  onTemplateDragStart: (
+    event: React.DragEvent,
+    template: ShiftTemplate,
+  ) => void;
+  onVendorDragStart: (
+    event: React.DragEvent,
+    vendor: VendorPaletteItem,
+  ) => void;
   onAutoFillWeek: () => void;
   onQuickVendorVisit: () => Promise<void>;
   showAIRecommendations: boolean;
@@ -45,7 +55,10 @@ export function AssignmentPanel({
       )}
 
       {showAIRecommendations && (
-        <AISidebar recommendations={aiRecommendations} onAssign={onAssignFromAI} />
+        <AISidebar
+          recommendations={aiRecommendations}
+          onAssign={onAssignFromAI}
+        />
       )}
     </div>
   );

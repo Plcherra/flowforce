@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calculator, Settings } from 'lucide-react';
-import { EnhancedCountingTable } from '@/components/inventory/EnhancedCountingTable';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Calculator, Settings } from "lucide-react";
+import { EnhancedCountingTable } from "@/components/inventory/EnhancedCountingTable";
 
 export default function InventoryCountExecution() {
   const { countId } = useParams<{ countId: string }>();
@@ -14,7 +14,10 @@ export default function InventoryCountExecution() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Count not found</h1>
-          <Button onClick={() => navigate('/inventory/counts')} className="mt-4">
+          <Button
+            onClick={() => navigate("/inventory/counts")}
+            className="mt-4"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Counts
           </Button>
@@ -29,7 +32,11 @@ export default function InventoryCountExecution() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => navigate('/inventory/counts')}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/inventory/counts")}
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Counts
             </Button>
@@ -43,7 +50,7 @@ export default function InventoryCountExecution() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
@@ -53,7 +60,7 @@ export default function InventoryCountExecution() {
         </div>
 
         {/* Enhanced Counting Table */}
-        <EnhancedCountingTable 
+        <EnhancedCountingTable
           countId={countId}
           onCountUpdate={(counts) => {
             // Handle count updates - could refresh data or show toast
@@ -66,15 +73,9 @@ export default function InventoryCountExecution() {
             Auto-save enabled • Last saved: Just now
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
-              Export Count Sheet
-            </Button>
-            <Button variant="outline">
-              Save Progress
-            </Button>
-            <Button>
-              Complete Count
-            </Button>
+            <Button variant="outline">Export Count Sheet</Button>
+            <Button variant="outline">Save Progress</Button>
+            <Button>Complete Count</Button>
           </div>
         </div>
       </div>

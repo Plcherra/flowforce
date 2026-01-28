@@ -1,15 +1,21 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X } from "lucide-react";
 
 export interface Task {
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
 }
 
 interface TaskFormProps {
@@ -19,9 +25,14 @@ interface TaskFormProps {
   minTasks?: number;
 }
 
-export function TaskForm({ tasks, onChange, disabled = false, minTasks = 2 }: TaskFormProps) {
+export function TaskForm({
+  tasks,
+  onChange,
+  disabled = false,
+  minTasks = 2,
+}: TaskFormProps) {
   const addTask = () => {
-    onChange([...tasks, { title: '', description: '', priority: 'medium' }]);
+    onChange([...tasks, { title: "", description: "", priority: "medium" }]);
   };
 
   const removeTask = (index: number) => {
@@ -31,13 +42,13 @@ export function TaskForm({ tasks, onChange, disabled = false, minTasks = 2 }: Ta
   };
 
   const updateTask = (index: number, field: keyof Task, value: string) => {
-    const updatedTasks = tasks.map((task, i) => 
-      i === index ? { ...task, [field]: value } : task
+    const updatedTasks = tasks.map((task, i) =>
+      i === index ? { ...task, [field]: value } : task,
     );
     onChange(updatedTasks);
   };
 
-  const hasEmptyTasks = tasks.some(task => !task.title.trim());
+  const hasEmptyTasks = tasks.some((task) => !task.title.trim());
 
   return (
     <div className="space-y-4">
@@ -53,7 +64,7 @@ export function TaskForm({ tasks, onChange, disabled = false, minTasks = 2 }: Ta
           Add Task
         </Button>
       </div>
-      
+
       <div className="space-y-3 max-h-60 overflow-y-auto">
         {tasks.map((task, index) => (
           <div key={index} className="p-4 border rounded-lg space-y-3">
@@ -72,26 +83,30 @@ export function TaskForm({ tasks, onChange, disabled = false, minTasks = 2 }: Ta
                 </Button>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Input
                 placeholder="Task title *"
                 value={task.title}
-                onChange={(e) => updateTask(index, 'title', e.target.value)}
+                onChange={(e) => updateTask(index, "title", e.target.value)}
                 disabled={disabled}
                 aria-label={`Task ${index + 1} title`}
               />
               <Textarea
                 placeholder="Task description"
                 value={task.description}
-                onChange={(e) => updateTask(index, 'description', e.target.value)}
+                onChange={(e) =>
+                  updateTask(index, "description", e.target.value)
+                }
                 rows={2}
                 disabled={disabled}
                 aria-label={`Task ${index + 1} description`}
               />
-              <Select 
-                value={task.priority} 
-                onValueChange={(value: 'low' | 'medium' | 'high') => updateTask(index, 'priority', value)}
+              <Select
+                value={task.priority}
+                onValueChange={(value: "low" | "medium" | "high") =>
+                  updateTask(index, "priority", value)
+                }
                 disabled={disabled}
               >
                 <SelectTrigger aria-label={`Task ${index + 1} priority`}>
@@ -107,12 +122,14 @@ export function TaskForm({ tasks, onChange, disabled = false, minTasks = 2 }: Ta
           </div>
         ))}
       </div>
-      
+
       {hasEmptyTasks && tasks.length >= minTasks && (
         <p className="text-sm text-destructive">All tasks must have a title</p>
       )}
       {tasks.length < minTasks && (
-        <p className="text-sm text-destructive">At least {minTasks} tasks are required</p>
+        <p className="text-sm text-destructive">
+          At least {minTasks} tasks are required
+        </p>
       )}
     </div>
   );

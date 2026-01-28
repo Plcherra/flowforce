@@ -1,1 +1,1 @@
-export { CreateVendorVisitDialog } from '@/features/calendar/components/CreateVendorVisitDialog';
+export { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";

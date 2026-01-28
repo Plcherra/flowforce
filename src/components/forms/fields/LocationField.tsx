@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Navigation, Clock } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Navigation, Clock } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface LocationData {
   latitude: number;
@@ -29,7 +29,7 @@ export function LocationField({
   value,
   onChange,
   required = false,
-  className = ""
+  className = "",
 }: LocationFieldProps) {
   const [loading, setLoading] = useState(false);
 
@@ -48,18 +48,18 @@ export function LocationField({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude, altitude, accuracy } = position.coords;
-        
+
         try {
           // Try to get address from coordinates using reverse geocoding
           const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
           );
-          
+
           let address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
           if (response.ok) {
             const data = await response.json();
             if (data.locality || data.city) {
-              address = `${data.locality || data.city}, ${data.countryName || ''}`;
+              address = `${data.locality || data.city}, ${data.countryName || ""}`;
             }
           }
 
@@ -78,7 +78,7 @@ export function LocationField({
             description: "Location captured successfully",
           });
         } catch (error) {
-          logger.error('Error getting address:', { error, tags: ['error'] });
+          logger.error("Error getting address:", { error, tags: ["error"] });
           // Still save location even if address lookup fails
           const locationData: LocationData = {
             latitude,
@@ -101,7 +101,7 @@ export function LocationField({
       (error) => {
         setLoading(false);
         let message = "Failed to get location";
-        
+
         switch (error.code) {
           case error.PERMISSION_DENIED:
             message = "Location access denied by user";
@@ -123,8 +123,8 @@ export function LocationField({
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
+        maximumAge: 300000, // 5 minutes
+      },
     );
   }, [onChange]);
 
@@ -217,7 +217,7 @@ export function LocationField({
 export function LocationFieldPreview({
   label = "Location",
   description = "Capture your current GPS coordinates and address",
-  className = ""
+  className = "",
 }: Partial<LocationFieldProps>) {
   return (
     <LocationField

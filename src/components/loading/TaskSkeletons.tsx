@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const TaskCardSkeleton = () => (
   <div className="rounded-lg border bg-card">
@@ -17,8 +17,16 @@ export const TaskCardSkeleton = () => (
 );
 
 export const TaskPageSkeleton = ({ isMobile }: { isMobile: boolean }) => (
-  <div className={isMobile ? 'space-y-4 px-4 pb-6' : 'space-y-6 max-w-7xl mx-auto px-6 pb-10'}>
-    <div className={isMobile ? 'space-y-3' : 'flex items-center justify-between'}>
+  <div
+    className={
+      isMobile
+        ? "space-y-4 px-4 pb-6"
+        : "space-y-6 max-w-7xl mx-auto px-6 pb-10"
+    }
+  >
+    <div
+      className={isMobile ? "space-y-3" : "flex items-center justify-between"}
+    >
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
@@ -41,8 +49,12 @@ export const TaskPageSkeleton = ({ isMobile }: { isMobile: boolean }) => (
       <Skeleton className="h-10 w-48" />
     </div>
 
-    <div className={isMobile ? 'space-y-3' : 'grid grid-cols-1 gap-6 lg:grid-cols-3'}>
-      <div className={isMobile ? 'space-y-3' : 'space-y-4 lg:col-span-2'}>
+    <div
+      className={
+        isMobile ? "space-y-3" : "grid grid-cols-1 gap-6 lg:grid-cols-3"
+      }
+    >
+      <div className={isMobile ? "space-y-3" : "space-y-4 lg:col-span-2"}>
         {[0, 1, 2].map((item) => (
           <TaskCardSkeleton key={item} />
         ))}

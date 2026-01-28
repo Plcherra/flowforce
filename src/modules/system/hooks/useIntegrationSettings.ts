@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from "react";
 import type {
   IntegrationConnection,
   IntegrationsSettings,
-} from '@/types/system-settings';
-import { DEFAULT_INTEGRATIONS } from './systemSettingsDefaults';
-import type { SystemSettingsHook } from './useSystemSettings';
+} from "@/types/system-settings";
+import { DEFAULT_INTEGRATIONS } from "./systemSettingsDefaults";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useIntegrationSettings(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
@@ -35,13 +35,14 @@ export function useIntegrationSettings(source: SystemSettingsHook) {
             ...(updates.providers ?? {}),
           },
           connections: Array.from(
-            new Map(
-              [
-                ...base.connections.map((connection) => [connection.id, connection] as const),
-                ...(updates.connections?.map((connection) => [connection.id, connection] as const) ??
-                  []),
-              ],
-            ).values(),
+            new Map([
+              ...base.connections.map(
+                (connection) => [connection.id, connection] as const,
+              ),
+              ...(updates.connections?.map(
+                (connection) => [connection.id, connection] as const,
+              ) ?? []),
+            ]).values(),
           ),
           syncMappings: {
             ...base.syncMappings,
@@ -73,7 +74,9 @@ export function useIntegrationSettings(source: SystemSettingsHook) {
         connections: [
           {
             ...connection,
-            metadata: connection.metadata ? { ...connection.metadata } : undefined,
+            metadata: connection.metadata
+              ? { ...connection.metadata }
+              : undefined,
           },
         ],
         lastSyncedAt: connection.lastSyncedAt ?? new Date().toISOString(),
@@ -91,8 +94,8 @@ export function useIntegrationSettings(source: SystemSettingsHook) {
       await updateIntegrations({
         providers: {
           [provider]: {
-            status: 'disconnected',
-            authType: base.providers[provider]?.authType ?? 'api_key',
+            status: "disconnected",
+            authType: base.providers[provider]?.authType ?? "api_key",
           },
         },
         connections: remainingConnections,

@@ -1,26 +1,34 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 export interface OpsIssue {
   id: string;
   title: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: "info" | "warning" | "critical";
   description?: string | null;
   status?: string | null;
   issue_type?: string | null;
 }
 
-const severityClasses: Record<OpsIssue['severity'], string> = {
-  info: 'text-muted-foreground border-border',
-  warning: 'text-amber-600 border-amber-200',
-  critical: 'text-red-600 border-red-200',
+const severityClasses: Record<OpsIssue["severity"], string> = {
+  info: "text-muted-foreground border-border",
+  warning: "text-amber-600 border-amber-200",
+  critical: "text-red-600 border-red-200",
 };
 
 interface AutomationSuggestionResponse {
@@ -35,27 +43,31 @@ export function IssuesStream() {
   const [drawerIssue, setDrawerIssue] = useState<OpsIssue | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
-  const [drawerResult, setDrawerResult] = useState<AutomationSuggestionResponse | null>(null);
+  const [drawerResult, setDrawerResult] =
+    useState<AutomationSuggestionResponse | null>(null);
 
   useEffect(() => {
     let active = true;
     async function loadIssues() {
       setLoading(true);
       const { data, error } = await supabase
-        .from('ops_issues')
-        .select('id,title,severity,description,status,issue_type')
-        .order('created_at', { ascending: false })
+        .from("ops_issues")
+        .select("id,title,severity,description,status,issue_type")
+        .order("created_at", { ascending: false })
         .limit(12);
       if (!active) return;
       if (error) {
-        logger.error('[IssuesStream] failed to load issues', { error, tags: ['error'] });
+        logger.error("[IssuesStream] failed to load issues", {
+          error,
+          tags: ["error"],
+        });
         setIssues([]);
       } else {
         setIssues(
           (data ?? []).map((issue) => ({
             id: issue.id,
             title: issue.title,
-            severity: (issue.severity as OpsIssue['severity']) ?? 'warning',
+            severity: (issue.severity as OpsIssue["severity"]) ?? "warning",
             description: issue.description,
             status: issue.status,
             issue_type: issue.issue_type,
@@ -77,21 +89,31 @@ export function IssuesStream() {
     setDrawerError(null);
     setDrawerResult(null);
     try {
-      const response = await fetch(`/api/ops/issues/${issue.id}/suggest-automation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/ops/issues/${issue.id}/suggest-automation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orgId: "demo-org" }),
         },
-        body: JSON.stringify({ orgId: 'demo-org' }),
-      });
+      );
       if (!response.ok) {
         throw new Error(`Failed to generate automation (${response.status})`);
       }
       const payload = (await response.json()) as AutomationSuggestionResponse;
       setDrawerResult(payload);
     } catch (error) {
-      logger.error('[IssuesStream] automation generation failed', { error, tags: ['error'] });
-      setDrawerError(error instanceof Error ? error.message : 'Unable to generate suggestion');
+      logger.error("[IssuesStream] automation generation failed", {
+        error,
+        tags: ["error"],
+      });
+      setDrawerError(
+        error instanceof Error
+          ? error.message
+          : "Unable to generate suggestion",
+      );
     } finally {
       setDrawerLoading(false);
     }
@@ -102,14 +124,21 @@ export function IssuesStream() {
       return (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={`ops-issue-skeleton-${index}`} className="h-20 w-full rounded-3xl" />
+            <Skeleton
+              key={`ops-issue-skeleton-${index}`}
+              className="h-20 w-full rounded-3xl"
+            />
           ))}
         </div>
       );
     }
 
     if (issues.length === 0) {
-      return <p className="text-sm text-muted-foreground">No live issues. Enjoy the calm.</p>;
+      return (
+        <p className="text-sm text-muted-foreground">
+          No live issues. Enjoy the calm.
+        </p>
+      );
     }
 
     return (
@@ -124,12 +153,25 @@ export function IssuesStream() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">{issue.title}</p>
-                  {issue.issue_type && <p className="text-xs uppercase tracking-wide text-muted-foreground">{issue.issue_type}</p>}
+                  {issue.issue_type && (
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {issue.issue_type}
+                    </p>
+                  )}
                 </div>
-                <Badge variant="outline">{issue.status ?? 'open'}</Badge>
+                <Badge variant="outline">{issue.status ?? "open"}</Badge>
               </div>
-              {issue.description && <p className="mt-2 text-sm text-muted-foreground">{issue.description}</p>}
-              <Button className="mt-4" size="sm" variant="outline" onClick={() => void openAutomationDrawer(issue)}>
+              {issue.description && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {issue.description}
+                </p>
+              )}
+              <Button
+                className="mt-4"
+                size="sm"
+                variant="outline"
+                onClick={() => void openAutomationDrawer(issue)}
+              >
                 Generate Automation
               </Button>
             </motion.div>
@@ -143,7 +185,9 @@ export function IssuesStream() {
     <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Issues</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+            Issues
+          </p>
           <h3 className="text-lg font-semibold">Operational Issues</h3>
         </div>
         <Badge variant="outline">Live</Badge>
@@ -164,7 +208,8 @@ export function IssuesStream() {
           <DrawerHeader>
             <DrawerTitle>Automation suggestion</DrawerTitle>
             <DrawerDescription>
-              FlowForce will design a sequence tailored to “{drawerIssue?.title ?? ''}”.
+              FlowForce will design a sequence tailored to “
+              {drawerIssue?.title ?? ""}”.
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">

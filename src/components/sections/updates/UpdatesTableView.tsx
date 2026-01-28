@@ -1,27 +1,39 @@
-import React, { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Plus, 
-  Pin, 
-  Eye, 
-  MessageCircle, 
+import React, { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Search,
+  Filter,
+  Download,
+  Plus,
+  Pin,
+  Eye,
+  MessageCircle,
   Heart,
   Calendar,
   MoreHorizontal,
   Users,
   Edit,
-  Trash2
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CompanyUpdate } from '@/types/companyUpdates';
-import { useCan } from '@/hooks/useCan';
+  Trash2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CompanyUpdate } from "@/types/companyUpdates";
+import { useCan } from "@/hooks/useCan";
 
 interface UpdatesTableViewProps {
   updates: CompanyUpdate[];
@@ -31,23 +43,23 @@ interface UpdatesTableViewProps {
   onAddNew?: () => void;
 }
 
-export function UpdatesTableView({ 
-  updates, 
-  onEdit, 
-  onDelete, 
-  onTogglePin, 
-  onAddNew 
+export function UpdatesTableView({
+  updates,
+  onEdit,
+  onDelete,
+  onTogglePin,
+  onAddNew,
 }: UpdatesTableViewProps) {
   const { can } = useCan();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('published');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("published");
 
-  const getStatusBadge = (status: CompanyUpdate['status']) => {
+  const getStatusBadge = (status: CompanyUpdate["status"]) => {
     const variants = {
-      published: 'default',
-      draft: 'secondary',
-      scheduled: 'outline',
-      archived: 'destructive'
+      published: "default",
+      draft: "secondary",
+      scheduled: "outline",
+      archived: "destructive",
     } as const;
 
     return (
@@ -57,51 +69,48 @@ export function UpdatesTableView({
     );
   };
 
-  const getTypeBadge = (type: CompanyUpdate['type']) => {
+  const getTypeBadge = (type: CompanyUpdate["type"]) => {
     const colors = {
-      announcement: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      news: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      event: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      policy: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+      announcement:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      news: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      event:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+      policy:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
     };
 
-    return (
-      <Badge className={`${colors[type]} text-xs`}>
-        {type}
-      </Badge>
-    );
+    return <Badge className={`${colors[type]} text-xs`}>{type}</Badge>;
   };
 
-  const getPriorityBadge = (priority: CompanyUpdate['priority']) => {
+  const getPriorityBadge = (priority: CompanyUpdate["priority"]) => {
     const colors = {
-      high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-      medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      low: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+      high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+      medium:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      low: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
     };
 
-    return (
-      <Badge className={`${colors[priority]} text-xs`}>
-        {priority}
-      </Badge>
-    );
+    return <Badge className={`${colors[priority]} text-xs`}>{priority}</Badge>;
   };
 
-  const filteredUpdates = updates.filter(update => {
-    const matchesSearch = update.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         update.body.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         update.author.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTab = activeTab === 'all' || update.status === activeTab;
-    
+  const filteredUpdates = updates.filter((update) => {
+    const matchesSearch =
+      update.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      update.body.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      update.author.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesTab = activeTab === "all" || update.status === activeTab;
+
     return matchesSearch && matchesTab;
   });
 
   const getTabCounts = () => {
     return {
-      published: updates.filter(u => u.status === 'published').length,
-      scheduled: updates.filter(u => u.status === 'scheduled').length,
-      archived: updates.filter(u => u.status === 'archived').length,
-      draft: updates.filter(u => u.status === 'draft').length
+      published: updates.filter((u) => u.status === "published").length,
+      scheduled: updates.filter((u) => u.status === "scheduled").length,
+      archived: updates.filter((u) => u.status === "archived").length,
+      draft: updates.filter((u) => u.status === "draft").length,
     };
   };
 
@@ -130,8 +139,8 @@ export function UpdatesTableView({
             Export
           </Button>
         </div>
-        
-        {can('systemSettings') && (
+
+        {can("systemSettings") && (
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
             Add New
@@ -148,9 +157,7 @@ export function UpdatesTableView({
           <TabsTrigger value="scheduled">
             Scheduled ({tabCounts.scheduled})
           </TabsTrigger>
-          <TabsTrigger value="draft">
-            Draft ({tabCounts.draft})
-          </TabsTrigger>
+          <TabsTrigger value="draft">Draft ({tabCounts.draft})</TabsTrigger>
           <TabsTrigger value="archived">
             Archived ({tabCounts.archived})
           </TabsTrigger>
@@ -204,7 +211,9 @@ export function UpdatesTableView({
                     <TableCell>
                       <div>
                         <div className="font-medium">{update.author.name}</div>
-                        <div className="text-sm text-muted-foreground">{update.author.role}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {update.author.role}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -213,11 +222,19 @@ export function UpdatesTableView({
                         {new Date(update.publishDate).toLocaleDateString()}
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">{update.likes}</TableCell>
-                    <TableCell className="text-center">{update.comments}</TableCell>
-                    <TableCell className="text-center">{update.views}</TableCell>
                     <TableCell className="text-center">
-                      {update.assignedEmployees.includes('all') ? 'All' : update.assignedEmployees.length}
+                      {update.likes}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {update.comments}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {update.views}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {update.assignedEmployees.includes("all")
+                        ? "All"
+                        : update.assignedEmployees.length}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -227,17 +244,21 @@ export function UpdatesTableView({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {can('systemSettings') && (
+                          {can("systemSettings") && (
                             <>
-                              <DropdownMenuItem onClick={() => onEdit?.(update)}>
+                              <DropdownMenuItem
+                                onClick={() => onEdit?.(update)}
+                              >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => onTogglePin?.(update.id)}>
+                              <DropdownMenuItem
+                                onClick={() => onTogglePin?.(update.id)}
+                              >
                                 <Pin className="h-4 w-4 mr-2" />
-                                {update.isPinned ? 'Unpin' : 'Pin'}
+                                {update.isPinned ? "Unpin" : "Pin"}
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => onDelete?.(update.id)}
                               >

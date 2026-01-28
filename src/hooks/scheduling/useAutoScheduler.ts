@@ -1,9 +1,13 @@
-import { useCallback, useState } from 'react';
-import { runCopilotAutoSchedule, type AutoScheduleParams, type AutoScheduleResult } from '@/services/scheduling/autoScheduler';
-import { useAuth } from '../useAuth';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { useToast } from '../use-toast';
-import { useProfile } from '../useProfile';
+import { useCallback, useState } from "react";
+import {
+  runCopilotAutoSchedule,
+  type AutoScheduleParams,
+  type AutoScheduleResult,
+} from "@/features/scheduling/services/autoScheduler";
+import { useAuth } from "../useAuth";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { useToast } from "../use-toast";
+import { useProfile } from "../useProfile";
 
 interface AutoScheduleState {
   loading: boolean;
@@ -16,42 +20,58 @@ export function useAutoScheduler() {
   const { refetchAll } = useScheduling();
   const { profile } = useProfile();
   const { toast } = useToast();
-  const [state, setState] = useState<AutoScheduleState>({ loading: false, error: null, lastResult: null });
+  const [state, setState] = useState<AutoScheduleState>({
+    loading: false,
+    error: null,
+    lastResult: null,
+  });
 
-  const autoScheduleWeek = useCallback(async (params: AutoScheduleParams) => {
-    if (!user) {
-      const error = new Error('Must be signed in to run the copilot');
-      setState((prev) => ({ ...prev, error: error.message }));
-      throw error;
-    }
+  const autoScheduleWeek = useCallback(
+    async (params: AutoScheduleParams) => {
+      if (!user) {
+        const error = new Error("Must be signed in to run the copilot");
+        setState((prev) => ({ ...prev, error: error.message }));
+        throw error;
+      }
 
-    const companyId = profile?.companyId ?? null;
-    if (!companyId) {
-      const error = new Error('A company must be selected before running the copilot');
-      setState((prev) => ({ ...prev, error: error.message }));
-      throw error;
-    }
+      const companyId = profile?.companyId ?? null;
+      if (!companyId) {
+        const error = new Error(
+          "A company must be selected before running the copilot",
+        );
+        setState((prev) => ({ ...prev, error: error.message }));
+        throw error;
+      }
 
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
 
-    try {
-      const result = await runCopilotAutoSchedule(user.id, companyId, params);
-      await refetchAll();
-      setState({ loading: false, error: null, lastResult: result });
+      try {
+        const result = await runCopilotAutoSchedule(user.id, companyId, params);
+        await refetchAll();
+        setState({ loading: false, error: null, lastResult: result });
 
-      toast({
-        title: 'Draft schedule ready',
-        description: `${result.schedulesCreated.length} shifts drafted for ${result.locationName}.`,
-      });
+        toast({
+          title: "Draft schedule ready",
+          description: `${result.schedulesCreated.length} shifts drafted for ${result.locationName}.`,
+        });
 
-      return { data: result, error: null } as const;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to auto-schedule week';
-      setState({ loading: false, error: message, lastResult: null });
-      toast({ title: 'Auto-schedule failed', description: message, variant: 'destructive' });
-      return { data: null, error: message } as const;
-    }
-  }, [profile?.companyId, refetchAll, toast, user]);
+        return { data: result, error: null } as const;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to auto-schedule week";
+        setState({ loading: false, error: message, lastResult: null });
+        toast({
+          title: "Auto-schedule failed",
+          description: message,
+          variant: "destructive",
+        });
+        return { data: null, error: message } as const;
+      }
+    },
+    [profile?.companyId, refetchAll, toast, user],
+  );
 
   return {
     autoScheduleWeek,

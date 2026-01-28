@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import OperationsPage from '@/screens/Operations';
+import OperationsPage from "@/screens/Operations";
 
 export default function Operations() {
   return <OperationsPage />;

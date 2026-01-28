@@ -1,29 +1,50 @@
-import { AlertTriangle } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useIdeaContext, type IdeaStage } from '../../contexts/IdeaProvider';
-import { useIdeaInsights } from '../../hooks/useIdeaInsights';
-import { useIdeaDiagnostics } from '../../hooks/useIdeaDiagnostics';
-import { useIdeaActions } from '../../hooks/useIdeaActions';
-import { useIdeaAssessments } from '../../hooks/useIdeaAssessments';
-import IDEAHeader from '@/components/operations/IDEAHeader';
-import { Suspense, lazy, useMemo } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useIdeaContext, type IdeaStage } from "../../contexts/IdeaProvider";
+import { useIdeaInsights } from "../../hooks/useIdeaInsights";
+import { useIdeaDiagnostics } from "../../hooks/useIdeaDiagnostics";
+import { useIdeaActions } from "../../hooks/useIdeaActions";
+import { useIdeaAssessments } from "../../hooks/useIdeaAssessments";
+import IDEAHeader from "@/components/operations/IDEAHeader";
+import { Suspense, lazy, useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const IdentifyPanel = lazy(() => import('@/components/operations/IdentifyPanel'));
-const DiagnosePanel = lazy(() => import('@/components/operations/DiagnosePanel'));
-const ExecutePanel = lazy(() => import('@/components/operations/ExecutePanel'));
-const AssessPanel = lazy(() => import('@/components/operations/AssessPanel'));
+const IdentifyPanel = lazy(
+  () => import("@/components/operations/IdentifyPanel"),
+);
+const DiagnosePanel = lazy(
+  () => import("@/components/operations/DiagnosePanel"),
+);
+const ExecutePanel = lazy(() => import("@/components/operations/ExecutePanel"));
+const AssessPanel = lazy(() => import("@/components/operations/AssessPanel"));
 
 const STAGES: { id: IdeaStage; label: string; description: string }[] = [
-  { id: 'identify', label: 'Identify', description: 'Surface operational signals and KPI shifts.' },
-  { id: 'diagnose', label: 'Diagnose', description: 'Investigate root causes with AI assistance.' },
-  { id: 'execute', label: 'Execute', description: 'Deploy corrective actions across teams.' },
-  { id: 'assess', label: 'Assess', description: 'Evaluate outcomes and capture learning.' },
+  {
+    id: "identify",
+    label: "Identify",
+    description: "Surface operational signals and KPI shifts.",
+  },
+  {
+    id: "diagnose",
+    label: "Diagnose",
+    description: "Investigate root causes with AI assistance.",
+  },
+  {
+    id: "execute",
+    label: "Execute",
+    description: "Deploy corrective actions across teams.",
+  },
+  {
+    id: "assess",
+    label: "Assess",
+    description: "Evaluate outcomes and capture learning.",
+  },
 ];
 
 export function IdeaLayout() {
-  const { stage, setStage, range, companyId, activeCycleId, setActiveCycleId } = useIdeaContext();
+  const { stage, setStage, range, companyId, activeCycleId, setActiveCycleId } =
+    useIdeaContext();
 
   const {
     data: insights,
@@ -34,7 +55,13 @@ export function IdeaLayout() {
 
   const diagnostics = useIdeaDiagnostics(companyId, insights, range);
   const actionsState = useIdeaActions(companyId, activeCycleId);
-  const assessments = useIdeaAssessments(companyId, range, activeCycleId, insights, stage === 'assess');
+  const assessments = useIdeaAssessments(
+    companyId,
+    range,
+    activeCycleId,
+    insights,
+    stage === "assess",
+  );
 
   const handleStageChange = (next: string) => {
     setStage(next as IdeaStage);
@@ -46,7 +73,11 @@ export function IdeaLayout() {
         <IDEAHeader onRefresh={refreshInsights} stageLoading={insightsLoading}>
           <TabsList>
             {STAGES.map((stageDefinition) => (
-              <TabsTrigger key={stageDefinition.id} value={stageDefinition.id} className="capitalize">
+              <TabsTrigger
+                key={stageDefinition.id}
+                value={stageDefinition.id}
+                className="capitalize"
+              >
                 {stageDefinition.label}
               </TabsTrigger>
             ))}
@@ -67,7 +98,7 @@ export function IdeaLayout() {
               insights={insights}
               loading={insightsLoading}
               stageDescription={STAGES[0].description}
-              onDiagnose={() => setStage('diagnose')}
+              onDiagnose={() => setStage("diagnose")}
             />
           </TabsContent>
 
@@ -76,7 +107,7 @@ export function IdeaLayout() {
               insights={insights}
               diagnostics={diagnostics}
               stageDescription={STAGES[1].description}
-              onRecommend={() => setStage('execute')}
+              onRecommend={() => setStage("execute")}
             />
           </TabsContent>
 
@@ -88,7 +119,7 @@ export function IdeaLayout() {
               insights={insights}
               onStageComplete={(cycleId) => {
                 setActiveCycleId(cycleId);
-                setStage('assess');
+                setStage("assess");
               }}
             />
           </TabsContent>
@@ -100,7 +131,7 @@ export function IdeaLayout() {
               stageDescription={STAGES[3].description}
               onRestart={() => {
                 setActiveCycleId(null);
-                setStage('identify');
+                setStage("identify");
               }}
             />
           </TabsContent>

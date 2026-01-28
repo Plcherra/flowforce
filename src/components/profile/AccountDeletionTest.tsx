@@ -1,9 +1,14 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAccountDeletionTests } from '@/hooks/useAccountDeletionTests';
-import DeletionTestForm from './DeletionTestForm';
-import DeletionTestResults from './DeletionTestResults';
-import DeletionTestInstructions from './DeletionTestInstructions';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useAccountDeletionTests } from "@/hooks/useAccountDeletionTests";
+import DeletionTestForm from "./DeletionTestForm";
+import DeletionTestResults from "./DeletionTestResults";
+import DeletionTestInstructions from "./DeletionTestInstructions";
 
 export default function AccountDeletionTest() {
   const {
@@ -21,7 +26,8 @@ export default function AccountDeletionTest() {
       <CardHeader>
         <CardTitle>Account Deletion Test Suite</CardTitle>
         <CardDescription>
-          Test that account deletion properly removes users and prevents future logins
+          Test that account deletion properly removes users and prevents future
+          logins
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

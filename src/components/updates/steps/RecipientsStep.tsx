@@ -1,21 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Users, Search, Building, UserCheck, Globe, Target, AlertCircle } from 'lucide-react';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Users,
+  Search,
+  Building,
+  UserCheck,
+  Globe,
+  Target,
+  AlertCircle,
+} from "lucide-react";
 
-import type { WizardFormData } from '../CreateUpdateWizard';
-import { useProfile } from '@/hooks/useProfile';
-import { useRecipientInsights } from '@/features/company-updates/wizard/useRecipientInsights';
+import type { WizardFormData } from "../CreateUpdateWizard";
+import { useProfile } from "@/hooks/useProfile";
+import { useRecipientInsights } from "@/features/company-updates/wizard/useRecipientInsights";
 
 interface RecipientsStepProps {
   formData: WizardFormData;
@@ -29,19 +37,19 @@ type SegmentOption = {
 };
 
 const STATIC_DEPARTMENTS: SegmentOption[] = [
-  { id: 'hr', name: 'Human Resources' },
-  { id: 'engineering', name: 'Engineering' },
-  { id: 'sales', name: 'Sales' },
-  { id: 'marketing', name: 'Marketing' },
-  { id: 'operations', name: 'Operations' },
-  { id: 'finance', name: 'Finance' },
+  { id: "hr", name: "Human Resources" },
+  { id: "engineering", name: "Engineering" },
+  { id: "sales", name: "Sales" },
+  { id: "marketing", name: "Marketing" },
+  { id: "operations", name: "Operations" },
+  { id: "finance", name: "Finance" },
 ];
 
 const STATIC_ROLES: SegmentOption[] = [
-  { id: 'admin', name: 'Admin' },
-  { id: 'manager', name: 'Manager' },
-  { id: 'employee', name: 'Employee' },
-  { id: 'contractor', name: 'Contractor' },
+  { id: "admin", name: "Admin" },
+  { id: "manager", name: "Manager" },
+  { id: "employee", name: "Employee" },
+  { id: "contractor", name: "Contractor" },
 ];
 
 type RecipientUser = {
@@ -68,8 +76,11 @@ function resolveSegmentOptions(
   return filtered.length > 0 ? filtered : fallback;
 }
 
-export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function RecipientsStep({
+  formData,
+  updateFormData,
+}: RecipientsStepProps) {
+  const [searchTerm, setSearchTerm] = useState("");
   const { profile } = useProfile();
   const insights = useRecipientInsights(formData);
 
@@ -77,17 +88,20 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
     const users = [...STATIC_USERS];
 
     if (profile) {
-      const id = profile.userId ?? profile.id ?? 'current-user';
-      const firstName = profile.firstName ?? profile.first_name ?? '';
-      const lastName = profile.lastName ?? profile.last_name ?? '';
-      const displayName = [firstName, lastName].filter(Boolean).join(' ').trim() || profile.email || 'You';
+      const id = profile.userId ?? profile.id ?? "current-user";
+      const firstName = profile.firstName ?? profile.first_name ?? "";
+      const lastName = profile.lastName ?? profile.last_name ?? "";
+      const displayName =
+        [firstName, lastName].filter(Boolean).join(" ").trim() ||
+        profile.email ||
+        "You";
       const alreadyIncluded = users.some((user) => user.id === id);
 
       if (!alreadyIncluded) {
         users.push({
           id,
           name: displayName,
-          role: profile.role ?? 'Member',
+          role: profile.role ?? "Member",
           department: null,
         });
       }
@@ -105,11 +119,14 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
   const handleRecipientTypeChange = (type: typeof formData.recipients.type) => {
     updateRecipients({
       type,
-      targets: type === 'all' ? [] : formData.recipients.targets,
+      targets: type === "all" ? [] : formData.recipients.targets,
     });
   };
 
-  const toggleTarget = (targetId: string, category: 'departments' | 'roles' | 'individuals' | 'groups') => {
+  const toggleTarget = (
+    targetId: string,
+    category: "departments" | "roles" | "individuals" | "groups",
+  ) => {
     const currentTargets = formData.recipients.targets;
     const prefixedId = `${category}:${targetId}`;
 
@@ -125,69 +142,87 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
   };
 
   const getRecipientCountLabel = () => {
-    if (formData.recipients.type === 'all') {
-      return 'All employees';
+    if (formData.recipients.type === "all") {
+      return "All employees";
     }
 
-    const selectionByCategory = formData.recipients.targets.reduce<Record<string, number>>((acc, target) => {
-      const [category] = target.split(':');
+    const selectionByCategory = formData.recipients.targets.reduce<
+      Record<string, number>
+    >((acc, target) => {
+      const [category] = target.split(":");
       acc[category] = (acc[category] ?? 0) + 1;
       return acc;
     }, {});
 
-    if (formData.recipients.type === 'individuals') {
+    if (formData.recipients.type === "individuals") {
       const individualCount = selectionByCategory.individuals ?? 0;
-      return individualCount > 0 ? `${individualCount} ${individualCount === 1 ? 'person' : 'people'}` : 'No recipients selected';
+      return individualCount > 0
+        ? `${individualCount} ${individualCount === 1 ? "person" : "people"}`
+        : "No recipients selected";
     }
 
     const appliedCategory = formData.recipients.type;
-    const labels: Record<typeof appliedCategory, { singular: string; plural: string }> = {
-      departments: { singular: 'department', plural: 'departments' },
-      roles: { singular: 'role', plural: 'roles' },
-      individuals: { singular: 'person', plural: 'people' },
-      groups: { singular: 'group', plural: 'groups' },
-      all: { singular: 'employee', plural: 'employees' },
+    const labels: Record<
+      typeof appliedCategory,
+      { singular: string; plural: string }
+    > = {
+      departments: { singular: "department", plural: "departments" },
+      roles: { singular: "role", plural: "roles" },
+      individuals: { singular: "person", plural: "people" },
+      groups: { singular: "group", plural: "groups" },
+      all: { singular: "employee", plural: "employees" },
     };
     const selectedCount = selectionByCategory[appliedCategory] ?? 0;
     return selectedCount > 0
       ? `${selectedCount} ${selectedCount === 1 ? labels[appliedCategory].singular : labels[appliedCategory].plural}`
-      : 'No recipients selected';
+      : "No recipients selected";
   };
 
-  const filteredUsers = availableUsers.filter((user: RecipientUser) =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.department?.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredUsers = availableUsers.filter(
+    (user: RecipientUser) =>
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.department?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const departmentOptions = useMemo(
-    () => resolveSegmentOptions(insights.segments, 'departments', STATIC_DEPARTMENTS),
+    () =>
+      resolveSegmentOptions(
+        insights.segments,
+        "departments",
+        STATIC_DEPARTMENTS,
+      ),
     [insights.segments],
   );
 
   const roleOptions = useMemo(
-    () => resolveSegmentOptions(insights.segments, 'roles', STATIC_ROLES),
+    () => resolveSegmentOptions(insights.segments, "roles", STATIC_ROLES),
     [insights.segments],
   );
 
   const selectedTargetBadges = useMemo(() => {
     return formData.recipients.targets.map((target) => {
-      const [category, id] = target.split(':');
-      if (category === 'departments') {
+      const [category, id] = target.split(":");
+      if (category === "departments") {
         const match = departmentOptions.find((dept) => dept.id === id);
         return { target, label: match?.name ?? id };
       }
-      if (category === 'roles') {
+      if (category === "roles") {
         const match = roleOptions.find((role) => role.id === id);
         return { target, label: match?.name ?? id };
       }
-      if (category === 'individuals') {
+      if (category === "individuals") {
         const match = availableUsers.find((user) => user.id === id);
         return { target, label: match?.name ?? id };
       }
       return { target, label: id };
     });
-  }, [availableUsers, departmentOptions, formData.recipients.targets, roleOptions]);
+  }, [
+    availableUsers,
+    departmentOptions,
+    formData.recipients.targets,
+    roleOptions,
+  ]);
 
   const insightsBanner = (
     <Card className="border-primary/40 bg-primary/5">
@@ -206,7 +241,9 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
             <p className="text-xs text-muted-foreground">Estimated reach</p>
-            <p className="text-lg font-semibold text-primary">{insights.estimatedReach.toLocaleString()}</p>
+            <p className="text-lg font-semibold text-primary">
+              {insights.estimatedReach.toLocaleString()}
+            </p>
           </div>
         )}
 
@@ -215,7 +252,9 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
             <p className="text-xs text-muted-foreground">Total employees</p>
-            <p className="text-lg font-semibold">{insights.totalEmployees.toLocaleString()}</p>
+            <p className="text-lg font-semibold">
+              {insights.totalEmployees.toLocaleString()}
+            </p>
           </div>
         )}
 
@@ -248,20 +287,31 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
   const segmentSuggestions = (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Suggested Segments</CardTitle>
-        <CardDescription className="text-xs">Pull in frequent audiences with one click.</CardDescription>
+        <CardTitle className="text-sm font-medium">
+          Suggested Segments
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Pull in frequent audiences with one click.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         {insights.loading && <Skeleton className="h-8 w-32 rounded-full" />}
         {!insights.loading && insights.segments.length === 0 && (
-          <p className="text-xs text-muted-foreground">No suggestions yet—adjust filters to see recommendations.</p>
+          <p className="text-xs text-muted-foreground">
+            No suggestions yet—adjust filters to see recommendations.
+          </p>
         )}
         {insights.segments.map((segment) => (
           <Button
             key={`${segment.type}:${segment.id}`}
             variant="secondary"
             size="sm"
-            onClick={() => toggleTarget(segment.id, segment.type as 'departments' | 'roles' | 'groups')}
+            onClick={() =>
+              toggleTarget(
+                segment.id,
+                segment.type as "departments" | "roles" | "groups",
+              )
+            }
           >
             {segment.name}
             <Badge variant="outline" className="ml-2">
@@ -277,7 +327,9 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="mb-2 text-lg font-semibold">Select Recipients</h3>
-        <p className="text-muted-foreground">Choose who should receive this update and confirm their reach.</p>
+        <p className="text-muted-foreground">
+          Choose who should receive this update and confirm their reach.
+        </p>
       </div>
 
       {insightsBanner}
@@ -286,82 +338,115 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === 'all' ? 'ring-2 ring-primary' : ''
+            formData.recipients.type === "all" ? "ring-2 ring-primary" : ""
           }`}
-          onClick={() => handleRecipientTypeChange('all')}
+          onClick={() => handleRecipientTypeChange("all")}
         >
           <CardContent className="p-4 text-center">
             <Globe className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">All Employees</h4>
             <p className="text-sm text-muted-foreground">Everyone in company</p>
-            {formData.recipients.type === 'all' && <Badge variant="default" className="mt-2">Selected</Badge>}
+            {formData.recipients.type === "all" && (
+              <Badge variant="default" className="mt-2">
+                Selected
+              </Badge>
+            )}
           </CardContent>
         </Card>
 
         <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === 'departments' ? 'ring-2 ring-primary' : ''
+            formData.recipients.type === "departments"
+              ? "ring-2 ring-primary"
+              : ""
           }`}
-          onClick={() => handleRecipientTypeChange('departments')}
+          onClick={() => handleRecipientTypeChange("departments")}
         >
           <CardContent className="p-4 text-center">
             <Building className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Departments</h4>
-            <p className="text-sm text-muted-foreground">Select by department</p>
-            {formData.recipients.type === 'departments' && <Badge variant="default" className="mt-2">Selected</Badge>}
+            <p className="text-sm text-muted-foreground">
+              Select by department
+            </p>
+            {formData.recipients.type === "departments" && (
+              <Badge variant="default" className="mt-2">
+                Selected
+              </Badge>
+            )}
           </CardContent>
         </Card>
 
         <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === 'roles' ? 'ring-2 ring-primary' : ''
+            formData.recipients.type === "roles" ? "ring-2 ring-primary" : ""
           }`}
-          onClick={() => handleRecipientTypeChange('roles')}
+          onClick={() => handleRecipientTypeChange("roles")}
         >
           <CardContent className="p-4 text-center">
             <UserCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Roles</h4>
             <p className="text-sm text-muted-foreground">Select by role</p>
-            {formData.recipients.type === 'roles' && <Badge variant="default" className="mt-2">Selected</Badge>}
+            {formData.recipients.type === "roles" && (
+              <Badge variant="default" className="mt-2">
+                Selected
+              </Badge>
+            )}
           </CardContent>
         </Card>
 
         <Card
           className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === 'individuals' ? 'ring-2 ring-primary' : ''
+            formData.recipients.type === "individuals"
+              ? "ring-2 ring-primary"
+              : ""
           }`}
-          onClick={() => handleRecipientTypeChange('individuals')}
+          onClick={() => handleRecipientTypeChange("individuals")}
         >
           <CardContent className="p-4 text-center">
             <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
             <h4 className="font-semibold">Individuals</h4>
-            <p className="text-sm text-muted-foreground">Select specific users</p>
-            {formData.recipients.type === 'individuals' && <Badge variant="default" className="mt-2">Selected</Badge>}
+            <p className="text-sm text-muted-foreground">
+              Select specific users
+            </p>
+            {formData.recipients.type === "individuals" && (
+              <Badge variant="default" className="mt-2">
+                Selected
+              </Badge>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {formData.recipients.type !== 'all' && (
+      {formData.recipients.type !== "all" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-4">
-            {formData.recipients.type === 'departments' && (
+            {formData.recipients.type === "departments" && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Select Departments</CardTitle>
+                  <CardTitle className="text-base">
+                    Select Departments
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {departmentOptions.map(({ id, name, count }) => {
                     return (
-                      <div key={`department-${id}`} className="flex items-center justify-between">
+                      <div
+                        key={`department-${id}`}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center space-x-3">
                           <Checkbox
-                            checked={isTargetSelected(id, 'departments')}
-                            onCheckedChange={() => toggleTarget(id, 'departments')}
+                            checked={isTargetSelected(id, "departments")}
+                            onCheckedChange={() =>
+                              toggleTarget(id, "departments")
+                            }
                           />
                           <span className="font-medium">{name}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {count !== undefined ? `${count} employees` : 'Connect a directory to view counts'}
+                          {count !== undefined
+                            ? `${count} employees`
+                            : "Connect a directory to view counts"}
                         </span>
                       </div>
                     );
@@ -370,7 +455,7 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
               </Card>
             )}
 
-            {formData.recipients.type === 'roles' && (
+            {formData.recipients.type === "roles" && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Select Roles</CardTitle>
@@ -378,16 +463,21 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                 <CardContent className="space-y-3">
                   {roleOptions.map(({ id, name, count }) => {
                     return (
-                      <div key={`role-${id}`} className="flex items-center justify-between">
+                      <div
+                        key={`role-${id}`}
+                        className="flex items-center justify-between"
+                      >
                         <div className="flex items-center space-x-3">
                           <Checkbox
-                            checked={isTargetSelected(id, 'roles')}
-                            onCheckedChange={() => toggleTarget(id, 'roles')}
+                            checked={isTargetSelected(id, "roles")}
+                            onCheckedChange={() => toggleTarget(id, "roles")}
                           />
                           <span className="font-medium">{name}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {count !== undefined ? `${count} employees` : 'Connect a directory to view counts'}
+                          {count !== undefined
+                            ? `${count} employees`
+                            : "Connect a directory to view counts"}
                         </span>
                       </div>
                     );
@@ -396,10 +486,12 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
               </Card>
             )}
 
-            {formData.recipients.type === 'individuals' && (
+            {formData.recipients.type === "individuals" && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Select Individuals</CardTitle>
+                  <CardTitle className="text-base">
+                    Select Individuals
+                  </CardTitle>
                   <CardDescription className="text-sm">
                     Add specific teammates or search across your directory.
                   </CardDescription>
@@ -417,21 +509,29 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
 
                   {filteredUsers.length === 0 ? (
                     <div className="text-sm text-muted-foreground">
-                      No people found. Connect a directory or adjust your search.
+                      No people found. Connect a directory or adjust your
+                      search.
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {filteredUsers.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between">
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between"
+                        >
                           <div className="flex items-center space-x-3">
                             <Checkbox
-                              checked={isTargetSelected(user.id, 'individuals')}
-                              onCheckedChange={() => toggleTarget(user.id, 'individuals')}
+                              checked={isTargetSelected(user.id, "individuals")}
+                              onCheckedChange={() =>
+                                toggleTarget(user.id, "individuals")
+                              }
                             />
                             <div>
                               <p className="font-medium">{user.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                {[user.role, user.department].filter(Boolean).join(' • ')}
+                                {[user.role, user.department]
+                                  .filter(Boolean)
+                                  .join(" • ")}
                               </p>
                             </div>
                           </div>
@@ -455,7 +555,9 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Selected audience</span>
-                  <span className="text-sm text-muted-foreground">{getRecipientCountLabel()}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {getRecipientCountLabel()}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Estimated reach</span>
@@ -472,7 +574,9 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                   {insights.loading ? (
                     <Skeleton className="h-5 w-10 rounded" />
                   ) : (
-                    <span className="text-sm text-muted-foreground">{insights.activeFilters}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {insights.activeFilters}
+                    </span>
                   )}
                 </div>
 
@@ -488,8 +592,15 @@ export function RecipientsStep({ formData, updateFormData }: RecipientsStepProps
                           variant="secondary"
                           className="cursor-pointer"
                           onClick={() => {
-                            const [category, id] = target.split(':');
-                            toggleTarget(id, category as 'departments' | 'roles' | 'individuals' | 'groups');
+                            const [category, id] = target.split(":");
+                            toggleTarget(
+                              id,
+                              category as
+                                | "departments"
+                                | "roles"
+                                | "individuals"
+                                | "groups",
+                            );
                           }}
                         >
                           {label}

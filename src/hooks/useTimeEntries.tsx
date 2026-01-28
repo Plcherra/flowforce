@@ -1,11 +1,10 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
-
-type TimeEntry = Tables<'time_entries'>;
+type TimeEntry = Tables<"time_entries">;
 
 export function useTimeEntries() {
   const { user } = useAuth();
@@ -26,32 +25,34 @@ export function useTimeEntries() {
 
     try {
       const { data, error } = await supabase
-        .from('time_entries')
-        .select('*')
-        .order('timestamp', { ascending: false });
+        .from("time_entries")
+        .select("*")
+        .order("timestamp", { ascending: false });
 
       if (error) throw error;
       setTimeEntries(data || []);
     } catch (error) {
-      logger.error('Error fetching time entries', { error, tags: ['error'] });
+      logger.error("Error fetching time entries", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
   };
 
-  const createTimeEntry = async (entryData: Omit<TimeEntry, 'id' | 'created_at' | 'updated_at'>) => {
+  const createTimeEntry = async (
+    entryData: Omit<TimeEntry, "id" | "created_at" | "updated_at">,
+  ) => {
     try {
       const { data, error } = await supabase
-        .from('time_entries')
+        .from("time_entries")
         .insert(entryData)
         .select()
         .single();
 
       if (error) throw error;
-      setTimeEntries(prev => [data, ...prev]);
+      setTimeEntries((prev) => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
-      logger.error('Error creating time entry', { error, tags: ['error'] });
+      logger.error("Error creating time entry", { error, tags: ["error"] });
       return { data: null, error };
     }
   };
@@ -62,7 +63,7 @@ export function useTimeEntries() {
 
   const isClockedIn = () => {
     const lastEntry = getLastEntry();
-    return lastEntry?.entry_type === 'clock_in';
+    return lastEntry?.entry_type === "clock_in";
   };
 
   return {
@@ -71,6 +72,6 @@ export function useTimeEntries() {
     createTimeEntry,
     getLastEntry,
     isClockedIn,
-    refetchTimeEntries: fetchTimeEntries
+    refetchTimeEntries: fetchTimeEntries,
   };
 }

@@ -1,7 +1,6 @@
-
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface CustomReport {
   id: string;
@@ -19,12 +18,12 @@ export interface CustomReport {
 
 export function useReports() {
   return useQuery({
-    queryKey: ['reports'],
+    queryKey: ["reports"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('custom_reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("custom_reports")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as CustomReport[];
@@ -37,9 +36,11 @@ export function useCreateReport() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (report: Omit<CustomReport, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (
+      report: Omit<CustomReport, "id" | "created_at" | "updated_at">,
+    ) => {
       const { data, error } = await supabase
-        .from('custom_reports')
+        .from("custom_reports")
         .insert(report)
         .select()
         .single();
@@ -48,17 +49,17 @@ export function useCreateReport() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: 'Success',
-        description: 'Report created successfully',
+        title: "Success",
+        description: "Report created successfully",
       });
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: `Failed to create report: ${error.message}`,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -69,11 +70,14 @@ export function useUpdateReport() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<CustomReport> & { id: string }) => {
+    mutationFn: async ({
+      id,
+      ...updates
+    }: Partial<CustomReport> & { id: string }) => {
       const { data, error } = await supabase
-        .from('custom_reports')
+        .from("custom_reports")
         .update(updates)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -81,17 +85,17 @@ export function useUpdateReport() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: 'Success',
-        description: 'Report updated successfully',
+        title: "Success",
+        description: "Report updated successfully",
       });
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: `Failed to update report: ${error.message}`,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -104,24 +108,24 @@ export function useDeleteReport() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('custom_reports')
+        .from("custom_reports")
         .delete()
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: 'Success',
-        description: 'Report deleted successfully',
+        title: "Success",
+        description: "Report deleted successfully",
       });
     },
     onError: (error) => {
       toast({
-        title: 'Error',
+        title: "Error",
         description: `Failed to delete report: ${error.message}`,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -129,17 +133,17 @@ export function useDeleteReport() {
 
 export function useReportData(reportType: string, filters: any = {}) {
   return useQuery({
-    queryKey: ['reportData', reportType, filters],
+    queryKey: ["reportData", reportType, filters],
     queryFn: async () => {
       // Map report types to actual table names
       const tableMap: Record<string, string> = {
-        'employee': 'profiles',
-        'timeoff': 'time_off_requests',
-        'scheduling': 'schedules',
-        'tasks': 'tasks',
-        'forms': 'forms',
-        'expenses': 'expenses',
-        'inventory': 'inventory_items'
+        employee: "profiles",
+        timeoff: "time_off_requests",
+        scheduling: "schedules",
+        tasks: "tasks",
+        forms: "forms",
+        expenses: "expenses",
+        inventory: "inventory_items",
       };
 
       const tableName = tableMap[reportType];
@@ -147,11 +151,11 @@ export function useReportData(reportType: string, filters: any = {}) {
         throw new Error(`Invalid report type: ${reportType}`);
       }
 
-      let query = supabase.from(tableName as any).select('*');
-      
+      let query = supabase.from(tableName as any).select("*");
+
       // Apply filters dynamically
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
+        if (value !== null && value !== undefined && value !== "") {
           query = query.eq(key, value);
         }
       });

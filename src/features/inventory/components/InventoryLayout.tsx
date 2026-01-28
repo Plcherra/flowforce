@@ -1,10 +1,10 @@
-import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Package } from 'lucide-react';
-import { InventoryNav } from './InventoryNav';
-import { InventorySummaryBoard } from './InventorySummaryBoard';
+import React from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Package } from "lucide-react";
+import { InventoryNav } from "./InventoryNav";
+import { InventorySummaryBoard } from "./InventorySummaryBoard";
 
 interface InventoryLayoutProps {
   children?: React.ReactNode;
@@ -15,29 +15,29 @@ export function InventoryLayout({ children }: InventoryLayoutProps) {
   const navigate = useNavigate();
 
   const currentPath = location.pathname;
-  const pathSegments = currentPath.split('/');
-  const currentPage = pathSegments[pathSegments.length - 1] || 'dashboard';
+  const pathSegments = currentPath.split("/");
+  const currentPage = pathSegments[pathSegments.length - 1] || "dashboard";
 
   const getBreadcrumb = () => {
     switch (currentPage) {
-      case 'inventory':
-        return 'Dashboard';
-      case 'cookbook':
-        return 'Cookbook';
-      case 'items':
-        return 'Items & Setup';
-      case 'counts':
-        return 'Counts';
-      case 'prep':
-        return 'Prep & PAR';
-      case 'purchasing':
-        return 'Purchasing';
-      case 'actions':
-        return 'Waste & Actions Log';
-      case 'reports':
-        return 'Reports';
+      case "inventory":
+        return "Dashboard";
+      case "cookbook":
+        return "Cookbook";
+      case "items":
+        return "Items & Setup";
+      case "counts":
+        return "Counts";
+      case "prep":
+        return "Prep & PAR";
+      case "purchasing":
+        return "Purchasing";
+      case "actions":
+        return "Waste & Actions Log";
+      case "reports":
+        return "Reports";
       default:
-        return 'Dashboard';
+        return "Dashboard";
     }
   };
 
@@ -54,7 +54,7 @@ export function InventoryLayout({ children }: InventoryLayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/app/dashboard')}
+              onClick={() => navigate("/app/dashboard")}
               className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -65,9 +65,13 @@ export function InventoryLayout({ children }: InventoryLayoutProps) {
                 <Package className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Inventory</p>
+                <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+                  Inventory
+                </p>
                 <h1 className="text-2xl font-semibold">Command Center</h1>
-                <p className="text-sm text-muted-foreground">{getBreadcrumb()}</p>
+                <p className="text-sm text-muted-foreground">
+                  {getBreadcrumb()}
+                </p>
               </div>
             </div>
 

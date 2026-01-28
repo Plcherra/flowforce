@@ -1,4 +1,4 @@
-import type { CompanyRole, CompanySettings } from '@/types/common';
+import type { CompanyRole, CompanySettings } from "@/types/common";
 
 export interface GeneralSettings {
   companyName: string;
@@ -68,8 +68,12 @@ export interface NotificationsSettings {
   };
 }
 
-export type IntegrationStatus = 'connected' | 'disconnected' | 'error' | 'pending';
-export type IntegrationAuthType = 'api_key' | 'oauth' | 'webhook';
+export type IntegrationStatus =
+  | "connected"
+  | "disconnected"
+  | "error"
+  | "pending";
+export type IntegrationAuthType = "api_key" | "oauth" | "webhook";
 
 export interface IntegrationConnection {
   id: string;
@@ -83,14 +87,17 @@ export interface IntegrationConnection {
 
 export interface IntegrationsSettings {
   connections: IntegrationConnection[];
-  providers: Record<string, { status: IntegrationStatus; authType: IntegrationAuthType }>;
+  providers: Record<
+    string,
+    { status: IntegrationStatus; authType: IntegrationAuthType }
+  >;
   syncMappings: Record<string, unknown>;
   lastSyncedAt?: string | null;
 }
 
-export type ThemeMode = 'light' | 'dark' | 'system';
-export type LogoPlacement = 'sidebar' | 'header';
-export type DashboardLayout = 'standard' | 'compact' | 'analytics';
+export type ThemeMode = "light" | "dark" | "system";
+export type LogoPlacement = "sidebar" | "header";
+export type DashboardLayout = "standard" | "compact" | "analytics";
 
 export interface AppearanceSettings {
   theme: ThemeMode;
@@ -100,7 +107,7 @@ export interface AppearanceSettings {
   logoPlacement: LogoPlacement;
   sidebarBranding: {
     enabled: boolean;
-    background: 'default' | 'minimal' | 'custom';
+    background: "default" | "minimal" | "custom";
   };
   dashboardLayout: DashboardLayout;
   preview: {
@@ -111,7 +118,7 @@ export interface AppearanceSettings {
 }
 
 export interface BusinessStructureSettings {
-  workingHours: CompanySettings['working_hours'] | null;
+  workingHours: CompanySettings["working_hours"] | null;
   locations: Array<{
     id: string;
     name: string;
@@ -137,7 +144,7 @@ export interface ApiMonitoringSettings {
   recent?: Array<{
     timestamp: string;
     provider: string;
-    status: 'ok' | 'warning' | 'error';
+    status: "ok" | "warning" | "error";
     message?: string;
   }>;
 }
@@ -158,7 +165,7 @@ export interface TenantManagementSettings {
   trialEndsAt?: string | null;
 }
 
-export type AutomationScopeLevel = 'suggestion' | 'assist' | 'autopilot';
+export type AutomationScopeLevel = "suggestion" | "assist" | "autopilot";
 
 export interface AICopilotSettings {
   enabled: boolean;

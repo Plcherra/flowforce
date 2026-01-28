@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from './useProfile';
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "./useProfile";
+import { logger } from "@/utils/logger";
 
 type InvitePayload = {
   email: string;
@@ -27,16 +28,20 @@ export function useInvites() {
     phone,
     birthDate,
   }: InvitePayload): Promise<InviteResult> => {
-    if (isSending) return { success: false, message: 'An invite is already in progress.' };
+    if (isSending)
+      return { success: false, message: "An invite is already in progress." };
     if (!profile?.company_id && !profile?.companyId) {
-      return { success: false, message: 'Missing company context for invite.' };
+      return { success: false, message: "Missing company context for invite." };
     }
 
-    const companyId = profile.company_id ?? profile.companyId ?? '';
-    const invitedBy = profile.userId ?? profile.id ?? '';
+    const companyId = profile.company_id ?? profile.companyId ?? "";
+    const invitedBy = profile.userId ?? profile.id ?? "";
 
     if (!companyId || !invitedBy) {
-      return { success: false, message: 'Unable to resolve company or user identifiers.' };
+      return {
+        success: false,
+        message: "Unable to resolve company or user identifiers.",
+      };
     }
 
     setIsSending(true);
@@ -45,27 +50,30 @@ export function useInvites() {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + INVITE_EXPIRATION_DAYS);
 
-      const { error } = await supabase.from('company_invites').insert({
+      const { error } = await supabase.from("company_invites").insert({
         email,
         first_name: firstName ?? null,
         last_name: lastName ?? null,
         phone: phone ?? null,
         birth_date: birthDate ?? null,
-        role: role ?? 'staff',
+        role: role ?? "staff",
         invite_token: inviteToken,
         expires_at: expiresAt.toISOString(),
         company_id: companyId,
         invited_by: invitedBy,
-        status: 'pending',
+        status: "pending",
       });
 
       if (error) {
-        return { success: false, message: error.message };
+        logger.error("Error creating invite", { error, tags: ["error"] });
+        return { success: false, message: error.message || "Failed to send invitation. Please try again." };
       }
 
       return { success: true };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to send invite';
+      const message =
+        error instanceof Error ? error.message : "Failed to send invite";
+      logger.error("Unexpected error sending invite", { error, tags: ["error"] });
       return { success: false, message };
     } finally {
       setIsSending(false);

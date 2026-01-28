@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import { useQuery } from "@tanstack/react-query";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
 
 export interface DashboardStats {
   totalItems: number;
@@ -27,25 +27,28 @@ export interface RecentActivity {
 
 export function useInventoryDashboard() {
   const statsQuery = useQuery({
-    queryKey: ['inventory-dashboard-stats'],
-    queryFn: () => InventoryService.getDashboardStats()
+    queryKey: ["inventory-dashboard-stats"],
+    queryFn: () => InventoryService.getDashboardStats(),
   });
 
   const lowStockQuery = useQuery({
-    queryKey: ['inventory-low-stock'],
-    queryFn: () => InventoryService.lowStock()
+    queryKey: ["inventory-low-stock"],
+    queryFn: () => InventoryService.lowStock(),
   });
 
   const activityQuery = useQuery({
-    queryKey: ['inventory-recent-activity'],
-    queryFn: () => InventoryService.getRecentActivity()
+    queryKey: ["inventory-recent-activity"],
+    queryFn: () => InventoryService.getRecentActivity(),
   });
 
   return {
     stats: statsQuery.data,
     lowStock: lowStockQuery.data || [],
     recentActivity: activityQuery.data || [],
-    isLoading: statsQuery.isLoading || lowStockQuery.isLoading || activityQuery.isLoading,
-    error: statsQuery.error || lowStockQuery.error || activityQuery.error
+    isLoading:
+      statsQuery.isLoading ||
+      lowStockQuery.isLoading ||
+      activityQuery.isLoading,
+    error: statsQuery.error || lowStockQuery.error || activityQuery.error,
   };
 }

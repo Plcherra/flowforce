@@ -1,9 +1,20 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, MessageCircle, Calendar, FileText } from 'lucide-react';
-import { useNavigate } from '@/lib/router-adapter';
-import type { ErrorBoundaryRenderProps } from './error-boundary';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  RefreshCw,
+  MessageCircle,
+  Calendar,
+  FileText,
+} from "lucide-react";
+import { useNavigate } from "@/lib/router-adapter";
+import type { ErrorBoundaryRenderProps } from "./error-boundary";
 
 interface FeatureErrorFallbackProps extends ErrorBoundaryRenderProps {
   featureName: string;
@@ -33,12 +44,15 @@ function FeatureErrorFallback({
           </div>
           <CardTitle className="text-xl">{featureName} Error</CardTitle>
           <CardDescription>
-            Something went wrong in the {featureName.toLowerCase()} workspace. You can try again or return to the dashboard.
+            Something went wrong in the {featureName.toLowerCase()} workspace.
+            You can try again or return to the dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-md bg-muted p-3">
-            <p className="text-sm font-mono text-destructive">{error.message}</p>
+            <p className="text-sm font-mono text-destructive">
+              {error.message}
+            </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button onClick={resetErrorBoundary} className="flex-1">

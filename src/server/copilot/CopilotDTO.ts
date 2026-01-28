@@ -1,15 +1,20 @@
-import type { Json } from '../../integrations/supabase/public-types';
+import type { Json } from "../../integrations/supabase/public-types";
 
 export type CopilotActionSource =
-  | 'scenario'
-  | 'scheduler'
-  | 'guardrail'
-  | 'chat'
-  | 'performance'
-  | 'recognition'
-  | 'system';
+  | "scenario"
+  | "scheduler"
+  | "guardrail"
+  | "chat"
+  | "performance"
+  | "recognition"
+  | "system";
 
-export type CopilotActionStatus = 'queued' | 'executing' | 'completed' | 'failed' | 'skipped';
+export type CopilotActionStatus =
+  | "queued"
+  | "executing"
+  | "completed"
+  | "failed"
+  | "skipped";
 
 export interface Timeframe {
   start: string;
@@ -32,7 +37,7 @@ export interface ForecastConfidenceBand {
 export interface CopilotMetricSnapshot {
   metric: string;
   value: number;
-  trend?: 'up' | 'down' | 'flat';
+  trend?: "up" | "down" | "flat";
   change?: number;
   unit?: string;
   observedAt: string;
@@ -41,7 +46,7 @@ export interface CopilotMetricSnapshot {
 
 export interface CopilotSignal {
   type: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: "info" | "warning" | "critical";
   message: string;
   metric?: string;
   observedAt?: string;
@@ -73,7 +78,15 @@ export interface CopilotContext {
 }
 
 export interface CopilotActionTarget {
-  type: 'employee' | 'team' | 'schedule' | 'task' | 'webhook' | 'idea' | 'recognition' | 'custom';
+  type:
+    | "employee"
+    | "team"
+    | "schedule"
+    | "task"
+    | "webhook"
+    | "idea"
+    | "recognition"
+    | "custom";
   id?: string;
   path?: string;
   label?: string;
@@ -107,7 +120,7 @@ export interface CopilotActionPayload {
 }
 
 export interface CopilotDiagnostic {
-  level: 'info' | 'warning' | 'error';
+  level: "info" | "warning" | "error";
   message: string;
   context?: Record<string, unknown>;
 }
@@ -128,7 +141,7 @@ export interface CopilotQueueResponse {
   actionIds?: string[];
   evaluation?: CopilotEvaluationResult;
   requestId?: string;
-  mode?: 'enqueue' | 'preview';
+  mode?: "enqueue" | "preview";
   denied?: Array<{
     action: CopilotActionPayload;
     reason: string;

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { UserSelector } from '@/components/messages/UserSelector';
-import { useMessageChannels } from '@/hooks/messages/useMessageChannels';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState } from "react";
+import { UserSelector } from "@/components/messages/UserSelector";
+import { useMessageChannels } from "@/hooks/messages/useMessageChannels";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface User {
   id: string;
@@ -18,7 +18,11 @@ interface DirectMessageDialogProps {
   onChannelCreated?: (channelId: string) => void;
 }
 
-export function DirectMessageDialog({ open, onClose, onChannelCreated }: DirectMessageDialogProps) {
+export function DirectMessageDialog({
+  open,
+  onClose,
+  onChannelCreated,
+}: DirectMessageDialogProps) {
   const { createChannel } = useMessageChannels();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -27,19 +31,19 @@ export function DirectMessageDialog({ open, onClose, onChannelCreated }: DirectM
     setLoading(true);
     try {
       const channelName = `${user.first_name} ${user.last_name}`;
-      
+
       const { data, error } = await createChannel({
         name: channelName,
         description: `Direct message with ${user.first_name} ${user.last_name}`,
-        type: 'direct',
+        type: "direct",
         is_private: true,
-        member_ids: [user.id]
+        member_ids: [user.id],
       });
 
       if (error) throw error;
 
       toast({
-        title: 'Success',
+        title: "Success",
         description: `Started conversation with ${user.first_name} ${user.last_name}`,
       });
 
@@ -49,11 +53,11 @@ export function DirectMessageDialog({ open, onClose, onChannelCreated }: DirectM
 
       onClose();
     } catch (error) {
-      logger.error('Error creating DM channel:', { error, tags: ['error'] });
+      logger.error("Error creating DM channel:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to start conversation',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to start conversation",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);

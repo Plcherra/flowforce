@@ -1,13 +1,25 @@
-import dayjs from 'dayjs';
-import { Clock, Loader2, Lock } from 'lucide-react';
+import dayjs from "dayjs";
+import { Clock, Loader2, Lock } from "lucide-react";
 
-import type { AvailabilityLockMode } from '@/types/availability';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { DayOption, HourOption, LockStatePreview } from './types';
+import type { AvailabilityLockMode } from "@/types/availability";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { DayOption, HourOption, LockStatePreview } from "./types";
 
 interface LockControlsProps {
   mode: AvailabilityLockMode;
@@ -43,19 +55,41 @@ export function LockControls({
           <Lock className="h-5 w-5 text-primary" />
           Lock controls
         </CardTitle>
-        <CardDescription>Configure how and when employees can adjust their availability.</CardDescription>
+        <CardDescription>
+          Configure how and when employees can adjust their availability.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
-          <Label className="text-sm font-semibold text-muted-foreground">Mode</Label>
-          <RadioGroup value={mode} onValueChange={(value) => onModeChange(value as AvailabilityLockMode)} className="grid gap-3 md:grid-cols-3">
-            <ModeOption value="open" title="Open" description="Employees can edit availability anytime." />
-            <ModeOption value="auto" title="Auto" description="Lock automatically before each week." />
-            <ModeOption value="lock" title="Lock" description="Only managers can approve changes." />
+          <Label className="text-sm font-semibold text-muted-foreground">
+            Mode
+          </Label>
+          <RadioGroup
+            value={mode}
+            onValueChange={(value) =>
+              onModeChange(value as AvailabilityLockMode)
+            }
+            className="grid gap-3 md:grid-cols-3"
+          >
+            <ModeOption
+              value="open"
+              title="Open"
+              description="Employees can edit availability anytime."
+            />
+            <ModeOption
+              value="auto"
+              title="Auto"
+              description="Lock automatically before each week."
+            />
+            <ModeOption
+              value="lock"
+              title="Lock"
+              description="Only managers can approve changes."
+            />
           </RadioGroup>
         </div>
 
-        {mode === 'auto' && (
+        {mode === "auto" && (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Lock day</Label>
@@ -92,7 +126,8 @@ export function LockControls({
               {lockStatePreview?.nextLock ? (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Next lock (based on current settings): {dayjsFormatted(lockStatePreview.nextLock)}
+                  Next lock (based on current settings):{" "}
+                  {dayjsFormatted(lockStatePreview.nextLock)}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-primary/80">
@@ -104,9 +139,10 @@ export function LockControls({
           </div>
         )}
 
-        {mode !== 'auto' && (
+        {mode !== "auto" && (
           <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-            Automatic locks are disabled. Employees keep their current access until you switch back to auto mode.
+            Automatic locks are disabled. Employees keep their current access
+            until you switch back to auto mode.
           </div>
         )}
 
@@ -143,5 +179,5 @@ function ModeOption({
 }
 
 function dayjsFormatted(date: string) {
-  return dayjs(date).format('ddd, MMM D h:mm A');
+  return dayjs(date).format("ddd, MMM D h:mm A");
 }

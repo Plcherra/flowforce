@@ -1,9 +1,16 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { Json, TablesInsert } from '@/integrations/supabase/public-types';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json, TablesInsert } from "@/integrations/supabase/public-types";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
-  z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(jsonSchema), z.record(jsonSchema)]),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonSchema),
+    z.record(jsonSchema),
+  ]),
 );
 
 const certificationCatalogEntrySchema = z
@@ -28,7 +35,7 @@ const certificationProgressRowSchema = z
     id: z.string(),
     employee_id: z.string(),
     certification_code: z.string(),
-    status: z.enum(['available', 'in_progress', 'earned', 'expired']),
+    status: z.enum(["available", "in_progress", "earned", "expired"]),
     progress_percent: z.number(),
     tasks_completed: z.number().nonnegative(),
     xp_earned: z.number().nonnegative(),
@@ -63,7 +70,7 @@ const skillMatrixRowSchema = z
 const courseProgressRowSchema = z
   .object({
     course_code: z.string(),
-    status: z.enum(['not_started', 'in_progress', 'completed']),
+    status: z.enum(["not_started", "in_progress", "completed"]),
   })
   .passthrough();
 
@@ -81,8 +88,12 @@ const profileRowSchema = z
   })
   .passthrough();
 
-export type CertificationCatalogRecord = z.infer<typeof certificationCatalogEntrySchema>;
-export type CertificationProgressRecord = z.infer<typeof certificationProgressRowSchema>;
+export type CertificationCatalogRecord = z.infer<
+  typeof certificationCatalogEntrySchema
+>;
+export type CertificationProgressRecord = z.infer<
+  typeof certificationProgressRowSchema
+>;
 export type SkillMatrixRecord = z.infer<typeof skillMatrixRowSchema>;
 export type CourseProgressRecord = z.infer<typeof courseProgressRowSchema>;
 export type BadgeRecord = z.infer<typeof badgeRowSchema>;
@@ -101,9 +112,9 @@ export interface CertificationRepositoryContext {
 
 export async function fetchCertificationCatalog() {
   const { data, error } = await supabase
-    .from('certification_catalog')
-    .select('*')
-    .order('title', { ascending: true });
+    .from("certification_catalog")
+    .select("*")
+    .order("title", { ascending: true });
 
   if (error) {
     throw error;
@@ -113,7 +124,10 @@ export async function fetchCertificationCatalog() {
 }
 
 export async function fetchCertificationProgress(employeeId: string) {
-  const { data, error } = await supabase.from('certification_progress').select('*').eq('employee_id', employeeId);
+  const { data, error } = await supabase
+    .from("certification_progress")
+    .select("*")
+    .eq("employee_id", employeeId);
 
   if (error) {
     throw error;
@@ -122,11 +136,18 @@ export async function fetchCertificationProgress(employeeId: string) {
   return certificationProgressRowSchema.array().parse(data ?? []);
 }
 
-export async function fetchCompletedTasks(employeeId: string, companyId: string | null) {
-  let query = supabase.from('tasks').select('id').eq('assigned_to', employeeId).eq('status', 'completed');
+export async function fetchCompletedTasks(
+  employeeId: string,
+  companyId: string | null,
+) {
+  let query = supabase
+    .from("tasks")
+    .select("id")
+    .eq("assigned_to", employeeId)
+    .eq("status", "completed");
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;
@@ -138,18 +159,23 @@ export async function fetchCompletedTasks(employeeId: string, companyId: string 
   return identifierSchema.array().parse(data ?? []).length;
 }
 
-export async function fetchCompletedGoals(employeeId: string, companyId: string | null) {
+export async function fetchCompletedGoals(
+  employeeId: string,
+  companyId: string | null,
+) {
   // First get goal participants for the employee
   const { data: participantsData, error: participantsError } = await supabase
-    .from('goal_participants')
-    .select('goal_id')
-    .eq('user_id', employeeId);
+    .from("goal_participants")
+    .select("goal_id")
+    .eq("user_id", employeeId);
 
   if (participantsError) {
     throw participantsError;
   }
 
-  const participants = goalParticipantSchema.array().parse(participantsData ?? []);
+  const participants = goalParticipantSchema
+    .array()
+    .parse(participantsData ?? []);
   const goalIds = participants.map((participant) => participant.goal_id);
 
   if (goalIds.length === 0) {
@@ -158,14 +184,14 @@ export async function fetchCompletedGoals(employeeId: string, companyId: string 
 
   // Then filter goals by company_id and status
   let goalsQuery = supabase
-    .from('goals')
-    .select('id')
-    .in('id', goalIds)
-    .eq('status', 'completed');
+    .from("goals")
+    .select("id")
+    .in("id", goalIds)
+    .eq("status", "completed");
 
   // Add company_id filter for tenant isolation
   if (companyId) {
-    goalsQuery = goalsQuery.eq('company_id', companyId);
+    goalsQuery = goalsQuery.eq("company_id", companyId);
   }
 
   const goalsResult = await goalsQuery;
@@ -179,9 +205,9 @@ export async function fetchCompletedGoals(employeeId: string, companyId: string 
 
 export async function fetchSkillMatrix(employeeId: string) {
   const { data, error } = await supabase
-    .from('skill_matrix')
-    .select('employee_id, role, level, xp')
-    .eq('employee_id', employeeId);
+    .from("skill_matrix")
+    .select("employee_id, role, level, xp")
+    .eq("employee_id", employeeId);
 
   if (error) {
     throw error;
@@ -192,9 +218,9 @@ export async function fetchSkillMatrix(employeeId: string) {
 
 export async function fetchLearningCourseProgress(employeeId: string) {
   const { data, error } = await supabase
-    .from('learning_course_progress')
-    .select('course_code, status')
-    .eq('employee_id', employeeId);
+    .from("learning_course_progress")
+    .select("course_code, status")
+    .eq("employee_id", employeeId);
 
   if (error) {
     throw error;
@@ -204,7 +230,10 @@ export async function fetchLearningCourseProgress(employeeId: string) {
 }
 
 export async function fetchEmployeeBadges(employeeId: string) {
-  const { data, error } = await supabase.from('employee_badge').select('badge_code').eq('employee_id', employeeId);
+  const { data, error } = await supabase
+    .from("employee_badge")
+    .select("badge_code")
+    .eq("employee_id", employeeId);
 
   if (error) {
     throw error;
@@ -214,7 +243,11 @@ export async function fetchEmployeeBadges(employeeId: string) {
 }
 
 export async function fetchProfileSummary(employeeId: string) {
-  const { data, error } = await supabase.from('profiles').select('id, role, company_id').eq('id', employeeId).maybeSingle();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, role, company_id")
+    .eq("id", employeeId)
+    .maybeSingle();
 
   if (error) {
     throw error;
@@ -223,11 +256,21 @@ export async function fetchProfileSummary(employeeId: string) {
   return data ? profileRowSchema.parse(data) : null;
 }
 
-export async function fetchCertificationContext(employeeId: string): Promise<CertificationRepositoryContext> {
+export async function fetchCertificationContext(
+  employeeId: string,
+): Promise<CertificationRepositoryContext> {
   const profile = await fetchProfileSummary(employeeId);
   const companyId = profile?.company_id ?? null;
 
-  const [catalog, progress, completedTasks, completedGoals, skillMatrix, courseProgress, badges] = await Promise.all([
+  const [
+    catalog,
+    progress,
+    completedTasks,
+    completedGoals,
+    skillMatrix,
+    courseProgress,
+    badges,
+  ] = await Promise.all([
     fetchCertificationCatalog(),
     fetchCertificationProgress(employeeId),
     fetchCompletedTasks(employeeId, companyId),
@@ -249,21 +292,25 @@ export async function fetchCertificationContext(employeeId: string): Promise<Cer
   };
 }
 
-export async function upsertCertificationProgressRows(rows: TablesInsert<'certification_progress'>[]) {
+export async function upsertCertificationProgressRows(
+  rows: TablesInsert<"certification_progress">[],
+) {
   if (rows.length === 0) return;
 
   const { error } = await supabase
-    .from('certification_progress')
-    .upsert(rows, { onConflict: 'employee_id,certification_code' });
+    .from("certification_progress")
+    .upsert(rows, { onConflict: "employee_id,certification_code" });
 
   if (error) {
     throw error;
   }
 }
 
-export async function upsertEmployeeBadgeRecord(payload: TablesInsert<'employee_badge'>) {
-  const { error } = await supabase.from('employee_badge').upsert(payload, {
-    onConflict: 'employee_id,badge_code',
+export async function upsertEmployeeBadgeRecord(
+  payload: TablesInsert<"employee_badge">,
+) {
+  const { error } = await supabase.from("employee_badge").upsert(payload, {
+    onConflict: "employee_id,badge_code",
   });
 
   if (error) {
@@ -271,9 +318,11 @@ export async function upsertEmployeeBadgeRecord(payload: TablesInsert<'employee_
   }
 }
 
-export async function upsertSkillMatrixRecord(payload: TablesInsert<'skill_matrix'>) {
-  const { error } = await supabase.from('skill_matrix').upsert(payload, {
-    onConflict: 'employee_id,role',
+export async function upsertSkillMatrixRecord(
+  payload: TablesInsert<"skill_matrix">,
+) {
+  const { error } = await supabase.from("skill_matrix").upsert(payload, {
+    onConflict: "employee_id,role",
   });
 
   if (error) {

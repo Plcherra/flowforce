@@ -1,8 +1,8 @@
-import { supabase } from '@/integrations/supabase/client';
-import { z } from 'zod';
-import type { DateRange } from '../hooks/useIdeaInsights';
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import type { DateRange } from "../hooks/useIdeaInsights";
 
-const trendSchema = z.enum(['up', 'down', 'flat']);
+const trendSchema = z.enum(["up", "down", "flat"]);
 
 const ideaKpiInsightSchema = z.object({
   id: z.string().optional(),
@@ -19,7 +19,7 @@ const ideaActionSchema = z.object({
   company_id: z.string(),
   cycle_id: z.string().nullable(),
   action_name: z.string(),
-  status: z.enum(['pending', 'executed', 'failed']),
+  status: z.enum(["pending", "executed", "failed"]),
   result: z.record(z.any()).nullable(),
   created_at: z.string(),
 });
@@ -29,7 +29,7 @@ const copilotInsightSchema = z.object({
   message: z.string().optional(),
   summary: z.string().optional(),
   metric: z.string().optional(),
-  severity: z.enum(['info', 'warning', 'critical']).optional(),
+  severity: z.enum(["info", "warning", "critical"]).optional(),
   metadata: z.record(z.any()).optional(),
 });
 
@@ -74,8 +74,11 @@ export function parseIdeaKpiInsights(payload: unknown): IdeaKpiInsightRecord[] {
   return ideaKpiInsightSchema.array().parse(payload ?? []);
 }
 
-export async function getIdeaInsights(companyId: string, range: DateRange): Promise<IdeaKpiInsightRecord[]> {
-  const { data, error } = await supabase.rpc('get_kpi_summary', {
+export async function getIdeaInsights(
+  companyId: string,
+  range: DateRange,
+): Promise<IdeaKpiInsightRecord[]> {
+  const { data, error } = await supabase.rpc("get_kpi_summary", {
     company_id: companyId,
     range_start: range.start.toISOString(),
     range_end: range.end.toISOString(),
@@ -88,14 +91,20 @@ export async function getIdeaInsights(companyId: string, range: DateRange): Prom
   return parseIdeaKpiInsights(data);
 }
 
-export async function listIdeaActions(companyId: string, cycleId: string | null): Promise<IdeaActionRecord[]> {
-  let query = supabase.from('idea_actions').select('*').eq('company_id', companyId);
+export async function listIdeaActions(
+  companyId: string,
+  cycleId: string | null,
+): Promise<IdeaActionRecord[]> {
+  let query = supabase
+    .from("idea_actions")
+    .select("*")
+    .eq("company_id", companyId);
 
   if (cycleId) {
-    query = query.eq('cycle_id', cycleId);
+    query = query.eq("cycle_id", cycleId);
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
+  const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
     throw error;
@@ -113,7 +122,15 @@ export async function insertIdeaAction(options: {
   impact?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const { companyId, cycleId, action, recommendationId, autoExecute = false, impact, metadata } = options;
+  const {
+    companyId,
+    cycleId,
+    action,
+    recommendationId,
+    autoExecute = false,
+    impact,
+    metadata,
+  } = options;
 
   const resultPayload = {
     ...(impact ? { impact } : {}),
@@ -125,33 +142,44 @@ export async function insertIdeaAction(options: {
     company_id: companyId,
     cycle_id: cycleId,
     action_name: action,
-    status: autoExecute ? 'executed' : 'pending',
+    status: autoExecute ? "executed" : "pending",
     result: Object.keys(resultPayload).length ? resultPayload : null,
   };
 
-  const { data, error } = await supabase.from('idea_actions').insert(payload).select().single();
+  const { data, error } = await supabase
+    .from("idea_actions")
+    .insert(payload)
+    .select()
+    .single();
 
   if (error) {
     throw error;
   }
 
   if (autoExecute && data?.id) {
-    await supabase.from('idea_actions').update({ status: 'executed' }).eq('id', data.id);
+    await supabase
+      .from("idea_actions")
+      .update({ status: "executed" })
+      .eq("id", data.id);
   }
 
   return ideaActionSchema.parse(data);
 }
 
-export async function updateIdeaAction(options: { companyId: string; actionId: string; result?: Record<string, unknown> }) {
+export async function updateIdeaAction(options: {
+  companyId: string;
+  actionId: string;
+  result?: Record<string, unknown>;
+}) {
   const { companyId, actionId, result } = options;
   const { data, error } = await supabase
-    .from('idea_actions')
+    .from("idea_actions")
     .update({
-      status: 'executed',
+      status: "executed",
       result: result ?? null,
     })
-    .eq('company_id', companyId)
-    .eq('id', actionId)
+    .eq("company_id", companyId)
+    .eq("id", actionId)
     .select()
     .single();
 
@@ -178,7 +206,7 @@ type DiagnosticsRequest = {
   }>;
   signals: Array<{
     type: string;
-    severity: 'info' | 'warning' | 'critical';
+    severity: "info" | "warning" | "critical";
     message: string;
     metric?: string;
     observedAt?: string;
@@ -188,15 +216,15 @@ type DiagnosticsRequest = {
 
 export async function runIdeaDiagnostics(request: DiagnosticsRequest) {
   const response = await fetch(request.endpoint, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       companyId: request.companyId,
       actorUserId: request.actorUserId,
-      source: 'system',
-      mode: 'preview',
+      source: "system",
+      mode: "preview",
       timeframe: request.timeframe,
       metrics: request.metrics,
       signals: request.signals,

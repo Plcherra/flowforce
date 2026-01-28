@@ -1,9 +1,12 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getIdeaInsights, type IdeaKpiInsightRecord } from '../data/ideaRepository';
-import { MOCK_IDEA_KPI_SUMMARY } from '@/mock/kpi_insights';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getIdeaInsights,
+  type IdeaKpiInsightRecord,
+} from "../data/ideaRepository";
+import { MOCK_IDEA_KPI_SUMMARY } from "@/mock/kpi_insights";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 export interface DateRange {
   start: Date;
@@ -15,7 +18,7 @@ export interface IdeaKpiInsight {
   label: string;
   value: number;
   delta?: number | null;
-  trend?: 'up' | 'down' | 'flat';
+  trend?: "up" | "down" | "flat";
   unit?: string | null;
 }
 
@@ -26,7 +29,10 @@ interface IdeaInsightsState {
   refresh: () => void;
 }
 
-export function useIdeaInsights(companyId: string | undefined, range: DateRange): IdeaInsightsState {
+export function useIdeaInsights(
+  companyId: string | undefined,
+  range: DateRange,
+): IdeaInsightsState {
   const normalizedRange = useMemo(
     () => ({
       start: range.start.toISOString(),
@@ -36,7 +42,12 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
   );
   const queryClient = useQueryClient();
   const queryKey = useMemo(
-    () => ['idea-insights', companyId, normalizedRange.start, normalizedRange.end],
+    () => [
+      "idea-insights",
+      companyId,
+      normalizedRange.start,
+      normalizedRange.end,
+    ],
     [companyId, normalizedRange.end, normalizedRange.start],
   );
 
@@ -54,12 +65,12 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
         });
         return mapRecordsToInsights(records);
       } catch (error) {
-        const message = (error as Error)?.message ?? '';
-        if (message.includes('function public.get_kpi_summary')) {
+        const message = (error as Error)?.message ?? "";
+        if (message.includes("function public.get_kpi_summary")) {
           if (appEnv.DEV) {
             logger.warn(
-              '[useIdeaInsights] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary',
-              { context: { errorMessage: message }, tags: ['warning'] },
+              "[useIdeaInsights] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary",
+              { context: { errorMessage: message }, tags: ["warning"] },
             );
           }
           return mapRecordsToInsights(MOCK_IDEA_KPI_SUMMARY);
@@ -81,13 +92,23 @@ export function useIdeaInsights(companyId: string | undefined, range: DateRange)
   };
 }
 
-const mapRecordsToInsights = (records: IdeaKpiInsightRecord[]): IdeaKpiInsight[] => {
+const mapRecordsToInsights = (
+  records: IdeaKpiInsightRecord[],
+): IdeaKpiInsight[] => {
   return records.map((item, index) => ({
     id: item.id ?? `kpi-${index}`,
-    label: item.label ?? item.metric ?? 'Metric',
+    label: item.label ?? item.metric ?? "Metric",
     value: Number(item.value ?? 0),
-    delta: typeof item.delta === 'number' ? item.delta : item.delta ? Number(item.delta) : null,
-    trend: item.trend === 'up' || item.trend === 'down' || item.trend === 'flat' ? item.trend : undefined,
+    delta:
+      typeof item.delta === "number"
+        ? item.delta
+        : item.delta
+          ? Number(item.delta)
+          : null,
+    trend:
+      item.trend === "up" || item.trend === "down" || item.trend === "flat"
+        ? item.trend
+        : undefined,
     unit: item.unit ?? null,
   }));
 };

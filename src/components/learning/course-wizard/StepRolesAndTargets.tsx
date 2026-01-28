@@ -1,10 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface RoleOption {
   value: string;
@@ -28,13 +40,15 @@ interface StepRolesAndTargetsProps {
   roleOptions: RoleOption[];
   unlockOptions: RoleOption[];
   noCertificationValue: string;
-  onChange: (updates: Partial<{
-    targetRoles: string[];
-    levelRequirement: number;
-    certificationId: string | null;
-    roleUnlock: string[];
-    autoScheduleEligible: boolean;
-  }>) => void;
+  onChange: (
+    updates: Partial<{
+      targetRoles: string[];
+      levelRequirement: number;
+      certificationId: string | null;
+      roleUnlock: string[];
+      autoScheduleEligible: boolean;
+    }>,
+  ) => void;
 }
 
 export function StepRolesAndTargets({
@@ -68,7 +82,9 @@ export function StepRolesAndTargets({
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Audience & certifications</CardTitle>
-        <CardDescription>Target the right roles and connect certification unlocks.</CardDescription>
+        <CardDescription>
+          Target the right roles and connect certification unlocks.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -78,7 +94,9 @@ export function StepRolesAndTargets({
               <Button
                 key={option.value}
                 type="button"
-                variant={targetRoles.includes(option.value) ? 'default' : 'outline'}
+                variant={
+                  targetRoles.includes(option.value) ? "default" : "outline"
+                }
                 onClick={() => toggleTargetRole(option.value)}
               >
                 {option.label}
@@ -96,14 +114,23 @@ export function StepRolesAndTargets({
               min={1}
               max={10}
               value={levelRequirement}
-              onChange={(event) => onChange({ levelRequirement: Number(event.target.value) })}
+              onChange={(event) =>
+                onChange({ levelRequirement: Number(event.target.value) })
+              }
             />
           </div>
           <div className="space-y-2">
             <Label>Auto-schedule eligible</Label>
             <div className="flex items-center gap-3 rounded-xl border p-3">
-              <Switch checked={autoScheduleEligible} onCheckedChange={(value) => onChange({ autoScheduleEligible: value })} />
-              <p className="text-sm text-muted-foreground">Allow Copilot to schedule this course automatically.</p>
+              <Switch
+                checked={autoScheduleEligible}
+                onCheckedChange={(value) =>
+                  onChange({ autoScheduleEligible: value })
+                }
+              />
+              <p className="text-sm text-muted-foreground">
+                Allow Copilot to schedule this course automatically.
+              </p>
             </div>
           </div>
         </div>
@@ -112,13 +139,19 @@ export function StepRolesAndTargets({
           <Label>Linked certification</Label>
           <Select
             value={certificationId ?? noCertificationValue}
-            onValueChange={(value) => onChange({ certificationId: value === noCertificationValue ? null : value })}
+            onValueChange={(value) =>
+              onChange({
+                certificationId: value === noCertificationValue ? null : value,
+              })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Select certification" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={noCertificationValue}>No certification</SelectItem>
+              <SelectItem value={noCertificationValue}>
+                No certification
+              </SelectItem>
               {loadingCertifications ? (
                 <SelectItem value="loading" disabled>
                   Loading…
@@ -140,7 +173,9 @@ export function StepRolesAndTargets({
             {unlockOptions.map((option) => (
               <Badge
                 key={option.value}
-                variant={roleUnlock.includes(option.value) ? 'default' : 'outline'}
+                variant={
+                  roleUnlock.includes(option.value) ? "default" : "outline"
+                }
                 className="cursor-pointer px-3 py-1"
                 onClick={() => toggleRoleUnlock(option.value)}
               >

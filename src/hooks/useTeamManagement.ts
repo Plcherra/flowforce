@@ -1,8 +1,5 @@
-import { useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from './useProfile';
-import { useToast } from '@/hooks/use-toast';
+// Re-export from feature folder
+export * from "@/features/employees/hooks/useTeamManagement";
 
 export type TeamRole = {
   id: string;
@@ -17,16 +14,16 @@ export function useTeamManagement() {
   const { toast } = useToast();
 
   const rolesQuery = useQuery({
-    queryKey: ['team-management-roles', companyId],
+    queryKey: ["team-management-roles", companyId],
     enabled: Boolean(companyId),
     queryFn: async (): Promise<TeamRole[]> => {
       if (!companyId) return [];
 
       const { data, error } = await supabase
-        .from('company_roles')
-        .select('id, name, permissions')
-        .eq('company_id', companyId)
-        .order('hierarchy_level', { ascending: true });
+        .from("company_roles")
+        .select("id, name, permissions")
+        .eq("company_id", companyId)
+        .order("hierarchy_level", { ascending: true });
 
       if (error) throw error;
 
@@ -39,41 +36,51 @@ export function useTeamManagement() {
   });
 
   const assignRole = useMutation({
-    mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
+    mutationFn: async ({
+      userId,
+      roleId,
+    }: {
+      userId: string;
+      roleId: string;
+    }) => {
       const { data: role, error: roleError } = await supabase
-        .from('company_roles')
-        .select('id, name')
-        .eq('id', roleId)
+        .from("company_roles")
+        .select("id, name")
+        .eq("id", roleId)
         .maybeSingle();
 
       if (roleError) throw roleError;
-      if (!role) throw new Error('Selected role is unavailable.');
+      if (!role) throw new Error("Selected role is unavailable.");
 
       const normalizedRole = normalizeRoleName(role.name);
 
       const { error: profileError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ role: normalizedRole, role_id: roleId })
-        .eq('id', userId);
+        .eq("id", userId);
 
       if (profileError) throw profileError;
 
       await supabase
-        .from('user_roles')
-        .upsert({ user_id: userId, role: normalizedRole }, { onConflict: 'user_id, role' });
+        .from("user_roles")
+        .upsert(
+          { user_id: userId, role: normalizedRole },
+          { onConflict: "user_id, role" },
+        );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ["profiles"] });
       toast({
-        title: 'Role updated',
-        description: 'The teammate now has the selected permissions.',
+        title: "Role updated",
+        description: "The teammate now has the selected permissions.",
       });
     },
     onError: (error) => {
       toast({
-        variant: 'destructive',
-        title: 'Unable to update role',
-        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: "destructive",
+        title: "Unable to update role",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
       });
     },
   });
@@ -87,24 +94,25 @@ export function useTeamManagement() {
       permissions: Record<string, boolean>;
     }) => {
       const { error } = await supabase
-        .from('company_roles')
+        .from("company_roles")
         .update({ permissions })
-        .eq('id', roleId);
+        .eq("id", roleId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-management-roles'] });
+      queryClient.invalidateQueries({ queryKey: ["team-management-roles"] });
       toast({
-        title: 'Permissions updated',
-        description: 'Role permissions saved successfully.',
+        title: "Permissions updated",
+        description: "Role permissions saved successfully.",
       });
     },
     onError: (error) => {
       toast({
-        variant: 'destructive',
-        title: 'Unable to update permissions',
-        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: "destructive",
+        title: "Unable to update permissions",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
       });
     },
   });
@@ -122,7 +130,7 @@ export function useTeamManagement() {
 
 function normalizePermissions(raw: unknown): Record<string, boolean> {
   if (!raw) return {};
-  if (typeof raw === 'string') {
+  if (typeof raw === "string") {
     try {
       return normalizePermissions(JSON.parse(raw));
     } catch {
@@ -131,13 +139,13 @@ function normalizePermissions(raw: unknown): Record<string, boolean> {
   }
   if (Array.isArray(raw)) {
     return raw.reduce<Record<string, boolean>>((acc, key) => {
-      if (typeof key === 'string') {
+      if (typeof key === "string") {
         acc[key] = true;
       }
       return acc;
     }, {});
   }
-  if (typeof raw === 'object') {
+  if (typeof raw === "object") {
     return Object.entries(raw as Record<string, boolean | number | string>)
       .filter(([, value]) => Boolean(value))
       .reduce<Record<string, boolean>>((acc, [key]) => {
@@ -150,8 +158,18 @@ function normalizePermissions(raw: unknown): Record<string, boolean> {
 
 function normalizeRoleName(roleName: string) {
   const normalized = roleName.toLowerCase();
-  if (['admin', 'manager', 'employee', 'staff', 'supervisor', 'owner'].includes(normalized)) {
-    return normalized as 'admin' | 'manager' | 'employee' | 'staff' | 'supervisor' | 'owner';
+  if (
+    ["admin", "manager", "employee", "staff", "supervisor", "owner"].includes(
+      normalized,
+    )
+  ) {
+    return normalized as
+      | "admin"
+      | "manager"
+      | "employee"
+      | "staff"
+      | "supervisor"
+      | "owner";
   }
-  return 'staff';
+  return "staff";
 }

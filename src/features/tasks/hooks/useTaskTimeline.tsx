@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-export type TaskActivity = Tables<'task_activities'>;
+export type TaskActivity = Tables<"task_activities">;
 
 export function useTaskTimeline(taskId: string | null, open: boolean) {
   const [activities, setActivities] = useState<TaskActivity[]>([]);
@@ -21,17 +21,20 @@ export function useTaskTimeline(taskId: string | null, open: boolean) {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('task_activities')
-          .select('*')
-          .eq('task_id', taskId)
-          .order('created_at', { ascending: true });
+          .from("task_activities")
+          .select("*")
+          .eq("task_id", taskId)
+          .order("created_at", { ascending: true });
 
         if (error) throw error;
         if (isMounted) {
           setActivities(data ?? []);
         }
       } catch (error) {
-        logger.error('Error fetching task timeline:', { error, tags: ['error'] });
+        logger.error("Error fetching task timeline:", {
+          error,
+          tags: ["error"],
+        });
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -45,15 +48,19 @@ export function useTaskTimeline(taskId: string | null, open: boolean) {
       .channel(`task-timeline-${taskId}`)
       .on(
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'task_activities',
+          event: "INSERT",
+          schema: "public",
+          table: "task_activities",
           filter: `task_id=eq.${taskId}`,
         },
         (payload) => {
           const newEntry = payload.new as TaskActivity;
-          setActivities((prev) => [...prev, newEntry].sort((a, b) => a.created_at.localeCompare(b.created_at)));
-        }
+          setActivities((prev) =>
+            [...prev, newEntry].sort((a, b) =>
+              a.created_at.localeCompare(b.created_at),
+            ),
+          );
+        },
       )
       .subscribe();
 

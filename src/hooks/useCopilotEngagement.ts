@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type CompanyUpdateEngagementRow = {
   id: string;
@@ -18,7 +18,7 @@ type CompanyUpdateEngagementRow = {
 
 export function useCopilotEngagement(companyId?: string | null) {
   return useQuery({
-    queryKey: ['copilot-engagement', companyId],
+    queryKey: ["copilot-engagement", companyId],
     enabled: Boolean(companyId),
     queryFn: async (): Promise<CompanyUpdateEngagementRow[]> => {
       if (!companyId) {
@@ -26,10 +26,10 @@ export function useCopilotEngagement(companyId?: string | null) {
       }
 
       const { data, error } = await supabase
-        .from('company_update_engagement')
-        .select('*')
-        .eq('company_id', companyId)
-        .order('last_analyzed', { ascending: false });
+        .from("company_update_engagement")
+        .select("*")
+        .eq("company_id", companyId)
+        .order("last_analyzed", { ascending: false });
 
       if (error) {
         throw error;

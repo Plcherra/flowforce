@@ -1,5 +1,5 @@
 // Common types to replace 'any' usage across the application
-import type { Tables } from '@/integrations/supabase/public-types';
+import type { Tables } from "@/integrations/supabase/public-types";
 
 export interface FormSubmission {
   id: string;
@@ -18,7 +18,18 @@ export interface FormSubmission {
 export interface FormField {
   id: string;
   form_id: string;
-  field_type: 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'textarea' | 'date' | 'file' | 'phone' | 'datetime' | 'radio';
+  field_type:
+    | "text"
+    | "email"
+    | "number"
+    | "select"
+    | "checkbox"
+    | "textarea"
+    | "date"
+    | "file"
+    | "phone"
+    | "datetime"
+    | "radio";
   label: string;
   description?: string;
   placeholder?: string;
@@ -35,7 +46,13 @@ export interface Schedule {
   end_time: string;
   user_id: string;
   color?: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled' | 'confirmed' | 'no_show';
+  status:
+    | "scheduled"
+    | "in-progress"
+    | "completed"
+    | "cancelled"
+    | "confirmed"
+    | "no_show";
   is_published: boolean;
   assignments?: ScheduleAssignment[];
   required_headcount?: number;
@@ -82,7 +99,7 @@ export interface ResourceItem {
   id: string;
   title: string;
   description: string;
-  type: 'blog' | 'video' | 'documentation' | 'download';
+  type: "blog" | "video" | "documentation" | "download";
   url?: string;
   category: string;
   tags: string[];
@@ -206,7 +223,7 @@ export interface Payment {
   amount: number;
   description: string;
   category: string;
-  status: 'pending' | 'approved' | 'rejected' | 'paid';
+  status: "pending" | "approved" | "rejected" | "paid";
   due_date?: string;
   paid_date?: string;
   approved_by?: string;
@@ -227,7 +244,7 @@ export interface Payment {
 }
 
 // Task types
-type TaskRow = Tables<'tasks'>;
+type TaskRow = Tables<"tasks">;
 
 export type Task = TaskRow & {
   assigned_profile?: {

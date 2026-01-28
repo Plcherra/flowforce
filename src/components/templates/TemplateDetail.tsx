@@ -1,19 +1,18 @@
-
-import { useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { BackButton } from '@/components/ui/back-button';
-import { 
+import { useNavigate, Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
+import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbSeparator,
-  BreadcrumbPage
-} from '@/components/ui/breadcrumb';
-import { Check, ArrowRight } from 'lucide-react';
-import { RetailScene } from '@/components/illustrations/RetailScene';
-import { Template, TemplateKey } from '@/data/templateData';
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+import { Check, ArrowRight } from "lucide-react";
+import { RetailScene } from "@/components/illustrations/RetailScene";
+import { Template, TemplateKey } from "@/data/templateData";
 
 interface TemplateDetailProps {
   templateId: TemplateKey;
@@ -60,17 +59,17 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Left Side - Content */}
           <div className="flex flex-col justify-center">
-            <div className={`w-24 h-24 bg-gradient-to-br ${template.gradient} rounded-3xl flex items-center justify-center mb-6`}>
+            <div
+              className={`w-24 h-24 bg-gradient-to-br ${template.gradient} rounded-3xl flex items-center justify-center mb-6`}
+            >
               <template.icon className="h-12 w-12 text-white" />
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
               {template.title}
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              {template.description}
-            </p>
+            <p className="text-xl text-gray-600 mb-8">{template.description}</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
+              <Button
                 size="lg"
                 className={`bg-gradient-to-r ${template.gradient} text-white px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}
@@ -86,10 +85,12 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
 
           {/* Right Side - Illustration */}
           <div className="h-96 lg:h-[500px]">
-            {templateId === 'retail' ? (
+            {templateId === "retail" ? (
               <RetailScene />
             ) : (
-              <div className={`w-full h-full bg-gradient-to-br ${template.gradient} rounded-lg opacity-10 flex items-center justify-center`}>
+              <div
+                className={`w-full h-full bg-gradient-to-br ${template.gradient} rounded-lg opacity-10 flex items-center justify-center`}
+              >
                 <template.icon className="h-24 w-24 text-white/50" />
               </div>
             )}
@@ -99,11 +100,15 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         {/* Features Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Key Features</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Key Features
+            </h2>
             <div className="space-y-4">
               {template.features.map((feature, index) => (
                 <div key={index} className="flex items-center">
-                  <div className={`w-6 h-6 ${template.bgColor} rounded-full flex items-center justify-center mr-4`}>
+                  <div
+                    className={`w-6 h-6 ${template.bgColor} rounded-full flex items-center justify-center mr-4`}
+                  >
                     <Check className="h-4 w-4 text-white" />
                   </div>
                   <span className="text-gray-700">{feature}</span>
@@ -113,13 +118,23 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Included Modules</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Included Modules
+            </h2>
             <div className="space-y-4">
               {template.modules.map((module, index) => (
-                <Card key={index} className="border-l-4" style={{ borderLeftColor: template.bgColor }}>
+                <Card
+                  key={index}
+                  className="border-l-4"
+                  style={{ borderLeftColor: template.bgColor }}
+                >
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{module.name}</h3>
-                    <p className="text-sm text-gray-600">{module.description}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {module.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {module.description}
+                    </p>
                   </CardContent>
                 </Card>
               ))}
@@ -134,11 +149,12 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
               Ready to Get Started?
             </h2>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              Set up your {template.title.toLowerCase()} in minutes with our pre-configured template. 
-              Customize it to match your specific workflow needs.
+              Set up your {template.title.toLowerCase()} in minutes with our
+              pre-configured template. Customize it to match your specific
+              workflow needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+              <Button
                 size="lg"
                 className={`bg-gradient-to-r ${template.gradient} text-white px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}

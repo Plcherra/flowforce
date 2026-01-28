@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { addDays, format, isSameDay, startOfWeek } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { useProfile } from '@/hooks/useProfile';
-import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { VendorEventWithMetadata, ProfileSummary } from './useSchedulingConsolidated';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { useProfile } from "@/hooks/useProfile";
+import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type {
+  VendorEventWithMetadata,
+  ProfileSummary,
+} from "./useSchedulingConsolidated";
+import { logger } from "@/utils/logger";
 
 interface LocationOption {
   id: string;
@@ -39,7 +42,11 @@ type BasicEmployee = {
   avatar_url: string | null;
 };
 
-export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEvent }: UseScheduleBoardParams) {
+export function useScheduleBoard({
+  selectedDate,
+  locationFilter,
+  pendingVendorEvent,
+}: UseScheduleBoardParams) {
   const {
     shifts,
     assignments,
@@ -75,18 +82,27 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
 
   const weekStart = useMemo(() => startOfWeek(selectedDate), [selectedDate]);
   const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart]);
-  const formattedWeekStart = useMemo(() => format(weekStart, 'yyyy-MM-dd'), [weekStart]);
-  const formattedWeekEnd = useMemo(() => format(weekEnd, 'yyyy-MM-dd'), [weekEnd]);
+  const formattedWeekStart = useMemo(
+    () => format(weekStart, "yyyy-MM-dd"),
+    [weekStart],
+  );
+  const formattedWeekEnd = useMemo(
+    () => format(weekEnd, "yyyy-MM-dd"),
+    [weekEnd],
+  );
   const previousWeekStart = useMemo(() => addDays(weekStart, -7), [weekStart]);
   const formattedPreviousWeekStart = useMemo(
-    () => format(previousWeekStart, 'yyyy-MM-dd'),
+    () => format(previousWeekStart, "yyyy-MM-dd"),
     [previousWeekStart],
   );
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)),
     [weekStart],
   );
-  const hours = useMemo(() => Array.from({ length: 17 }, (_, index) => index + 6), []);
+  const hours = useMemo(
+    () => Array.from({ length: 17 }, (_, index) => index + 6),
+    [],
+  );
 
   const employees = useMemo<BasicEmployee[]>(() => {
     const map = new Map<string, BasicEmployee>();
@@ -96,8 +112,8 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
       if (map.has(profile.id)) return;
       map.set(profile.id, {
         id: profile.id,
-        first_name: profile.first_name ?? 'Team',
-        last_name: profile.last_name ?? 'Member',
+        first_name: profile.first_name ?? "Team",
+        last_name: profile.last_name ?? "Member",
         avatar_url: profile.avatar_url ?? null,
       });
     };
@@ -126,13 +142,13 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
     setIsLocationsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('inv_locations')
-        .select('id, name')
-        .eq('company_id', companyId)
-        .order('name', { ascending: true });
+        .from("inv_locations")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .order("name", { ascending: true });
 
       if (error) {
-        logger.error('Failed to load locations', { error, tags: ['error'] });
+        logger.error("Failed to load locations", { error, tags: ["error"] });
         return;
       }
 
@@ -152,7 +168,7 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
     () =>
       shifts.filter((schedule) => {
         if (!locationFilter) return true;
-        return (schedule.location ?? '') === locationFilter;
+        return (schedule.location ?? "") === locationFilter;
       }),
     [locationFilter, shifts],
   );
@@ -179,7 +195,9 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
       day,
       shifts: weekSchedules.filter((schedule) => {
         const start = new Date(schedule.start_time);
-        return isSameDay(start, day) && (schedule.assignments?.length ?? 0) === 0;
+        return (
+          isSameDay(start, day) && (schedule.assignments?.length ?? 0) === 0
+        );
       }),
     }));
   }, [weekDays, weekSchedules]);
@@ -197,13 +215,21 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
 
   const weekCsvRows = useMemo(() => {
     return [
-      ['Title', 'Location', 'Start', 'End', 'Published', 'Required', 'Assigned'],
+      [
+        "Title",
+        "Location",
+        "Start",
+        "End",
+        "Published",
+        "Required",
+        "Assigned",
+      ],
       ...weekSchedules.map((schedule) => [
-        schedule.title ?? '',
-        schedule.location ?? '',
-        format(new Date(schedule.start_time), 'yyyy-MM-dd HH:mm'),
-        format(new Date(schedule.end_time), 'yyyy-MM-dd HH:mm'),
-        schedule.is_published ? 'Yes' : 'No',
+        schedule.title ?? "",
+        schedule.location ?? "",
+        format(new Date(schedule.start_time), "yyyy-MM-dd HH:mm"),
+        format(new Date(schedule.end_time), "yyyy-MM-dd HH:mm"),
+        schedule.is_published ? "Yes" : "No",
         schedule.required_headcount ?? 1,
         schedule.assignments?.length ?? 0,
       ]),
@@ -213,8 +239,12 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
   const weekCsvContent = useMemo(
     () =>
       weekCsvRows
-        .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-        .join('\n'),
+        .map((row) =>
+          row
+            .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+            .join(","),
+        )
+        .join("\n"),
     [weekCsvRows],
   );
 
@@ -263,8 +293,13 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
 
       timeOffRequests.forEach((request) => {
         if (!request.user_id) return;
-        const startSource = request.start_date ?? request.start_time ?? request.created_at;
-        const endSource = request.end_date ?? request.end_time ?? request.start_date ?? request.created_at;
+        const startSource =
+          request.start_date ?? request.start_time ?? request.created_at;
+        const endSource =
+          request.end_date ??
+          request.end_time ??
+          request.start_date ??
+          request.created_at;
         if (!startSource || !endSource) return;
         const start = new Date(startSource);
         const end = new Date(endSource);
@@ -296,7 +331,7 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
   const candidateVendorShifts = useMemo<ShiftWithAssignments[]>(() => {
     if (!pendingVendorEvent) return [];
 
-    const priorityRoles = ['supervisor', 'manager'];
+    const priorityRoles = ["supervisor", "manager"];
 
     return weekSchedules
       .filter((schedule) => {
@@ -309,13 +344,15 @@ export function useScheduleBoard({ selectedDate, locationFilter, pendingVendorEv
         );
       })
       .sort((a, b) => {
-        const roleA = a.role?.toLowerCase?.() ?? '';
-        const roleB = b.role?.toLowerCase?.() ?? '';
+        const roleA = a.role?.toLowerCase?.() ?? "";
+        const roleB = b.role?.toLowerCase?.() ?? "";
         const priorityA = priorityRoles.indexOf(roleA);
         const priorityB = priorityRoles.indexOf(roleB);
 
         if (priorityA === priorityB) {
-          return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+          return (
+            new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+          );
         }
         if (priorityA === -1) return 1;
         if (priorityB === -1) return -1;

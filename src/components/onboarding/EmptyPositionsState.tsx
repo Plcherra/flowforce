@@ -1,5 +1,4 @@
-
-import { Users } from 'lucide-react';
+import { Users } from "lucide-react";
 
 export default function EmptyPositionsState() {
   return (

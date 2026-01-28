@@ -1,7 +1,13 @@
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { GoalDialogs } from '@/hooks/useGoalDialogs';
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { GoalDialogs } from "@/hooks/useGoalDialogs";
 
 interface GoalEmptyStateProps {
   dialogs: GoalDialogs;
@@ -13,7 +19,8 @@ export function GoalEmptyState({ dialogs }: GoalEmptyStateProps) {
       <CardHeader className="space-y-2 text-center">
         <CardTitle>No goals yet</CardTitle>
         <CardDescription>
-          Create your first goal to start tracking progress across the organization.
+          Create your first goal to start tracking progress across the
+          organization.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">

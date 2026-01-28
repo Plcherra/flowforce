@@ -1,4 +1,8 @@
-export type EmployeeReportCategory = 'performance' | 'attendance' | 'behavior' | 'customer';
+export type EmployeeReportCategory =
+  | "performance"
+  | "attendance"
+  | "behavior"
+  | "customer";
 
 export interface EmployeeReport {
   id: string;
@@ -52,7 +56,7 @@ export interface EmployeeBadge {
   createdAt: string;
 }
 
-export type PromotionStatus = 'pending' | 'approved' | 'rejected';
+export type PromotionStatus = "pending" | "approved" | "rejected";
 
 export interface PromotionProposal {
   id: string;

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import ExpensesPage from '@/screens/Expenses';
+import ExpensesPage from "@/screens/Expenses";
 
 export default function Expenses() {
   return <ExpensesPage />;

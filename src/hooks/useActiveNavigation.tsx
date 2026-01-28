@@ -1,54 +1,55 @@
-import { useMemo, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { NavigationSection, NavigationItem } from './useNavigationStructure';
+import { useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
+import { NavigationSection, NavigationItem } from "./useNavigationStructure";
 
 export interface ProcessedNavigationItem extends NavigationItem {
   isActive: boolean;
 }
 
-export interface ProcessedNavigationSection extends Omit<NavigationSection, 'items'> {
+export interface ProcessedNavigationSection
+  extends Omit<NavigationSection, "items"> {
   items: ProcessedNavigationItem[];
 }
 
 const normalizeNavigationPath = (path: string) => {
   if (!path) {
-    return '/app'
+    return "/app";
   }
 
-  let normalized = path.startsWith('/') ? path : `/${path}`
+  let normalized = path.startsWith("/") ? path : `/${path}`;
 
-  if (!normalized.startsWith('/app')) {
-    normalized = normalized === '/' ? '/app' : `/app${normalized}`
+  if (!normalized.startsWith("/app")) {
+    normalized = normalized === "/" ? "/app" : `/app${normalized}`;
   }
 
-  if (normalized.length > 1 && normalized.endsWith('/')) {
-    normalized = normalized.slice(0, -1)
+  if (normalized.length > 1 && normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
   }
 
-  return normalized
-}
+  return normalized;
+};
 
 export function useActiveNavigation(navigationStructure: NavigationSection[]) {
   const location = useLocation();
 
   const getIsActive = useCallback(
     (path: string) => {
-      const normalizedPath = normalizeNavigationPath(path)
-      const current = normalizeNavigationPath(location.pathname)
+      const normalizedPath = normalizeNavigationPath(path);
+      const current = normalizeNavigationPath(location.pathname);
 
       if (current === normalizedPath) {
-        return true
+        return true;
       }
 
-      return current.startsWith(`${normalizedPath}/`)
+      return current.startsWith(`${normalizedPath}/`);
     },
-    [location.pathname]
-  )
+    [location.pathname],
+  );
 
   const processedSections: ProcessedNavigationSection[] = useMemo(() => {
-    return navigationStructure.map(section => ({
+    return navigationStructure.map((section) => ({
       ...section,
-      items: section.items.map(item => ({
+      items: section.items.map((item) => ({
         ...item,
         href: normalizeNavigationPath(item.href),
         isActive: getIsActive(item.href),

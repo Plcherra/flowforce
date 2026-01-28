@@ -1,4 +1,4 @@
-import { parseISO } from 'date-fns';
+import { parseISO } from "date-fns";
 
 type CoverageTemplateInput = {
   id: string;
@@ -38,7 +38,8 @@ const TIME_BANDS = [
   { endHour: 23, multiplier: 1.02 },
 ];
 
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
 
 const isIsoTime = (value: string) => /^\d{2}:\d{2}(:\d{2})?$/.test(value);
 
@@ -67,12 +68,23 @@ export class ForecastAPI {
 
     for (const template of templates) {
       const weekendMultiplier = getWeekendMultiplier(template.day_of_week);
-      const bandMultiplier = TIME_BANDS.find((band) => extractHour(template.start_time) <= band.endHour)?.multiplier ?? 1;
+      const bandMultiplier =
+        TIME_BANDS.find(
+          (band) => extractHour(template.start_time) <= band.endHour,
+        )?.multiplier ?? 1;
 
       const previousMultiplier = safeNumber(template.forecast_multiplier, 1);
       const metadataMultiplier = getMetadataMultiplier(template.metadata);
 
-      const scale = clamp(previousMultiplier * weekendMultiplier * bandMultiplier * metadataMultiplier * confidenceDecay, 0.6, 1.8);
+      const scale = clamp(
+        previousMultiplier *
+          weekendMultiplier *
+          bandMultiplier *
+          metadataMultiplier *
+          confidenceDecay,
+        0.6,
+        1.8,
+      );
 
       const required = Math.max(0, Math.round(template.required_count * scale));
       const delta = Math.abs(scale - previousMultiplier);
@@ -93,7 +105,10 @@ export class ForecastAPI {
   private getConfidenceDecay(referenceDate: Date | null): number {
     if (!referenceDate) return 1;
     const now = new Date();
-    const diffDays = Math.max(0, (referenceDate.getTime() - now.getTime()) / 86400000);
+    const diffDays = Math.max(
+      0,
+      (referenceDate.getTime() - now.getTime()) / 86400000,
+    );
     if (diffDays <= 7) return 1.05;
     if (diffDays <= 14) return 1.0;
     if (diffDays <= 21) return 0.95;
@@ -111,7 +126,7 @@ function safeParseDate(value: string | undefined): Date | null {
 }
 
 function safeNumber(value: number | null | undefined, fallback: number) {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
   return fallback;
 }
 
@@ -119,16 +134,19 @@ function getWeekendMultiplier(day: number) {
   return WEEKEND_BOOST[day] ?? 1;
 }
 
-function getMetadataMultiplier(metadata: Record<string, unknown> | null | undefined): number {
+function getMetadataMultiplier(
+  metadata: Record<string, unknown> | null | undefined,
+): number {
   if (!metadata) return 1;
-  const demand = (metadata as { demand_signal?: number | string } | undefined)?.demand_signal;
-  if (typeof demand === 'number') {
+  const demand = (metadata as { demand_signal?: number | string } | undefined)
+    ?.demand_signal;
+  if (typeof demand === "number") {
     return clamp(1 + demand / 100, 0.8, 1.4);
   }
-  if (typeof demand === 'string') {
+  if (typeof demand === "string") {
     const normalized = demand.toLowerCase();
-    if (normalized.includes('high')) return 1.2;
-    if (normalized.includes('low')) return 0.85;
+    if (normalized.includes("high")) return 1.2;
+    if (normalized.includes("low")) return 0.85;
   }
   return 1;
 }

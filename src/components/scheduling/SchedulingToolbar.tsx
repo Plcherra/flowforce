@@ -1,13 +1,12 @@
-
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Plus,
   Copy,
@@ -21,18 +20,21 @@ import {
   Wand2,
   Trash2,
   Eye,
-  EyeOff
-} from 'lucide-react';
-import { ShiftWizardDialog } from './ShiftWizardDialog';
-import { WeekTemplateDialog } from './WeekTemplateDialog';
-import { ImportShiftsDialog } from './ImportShiftsDialog';
+  EyeOff,
+} from "lucide-react";
+import { ShiftWizardDialog } from "./ShiftWizardDialog";
+import { WeekTemplateDialog } from "./WeekTemplateDialog";
+import { ImportShiftsDialog } from "./ImportShiftsDialog";
 
 interface SchedulingToolbarProps {
   selectedDate: Date;
   currentView: string;
 }
 
-export function SchedulingToolbar({ selectedDate, currentView }: SchedulingToolbarProps) {
+export function SchedulingToolbar({
+  selectedDate,
+  currentView,
+}: SchedulingToolbarProps) {
   const [showAddShift, setShowAddShift] = useState(false);
   const [showWeekTemplate, setShowWeekTemplate] = useState(false);
   const [showImportShifts, setShowImportShifts] = useState(false);
@@ -53,7 +55,7 @@ export function SchedulingToolbar({ selectedDate, currentView }: SchedulingToolb
     // Implementation for publishing week
   };
 
-  const handleExportWeek = (format: 'csv' | 'xlsx' | 'print') => {
+  const handleExportWeek = (format: "csv" | "xlsx" | "print") => {
     // Implementation for exporting week
   };
 
@@ -137,16 +139,16 @@ export function SchedulingToolbar({ selectedDate, currentView }: SchedulingToolb
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => handleExportWeek('csv')}>
+            <DropdownMenuItem onClick={() => handleExportWeek("csv")}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Export as CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExportWeek('xlsx')}>
+            <DropdownMenuItem onClick={() => handleExportWeek("xlsx")}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Export as Excel
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleExportWeek('print')}>
+            <DropdownMenuItem onClick={() => handleExportWeek("print")}>
               <Printer className="mr-2 h-4 w-4" />
               Print Week
             </DropdownMenuItem>
@@ -161,19 +163,19 @@ export function SchedulingToolbar({ selectedDate, currentView }: SchedulingToolb
       </div>
 
       {/* Dialogs */}
-      <ShiftWizardDialog 
+      <ShiftWizardDialog
         open={showAddShift}
         onOpenChange={setShowAddShift}
         selectedDate={selectedDate}
       />
-      
-      <WeekTemplateDialog 
+
+      <WeekTemplateDialog
         open={showWeekTemplate}
         onOpenChange={setShowWeekTemplate}
         selectedDate={selectedDate}
       />
-      
-      <ImportShiftsDialog 
+
+      <ImportShiftsDialog
         open={showImportShifts}
         onOpenChange={setShowImportShifts}
       />

@@ -1,9 +1,8 @@
-
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
-import OnboardingRoleManager from '@/components/onboarding/OnboardingRoleManager';
-import { useTranslation } from 'react-i18next';
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import OnboardingRoleManager from "@/components/onboarding/OnboardingRoleManager";
+import { useTranslation } from "react-i18next";
 
 interface OnboardingRole {
   id: string;
@@ -24,12 +23,12 @@ interface RoleSetupStepProps {
   onPositionsChange: (positions: OnboardingPosition[]) => void;
 }
 
-export default function RoleSetupStep({ 
-  selectedTemplate, 
-  customRoles, 
-  positions, 
-  onRolesChange, 
-  onPositionsChange 
+export default function RoleSetupStep({
+  selectedTemplate,
+  customRoles,
+  positions,
+  onRolesChange,
+  onPositionsChange,
 }: RoleSetupStepProps) {
   const { t } = useTranslation();
 
@@ -38,11 +37,9 @@ export default function RoleSetupStep({
       <CardHeader className="px-0 pt-0">
         <CardTitle className="flex items-center">
           <CheckCircle className="mr-2 h-6 w-6" />
-          {t('onboarding.roles.title')}
+          {t("onboarding.roles.title")}
         </CardTitle>
-        <CardDescription>
-          {t('onboarding.roles.description')}
-        </CardDescription>
+        <CardDescription>{t("onboarding.roles.description")}</CardDescription>
       </CardHeader>
 
       <OnboardingRoleManager

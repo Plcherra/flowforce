@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Star, Heart, ThumbsUp, Smile, Meh, Frown } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Star, Heart, ThumbsUp, Smile, Meh, Frown } from "lucide-react";
 
 interface RatingConfig {
   max_rating?: number;
-  rating_type?: 'stars' | 'numeric' | 'emoji';
+  rating_type?: "stars" | "numeric" | "emoji";
   labels?: string[];
 }
 
 interface RatingData {
   rating_value: number;
   max_rating: number;
-  rating_type: 'stars' | 'numeric' | 'emoji';
+  rating_type: "stars" | "numeric" | "emoji";
 }
 
 interface RatingFieldProps {
@@ -32,15 +32,15 @@ export function RatingField({
   required = false,
   config = {
     max_rating: 5,
-    rating_type: 'stars',
-    labels: []
+    rating_type: "stars",
+    labels: [],
   },
-  className = ""
+  className = "",
 }: RatingFieldProps) {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
   const maxRating = config.max_rating || 5;
-  const ratingType = config.rating_type || 'stars';
+  const ratingType = config.rating_type || "stars";
   const labels = config.labels || [];
 
   const handleRatingClick = (rating: number) => {
@@ -61,14 +61,18 @@ export function RatingField({
       <div className="flex items-center gap-1">
         {Array.from({ length: maxRating }, (_, index) => {
           const rating = index + 1;
-          const isActive = (hoverValue !== null ? hoverValue : value?.rating_value || 0) >= rating;
-          
+          const isActive =
+            (hoverValue !== null ? hoverValue : value?.rating_value || 0) >=
+            rating;
+
           return (
             <button
               key={rating}
               type="button"
               className={`transition-colors duration-150 hover:scale-110 ${
-                isActive ? 'text-yellow-400' : 'text-muted-foreground hover:text-yellow-300'
+                isActive
+                  ? "text-yellow-400"
+                  : "text-muted-foreground hover:text-yellow-300"
               }`}
               onClick={() => handleRatingClick(rating)}
               onMouseEnter={() => setHoverValue(rating)}
@@ -98,16 +102,18 @@ export function RatingField({
         <div className="flex gap-1">
           {Array.from({ length: maxRating }, (_, index) => {
             const rating = index + 1;
-            const isActive = (hoverValue !== null ? hoverValue : value?.rating_value || 0) >= rating;
-            
+            const isActive =
+              (hoverValue !== null ? hoverValue : value?.rating_value || 0) >=
+              rating;
+
             return (
               <button
                 key={rating}
                 type="button"
                 className={`w-8 h-8 rounded-full border-2 transition-all duration-150 hover:scale-105 ${
-                  isActive 
-                    ? 'bg-primary border-primary text-primary-foreground' 
-                    : 'border-muted-foreground/30 text-muted-foreground hover:border-primary/50'
+                  isActive
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "border-muted-foreground/30 text-muted-foreground hover:border-primary/50"
                 }`}
                 onClick={() => handleRatingClick(rating)}
                 onMouseEnter={() => setHoverValue(rating)}
@@ -134,11 +140,11 @@ export function RatingField({
 
   const renderEmojiRating = () => {
     const emojis = [
-      { icon: Frown, label: 'Very Poor', color: 'text-red-500' },
-      { icon: Meh, label: 'Poor', color: 'text-orange-500' },
-      { icon: Smile, label: 'Average', color: 'text-yellow-500' },
-      { icon: Smile, label: 'Good', color: 'text-lime-500' },
-      { icon: Smile, label: 'Excellent', color: 'text-green-500' },
+      { icon: Frown, label: "Very Poor", color: "text-red-500" },
+      { icon: Meh, label: "Poor", color: "text-orange-500" },
+      { icon: Smile, label: "Average", color: "text-yellow-500" },
+      { icon: Smile, label: "Good", color: "text-lime-500" },
+      { icon: Smile, label: "Excellent", color: "text-green-500" },
     ];
 
     const visibleEmojis = emojis.slice(0, maxRating);
@@ -147,17 +153,19 @@ export function RatingField({
       <div className="flex items-center gap-2">
         {visibleEmojis.map((emoji, index) => {
           const rating = index + 1;
-          const isActive = (hoverValue !== null ? hoverValue : value?.rating_value || 0) === rating;
+          const isActive =
+            (hoverValue !== null ? hoverValue : value?.rating_value || 0) ===
+            rating;
           const IconComponent = emoji.icon;
-          
+
           return (
             <button
               key={rating}
               type="button"
               className={`p-2 rounded-full transition-all duration-150 hover:scale-110 ${
-                isActive 
-                  ? `${emoji.color} bg-current/10` 
-                  : 'text-muted-foreground hover:text-foreground'
+                isActive
+                  ? `${emoji.color} bg-current/10`
+                  : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => handleRatingClick(rating)}
               onMouseEnter={() => setHoverValue(rating)}
@@ -183,9 +191,9 @@ export function RatingField({
 
   const renderRating = () => {
     switch (ratingType) {
-      case 'numeric':
+      case "numeric":
         return renderNumericRating();
-      case 'emoji':
+      case "emoji":
         return renderEmojiRating();
       default:
         return renderStarRating();
@@ -208,7 +216,7 @@ export function RatingField({
         <CardContent className="pt-6">
           <div className="flex flex-col items-center gap-4">
             {renderRating()}
-            
+
             {value && (
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground">
@@ -221,7 +229,7 @@ export function RatingField({
                 )}
               </div>
             )}
-            
+
             {hoverValue !== null && !value && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
@@ -245,7 +253,7 @@ export function RatingField({
 export function RatingFieldPreview({
   label = "Rating",
   description = "Please rate your experience",
-  className = ""
+  className = "",
 }: Partial<RatingFieldProps>) {
   return (
     <RatingField
@@ -255,8 +263,8 @@ export function RatingFieldPreview({
       onChange={() => {}}
       config={{
         max_rating: 5,
-        rating_type: 'stars',
-        labels: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
+        rating_type: "stars",
+        labels: ["Poor", "Fair", "Good", "Very Good", "Excellent"],
       }}
       className={className}
     />

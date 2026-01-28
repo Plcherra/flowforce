@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import { formatISO, subMonths } from 'date-fns';
+import { supabase } from "@/integrations/supabase/client";
+import { formatISO, subMonths } from "date-fns";
 
 type DemoSeedResult = {
   paymentsInserted: number;
@@ -9,9 +9,9 @@ type DemoSeedResult = {
   alreadySeeded?: boolean;
 };
 
-const SAMPLE_PREFIX = 'Demo Financial';
+const SAMPLE_PREFIX = "Demo Financial";
 
-const asDateOnly = (date: Date) => formatISO(date, { representation: 'date' });
+const asDateOnly = (date: Date) => formatISO(date, { representation: "date" });
 
 export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   const {
@@ -24,10 +24,12 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   }
 
   if (!user) {
-    throw new Error('You must be signed in to generate demo financial data.');
+    throw new Error("You must be signed in to generate demo financial data.");
   }
 
-  const months = Array.from({ length: 6 }, (_, index) => subMonths(new Date(), index));
+  const months = Array.from({ length: 6 }, (_, index) =>
+    subMonths(new Date(), index),
+  );
 
   let paymentsInserted = 0;
   let expensesInserted = 0;
@@ -35,9 +37,9 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   let skippedTransactions: string | undefined;
 
   const paymentsCheck = await supabase
-    .from('payments')
-    .select('id')
-    .ilike('description', `${SAMPLE_PREFIX}%`)
+    .from("payments")
+    .select("id")
+    .ilike("description", `${SAMPLE_PREFIX}%`)
     .limit(1);
 
   if (paymentsCheck.error) {
@@ -48,31 +50,36 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
 
   if (!alreadySeeded) {
     const paymentRows = months.map((date, index) => {
-      const status = index <= 3 ? 'paid' : 'approved';
+      const status = index <= 3 ? "paid" : "approved";
       const amount = 1150 + index * 85;
       return {
-        payment_type: index % 3 === 0 ? 'wage' : index % 3 === 1 ? 'bonus' : 'expense_reimbursement',
-        recipient_type: 'employee',
+        payment_type:
+          index % 3 === 0
+            ? "wage"
+            : index % 3 === 1
+              ? "bonus"
+              : "expense_reimbursement",
+        recipient_type: "employee",
         recipient_id: user.id,
-        recipient_name: 'Demo Employee',
+        recipient_name: "Demo Employee",
         amount,
-        currency: 'USD',
-        payment_method: 'bank_transfer',
+        currency: "USD",
+        payment_method: "bank_transfer",
         reference_number: `DEMO-PAY-${index}-${date.getFullYear()}`,
-        description: `${SAMPLE_PREFIX} Payroll ${date.toLocaleString('default', { month: 'short', year: 'numeric' })}`,
+        description: `${SAMPLE_PREFIX} Payroll ${date.toLocaleString("default", { month: "short", year: "numeric" })}`,
         status,
         due_date: asDateOnly(date),
-        paid_date: status === 'paid' ? asDateOnly(date) : null,
+        paid_date: status === "paid" ? asDateOnly(date) : null,
         approved_by: user.id,
         approved_at: formatISO(date),
         created_by: user.id,
         created_at: formatISO(date),
-        notes: 'Seeded via demo generator',
+        notes: "Seeded via demo generator",
         attachments: [],
       };
     });
 
-    const paymentInsert = await supabase.from('payments').insert(paymentRows);
+    const paymentInsert = await supabase.from("payments").insert(paymentRows);
     if (paymentInsert.error) {
       throw paymentInsert.error;
     }
@@ -80,9 +87,9 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   }
 
   const expensesCheck = await supabase
-    .from('expenses')
-    .select('id')
-    .ilike('description', `${SAMPLE_PREFIX}%`)
+    .from("expenses")
+    .select("id")
+    .ilike("description", `${SAMPLE_PREFIX}%`)
     .limit(1);
 
   if (expensesCheck.error) {
@@ -90,26 +97,33 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   }
 
   if (expensesCheck.data?.length === 0) {
-    const categories = ['utilities', 'supplies', 'travel', 'software', 'equipment', 'other'] as const;
+    const categories = [
+      "utilities",
+      "supplies",
+      "travel",
+      "software",
+      "equipment",
+      "other",
+    ] as const;
     const expenseRows = months.map((date, index) => {
       const category = categories[index % categories.length];
-      const status = index <= 2 ? 'approved' : index === 3 ? 'paid' : 'pending';
+      const status = index <= 2 ? "approved" : index === 3 ? "paid" : "pending";
       const amount = 240 + index * 45;
       return {
         category,
-        description: `${SAMPLE_PREFIX} ${category} ${date.toLocaleString('default', { month: 'short', year: 'numeric' })}`,
+        description: `${SAMPLE_PREFIX} ${category} ${date.toLocaleString("default", { month: "short", year: "numeric" })}`,
         amount,
-        currency: 'USD',
+        currency: "USD",
         expense_date: asDateOnly(date),
         status,
         employee_id: user.id,
         created_by: user.id,
         created_at: formatISO(date),
-        notes: 'Seeded via demo generator',
+        notes: "Seeded via demo generator",
       };
     });
 
-    const expenseInsert = await supabase.from('expenses').insert(expenseRows);
+    const expenseInsert = await supabase.from("expenses").insert(expenseRows);
     if (expenseInsert.error) {
       throw expenseInsert.error;
     }
@@ -117,9 +131,9 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   }
 
   const transactionCheck = await supabase
-    .from('inventory_transactions')
-    .select('id')
-    .ilike('reference_number', 'DEMO-FIN-%')
+    .from("inventory_transactions")
+    .select("id")
+    .ilike("reference_number", "DEMO-FIN-%")
     .limit(1);
 
   if (transactionCheck.error) {
@@ -129,9 +143,9 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
   if (transactionCheck.data?.length === 0) {
     let itemId: string | null = null;
     const existingItem = await supabase
-      .from('inventory_items')
-      .select('id')
-      .eq('name', 'Demo Coffee Beans')
+      .from("inventory_items")
+      .select("id")
+      .eq("name", "Demo Coffee Beans")
       .maybeSingle();
 
     if (existingItem.error) {
@@ -142,22 +156,23 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
       itemId = existingItem.data.id;
     } else {
       const insertedItem = await supabase
-        .from('inventory_items')
+        .from("inventory_items")
         .insert({
-          name: 'Demo Coffee Beans',
-          description: 'Sample inventory item for analytics demo seeding',
+          name: "Demo Coffee Beans",
+          description: "Sample inventory item for analytics demo seeding",
           created_by: user.id,
           unit_price: 6.75,
-          currency: 'USD',
+          currency: "USD",
           current_stock: 200,
-          unit: 'bag',
-          status: 'active',
+          unit: "bag",
+          status: "active",
         })
-        .select('id')
+        .select("id")
         .single();
 
       if (insertedItem.error) {
-        skippedTransactions = 'Unable to create demo inventory item due to permissions.';
+        skippedTransactions =
+          "Unable to create demo inventory item due to permissions.";
       } else {
         itemId = insertedItem.data.id;
       }
@@ -176,37 +191,39 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
         return [
           {
             item_id: itemId!,
-            transaction_type: 'sale',
+            transaction_type: "sale",
             quantity: saleQuantity,
             unit_price: salePrice,
             total_amount: saleQuantity * salePrice,
             reference_number: `DEMO-FIN-SALE-${index}-${date.getFullYear()}`,
-            notes: 'Seeded sale transaction for analytics demo',
+            notes: "Seeded sale transaction for analytics demo",
             performed_by: user.id,
             created_at: formatISO(date),
           },
           {
             item_id: itemId!,
-            transaction_type: 'purchase',
+            transaction_type: "purchase",
             quantity: purchaseQuantity,
             unit_price: purchasePrice,
             total_amount: purchaseQuantity * purchasePrice,
             reference_number: `DEMO-FIN-PURCHASE-${index}-${date.getFullYear()}`,
-            notes: 'Seeded purchase transaction for analytics demo',
+            notes: "Seeded purchase transaction for analytics demo",
             performed_by: user.id,
             created_at: formatISO(date),
           },
         ];
       });
 
-      const transactionInsert = await supabase.from('inventory_transactions').insert(transactionRows);
+      const transactionInsert = await supabase
+        .from("inventory_transactions")
+        .insert(transactionRows);
       if (transactionInsert.error) {
         throw transactionInsert.error;
       }
       transactionsInserted = transactionRows.length;
     }
   } else {
-    skippedTransactions = 'Demo inventory transactions already present.';
+    skippedTransactions = "Demo inventory transactions already present.";
   }
 
   return {

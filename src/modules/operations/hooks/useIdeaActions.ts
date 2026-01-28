@@ -1,8 +1,13 @@
-import { useCallback, useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { insertIdeaAction, listIdeaActions, updateIdeaAction, type IdeaActionRecord } from '../data/ideaRepository';
+import { useCallback, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  insertIdeaAction,
+  listIdeaActions,
+  updateIdeaAction,
+  type IdeaActionRecord,
+} from "../data/ideaRepository";
 
-export type IdeaActionStatus = 'pending' | 'executed' | 'failed';
+export type IdeaActionStatus = "pending" | "executed" | "failed";
 
 interface CreateActionInput {
   recommendationId?: string;
@@ -26,9 +31,15 @@ interface IdeaActionsState {
   execute: (options: ExecuteActionOptions) => Promise<IdeaActionRecord>;
 }
 
-export function useIdeaActions(companyId: string | undefined, cycleId: string | null): IdeaActionsState {
+export function useIdeaActions(
+  companyId: string | undefined,
+  cycleId: string | null,
+): IdeaActionsState {
   const queryClient = useQueryClient();
-  const queryKey = useMemo(() => ['idea-actions', companyId, cycleId ?? 'all'], [companyId, cycleId]);
+  const queryKey = useMemo(
+    () => ["idea-actions", companyId, cycleId ?? "all"],
+    [companyId, cycleId],
+  );
 
   const actionsQuery = useQuery<IdeaActionRecord[]>({
     queryKey,
@@ -37,7 +48,7 @@ export function useIdeaActions(companyId: string | undefined, cycleId: string | 
     retry: 1,
     queryFn: async () => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       return listIdeaActions(companyId, cycleId);
     },
@@ -50,10 +61,12 @@ export function useIdeaActions(companyId: string | undefined, cycleId: string | 
   const createMutation = useMutation({
     mutationFn: async (input: CreateActionInput) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       if (!cycleId) {
-        throw new Error('Missing IDEA cycle. Wait for diagnostics to start a cycle.');
+        throw new Error(
+          "Missing IDEA cycle. Wait for diagnostics to start a cycle.",
+        );
       }
       return insertIdeaAction({
         companyId,
@@ -71,7 +84,7 @@ export function useIdeaActions(companyId: string | undefined, cycleId: string | 
   const executeMutation = useMutation({
     mutationFn: async ({ actionId, result }: ExecuteActionOptions) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       return updateIdeaAction({
         companyId,

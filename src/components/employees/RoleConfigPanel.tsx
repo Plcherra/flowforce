@@ -1,23 +1,32 @@
-import { useMemo } from 'react';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Sparkles } from 'lucide-react';
-import { useRoles, useAssignRole } from '@/hooks/useRoles';
-import { useEmployeeAccess } from './AccessControlPanel';
-import { useCopilotSuggestion } from '@/hooks/useCopilotSuggestions';
+import { useMemo } from "react";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Sparkles } from "lucide-react";
+import { useRoles, useAssignRole } from "@/hooks/useRoles";
+import { useEmployeeAccess } from "./AccessControlPanel";
+import { useCopilotSuggestion } from "@/hooks/useCopilotSuggestions";
 
-type Profile = Tables<'profiles'>;
+type Profile = Tables<"profiles">;
 
 interface RoleConfigPanelProps {
   employeeId: string;
   employee?: Profile | null;
 }
 
-export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) {
+export function RoleConfigPanel({
+  employeeId,
+  employee,
+}: RoleConfigPanelProps) {
   const { data: roles = [], isLoading } = useRoles();
   const assignRole = useAssignRole();
   const { data: access } = useEmployeeAccess(employeeId);
@@ -36,7 +45,7 @@ export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) 
     [roles],
   );
 
-  const suggestions = useCopilotSuggestion('employee_management', {
+  const suggestions = useCopilotSuggestion("employee_management", {
     context: {
       role: employee?.role,
       department: employee?.department_id,
@@ -57,10 +66,15 @@ export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) 
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground">Assign a new role to update this teammate&apos;s access.</p>
+            <p className="text-sm text-muted-foreground">
+              Assign a new role to update this teammate&apos;s access.
+            </p>
           </div>
 
-          <Select onValueChange={handleAssignRole} disabled={isLoading || assignRole.isPending}>
+          <Select
+            onValueChange={handleAssignRole}
+            disabled={isLoading || assignRole.isPending}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Assign new role" />
             </SelectTrigger>
@@ -105,7 +119,11 @@ export function RoleConfigPanel({ employeeId, employee }: RoleConfigPanelProps) 
   );
 }
 
-function PermissionsMatrix({ roles }: { roles: Array<{ id: string; name: string; permissions: string[] }> }) {
+function PermissionsMatrix({
+  roles,
+}: {
+  roles: Array<{ id: string; name: string; permissions: string[] }>;
+}) {
   const uniquePermissions = useMemo(() => {
     const permissionSet = new Set<string>();
     roles.forEach((role) => {
@@ -122,7 +140,8 @@ function PermissionsMatrix({ roles }: { roles: Array<{ id: string; name: string;
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Assign a role to preview the permissions that will apply to this teammate.
+            Assign a role to preview the permissions that will apply to this
+            teammate.
           </p>
         </CardContent>
       </Card>
@@ -136,7 +155,9 @@ function PermissionsMatrix({ roles }: { roles: Array<{ id: string; name: string;
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Assigned Roles</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            Assigned Roles
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {roles.map((role) => (
               <Badge key={role.id} variant="secondary">
@@ -147,7 +168,9 @@ function PermissionsMatrix({ roles }: { roles: Array<{ id: string; name: string;
         </div>
 
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Effective Permissions</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            Effective Permissions
+          </p>
           {uniquePermissions.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
               {uniquePermissions.map((permission) => (
@@ -171,5 +194,5 @@ function formatPermission(permission: string) {
   return permission
     .split(/[_.-]/)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
+    .join(" ");
 }

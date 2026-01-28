@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { Bot, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import AIAssistant from './AIAssistant';
-import type { AssistantAction, AssistantContext } from '@/types/ai';
+import React, { useState } from "react";
+import { Bot, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import AIAssistant from "./AIAssistant";
+import type { AssistantAction, AssistantContext } from "@/types/ai";
 
 interface FloatingAssistantProps {
   context?: AssistantContext | null;
   onTriggerAction?: (action: AssistantAction) => void;
 }
 
-export function FloatingAssistant({ context, onTriggerAction }: FloatingAssistantProps) {
+export function FloatingAssistant({
+  context,
+  onTriggerAction,
+}: FloatingAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleAssistant = () => setIsOpen((prev) => !prev);
@@ -33,7 +36,7 @@ export function FloatingAssistant({ context, onTriggerAction }: FloatingAssistan
         onClick={toggleAssistant}
       >
         <Bot className="h-4 w-4" />
-        {isOpen ? 'Hide Co-Pilot' : 'Co-Pilot Live'}
+        {isOpen ? "Hide Co-Pilot" : "Co-Pilot Live"}
         <Sparkles className="h-3 w-3 text-yellow-500" />
       </Button>
     </div>

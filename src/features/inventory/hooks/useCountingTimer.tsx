@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 export interface TimerStats {
   totalTimeSpent: number;
@@ -23,7 +23,7 @@ export function useCountingTimer() {
   useEffect(() => {
     if (isTimerRunning) {
       intervalRef.current = setInterval(() => {
-        setCountingTime(prev => prev + 1);
+        setCountingTime((prev) => prev + 1);
       }, 1000);
     } else {
       if (intervalRef.current) {
@@ -43,7 +43,7 @@ export function useCountingTimer() {
   useEffect(() => {
     if (isEditTimerRunning) {
       editIntervalRef.current = setInterval(() => {
-        setEditTime(prev => prev + 1);
+        setEditTime((prev) => prev + 1);
       }, 1000);
     } else {
       if (editIntervalRef.current) {
@@ -63,11 +63,11 @@ export function useCountingTimer() {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
   const startCountingTimer = () => setIsTimerRunning(true);
@@ -76,18 +76,21 @@ export function useCountingTimer() {
   const stopEditTimer = () => setIsEditTimerRunning(false);
 
   const generateTimerStats = (itemsCounted: number): TimerStats => {
-    const itemsPerMinute = countingTime > 0 ? (itemsCounted / (countingTime / 60)).toFixed(1) : '0.0';
+    const itemsPerMinute =
+      countingTime > 0
+        ? (itemsCounted / (countingTime / 60)).toFixed(1)
+        : "0.0";
     return {
       totalTimeSpent: countingTime,
       itemsCounted,
-      itemsPerMinute
+      itemsPerMinute,
     };
   };
 
   const generateEditStats = (itemsEdited: number): EditStats => {
     return {
       editTimeSpent: editTime,
-      itemsEdited
+      itemsEdited,
     };
   };
 
@@ -102,6 +105,6 @@ export function useCountingTimer() {
     startEditTimer,
     stopEditTimer,
     generateTimerStats,
-    generateEditStats
+    generateEditStats,
   };
 }

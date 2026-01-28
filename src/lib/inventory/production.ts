@@ -1,8 +1,11 @@
-import type { InventoryItem, InventoryUnit } from '@/features/inventory/hooks/types';
+import type {
+  InventoryItem,
+  InventoryUnit,
+} from "@/features/inventory/hooks/types";
 
 type UnitLookup = Record<string, InventoryUnit>;
 
-type ManualUnitGroup = 'weight' | 'count' | 'volume';
+type ManualUnitGroup = "weight" | "count" | "volume";
 
 type ManualUnitDefinition = {
   keys: string[];
@@ -11,12 +14,16 @@ type ManualUnitDefinition = {
 };
 
 const MANUAL_UNIT_DEFINITIONS: ManualUnitDefinition[] = [
-  { keys: ['g', 'gram', 'grams'], factor: 1, group: 'weight' },
-  { keys: ['kg', 'kilogram', 'kilograms'], factor: 1000, group: 'weight' },
-  { keys: ['mg', 'milligram', 'milligrams'], factor: 0.001, group: 'weight' },
-  { keys: ['lb', 'lbs', 'pound', 'pounds'], factor: 453.59237, group: 'weight' },
-  { keys: ['oz', 'ounce', 'ounces'], factor: 28.349523125, group: 'weight' },
-  { keys: ['each', 'ea', 'unit', 'units'], factor: 1, group: 'count' },
+  { keys: ["g", "gram", "grams"], factor: 1, group: "weight" },
+  { keys: ["kg", "kilogram", "kilograms"], factor: 1000, group: "weight" },
+  { keys: ["mg", "milligram", "milligrams"], factor: 0.001, group: "weight" },
+  {
+    keys: ["lb", "lbs", "pound", "pounds"],
+    factor: 453.59237,
+    group: "weight",
+  },
+  { keys: ["oz", "ounce", "ounces"], factor: 28.349523125, group: "weight" },
+  { keys: ["each", "ea", "unit", "units"], factor: 1, group: "count" },
 ];
 
 const manualUnitMap = (() => {
@@ -75,10 +82,13 @@ function buildUnitLookup(units: InventoryUnit[]): UnitLookup {
 
 function normaliseUnitKey(unit?: InventoryUnit | null): string | null {
   if (!unit) return null;
-  return (unit.abbreviation || unit.name || '').toLowerCase() || null;
+  return (unit.abbreviation || unit.name || "").toLowerCase() || null;
 }
 
-function manualConversionFactor(from?: InventoryUnit | null, to?: InventoryUnit | null): number | null {
+function manualConversionFactor(
+  from?: InventoryUnit | null,
+  to?: InventoryUnit | null,
+): number | null {
   if (!from || !to) return null;
   const fromKey = normaliseUnitKey(from);
   const toKey = normaliseUnitKey(to);
@@ -92,7 +102,10 @@ function manualConversionFactor(from?: InventoryUnit | null, to?: InventoryUnit 
   return fromDef.factor / toDef.factor;
 }
 
-function factorToRoot(unitsById: UnitLookup, unitId: string): { rootId: string; factor: number } | null {
+function factorToRoot(
+  unitsById: UnitLookup,
+  unitId: string,
+): { rootId: string; factor: number } | null {
   const visited = new Set<string>();
   let current = unitsById[unitId];
   if (!current) {
@@ -184,17 +197,20 @@ function round(value: number, precision = 4): number {
   return Math.round((value + Number.EPSILON) * factor) / factor;
 }
 
-export function calculateProductionMaterials(input: ProductionCalculationInput): ProductionCalculationResult {
+export function calculateProductionMaterials(
+  input: ProductionCalculationInput,
+): ProductionCalculationResult {
   const { item, producedQuantity, producedUnitId, recipeLines, units } = input;
   const unitsById = buildUnitLookup(units);
   const warnings: string[] = [];
 
-  const { value: producedQuantityInItemUnit, factor: producedFactor } = convertQuantityWithFallback(
-    unitsById,
-    producedQuantity,
-    producedUnitId,
-    item.unit_id,
-  );
+  const { value: producedQuantityInItemUnit, factor: producedFactor } =
+    convertQuantityWithFallback(
+      unitsById,
+      producedQuantity,
+      producedUnitId,
+      item.unit_id,
+    );
 
   if (producedFactor == null) {
     warnings.push(
@@ -210,38 +226,55 @@ export function calculateProductionMaterials(input: ProductionCalculationInput):
     const ingredient = line.ingredient ?? null;
     const ingredientUnitId = ingredient?.unit_id ?? line.unit_id;
     if (!ingredientUnitId) {
-      warnings.push(`Missing unit information for ingredient ${line.ingredient_id}`);
+      warnings.push(
+        `Missing unit information for ingredient ${line.ingredient_id}`,
+      );
       continue;
     }
 
-    const multiplierSource = line.yield_amount && line.yield_amount > 0 ? line.yield_amount : 1;
+    const multiplierSource =
+      line.yield_amount && line.yield_amount > 0 ? line.yield_amount : 1;
     const multiplier = finalProducedQuantity / multiplierSource;
-    const quantityInRecipeUnit = round((line.quantity_needed || 0) * multiplier, 6);
-
-    const { value: quantityInIngredientUnit, factor: conversionFactor } = convertQuantityWithFallback(
-      unitsById,
-      quantityInRecipeUnit,
-      line.unit_id,
-      ingredientUnitId,
+    const quantityInRecipeUnit = round(
+      (line.quantity_needed || 0) * multiplier,
+      6,
     );
+
+    const { value: quantityInIngredientUnit, factor: conversionFactor } =
+      convertQuantityWithFallback(
+        unitsById,
+        quantityInRecipeUnit,
+        line.unit_id,
+        ingredientUnitId,
+      );
 
     if (conversionFactor == null && line.unit_id !== ingredientUnitId) {
       const fromUnit = unitsById[line.unit_id];
       const toUnit = unitsById[ingredientUnitId];
       warnings.push(
-        `Could not convert ${quantityInRecipeUnit} ${fromUnit?.abbreviation || fromUnit?.name || 'units'} of ${
-          ingredient?.name || 'ingredient'
-        } to ${toUnit?.abbreviation || toUnit?.name || 'target unit'}; using recipe unit`,
+        `Could not convert ${quantityInRecipeUnit} ${fromUnit?.abbreviation || fromUnit?.name || "units"} of ${
+          ingredient?.name || "ingredient"
+        } to ${toUnit?.abbreviation || toUnit?.name || "target unit"}; using recipe unit`,
       );
     }
 
     const unitCost = ingredient?.cost_per_unit ?? 0;
-    const totalCost = round((conversionFactor == null ? quantityInRecipeUnit : quantityInIngredientUnit) * unitCost, 4);
+    const totalCost = round(
+      (conversionFactor == null
+        ? quantityInRecipeUnit
+        : quantityInIngredientUnit) * unitCost,
+      4,
+    );
 
     materials.push({
       ingredientId: line.ingredient_id,
       ingredient,
-      quantityUsed: round(conversionFactor == null ? quantityInRecipeUnit : quantityInIngredientUnit, 4),
+      quantityUsed: round(
+        conversionFactor == null
+          ? quantityInRecipeUnit
+          : quantityInIngredientUnit,
+        4,
+      ),
       quantityInRecipeUnit: round(quantityInRecipeUnit, 4),
       unitId: ingredientUnitId,
       unit: unitsById[ingredientUnitId],
@@ -252,7 +285,10 @@ export function calculateProductionMaterials(input: ProductionCalculationInput):
     });
   }
 
-  const materialCostTotal = round(materials.reduce((sum, material) => sum + (material.totalCost || 0), 0), 4);
+  const materialCostTotal = round(
+    materials.reduce((sum, material) => sum + (material.totalCost || 0), 0),
+    4,
+  );
 
   return {
     producedQuantityInItemUnit: finalProducedQuantity,

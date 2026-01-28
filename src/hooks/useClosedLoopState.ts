@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import {
   buildClosedLoopState,
   type BuildClosedLoopStateParams,
   type ClosedLoopState,
-} from '@/services/intelligence/closedLoopEngine';
+} from "@/services/intelligence/closedLoopEngine";
 
 export interface UseClosedLoopOptions {
   rangeDays?: number;
-  aiType?: BuildClosedLoopStateParams['aiType'];
+  aiType?: BuildClosedLoopStateParams["aiType"];
   enabled?: boolean;
 }
 
@@ -21,16 +21,18 @@ export interface UseClosedLoopResult {
   refetch: () => Promise<ClosedLoopState | undefined>;
 }
 
-export function useClosedLoopState(options: UseClosedLoopOptions = {}): UseClosedLoopResult {
+export function useClosedLoopState(
+  options: UseClosedLoopOptions = {},
+): UseClosedLoopResult {
   const { user } = useAuth();
   const enabled = Boolean(user?.id) && (options.enabled ?? true);
 
   const queryKey = useMemo(
     () => [
-      'closed-loop-state',
-      user?.id ?? 'anonymous',
+      "closed-loop-state",
+      user?.id ?? "anonymous",
       options.rangeDays ?? 14,
-      options.aiType ?? 'dashboard',
+      options.aiType ?? "dashboard",
     ],
     [user?.id, options.rangeDays, options.aiType],
   );
@@ -61,5 +63,4 @@ export function useClosedLoopState(options: UseClosedLoopOptions = {}): UseClose
   };
 }
 
-export type { ClosedLoopState } from '@/services/intelligence/closedLoopEngine';
-
+export type { ClosedLoopState } from "@/services/intelligence/closedLoopEngine";

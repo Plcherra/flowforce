@@ -1,14 +1,27 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Hash, Users, Lock, MessageSquare, Search, Megaphone } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import type { MessageChannel } from '@/types/messages';
-import { Input } from '@/components/ui/input';
-import { MessageFilterBar } from '@/components/MessageFilterBar';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Hash,
+  Users,
+  Lock,
+  MessageSquare,
+  Search,
+  Megaphone,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { MessageChannel } from "@/types/messages";
+import { Input } from "@/components/ui/input";
+import { MessageFilterBar } from "@/components/MessageFilterBar";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface MessagesSidebarProps {
   channels: MessageChannel[];
@@ -22,8 +35,8 @@ interface MessagesSidebarProps {
   query?: string;
   onQueryChange?: (v: string) => void;
   // Filters
-  activeFilter?: 'all' | 'unread' | 'teams' | 'helpdesk';
-  onFilterChange?: (v: 'all' | 'unread' | 'teams' | 'helpdesk') => void;
+  activeFilter?: "all" | "unread" | "teams" | "helpdesk";
+  onFilterChange?: (v: "all" | "unread" | "teams" | "helpdesk") => void;
   // Availability toggle (optional)
   canShowAvailability?: boolean;
   available?: boolean;
@@ -48,7 +61,7 @@ export function MessagesSidebar({
 }: MessagesSidebarProps) {
   const getChannelIcon = (type: string, isPrivate: boolean) => {
     if (isPrivate) return <Lock className="h-4 w-4" />;
-    if (type === 'direct') return <Users className="h-4 w-4" />;
+    if (type === "direct") return <Users className="h-4 w-4" />;
     return <Hash className="h-4 w-4" />;
   };
 
@@ -57,19 +70,21 @@ export function MessagesSidebar({
       <div className="space-y-3 border-b border-border/70 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Communication</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Communication
+            </p>
             <h2 className="text-lg font-semibold">Channels</h2>
           </div>
           <div className="flex items-center gap-2">
-            {canShowAvailability && typeof onToggleAvailable === 'function' && (
+            {canShowAvailability && typeof onToggleAvailable === "function" && (
               <Button
                 size="sm"
-                variant={available ? 'default' : 'outline'}
+                variant={available ? "default" : "outline"}
                 onClick={() => {
                   void onToggleAvailable(!available);
                 }}
               >
-                {available ? 'Available' : 'Set as Away'}
+                {available ? "Available" : "Set as Away"}
               </Button>
             )}
             <DropdownMenu>
@@ -96,12 +111,12 @@ export function MessagesSidebar({
           </div>
         </div>
 
-        {typeof onFilterChange === 'function' && activeFilter && (
+        {typeof onFilterChange === "function" && activeFilter && (
           <MessageFilterBar active={activeFilter} onChange={onFilterChange} />
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          {typeof onQueryChange === 'function' && typeof query === 'string' && (
+          {typeof onQueryChange === "function" && typeof query === "string" && (
             <div className="flex-1">
               <Label htmlFor="messages-sidebar-search" className="sr-only">
                 Search channels
@@ -138,10 +153,10 @@ export function MessagesSidebar({
                   key={channel.id}
                   type="button"
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    "flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     currentChannelId === channel.id
-                      ? 'border-primary bg-primary/5 shadow-sm'
-                      : 'hover:border-primary/40 hover:bg-primary/5'
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "hover:border-primary/40 hover:bg-primary/5",
                   )}
                   onClick={() => onChannelSelect(channel.id)}
                   aria-pressed={currentChannelId === channel.id}

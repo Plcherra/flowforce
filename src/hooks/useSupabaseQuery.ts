@@ -1,8 +1,8 @@
 /**
  * useSupabaseQuery - React Query helper for Supabase queries with automatic company_id filtering
- * 
+ *
  * Phase 4 Optimization: Provides consistent caching and company_id injection across hooks
- * 
+ *
  * Features:
  * - Automatic company_id injection from profile context
  * - Consistent staleTime and gcTime defaults
@@ -10,11 +10,15 @@
  * - Memoized responses
  */
 
-import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query';
-import { useProfile } from './useProfile';
-import { supabase } from '@/integrations/supabase/client';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  useQuery,
+  type UseQueryOptions,
+  type UseQueryResult,
+} from "@tanstack/react-query";
+import { useProfile } from "./useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type QueryBuilder<T> = (
   client: SupabaseClient,
@@ -38,7 +42,8 @@ export function useSupabaseQuery<TData, TError = Error>(
   options: UseSupabaseQueryOptions<TData, TError>,
 ): UseQueryResult<TData[], TError> {
   const { profile } = useProfile();
-  const companyId = options.companyId ?? profile?.companyId ?? profile?.company_id ?? null;
+  const companyId =
+    options.companyId ?? profile?.companyId ?? profile?.company_id ?? null;
 
   return useQuery<TData[], TError>({
     queryKey: [...options.queryKey, companyId],
@@ -61,7 +66,7 @@ export function useSupabaseQuery<TData, TError = Error>(
 
 /**
  * Example usage:
- * 
+ *
  * const { data: employees, isLoading } = useSupabaseQuery<Employee>({
  *   queryKey: ['employees'],
  *   queryFn: (client, companyId) =>

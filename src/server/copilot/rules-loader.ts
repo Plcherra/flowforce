@@ -1,12 +1,14 @@
 // src/server/copilot/rules-loader.ts
 // Loads and caches active rulesets. Replace in-memory stub with DB access later.
 
-export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
-export type Area = 'FOH' | 'BOH';
+export type Weekday = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
+export type Area = "FOH" | "BOH";
 
 export interface ScheduleRules {
   // Example: hard caps per area/day
-  caps?: Partial<Record<Area, Partial<Record<Weekday, { min?: number; max?: number }>>>>;
+  caps?: Partial<
+    Record<Area, Partial<Record<Weekday, { min?: number; max?: number }>>>
+  >;
   // Example: certain roles must have open/close capability
   requireCloser?: boolean;
   // Example: disallow trainees alone for some roles/areas
@@ -42,13 +44,13 @@ export interface Ruleset {
 const cache = new Map<string, Ruleset>(); // key = orgId|locationId
 
 function cacheKey(orgId: string, locationId?: string) {
-  return `${orgId}|${locationId ?? 'org'}`;
+  return `${orgId}|${locationId ?? "org"}`;
 }
 
 // Default ruleset (safe, conservative). Adjust after wiring your Rules page.
 const DEFAULT_RULESET: Ruleset = {
-  orgId: 'default',
-  version: 'v0',
+  orgId: "default",
+  version: "v0",
   updatedAt: new Date().toISOString(),
   schedule: {
     caps: {
@@ -80,7 +82,7 @@ const DEFAULT_RULESET: Ruleset = {
     defaultUnits: {},
   },
   availability: {
-    submissionDeadline: 'ThuT18:00',
+    submissionDeadline: "ThuT18:00",
     maxWeeklyHours: 60,
     minRestBetweenShiftsHours: 10,
   },
@@ -90,7 +92,10 @@ const DEFAULT_RULESET: Ruleset = {
  * Load active ruleset for an org/location.
  * Replace with a DB call (e.g., Supabase) and populate cache.
  */
-export async function loadActiveRuleset(orgId: string, locationId?: string): Promise<Ruleset> {
+export async function loadActiveRuleset(
+  orgId: string,
+  locationId?: string,
+): Promise<Ruleset> {
   const key = cacheKey(orgId, locationId);
   const existing = cache.get(key);
   if (existing) return existing;

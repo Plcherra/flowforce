@@ -1,39 +1,55 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, Camera, Settings } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
+  Camera,
+  Settings,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface VideoCallDialogProps {
   isOpen: boolean;
   onClose: () => void;
   channelName: string;
   participants: Array<{ id: string; name: string; avatar?: string }>;
-  callType: 'video' | 'audio';
+  callType: "video" | "audio";
 }
 
-export function VideoCallDialog({ 
-  isOpen, 
-  onClose, 
-  channelName, 
-  participants, 
-  callType 
+export function VideoCallDialog({
+  isOpen,
+  onClose,
+  channelName,
+  participants,
+  callType,
 }: VideoCallDialogProps) {
   const { toast } = useToast();
-  const [isVideoEnabled, setIsVideoEnabled] = useState(callType === 'video');
+  const [isVideoEnabled, setIsVideoEnabled] = useState(callType === "video");
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [callStatus, setCallStatus] = useState<'connecting' | 'connected' | 'ended'>('connecting');
+  const [callStatus, setCallStatus] = useState<
+    "connecting" | "connected" | "ended"
+  >("connecting");
   const [callDuration, setCallDuration] = useState(0);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const intervalRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    if (isOpen && callStatus === 'connected') {
+    if (isOpen && callStatus === "connected") {
       intervalRef.current = setInterval(() => {
-        setCallDuration(prev => prev + 1);
+        setCallDuration((prev) => prev + 1);
       }, 1000);
     }
 
@@ -49,7 +65,7 @@ export function VideoCallDialog({
       initializeMedia();
       // Simulate connection after 2 seconds
       setTimeout(() => {
-        setCallStatus('connected');
+        setCallStatus("connected");
         toast({
           title: "Call Connected",
           description: `Connected to ${channelName}`,
@@ -61,15 +77,15 @@ export function VideoCallDialog({
   const initializeMedia = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: callType === 'video',
-        audio: true
+        video: callType === "video",
+        audio: true,
       });
 
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
     } catch (error) {
-      logger.error('Error accessing media:', { error, tags: ['error'] });
+      logger.error("Error accessing media:", { error, tags: ["error"] });
       toast({
         title: "Media Access Error",
         description: "Could not access camera or microphone",
@@ -89,13 +105,13 @@ export function VideoCallDialog({
   };
 
   const endCall = () => {
-    setCallStatus('ended');
+    setCallStatus("ended");
     setCallDuration(0);
-    
+
     // Stop media streams
     if (localVideoRef.current?.srcObject) {
       const stream = localVideoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
     }
 
     toast({
@@ -109,7 +125,7 @@ export function VideoCallDialog({
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -120,20 +136,22 @@ export function VideoCallDialog({
           <div className="flex items-center justify-between p-4 bg-gray-800">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                {callType === 'video' ? (
+                {callType === "video" ? (
                   <Video className="h-5 w-5 text-blue-400" />
                 ) : (
                   <Phone className="h-5 w-5 text-green-400" />
                 )}
                 <h3 className="font-semibold">{channelName}</h3>
               </div>
-              <Badge variant={callStatus === 'connected' ? 'default' : 'secondary'}>
-                {callStatus === 'connecting' && 'Connecting...'}
-                {callStatus === 'connected' && formatDuration(callDuration)}
-                {callStatus === 'ended' && 'Call Ended'}
+              <Badge
+                variant={callStatus === "connected" ? "default" : "secondary"}
+              >
+                {callStatus === "connecting" && "Connecting..."}
+                {callStatus === "connected" && formatDuration(callDuration)}
+                {callStatus === "ended" && "Call Ended"}
               </Badge>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm text-gray-300">
               <span>{participants.length} participants</span>
             </div>
@@ -144,7 +162,7 @@ export function VideoCallDialog({
             {/* Local Video */}
             <Card className="relative bg-gray-800 border-gray-700">
               <CardContent className="p-0 h-full">
-                {isVideoEnabled && callType === 'video' ? (
+                {isVideoEnabled && callType === "video" ? (
                   <video
                     ref={localVideoRef}
                     autoPlay
@@ -155,30 +173,40 @@ export function VideoCallDialog({
                   <div className="flex items-center justify-center h-full bg-gray-700 rounded-lg">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-xl font-semibold text-white">You</span>
+                        <span className="text-xl font-semibold text-white">
+                          You
+                        </span>
                       </div>
                       <p className="text-sm text-gray-300">Camera off</p>
                     </div>
                   </div>
                 )}
                 <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-xs">
-                  You {!isAudioEnabled && '(muted)'}
+                  You {!isAudioEnabled && "(muted)"}
                 </div>
               </CardContent>
             </Card>
 
             {/* Remote Participants */}
             {participants.slice(0, 3).map((participant, index) => (
-              <Card key={participant.id} className="relative bg-gray-800 border-gray-700">
+              <Card
+                key={participant.id}
+                className="relative bg-gray-800 border-gray-700"
+              >
                 <CardContent className="p-0 h-full">
                   <div className="flex items-center justify-center h-full bg-gray-700 rounded-lg">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
                         <span className="text-xl font-semibold text-white">
-                          {participant.name.split(' ').map(n => n[0]).join('')}
+                          {participant.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300">{participant.name}</p>
+                      <p className="text-sm text-gray-300">
+                        {participant.name}
+                      </p>
                     </div>
                   </div>
                   <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-xs">
@@ -197,25 +225,29 @@ export function VideoCallDialog({
               className="rounded-full p-3"
               onClick={toggleAudio}
             >
-              {isAudioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+              {isAudioEnabled ? (
+                <Mic className="h-5 w-5" />
+              ) : (
+                <MicOff className="h-5 w-5" />
+              )}
             </Button>
 
-            {callType === 'video' && (
+            {callType === "video" && (
               <Button
                 variant={isVideoEnabled ? "default" : "destructive"}
                 size="lg"
                 className="rounded-full p-3"
                 onClick={toggleVideo}
               >
-                {isVideoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+                {isVideoEnabled ? (
+                  <Video className="h-5 w-5" />
+                ) : (
+                  <VideoOff className="h-5 w-5" />
+                )}
               </Button>
             )}
 
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full p-3"
-            >
+            <Button variant="outline" size="lg" className="rounded-full p-3">
               <Settings className="h-5 w-5" />
             </Button>
 

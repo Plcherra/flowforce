@@ -1,9 +1,8 @@
-
-import { Button } from '@/components/ui/button';
-import { Building2, Play, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { DemoModal } from '@/components/DemoModal';
-import { useTranslation } from 'react-i18next';
+import { Button } from "@/components/ui/button";
+import { Building2, Play, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { DemoModal } from "@/components/DemoModal";
+import { useTranslation } from "react-i18next";
 
 export function HeroSection() {
   const navigate = useNavigate();
@@ -23,40 +22,40 @@ export function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#3F51B5]/10 text-[#3F51B5] text-sm font-medium mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-[#3F51B5] rounded-full mr-2 animate-pulse"></span>
-            {t('landing.usedBy')}
+            {t("landing.usedBy")}
           </div>
 
           {/* Main Headline */}
           <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in">
-            {t('landing.operationsMade')}
-            <span className="text-primary block">{t('landing.simple')}</span>
+            {t("landing.operationsMade")}
+            <span className="text-primary block">{t("landing.simple")}</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl lg:text-2xl text-gray-600 mb-8 leading-relaxed animate-fade-in">
-            {t('landing.subtitle')}
+            {t("landing.subtitle")}
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg font-semibold group transition-all duration-300 hover:scale-105"
-              onClick={() => navigate('/company-registration')}
+              onClick={() => navigate("/company-registration")}
             >
               <Building2 className="mr-2 h-5 w-5" />
-              {t('landing.registerCompany')}
+              {t("landing.registerCompany")}
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            
+
             <DemoModal>
-              <Button 
-                variant="outline" 
-                size="lg" 
+              <Button
+                variant="outline"
+                size="lg"
                 className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg font-semibold group transition-all duration-300"
               >
                 <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                {t('landing.watchDemo')}
+                {t("landing.watchDemo")}
               </Button>
             </DemoModal>
           </div>
@@ -65,15 +64,21 @@ export function HeroSection() {
           <div className="flex flex-wrap gap-8 mt-12 pt-8 border-t border-gray-200 animate-fade-in">
             <div>
               <div className="text-2xl font-bold text-gray-900">20%</div>
-              <div className="text-sm text-gray-600">{t('landing.fasterScheduling')}</div>
+              <div className="text-sm text-gray-600">
+                {t("landing.fasterScheduling")}
+              </div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">15min</div>
-              <div className="text-sm text-gray-600">{t('landing.averageSetup')}</div>
+              <div className="text-sm text-gray-600">
+                {t("landing.averageSetup")}
+              </div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">99.9%</div>
-              <div className="text-sm text-gray-600">{t('landing.uptimeGuarantee')}</div>
+              <div className="text-sm text-gray-600">
+                {t("landing.uptimeGuarantee")}
+              </div>
             </div>
           </div>
         </div>

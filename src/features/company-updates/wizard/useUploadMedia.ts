@@ -1,20 +1,20 @@
-import { useCallback, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { UpdateMediaItem } from './types';
+import { useCallback, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { UpdateMediaItem } from "./types";
 
-const BUCKET = 'company-updates-media';
+const BUCKET = "company-updates-media";
 
 const generateId = () => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
   return Math.random().toString(36).slice(2);
 };
 
-const resolveMediaType = (file: File): UpdateMediaItem['type'] => {
-  if (file.type.startsWith('image/')) return 'image';
-  if (file.type.startsWith('video/')) return 'video';
-  return 'file';
+const resolveMediaType = (file: File): UpdateMediaItem["type"] => {
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  return "file";
 };
 
 export function useUploadMedia() {
@@ -42,18 +42,22 @@ export function useUploadMedia() {
         const fileId = generateId();
         const path = `drafts/${new Date().toISOString().slice(0, 10)}/${fileId}-${file.name}`;
 
-        const { error: uploadError, data } = await supabase.storage.from(BUCKET).upload(path, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+        const { error: uploadError, data } = await supabase.storage
+          .from(BUCKET)
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
 
         if (uploadError) {
           throw uploadError;
         }
 
-        const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(data.path, {
-          download: false,
-        });
+        const { data: publicData } = supabase.storage
+          .from(BUCKET)
+          .getPublicUrl(data.path, {
+            download: false,
+          });
 
         uploaded.push({
           id: fileId,
@@ -71,7 +75,8 @@ export function useUploadMedia() {
 
       return uploaded;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to upload media.';
+      const message =
+        err instanceof Error ? err.message : "Unable to upload media.";
       setError(message);
       return [];
     } finally {

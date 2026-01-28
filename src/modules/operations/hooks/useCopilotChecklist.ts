@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { PostgrestError } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
-import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { PostgrestError } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
+import { logger } from "@/utils/logger";
 
-type TaskStatus = 'pending' | 'done' | 'missed';
+type TaskStatus = "pending" | "done" | "missed";
 
 type ChecklistRow = {
   id: string;
@@ -100,7 +100,7 @@ type PlannedAssignmentUpdate = {
 
 type AssignmentEvent =
   | {
-      type: 'created';
+      type: "created";
       fingerprint: string;
       checklistId: string;
       title: string;
@@ -108,7 +108,7 @@ type AssignmentEvent =
       assigneeName: string | null;
     }
   | {
-      type: 'updated';
+      type: "updated";
       taskId: string;
       checklistId: string;
       title: string;
@@ -133,17 +133,18 @@ export interface ChecklistPlanResult {
 }
 
 const NORMALISE = (value: string) => value.trim().toLowerCase();
-const buildFingerprint = (checklistId: string, title: string) => `${checklistId}::${NORMALISE(title)}`;
+const buildFingerprint = (checklistId: string, title: string) =>
+  `${checklistId}::${NORMALISE(title)}`;
 
 const parseDefaultTasks = (value: unknown): DefaultTask[] => {
   if (!value) return [];
   if (Array.isArray(value)) {
     return value
       .map((entry) => {
-        if (!entry || typeof entry !== 'object') return null;
+        if (!entry || typeof entry !== "object") return null;
         const title = (entry as { title?: string }).title;
-        if (typeof title !== 'string' || title.trim().length === 0) return null;
-        const role = (entry as { role?: string }).role ?? 'supervisor';
+        if (typeof title !== "string" || title.trim().length === 0) return null;
+        const role = (entry as { role?: string }).role ?? "supervisor";
         return { title, role } satisfies DefaultTask;
       })
       .filter((entry): entry is DefaultTask => Boolean(entry));
@@ -151,7 +152,8 @@ const parseDefaultTasks = (value: unknown): DefaultTask[] => {
   return [];
 };
 
-const isSupervisorRole = (value: string | null | undefined) => (value ?? '').toLowerCase() === 'supervisor';
+const isSupervisorRole = (value: string | null | undefined) =>
+  (value ?? "").toLowerCase() === "supervisor";
 
 const mapTaskRowToChecklistTask = (
   row: TaskRow,
@@ -164,10 +166,12 @@ const mapTaskRowToChecklistTask = (
   title:
     (row.metadata as { defaultTitle?: string } | null)?.defaultTitle ??
     (row.metadata as { title?: string } | null)?.title ??
-    'Task',
-  status: (row.status as TaskStatus) ?? 'pending',
+    "Task",
+  status: (row.status as TaskStatus) ?? "pending",
   assignedTo: row.assigned_to,
-  assigneeName: row.assigned_to ? employeeNames.get(row.assigned_to) ?? null : null,
+  assigneeName: row.assigned_to
+    ? (employeeNames.get(row.assigned_to) ?? null)
+    : null,
   storeId: row.store_id,
   day: row.day,
 });
@@ -195,7 +199,8 @@ export function generateChecklistPlan({
 
   const nextSupervisor = () => {
     if (supervisorQueue.length === 0) return null;
-    const supervisor = supervisorQueue[supervisorIndex % supervisorQueue.length];
+    const supervisor =
+      supervisorQueue[supervisorIndex % supervisorQueue.length];
     supervisorIndex += 1;
     return supervisor;
   };
@@ -206,7 +211,8 @@ export function generateChecklistPlan({
   existingTasks.forEach((task) => {
     const checklist = checklistIndex.get(task.checklist_id);
     if (!checklist) return;
-    const defaultTitle = (task.metadata as { defaultTitle?: string } | null)?.defaultTitle;
+    const defaultTitle = (task.metadata as { defaultTitle?: string } | null)
+      ?.defaultTitle;
     const fingerprint = defaultTitle
       ? buildFingerprint(task.checklist_id, defaultTitle)
       : buildFingerprint(task.checklist_id, task.id);
@@ -222,8 +228,10 @@ export function generateChecklistPlan({
     const checklist = checklistIndex.get(task.checklist_id);
     if (!checklist) return;
     const defaultTasks = parseDefaultTasks(checklist.default_tasks);
-    const defaultTitle = (task.metadata as { defaultTitle?: string } | null)?.defaultTitle ??
-      defaultTasks[0]?.title ?? 'Task';
+    const defaultTitle =
+      (task.metadata as { defaultTitle?: string } | null)?.defaultTitle ??
+      defaultTasks[0]?.title ??
+      "Task";
     const fingerprint = buildFingerprint(task.checklist_id, defaultTitle);
     fingerprintsByTaskId.set(task.id, fingerprint);
 
@@ -239,7 +247,7 @@ export function generateChecklistPlan({
     });
 
     assignmentEvents.push({
-      type: 'updated',
+      type: "updated",
       taskId: task.id,
       checklistId: task.checklist_id,
       title: defaultTitle,
@@ -249,17 +257,19 @@ export function generateChecklistPlan({
   });
 
   checklists.forEach((checklist) => {
-    if (checklist.recurrence !== 'daily') return;
+    if (checklist.recurrence !== "daily") return;
     const defaults = parseDefaultTasks(checklist.default_tasks);
     defaults.forEach((defaultTask) => {
       const fingerprint = buildFingerprint(checklist.id, defaultTask.title);
       if (existingTaskMap.has(fingerprint)) return;
-      const supervisor = isSupervisorRole(defaultTask.role ?? 'supervisor') ? nextSupervisor() : null;
+      const supervisor = isSupervisorRole(defaultTask.role ?? "supervisor")
+        ? nextSupervisor()
+        : null;
 
       const metadata = {
-        source: 'copilot',
+        source: "copilot",
         defaultTitle: defaultTask.title,
-        defaultRole: defaultTask.role ?? 'supervisor',
+        defaultRole: defaultTask.role ?? "supervisor",
         fingerprint,
       } satisfies Record<string, unknown>;
 
@@ -274,7 +284,7 @@ export function generateChecklistPlan({
           company_id: companyId,
           store_id: storeId,
           day,
-          status: 'pending',
+          status: "pending",
           assigned_to: supervisor?.employeeId ?? null,
           metadata,
         },
@@ -282,7 +292,7 @@ export function generateChecklistPlan({
 
       if (supervisor?.employeeId) {
         assignmentEvents.push({
-          type: 'created',
+          type: "created",
           fingerprint,
           checklistId: checklist.id,
           title: defaultTask.title,
@@ -310,7 +320,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
   const targetDay = useMemo(() => {
     const iso = date.toISOString();
-    return iso.split('T')[0] ?? iso;
+    return iso.split("T")[0] ?? iso;
   }, [date]);
 
   const refresh = useCallback(async () => {
@@ -319,54 +329,61 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
     try {
       const checklistsQuery = supabase
-        .from('operations_checklists')
-        .select('id, name, recurrence, default_tasks')
-        .eq('company_id', companyId);
+        .from("operations_checklists")
+        .select("id, name, recurrence, default_tasks")
+        .eq("company_id", companyId);
 
       const tasksQuery = supabase
-        .from('operations_tasks')
-        .select('id, checklist_id, assigned_to, store_id, day, status, metadata')
-        .eq('company_id', companyId)
-        .eq('day', targetDay);
+        .from("operations_tasks")
+        .select(
+          "id, checklist_id, assigned_to, store_id, day, status, metadata",
+        )
+        .eq("company_id", companyId)
+        .eq("day", targetDay);
 
       if (storeId) {
-        tasksQuery.eq('store_id', storeId);
+        tasksQuery.eq("store_id", storeId);
       }
 
       const shiftsQuery = supabase
-        .from('schedule_shifts')
-        .select('employee_id, role, store_id, day')
-        .eq('company_id', companyId)
-        .eq('day', targetDay);
+        .from("schedule_shifts")
+        .select("employee_id, role, store_id, day")
+        .eq("company_id", companyId)
+        .eq("day", targetDay);
 
       if (storeId) {
-        shiftsQuery.eq('store_id', storeId);
+        shiftsQuery.eq("store_id", storeId);
       }
 
       const employeesQuery = supabase
-        .from('employees')
-        .select('id, name, display_name')
-        .eq('company_id', companyId)
-        .eq('active', true);
+        .from("employees")
+        .select("id, name, display_name")
+        .eq("company_id", companyId)
+        .eq("active", true);
 
-      const [checklistsRes, tasksRes, shiftsRes, employeesRes] = await Promise.all([
-        checklistsQuery,
-        tasksQuery,
-        shiftsQuery,
-        employeesQuery,
-      ]);
+      const [checklistsRes, tasksRes, shiftsRes, employeesRes] =
+        await Promise.all([
+          checklistsQuery,
+          tasksQuery,
+          shiftsQuery,
+          employeesQuery,
+        ]);
 
       const responses = [
-        { label: 'operations_checklists', response: checklistsRes },
-        { label: 'operations_tasks', response: tasksRes },
-        { label: 'schedule_shifts', response: shiftsRes },
-        { label: 'employees', response: employeesRes },
+        { label: "operations_checklists", response: checklistsRes },
+        { label: "operations_tasks", response: tasksRes },
+        { label: "schedule_shifts", response: shiftsRes },
+        { label: "employees", response: employeesRes },
       ];
 
       const failed = responses.filter(({ response }) => response.error);
       if (failed.length > 0) {
         failed.forEach(({ label, response }) => {
-          logger.error('[useCopilotChecklist] Query failed', { context: { label }, error: response.error, tags: ['error'] });
+          logger.error("[useCopilotChecklist] Query failed", {
+            context: { label },
+            error: response.error,
+            tags: ["error"],
+          });
         });
         throw failed[0].response.error as PostgrestError;
       }
@@ -378,12 +395,17 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
       const employeeNames = new Map<string, string>();
       employees.forEach((employee) => {
-        const label = employee.name ?? employee.display_name ?? `Employee ${employee.id.slice(0, 6)}`;
+        const label =
+          employee.name ??
+          employee.display_name ??
+          `Employee ${employee.id.slice(0, 6)}`;
         employeeNames.set(employee.id, label);
       });
 
       const supervisors = shifts
-        .filter((shift) => Boolean(shift.employee_id) && isSupervisorRole(shift.role))
+        .filter(
+          (shift) => Boolean(shift.employee_id) && isSupervisorRole(shift.role),
+        )
         .map((shift) => ({
           employeeId: shift.employee_id as string,
           employeeName: employeeNames.get(shift.employee_id as string) ?? null,
@@ -402,23 +424,27 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       let insertedRows: TaskRow[] = [];
       if (plan.creations.length > 0) {
         const { data, error } = await supabase
-          .from('operations_tasks')
+          .from("operations_tasks")
           .insert(plan.creations.map((item) => item.payload))
-          .select('id, checklist_id, assigned_to, store_id, day, status, metadata');
+          .select(
+            "id, checklist_id, assigned_to, store_id, day, status, metadata",
+          );
         if (error) throw error;
         insertedRows = (data ?? []) as TaskRow[];
       }
 
       if (plan.updates.length > 0) {
-        const { error } = await supabase
-          .from('operations_tasks')
-          .upsert(plan.updates.map(({ id, assigned_to }) => ({ id, assigned_to })), { onConflict: 'id' });
+        const { error } = await supabase.from("operations_tasks").upsert(
+          plan.updates.map(({ id, assigned_to }) => ({ id, assigned_to })),
+          { onConflict: "id" },
+        );
         if (error) throw error;
       }
 
       const insertedByFingerprint = new Map<string, TaskRow>();
       insertedRows.forEach((row) => {
-        const fingerprint = (row.metadata as { fingerprint?: string } | null)?.fingerprint;
+        const fingerprint = (row.metadata as { fingerprint?: string } | null)
+          ?.fingerprint;
         if (fingerprint) {
           insertedByFingerprint.set(fingerprint, row);
         }
@@ -428,7 +454,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       if (plan.assignmentEvents.length > 0 && companyId && actorUserId) {
         plan.assignmentEvents.forEach((event) => {
           let taskId: string | null = null;
-          if (event.type === 'updated') {
+          if (event.type === "updated") {
             taskId = event.taskId;
           } else {
             const matched = insertedByFingerprint.get(event.fingerprint);
@@ -438,19 +464,20 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
           actions.push({
             companyId,
             actorUserId,
-            source: 'scheduler',
+            source: "scheduler",
             dedupeKey: `task_auto_assign::${taskId}`,
-            actionType: 'task_auto_assign',
-            status: 'queued',
+            actionType: "task_auto_assign",
+            status: "queued",
             payload: {
-              type: 'task_auto_assign',
+              type: "task_auto_assign",
               taskId,
               checklistId: event.checklistId,
               taskTitle: event.title,
               assignee: event.assigneeId,
             },
             evaluation: {
-              reason: 'Auto-assigned checklist task based on supervisor coverage.',
+              reason:
+                "Auto-assigned checklist task based on supervisor coverage.",
             },
             metadata: {
               storeId,
@@ -467,21 +494,24 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       }
 
       if (actions.length > 0) {
-        const { error } = await supabase.functions.invoke('copilot-service', {
+        const { error } = await supabase.functions.invoke("copilot-service", {
           body: {
             companyId,
             actorUserId,
-            source: 'scheduler',
+            source: "scheduler",
             timeframe: {
               start: `${targetDay}T00:00:00Z`,
               end: `${targetDay}T23:59:59Z`,
             },
-            mode: 'enqueue',
+            mode: "enqueue",
             actions,
           },
         });
         if (error) {
-          logger.warn('[useCopilotChecklist] Failed to enqueue Copilot actions', { error, tags: ['warning'] });
+          logger.warn(
+            "[useCopilotChecklist] Failed to enqueue Copilot actions",
+            { error, tags: ["warning"] },
+          );
         }
       }
 
@@ -496,37 +526,44 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       });
 
       const baseTasks: ChecklistTask[] = rawTasks.map((task) => {
-        const checklistName = checklistNames.get(task.checklist_id) ?? 'Checklist';
+        const checklistName =
+          checklistNames.get(task.checklist_id) ?? "Checklist";
         if (updatedTaskIds.has(task.id)) {
           const assignedTo = updatedTaskIds.get(task.id) ?? null;
           return {
             ...mapTaskRowToChecklistTask(task, checklistName, employeeNames),
             assignedTo,
-            assigneeName: assignedTo ? employeeNames.get(assignedTo) ?? null : null,
+            assigneeName: assignedTo
+              ? (employeeNames.get(assignedTo) ?? null)
+              : null,
           };
         }
         return mapTaskRowToChecklistTask(task, checklistName, employeeNames);
       });
 
       const insertedTasks: ChecklistTask[] = insertedRows.map((row) => {
-        const checklistName = checklistNames.get(row.checklist_id) ?? 'Checklist';
+        const checklistName =
+          checklistNames.get(row.checklist_id) ?? "Checklist";
         return mapTaskRowToChecklistTask(row, checklistName, employeeNames);
       });
 
       setState({
         loading: false,
         error: null,
-        tasks: [...baseTasks, ...insertedTasks].sort((a, b) => a.title.localeCompare(b.title)),
+        tasks: [...baseTasks, ...insertedTasks].sort((a, b) =>
+          a.title.localeCompare(b.title),
+        ),
         supervisorsOnDuty: supervisors,
       });
     } catch (error) {
       const message =
-        (error as PostgrestError)?.message ?? (error instanceof Error ? error.message : 'Failed to load checklist');
+        (error as PostgrestError)?.message ??
+        (error instanceof Error ? error.message : "Failed to load checklist");
       setState({ ...INITIAL_STATE, error: message });
       toast({
-        title: 'Checklist sync failed',
+        title: "Checklist sync failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   }, [actorUserId, companyId, storeId, targetDay, toast]);
@@ -540,16 +577,16 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
     async (taskId: string, status: TaskStatus) => {
       if (!companyId) return;
       const { error } = await supabase
-        .from('operations_tasks')
+        .from("operations_tasks")
         .update({ status })
-        .eq('company_id', companyId)
-        .eq('id', taskId);
+        .eq("company_id", companyId)
+        .eq("id", taskId);
 
       if (error) {
         toast({
-          title: 'Update failed',
-          description: error.message ?? 'Unable to update task status.',
-          variant: 'destructive',
+          title: "Update failed",
+          description: error.message ?? "Unable to update task status.",
+          variant: "destructive",
         });
         return;
       }
@@ -557,9 +594,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       setState((prev) => ({
         ...prev,
         tasks: prev.tasks.map((task) =>
-          task.id === taskId
-            ? { ...task, status }
-            : task
+          task.id === taskId ? { ...task, status } : task,
         ),
       }));
     },

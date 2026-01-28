@@ -1,6 +1,13 @@
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EmptyState } from '@/modules/system/components/EmptyState';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/modules/system/components/EmptyState";
 
 type KPIInsightLike = {
   metric?: string;
@@ -15,14 +22,19 @@ interface KPIChartsProps {
   title?: string;
 }
 
-export function KPICharts({ data, title = 'KPI Insights Overview' }: KPIChartsProps) {
+export function KPICharts({
+  data,
+  title = "KPI Insights Overview",
+}: KPIChartsProps) {
   const metrics =
     data?.map((datum) => ({
-      name: datum.metric ?? datum.name ?? datum.label ?? 'Metric',
+      name: datum.metric ?? datum.name ?? datum.label ?? "Metric",
       value: datum.value ?? datum.change ?? 0,
     })) ?? [];
 
-  const hasData = metrics.some((metric) => typeof metric.value === 'number' && metric.value !== 0);
+  const hasData = metrics.some(
+    (metric) => typeof metric.value === "number" && metric.value !== 0,
+  );
 
   if (!data?.length) {
     return (
@@ -36,7 +48,9 @@ export function KPICharts({ data, title = 'KPI Insights Overview' }: KPIChartsPr
   return (
     <Card className="border-border/60 bg-background/80 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent className="h-[300px]">
         {hasData ? (

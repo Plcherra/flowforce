@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function QuickActions() {
   const { toast } = useToast();
@@ -13,31 +13,31 @@ export function QuickActions() {
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button 
-        size="sm" 
+      <Button
+        size="sm"
         className="bg-primary text-primary-foreground"
-        onClick={() => handleQuickAction('Count Now')}
+        onClick={() => handleQuickAction("Count Now")}
       >
         Count Now
       </Button>
-      <Button 
-        size="sm" 
+      <Button
+        size="sm"
         variant="outline"
-        onClick={() => handleQuickAction('Receive')}
+        onClick={() => handleQuickAction("Receive")}
       >
         Receive
       </Button>
-      <Button 
-        size="sm" 
+      <Button
+        size="sm"
         variant="outline"
-        onClick={() => handleQuickAction('Log Waste')}
+        onClick={() => handleQuickAction("Log Waste")}
       >
         Log Waste
       </Button>
-      <Button 
-        size="sm" 
+      <Button
+        size="sm"
         variant="outline"
-        onClick={() => handleQuickAction('Prep Today')}
+        onClick={() => handleQuickAction("Prep Today")}
       >
         Prep Today
       </Button>

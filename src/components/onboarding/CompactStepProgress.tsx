@@ -1,6 +1,10 @@
-
-import { motion } from 'framer-motion';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { motion } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CompactStepProgressProps {
   currentStep: number;
@@ -12,7 +16,11 @@ interface CompactStepProgressProps {
   }>;
 }
 
-export default function CompactStepProgress({ currentStep, totalSteps, steps }: CompactStepProgressProps) {
+export default function CompactStepProgress({
+  currentStep,
+  totalSteps,
+  steps,
+}: CompactStepProgressProps) {
   return (
     <div className="w-full">
       <TooltipProvider>
@@ -28,24 +36,24 @@ export default function CompactStepProgress({ currentStep, totalSteps, steps }: 
                 >
                   <motion.div
                     className={`h-full rounded-full ${
-                      step.id <= currentStep 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
-                        : 'bg-transparent'
+                      step.id <= currentStep
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500"
+                        : "bg-transparent"
                     }`}
-                    initial={{ width: '0%' }}
-                    animate={{ 
-                      width: step.id <= currentStep ? '100%' : '0%' 
+                    initial={{ width: "0%" }}
+                    animate={{
+                      width: step.id <= currentStep ? "100%" : "0%",
                     }}
-                    transition={{ 
-                      duration: 0.6, 
-                      ease: 'easeInOut',
-                      delay: index * 0.1
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeInOut",
+                      delay: index * 0.1,
                     }}
                   />
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent 
-                side="bottom" 
+              <TooltipContent
+                side="bottom"
                 className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
               >
                 <p className="font-medium">{step.title}</p>
@@ -61,9 +69,9 @@ export default function CompactStepProgress({ currentStep, totalSteps, steps }: 
             <span
               key={step.id}
               className={`text-xs font-medium ${
-                step.id <= currentStep 
-                  ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-400 dark:text-gray-500'
+                step.id <= currentStep
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             >
               {step.title}

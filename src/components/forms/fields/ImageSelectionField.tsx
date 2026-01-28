@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Image, Plus, X, Upload, Check } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Image, Plus, X, Upload, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ImageSelectionData {
   selected_images: string[];
@@ -32,10 +32,11 @@ export function ImageSelectionField({
   predefinedImages = [],
   allowCustomImages = true,
   maxSelection = 5,
-  className = ""
+  className = "",
 }: ImageSelectionFieldProps) {
-  const [customImageUrl, setCustomImageUrl] = useState('');
-  const [availableImages, setAvailableImages] = useState<string[]>(predefinedImages);
+  const [customImageUrl, setCustomImageUrl] = useState("");
+  const [availableImages, setAvailableImages] =
+    useState<string[]>(predefinedImages);
 
   const selectedImages = value?.selected_images || [];
   const allImages = value?.image_urls || availableImages;
@@ -57,16 +58,16 @@ export function ImageSelectionField({
 
     const newImages = [...allImages, customImageUrl.trim()];
     setAvailableImages(newImages);
-    
+
     // Update the field value to include the new image in available images
     const updatedValue: ImageSelectionData = {
       selected_images: selectedImages,
       image_urls: newImages,
     };
     onChange(updatedValue);
-    
-    setCustomImageUrl('');
-    
+
+    setCustomImageUrl("");
+
     toast({
       title: "Success",
       description: "Image added successfully",
@@ -74,11 +75,11 @@ export function ImageSelectionField({
   };
 
   const removeCustomImage = (imageUrl: string) => {
-    const newImages = allImages.filter(img => img !== imageUrl);
-    const newSelectedImages = selectedImages.filter(img => img !== imageUrl);
-    
+    const newImages = allImages.filter((img) => img !== imageUrl);
+    const newSelectedImages = selectedImages.filter((img) => img !== imageUrl);
+
     setAvailableImages(newImages);
-    
+
     const updatedValue: ImageSelectionData = {
       selected_images: newSelectedImages,
       image_urls: newImages,
@@ -88,9 +89,9 @@ export function ImageSelectionField({
 
   const toggleImageSelection = (imageUrl: string) => {
     let newSelectedImages: string[];
-    
+
     if (selectedImages.includes(imageUrl)) {
-      newSelectedImages = selectedImages.filter(img => img !== imageUrl);
+      newSelectedImages = selectedImages.filter((img) => img !== imageUrl);
     } else {
       if (selectedImages.length >= maxSelection) {
         toast({
@@ -120,9 +121,9 @@ export function ImageSelectionField({
 
   const getImageName = (url: string) => {
     try {
-      return url.split('/').pop()?.split('?')[0] || 'Image';
+      return url.split("/").pop()?.split("?")[0] || "Image";
     } catch {
-      return 'Image';
+      return "Image";
     }
   };
 
@@ -184,8 +185,8 @@ export function ImageSelectionField({
                     <div
                       className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
                         isImageSelected(imageUrl)
-                          ? 'border-primary bg-primary/5'
-                          : 'border-muted-foreground/20 hover:border-primary/50'
+                          ? "border-primary bg-primary/5"
+                          : "border-muted-foreground/20 hover:border-primary/50"
                       }`}
                       onClick={() => toggleImageSelection(imageUrl)}
                     >
@@ -195,11 +196,12 @@ export function ImageSelectionField({
                           alt={`Option ${index + 1}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Im0xNSAxMi0zIDMtMyAtMyIgZmlsbD0iIzk0YTNiOCIvPgo8L3N2Zz4K';
+                            (e.target as HTMLImageElement).src =
+                              "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjNmNGY2Ii8+CjxwYXRoIGQ9Im0xNSAxMi0zIDMtMyAtMyIgZmlsbD0iIzk0YTNiOCIvPgo8L3N2Zz4K";
                           }}
                         />
                       </div>
-                      
+
                       {isImageSelected(imageUrl) && (
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                           <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
@@ -235,14 +237,16 @@ export function ImageSelectionField({
 
             {allowCustomImages && (
               <div className="border-t pt-4">
-                <p className="text-sm font-medium text-foreground mb-2">Add Custom Image</p>
+                <p className="text-sm font-medium text-foreground mb-2">
+                  Add Custom Image
+                </p>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Enter image URL"
                     value={customImageUrl}
                     onChange={(e) => setCustomImageUrl(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         addCustomImage();
                       }
                     }}
@@ -272,13 +276,13 @@ export function ImageSelectionField({
 export function ImageSelectionFieldPreview({
   label = "Image Selection",
   description = "Select one or more images from the options below",
-  className = ""
+  className = "",
 }: Partial<ImageSelectionFieldProps>) {
   const sampleImages = [
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    'https://images.unsplash.com/photo-1447433819943-74ca0d7a6ad8?w=150&h=150&fit=crop',
-    'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=150&h=150&fit=crop',
-    'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=150&h=150&fit=crop',
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
+    "https://images.unsplash.com/photo-1447433819943-74ca0d7a6ad8?w=150&h=150&fit=crop",
+    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=150&h=150&fit=crop",
+    "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=150&h=150&fit=crop",
   ];
 
   return (

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AvailabilityRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/app/enhanced-scheduling?tab=availability');
+    router.replace("/app/enhanced-scheduling?tab=availability");
   }, [router]);
 
   return null;

@@ -1,11 +1,17 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Bell, BellRing, Clock, Calendar } from 'lucide-react';
-import { useSchedulingReminders } from '@/hooks/useSchedulingReminders';
-import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bell, BellRing, Clock, Calendar } from "lucide-react";
+import { useSchedulingReminders } from "@/hooks/useSchedulingReminders";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export function SchedulingNotifications() {
   const { toast } = useToast();
@@ -48,19 +54,16 @@ export function SchedulingNotifications() {
             <BellRing className="h-5 w-5 text-primary" />
             Scheduling Notifications
           </div>
-          <Switch
-            checked={isEnabled}
-            onCheckedChange={toggleReminders}
-          />
+          <Switch checked={isEnabled} onCheckedChange={toggleReminders} />
         </CardTitle>
         <CardDescription>
           Automated reminders for your weekly scheduling workflow
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Permission Request */}
-        {'Notification' in window && Notification.permission !== 'granted' && (
+        {"Notification" in window && Notification.permission !== "granted" && (
           <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <div className="flex items-start gap-3">
               <Bell className="h-5 w-5 text-amber-600 mt-0.5" />
@@ -71,8 +74,8 @@ export function SchedulingNotifications() {
                 <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
                   Get reminders even when the app is closed
                 </p>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={handlePermissionRequest}
                   className="border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
@@ -93,7 +96,10 @@ export function SchedulingNotifications() {
             </h3>
             <div className="space-y-2">
               {upcomingReminders.slice(0, 3).map((reminder, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                >
                   <div>
                     <div className="font-medium text-sm">{reminder.title}</div>
                     <div className="text-xs text-muted-foreground">
@@ -101,7 +107,7 @@ export function SchedulingNotifications() {
                     </div>
                   </div>
                   <Badge variant="secondary">
-                    {format(reminder.date, 'MMM d')}
+                    {format(reminder.date, "MMM d")}
                   </Badge>
                 </div>
               ))}
@@ -117,13 +123,15 @@ export function SchedulingNotifications() {
           </h3>
           <div className="space-y-3">
             {reminders.map((reminder, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">{reminder.title}</span>
+                    <span className="font-medium text-sm">
+                      {reminder.title}
+                    </span>
                     <Badge variant="outline" className="text-xs">
                       {getDayDisplayName(reminder.day)} {reminder.time}
                     </Badge>
@@ -134,7 +142,7 @@ export function SchedulingNotifications() {
                 </div>
                 <Switch
                   checked={reminder.enabled && isEnabled}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     toggleReminder(reminder.day, reminder.time, checked)
                   }
                   disabled={!isEnabled}
@@ -146,9 +154,9 @@ export function SchedulingNotifications() {
 
         {/* Test Notification */}
         <div className="pt-4 border-t">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               toast({
                 title: "Test Notification",

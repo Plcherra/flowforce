@@ -1,6 +1,6 @@
-import { useAuth } from '@/hooks/useAuth';
-import { useOrganization } from '@/hooks/useOrganization';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/hooks/useOrganization";
+import { useEmployees } from "@/hooks/useEmployees";
 
 export interface CommunicationBootstrapOptions {
   includeInactiveEmployees?: boolean;
@@ -16,8 +16,8 @@ export interface CommunicationBootstrapResult {
   employeesReady: boolean;
   organizationFallback: boolean;
   employeesFallback: boolean;
-  organization: ReturnType<typeof useOrganization>['organization'];
-  employees: ReturnType<typeof useEmployees>['employees'];
+  organization: ReturnType<typeof useOrganization>["organization"];
+  employees: ReturnType<typeof useEmployees>["employees"];
   refreshOrganization: () => Promise<void>;
   refetchEmployees: () => Promise<unknown>;
 }
@@ -34,7 +34,9 @@ export function useCommunicationBootstrap(
     enabled: Boolean(user?.id),
   });
 
-  const loading = Boolean(userLoading || organizationState.loading || employeesState.loading);
+  const loading = Boolean(
+    userLoading || organizationState.loading || employeesState.loading,
+  );
   const error = organizationState.error ?? employeesState.error ?? null;
   const employeesReady = !employeesState.loading;
   const ready = Boolean(user) && !loading && employeesReady;

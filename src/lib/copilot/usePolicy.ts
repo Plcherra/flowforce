@@ -2,24 +2,24 @@
 // Lightweight policy hook to check Co-Pilot decisions from the UI.
 // NOTE: This file is .ts (not .tsx). Avoid JSX to keep module resolution simple.
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type { UserIdentity } from '@/lib/auth/acl';
+import React, { useEffect, useMemo, useState } from "react";
+import type { UserIdentity } from "@/lib/auth/acl";
 
 export type PolicyAction =
-  | 'schedule.assign'
-  | 'schedule.publish'
-  | 'availability.approve'
-  | 'prep.create_task'
-  | 'prep.complete_task'
-  | 'inventory.update_counts'
-  | 'rules.manage'
-  | 'onboarding.assign_training';
+  | "schedule.assign"
+  | "schedule.publish"
+  | "availability.approve"
+  | "prep.create_task"
+  | "prep.complete_task"
+  | "inventory.update_counts"
+  | "rules.manage"
+  | "onboarding.assign_training";
 
 export interface PolicyPayload {
   locationId?: string;
   date?: string; // ISO date for schedule actions
   roleId?: string;
-  area?: 'FOH' | 'BOH';
+  area?: "FOH" | "BOH";
   [key: string]: any;
 }
 
@@ -35,17 +35,24 @@ export interface UsePolicyResult extends PolicyDecision {
 }
 
 // Try backend policy API
-async function requestDecision(action: PolicyAction, payload: PolicyPayload): Promise<PolicyDecision | null> {
+async function requestDecision(
+  action: PolicyAction,
+  payload: PolicyPayload,
+): Promise<PolicyDecision | null> {
   try {
-    const res = await fetch('/api/policy/check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/policy/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, payload }),
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (typeof data?.allowed === 'boolean') {
-      return { allowed: data.allowed, reasons: data.reasons ?? [], fixes: data.fixes ?? [] };
+    if (typeof data?.allowed === "boolean") {
+      return {
+        allowed: data.allowed,
+        reasons: data.reasons ?? [],
+        fixes: data.fixes ?? [],
+      };
     }
     return null;
   } catch {
@@ -54,12 +61,15 @@ async function requestDecision(action: PolicyAction, payload: PolicyPayload): Pr
 }
 
 // Fallback local simulation
-function simulateDecision(action: PolicyAction, payload: PolicyPayload): PolicyDecision {
-  if (action === 'schedule.publish' && !payload?.date) {
-    return { allowed: false, reasons: ['Missing schedule date'], fixes: [] };
+function simulateDecision(
+  action: PolicyAction,
+  payload: PolicyPayload,
+): PolicyDecision {
+  if (action === "schedule.publish" && !payload?.date) {
+    return { allowed: false, reasons: ["Missing schedule date"], fixes: [] };
   }
-  if (action === 'inventory.update_counts' && !payload?.locationId) {
-    return { allowed: false, reasons: ['Missing locationId'], fixes: [] };
+  if (action === "inventory.update_counts" && !payload?.locationId) {
+    return { allowed: false, reasons: ["Missing locationId"], fixes: [] };
   }
   return { allowed: true, reasons: [] };
 }
@@ -68,9 +78,12 @@ function simulateDecision(action: PolicyAction, payload: PolicyPayload): PolicyD
 export function usePolicy(
   user: UserIdentity | null | undefined,
   action: PolicyAction,
-  payload: PolicyPayload
+  payload: PolicyPayload,
 ): UsePolicyResult {
-  const [decision, setDecision] = useState<PolicyDecision>({ allowed: false, reasons: ['Checking policy...'] });
+  const [decision, setDecision] = useState<PolicyDecision>({
+    allowed: false,
+    reasons: ["Checking policy..."],
+  });
   const [loading, setLoading] = useState(true);
 
   const stablePayload = useMemo(() => JSON.stringify(payload ?? {}), [payload]);
@@ -111,7 +124,7 @@ export function PolicyGate({
   return React.createElement(
     React.Fragment,
     null,
-    allowed ? children : fallback ?? null,
+    allowed ? children : (fallback ?? null),
   );
 }
 
@@ -128,9 +141,13 @@ export function WithPolicyButton({
   payload: PolicyPayload;
 }) {
   const { allowed, reasons, loading } = usePolicy(user, action, payload);
-  const title = !allowed ? (reasons && reasons.length > 0 ? reasons[0] : 'Action blocked by policy') : undefined;
+  const title = !allowed
+    ? reasons && reasons.length > 0
+      ? reasons[0]
+      : "Action blocked by policy"
+    : undefined;
   return React.createElement(
-    'button',
+    "button",
     {
       ...rest,
       disabled: Boolean(disabled) || loading || !allowed,

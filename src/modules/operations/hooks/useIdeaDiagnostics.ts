@@ -1,17 +1,26 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { IdeaKpiInsight, DateRange } from './useIdeaInsights';
-import { useProfile } from '@/hooks/useProfile';
-import { runIdeaDiagnostics, type CopilotInsight, type CopilotRecommendation } from '../data/ideaRepository';
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { IdeaKpiInsight, DateRange } from "./useIdeaInsights";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  runIdeaDiagnostics,
+  type CopilotInsight,
+  type CopilotRecommendation,
+} from "../data/ideaRepository";
 import {
   buildMetricsPayload,
   buildSignalsFromMetrics,
   severityConfidence,
-} from '@/features/operations/utils/ideaMetrics';
+} from "@/features/operations/utils/ideaMetrics";
 
 interface IdeaDiagnosticsResult {
   causes: Array<{ id: string; summary: string; confidence: number }>;
-  recommendations: Array<{ id: string; action: string; impact: string; confidence: number }>;
+  recommendations: Array<{
+    id: string;
+    action: string;
+    impact: string;
+    confidence: number;
+  }>;
 }
 
 interface IdeaDiagnosticsState extends IdeaDiagnosticsResult {
@@ -34,12 +43,18 @@ export function useIdeaDiagnostics(
     return buildMetricsPayload(insights, range.end.toISOString());
   }, [insights, range.end]);
 
-  const signalsPayload = useMemo(() => buildSignalsFromMetrics(metricsPayload), [metricsPayload]);
+  const signalsPayload = useMemo(
+    () => buildSignalsFromMetrics(metricsPayload),
+    [metricsPayload],
+  );
 
-  const metricsFingerprint = useMemo(() => JSON.stringify(metricsPayload), [metricsPayload]);
+  const metricsFingerprint = useMemo(
+    () => JSON.stringify(metricsPayload),
+    [metricsPayload],
+  );
   const queryKey = useMemo(
     () => [
-      'idea-diagnostics',
+      "idea-diagnostics",
       companyId,
       actorUserId,
       range.start.toISOString(),
@@ -56,31 +71,35 @@ export function useIdeaDiagnostics(
     retry: 1,
     queryFn: async () => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       if (!actorUserId) {
-        throw new Error('Missing actor context');
+        throw new Error("Missing actor context");
       }
       if (metricsPayload.length === 0) {
         return { causes: [], recommendations: [] };
       }
 
       const diagnostics = await runIdeaDiagnostics({
-        endpoint: '/functions/v1/copilot-service',
+        endpoint: "/functions/v1/copilot-service",
         companyId,
         actorUserId,
         timeframe: {
           start: range.start.toISOString(),
           end: range.end.toISOString(),
-          label: 'idea_cycle',
+          label: "idea_cycle",
         },
         metrics: metricsPayload,
         signals: signalsPayload,
       });
 
-      const causes = mapDiagnosticsCauses(diagnostics.insights ?? diagnostics.legacyCauses ?? []);
+      const causes = mapDiagnosticsCauses(
+        diagnostics.insights ?? diagnostics.legacyCauses ?? [],
+      );
       const recommendations = mapDiagnosticsRecommendations(
-        diagnostics.recommendedActions ?? diagnostics.legacyRecommendations ?? [],
+        diagnostics.recommendedActions ??
+          diagnostics.legacyRecommendations ??
+          [],
       );
 
       return { causes, recommendations };
@@ -91,7 +110,7 @@ export function useIdeaDiagnostics(
     queryClient.invalidateQueries({ queryKey });
   }, [queryClient, queryKey]);
 
-const fallback: IdeaDiagnosticsResult = { causes: [], recommendations: [] };
+  const fallback: IdeaDiagnosticsResult = { causes: [], recommendations: [] };
 
   return {
     ...(query.data ?? fallback),
@@ -102,41 +121,57 @@ const fallback: IdeaDiagnosticsResult = { causes: [], recommendations: [] };
   };
 }
 
-function mapDiagnosticsCauses(source: CopilotInsight[]): IdeaDiagnosticsResult['causes'] {
+function mapDiagnosticsCauses(
+  source: CopilotInsight[],
+): IdeaDiagnosticsResult["causes"] {
   return source.map((insight, index) => ({
     id: insight.id ?? insight.metric ?? `cause-${index}`,
-    summary: insight.message ?? insight.metric ?? insight.summary ?? 'Operational insight',
+    summary:
+      insight.message ??
+      insight.metric ??
+      insight.summary ??
+      "Operational insight",
     confidence:
-      typeof insight?.metadata?.confidence === 'number'
+      typeof insight?.metadata?.confidence === "number"
         ? (insight.metadata.confidence as number)
-        : severityConfidence[insight.severity ?? 'info'] ?? 0.5,
+        : (severityConfidence[insight.severity ?? "info"] ?? 0.5),
   }));
 }
 
-function mapDiagnosticsRecommendations(source: CopilotRecommendation[]): IdeaDiagnosticsResult['recommendations'] {
+function mapDiagnosticsRecommendations(
+  source: CopilotRecommendation[],
+): IdeaDiagnosticsResult["recommendations"] {
   return source.map((item, index) => {
-    const impactSummary = Array.isArray(item.impacts) && item.impacts.length > 0
-      ? item.impacts
-          .map((impact) => `${impact.metric ?? 'Metric'} ${impact.delta ?? 0}${impact.unit ?? ''}`)
-          .join('; ')
-      : item.evaluation?.reason ?? item.notes?.join(' ') ?? item.impact ?? 'Impact pending validation.';
+    const impactSummary =
+      Array.isArray(item.impacts) && item.impacts.length > 0
+        ? item.impacts
+            .map(
+              (impact) =>
+                `${impact.metric ?? "Metric"} ${impact.delta ?? 0}${impact.unit ?? ""}`,
+            )
+            .join("; ")
+        : (item.evaluation?.reason ??
+          item.notes?.join(" ") ??
+          item.impact ??
+          "Impact pending validation.");
 
     const metadataTitle = getMetadataTitle(item.metadata);
 
     return {
       id: item.dedupeKey ?? item.id ?? `recommendation-${index}`,
-      action: item.actionType ?? metadataTitle ?? item.action ?? 'Suggested action',
+      action:
+        item.actionType ?? metadataTitle ?? item.action ?? "Suggested action",
       impact: impactSummary,
-      confidence: typeof item.confidence === 'number' ? item.confidence : 0.5,
+      confidence: typeof item.confidence === "number" ? item.confidence : 0.5,
     };
   });
 }
 
-function getMetadataTitle(metadata: CopilotRecommendation['metadata']) {
-  if (!metadata || typeof metadata !== 'object') {
+function getMetadataTitle(metadata: CopilotRecommendation["metadata"]) {
+  if (!metadata || typeof metadata !== "object") {
     return undefined;
   }
-  if ('title' in metadata && typeof metadata.title === 'string') {
+  if ("title" in metadata && typeof metadata.title === "string") {
     return metadata.title;
   }
   return undefined;

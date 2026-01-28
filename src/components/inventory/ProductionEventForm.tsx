@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -19,26 +19,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { calculateProductionMaterials } from '@/lib/inventory/production';
-import { useCreateProductionEvent } from '@/features/inventory/hooks/useInventoryProductionEvents';
-import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
-import { useInventoryUnits } from '@/features/inventory/hooks/useInventoryUnits';
+} from "@/components/ui/table";
+import { calculateProductionMaterials } from "@/lib/inventory/production";
+import { useCreateProductionEvent } from "@/features/inventory/hooks/useInventoryProductionEvents";
+import { useInventoryItems } from "@/features/inventory/hooks/useInventoryItems";
+import { useInventoryUnits } from "@/features/inventory/hooks/useInventoryUnits";
 import type {
   InventoryItem,
   InventoryUnit,
   ProductionMaterialUsage,
   ProductionType,
-} from '@/features/inventory/hooks/types';
-import { collectUnits } from '@/utils/inventoryUnits';
-import { Loader2, AlertTriangle } from 'lucide-react';
+} from "@/features/inventory/hooks/types";
+import { collectUnits } from "@/utils/inventoryUnits";
+import { Loader2, AlertTriangle } from "lucide-react";
 
 const PRODUCTION_TYPES: { value: ProductionType; label: string }[] = [
-  { value: 'prep', label: 'Prep' },
-  { value: 'batch', label: 'Batch' },
-  { value: 'cooked', label: 'Cooked' },
-  { value: 'baked', label: 'Baked' },
-  { value: 'other', label: 'Other' },
+  { value: "prep", label: "Prep" },
+  { value: "batch", label: "Batch" },
+  { value: "cooked", label: "Cooked" },
+  { value: "baked", label: "Baked" },
+  { value: "other", label: "Other" },
 ];
 
 type FormState = {
@@ -59,29 +59,29 @@ type FormState = {
 };
 
 const defaultFormState: FormState = {
-  item_id: '',
-  production_type: 'prep',
-  produced_quantity: '',
-  produced_unit_id: '',
-  produced_at: '',
-  labor_cost: '',
-  overhead_cost: '',
-  yield_quantity: '',
-  yield_unit_id: '',
-  waste_quantity: '',
-  waste_unit_id: '',
-  batch_reference: '',
-  notes: '',
-  submission_note: '',
+  item_id: "",
+  production_type: "prep",
+  produced_quantity: "",
+  produced_unit_id: "",
+  produced_at: "",
+  labor_cost: "",
+  overhead_cost: "",
+  yield_quantity: "",
+  yield_unit_id: "",
+  waste_quantity: "",
+  waste_unit_id: "",
+  batch_reference: "",
+  notes: "",
+  submission_note: "",
 };
 
 const currencyFormatter = new Intl.NumberFormat(undefined, {
-  style: 'currency',
-  currency: 'USD',
+  style: "currency",
+  currency: "USD",
 });
 
 const unitLabel = (unit?: InventoryUnit | null) => {
-  if (!unit) return 'units';
+  if (!unit) return "units";
   return unit.abbreviation ? `${unit.name} (${unit.abbreviation})` : unit.name;
 };
 
@@ -117,7 +117,10 @@ export function ProductionEventForm() {
     }
 
     const producedQuantityNumber = Number(form.produced_quantity);
-    if (!Number.isFinite(producedQuantityNumber) || producedQuantityNumber <= 0) {
+    if (
+      !Number.isFinite(producedQuantityNumber) ||
+      producedQuantityNumber <= 0
+    ) {
       return null;
     }
 
@@ -137,12 +140,21 @@ export function ProductionEventForm() {
       })),
       units: relevantUnits,
     });
-  }, [form.produced_quantity, form.produced_unit_id, recipeLines, relevantUnits, selectedItem]);
+  }, [
+    form.produced_quantity,
+    form.produced_unit_id,
+    recipeLines,
+    relevantUnits,
+    selectedItem,
+  ]);
 
   const laborCost = Number(form.labor_cost || 0);
   const overheadCost = Number(form.overhead_cost || 0);
   const materialCost = preview?.materialCostTotal ?? 0;
-  const totalCost = materialCost + (Number.isFinite(laborCost) ? laborCost : 0) + (Number.isFinite(overheadCost) ? overheadCost : 0);
+  const totalCost =
+    materialCost +
+    (Number.isFinite(laborCost) ? laborCost : 0) +
+    (Number.isFinite(overheadCost) ? overheadCost : 0);
   const costPerUnit =
     preview && preview.producedQuantityInItemUnit > 0
       ? totalCost / preview.producedQuantityInItemUnit
@@ -153,8 +165,9 @@ export function ProductionEventForm() {
     setForm((prev) => ({
       ...prev,
       item_id: itemId,
-      produced_unit_id: item?.unit_id || '',
-      yield_unit_id: item?.recipe_yield_unit_id || item?.unit_id || prev.yield_unit_id,
+      produced_unit_id: item?.unit_id || "",
+      yield_unit_id:
+        item?.recipe_yield_unit_id || item?.unit_id || prev.yield_unit_id,
     }));
     setSubmissionWarnings([]);
   };
@@ -175,7 +188,10 @@ export function ProductionEventForm() {
     }
 
     const producedQuantityNumber = Number(form.produced_quantity);
-    if (!Number.isFinite(producedQuantityNumber) || producedQuantityNumber <= 0) {
+    if (
+      !Number.isFinite(producedQuantityNumber) ||
+      producedQuantityNumber <= 0
+    ) {
       return;
     }
 
@@ -185,12 +201,18 @@ export function ProductionEventForm() {
         production_type: form.production_type,
         produced_quantity: producedQuantityNumber,
         produced_unit_id: form.produced_unit_id,
-        produced_at: form.produced_at ? new Date(form.produced_at).toISOString() : undefined,
+        produced_at: form.produced_at
+          ? new Date(form.produced_at).toISOString()
+          : undefined,
         labor_cost: Number.isFinite(laborCost) ? laborCost : undefined,
         overhead_cost: Number.isFinite(overheadCost) ? overheadCost : undefined,
-        yield_quantity: form.yield_quantity ? Number(form.yield_quantity) : undefined,
+        yield_quantity: form.yield_quantity
+          ? Number(form.yield_quantity)
+          : undefined,
         yield_unit_id: form.yield_unit_id || undefined,
-        waste_quantity: form.waste_quantity ? Number(form.waste_quantity) : undefined,
+        waste_quantity: form.waste_quantity
+          ? Number(form.waste_quantity)
+          : undefined,
         waste_unit_id: form.waste_unit_id || undefined,
         notes: form.notes || undefined,
         batch_reference: form.batch_reference || undefined,
@@ -234,7 +256,9 @@ export function ProductionEventForm() {
             onValueChange={handleItemChange}
           >
             <SelectTrigger>
-              <SelectValue placeholder={itemsLoading ? 'Loading items...' : 'Select item'} />
+              <SelectValue
+                placeholder={itemsLoading ? "Loading items..." : "Select item"}
+              />
             </SelectTrigger>
             <SelectContent>
               {items.map((item) => (
@@ -251,7 +275,10 @@ export function ProductionEventForm() {
           <Select
             value={form.production_type}
             onValueChange={(value) =>
-              setForm((prev) => ({ ...prev, production_type: value as ProductionType }))
+              setForm((prev) => ({
+                ...prev,
+                production_type: value as ProductionType,
+              }))
             }
           >
             <SelectTrigger>
@@ -276,7 +303,10 @@ export function ProductionEventForm() {
             placeholder="0.00"
             value={form.produced_quantity}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, produced_quantity: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                produced_quantity: event.target.value,
+              }))
             }
           />
         </div>
@@ -291,7 +321,9 @@ export function ProductionEventForm() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder={unitsLoading ? 'Loading units...' : 'Select unit'} />
+              <SelectValue
+                placeholder={unitsLoading ? "Loading units..." : "Select unit"}
+              />
             </SelectTrigger>
             <SelectContent>
               {unitsForSelect.map((unit) => (
@@ -308,7 +340,10 @@ export function ProductionEventForm() {
           <Input
             value={form.batch_reference}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, batch_reference: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                batch_reference: event.target.value,
+              }))
             }
             placeholder="Optional batch identifier"
           />
@@ -349,7 +384,10 @@ export function ProductionEventForm() {
             step="0.01"
             value={form.overhead_cost}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, overhead_cost: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                overhead_cost: event.target.value,
+              }))
             }
             placeholder="0.00"
           />
@@ -362,7 +400,10 @@ export function ProductionEventForm() {
             step="0.01"
             value={form.yield_quantity}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, yield_quantity: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                yield_quantity: event.target.value,
+              }))
             }
             placeholder="Optional actual yield"
           />
@@ -396,7 +437,10 @@ export function ProductionEventForm() {
             step="0.01"
             value={form.waste_quantity}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, waste_quantity: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                waste_quantity: event.target.value,
+              }))
             }
             placeholder="Optional waste"
           />
@@ -444,7 +488,10 @@ export function ProductionEventForm() {
             rows={4}
             value={form.submission_note}
             onChange={(event) =>
-              setForm((prev) => ({ ...prev, submission_note: event.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                submission_note: event.target.value,
+              }))
             }
             placeholder="Optional note for approvers"
           />
@@ -457,7 +504,8 @@ export function ProductionEventForm() {
             <div>
               <h4 className="text-lg font-semibold">Production Summary</h4>
               <p className="text-sm text-muted-foreground">
-                Yield estimates and costs update automatically as you change quantities.
+                Yield estimates and costs update automatically as you change
+                quantities.
               </p>
             </div>
             <div className="flex flex-col items-end gap-1 text-right">
@@ -476,24 +524,32 @@ export function ProductionEventForm() {
               <p className="text-lg font-semibold">
                 {preview.producedQuantityInItemUnit.toLocaleString(undefined, {
                   maximumFractionDigits: 2,
-                })}{' '}
+                })}{" "}
                 {unitLabel(selectedItem?.unit)}
               </p>
             </div>
             <div className="rounded-md border p-3">
               <p className="text-xs uppercase text-muted-foreground">Labor</p>
               <p className="text-lg font-semibold">
-                {currencyFormatter.format(Number.isFinite(laborCost) ? laborCost : 0)}
+                {currencyFormatter.format(
+                  Number.isFinite(laborCost) ? laborCost : 0,
+                )}
               </p>
             </div>
             <div className="rounded-md border p-3">
-              <p className="text-xs uppercase text-muted-foreground">Overhead</p>
+              <p className="text-xs uppercase text-muted-foreground">
+                Overhead
+              </p>
               <p className="text-lg font-semibold">
-                {currencyFormatter.format(Number.isFinite(overheadCost) ? overheadCost : 0)}
+                {currencyFormatter.format(
+                  Number.isFinite(overheadCost) ? overheadCost : 0,
+                )}
               </p>
             </div>
             <div className="rounded-md border p-3">
-              <p className="text-xs uppercase text-muted-foreground">Cost per Unit</p>
+              <p className="text-xs uppercase text-muted-foreground">
+                Cost per Unit
+              </p>
               <p className="text-lg font-semibold">
                 {currencyFormatter.format(costPerUnit || 0)}
               </p>
@@ -530,7 +586,10 @@ export function ProductionEventForm() {
               <TableBody>
                 {materialRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-sm text-muted-foreground"
+                    >
                       No recipe lines configured for this item.
                     </TableCell>
                   </TableRow>
@@ -539,10 +598,13 @@ export function ProductionEventForm() {
                     <TableRow key={material.ingredientId}>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span>{material.ingredient?.name || 'Ingredient'}</span>
+                          <span>
+                            {material.ingredient?.name || "Ingredient"}
+                          </span>
                           {material.conversionFactor == null && (
                             <span className="text-xs text-muted-foreground">
-                              Using recipe unit ({unitLabel(material.recipeUnit)})
+                              Using recipe unit (
+                              {unitLabel(material.recipeUnit)})
                             </span>
                           )}
                         </div>
@@ -594,7 +656,9 @@ export function ProductionEventForm() {
           Clear
         </Button>
         <Button type="submit" disabled={disableSubmit}>
-          {createProductionEvent.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {createProductionEvent.isPending && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
           Record Production
         </Button>
       </div>

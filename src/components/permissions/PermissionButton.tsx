@@ -1,8 +1,13 @@
-import React from 'react';
-import { Button, type ButtonProps } from '@/components/ui/button';
-import { useCan } from '@/hooks/useCan';
-import { type PermissionKey } from '@/hooks/useUserPermissions';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import React from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
+import { useCan } from "@/hooks/useCan";
+import { type PermissionKey } from "@/hooks/useUserPermissions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PermissionButtonProps extends ButtonProps {
   permission: PermissionKey;
@@ -45,16 +50,14 @@ export function PermissionButton({
 
   // Show tooltip when permission denied and showTooltip is true
   if (!hasPermission && showTooltip) {
-    const message = tooltipMessage || `You don't have permission: ${permission}`;
-    
+    const message =
+      tooltipMessage || `You don't have permission: ${permission}`;
+
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              disabled={true} 
-              {...props}
-            >
+            <Button disabled={true} {...props}>
               {children}
             </Button>
           </TooltipTrigger>
@@ -68,10 +71,7 @@ export function PermissionButton({
 
   // Regular button with permission-based disabled state
   return (
-    <Button 
-      disabled={!hasPermission || disabled} 
-      {...props}
-    >
+    <Button disabled={!hasPermission || disabled} {...props}>
       {children}
     </Button>
   );
@@ -82,7 +82,7 @@ export function PermissionButton({
  */
 interface MultiPermissionButtonProps extends ButtonProps {
   permissions: PermissionKey[];
-  strategy?: 'any' | 'all';
+  strategy?: "any" | "all";
   fallback?: React.ReactNode;
   showTooltip?: boolean;
   tooltipMessage?: string;
@@ -91,7 +91,7 @@ interface MultiPermissionButtonProps extends ButtonProps {
 
 export function MultiPermissionButton({
   permissions,
-  strategy = 'any',
+  strategy = "any",
   fallback = null,
   showTooltip = true,
   tooltipMessage,
@@ -110,9 +110,8 @@ export function MultiPermissionButton({
     );
   }
 
-  const hasPermission = strategy === 'any' 
-    ? canAny(permissions) 
-    : canAll(permissions);
+  const hasPermission =
+    strategy === "any" ? canAny(permissions) : canAll(permissions);
 
   // Hide button when permission denied and hideWhenDenied is true
   if (!hasPermission && hideWhenDenied) {
@@ -121,16 +120,15 @@ export function MultiPermissionButton({
 
   // Show tooltip when permission denied and showTooltip is true
   if (!hasPermission && showTooltip) {
-    const message = tooltipMessage || `You don't have required permissions: ${permissions.join(', ')}`;
-    
+    const message =
+      tooltipMessage ||
+      `You don't have required permissions: ${permissions.join(", ")}`;
+
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              disabled={true} 
-              {...props}
-            >
+            <Button disabled={true} {...props}>
               {children}
             </Button>
           </TooltipTrigger>
@@ -144,10 +142,7 @@ export function MultiPermissionButton({
 
   // Regular button with permission-based disabled state
   return (
-    <Button 
-      disabled={!hasPermission || disabled} 
-      {...props}
-    >
+    <Button disabled={!hasPermission || disabled} {...props}>
       {children}
     </Button>
   );

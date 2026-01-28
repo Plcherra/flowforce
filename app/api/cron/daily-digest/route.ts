@@ -1,12 +1,12 @@
-import { randomUUID } from 'node:crypto';
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../_server/supabaseAdmin';
-import { createServerLogger } from '../../_server/utils/logger';
-import { verifyCronRequest } from '@/lib/cron/verifyCron';
+import { randomUUID } from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "../../_server/supabaseAdmin";
+import { createServerLogger } from "../../_server/utils/logger";
+import { verifyCronRequest } from "@/lib/cron/verifyCron";
 
-const loggerScope = 'cron-daily-digest';
+const loggerScope = "cron-daily-digest";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const toPlainHeaders = (headers: Headers) => {
   const plain: Record<string, string> = {};
@@ -17,21 +17,33 @@ const toPlainHeaders = (headers: Headers) => {
 };
 
 async function handle(request: NextRequest) {
-  const requestId = request.headers.get('x-request-id') ?? randomUUID();
-  const logger = createServerLogger(loggerScope, { requestId, tags: ['cron', 'digest'] });
+  const requestId = request.headers.get("x-request-id") ?? randomUUID();
+  const logger = createServerLogger(loggerScope, {
+    requestId,
+    tags: ["cron", "digest"],
+  });
   const auth = verifyCronRequest(toPlainHeaders(request.headers));
 
   if (!auth.ok) {
-    logger.warn('Cron authentication failed', { context: { reason: auth.reason } });
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    logger.warn("Cron authentication failed", {
+      context: { reason: auth.reason },
+    });
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
-  const startOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
-  const endOfYesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const startOfYesterday = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1),
+  );
+  const endOfYesterday = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
 
-  logger.info('Daily digest run started', {
-    context: { windowStart: startOfYesterday.toISOString(), windowEnd: endOfYesterday.toISOString() },
+  logger.info("Daily digest run started", {
+    context: {
+      windowStart: startOfYesterday.toISOString(),
+      windowEnd: endOfYesterday.toISOString(),
+    },
   });
 
   try {
@@ -49,14 +61,19 @@ async function handle(request: NextRequest) {
       collected_at: new Date().toISOString(),
     };
 
-    const { error } = await supabaseAdmin.from('daily_insights').insert(insertPayload);
+    const { error } = await supabaseAdmin
+      .from("daily_insights")
+      .insert(insertPayload);
 
     if (error) {
-      logger.error('Failed to persist daily insights', { error, context: insertPayload });
+      logger.error("Failed to persist daily insights", {
+        error,
+        context: insertPayload,
+      });
       throw error;
     }
 
-    logger.info('Daily digest run finished', {
+    logger.info("Daily digest run finished", {
       context: { shiftsWorked, openTasks, scheduleChanges },
     });
 
@@ -68,8 +85,8 @@ async function handle(request: NextRequest) {
       scheduleChanges,
     });
   } catch (error) {
-    logger.error('Daily digest cron failed', { error });
-    return NextResponse.json({ error: 'daily_digest_failed' }, { status: 500 });
+    logger.error("Daily digest cron failed", { error });
+    return NextResponse.json({ error: "daily_digest_failed" }, { status: 500 });
   }
 }
 
@@ -86,14 +103,17 @@ async function countPublishedShifts(
   const endIso = end.toISOString();
 
   const { count, error } = await supabaseAdmin
-    .from('schedule_shifts')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'published')
-    .gte('start_time', startIso)
-    .lt('start_time', endIso);
+    .from("schedule_shifts")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "published")
+    .gte("start_time", startIso)
+    .lt("start_time", endIso);
 
   if (error) {
-    logger.warn('Unable to count published shifts', { error, context: { start: startIso, end: endIso } });
+    logger.warn("Unable to count published shifts", {
+      error,
+      context: { start: startIso, end: endIso },
+    });
     return 0;
   }
 
@@ -109,14 +129,17 @@ async function countOpenTasks(
   const endIso = end.toISOString();
 
   const { count, error } = await supabaseAdmin
-    .from('tasks')
-    .select('id', { count: 'exact', head: true })
-    .in('status', ['todo', 'in_progress', 'review'])
-    .gte('updated_at', startIso)
-    .lt('updated_at', endIso);
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .in("status", ["todo", "in_progress", "review"])
+    .gte("updated_at", startIso)
+    .lt("updated_at", endIso);
 
   if (error) {
-    logger.warn('Unable to count open tasks', { error, context: { start: startIso, end: endIso } });
+    logger.warn("Unable to count open tasks", {
+      error,
+      context: { start: startIso, end: endIso },
+    });
     return 0;
   }
 
@@ -132,13 +155,16 @@ async function countScheduleChanges(
   const endIso = end.toISOString();
 
   const { count, error } = await supabaseAdmin
-    .from('schedules')
-    .select('id', { count: 'exact', head: true })
-    .gte('updated_at', startIso)
-    .lt('updated_at', endIso);
+    .from("schedules")
+    .select("id", { count: "exact", head: true })
+    .gte("updated_at", startIso)
+    .lt("updated_at", endIso);
 
   if (error) {
-    logger.warn('Unable to count schedule changes', { error, context: { start: startIso, end: endIso } });
+    logger.warn("Unable to count schedule changes", {
+      error,
+      context: { start: startIso, end: endIso },
+    });
     return 0;
   }
 

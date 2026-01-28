@@ -1,11 +1,11 @@
-import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { vi } from 'vitest';
-import LearningCenter from '../LearningCenter';
-import { useLearningCenter } from '@/hooks/learning/useLearningCenter';
+import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { vi } from "vitest";
+import LearningCenter from "../LearningCenter";
+import { useLearningCenter } from "@/hooks/learning/useLearningCenter";
 
-vi.mock('@/hooks/learning/useLearningCenter', () => ({
+vi.mock("@/hooks/learning/useLearningCenter", () => ({
   useLearningCenter: vi.fn(),
 }));
 
@@ -52,13 +52,13 @@ const renderPage = () =>
     </MemoryRouter>,
   );
 
-describe('LearningCenter page', () => {
+describe("LearningCenter page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockHook.mockReturnValue(baseHookResult);
   });
 
-  it('disables refresh button while loading snapshot', () => {
+  it("disables refresh button while loading snapshot", () => {
     mockHook.mockReturnValue({
       ...baseHookResult,
       loading: true,
@@ -67,10 +67,10 @@ describe('LearningCenter page', () => {
 
     renderPage();
 
-    expect(screen.getByRole('button', { name: /sync/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /sync/i })).toBeDisabled();
   });
 
-  it('shows catalog empty state when no courses exist', async () => {
+  it("shows catalog empty state when no courses exist", async () => {
     mockHook.mockReturnValue({
       ...baseHookResult,
       loading: false,
@@ -79,7 +79,7 @@ describe('LearningCenter page', () => {
 
     renderPage();
     const user = userEvent.setup();
-    await user.click(screen.getByRole('tab', { name: /catalog/i }));
-    expect(screen.getByText('No courses in the catalog')).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: /catalog/i }));
+    expect(screen.getByText("No courses in the catalog")).toBeInTheDocument();
   });
 });

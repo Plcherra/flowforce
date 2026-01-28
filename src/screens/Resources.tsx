@@ -1,18 +1,12 @@
-import { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  FileText, 
-  Video, 
-  Download,
-  Home
-} from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import ResourceSection from '@/components/resources/ResourceSection';
-import HelpSection from '@/components/resources/HelpSection';
-import LoadingSpinner from '@/components/resources/LoadingSpinner';
-import { logger } from '@/utils/logger';
+import { useState, useEffect } from "react";
+import { BookOpen, FileText, Video, Download, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import ResourceSection from "@/components/resources/ResourceSection";
+import HelpSection from "@/components/resources/HelpSection";
+import LoadingSpinner from "@/components/resources/LoadingSpinner";
+import { logger } from "@/utils/logger";
 
 interface ResourceData {
   documentation: any[];
@@ -29,47 +23,47 @@ export default function Resources() {
 
   const resourceCategories = [
     {
-      title: t('resources.documentation.title'),
-      description: t('resources.documentation.description'),
+      title: t("resources.documentation.title"),
+      description: t("resources.documentation.description"),
       icon: BookOpen,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      key: 'documentation' as const
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      key: "documentation" as const,
     },
     {
-      title: t('resources.blog.title'),
-      description: t('resources.blog.description'),
+      title: t("resources.blog.title"),
+      description: t("resources.blog.description"),
       icon: FileText,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      key: 'blog' as const
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      key: "blog" as const,
     },
     {
-      title: t('resources.videos.title'),
-      description: t('resources.videos.description'),
+      title: t("resources.videos.title"),
+      description: t("resources.videos.description"),
       icon: Video,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      key: 'videos' as const
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      key: "videos" as const,
     },
     {
-      title: t('resources.downloads.title'),
-      description: t('resources.downloads.description'),
+      title: t("resources.downloads.title"),
+      description: t("resources.downloads.description"),
       icon: Download,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      key: 'downloads' as const
-    }
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      key: "downloads" as const,
+    },
   ];
 
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const response = await fetch('/data/resources.json');
+        const response = await fetch("/data/resources.json");
         const data = await response.json();
         setResourceData(data);
       } catch (error) {
-        logger.error('Failed to fetch resources:', { error, tags: ['error'] });
+        logger.error("Failed to fetch resources:", { error, tags: ["error"] });
       } finally {
         setLoading(false);
       }
@@ -86,10 +80,10 @@ export default function Resources() {
     <div className="min-h-screen bg-white">
       {/* Back to Home Button */}
       <div className="fixed top-4 right-4 z-50">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => navigate('/')}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/")}
           className="bg-white shadow-lg hover:bg-gray-50"
         >
           <Home className="h-4 w-4 mr-2" />
@@ -101,10 +95,10 @@ export default function Resources() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            {t('resources.title')}
+            {t("resources.title")}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {t('resources.subtitle')}
+            {t("resources.subtitle")}
           </p>
         </div>
 
@@ -113,7 +107,7 @@ export default function Resources() {
           <div className="space-y-16">
             {resourceCategories.map((category) => {
               const resources = resourceData[category.key];
-              
+
               return (
                 <ResourceSection
                   key={category.title}

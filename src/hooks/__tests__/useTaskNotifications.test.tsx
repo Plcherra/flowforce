@@ -1,10 +1,10 @@
 /* @vitest-environment jsdom */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderHook, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 
-import { useTaskNotifications } from '@/features/tasks';
+import { useTaskNotifications } from "@/features/tasks";
 
 const {
   supabaseMock,
@@ -34,15 +34,15 @@ const {
   };
 });
 
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: supabaseMock,
 }));
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: { id: 'user-123' } }),
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ user: { id: "user-123" } }),
 }));
 
-vi.mock('@/repositories/taskNotificationsRepository', () => ({
+vi.mock("@/repositories/taskNotificationsRepository", () => ({
   fetchNotificationsForUser: fetchNotificationsForUserMock,
   fetchTasksDueSoon: fetchTasksDueSoonMock,
   fetchOverdueTasks: fetchOverdueTasksMock,
@@ -53,14 +53,18 @@ vi.mock('@/repositories/taskNotificationsRepository', () => ({
   deleteNotification: vi.fn(),
 }));
 
-describe('useTaskNotifications', () => {
+describe("useTaskNotifications", () => {
   const renderHookWithClient = () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
 
     return renderHook(() => useTaskNotifications(), {
-      wrapper: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>,
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      ),
     });
   };
 
@@ -75,19 +79,19 @@ describe('useTaskNotifications', () => {
     fetchOverdueTasksMock.mockResolvedValue([]);
     findRecentNotificationMock.mockResolvedValue(null);
     createTaskNotificationMock.mockResolvedValue({
-      id: 'notification-1',
-      user_id: 'user-123',
-      task_id: 'task-1',
-      type: 'task_due_soon',
-      title: 'Task Due Soon',
-      message: 'Task is due soon',
+      id: "notification-1",
+      user_id: "user-123",
+      task_id: "task-1",
+      type: "task_due_soon",
+      title: "Task Due Soon",
+      message: "Task is due soon",
       metadata: null,
       read_at: null,
       created_at: new Date().toISOString(),
     });
   });
 
-  it('runs the due-task sweep immediately on mount', async () => {
+  it("runs the due-task sweep immediately on mount", async () => {
     renderHookWithClient();
 
     await waitFor(() => {

@@ -1,25 +1,33 @@
-
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileSpreadsheet, Download, AlertCircle } from 'lucide-react';
-import { logger } from '@/utils/logger';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Upload, FileSpreadsheet, Download, AlertCircle } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface ImportShiftsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function ImportShiftsDialog({ open, onOpenChange }: ImportShiftsDialogProps) {
+export function ImportShiftsDialog({
+  open,
+  onOpenChange,
+}: ImportShiftsDialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,14 +44,14 @@ export function ImportShiftsDialog({ open, onOpenChange }: ImportShiftsDialogPro
     setLoading(true);
     try {
       // In a real implementation, this would parse the file and create shifts
-      
+
       // Simulated import process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       onOpenChange(false);
       setSelectedFile(null);
     } catch (error) {
-      logger.error('Error importing shifts:', { error, tags: ['error'] });
+      logger.error("Error importing shifts:", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
@@ -55,11 +63,11 @@ export function ImportShiftsDialog({ open, onOpenChange }: ImportShiftsDialogPro
 Morning Shift,2025-06-20,09:00,2025-06-20,17:00,Store A,2,Regular morning shift
 Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'shift_template.csv';
+    a.download = "shift_template.csv";
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -73,7 +81,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
             Upload a CSV or Excel file to import multiple shifts at once
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Download Template */}
           <Card>
@@ -87,7 +95,11 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" onClick={downloadTemplate} className="w-full">
+              <Button
+                variant="outline"
+                onClick={downloadTemplate}
+                className="w-full"
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download CSV Template
               </Button>
@@ -153,11 +165,8 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleImport} 
-              disabled={!selectedFile || loading}
-            >
-              {loading ? 'Importing...' : 'Import Shifts'}
+            <Button onClick={handleImport} disabled={!selectedFile || loading}>
+              {loading ? "Importing..." : "Import Shifts"}
             </Button>
           </div>
         </div>

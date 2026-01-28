@@ -1,5 +1,5 @@
-import { CalendarToolbar } from '../calendar/CalendarToolbar';
-import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
+import { CalendarToolbar } from "../calendar/CalendarToolbar";
+import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
 
 interface ScheduleToolbarProps {
   weekStart: Date;

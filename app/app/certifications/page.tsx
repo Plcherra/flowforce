@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import CertificationsPage from '@/screens/Certifications';
+import CertificationsPage from "@/screens/Certifications";
 
 export default function Certifications() {
   return <CertificationsPage />;

@@ -1,14 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2 } from 'lucide-react';
-import { useCustomSections, type CustomSection } from '@/hooks/useCustomSections';
-import { logger } from '@/utils/logger';
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import {
+  useCustomSections,
+  type CustomSection,
+} from "@/hooks/useCustomSections";
+import { logger } from "@/utils/logger";
 
 interface EditSectionDialogProps {
   section: CustomSection | null;
@@ -16,20 +40,24 @@ interface EditSectionDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDialogProps) {
+export function EditSectionDialog({
+  section,
+  open,
+  onOpenChange,
+}: EditSectionDialogProps) {
   const { updateSection, deleteSection } = useCustomSections();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [icon, setIcon] = useState('');
-  const [path, setPath] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [icon, setIcon] = useState("");
+  const [path, setPath] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (section) {
       setName(section.name);
-      setDescription(section.description || '');
+      setDescription(section.description || "");
       setCategory(section.category);
       setIcon(section.icon);
       setPath(section.path);
@@ -51,7 +79,7 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
       });
       onOpenChange(false);
     } catch (error) {
-      logger.error('Error updating section:', { error, tags: ['error'] });
+      logger.error("Error updating section:", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
@@ -65,23 +93,23 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
       await deleteSection(section.id);
       onOpenChange(false);
     } catch (error) {
-      logger.error('Error deleting section:', { error, tags: ['error'] });
+      logger.error("Error deleting section:", { error, tags: ["error"] });
     } finally {
       setDeleteLoading(false);
     }
   };
 
   const iconOptions = [
-    { value: 'FileText', label: 'Document' },
-    { value: 'Users', label: 'Users' },
-    { value: 'MessageSquare', label: 'Messages' },
-    { value: 'Calendar', label: 'Calendar' },
-    { value: 'BarChart3', label: 'Chart' },
-    { value: 'Settings', label: 'Settings' },
-    { value: 'CheckSquare', label: 'Tasks' },
-    { value: 'Target', label: 'Goal' },
-    { value: 'Package', label: 'Package' },
-    { value: 'Award', label: 'Award' }
+    { value: "FileText", label: "Document" },
+    { value: "Users", label: "Users" },
+    { value: "MessageSquare", label: "Messages" },
+    { value: "Calendar", label: "Calendar" },
+    { value: "BarChart3", label: "Chart" },
+    { value: "Settings", label: "Settings" },
+    { value: "CheckSquare", label: "Tasks" },
+    { value: "Target", label: "Goal" },
+    { value: "Package", label: "Package" },
+    { value: "Award", label: "Award" },
   ];
 
   if (!section) return null;
@@ -163,7 +191,11 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
           <div className="flex justify-between">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" variant="destructive" disabled={loading || deleteLoading}>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={loading || deleteLoading}
+                >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Section
                 </Button>
@@ -172,18 +204,20 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete the "{section.name}" section and all its data. 
-                    This action cannot be undone.
+                    This will permanently delete the "{section.name}" section
+                    and all its data. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
+                  <AlertDialogCancel disabled={deleteLoading}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
                     onClick={handleDelete}
                     disabled={deleteLoading}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {deleteLoading ? 'Deleting...' : 'Delete Section'}
+                    {deleteLoading ? "Deleting..." : "Delete Section"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -198,8 +232,11 @@ export function EditSectionDialog({ section, open, onOpenChange }: EditSectionDi
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || deleteLoading || !name.trim()}>
-                {loading ? 'Saving...' : 'Save Changes'}
+              <Button
+                type="submit"
+                disabled={loading || deleteLoading || !name.trim()}
+              >
+                {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>

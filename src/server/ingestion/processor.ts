@@ -5,7 +5,7 @@ import {
   persistExtractedEvents,
   type CompleteDocumentParams,
   type ParsedEventInput,
-} from '@/services/ingestion/api';
+} from "@/services/ingestion/api";
 
 interface SimulationOptions {
   documentId: string;
@@ -25,7 +25,8 @@ export async function simulateDocumentProcessing(options: SimulationOptions) {
       await persistExtractedEvents(documentId, events, companyId);
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown processing error';
+    const message =
+      error instanceof Error ? error.message : "Unknown processing error";
     await markDocumentFailed(documentId, message);
     throw error;
   }

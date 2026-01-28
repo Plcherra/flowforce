@@ -71,6 +71,23 @@ CREATE POLICY "Admins and managers can manage departments" ON public.departments
   );
 
 -- 3. Harden all functions with proper search_path
+-- Drop all variants of get_user_role first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'get_user_role'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.get_user_role(user_uuid UUID DEFAULT auth.uid())
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -82,6 +99,23 @@ BEGIN
   RETURN (SELECT role::TEXT FROM public.profiles WHERE id = user_uuid LIMIT 1);
 END;
 $$;
+
+-- Drop all variants of get_user_company_id first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'get_user_company_id'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.get_user_company_id(user_uuid UUID DEFAULT auth.uid())
 RETURNS UUID
@@ -95,6 +129,23 @@ BEGIN
 END;
 $$;
 
+-- Drop all variants of is_company_admin first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'is_company_admin'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.is_company_admin(user_uuid UUID DEFAULT auth.uid())
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -106,6 +157,23 @@ BEGIN
   RETURN COALESCE((SELECT is_company_admin FROM public.profiles WHERE id = user_uuid LIMIT 1), false);
 END;
 $$;
+
+-- Drop all variants of has_role first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'has_role'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role TEXT)
 RETURNS BOOLEAN
@@ -123,6 +191,23 @@ BEGIN
 END;
 $$;
 
+-- Drop all variants of is_admin_or_manager first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'is_admin_or_manager'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.is_admin_or_manager(_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -138,6 +223,23 @@ BEGIN
   );
 END;
 $$;
+
+-- Drop all variants of get_company_roles first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'get_company_roles'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.get_company_roles(company_uuid UUID DEFAULT NULL)
 RETURNS TABLE (
@@ -186,6 +288,23 @@ BEGIN
 END;
 $$;
 
+-- Drop all variants of create_company_invite first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'create_company_invite'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.create_company_invite(company_uuid UUID, invite_email TEXT, invite_role TEXT DEFAULT 'employee')
 RETURNS UUID
 LANGUAGE plpgsql
@@ -207,6 +326,23 @@ BEGIN
   RETURN invite_id;
 END;
 $$;
+
+-- Drop all variants of create_company_with_setup first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'create_company_with_setup'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.create_company_with_setup(
   company_data JSONB,
@@ -300,6 +436,23 @@ BEGIN
   RETURN new_company_id;
 END;
 $$;
+
+-- Drop all variants of handle_new_user first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'handle_new_user'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER

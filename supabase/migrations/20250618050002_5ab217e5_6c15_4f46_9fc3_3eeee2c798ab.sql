@@ -31,9 +31,11 @@ ON CONFLICT DO NOTHING;
 ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for positions
+DROP POLICY IF EXISTS "Everyone can view positions" ON public.positions;
 CREATE POLICY "Everyone can view positions" ON public.positions
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage positions" ON public.positions;
 CREATE POLICY "Admins can manage positions" ON public.positions
   FOR ALL USING (
     EXISTS (

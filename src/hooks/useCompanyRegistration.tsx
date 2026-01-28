@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { UserInfo, CompanyInfo, Branding, OnboardingRole } from '@/types/onboarding';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
-import { logger } from '@/utils/logger';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  UserInfo,
+  CompanyInfo,
+  Branding,
+  OnboardingRole,
+} from "@/types/onboarding";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import { logger } from "@/utils/logger";
 
 interface RegistrationData {
   userInfo: UserInfo;
@@ -17,7 +22,7 @@ interface RegistrationData {
 }
 
 interface RegistrationError {
-  type: 'auth' | 'validation' | 'database' | 'network';
+  type: "auth" | "validation" | "database" | "network";
   message: string;
   details?: string;
 }
@@ -29,34 +34,41 @@ export function useCompanyRegistration() {
   const { toast } = useToast();
 
   const transformRolesForDatabase = (roles: OnboardingRole[]) => {
-    return roles.map(role => ({
+    return roles.map((role) => ({
       id: role.id,
       name: role.name,
-      description: role.description || '',
+      description: role.description || "",
       color: role.color,
       icon: role.icon,
       hierarchy_level: role.hierarchy_level,
       permissions: role.permissions || {},
-      is_system_role: role.is_system_role || false
+      is_system_role: role.is_system_role || false,
     }));
   };
 
   const transformPositionsForDatabase = (positions: OnboardingPosition[]) => {
-    return positions.map(position => ({
+    return positions.map((position) => ({
       id: position.id,
       name: position.name,
-      description: position.description || '',
+      description: position.description || "",
       roleId: position.roleId,
-      permissions: position.permissions || {}
+      permissions: position.permissions || {},
     }));
   };
 
-  const validateRegistrationData = (data: RegistrationData): RegistrationError | null => {
+  const validateRegistrationData = (
+    data: RegistrationData,
+  ): RegistrationError | null => {
     // Validate user info
-    if (!data.userInfo.email || !data.userInfo.password || !data.userInfo.firstName || !data.userInfo.lastName) {
+    if (
+      !data.userInfo.email ||
+      !data.userInfo.password ||
+      !data.userInfo.firstName ||
+      !data.userInfo.lastName
+    ) {
       return {
-        type: 'validation',
-        message: 'Please fill in all required user information fields.'
+        type: "validation",
+        message: "Please fill in all required user information fields.",
       };
     }
 
@@ -64,24 +76,24 @@ export function useCompanyRegistration() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.userInfo.email)) {
       return {
-        type: 'validation',
-        message: 'Please enter a valid email address.'
+        type: "validation",
+        message: "Please enter a valid email address.",
       };
     }
 
     // Validate password strength
     if (data.userInfo.password.length < 8) {
       return {
-        type: 'validation',
-        message: 'Password must be at least 8 characters long.'
+        type: "validation",
+        message: "Password must be at least 8 characters long.",
       };
     }
 
     // Validate company info
     if (!data.companyInfo.name || !data.companyInfo.industry) {
       return {
-        type: 'validation',
-        message: 'Please fill in all required company information fields.'
+        type: "validation",
+        message: "Please fill in all required company information fields.",
       };
     }
 
@@ -98,33 +110,36 @@ export function useCompanyRegistration() {
     const transformedPositions = transformPositionsForDatabase(data.positions);
 
     // Use the existing database function that handles both user creation and company setup
-    const { data: result, error } = await supabase.rpc('create_company_with_owner', {
-      user_email: data.userInfo.email,
-      user_password: data.userInfo.password,
-      user_first_name: data.userInfo.firstName,
-      user_last_name: data.userInfo.lastName,
-      company_data: {
-        name: data.companyInfo.name,
-        industry: data.companyInfo.industry,
-        size: data.companyInfo.size,
-        description: data.companyInfo.description,
-        website: data.companyInfo.website,
-        phone: data.companyInfo.phone,
-        primary_color: data.branding.primaryColor,
-        secondary_color: data.branding.secondaryColor,
-        template_id: data.template.id,
-        template_name: data.template.name,
-        enabled_sections: data.enabledSections,
-        template_config: {
-          industry: data.template.industry,
-          defaultRoles: data.template.defaultRoles,
-          customFields: data.template.customFields,
-          suggestedPositions: data.template.suggestedPositions
-        }
+    const { data: result, error } = await supabase.rpc(
+      "create_company_with_owner",
+      {
+        user_email: data.userInfo.email,
+        user_password: data.userInfo.password,
+        user_first_name: data.userInfo.firstName,
+        user_last_name: data.userInfo.lastName,
+        company_data: {
+          name: data.companyInfo.name,
+          industry: data.companyInfo.industry,
+          size: data.companyInfo.size,
+          description: data.companyInfo.description,
+          website: data.companyInfo.website,
+          phone: data.companyInfo.phone,
+          primary_color: data.branding.primaryColor,
+          secondary_color: data.branding.secondaryColor,
+          template_id: data.template.id,
+          template_name: data.template.name,
+          enabled_sections: data.enabledSections,
+          template_config: {
+            industry: data.template.industry,
+            defaultRoles: data.template.defaultRoles,
+            customFields: data.template.customFields,
+            suggestedPositions: data.template.suggestedPositions,
+          },
+        },
+        custom_roles: transformedRoles,
+        positions_data: transformedPositions,
       },
-      custom_roles: transformedRoles,
-      positions_data: transformedPositions
-    });
+    );
 
     if (error) {
       throw error;
@@ -134,60 +149,80 @@ export function useCompanyRegistration() {
   };
 
   const handleRegistrationError = (error: unknown): RegistrationError => {
-    logger.error('Registration error', { error, tags: ['error'] });
+    logger.error("Registration error", { error, tags: ["error"] });
 
-    if (error.message?.includes('email') || error.message?.includes('User already registered')) {
+    if (
+      error.message?.includes("email") ||
+      error.message?.includes("User already registered")
+    ) {
       return {
-        type: 'validation',
-        message: 'An account with this email already exists. Please use a different email or sign in.',
-        details: error.message
+        type: "validation",
+        message:
+          "An account with this email already exists. Please use a different email or sign in.",
+        details: error.message,
       };
     }
 
-    if (error.message?.includes('password') || error.message?.includes('weak') || error.message?.includes('guess')) {
+    if (
+      error.message?.includes("password") ||
+      error.message?.includes("weak") ||
+      error.message?.includes("guess")
+    ) {
       return {
-        type: 'validation',
-        message: 'Your password is too weak or common. Please create a stronger, more unique password.',
-        details: error.message
+        type: "validation",
+        message:
+          "Your password is too weak or common. Please create a stronger, more unique password.",
+        details: error.message,
       };
     }
 
-    if (error.message?.includes('rate_limit') || error.message?.includes('58 seconds')) {
+    if (
+      error.message?.includes("rate_limit") ||
+      error.message?.includes("58 seconds")
+    ) {
       return {
-        type: 'auth',
-        message: 'Too many registration attempts. Please wait about a minute before trying again.',
-        details: error.message
+        type: "auth",
+        message:
+          "Too many registration attempts. Please wait about a minute before trying again.",
+        details: error.message,
       };
     }
 
-    if (error.message?.includes('role')) {
+    if (error.message?.includes("role")) {
       return {
-        type: 'database',
-        message: 'There was an issue setting up your company roles. Please check your role configuration.',
-        details: error.message
+        type: "database",
+        message:
+          "There was an issue setting up your company roles. Please check your role configuration.",
+        details: error.message,
       };
     }
 
-    if (error.message?.includes('position')) {
+    if (error.message?.includes("position")) {
       return {
-        type: 'database',
-        message: 'There was an issue setting up your company positions. Please check your position configuration.',
-        details: error.message
+        type: "database",
+        message:
+          "There was an issue setting up your company positions. Please check your position configuration.",
+        details: error.message,
       };
     }
 
-    if (error.message?.includes('network') || error.message?.includes('fetch')) {
+    if (
+      error.message?.includes("network") ||
+      error.message?.includes("fetch")
+    ) {
       return {
-        type: 'network',
-        message: 'Network error. Please check your connection and try again.',
-        details: error.message
+        type: "network",
+        message: "Network error. Please check your connection and try again.",
+        details: error.message,
       };
     }
 
     return {
-      type: 'database',
-      message: error.message || 'There was an error setting up your company. Please try again.',
-      details: error.message
+      type: "database",
+      message:
+        error.message ||
+        "There was an error setting up your company. Please try again.",
+      details: error.message,
     };
   };
 
@@ -212,8 +247,7 @@ export function useCompanyRegistration() {
       });
 
       // Navigate to dashboard
-      navigate('/dashboard');
-
+      navigate("/dashboard");
     } catch (error: any) {
       const registrationError = handleRegistrationError(error);
       setError(registrationError);
@@ -236,6 +270,6 @@ export function useCompanyRegistration() {
     register,
     isLoading,
     error,
-    clearError
+    clearError,
   };
 }

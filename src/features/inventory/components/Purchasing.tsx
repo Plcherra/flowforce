@@ -1,65 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from "react";
 import {
   ShoppingCart,
   Plus,
   Truck,
   Package,
-  CheckCircle,
-  Clock,
   History as HistoryIcon,
   FileText,
-  Link2,
-  RefreshCw,
-  BadgeCheck,
-  AlertTriangle,
-  ExternalLink,
-  TrendingUp,
-  Trash2,
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import { InventoryLayout } from '../components/InventoryLayout';
-import { IfCan } from '@/components/permissions/IfCan';
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { InventoryLayout } from "../components/InventoryLayout";
+import { IfCan } from "@/components/permissions/IfCan";
 import {
   useInventoryItems,
   useInventorySuppliers,
@@ -70,14 +29,41 @@ import {
   useRecordVendorInvoice,
   useVendorInvoices,
   useSupplierIntegrationLink,
-} from '@/hooks/useInventory';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
+} from "@/hooks/useInventory";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  PlaceOrdersTab,
+  ReceiveOrdersTab,
+  OrderHistoryTab,
+  VendorInvoicesTab,
+  IntegrationDialog,
+  VendorInvoiceDialog,
+  PurchaseOrderDetailsDialog,
+} from "./purchasing";
+import { usePurchaseOrderForm } from "../hooks/usePurchaseOrderForm";
+import { useReceiveOrders } from "../hooks/useReceiveOrders";
+import { useOrderHistory } from "../hooks/useOrderHistory";
+import { useVendorInvoices } from "../hooks/useVendorInvoices";
+import { formatCurrency, formatDate } from "@/shared/utils";
+import {
+  STATUS_LABELS,
+  getPaymentStatusVariant,
+  getStatusColor,
+  getStatusIcon,
+} from "../utils/statusHelpers";
+import { extractInvoiceNumber, createDraftLineItem } from "../types/purchasing";
 import type {
   InventoryItem,
   PurchaseOrder,
   SupplierIntegrationDetails,
-} from '@/features/inventory/hooks/types';
+} from "../hooks/types";
+import type {
+  DraftLineItem,
+  IntegrationFormState,
+  InvoiceFormState,
+  VendorInvoiceRecord,
+} from "../types/purchasing";
 
 type DraftLineItem = {
   id: string;
@@ -90,7 +76,7 @@ type DraftLineItem = {
 };
 
 type IntegrationFormState = {
-  provider: SupplierIntegrationDetails['provider'];
+  provider: SupplierIntegrationDetails["provider"];
   account_id: string;
   api_key: string;
   notes: string;
@@ -117,145 +103,22 @@ type VendorInvoiceRecord = {
   description?: string | null;
 };
 
-const providerOptions: Array<{
-  value: SupplierIntegrationDetails['provider'];
-  label: string;
-  description: string;
-}> = [
-  {
-    value: 'marketman',
-    label: 'MarketMan',
-    description: 'Sync catalogs, recipes, and pricing automatically.',
-  },
-  {
-    value: 'us_foods',
-    label: 'US Foods',
-    description: 'Transmit orders directly to your US Foods representative.',
-  },
-  {
-    value: 'baldor',
-    label: 'Baldor',
-    description: 'Automate produce replenishment and delivery confirmations.',
-  },
-  {
-    value: 'sysco',
-    label: 'Sysco',
-    description: 'Pull live pricing and availability from Sysco.',
-  },
-  {
-    value: 'other',
-    label: 'Other Provider',
-    description: 'Configure a custom API, EDI, or FTP integration.',
-  },
-];
-
-const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  pending: 'Pending Approval',
-  ordered: 'Ordered',
-  partial: 'Partially Received',
-  received: 'Received',
-  cancelled: 'Cancelled',
-};
-
-const generateLineId = () => Math.random().toString(36).slice(2, 10);
-
-const createDraftLineItem = (): DraftLineItem => ({
-  id: generateLineId(),
-  itemId: undefined,
-  itemName: '',
-  category: null,
-  quantity: 1,
-  unitPrice: 0,
-  total: 0,
-});
-
-const formatCurrency = (value?: number | null, currency = 'USD') => {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return '—';
-  }
-
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 2,
-    }).format(value);
-  } catch {
-    return `$${value.toFixed(2)}`;
-  }
-};
-
-const formatDate = (value?: string | null) =>
-  value ? new Date(value).toLocaleDateString() : '—';
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'received':
-      return 'default';
-    case 'ordered':
-    case 'pending':
-    case 'partial':
-      return 'secondary';
-    case 'cancelled':
-      return 'destructive';
-    case 'draft':
-    default:
-      return 'outline';
-  }
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'received':
-      return CheckCircle;
-    case 'ordered':
-      return Truck;
-    case 'partial':
-      return RefreshCw;
-    case 'cancelled':
-      return AlertTriangle;
-    case 'pending':
-    case 'draft':
-    default:
-      return Clock;
-  }
-};
-
-const paymentStatusVariant = (status: string) => {
-  switch (status) {
-    case 'approved':
-    case 'paid':
-      return 'default';
-    case 'pending':
-      return 'secondary';
-    case 'rejected':
-    case 'cancelled':
-      return 'destructive';
-    default:
-      return 'outline';
-  }
-};
-
-const extractInvoiceNumber = (notes?: string | null, description?: string | null) => {
-  if (notes) {
-    const match = notes.match(/Invoice\s?#([^•]+)/i);
-    if (match) return match[1].trim();
-  }
-  if (description) {
-    const match = description.match(/Invoice\s+([^\s]+)\s+for/i);
-    if (match) return match[1].trim();
-  }
-  return undefined;
-};
+// Utilities and types are now imported from:
+// - utils/formatting.ts (formatCurrency, formatDate)
+// - utils/statusHelpers.ts (STATUS_LABELS, getPaymentStatusVariant)
+// - types/purchasing.ts (extractInvoiceNumber, createDraftLineItem)
 
 export default function InventoryPurchasingPage() {
   const { profile } = useProfile();
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
-  const { data: purchaseOrders = [], isLoading: ordersLoading } = usePurchaseOrders();
-  const { data: inventoryItems = [], isLoading: itemsLoading } = useInventoryItems();
-  const { data: suppliers = [], isLoading: suppliersLoading } = useInventorySuppliers(companyId);
-  const { data: vendorInvoiceData = [], isLoading: invoicesLoading } = useVendorInvoices();
+  const { data: purchaseOrders = [], isLoading: ordersLoading } =
+    usePurchaseOrders();
+  const { data: inventoryItems = [], isLoading: itemsLoading } =
+    useInventoryItems();
+  const { data: suppliers = [], isLoading: suppliersLoading } =
+    useInventorySuppliers(companyId);
+  const { data: vendorInvoiceData = [], isLoading: invoicesLoading } =
+    useVendorInvoices();
 
   const createOrder = useCreatePurchaseOrder();
   const receiveOrder = useReceivePurchaseOrder();
@@ -266,86 +129,20 @@ export default function InventoryPurchasingPage() {
   const { toast } = useToast();
   const vendorInvoices = useMemo<VendorInvoiceRecord[]>(
     () => (vendorInvoiceData as VendorInvoiceRecord[]) ?? [],
-    [vendorInvoiceData]
+    [vendorInvoiceData],
   );
 
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
-  const [orderDate, setOrderDate] = useState<string>(() =>
-    new Date().toISOString().split('T')[0]
-  );
-  const [expectedDate, setExpectedDate] = useState<string>('');
-  const [orderNotes, setOrderNotes] = useState<string>('');
-  const [autoApprove, setAutoApprove] = useState<boolean>(false);
-  const [lineItems, setLineItems] = useState<DraftLineItem[]>([createDraftLineItem()]);
-
-  const [receivingSelection, setReceivingSelection] = useState<string | null>(null);
-  const [receivingLines, setReceivingLines] = useState<Record<string, number>>({});
-  const [receivingNotes, setReceivingNotes] = useState<string>('');
-  const [closeReceiving, setCloseReceiving] = useState<boolean>(false);
-
-  const [historyFilter, setHistoryFilter] = useState({
-    status: 'all',
-    supplier: 'all',
-    search: '',
-    from: '',
-    to: '',
-  });
-  const [historyDetailId, setHistoryDetailId] = useState<string | null>(null);
-
-  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
-  const [invoiceForm, setInvoiceForm] = useState<InvoiceFormState>({
-    po_id: '',
-    invoiceNumber: '',
-    amount: '',
-    dueDate: '',
-    notes: '',
-    paymentMethod: 'bank_transfer',
-  });
-
-  const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false);
-  const [integrationSupplierId, setIntegrationSupplierId] = useState<string | null>(null);
-  const [integrationForm, setIntegrationForm] = useState<IntegrationFormState>({
-    provider: 'marketman',
-    account_id: '',
-    api_key: '',
-    notes: '',
-  });
-
-  const selectedSupplier = useMemo(
-    () => suppliers?.find((supplierItem) => supplierItem.id === selectedSupplierId) ?? null,
-    [suppliers, selectedSupplierId]
-  );
-
-  const selectedSupplierIntegration = useMemo(() => {
-    if (!selectedSupplier) return null;
-    if (selectedSupplier.integration) return selectedSupplier.integration;
-    const address = selectedSupplier.address;
-    if (address && typeof address === 'object' && !Array.isArray(address) && 'integration' in address) {
-      return (address as Record<string, unknown>).integration as SupplierIntegrationDetails;
-    }
-    return null;
-  }, [selectedSupplier]);
-
-  const pendingOrders = useMemo(
-    () => purchaseOrders.filter((po) => ['pending', 'draft'].includes(po.status)),
-    [purchaseOrders]
-  );
-
-  const receivingCandidates = useMemo(
-    () => purchaseOrders.filter((po) => ['pending', 'ordered', 'partial'].includes(po.status)),
-    [purchaseOrders]
-  );
-
+  // Calculate outstandingByPo first (needed by hooks)
   const outstandingByPo = useMemo(() => {
     const map = new Map<string, number>();
 
     purchaseOrders.forEach((po) => {
       const invoicesForPo = vendorInvoices.filter(
-        (invoice) => invoice.reference_number === po.po_number
+        (invoice) => invoice.reference_number === po.po_number,
       );
       const paidTotal = invoicesForPo.reduce(
         (sum, invoice) => sum + (Number(invoice.amount) || 0),
-        0
+        0,
       );
       const outstanding = Math.max((po.total_amount ?? 0) - paidTotal, 0);
       map.set(po.id, outstanding);
@@ -354,204 +151,139 @@ export default function InventoryPurchasingPage() {
     return map;
   }, [purchaseOrders, vendorInvoices]);
 
-  const orderTotal = useMemo(
-    () => lineItems.reduce((sum, item) => sum + (Number.isFinite(item.total) ? item.total : 0), 0),
-    [lineItems]
+  // Use extracted hooks
+  const purchaseOrderForm = usePurchaseOrderForm({
+    inventoryItems,
+    itemsLoading,
+  });
+
+  const receiveOrders = useReceiveOrders({
+    purchaseOrders,
+    outstandingByPo,
+  });
+
+  const orderHistory = useOrderHistory({
+    purchaseOrders,
+  });
+
+  const vendorInvoicesHook = useVendorInvoices({
+    purchaseOrders,
+    vendorInvoices,
+    outstandingByPo,
+  });
+
+  // Local state for supplier selection and integration
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string>("");
+  const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false);
+  const [integrationSupplierId, setIntegrationSupplierId] = useState<
+    string | null
+  >(null);
+  const [integrationForm, setIntegrationForm] = useState<IntegrationFormState>({
+    provider: "marketman",
+    account_id: "",
+    api_key: "",
+    notes: "",
+  });
+
+  const selectedSupplier = useMemo(
+    () =>
+      suppliers?.find(
+        (supplierItem) => supplierItem.id === selectedSupplierId,
+      ) ?? null,
+    [suppliers, selectedSupplierId],
   );
 
-  const filteredHistoryOrders = useMemo(() => {
-    const statusFilter = historyFilter.status;
-    const supplierFilter = historyFilter.supplier;
-    const searchTerm = historyFilter.search.trim().toLowerCase();
-    const fromDate = historyFilter.from ? new Date(historyFilter.from) : null;
-    const toDate = historyFilter.to ? new Date(historyFilter.to) : null;
+  const selectedSupplierIntegration = useMemo(() => {
+    if (!selectedSupplier) return null;
+    if (selectedSupplier.integration) return selectedSupplier.integration;
+    const address = selectedSupplier.address;
+    if (
+      address &&
+      typeof address === "object" &&
+      !Array.isArray(address) &&
+      "integration" in address
+    ) {
+      return (address as Record<string, unknown>)
+        .integration as SupplierIntegrationDetails;
+    }
+    return null;
+  }, [selectedSupplier]);
 
-    return purchaseOrders.filter((po) => {
-      if (statusFilter !== 'all' && po.status !== statusFilter) return false;
-      if (supplierFilter !== 'all' && po.supplier_name !== supplierFilter) return false;
-
-      if (searchTerm) {
-        const matchesSearch =
-          po.po_number.toLowerCase().includes(searchTerm) ||
-          po.supplier_name.toLowerCase().includes(searchTerm);
-        if (!matchesSearch) return false;
-      }
-
-      if (fromDate) {
-        const order = new Date(po.order_date);
-        if (order < fromDate) return false;
-      }
-
-      if (toDate) {
-        const order = new Date(po.order_date);
-        if (order > toDate) return false;
-      }
-
-      return true;
-    });
-  }, [purchaseOrders, historyFilter]);
-
-  const totalOutstandingValue = useMemo(
-    () => Array.from(outstandingByPo.values()).reduce((sum, value) => sum + value, 0),
-    [outstandingByPo]
+  const pendingOrders = useMemo(
+    () =>
+      purchaseOrders.filter((po) => ["pending", "draft"].includes(po.status)),
+    [purchaseOrders],
   );
 
+  // Computed values from hooks
+  const orderTotal = purchaseOrderForm.orderTotal;
+  const filteredHistoryOrders = orderHistory.filteredOrders;
+  const totalOutstandingValue = vendorInvoicesHook.totalOutstandingValue;
+
+  // Additional computed values
   const openOrderCount = useMemo(
     () =>
       purchaseOrders.filter(
-        (po) => po.status !== 'received' && po.status !== 'cancelled'
+        (po) => po.status !== "received" && po.status !== "cancelled",
       ).length,
-    [purchaseOrders]
+    [purchaseOrders],
   );
 
   const pendingApprovalCount = pendingOrders.length;
   const supplierCount = suppliers?.length ?? 0;
 
+  // Initialize invoice form with first PO if available
   useEffect(() => {
     if (!purchaseOrders.length) return;
+    if (vendorInvoicesHook.invoiceForm.po_id) return;
 
-    setInvoiceForm((prev) => {
-      if (prev.po_id && purchaseOrders.some((po) => po.id === prev.po_id)) {
-        return prev;
-      }
-      const defaultPo = purchaseOrders[0];
-      return {
-        ...prev,
-        po_id: defaultPo.id,
-        amount: (defaultPo.total_amount ?? 0).toFixed(2),
-      };
+    const defaultPo = purchaseOrders[0];
+    vendorInvoicesHook.updateInvoiceForm({
+      po_id: defaultPo.id,
+      amount: (defaultPo.total_amount ?? 0).toFixed(2),
     });
-  }, [purchaseOrders]);
+  }, [purchaseOrders, vendorInvoicesHook]);
 
-  useEffect(() => {
-    if (!receivingCandidates.length) return;
-
-    setReceivingSelection((prev) => {
-      if (prev && receivingCandidates.some((po) => po.id === prev)) {
-        return prev;
-      }
-      return receivingCandidates[0].id;
-    });
-  }, [receivingCandidates]);
-
-  const selectedReceivingPo = useMemo<PurchaseOrder | null>(
+  const openOrderCount = useMemo(
     () =>
-      receivingCandidates.find((po) => po.id === receivingSelection) ??
-      receivingCandidates.find((po) => po.id === invoiceForm.po_id) ??
-      null,
-    [receivingCandidates, receivingSelection, invoiceForm.po_id]
+      purchaseOrders.filter(
+        (po) => po.status !== "received" && po.status !== "cancelled",
+      ).length,
+    [purchaseOrders],
   );
 
-  useEffect(() => {
-    if (!selectedReceivingPo) {
-      setReceivingLines({});
-      return;
-    }
+  const pendingApprovalCount = pendingOrders.length;
+  const supplierCount = suppliers?.length ?? 0;
 
-    const defaults: Record<string, number> = {};
-    selectedReceivingPo.purchase_order_items?.forEach((line) => {
-      const received = line.received_quantity ?? 0;
-      const remaining = Math.max(line.quantity - received, 0);
-      defaults[line.id] = remaining;
-    });
-    setReceivingLines(defaults);
-    setCloseReceiving(
-      selectedReceivingPo.purchase_order_items?.every(
-        (line) => (line.received_quantity ?? 0) >= line.quantity
-      ) ?? false
-    );
-  }, [selectedReceivingPo]);
+  // Use values from hooks
+  const receivingCandidates = receiveOrders.receivingCandidates;
+  const selectedReceivingPo = receiveOrders.selectedReceivingPo;
+  const selectedInvoicePo = vendorInvoicesHook.selectedInvoicePo;
+  const invoicesForSelectedPo = vendorInvoicesHook.invoicesForSelectedPo;
+  const outstandingForSelectedPo = vendorInvoicesHook.outstandingForSelectedPo;
 
-  const selectedInvoicePo = useMemo<PurchaseOrder | null>(
-    () => purchaseOrders.find((po) => po.id === invoiceForm.po_id) ?? null,
-    [purchaseOrders, invoiceForm.po_id]
-  );
-
-  const invoicesForSelectedPo = useMemo(
-    () =>
-      selectedInvoicePo
-        ? vendorInvoices.filter((invoice) => invoice.reference_number === selectedInvoicePo.po_number)
-        : [],
-    [selectedInvoicePo, vendorInvoices]
-  );
-
-  const outstandingForSelectedPo =
-    selectedInvoicePo && outstandingByPo.has(selectedInvoicePo.id)
-      ? outstandingByPo.get(selectedInvoicePo.id) ?? 0
-      : 0;
-
-  const handleLineItemSelect = (lineId: string, itemId: string) => {
-    const inventoryItem = inventoryItems.find((item) => item.id === itemId);
-    setLineItems((prev) =>
-      prev.map((line) => {
-        if (line.id !== lineId) return line;
-        const unitPrice = inventoryItem?.cost_per_unit ?? line.unitPrice ?? 0;
-        const quantity = line.quantity > 0 ? line.quantity : 1;
-        return {
-          ...line,
-          itemId,
-          itemName: inventoryItem?.name ?? line.itemName,
-          category: inventoryItem?.category ?? inventoryItem?.category_details?.name ?? null,
-          unitPrice,
-          quantity,
-          total: Number((unitPrice * quantity).toFixed(2)),
-        };
-      })
-    );
-  };
-
-  const handleLineItemQuantity = (lineId: string, value: string) => {
-    const quantity = Math.max(Number(value) || 0, 0);
-    setLineItems((prev) =>
-      prev.map((line) =>
-        line.id === lineId
-          ? {
-              ...line,
-              quantity,
-              total: Number((quantity * line.unitPrice).toFixed(2)),
-            }
-          : line
-      )
-    );
-  };
-
-  const handleLineItemPrice = (lineId: string, value: string) => {
-    const unitPrice = Math.max(Number(value) || 0, 0);
-    setLineItems((prev) =>
-      prev.map((line) =>
-        line.id === lineId
-          ? {
-              ...line,
-              unitPrice,
-              total: Number((unitPrice * line.quantity).toFixed(2)),
-            }
-          : line
-      )
-    );
-  };
-
-  const handleLineItemName = (lineId: string, value: string) => {
-    setLineItems((prev) =>
-      prev.map((line) => (line.id === lineId ? { ...line, itemName: value } : line))
-    );
-  };
-
-  const handleRemoveLineItem = (lineId: string) => {
-    setLineItems((prev) => (prev.length > 1 ? prev.filter((line) => line.id !== lineId) : prev));
-  };
+  // Use handlers from purchaseOrderForm hook
+  const {
+    handleLineItemSelect,
+    handleLineItemQuantity,
+    handleLineItemPrice,
+    handleLineItemName,
+    handleRemoveLineItem,
+    handleAddLineItem,
+  } = purchaseOrderForm;
 
   const handleCreateOrder = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedSupplier) {
       toast({
-        title: 'Supplier required',
-        description: 'Select a supplier before creating a purchase order.',
-        variant: 'destructive',
+        title: "Supplier required",
+        description: "Select a supplier before creating a purchase order.",
+        variant: "destructive",
       });
       return;
     }
 
-    const validLines = lineItems
+    const validLines = purchaseOrderForm.lineItems
       .map((line) => ({
         ...line,
         itemName: line.itemName.trim(),
@@ -560,9 +292,9 @@ export default function InventoryPurchasingPage() {
 
     if (validLines.length === 0) {
       toast({
-        title: 'No line items',
-        description: 'Add at least one item with quantity greater than zero.',
-        variant: 'destructive',
+        title: "No line items",
+        description: "Add at least one item with quantity greater than zero.",
+        variant: "destructive",
       });
       return;
     }
@@ -575,7 +307,10 @@ export default function InventoryPurchasingPage() {
           contact_name: selectedSupplier.contact_name,
           email: selectedSupplier.email,
           phone: selectedSupplier.phone,
-          address: selectedSupplier.address as Record<string, unknown> | string | null,
+          address: selectedSupplier.address as
+            | Record<string, unknown>
+            | string
+            | null,
           payment_terms: selectedSupplier.payment_terms,
           integration: selectedSupplierIntegration ?? undefined,
         },
@@ -585,20 +320,17 @@ export default function InventoryPurchasingPage() {
           quantity: line.quantity,
           unit_price: line.unitPrice,
         })),
-        orderDate,
-        expectedDeliveryDate: expectedDate || undefined,
-        notes: orderNotes || undefined,
-        status: autoApprove ? 'ordered' : 'pending',
-        autoApprove,
+        orderDate: purchaseOrderForm.orderDate,
+        expectedDeliveryDate: purchaseOrderForm.expectedDate || undefined,
+        notes: purchaseOrderForm.orderNotes || undefined,
+        status: purchaseOrderForm.autoApprove ? "ordered" : "pending",
+        autoApprove: purchaseOrderForm.autoApprove,
       },
       {
         onSuccess: () => {
-          setLineItems([createDraftLineItem()]);
-          setOrderNotes('');
-          setExpectedDate('');
-          setAutoApprove(false);
+          purchaseOrderForm.reset();
         },
-      }
+      },
     );
   };
 
@@ -606,7 +338,7 @@ export default function InventoryPurchasingPage() {
     updateOrder.mutate({
       id: po.id,
       updates: {
-        status: 'ordered',
+        status: "ordered",
         approved_by: profile?.id ?? undefined,
       },
     });
@@ -616,7 +348,7 @@ export default function InventoryPurchasingPage() {
     updateOrder.mutate({
       id: po.id,
       updates: {
-        status: 'cancelled',
+        status: "cancelled",
         notes: po.notes ?? undefined,
       },
     });
@@ -628,7 +360,7 @@ export default function InventoryPurchasingPage() {
     const payloadItems =
       selectedReceivingPo.purchase_order_items
         ?.map((line) => {
-          const requested = Number(receivingLines[line.id] ?? 0);
+          const requested = Number(receiveOrders.receivingLines[line.id] ?? 0);
           const alreadyReceived = line.received_quantity ?? 0;
           const remaining = Math.max(line.quantity - alreadyReceived, 0);
           const receiveNow = Math.min(Math.max(requested, 0), remaining);
@@ -644,9 +376,10 @@ export default function InventoryPurchasingPage() {
 
     if (!payloadItems.length) {
       toast({
-        title: 'Nothing to receive',
-        description: 'Enter at least one quantity above zero to record receiving.',
-        variant: 'destructive',
+        title: "Nothing to receive",
+        description:
+          "Enter at least one quantity above zero to record receiving.",
+        variant: "destructive",
       });
       return;
     }
@@ -655,9 +388,9 @@ export default function InventoryPurchasingPage() {
       id: selectedReceivingPo.id,
       payload: {
         items: payloadItems,
-        notes: receivingNotes || undefined,
-        closeOrder: closeReceiving,
-        actual_delivery_date: new Date().toISOString().split('T')[0],
+        notes: receiveOrders.receivingNotes || undefined,
+        closeOrder: receiveOrders.closeReceiving,
+        actual_delivery_date: new Date().toISOString().split("T")[0],
       },
     });
   };
@@ -666,12 +399,12 @@ export default function InventoryPurchasingPage() {
     event.preventDefault();
     if (!selectedInvoicePo) return;
 
-    const amount = Number(invoiceForm.amount);
+    const amount = Number(vendorInvoicesHook.invoiceForm.amount);
     if (!amount || amount <= 0) {
       toast({
-        title: 'Amount required',
-        description: 'Enter an amount greater than zero for the invoice.',
-        variant: 'destructive',
+        title: "Amount required",
+        description: "Enter an amount greater than zero for the invoice.",
+        variant: "destructive",
       });
       return;
     }
@@ -681,24 +414,25 @@ export default function InventoryPurchasingPage() {
         poId: selectedInvoicePo.id,
         supplierName: selectedInvoicePo.supplier_name,
         amount,
-        dueDate: invoiceForm.dueDate || undefined,
-        invoiceNumber: invoiceForm.invoiceNumber || undefined,
-        notes: invoiceForm.notes || undefined,
-        paymentMethod: invoiceForm.paymentMethod || undefined,
+        dueDate: vendorInvoicesHook.invoiceForm.dueDate || undefined,
+        invoiceNumber:
+          vendorInvoicesHook.invoiceForm.invoiceNumber || undefined,
+        notes: vendorInvoicesHook.invoiceForm.notes || undefined,
+        paymentMethod:
+          vendorInvoicesHook.invoiceForm.paymentMethod || undefined,
       },
       {
         onSuccess: () => {
-          setInvoiceDialogOpen(false);
-          setInvoiceForm((prev) => ({
-            ...prev,
-            invoiceNumber: '',
-            notes: '',
+          vendorInvoicesHook.setInvoiceDialogOpen(false);
+          vendorInvoicesHook.updateInvoiceForm({
+            invoiceNumber: "",
+            notes: "",
             amount: outstandingForSelectedPo
               ? outstandingForSelectedPo.toFixed(2)
               : (selectedInvoicePo.total_amount ?? 0).toFixed(2),
-          }));
+          });
         },
-      }
+      },
     );
   };
 
@@ -713,7 +447,7 @@ export default function InventoryPurchasingPage() {
           provider: integrationForm.provider,
           account_id: integrationForm.account_id || undefined,
           api_key: integrationForm.api_key || undefined,
-          status: 'connected',
+          status: "connected",
           sync_notes: integrationForm.notes || undefined,
         },
       },
@@ -721,18 +455,17 @@ export default function InventoryPurchasingPage() {
         onSuccess: () => {
           setIntegrationDialogOpen(false);
           setIntegrationForm({
-            provider: 'marketman',
-            account_id: '',
-            api_key: '',
-            notes: '',
+            provider: "marketman",
+            account_id: "",
+            api_key: "",
+            notes: "",
           });
         },
-      }
+      },
     );
   };
 
-  const historyDetailPo =
-    historyDetailId && purchaseOrders.find((po) => po.id === historyDetailId);
+  // historyDetailPo is now provided by orderHistory hook
 
   return (
     <InventoryLayout>
@@ -746,20 +479,28 @@ export default function InventoryPurchasingPage() {
                   Inventory Purchasing
                 </h1>
                 <p className="text-muted-foreground">
-                  Place purchase orders, reconcile deliveries, and track vendor invoices in one
-                  workspace.
+                  Place purchase orders, reconcile deliveries, and track vendor
+                  invoices in one workspace.
                 </p>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setReceivingSelection(receivingCandidates[0]?.id ?? null)}
+                  onClick={() =>
+                    receiveOrders.setReceivingSelection(
+                      receivingCandidates[0]?.id ?? null,
+                    )
+                  }
                   disabled={!receivingCandidates.length}
                 >
                   <Package className="mr-2 h-4 w-4" />
                   Quick Receive
                 </Button>
-                <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <Button
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   New Purchase Order
                 </Button>
@@ -770,7 +511,9 @@ export default function InventoryPurchasingPage() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardDescription>Open Purchase Orders</CardDescription>
-                  <CardTitle className="text-3xl font-bold">{openOrderCount}</CardTitle>
+                  <CardTitle className="text-3xl font-bold">
+                    {openOrderCount}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-muted-foreground">
                   Awaiting completion or receiving.
@@ -780,7 +523,9 @@ export default function InventoryPurchasingPage() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardDescription>Pending Approvals</CardDescription>
-                  <CardTitle className="text-3xl font-bold">{pendingApprovalCount}</CardTitle>
+                  <CardTitle className="text-3xl font-bold">
+                    {pendingApprovalCount}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-muted-foreground">
                   Purchase orders waiting for manager approval.
@@ -803,8 +548,9 @@ export default function InventoryPurchasingPage() {
                 <CardHeader className="pb-2">
                   <CardDescription>Integrated Suppliers</CardDescription>
                   <CardTitle className="text-3xl font-bold">
-                    {suppliers?.filter((supplier) => supplier.integration)?.length ?? 0} /{' '}
-                    {supplierCount}
+                    {suppliers?.filter((supplier) => supplier.integration)
+                      ?.length ?? 0}{" "}
+                    / {supplierCount}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-muted-foreground">
@@ -819,21 +565,80 @@ export default function InventoryPurchasingPage() {
                   <ShoppingCart className="h-4 w-4" />
                   Place Orders
                 </TabsTrigger>
-                <TabsTrigger value="receive" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="receive"
+                  className="flex items-center gap-2"
+                >
                   <Truck className="h-4 w-4" />
                   Receive Orders
                 </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="history"
+                  className="flex items-center gap-2"
+                >
                   <HistoryIcon className="h-4 w-4" />
                   Order History
                 </TabsTrigger>
-                <TabsTrigger value="invoices" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="invoices"
+                  className="flex items-center gap-2"
+                >
                   <FileText className="h-4 w-4" />
                   Invoices
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="place" className="space-y-6">
+                <PlaceOrdersTab
+                  selectedSupplierId={selectedSupplierId}
+                  onSupplierChange={setSelectedSupplierId}
+                  orderDate={purchaseOrderForm.orderDate}
+                  onOrderDateChange={purchaseOrderForm.setOrderDate}
+                  expectedDate={purchaseOrderForm.expectedDate}
+                  onExpectedDateChange={purchaseOrderForm.setExpectedDate}
+                  orderNotes={purchaseOrderForm.orderNotes}
+                  onOrderNotesChange={purchaseOrderForm.setOrderNotes}
+                  autoApprove={purchaseOrderForm.autoApprove}
+                  onAutoApproveChange={purchaseOrderForm.setAutoApprove}
+                  lineItems={purchaseOrderForm.lineItems}
+                  orderTotal={orderTotal}
+                  suppliers={suppliers}
+                  suppliersLoading={suppliersLoading}
+                  inventoryItems={inventoryItems}
+                  itemsLoading={itemsLoading}
+                  selectedSupplier={selectedSupplier}
+                  selectedSupplierIntegration={selectedSupplierIntegration}
+                  onLineItemSelect={handleLineItemSelect}
+                  onLineItemQuantity={handleLineItemQuantity}
+                  onLineItemPrice={handleLineItemPrice}
+                  onLineItemName={handleLineItemName}
+                  onRemoveLineItem={handleRemoveLineItem}
+                  onAddLineItem={handleAddLineItem}
+                  onLinkIntegration={() => {
+                    setIntegrationSupplierId(selectedSupplier?.id ?? null);
+                    setIntegrationForm((prev) => ({
+                      ...prev,
+                      provider:
+                        selectedSupplierIntegration?.provider ?? prev.provider,
+                      account_id: selectedSupplierIntegration?.account_id ?? "",
+                      api_key: "",
+                      notes: selectedSupplierIntegration?.sync_notes ?? "",
+                    }));
+                    setIntegrationDialogOpen(true);
+                  }}
+                  onSubmit={handleCreateOrder}
+                  isSubmitting={createOrder.isPending}
+                  pendingOrders={pendingOrders}
+                  ordersLoading={ordersLoading}
+                  onApproveOrder={handleApproveOrder}
+                  onCancelOrder={handleMarkCancelled}
+                  onViewOrder={orderHistory.setHistoryDetailId}
+                  isUpdating={updateOrder.isPending}
+                  outstandingByPo={outstandingByPo}
+                />
+              </TabsContent>
+
+              <TabsContent value="place-old" className="space-y-6 hidden">
                 <form onSubmit={handleCreateOrder}>
                   <Card className="overflow-hidden">
                     <CardHeader className="border-b bg-muted/30">
@@ -842,7 +647,8 @@ export default function InventoryPurchasingPage() {
                         Create Purchase Order
                       </CardTitle>
                       <CardDescription>
-                        Build a new purchase order using live catalog pricing from Items &amp; Setup.
+                        Build a new purchase order using live catalog pricing
+                        from Items &amp; Setup.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6">
@@ -861,7 +667,10 @@ export default function InventoryPurchasingPage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {suppliers.map((supplier) => (
-                                    <SelectItem key={supplier.id} value={supplier.id}>
+                                    <SelectItem
+                                      key={supplier.id}
+                                      value={supplier.id}
+                                    >
                                       {supplier.name}
                                     </SelectItem>
                                   ))}
@@ -873,26 +682,38 @@ export default function InventoryPurchasingPage() {
                               <Input
                                 id="order-date"
                                 type="date"
-                                value={orderDate}
-                                onChange={(event) => setOrderDate(event.target.value)}
+                                value={purchaseOrderForm.orderDate}
+                                onChange={(event) =>
+                                  purchaseOrderForm.setOrderDate(
+                                    event.target.value,
+                                  )
+                                }
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="expected-date">Expected Delivery</Label>
+                              <Label htmlFor="expected-date">
+                                Expected Delivery
+                              </Label>
                               <Input
                                 id="expected-date"
                                 type="date"
                                 value={expectedDate}
-                                onChange={(event) => setExpectedDate(event.target.value)}
+                                onChange={(event) =>
+                                  setExpectedDate(event.target.value)
+                                }
                               />
                             </div>
                             <div className="space-y-2 sm:col-span-2">
                               <Label htmlFor="notes">Internal Notes</Label>
                               <Textarea
                                 id="notes"
-                                value={orderNotes}
+                                value={purchaseOrderForm.orderNotes}
                                 rows={3}
-                                onChange={(event) => setOrderNotes(event.target.value)}
+                                onChange={(event) =>
+                                  purchaseOrderForm.setOrderNotes(
+                                    event.target.value,
+                                  )
+                                }
                                 placeholder="Share ordering instructions, substitutions, or approval context."
                               />
                             </div>
@@ -903,14 +724,17 @@ export default function InventoryPurchasingPage() {
                               <div>
                                 <p className="font-medium">Line Items</p>
                                 <p className="text-sm text-muted-foreground">
-                                  Search items from Items &amp; Setup to inherit category and pricing.
+                                  Search items from Items &amp; Setup to inherit
+                                  category and pricing.
                                 </p>
                               </div>
                               <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setLineItems((prev) => [...prev, createDraftLineItem()])}
+                                onClick={() =>
+                                  purchaseOrderForm.handleAddLineItem()
+                                }
                               >
                                 <Plus className="mr-2 h-4 w-4" />
                                 Add Item
@@ -921,44 +745,69 @@ export default function InventoryPurchasingPage() {
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>Item</TableHead>
-                                    <TableHead className="w-[110px]">Quantity</TableHead>
-                                    <TableHead className="w-[140px]">Unit Cost</TableHead>
-                                    <TableHead className="w-[120px] text-right">Line Total</TableHead>
+                                    <TableHead className="w-[110px]">
+                                      Quantity
+                                    </TableHead>
+                                    <TableHead className="w-[140px]">
+                                      Unit Cost
+                                    </TableHead>
+                                    <TableHead className="w-[120px] text-right">
+                                      Line Total
+                                    </TableHead>
                                     <TableHead className="w-[44px]" />
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {lineItems.map((line) => (
+                                  {purchaseOrderForm.lineItems.map((line) => (
                                     <TableRow key={line.id}>
                                       <TableCell>
                                         <div className="space-y-2">
                                           <Select
-                                            value={line.itemId ?? ''}
-                                            onValueChange={(value) => handleLineItemSelect(line.id, value)}
+                                            value={line.itemId ?? ""}
+                                            onValueChange={(value) =>
+                                              handleLineItemSelect(
+                                                line.id,
+                                                value,
+                                              )
+                                            }
                                             disabled={itemsLoading}
                                           >
                                             <SelectTrigger>
                                               <SelectValue placeholder="Search items" />
                                             </SelectTrigger>
                                             <SelectContent className="max-h-80">
-                                              {inventoryItems.map((item: InventoryItem) => (
-                                                <SelectItem key={item.id} value={item.id}>
-                                                  <div className="flex flex-col text-left">
-                                                    <span>{item.name}</span>
-                                                    <span className="text-xs text-muted-foreground">
-                                                      {item.category || 'Uncategorized'} ·{' '}
-                                                      {item.cost_per_unit
-                                                        ? formatCurrency(item.cost_per_unit)
-                                                        : 'No cost set'}
-                                                    </span>
-                                                  </div>
-                                                </SelectItem>
-                                              ))}
+                                              {inventoryItems.map(
+                                                (item: InventoryItem) => (
+                                                  <SelectItem
+                                                    key={item.id}
+                                                    value={item.id}
+                                                  >
+                                                    <div className="flex flex-col text-left">
+                                                      <span>{item.name}</span>
+                                                      <span className="text-xs text-muted-foreground">
+                                                        {item.category ||
+                                                          "Uncategorized"}{" "}
+                                                        ·{" "}
+                                                        {item.cost_per_unit
+                                                          ? formatCurrency(
+                                                              item.cost_per_unit,
+                                                            )
+                                                          : "No cost set"}
+                                                      </span>
+                                                    </div>
+                                                  </SelectItem>
+                                                ),
+                                              )}
                                             </SelectContent>
                                           </Select>
                                           <Input
                                             value={line.itemName}
-                                            onChange={(event) => handleLineItemName(line.id, event.target.value)}
+                                            onChange={(event) =>
+                                              handleLineItemName(
+                                                line.id,
+                                                event.target.value,
+                                              )
+                                            }
                                             placeholder="Custom item name"
                                           />
                                         </div>
@@ -969,7 +818,10 @@ export default function InventoryPurchasingPage() {
                                           min="0"
                                           value={line.quantity}
                                           onChange={(event) =>
-                                            handleLineItemQuantity(line.id, event.target.value)
+                                            handleLineItemQuantity(
+                                              line.id,
+                                              event.target.value,
+                                            )
                                           }
                                         />
                                       </TableCell>
@@ -980,16 +832,20 @@ export default function InventoryPurchasingPage() {
                                           step="0.01"
                                           value={line.unitPrice}
                                           onChange={(event) =>
-                                            handleLineItemPrice(line.id, event.target.value)
+                                            handleLineItemPrice(
+                                              line.id,
+                                              event.target.value,
+                                            )
                                           }
                                         />
                                       </TableCell>
                                       <TableCell className="text-right font-medium">
                                         {formatCurrency(
                                           line.total,
-                                          selectedSupplierIntegration?.provider === 'us_foods'
-                                            ? 'USD'
-                                            : 'USD'
+                                          selectedSupplierIntegration?.provider ===
+                                            "us_foods"
+                                            ? "USD"
+                                            : "USD",
                                         )}
                                       </TableCell>
                                       <TableCell className="text-right">
@@ -997,8 +853,13 @@ export default function InventoryPurchasingPage() {
                                           type="button"
                                           variant="ghost"
                                           size="icon"
-                                          onClick={() => handleRemoveLineItem(line.id)}
-                                          disabled={lineItems.length === 1}
+                                          onClick={() =>
+                                            handleRemoveLineItem(line.id)
+                                          }
+                                          disabled={
+                                            purchaseOrderForm.lineItems
+                                              .length === 1
+                                          }
                                         >
                                           <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -1019,33 +880,53 @@ export default function InventoryPurchasingPage() {
                                 Supplier Snapshot
                               </CardTitle>
                               <CardDescription>
-                                Contact and integration details from Items &amp; Setup.
+                                Contact and integration details from Items &amp;
+                                Setup.
                               </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3 text-sm">
                               {selectedSupplier ? (
                                 <>
                                   <div className="space-y-1">
-                                    <p className="font-medium">{selectedSupplier.name}</p>
+                                    <p className="font-medium">
+                                      {selectedSupplier.name}
+                                    </p>
                                     <p className="text-muted-foreground">
-                                      {selectedSupplier.contact_name || 'No contact on file'}
+                                      {selectedSupplier.contact_name ||
+                                        "No contact on file"}
                                     </p>
                                   </div>
                                   <div className="space-y-1 text-muted-foreground">
-                                    <p>{selectedSupplier.email || 'No email provided'}</p>
-                                    <p>{selectedSupplier.phone || 'No phone provided'}</p>
+                                    <p>
+                                      {selectedSupplier.email ||
+                                        "No email provided"}
+                                    </p>
+                                    <p>
+                                      {selectedSupplier.phone ||
+                                        "No phone provided"}
+                                    </p>
                                   </div>
                                   <Separator />
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-sm font-medium">Integration Status</span>
+                                      <span className="text-sm font-medium">
+                                        Integration Status
+                                      </span>
                                       {selectedSupplierIntegration ? (
-                                        <Badge variant="default" className="gap-1">
+                                        <Badge
+                                          variant="default"
+                                          className="gap-1"
+                                        >
                                           <Link2 className="h-3 w-3" />
-                                          Connected ({selectedSupplierIntegration.provider})
+                                          Connected (
+                                          {selectedSupplierIntegration.provider}
+                                          )
                                         </Badge>
                                       ) : (
-                                        <Badge variant="outline" className="gap-1">
+                                        <Badge
+                                          variant="outline"
+                                          className="gap-1"
+                                        >
                                           <Link2 className="h-3 w-3" />
                                           Not linked
                                         </Badge>
@@ -1056,15 +937,21 @@ export default function InventoryPurchasingPage() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => {
-                                        setIntegrationSupplierId(selectedSupplier.id);
+                                        setIntegrationSupplierId(
+                                          selectedSupplier.id,
+                                        );
                                         setIntegrationForm((prev) => ({
                                           ...prev,
                                           provider:
-                                            selectedSupplierIntegration?.provider ?? prev.provider,
+                                            selectedSupplierIntegration?.provider ??
+                                            prev.provider,
                                           account_id:
-                                            selectedSupplierIntegration?.account_id ?? '',
-                                          api_key: '',
-                                          notes: selectedSupplierIntegration?.sync_notes ?? '',
+                                            selectedSupplierIntegration?.account_id ??
+                                            "",
+                                          api_key: "",
+                                          notes:
+                                            selectedSupplierIntegration?.sync_notes ??
+                                            "",
                                         }));
                                         setIntegrationDialogOpen(true);
                                       }}
@@ -1076,7 +963,8 @@ export default function InventoryPurchasingPage() {
                                 </>
                               ) : (
                                 <p className="text-sm text-muted-foreground">
-                                  Select a supplier to view contact and integration details.
+                                  Select a supplier to view contact and
+                                  integration details.
                                 </p>
                               )}
                             </CardContent>
@@ -1092,16 +980,19 @@ export default function InventoryPurchasingPage() {
                             <CardContent className="space-y-3 text-sm">
                               <div className="flex items-center justify-between">
                                 <span>Line Items</span>
-                                <span className="font-medium">{lineItems.length}</span>
+                                <span className="font-medium">
+                                  {lineItems.length}
+                                </span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <span>Estimated Total</span>
                                 <span className="font-medium">
                                   {formatCurrency(
                                     orderTotal,
-                                    selectedSupplierIntegration?.provider === 'us_foods'
-                                      ? 'USD'
-                                      : 'USD'
+                                    selectedSupplierIntegration?.provider ===
+                                      "us_foods"
+                                      ? "USD"
+                                      : "USD",
                                   )}
                                 </span>
                               </div>
@@ -1111,27 +1002,38 @@ export default function InventoryPurchasingPage() {
                                   <span>
                                     {formatCurrency(
                                       purchaseOrders
-                                        .filter((po) => po.supplier_name === selectedSupplier.name)
-                                        .reduce(
-                                          (sum, po) => sum + (outstandingByPo.get(po.id) ?? 0),
-                                          0
+                                        .filter(
+                                          (po) =>
+                                            po.supplier_name ===
+                                            selectedSupplier.name,
                                         )
+                                        .reduce(
+                                          (sum, po) =>
+                                            sum +
+                                            (outstandingByPo.get(po.id) ?? 0),
+                                          0,
+                                        ),
                                     )}
                                   </span>
                                 </div>
                               )}
                               <Separator />
                               <div className="flex items-center justify-between">
-                                <span className="font-medium">Auto-approve order</span>
+                                <span className="font-medium">
+                                  Auto-approve order
+                                </span>
                                 <Switch
-                                  checked={autoApprove}
-                                  onCheckedChange={setAutoApprove}
+                                  checked={purchaseOrderForm.autoApprove}
+                                  onCheckedChange={
+                                    purchaseOrderForm.setAutoApprove
+                                  }
                                   aria-label="Auto approve purchase order"
                                 />
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                Enable to move this purchase order directly to <strong>Ordered</strong>{' '}
-                                without manager approval.
+                                Enable to move this purchase order directly to{" "}
+                                <strong>Ordered</strong> without manager
+                                approval.
                               </p>
                             </CardContent>
                           </Card>
@@ -1140,10 +1042,13 @@ export default function InventoryPurchasingPage() {
                     </CardContent>
                     <CardFooter className="flex items-center justify-between border-t bg-muted/20 py-4">
                       <div className="text-sm text-muted-foreground">
-                        Need recurring orders? Create templates from the Order History tab.
+                        Need recurring orders? Create templates from the Order
+                        History tab.
                       </div>
                       <Button type="submit" disabled={createOrder.isPending}>
-                        {createOrder.isPending ? 'Saving...' : 'Create Purchase Order'}
+                        {createOrder.isPending
+                          ? "Saving..."
+                          : "Create Purchase Order"}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1163,7 +1068,10 @@ export default function InventoryPurchasingPage() {
                     {ordersLoading ? (
                       <div className="space-y-2">
                         {[...Array(3)].map((_, index) => (
-                          <div key={index} className="h-14 w-full animate-pulse rounded bg-muted/60" />
+                          <div
+                            key={index}
+                            className="h-14 w-full animate-pulse rounded bg-muted/60"
+                          />
                         ))}
                       </div>
                     ) : pendingOrders.length === 0 ? (
@@ -1182,13 +1090,17 @@ export default function InventoryPurchasingPage() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <p className="font-medium">{po.po_number}</p>
-                                  <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                  <Badge
+                                    variant={getStatusColor(po.status)}
+                                    className="gap-1"
+                                  >
                                     <StatusIcon className="h-3 w-3" />
-                                    {statusLabels[po.status] ?? po.status}
+                                    {STATUS_LABELS[po.status] ?? po.status}
                                   </Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                  {po.supplier_name} · Ordered {formatDate(po.order_date)} ·{' '}
+                                  {po.supplier_name} · Ordered{" "}
+                                  {formatDate(po.order_date)} ·{" "}
                                   {formatCurrency(po.total_amount)}
                                 </p>
                               </div>
@@ -1197,7 +1109,9 @@ export default function InventoryPurchasingPage() {
                                   type="button"
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setHistoryDetailId(po.id)}
+                                  onClick={() =>
+                                    orderHistory.setHistoryDetailId(po.id)
+                                  }
                                 >
                                   <ExternalLink className="mr-2 h-4 w-4" />
                                   Review
@@ -1231,6 +1145,25 @@ export default function InventoryPurchasingPage() {
               </TabsContent>
 
               <TabsContent value="receive" className="space-y-6">
+                <ReceiveOrdersTab
+                  receivingCandidates={receivingCandidates}
+                  selectedReceivingPo={selectedReceivingPo}
+                  receivingLines={receiveOrders.receivingLines}
+                  receivingNotes={receiveOrders.receivingNotes}
+                  closeReceiving={receiveOrders.closeReceiving}
+                  outstandingByPo={outstandingByPo}
+                  onSelectPo={receiveOrders.setReceivingSelection}
+                  onReceivingLineChange={
+                    receiveOrders.handleReceivingLineChange
+                  }
+                  onReceivingNotesChange={receiveOrders.setReceivingNotes}
+                  onCloseReceivingChange={receiveOrders.setCloseReceiving}
+                  onReceive={handleReceive}
+                  isReceiving={receiveOrder.isPending}
+                />
+              </TabsContent>
+
+              <TabsContent value="receive-old" className="space-y-6 hidden">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1238,7 +1171,8 @@ export default function InventoryPurchasingPage() {
                       Receiving Station
                     </CardTitle>
                     <CardDescription>
-                      Log deliveries, capture cost adjustments, and update on-hand inventory.
+                      Log deliveries, capture cost adjustments, and update
+                      on-hand inventory.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
@@ -1248,7 +1182,8 @@ export default function InventoryPurchasingPage() {
                           <div>
                             <p className="font-medium">Receiving Queue</p>
                             <p className="text-xs text-muted-foreground">
-                              {receivingCandidates.length} purchase orders awaiting receiving.
+                              {receivingCandidates.length} purchase orders
+                              awaiting receiving.
                             </p>
                           </div>
                         </div>
@@ -1261,7 +1196,8 @@ export default function InventoryPurchasingPage() {
                             ) : (
                               receivingCandidates.map((po) => {
                                 const StatusIcon = getStatusIcon(po.status);
-                                const outstanding = outstandingByPo.get(po.id) ?? 0;
+                                const outstanding =
+                                  outstandingByPo.get(po.id) ?? 0;
                                 const isSelected = receivingSelection === po.id;
                                 return (
                                   <button
@@ -1269,30 +1205,44 @@ export default function InventoryPurchasingPage() {
                                     type="button"
                                     onClick={() => setReceivingSelection(po.id)}
                                     className={cn(
-                                      'w-full rounded-lg border p-4 text-left transition hover:border-primary',
-                                      isSelected && 'border-primary shadow-sm'
+                                      "w-full rounded-lg border p-4 text-left transition hover:border-primary",
+                                      isSelected && "border-primary shadow-sm",
                                     )}
                                   >
                                     <div className="flex items-center justify-between">
                                       <div>
-                                        <p className="font-medium">{po.po_number}</p>
+                                        <p className="font-medium">
+                                          {po.po_number}
+                                        </p>
                                         <p className="text-xs text-muted-foreground">
-                                          {po.supplier_name} · Expected {formatDate(po.expected_delivery_date)}
+                                          {po.supplier_name} · Expected{" "}
+                                          {formatDate(
+                                            po.expected_delivery_date,
+                                          )}
                                         </p>
                                       </div>
-                                      <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                      <Badge
+                                        variant={getStatusColor(po.status)}
+                                        className="gap-1"
+                                      >
                                         <StatusIcon className="h-3 w-3" />
-                                        {statusLabels[po.status] ?? po.status}
+                                        {STATUS_LABELS[po.status] ?? po.status}
                                       </Badge>
                                     </div>
                                     <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                                       <span>
                                         {po.purchase_order_items
                                           ?.map((item) => item.quantity)
-                                          .reduce((sum, qty) => sum + (qty || 0), 0) ?? 0}{' '}
+                                          .reduce(
+                                            (sum, qty) => sum + (qty || 0),
+                                            0,
+                                          ) ?? 0}{" "}
                                         units ordered
                                       </span>
-                                      <span>Outstanding {formatCurrency(outstanding)}</span>
+                                      <span>
+                                        Outstanding{" "}
+                                        {formatCurrency(outstanding)}
+                                      </span>
                                     </div>
                                   </button>
                                 );
@@ -1308,17 +1258,28 @@ export default function InventoryPurchasingPage() {
                         <div className="space-y-4">
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-lg font-semibold">{selectedReceivingPo.po_number}</h3>
-                              <Badge variant={getStatusColor(selectedReceivingPo.status)} className="gap-1">
+                              <h3 className="text-lg font-semibold">
+                                {selectedReceivingPo.po_number}
+                              </h3>
+                              <Badge
+                                variant={getStatusColor(
+                                  selectedReceivingPo.status,
+                                )}
+                                className="gap-1"
+                              >
                                 {(() => {
-                                  const StatusIcon = getStatusIcon(selectedReceivingPo.status);
+                                  const StatusIcon = getStatusIcon(
+                                    selectedReceivingPo.status,
+                                  );
                                   return <StatusIcon className="h-3 w-3" />;
                                 })()}
-                                {statusLabels[selectedReceivingPo.status] ?? selectedReceivingPo.status}
+                                {STATUS_LABELS[selectedReceivingPo.status] ??
+                                  selectedReceivingPo.status}
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {selectedReceivingPo.supplier_name} · Ordered {formatDate(selectedReceivingPo.order_date)}
+                              {selectedReceivingPo.supplier_name} · Ordered{" "}
+                              {formatDate(selectedReceivingPo.order_date)}
                             </p>
                           </div>
 
@@ -1331,52 +1292,84 @@ export default function InventoryPurchasingPage() {
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>Item</TableHead>
-                                    <TableHead className="w-[80px] text-right">Ordered</TableHead>
-                                    <TableHead className="w-[80px] text-right">Received</TableHead>
-                                    <TableHead className="w-[80px] text-right">Remaining</TableHead>
-                                    <TableHead className="w-[120px] text-right">Receive Now</TableHead>
+                                    <TableHead className="w-[80px] text-right">
+                                      Ordered
+                                    </TableHead>
+                                    <TableHead className="w-[80px] text-right">
+                                      Received
+                                    </TableHead>
+                                    <TableHead className="w-[80px] text-right">
+                                      Remaining
+                                    </TableHead>
+                                    <TableHead className="w-[120px] text-right">
+                                      Receive Now
+                                    </TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                  {selectedReceivingPo.purchase_order_items?.map((line) => {
-                                    const alreadyReceived = line.received_quantity ?? 0;
-                                    const remaining = Math.max(line.quantity - alreadyReceived, 0);
-                                    return (
-                                      <TableRow key={line.id}>
-                                        <TableCell>
-                                          <div>
-                                            <p className="font-medium">{line.item_name}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                              {formatCurrency(line.unit_price)} per unit
-                                            </p>
-                                          </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">{line.quantity}</TableCell>
-                                        <TableCell className="text-right">{alreadyReceived}</TableCell>
-                                        <TableCell className="text-right">
-                                          {remaining}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                          <Input
-                                            type="number"
-                                            min="0"
-                                            max={remaining}
-                                            value={receivingLines[line.id] ?? 0}
-                                            onChange={(event) => {
-                                              const value = Math.min(
-                                                Math.max(Number(event.target.value) || 0, 0),
-                                                remaining
-                                              );
-                                              setReceivingLines((prev) => ({
-                                                ...prev,
-                                                [line.id]: value,
-                                              }));
-                                            }}
-                                          />
-                                        </TableCell>
-                                      </TableRow>
-                                    );
-                                  })}
+                                  {selectedReceivingPo.purchase_order_items?.map(
+                                    (line) => {
+                                      const alreadyReceived =
+                                        line.received_quantity ?? 0;
+                                      const remaining = Math.max(
+                                        line.quantity - alreadyReceived,
+                                        0,
+                                      );
+                                      return (
+                                        <TableRow key={line.id}>
+                                          <TableCell>
+                                            <div>
+                                              <p className="font-medium">
+                                                {line.item_name}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">
+                                                {formatCurrency(
+                                                  line.unit_price,
+                                                )}{" "}
+                                                per unit
+                                              </p>
+                                            </div>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {line.quantity}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {alreadyReceived}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {remaining}
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <Input
+                                              type="number"
+                                              min="0"
+                                              max={remaining}
+                                              value={
+                                                receiveOrders.receivingLines[
+                                                  line.id
+                                                ] ?? 0
+                                              }
+                                              onChange={(event) => {
+                                                const value = Math.min(
+                                                  Math.max(
+                                                    Number(
+                                                      event.target.value,
+                                                    ) || 0,
+                                                    0,
+                                                  ),
+                                                  remaining,
+                                                );
+                                                receiveOrders.handleReceivingLineChange(
+                                                  line.id,
+                                                  value,
+                                                );
+                                              }}
+                                            />
+                                          </TableCell>
+                                        </TableRow>
+                                      );
+                                    },
+                                  )}
                                 </TableBody>
                               </Table>
                             </ScrollArea>
@@ -1385,30 +1378,46 @@ export default function InventoryPurchasingPage() {
                           <div className="space-y-3 rounded-lg border p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div>
-                                <p className="text-sm font-medium">Close purchase order after receiving</p>
+                                <p className="text-sm font-medium">
+                                  Close purchase order after receiving
+                                </p>
                                 <p className="text-xs text-muted-foreground">
-                                  Automatically marks the order as received and timestamps the delivery.
+                                  Automatically marks the order as received and
+                                  timestamps the delivery.
                                 </p>
                               </div>
                               <Switch
-                                checked={closeReceiving}
-                                onCheckedChange={setCloseReceiving}
+                                checked={receiveOrders.closeReceiving}
+                                onCheckedChange={
+                                  receiveOrders.setCloseReceiving
+                                }
                                 aria-label="Close purchase order after receiving"
                               />
                             </div>
                             <div className="space-y-1 text-sm">
-                              <Label htmlFor="receiving-notes">Receiving Notes</Label>
+                              <Label htmlFor="receiving-notes">
+                                Receiving Notes
+                              </Label>
                               <Textarea
                                 id="receiving-notes"
-                                value={receivingNotes}
-                                onChange={(event) => setReceivingNotes(event.target.value)}
+                                value={receiveOrders.receivingNotes}
+                                onChange={(event) =>
+                                  receiveOrders.setReceivingNotes(
+                                    event.target.value,
+                                  )
+                                }
                                 placeholder="Log any discrepancies, substitutions, or credits."
                                 rows={3}
                               />
                             </div>
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <span>Outstanding balance</span>
-                              <span>{formatCurrency(outstandingByPo.get(selectedReceivingPo.id) ?? 0)}</span>
+                              <span>
+                                {formatCurrency(
+                                  outstandingByPo.get(selectedReceivingPo.id) ??
+                                    0,
+                                )}
+                              </span>
                             </div>
                             <Button
                               type="button"
@@ -1416,13 +1425,16 @@ export default function InventoryPurchasingPage() {
                               onClick={handleReceive}
                               disabled={receiveOrder.isPending}
                             >
-                              {receiveOrder.isPending ? 'Recording...' : 'Record Receiving'}
+                              {receiveOrder.isPending
+                                ? "Recording..."
+                                : "Record Receiving"}
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex h-full items-center justify-center rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
-                          Select a purchase order from the queue to record receiving activity.
+                          Select a purchase order from the queue to record
+                          receiving activity.
                         </div>
                       )}
                     </div>
@@ -1431,6 +1443,17 @@ export default function InventoryPurchasingPage() {
               </TabsContent>
 
               <TabsContent value="history" className="space-y-6">
+                <OrderHistoryTab
+                  purchaseOrders={purchaseOrders}
+                  filteredOrders={filteredHistoryOrders}
+                  filter={orderHistory.filter}
+                  onFilterChange={orderHistory.updateFilter}
+                  onViewOrder={orderHistory.setHistoryDetailId}
+                  suppliers={orderHistory.suppliers}
+                />
+              </TabsContent>
+
+              <TabsContent value="history-old" className="space-y-6 hidden">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1438,17 +1461,23 @@ export default function InventoryPurchasingPage() {
                       Purchase Order History
                     </CardTitle>
                     <CardDescription>
-                      Audit trail for every purchase order, including approvals, receiving, and invoices.
+                      Audit trail for every purchase order, including approvals,
+                      receiving, and invoices.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                       <div>
-                        <Label className="text-xs uppercase text-muted-foreground">Status</Label>
+                        <Label className="text-xs uppercase text-muted-foreground">
+                          Status
+                        </Label>
                         <Select
                           value={historyFilter.status}
                           onValueChange={(value) =>
-                            setHistoryFilter((prev) => ({ ...prev, status: value }))
+                            setHistoryFilter((prev) => ({
+                              ...prev,
+                              status: value,
+                            }))
                           }
                         >
                           <SelectTrigger>
@@ -1456,20 +1485,27 @@ export default function InventoryPurchasingPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All statuses</SelectItem>
-                            {Object.entries(statusLabels).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(STATUS_LABELS).map(
+                              ([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs uppercase text-muted-foreground">Supplier</Label>
+                        <Label className="text-xs uppercase text-muted-foreground">
+                          Supplier
+                        </Label>
                         <Select
                           value={historyFilter.supplier}
                           onValueChange={(value) =>
-                            setHistoryFilter((prev) => ({ ...prev, supplier: value }))
+                            setHistoryFilter((prev) => ({
+                              ...prev,
+                              supplier: value,
+                            }))
                           }
                         >
                           <SelectTrigger>
@@ -1477,13 +1513,15 @@ export default function InventoryPurchasingPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All suppliers</SelectItem>
-                            {Array.from(new Set(purchaseOrders.map((po) => po.supplier_name))).map(
-                              (supplier) => (
-                                <SelectItem key={supplier} value={supplier}>
-                                  {supplier}
-                                </SelectItem>
-                              )
-                            )}
+                            {Array.from(
+                              new Set(
+                                purchaseOrders.map((po) => po.supplier_name),
+                              ),
+                            ).map((supplier) => (
+                              <SelectItem key={supplier} value={supplier}>
+                                {supplier}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1495,27 +1533,40 @@ export default function InventoryPurchasingPage() {
                           type="date"
                           value={historyFilter.from}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({ ...prev, from: event.target.value }))
+                            setHistoryFilter((prev) => ({
+                              ...prev,
+                              from: event.target.value,
+                            }))
                           }
                         />
                       </div>
                       <div>
-                        <Label className="text-xs uppercase text-muted-foreground">Order date to</Label>
+                        <Label className="text-xs uppercase text-muted-foreground">
+                          Order date to
+                        </Label>
                         <Input
                           type="date"
                           value={historyFilter.to}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({ ...prev, to: event.target.value }))
+                            setHistoryFilter((prev) => ({
+                              ...prev,
+                              to: event.target.value,
+                            }))
                           }
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <Label className="text-xs uppercase text-muted-foreground">Search</Label>
+                        <Label className="text-xs uppercase text-muted-foreground">
+                          Search
+                        </Label>
                         <Input
                           placeholder="Search by PO number or supplier"
                           value={historyFilter.search}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({ ...prev, search: event.target.value }))
+                            setHistoryFilter((prev) => ({
+                              ...prev,
+                              search: event.target.value,
+                            }))
                           }
                         />
                       </div>
@@ -1530,9 +1581,13 @@ export default function InventoryPurchasingPage() {
                               <TableHead>Supplier</TableHead>
                               <TableHead>Ordered</TableHead>
                               <TableHead>Expected</TableHead>
-                              <TableHead className="text-right">Total</TableHead>
+                              <TableHead className="text-right">
+                                Total
+                              </TableHead>
                               <TableHead>Status</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
+                              <TableHead className="text-right">
+                                Actions
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1549,18 +1604,30 @@ export default function InventoryPurchasingPage() {
                               filteredHistoryOrders.map((po) => {
                                 const StatusIcon = getStatusIcon(po.status);
                                 return (
-                                  <TableRow key={po.id} className="hover:bg-muted/40">
-                                    <TableCell className="font-medium">{po.po_number}</TableCell>
+                                  <TableRow
+                                    key={po.id}
+                                    className="hover:bg-muted/40"
+                                  >
+                                    <TableCell className="font-medium">
+                                      {po.po_number}
+                                    </TableCell>
                                     <TableCell>{po.supplier_name}</TableCell>
-                                    <TableCell>{formatDate(po.order_date)}</TableCell>
-                                    <TableCell>{formatDate(po.expected_delivery_date)}</TableCell>
+                                    <TableCell>
+                                      {formatDate(po.order_date)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {formatDate(po.expected_delivery_date)}
+                                    </TableCell>
                                     <TableCell className="text-right">
                                       {formatCurrency(po.total_amount)}
                                     </TableCell>
                                     <TableCell>
-                                      <Badge variant={getStatusColor(po.status)} className="gap-1">
+                                      <Badge
+                                        variant={getStatusColor(po.status)}
+                                        className="gap-1"
+                                      >
                                         <StatusIcon className="h-3 w-3" />
-                                        {statusLabels[po.status] ?? po.status}
+                                        {STATUS_LABELS[po.status] ?? po.status}
                                       </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -1568,7 +1635,9 @@ export default function InventoryPurchasingPage() {
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => setHistoryDetailId(po.id)}
+                                        onClick={() =>
+                                          orderHistory.setHistoryDetailId(po.id)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -1586,6 +1655,41 @@ export default function InventoryPurchasingPage() {
               </TabsContent>
 
               <TabsContent value="invoices" className="space-y-6">
+                <VendorInvoicesTab
+                  purchaseOrders={purchaseOrders}
+                  vendorInvoices={vendorInvoices}
+                  invoicesLoading={invoicesLoading}
+                  ordersLoading={ordersLoading}
+                  selectedInvoicePoId={vendorInvoicesHook.invoiceForm.po_id}
+                  onInvoicePoChange={(poId) => {
+                    const targetPo = purchaseOrders.find(
+                      (po) => po.id === poId,
+                    );
+                    vendorInvoicesHook.updateInvoiceForm({
+                      po_id: poId,
+                      amount: targetPo
+                        ? (
+                            outstandingByPo.get(targetPo.id) ??
+                            targetPo.total_amount ??
+                            0
+                          ).toFixed(2)
+                        : vendorInvoicesHook.invoiceForm.amount,
+                    });
+                  }}
+                  selectedInvoicePo={selectedInvoicePo}
+                  outstandingForSelectedPo={outstandingForSelectedPo}
+                  invoicesForSelectedPo={invoicesForSelectedPo}
+                  totalOutstandingValue={
+                    vendorInvoicesHook.totalOutstandingValue
+                  }
+                  onLogInvoice={() =>
+                    vendorInvoicesHook.setInvoiceDialogOpen(true)
+                  }
+                  outstandingByPo={outstandingByPo}
+                />
+              </TabsContent>
+
+              <TabsContent value="invoices-old" className="space-y-6 hidden">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1593,7 +1697,8 @@ export default function InventoryPurchasingPage() {
                       Vendor Invoices
                     </CardTitle>
                     <CardDescription>
-                      Track invoices, payment status, and outstanding balances for each purchase order.
+                      Track invoices, payment status, and outstanding balances
+                      for each purchase order.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -1605,16 +1710,21 @@ export default function InventoryPurchasingPage() {
                               Purchase Order
                             </Label>
                             <Select
-                              value={invoiceForm.po_id}
+                              value={vendorInvoicesHook.invoiceForm.po_id}
                               onValueChange={(value) => {
-                                const targetPo = purchaseOrders.find((po) => po.id === value);
-                                setInvoiceForm((prev) => ({
-                                  ...prev,
+                                const targetPo = purchaseOrders.find(
+                                  (po) => po.id === value,
+                                );
+                                vendorInvoicesHook.updateInvoiceForm({
                                   po_id: value,
                                   amount: targetPo
-                                    ? (outstandingByPo.get(targetPo.id) ?? targetPo.total_amount ?? 0).toFixed(2)
-                                    : prev.amount,
-                                }));
+                                    ? (
+                                        outstandingByPo.get(targetPo.id) ??
+                                        targetPo.total_amount ??
+                                        0
+                                      ).toFixed(2)
+                                    : vendorInvoicesHook.invoiceForm.amount,
+                                });
                               }}
                               disabled={ordersLoading}
                             >
@@ -1633,7 +1743,9 @@ export default function InventoryPurchasingPage() {
                           <Button
                             type="button"
                             size="sm"
-                            onClick={() => setInvoiceDialogOpen(true)}
+                            onClick={() =>
+                              vendorInvoicesHook.setInvoiceDialogOpen(true)
+                            }
                             disabled={!selectedInvoicePo}
                           >
                             <Plus className="mr-2 h-4 w-4" />
@@ -1643,22 +1755,42 @@ export default function InventoryPurchasingPage() {
                         {selectedInvoicePo && (
                           <div className="rounded-md border bg-muted/40 p-3 text-sm">
                             <div className="flex items-center justify-between">
-                              <span className="font-medium">{selectedInvoicePo.po_number}</span>
-                              <Badge variant={getStatusColor(selectedInvoicePo.status)} className="gap-1">
-                                {statusLabels[selectedInvoicePo.status] ?? selectedInvoicePo.status}
+                              <span className="font-medium">
+                                {selectedInvoicePo.po_number}
+                              </span>
+                              <Badge
+                                variant={getStatusColor(
+                                  selectedInvoicePo.status,
+                                )}
+                                className="gap-1"
+                              >
+                                {STATUS_LABELS[selectedInvoicePo.status] ??
+                                  selectedInvoicePo.status}
                               </Badge>
                             </div>
                             <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
                               <span>Ordered</span>
-                              <span className="text-right">{formatDate(selectedInvoicePo.order_date)}</span>
+                              <span className="text-right">
+                                {formatDate(selectedInvoicePo.order_date)}
+                              </span>
                               <span>Expected Delivery</span>
-                              <span className="text-right">{formatDate(selectedInvoicePo.expected_delivery_date)}</span>
+                              <span className="text-right">
+                                {formatDate(
+                                  selectedInvoicePo.expected_delivery_date,
+                                )}
+                              </span>
                               <span>Total Value</span>
-                              <span className="text-right">{formatCurrency(selectedInvoicePo.total_amount)}</span>
+                              <span className="text-right">
+                                {formatCurrency(selectedInvoicePo.total_amount)}
+                              </span>
                               <span>Outstanding</span>
-                              <span className="text-right">{formatCurrency(outstandingForSelectedPo)}</span>
+                              <span className="text-right">
+                                {formatCurrency(outstandingForSelectedPo)}
+                              </span>
                               <span>Invoices Logged</span>
-                              <span className="text-right">{invoicesForSelectedPo.length}</span>
+                              <span className="text-right">
+                                {invoicesForSelectedPo.length}
+                              </span>
                             </div>
                           </div>
                         )}
@@ -1675,7 +1807,9 @@ export default function InventoryPurchasingPage() {
                           <span>
                             {
                               vendorInvoices.filter(
-                                (invoice) => invoice.status === 'pending' || invoice.status === 'approved'
+                                (invoice) =>
+                                  invoice.status === "pending" ||
+                                  invoice.status === "approved",
                               ).length
                             }
                           </span>
@@ -1683,7 +1817,11 @@ export default function InventoryPurchasingPage() {
                         <div className="flex items-center justify-between">
                           <span>Paid invoices</span>
                           <span>
-                            {vendorInvoices.filter((invoice) => invoice.status === 'paid').length}
+                            {
+                              vendorInvoices.filter(
+                                (invoice) => invoice.status === "paid",
+                              ).length
+                            }
                           </span>
                         </div>
                         <Separator />
@@ -1704,7 +1842,9 @@ export default function InventoryPurchasingPage() {
                               <TableHead>Amount</TableHead>
                               <TableHead>Status</TableHead>
                               <TableHead>Due</TableHead>
-                              <TableHead className="text-right">Logged</TableHead>
+                              <TableHead className="text-right">
+                                Logged
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1713,7 +1853,10 @@ export default function InventoryPurchasingPage() {
                                 <TableCell colSpan={6}>
                                   <div className="space-y-2 p-4">
                                     {[...Array(3)].map((_, index) => (
-                                      <div key={index} className="h-10 animate-pulse rounded bg-muted/60" />
+                                      <div
+                                        key={index}
+                                        className="h-10 animate-pulse rounded bg-muted/60"
+                                      />
                                     ))}
                                   </div>
                                 </TableCell>
@@ -1728,37 +1871,58 @@ export default function InventoryPurchasingPage() {
                                 </TableCell>
                               </TableRow>
                             ) : (
-                              vendorInvoices.map((invoice: VendorInvoiceRecord) => {
-                                const relatedPo = purchaseOrders.find(
-                                  (po) => po.po_number === invoice.reference_number
-                                );
-                                const invoiceNumber = extractInvoiceNumber(invoice.notes, invoice.description);
-                                return (
-                                  <TableRow key={invoice.id}>
-                                    <TableCell>
-                                      <div>
-                                        <p className="font-medium">
-                                          {invoiceNumber ?? invoice.reference_number ?? 'Invoice'}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                          {invoice.payment_method ?? 'Payment method not set'}
-                                        </p>
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>{relatedPo?.po_number ?? invoice.reference_number}</TableCell>
-                                    <TableCell>{formatCurrency(invoice.amount)}</TableCell>
-                                    <TableCell>
-                                      <Badge variant={paymentStatusVariant(invoice.status)} className="capitalize">
-                                        {invoice.status ?? 'pending'}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                                    <TableCell className="text-right text-xs text-muted-foreground">
-                                      {formatDate(invoice.created_at)}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })
+                              vendorInvoices.map(
+                                (invoice: VendorInvoiceRecord) => {
+                                  const relatedPo = purchaseOrders.find(
+                                    (po) =>
+                                      po.po_number === invoice.reference_number,
+                                  );
+                                  const invoiceNumber = extractInvoiceNumber(
+                                    invoice.notes,
+                                    invoice.description,
+                                  );
+                                  return (
+                                    <TableRow key={invoice.id}>
+                                      <TableCell>
+                                        <div>
+                                          <p className="font-medium">
+                                            {invoiceNumber ??
+                                              invoice.reference_number ??
+                                              "Invoice"}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {invoice.payment_method ??
+                                              "Payment method not set"}
+                                          </p>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell>
+                                        {relatedPo?.po_number ??
+                                          invoice.reference_number}
+                                      </TableCell>
+                                      <TableCell>
+                                        {formatCurrency(invoice.amount)}
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge
+                                          variant={getPaymentStatusVariant(
+                                            invoice.status ?? "pending",
+                                          )}
+                                          className="capitalize"
+                                        >
+                                          {invoice.status ?? "pending"}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell>
+                                        {formatDate(invoice.due_date)}
+                                      </TableCell>
+                                      <TableCell className="text-right text-xs text-muted-foreground">
+                                        {formatDate(invoice.created_at)}
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                },
+                              )
                             )}
                           </TableBody>
                         </Table>
@@ -1770,266 +1934,38 @@ export default function InventoryPurchasingPage() {
             </Tabs>
           </div>
 
-          <Dialog
-            open={Boolean(historyDetailPo)}
+          <PurchaseOrderDetailsDialog
+            open={Boolean(orderHistory.historyDetailPo)}
             onOpenChange={(open) => {
-              if (!open) setHistoryDetailId(null);
+              if (!open) orderHistory.setHistoryDetailId(null);
             }}
-          >
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Purchase Order Details</DialogTitle>
-                <DialogDescription>
-                  {historyDetailPo?.po_number} · {historyDetailPo?.supplier_name}
-                </DialogDescription>
-              </DialogHeader>
-              {historyDetailPo && (
-                <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-                      <p className="font-medium">Summary</p>
-                      <div className="mt-2 space-y-1 text-muted-foreground">
-                        <p>Order date: {formatDate(historyDetailPo.order_date)}</p>
-                        <p>Expected delivery: {formatDate(historyDetailPo.expected_delivery_date)}</p>
-                        <p>Actual delivery: {formatDate(historyDetailPo.actual_delivery_date)}</p>
-                      </div>
-                    </div>
-                    <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-                      <p className="font-medium">Financials</p>
-                      <div className="mt-2 space-y-1 text-muted-foreground">
-                        <p>Total: {formatCurrency(historyDetailPo.total_amount)}</p>
-                        <p>
-                          Outstanding:{' '}
-                          {formatCurrency(outstandingByPo.get(historyDetailPo.id) ?? 0)}
-                        </p>
-                        <p>Status: {statusLabels[historyDetailPo.status] ?? historyDetailPo.status}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 rounded-lg border">
-                    <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">
-                      Line Items
-                    </div>
-                    <ScrollArea className="h-64">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Item</TableHead>
-                            <TableHead className="w-[90px] text-right">Quantity</TableHead>
-                            <TableHead className="w-[90px] text-right">Unit Cost</TableHead>
-                            <TableHead className="w-[100px] text-right">Received</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {historyDetailPo.purchase_order_items?.map((item) => (
-                            <TableRow key={item.id}>
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium">{item.item_name}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Line value {formatCurrency(item.unit_price * item.quantity)}
-                                  </p>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">{item.quantity}</TableCell>
-                              <TableCell className="text-right">
-                                {formatCurrency(item.unit_price)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {item.received_quantity ?? 0}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
-                  </div>
-                </div>
-              )}
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setHistoryDetailId(null)}>
-                  Close
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            purchaseOrder={orderHistory.historyDetailPo}
+            outstandingAmount={
+              orderHistory.historyDetailPo
+                ? (outstandingByPo.get(orderHistory.historyDetailPo.id) ?? 0)
+                : 0
+            }
+          />
 
-          <Dialog open={invoiceDialogOpen} onOpenChange={setInvoiceDialogOpen}>
-            <DialogContent>
-              <form onSubmit={handleSubmitInvoice} className="space-y-4">
-                <DialogHeader>
-                  <DialogTitle>Log Vendor Invoice</DialogTitle>
-                  <DialogDescription>
-                    Capture invoice details to reconcile against the purchase order.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="invoice-number">Invoice Number</Label>
-                      <Input
-                        id="invoice-number"
-                        value={invoiceForm.invoiceNumber}
-                        onChange={(event) =>
-                          setInvoiceForm((prev) => ({ ...prev, invoiceNumber: event.target.value }))
-                        }
-                        placeholder="Invoice #"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="invoice-amount">Amount</Label>
-                      <Input
-                        id="invoice-amount"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={invoiceForm.amount}
-                        onChange={(event) =>
-                          setInvoiceForm((prev) => ({ ...prev, amount: event.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="invoice-due">Due Date</Label>
-                      <Input
-                        id="invoice-due"
-                        type="date"
-                        value={invoiceForm.dueDate}
-                        onChange={(event) =>
-                          setInvoiceForm((prev) => ({ ...prev, dueDate: event.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="payment-method">Payment Method</Label>
-                      <Select
-                        value={invoiceForm.paymentMethod}
-                        onValueChange={(value) =>
-                          setInvoiceForm((prev) => ({ ...prev, paymentMethod: value }))
-                        }
-                      >
-                        <SelectTrigger id="payment-method">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bank_transfer">Bank transfer / ACH</SelectItem>
-                          <SelectItem value="check">Check</SelectItem>
-                          <SelectItem value="credit_card">Credit card</SelectItem>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="invoice-notes">Notes</Label>
-                    <Textarea
-                      id="invoice-notes"
-                      rows={3}
-                      value={invoiceForm.notes}
-                      onChange={(event) =>
-                        setInvoiceForm((prev) => ({ ...prev, notes: event.target.value }))
-                      }
-                      placeholder="Add memo or reconciliation details."
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setInvoiceDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={recordInvoice.isPending}>
-                    {recordInvoice.isPending ? 'Saving...' : 'Save Invoice'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <VendorInvoiceDialog
+            open={vendorInvoicesHook.invoiceDialogOpen}
+            onOpenChange={vendorInvoicesHook.setInvoiceDialogOpen}
+            form={vendorInvoicesHook.invoiceForm}
+            onFormChange={vendorInvoicesHook.updateInvoiceForm}
+            onSubmit={handleSubmitInvoice}
+            isSubmitting={recordInvoice.isPending}
+          />
 
-          <Dialog open={integrationDialogOpen} onOpenChange={setIntegrationDialogOpen}>
-            <DialogContent>
-              <form onSubmit={handleLinkIntegration} className="space-y-4">
-                <DialogHeader>
-                  <DialogTitle>Link Supplier Integration</DialogTitle>
-                  <DialogDescription>
-                    Connect supplier APIs to sync catalogs, pricing, and order statuses automatically.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="integration-provider">Provider</Label>
-                    <Select
-                      value={integrationForm.provider}
-                      onValueChange={(value) =>
-                        setIntegrationForm((prev) => ({
-                          ...prev,
-                          provider: value as SupplierIntegrationDetails['provider'],
-                        }))
-                      }
-                    >
-                      <SelectTrigger id="integration-provider">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {providerOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex flex-col text-start">
-                              <span>{option.label}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {option.description}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="integration-account">Account Identifier</Label>
-                    <Input
-                      id="integration-account"
-                      value={integrationForm.account_id}
-                      onChange={(event) =>
-                        setIntegrationForm((prev) => ({ ...prev, account_id: event.target.value }))
-                      }
-                      placeholder="e.g. MarketMan store ID or vendor account number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="integration-key">API Key / Secret</Label>
-                    <Input
-                      id="integration-key"
-                      value={integrationForm.api_key}
-                      onChange={(event) =>
-                        setIntegrationForm((prev) => ({ ...prev, api_key: event.target.value }))
-                      }
-                      placeholder="Secure credential (stored encrypted)"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="integration-notes">Integration Notes</Label>
-                    <Textarea
-                      id="integration-notes"
-                      rows={3}
-                      value={integrationForm.notes}
-                      onChange={(event) =>
-                        setIntegrationForm((prev) => ({ ...prev, notes: event.target.value }))
-                      }
-                      placeholder="Connection details, sync cadence, or contacts."
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIntegrationDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={linkIntegration.isPending}>
-                    {linkIntegration.isPending ? 'Linking...' : 'Save Integration'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <IntegrationDialog
+            open={integrationDialogOpen}
+            onOpenChange={setIntegrationDialogOpen}
+            form={integrationForm}
+            onFormChange={(updates) =>
+              setIntegrationForm((prev) => ({ ...prev, ...updates }))
+            }
+            onSubmit={handleLinkIntegration}
+            isSubmitting={linkIntegration.isPending}
+          />
         </TooltipProvider>
       </IfCan>
     </InventoryLayout>

@@ -1,26 +1,55 @@
 -- Optimize RLS policies to prevent unnecessary re-evaluation of auth functions
 -- Replace auth.uid() with (select auth.uid()) for better performance
 
--- Update company_settings policies
-DROP POLICY IF EXISTS "settings: update where owner" ON public.company_settings;
-CREATE POLICY "settings: update where owner" ON public.company_settings
-FOR UPDATE USING (
-  EXISTS (
-    SELECT 1 FROM companies c 
-    WHERE c.id = company_settings.company_id 
-    AND c.owner_id = (select auth.uid())
-  )
-) WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM companies c 
-    WHERE c.id = company_settings.company_id 
-    AND c.owner_id = (select auth.uid())
-  )
-);
+-- Update company_settings policies (only if company_id column exists)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'company_settings' 
+    AND column_name = 'company_id'
+  ) THEN
+    DROP POLICY IF EXISTS "settings: update where owner" ON public.company_settings;
+    CREATE POLICY "settings: update where owner" ON public.company_settings  
+    FOR UPDATE USING (                                                       
+      EXISTS (                                                               
+        SELECT 1 FROM companies c                                            
+        WHERE c.id = company_settings.company_id                             
+        AND c.owner_id = (select auth.uid())                                 
+      )                                                                      
+    ) WITH CHECK (                                                           
+      EXISTS (                                                               
+        SELECT 1 FROM companies c                                            
+        WHERE c.id = company_settings.company_id                             
+        AND c.owner_id = (select auth.uid())                                 
+      )                                                                      
+    );
+  END IF;
+END $$;
 
-DROP POLICY IF EXISTS "Only admins can update company settings" ON public.company_settings;
-CREATE POLICY "Only admins can update company settings" ON public.company_settings
-FOR UPDATE USING (has_role((select auth.uid()), 'admin'::user_role));
+-- Only create admin policy if has_role function exists with correct signature
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' 
+    AND p.proname = 'has_role'
+  ) THEN
+    DROP POLICY IF EXISTS "Only admins can update company settings" ON public.company_settings;
+    BEGIN
+      EXECUTE 'CREATE POLICY "Only admins can update company settings" ON public.company_settings
+      FOR UPDATE USING (has_role((select auth.uid()), ''admin''::text))';
+    EXCEPTION WHEN OTHERS THEN
+      BEGIN
+        EXECUTE 'CREATE POLICY "Only admins can update company settings" ON public.company_settings
+        FOR UPDATE USING (has_role((select auth.uid()), ''admin''::user_role))';
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END;
+    END;
+  END IF;
+END $$;
 
 -- Update goals policies
 DROP POLICY IF EXISTS "Users can view goals in their company" ON public.goals;
@@ -63,9 +92,29 @@ FOR UPDATE USING (
   is_admin_or_manager((select auth.uid()))
 );
 
-DROP POLICY IF EXISTS "Only admins can delete channels" ON public.message_channels;
-CREATE POLICY "Only admins can delete channels" ON public.message_channels
-FOR DELETE USING (has_role((select auth.uid()), 'admin'::user_role));
+-- Only create admin delete policy if has_role function exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' 
+    AND p.proname = 'has_role'
+  ) THEN
+    DROP POLICY IF EXISTS "Only admins can delete channels" ON public.message_channels;
+    -- Try with text first, then user_role if that fails
+    BEGIN
+      EXECUTE 'CREATE POLICY "Only admins can delete channels" ON public.message_channels
+      FOR DELETE USING (has_role((select auth.uid()), ''admin''::text))';
+    EXCEPTION WHEN OTHERS THEN
+      BEGIN
+        EXECUTE 'CREATE POLICY "Only admins can delete channels" ON public.message_channels
+        FOR DELETE USING (has_role((select auth.uid()), ''admin''::user_role))';
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END;
+    END;
+  END IF;
+END $$;
 
 DROP POLICY IF EXISTS "Users can view channels they are members of" ON public.message_channels;
 CREATE POLICY "Users can view channels they are members of" ON public.message_channels
@@ -124,12 +173,34 @@ FOR UPDATE USING (
   is_admin_or_manager((select auth.uid()))
 );
 
-DROP POLICY IF EXISTS "Only creators and admins can delete tasks" ON public.tasks;
-CREATE POLICY "Only creators and admins can delete tasks" ON public.tasks
-FOR DELETE USING (
-  (created_by = (select auth.uid())) OR 
-  has_role((select auth.uid()), 'admin'::user_role)
-);
+-- Only create admin delete tasks policy if has_role function exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' 
+    AND p.proname = 'has_role'
+  ) THEN
+    DROP POLICY IF EXISTS "Only creators and admins can delete tasks" ON public.tasks;
+    BEGIN
+      EXECUTE 'CREATE POLICY "Only creators and admins can delete tasks" ON public.tasks
+      FOR DELETE USING (
+        (created_by = (select auth.uid())) OR 
+        has_role((select auth.uid()), ''admin''::text)
+      )';
+    EXCEPTION WHEN OTHERS THEN
+      BEGIN
+        EXECUTE 'CREATE POLICY "Only creators and admins can delete tasks" ON public.tasks
+        FOR DELETE USING (
+          (created_by = (select auth.uid())) OR 
+          has_role((select auth.uid()), ''admin''::user_role)
+        )';
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END;
+    END;
+  END IF;
+END $$;
 
 -- Update messages policies
 DROP POLICY IF EXISTS "Users can update their own messages" ON public.messages;

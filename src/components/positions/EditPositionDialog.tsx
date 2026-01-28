@@ -1,18 +1,35 @@
-
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { usePositions } from '@/hooks/usePositions';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { usePositions } from "@/hooks/usePositions";
 
 interface Position {
   id: string;
   name: string;
-  role: 'staff' | 'supervisor' | 'manager' | 'admin';
+  role: "staff" | "supervisor" | "manager" | "admin";
   description?: string;
 }
 
@@ -25,41 +42,46 @@ interface EditPositionDialogProps {
 
 interface FormValues {
   name: string;
-  role: 'staff' | 'supervisor' | 'manager' | 'admin';
+  role: "staff" | "supervisor" | "manager" | "admin";
   description: string;
 }
 
 const ROLES = [
-  { value: 'staff' as const, label: 'Staff' },
-  { value: 'supervisor' as const, label: 'Supervisor' },
-  { value: 'manager' as const, label: 'Manager' },
-  { value: 'admin' as const, label: 'Admin' },
+  { value: "staff" as const, label: "Staff" },
+  { value: "supervisor" as const, label: "Supervisor" },
+  { value: "manager" as const, label: "Manager" },
+  { value: "admin" as const, label: "Admin" },
 ];
 
-export default function EditPositionDialog({ open, onOpenChange, position, onClose }: EditPositionDialogProps) {
+export default function EditPositionDialog({
+  open,
+  onOpenChange,
+  position,
+  onClose,
+}: EditPositionDialogProps) {
   const { updatePosition } = usePositions();
 
   const form = useForm<FormValues>({
     defaultValues: {
-      name: '',
-      role: 'staff',
-      description: '',
+      name: "",
+      role: "staff",
+      description: "",
     },
   });
 
   useEffect(() => {
     if (position) {
       form.reset({
-        name: position.name || '',
-        role: position.role || 'staff',
-        description: position.description || '',
+        name: position.name || "",
+        role: position.role || "staff",
+        description: position.description || "",
       });
     }
   }, [position, form]);
 
   const onSubmit = async (values: FormValues) => {
     if (!position) return;
-    
+
     const { error } = await updatePosition(position.id, values);
     if (!error) {
       onOpenChange(false);
@@ -84,12 +106,15 @@ export default function EditPositionDialog({ open, onOpenChange, position, onClo
             <FormField
               control={form.control}
               name="name"
-              rules={{ required: 'Position name is required' }}
+              rules={{ required: "Position name is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Position Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Runner, Cashier, FOH Supervisor" {...field} />
+                    <Input
+                      placeholder="e.g., Runner, Cashier, FOH Supervisor"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,7 +124,7 @@ export default function EditPositionDialog({ open, onOpenChange, position, onClo
             <FormField
               control={form.control}
               name="role"
-              rules={{ required: 'Role is required' }}
+              rules={{ required: "Role is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role Level</FormLabel>
@@ -129,7 +154,7 @@ export default function EditPositionDialog({ open, onOpenChange, position, onClo
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Describe the responsibilities and duties of this position"
                       className="min-h-[100px]"
                       {...field}
@@ -145,7 +170,9 @@ export default function EditPositionDialog({ open, onOpenChange, position, onClo
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Updating...' : 'Update Position'}
+                {form.formState.isSubmitting
+                  ? "Updating..."
+                  : "Update Position"}
               </Button>
             </div>
           </form>

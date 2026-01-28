@@ -1,6 +1,6 @@
-import React from 'react';
-import { useCan } from '@/hooks/useCan';
-import type { PermissionKey } from '@/hooks/useUserPermissions';
+import React from "react";
+import { useCan } from "@/hooks/useCan";
+import type { PermissionKey } from "@/hooks/useUserPermissions";
 
 interface IfCanProps {
   children: React.ReactNode;

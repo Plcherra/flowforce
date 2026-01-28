@@ -1,9 +1,14 @@
-import { useMemo, useCallback } from 'react';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { TablesInsert } from '@/integrations/supabase/public-types';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { logger } from '@/utils/logger';
+import { useMemo, useCallback } from "react";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import type { TablesInsert } from "@/integrations/supabase/public-types";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { logger } from "@/utils/logger";
 import {
   deleteGoalRow,
   fetchGoalRewards,
@@ -12,15 +17,15 @@ import {
   insertGoalRow,
   updateGoalRow,
   updateGoalStatusRow,
-} from '@/features/goals/repositories/goalsRepository';
-import { fetchProfilesByIds } from '@/features/goals/repositories/profileRepository';
-import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
+} from "@/features/goals/repositories/goalsRepository";
+import { fetchProfilesByIds } from "@/features/goals/repositories/profileRepository";
+import { parseRewardDetails } from "@/features/goals/utils/rewardUtils";
 import {
   buildOwnerMap,
   buildRecognitionMap,
   groupGoalTasks,
   parseRecognitionDetailsValue,
-} from '@/features/goals/utils/goalEnrichers';
+} from "@/features/goals/utils/goalEnrichers";
 import type {
   CreateGoalInput,
   Goal,
@@ -30,7 +35,7 @@ import type {
   GoalTaskWithDetails,
   OwnerProfile,
   UpdateGoalInput,
-} from '@/features/goals/types';
+} from "@/features/goals/types";
 export type {
   Goal,
   GoalStats,
@@ -40,11 +45,12 @@ export type {
   OwnerProfile,
   CreateGoalInput,
   UpdateGoalInput,
-} from '@/features/goals/types';
+} from "@/features/goals/types";
 
 const DEFAULT_RECOGNITION_XP = 110;
 
-const goalsQueryKey = (companyId: string | null) => ['goals', companyId] as const;
+const goalsQueryKey = (companyId: string | null) =>
+  ["goals", companyId] as const;
 
 async function fetchGoals(companyId: string): Promise<Goal[]> {
   const rows = await fetchGoalsByCompany(companyId);
@@ -72,14 +78,20 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
       const taskLinks = await fetchGoalTasks(goalIds);
       goalTasksMap = groupGoalTasks(taskLinks);
     } catch (goalTasksError) {
-      logger.warn('[useGoals] Failed to load goal task links', { error: goalTasksError, tags: ['warning'] });
+      logger.warn("[useGoals] Failed to load goal task links", {
+        error: goalTasksError,
+        tags: ["warning"],
+      });
     }
 
     let rewardList: Awaited<ReturnType<typeof fetchGoalRewards>> = [];
     try {
       rewardList = await fetchGoalRewards(goalIds, companyId);
     } catch (rewardsError) {
-      logger.warn('[useGoals] Failed to load goal rewards', { error: rewardsError, tags: ['warning'] });
+      logger.warn("[useGoals] Failed to load goal rewards", {
+        error: rewardsError,
+        tags: ["warning"],
+      });
     }
 
     const rewardUserIds = Array.from(
@@ -93,10 +105,16 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
     let rewardUsers: Record<string, OwnerProfile> = {};
     if (rewardUserIds.length > 0) {
       try {
-        const rewardProfiles = await fetchProfilesByIds(companyId, rewardUserIds);
+        const rewardProfiles = await fetchProfilesByIds(
+          companyId,
+          rewardUserIds,
+        );
         rewardUsers = buildOwnerMap(rewardProfiles);
       } catch (rewardProfileError) {
-        logger.warn('[useGoals] Failed to load recognition recipients', { error: rewardProfileError, tags: ['warning'] });
+        logger.warn("[useGoals] Failed to load recognition recipients", {
+          error: rewardProfileError,
+          tags: ["warning"],
+        });
       }
     }
 
@@ -125,11 +143,11 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
 
     return {
       ...goal,
-      owner: ownerId ? owners[ownerId] ?? null : null,
+      owner: ownerId ? (owners[ownerId] ?? null) : null,
       tasks: goalTasks,
       recognitions: recognitionList,
       xpSummary,
-      rewardSummary: rewardDetails.summary ?? '',
+      rewardSummary: rewardDetails.summary ?? "",
     };
   });
 }
@@ -139,18 +157,22 @@ export function useGoals() {
   const { profile } = useProfile();
   const queryClient = useQueryClient();
   const invalidatePerformanceDataset = useCallback(() => {
-    return queryClient.invalidateQueries({ queryKey: ['performance-dataset'] });
+    return queryClient.invalidateQueries({ queryKey: ["performance-dataset"] });
   }, [queryClient]);
 
   const windowCompanyId =
-    typeof window !== 'undefined' && typeof (window as { activeCompanyId?: string }).activeCompanyId === 'string'
-      ? (window as { activeCompanyId?: string }).activeCompanyId ?? null
+    typeof window !== "undefined" &&
+    typeof (window as { activeCompanyId?: string }).activeCompanyId === "string"
+      ? ((window as { activeCompanyId?: string }).activeCompanyId ?? null)
       : null;
 
-  const companyId = profile?.companyId ?? profile?.company_id ?? windowCompanyId ?? null;
+  const companyId =
+    profile?.companyId ?? profile?.company_id ?? windowCompanyId ?? null;
   const userId = profile?.userId ?? profile?.id ?? null;
 
   const goalsQuery = useQuery({
+    throwOnError: false,
+    retry: 1,
     queryKey: goalsQueryKey(companyId),
     queryFn: async () => {
       if (!companyId) {
@@ -168,65 +190,78 @@ export function useGoals() {
   const createGoalMutation = useMutation({
     mutationFn: async (input: CreateGoalInput) => {
       if (!companyId || !userId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
-      const payload: TablesInsert<'goals'> = {
+      const payload: TablesInsert<"goals"> = {
         company_id: companyId,
         created_by: userId,
         title: input.title,
         description: input.description ?? null,
-        status: input.status ?? 'active',
+        status: input.status ?? "active",
         progress: input.progress ?? 0,
-        priority: input.priority ?? 'medium',
+        priority: input.priority ?? "medium",
         target_completion_date: input.target_completion_date ?? null,
-        reward_type: input.reward_type ?? 'recognition',
+        reward_type: input.reward_type ?? "recognition",
         reward_details: input.reward_details ?? null,
-        completed_at: input.status === 'completed' ? new Date().toISOString() : null,
+        completed_at:
+          input.status === "completed" ? new Date().toISOString() : null,
       };
 
       return insertGoalRow(payload);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void queryClient.invalidateQueries({
+        queryKey: goalsQueryKey(companyId),
+      });
       void invalidatePerformanceDataset();
       toast({
-        title: 'Goal created',
-        description: 'Your new goal has been added',
+        title: "Goal created",
+        description: "Your new goal has been added",
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Unable to create goal';
+      const message =
+        error instanceof Error ? error.message : "Unable to create goal";
       toast({
-        title: 'Create goal failed',
+        title: "Create goal failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
 
   const updateGoalMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: UpdateGoalInput }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: UpdateGoalInput;
+    }) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       await updateGoalRow(id, updates, companyId);
       return id;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void queryClient.invalidateQueries({
+        queryKey: goalsQueryKey(companyId),
+      });
       void invalidatePerformanceDataset();
       toast({
-        title: 'Goal updated',
-        description: 'Changes saved successfully',
+        title: "Goal updated",
+        description: "Changes saved successfully",
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Unable to update goal';
+      const message =
+        error instanceof Error ? error.message : "Unable to update goal";
       toast({
-        title: 'Update goal failed',
+        title: "Update goal failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -234,25 +269,28 @@ export function useGoals() {
   const deleteGoalMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
       await deleteGoalRow(id, companyId);
       return id;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void queryClient.invalidateQueries({
+        queryKey: goalsQueryKey(companyId),
+      });
       void invalidatePerformanceDataset();
       toast({
-        title: 'Goal removed',
-        description: 'The goal has been archived',
+        title: "Goal removed",
+        description: "The goal has been archived",
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Unable to delete goal';
+      const message =
+        error instanceof Error ? error.message : "Unable to delete goal";
       toast({
-        title: 'Delete goal failed',
+        title: "Delete goal failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -260,7 +298,7 @@ export function useGoals() {
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: GoalStatus }) => {
       if (!companyId) {
-        throw new Error('Missing company context');
+        throw new Error("Missing company context");
       }
 
       await updateGoalStatusRow(id, status, companyId);
@@ -268,19 +306,22 @@ export function useGoals() {
       return id;
     },
     onSuccess: (_id, variables) => {
-      void queryClient.invalidateQueries({ queryKey: goalsQueryKey(companyId) });
+      void queryClient.invalidateQueries({
+        queryKey: goalsQueryKey(companyId),
+      });
       void invalidatePerformanceDataset();
       toast({
-        title: 'Goal status updated',
+        title: "Goal status updated",
         description: `Goal marked as ${variables.status}`,
       });
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Unable to update status';
+      const message =
+        error instanceof Error ? error.message : "Unable to update status";
       toast({
-        title: 'Status change failed',
+        title: "Status change failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -299,10 +340,10 @@ export function useGoals() {
     }
 
     const total = list.length;
-    const active = list.filter((goal) => goal.status === 'active').length;
-    const completed = list.filter((goal) => goal.status === 'completed').length;
-    const drafts = list.filter((goal) => goal.status === 'draft').length;
-    const cancelled = list.filter((goal) => goal.status === 'cancelled').length;
+    const active = list.filter((goal) => goal.status === "active").length;
+    const completed = list.filter((goal) => goal.status === "completed").length;
+    const drafts = list.filter((goal) => goal.status === "draft").length;
+    const cancelled = list.filter((goal) => goal.status === "cancelled").length;
     const averageProgress = Math.round(
       list.reduce((sum, goal) => sum + (goal.progress ?? 0), 0) / total,
     );
@@ -321,10 +362,15 @@ export function useGoals() {
   const normalizedError =
     queryError instanceof Error
       ? queryError
-      : queryError && typeof queryError === 'object' && 'message' in queryError
-        ? new Error(String((queryError as { message?: unknown }).message ?? 'Failed to load goals'))
+      : queryError && typeof queryError === "object" && "message" in queryError
+        ? new Error(
+            String(
+              (queryError as { message?: unknown }).message ??
+                "Failed to load goals",
+            ),
+          )
         : queryError
-          ? new Error('Failed to load goals')
+          ? new Error("Failed to load goals")
           : null;
 
   return {

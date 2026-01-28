@@ -1,9 +1,8 @@
-
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2 } from 'lucide-react';
-import { OnboardingPosition } from '@/types/templates';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Trash2 } from "lucide-react";
+import { OnboardingPosition } from "@/types/templates";
 
 interface OnboardingRole {
   id: string;
@@ -23,7 +22,12 @@ interface PositionCardProps {
   onDelete: (positionId: string) => void;
 }
 
-export default function PositionCard({ position, role, onEdit, onDelete }: PositionCardProps) {
+export default function PositionCard({
+  position,
+  role,
+  onEdit,
+  onDelete,
+}: PositionCardProps) {
   return (
     <Card className="border-l-4" style={{ borderLeftColor: role.color }}>
       <CardContent className="p-4">
@@ -39,19 +43,19 @@ export default function PositionCard({ position, role, onEdit, onDelete }: Posit
               <p className="text-sm text-gray-600">{position.description}</p>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onEdit(position)}
             >
               <Edit className="h-3 w-3 mr-1" />
               Edit
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onDelete(position.id)}
               className="text-red-600 hover:text-red-700"
             >

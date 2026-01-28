@@ -1,8 +1,8 @@
 /**
  * Retry utility with exponential backoff
- * 
+ *
  * Phase 6: Error Recovery - Provides configurable retry logic for failed operations
- * 
+ *
  * @example
  * ```typescript
  * const result = await retryWithBackoff(
@@ -12,7 +12,7 @@
  * ```
  */
 
-import { logger } from './logger';
+import { logger } from "./logger";
 
 export interface RetryOptions {
   /** Maximum number of retry attempts (default: 3) */
@@ -35,7 +35,7 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
   maxDelay: 10000,
   multiplier: 2,
   shouldRetry: () => true,
-  errorMessage: 'Operation failed',
+  errorMessage: "Operation failed",
 };
 
 /**
@@ -44,7 +44,9 @@ const DEFAULT_OPTIONS: Required<RetryOptions> = {
 function isNetworkError(error: unknown): boolean {
   if (error instanceof TypeError) return true;
   if (error instanceof Error) {
-    return /network\s?error|failed to fetch|timeout|econnreset|enotfound/i.test(error.message);
+    return /network\s?error|failed to fetch|timeout|econnreset|enotfound/i.test(
+      error.message,
+    );
   }
   return false;
 }
@@ -53,10 +55,19 @@ function isNetworkError(error: unknown): boolean {
  * Determines if an error is a transient database error (retryable)
  */
 function isTransientDatabaseError(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'code' in error) {
+  if (error && typeof error === "object" && "code" in error) {
     const code = String(error.code);
     // PostgreSQL error codes for transient errors
-    return ['08000', '08003', '08006', '08001', '08004', '57P01', '57P02', '57P03'].includes(code);
+    return [
+      "08000",
+      "08003",
+      "08006",
+      "08001",
+      "08004",
+      "57P01",
+      "57P02",
+      "57P03",
+    ].includes(code);
   }
   return false;
 }
@@ -71,7 +82,12 @@ function defaultShouldRetry(error: unknown): boolean {
 /**
  * Calculates delay for exponential backoff
  */
-function calculateDelay(attempt: number, baseDelay: number, maxDelay: number, multiplier: number): number {
+function calculateDelay(
+  attempt: number,
+  baseDelay: number,
+  maxDelay: number,
+  multiplier: number,
+): number {
   const delay = baseDelay * Math.pow(multiplier, attempt);
   return Math.min(delay, maxDelay);
 }
@@ -85,17 +101,17 @@ function sleep(ms: number): Promise<void> {
 
 /**
  * Retries an async operation with exponential backoff
- * 
+ *
  * @param operation - The async operation to retry
  * @param options - Retry configuration options
  * @returns The result of the operation
  * @throws The last error if all retries fail
- * 
+ *
  * @example
  * ```typescript
  * // Basic usage
  * const result = await retryWithBackoff(() => fetchData());
- * 
+ *
  * // Custom options
  * const result = await retryWithBackoff(
  *   () => supabase.from('tasks').select('*'),
@@ -108,25 +124,26 @@ export async function retryWithBackoff<T>(
   options: RetryOptions = {},
 ): Promise<T> {
   const config = { ...DEFAULT_OPTIONS, ...options };
-  const shouldRetry = config.shouldRetry === DEFAULT_OPTIONS.shouldRetry 
-    ? defaultShouldRetry 
-    : config.shouldRetry;
+  const shouldRetry =
+    config.shouldRetry === DEFAULT_OPTIONS.shouldRetry
+      ? defaultShouldRetry
+      : config.shouldRetry;
 
   let lastError: unknown;
-  
+
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry if we've exhausted retries or error is not retryable
       if (attempt >= config.maxRetries || !shouldRetry(error)) {
-        logger.error('[retry] Operation failed after retries', {
+        logger.error("[retry] Operation failed after retries", {
           error,
           attempt,
           maxRetries: config.maxRetries,
-          tags: ['error', 'retry'],
+          tags: ["error", "retry"],
         });
         throw error;
       }
@@ -139,12 +156,12 @@ export async function retryWithBackoff<T>(
         config.multiplier,
       );
 
-      logger.warn('[retry] Retrying operation', {
+      logger.warn("[retry] Retrying operation", {
         attempt: attempt + 1,
         maxRetries: config.maxRetries,
         delay,
         error: error instanceof Error ? error.message : String(error),
-        tags: ['retry', 'warning'],
+        tags: ["retry", "warning"],
       });
 
       // Wait before retrying
@@ -158,11 +175,11 @@ export async function retryWithBackoff<T>(
 
 /**
  * Retries a Supabase query operation with exponential backoff
- * 
+ *
  * @param operation - The Supabase query operation
  * @param options - Retry configuration options
  * @returns The query result
- * 
+ *
  * @example
  * ```typescript
  * const { data, error } = await retrySupabaseQuery(
@@ -179,13 +196,13 @@ export async function retrySupabaseQuery<T>(
     shouldRetry: (error) => {
       // Retry on network errors or if the error object indicates a retryable error
       if (isNetworkError(error)) return true;
-      
+
       // Check if error is a Supabase error that's retryable
-      if (error && typeof error === 'object' && 'message' in error) {
+      if (error && typeof error === "object" && "message" in error) {
         const message = String(error.message).toLowerCase();
         return /network|timeout|connection|econnreset|enotfound/i.test(message);
       }
-      
+
       return false;
     },
   });

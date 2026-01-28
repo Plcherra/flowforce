@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 type SuggestionRoleOption = {
   id: string;
@@ -29,7 +29,10 @@ type CopilotResult = {
   accept: (item: CopilotSuggestion) => void;
 };
 
-export function useCopilotSuggestions(_namespace: string, options: CopilotOptions = {}): CopilotResult {
+export function useCopilotSuggestions(
+  _namespace: string,
+  options: CopilotOptions = {},
+): CopilotResult {
   const { context, onAccept } = options;
   const contextKey = JSON.stringify(context ?? {});
 
@@ -37,49 +40,51 @@ export function useCopilotSuggestions(_namespace: string, options: CopilotOption
     if (!context) return [];
 
     const availableRoles = context.availableRoles ?? [];
-    const lowerRole = context.role?.toLowerCase() ?? '';
+    const lowerRole = context.role?.toLowerCase() ?? "";
     const suggestions: CopilotSuggestion[] = [];
 
     const findRole = (match: string) =>
-      availableRoles.find((role) => role.name.toLowerCase().includes(match.toLowerCase()));
+      availableRoles.find((role) =>
+        role.name.toLowerCase().includes(match.toLowerCase()),
+      );
 
-    const supervisorRole = findRole('supervisor');
-    if (lowerRole === 'staff' && supervisorRole) {
+    const supervisorRole = findRole("supervisor");
+    if (lowerRole === "staff" && supervisorRole) {
       suggestions.push({
-        id: 'promotion-supervisor',
+        id: "promotion-supervisor",
         message: `Promote this employee to ${supervisorRole.name}?`,
         roleId: supervisorRole.id,
-        metadata: { recommendation: 'promotion' },
+        metadata: { recommendation: "promotion" },
       });
     }
 
-    const coverageRole = findRole('manager') ?? findRole('lead');
+    const coverageRole = findRole("manager") ?? findRole("lead");
     if (coverageRole) {
       suggestions.push({
-        id: 'coverage-assignment',
+        id: "coverage-assignment",
         message: `Assign temporary ${coverageRole.name} permissions for coverage?`,
         roleId: coverageRole.id,
-        metadata: { recommendation: 'temporary-coverage' },
+        metadata: { recommendation: "temporary-coverage" },
       });
     }
 
     if (context.engagement != null && context.engagement < 0.35) {
-      const mentorRole = findRole('mentor') ?? supervisorRole;
+      const mentorRole = findRole("mentor") ?? supervisorRole;
       suggestions.push({
-        id: 'mentor-support',
+        id: "mentor-support",
         message: mentorRole
           ? `Pair with a ${mentorRole.name} mentor to boost engagement?`
-          : 'Schedule a development check-in to boost engagement?',
+          : "Schedule a development check-in to boost engagement?",
         roleId: mentorRole?.id,
-        metadata: { recommendation: 'engagement-support' },
+        metadata: { recommendation: "engagement-support" },
       });
     }
 
     if (context.department) {
       suggestions.push({
-        id: 'department-cross-training',
+        id: "department-cross-training",
         message: `Rotate this teammate to support ${context.department} for cross-training?`,
-        metadata: { recommendation: 'cross-training' },
+        metadata: { recommendation: "cross-training" },
       });
     }
 
@@ -93,6 +98,9 @@ export function useCopilotSuggestions(_namespace: string, options: CopilotOption
   return { items, accept };
 }
 
-export function useCopilotSuggestion(namespace: string, options?: CopilotOptions) {
+export function useCopilotSuggestion(
+  namespace: string,
+  options?: CopilotOptions,
+) {
   return useCopilotSuggestions(namespace, options);
 }

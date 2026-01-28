@@ -1,8 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CourseModulesForm } from '@/components/learning/CourseModulesForm';
-import type { CourseModuleInput } from '@/types/learning';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CourseModulesForm } from "@/components/learning/CourseModulesForm";
+import type { CourseModuleInput } from "@/types/learning";
 
 interface StepXPRewardsProps {
   manualXpReward: number;
@@ -30,7 +36,9 @@ export function StepXPRewards({
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>XP rewards</CardTitle>
-          <CardDescription>Ensure the XP aligns with course effort.</CardDescription>
+          <CardDescription>
+            Ensure the XP aligns with course effort.
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
@@ -43,11 +51,15 @@ export function StepXPRewards({
               value={manualXpReward}
               onChange={(event) => onManualXpChange(Number(event.target.value))}
             />
-            <p className="text-xs text-muted-foreground">Auto-calculated XP from modules: {totalXp}</p>
+            <p className="text-xs text-muted-foreground">
+              Auto-calculated XP from modules: {totalXp}
+            </p>
           </div>
           <div className="space-y-2 rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">
             <p>Estimated hours based on modules:</p>
-            <p className="text-2xl font-semibold text-foreground">{estimatedHours}h</p>
+            <p className="text-2xl font-semibold text-foreground">
+              {estimatedHours}h
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -55,10 +67,16 @@ export function StepXPRewards({
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Modules</CardTitle>
-          <CardDescription>Break the course into lessons with XP awards.</CardDescription>
+          <CardDescription>
+            Break the course into lessons with XP awards.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <CourseModulesForm modules={modules} onAddModule={onAddModule} onRemoveModule={onRemoveModule} />
+          <CourseModulesForm
+            modules={modules}
+            onAddModule={onAddModule}
+            onRemoveModule={onRemoveModule}
+          />
         </CardContent>
       </Card>
     </div>

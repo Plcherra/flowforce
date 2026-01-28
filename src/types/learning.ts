@@ -1,4 +1,4 @@
-export type LearningDeliveryMode = 'self_paced' | 'live' | 'blended';
+export type LearningDeliveryMode = "self_paced" | "live" | "blended";
 
 export interface LearningCourse {
   id: string;
@@ -48,7 +48,7 @@ export interface LearningEnrollment {
   id: string;
   courseId: string;
   employeeId: string;
-  status: 'in_progress' | 'completed' | 'withdrawn';
+  status: "in_progress" | "completed" | "withdrawn";
   progressPercent: number;
   hoursCompleted: number;
   currentModule: number;
@@ -64,7 +64,12 @@ export interface LearningProgressEvent {
   id: string;
   enrollmentId: string;
   moduleId: string | null;
-  eventType: 'started' | 'module_completed' | 'checkpoint' | 'completed' | 'note';
+  eventType:
+    | "started"
+    | "module_completed"
+    | "checkpoint"
+    | "completed"
+    | "note";
   deltaProgress: number;
   deltaHours: number;
   note: string | null;
@@ -129,7 +134,7 @@ export interface CourseRecommendation {
   courseId: string;
   reason: string;
   confidence: number;
-  source: 'copilot' | 'xp_gap' | 'certification_path';
+  source: "copilot" | "xp_gap" | "certification_path";
 }
 
 export interface LearningCatalogRecord extends LearningCourse {

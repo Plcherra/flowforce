@@ -1,24 +1,24 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   ArrowRight,
   Calendar,
@@ -28,8 +28,8 @@ import {
   MessageSquare,
   Send,
   Target,
-} from 'lucide-react';
-import { format } from 'date-fns';
+} from "lucide-react";
+import { format } from "date-fns";
 import {
   useTasks,
   TASK_STATUS_TRANSITIONS,
@@ -37,20 +37,23 @@ import {
   normalizeTaskStatus,
   type TaskStatus as WorkflowStatus,
   type TaskWithRelations,
-} from '@/hooks/useTasks';
-import { useToast } from '@/hooks/use-toast';
-import { TaskTimeline } from './TaskTimeline';
+} from "@/hooks/useTasks";
+import { useToast } from "@/hooks/use-toast";
+import { TaskTimeline } from "./TaskTimeline";
 import {
   getTaskStatusBadgeClass,
   getTaskStatusLabel,
   TASK_STATUS_FLOW,
-} from '@/constants/taskStatus';
-import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
-import { useTaskComments, type TaskCommentWithUser } from '@/features/tasks/hooks';
-import { CommentsSkeleton } from '@/components/loading/TaskSkeletons';
-import { logger } from '@/utils/logger';
+} from "@/constants/taskStatus";
+import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
+import {
+  useTaskComments,
+  type TaskCommentWithUser,
+} from "@/features/tasks/hooks";
+import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
+import { logger } from "@/utils/logger";
 
-type ButtonVariant = 'default' | 'secondary' | 'outline';
+type ButtonVariant = "default" | "secondary" | "outline";
 interface TaskDetailsDialogProps {
   task: TaskWithRelations | null;
   open: boolean;
@@ -60,45 +63,48 @@ interface TaskDetailsDialogProps {
 
 const getPriorityColor = (priority?: string | null) => {
   switch (priority) {
-    case 'urgent':
-      return 'bg-red-500';
-    case 'high':
-      return 'bg-orange-500';
-    case 'medium':
-      return 'bg-yellow-500';
-    case 'low':
-      return 'bg-green-500';
+    case "urgent":
+      return "bg-red-500";
+    case "high":
+      return "bg-orange-500";
+    case "medium":
+      return "bg-yellow-500";
+    case "low":
+      return "bg-green-500";
     default:
-      return 'bg-gray-500';
+      return "bg-gray-500";
   }
 };
 
 const getActionLabel = (current: WorkflowStatus, target: WorkflowStatus) => {
-  if (current === 'todo' && target === 'in_progress') return 'Start Task';
-  if (current === 'in_progress' && target === 'review') return 'Send to Review';
-  if (current === 'in_progress' && target === 'blocked') return 'Mark Blocked';
-  if (current === 'blocked' && target === 'in_progress') return 'Unblock Task';
-  if (target === 'cancelled') return 'Cancel Task';
-  if (target === 'done') return 'Mark Done';
-  if (target === 'todo') {
-    if (current === 'cancelled') return 'Reopen Task';
-    if (current === 'review') return 'Send Back to To Do';
-    return 'Move to To Do';
+  if (current === "todo" && target === "in_progress") return "Start Task";
+  if (current === "in_progress" && target === "review") return "Send to Review";
+  if (current === "in_progress" && target === "blocked") return "Mark Blocked";
+  if (current === "blocked" && target === "in_progress") return "Unblock Task";
+  if (target === "cancelled") return "Cancel Task";
+  if (target === "done") return "Mark Done";
+  if (target === "todo") {
+    if (current === "cancelled") return "Reopen Task";
+    if (current === "review") return "Send Back to To Do";
+    return "Move to To Do";
   }
   return `Move to ${labelFor(target)}`;
 };
 
-const getActionVariant = (current: WorkflowStatus, target: WorkflowStatus): ButtonVariant => {
-  if (target === 'todo') {
-    return current === 'cancelled' ? 'outline' : 'secondary';
+const getActionVariant = (
+  current: WorkflowStatus,
+  target: WorkflowStatus,
+): ButtonVariant => {
+  if (target === "todo") {
+    return current === "cancelled" ? "outline" : "secondary";
   }
-  if (target === 'cancelled') {
-    return 'outline';
+  if (target === "cancelled") {
+    return "outline";
   }
-  if (target === 'blocked') {
-    return 'secondary';
+  if (target === "blocked") {
+    return "secondary";
   }
-  return 'default';
+  return "default";
 };
 
 export function TaskDetailsDialog({
@@ -115,19 +121,19 @@ export function TaskDetailsDialog({
     loading: optionsLoading,
   } = useTaskFormOptions(open);
 
-  const [currentTask, setCurrentTask] = useState<TaskWithRelations | null>(task);
-  const [newComment, setNewComment] = useState('');
-  const [pendingTarget, setPendingTarget] = useState<WorkflowStatus | null>(null);
-  const [assignmentValue, setAssignmentValue] = useState('none');
-  const [goalValue, setGoalValue] = useState('none');
+  const [currentTask, setCurrentTask] = useState<TaskWithRelations | null>(
+    task,
+  );
+  const [newComment, setNewComment] = useState("");
+  const [pendingTarget, setPendingTarget] = useState<WorkflowStatus | null>(
+    null,
+  );
+  const [assignmentValue, setAssignmentValue] = useState("none");
+  const [goalValue, setGoalValue] = useState("none");
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
   const [updatingGoal, setUpdatingGoal] = useState(false);
-  const {
-    comments,
-    loadingComments,
-    addingComment,
-    submitComment,
-  } = useTaskComments(currentTask, open);
+  const { comments, loadingComments, addingComment, submitComment } =
+    useTaskComments(currentTask, open);
 
   useEffect(() => {
     setCurrentTask(task);
@@ -135,19 +141,19 @@ export function TaskDetailsDialog({
 
   useEffect(() => {
     if (!currentTask) {
-      setAssignmentValue('none');
-      setGoalValue('none');
+      setAssignmentValue("none");
+      setGoalValue("none");
       return;
     }
 
-    setAssignmentValue(currentTask.assigned_to ?? 'none');
-    setGoalValue(currentTask.goal_id ?? 'none');
+    setAssignmentValue(currentTask.assigned_to ?? "none");
+    setGoalValue(currentTask.goal_id ?? "none");
   }, [currentTask?.id, currentTask?.assigned_to, currentTask?.goal_id]);
 
   const handleAssigneeChange = async (value: string) => {
     if (!currentTask) return;
 
-    const nextAssignedTo = value === 'none' ? null : value;
+    const nextAssignedTo = value === "none" ? null : value;
     const previousAssignedTo = currentTask.assigned_to ?? null;
 
     if (nextAssignedTo === previousAssignedTo) {
@@ -164,10 +170,12 @@ export function TaskDetailsDialog({
       });
 
       if (error || !data) {
-        throw error ?? new Error('Unable to update assignee');
+        throw error ?? new Error("Unable to update assignee");
       }
 
-      const selectedAssignee = assignees.find((option) => option.id === nextAssignedTo);
+      const selectedAssignee = assignees.find(
+        (option) => option.id === nextAssignedTo,
+      );
 
       const updatedTask: TaskWithRelations = {
         ...currentTask,
@@ -184,18 +192,21 @@ export function TaskDetailsDialog({
       onTaskUpdate?.(updatedTask);
 
       toast({
-        title: 'Assignment updated',
+        title: "Assignment updated",
         description: selectedAssignee
           ? `Task assigned to ${selectedAssignee.first_name} ${selectedAssignee.last_name}.`
-          : 'Task is now unassigned.',
+          : "Task is now unassigned.",
       });
     } catch (error) {
-      logger.error('Error updating task assignment:', { error, tags: ['error'] });
-      setAssignmentValue(previousAssignedTo ?? 'none');
+      logger.error("Error updating task assignment:", {
+        error,
+        tags: ["error"],
+      });
+      setAssignmentValue(previousAssignedTo ?? "none");
       toast({
-        title: 'Assignment update failed',
-        description: 'Could not update the task assignment. Please try again.',
-        variant: 'destructive',
+        title: "Assignment update failed",
+        description: "Could not update the task assignment. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setUpdatingAssignment(false);
@@ -205,7 +216,7 @@ export function TaskDetailsDialog({
   const handleGoalChange = async (value: string) => {
     if (!currentTask) return;
 
-    const nextGoalId = value === 'none' ? null : value;
+    const nextGoalId = value === "none" ? null : value;
     const previousGoalId = currentTask.goal_id ?? null;
 
     if (nextGoalId === previousGoalId) {
@@ -222,10 +233,12 @@ export function TaskDetailsDialog({
       });
 
       if (error || !data) {
-        throw error ?? new Error('Unable to update goal');
+        throw error ?? new Error("Unable to update goal");
       }
 
-      const selectedGoal = goals.find((goalOption) => goalOption.id === nextGoalId);
+      const selectedGoal = goals.find(
+        (goalOption) => goalOption.id === nextGoalId,
+      );
 
       const updatedTask: TaskWithRelations = {
         ...currentTask,
@@ -246,18 +259,21 @@ export function TaskDetailsDialog({
       onTaskUpdate?.(updatedTask);
 
       toast({
-        title: 'Goal link updated',
+        title: "Goal link updated",
         description: selectedGoal
           ? `Task linked to goal “${selectedGoal.title}”.`
-          : 'Task is no longer linked to a goal.',
+          : "Task is no longer linked to a goal.",
       });
     } catch (error) {
-      logger.error('Error updating task goal link:', { error, tags: ['error'] });
-      setGoalValue(previousGoalId ?? 'none');
+      logger.error("Error updating task goal link:", {
+        error,
+        tags: ["error"],
+      });
+      setGoalValue(previousGoalId ?? "none");
       toast({
-        title: 'Goal update failed',
-        description: 'Could not update the goal link. Please try again.',
-        variant: 'destructive',
+        title: "Goal update failed",
+        description: "Could not update the goal link. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setUpdatingGoal(false);
@@ -269,16 +285,17 @@ export function TaskDetailsDialog({
 
     const result = await submitComment(newComment);
     if (result.success) {
-      setNewComment('');
+      setNewComment("");
       toast({
-        title: 'Comment added',
-        description: 'Your comment was posted successfully.',
+        title: "Comment added",
+        description: "Your comment was posted successfully.",
       });
     } else {
       toast({
-        title: 'Error',
-        description: result.error?.message ?? 'Failed to add comment. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          result.error?.message ?? "Failed to add comment. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -291,11 +308,12 @@ export function TaskDetailsDialog({
       const { data, error } = await updateStatus(currentTask.id, targetStatus);
       if (error || !data) {
         const errorMessage =
-          (error as Error)?.message ?? 'Unable to update task status. Please try again.';
+          (error as Error)?.message ??
+          "Unable to update task status. Please try again.";
         toast({
-          title: 'Status update failed',
+          title: "Status update failed",
           description: errorMessage,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return;
       }
@@ -311,33 +329,33 @@ export function TaskDetailsDialog({
       const previous = normalizeTaskStatus(currentTask.status);
       let successMessage = `Task status updated to ${labelFor(targetStatus)}.`;
 
-      if (targetStatus === 'in_progress') {
-        successMessage = 'Task is now in progress.';
-      } else if (targetStatus === 'done' || targetStatus === 'completed') {
-        successMessage = 'Task marked as completed.';
-      } else if (targetStatus === 'blocked') {
-        successMessage = 'Task marked as blocked.';
-      } else if (targetStatus === 'todo') {
+      if (targetStatus === "in_progress") {
+        successMessage = "Task is now in progress.";
+      } else if (targetStatus === "done" || targetStatus === "completed") {
+        successMessage = "Task marked as completed.";
+      } else if (targetStatus === "blocked") {
+        successMessage = "Task marked as blocked.";
+      } else if (targetStatus === "todo") {
         successMessage =
-          previous === 'cancelled'
-            ? 'Task reopened and moved back to To Do.'
-            : 'Task moved back to To Do.';
-      } else if (targetStatus === 'review') {
-        successMessage = 'Task moved to review.';
-      } else if (targetStatus === 'cancelled') {
-        successMessage = 'Task cancelled.';
+          previous === "cancelled"
+            ? "Task reopened and moved back to To Do."
+            : "Task moved back to To Do.";
+      } else if (targetStatus === "review") {
+        successMessage = "Task moved to review.";
+      } else if (targetStatus === "cancelled") {
+        successMessage = "Task cancelled.";
       }
 
       toast({
-        title: 'Status updated',
+        title: "Status updated",
         description: successMessage,
       });
     } catch (error) {
-      logger.error('Error updating task status:', { error, tags: ['error'] });
+      logger.error("Error updating task status:", { error, tags: ["error"] });
       toast({
-        title: 'Status update failed',
-        description: 'An unexpected error occurred. Please try again.',
-        variant: 'destructive',
+        title: "Status update failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setPendingTarget(null);
@@ -360,7 +378,9 @@ export function TaskDetailsDialog({
     if (!currentTask) return -1;
     const normalized = normalizeTaskStatus(currentTask.status);
     if (!normalized) return -1;
-    return TASK_STATUS_FLOW.indexOf(normalized as (typeof TASK_STATUS_FLOW)[number]);
+    return TASK_STATUS_FLOW.indexOf(
+      normalized as (typeof TASK_STATUS_FLOW)[number],
+    );
   })();
 
   if (!currentTask) return null;
@@ -371,7 +391,9 @@ export function TaskDetailsDialog({
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
-              <DialogTitle className="text-xl font-semibold">{currentTask.title}</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">
+                {currentTask.title}
+              </DialogTitle>
               {currentTask.description && (
                 <DialogDescription className="text-base leading-relaxed">
                   {currentTask.description}
@@ -379,7 +401,9 @@ export function TaskDetailsDialog({
               )}
             </div>
             <div className="flex items-center space-x-2">
-              <div className={`h-3 w-3 rounded-full ${getPriorityColor(currentTask.priority)}`} />
+              <div
+                className={`h-3 w-3 rounded-full ${getPriorityColor(currentTask.priority)}`}
+              />
               <Badge className={getTaskStatusBadgeClass(currentTask.status)}>
                 {getTaskStatusLabel(currentTask.status)}
               </Badge>
@@ -393,7 +417,9 @@ export function TaskDetailsDialog({
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Workflow
               </p>
-              <Badge variant="secondary">{getTaskStatusLabel(currentTask.status)}</Badge>
+              <Badge variant="secondary">
+                {getTaskStatusLabel(currentTask.status)}
+              </Badge>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm">
               {TASK_STATUS_FLOW.map((status, index) => {
@@ -405,15 +431,17 @@ export function TaskDetailsDialog({
                       <span
                         className={`h-3 w-3 rounded-full ${
                           isActive
-                            ? 'bg-primary'
+                            ? "bg-primary"
                             : isCompleted
-                              ? 'bg-emerald-500'
-                              : 'bg-muted-foreground/40'
+                              ? "bg-emerald-500"
+                              : "bg-muted-foreground/40"
                         }`}
                       />
                       <span
                         className={`${
-                          isActive ? 'font-semibold text-foreground' : 'text-muted-foreground'
+                          isActive
+                            ? "font-semibold text-foreground"
+                            : "text-muted-foreground"
                         }`}
                       >
                         {getTaskStatusLabel(status)}
@@ -427,7 +455,8 @@ export function TaskDetailsDialog({
               })}
               {activeFlowIndex === -1 && (
                 <span className="text-sm text-muted-foreground">
-                  {getTaskStatusLabel(currentTask.status)} (outside primary flow)
+                  {getTaskStatusLabel(currentTask.status)} (outside primary
+                  flow)
                 </span>
               )}
             </div>
@@ -441,7 +470,9 @@ export function TaskDetailsDialog({
                     onClick={() => handleStatusChange(action.target)}
                     disabled={!!pendingTarget}
                   >
-                    {pendingTarget === action.target ? 'Updating…' : action.label}
+                    {pendingTarget === action.target
+                      ? "Updating…"
+                      : action.label}
                   </Button>
                 ))
               ) : (
@@ -455,7 +486,9 @@ export function TaskDetailsDialog({
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">Assignee</Label>
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Assignee
+                </Label>
                 <Select
                   value={assignmentValue}
                   onValueChange={handleAssigneeChange}
@@ -474,12 +507,16 @@ export function TaskDetailsDialog({
                   </SelectContent>
                 </Select>
                 {updatingAssignment && (
-                  <p className="text-xs text-muted-foreground">Updating assignment…</p>
+                  <p className="text-xs text-muted-foreground">
+                    Updating assignment…
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">Linked Goal</Label>
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Linked Goal
+                </Label>
                 <Select
                   value={goalValue}
                   onValueChange={handleGoalChange}
@@ -498,9 +535,11 @@ export function TaskDetailsDialog({
                   </SelectContent>
                 </Select>
                 {updatingGoal && (
-                  <p className="text-xs text-muted-foreground">Updating goal link…</p>
+                  <p className="text-xs text-muted-foreground">
+                    Updating goal link…
+                  </p>
                 )}
-                {goalValue !== 'none' && currentTask.goal && (
+                {goalValue !== "none" && currentTask.goal && (
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Target className="h-3.5 w-3.5" />
@@ -509,8 +548,10 @@ export function TaskDetailsDialog({
                     <span>{currentTask.goal.progress}%</span>
                   </div>
                 )}
-                {goalValue === 'none' && (
-                  <p className="text-xs text-muted-foreground">Not linked to a goal.</p>
+                {goalValue === "none" && (
+                  <p className="text-xs text-muted-foreground">
+                    Not linked to a goal.
+                  </p>
                 )}
               </div>
 
@@ -519,20 +560,22 @@ export function TaskDetailsDialog({
                 <span className="text-muted-foreground">Priority:</span>
                 <span className="capitalize">{currentTask.priority}</span>
               </div>
-              {currentTask.estimated_hours !== null && currentTask.estimated_hours !== undefined && (
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Estimated:</span>
-                  <span>{currentTask.estimated_hours}h</span>
-                </div>
-              )}
-              {currentTask.actual_hours !== null && currentTask.actual_hours !== undefined && (
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Actual:</span>
-                  <span>{currentTask.actual_hours}h</span>
-                </div>
-              )}
+              {currentTask.estimated_hours !== null &&
+                currentTask.estimated_hours !== undefined && (
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Estimated:</span>
+                    <span>{currentTask.estimated_hours}h</span>
+                  </div>
+                )}
+              {currentTask.actual_hours !== null &&
+                currentTask.actual_hours !== undefined && (
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Actual:</span>
+                    <span>{currentTask.actual_hours}h</span>
+                  </div>
+                )}
             </div>
 
             <div className="space-y-3">
@@ -540,19 +583,25 @@ export function TaskDetailsDialog({
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Due:</span>
-                  <span>{format(new Date(currentTask.due_date), 'MMM dd, yyyy')}</span>
+                  <span>
+                    {format(new Date(currentTask.due_date), "MMM dd, yyyy")}
+                  </span>
                 </div>
               )}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Created:</span>
-                <span>{format(new Date(currentTask.created_at), 'MMM dd, yyyy')}</span>
+                <span>
+                  {format(new Date(currentTask.created_at), "MMM dd, yyyy")}
+                </span>
               </div>
               {currentTask.completed_at && (
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Completed:</span>
-                  <span>{format(new Date(currentTask.completed_at), 'MMM dd, yyyy')}</span>
+                  <span>
+                    {format(new Date(currentTask.completed_at), "MMM dd, yyyy")}
+                  </span>
                 </div>
               )}
               {currentTask.department && (
@@ -590,7 +639,7 @@ export function TaskDetailsDialog({
                   size="sm"
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  {addingComment ? 'Adding…' : 'Add Comment'}
+                  {addingComment ? "Adding…" : "Add Comment"}
                 </Button>
               </div>
             </div>
@@ -611,7 +660,10 @@ export function TaskDetailsDialog({
                           {comment.user?.first_name} {comment.user?.last_name}
                         </CardTitle>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(comment.created_at), 'MMM dd, yyyy HH:mm')}
+                          {format(
+                            new Date(comment.created_at),
+                            "MMM dd, yyyy HH:mm",
+                          )}
                         </span>
                       </div>
                     </CardHeader>

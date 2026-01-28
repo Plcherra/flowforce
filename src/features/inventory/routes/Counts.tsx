@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Calculator, Plus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { NewCountWizard } from '@/components/inventory/NewCountWizard';
-import { CountManagement } from '@/components/inventory/CountManagement';
-import { InventoryLayout } from '../components/InventoryLayout';
-import { IfCan } from '@/components/permissions/IfCan';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Calculator, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { NewCountWizard } from "@/components/inventory/NewCountWizard";
+import { CountManagement } from "@/components/inventory/CountManagement";
+import { InventoryLayout } from "../components/InventoryLayout";
+import { IfCan } from "@/components/permissions/IfCan";
 
 export default function InventoryCountsPage() {
   const [showWizard, setShowWizard] = useState(false);
@@ -32,7 +32,7 @@ export default function InventoryCountsPage() {
                 Physical inventory counts and reconciliation
               </p>
             </div>
-            
+
             <div className="flex gap-2">
               <Button variant="outline">Import Count</Button>
               <Button onClick={() => setShowWizard(true)}>
@@ -46,9 +46,7 @@ export default function InventoryCountsPage() {
             {/* Count List */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Recent Counts</h2>
-              <CountManagement 
-                onViewCount={handleViewCount}
-              />
+              <CountManagement onViewCount={handleViewCount} />
             </div>
           </div>
 

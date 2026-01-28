@@ -1,51 +1,56 @@
-
-import { useTranslation } from 'react-i18next';
-import Breadcrumbs from '@/components/resources/Breadcrumbs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Book, Clock, ChevronRight } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "@/components/resources/Breadcrumbs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Book, Clock, ChevronRight } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function UserManual() {
   const { t } = useTranslation();
 
   const breadcrumbItems = [
-    { label: t('landing.resources'), href: '/resources' },
-    { label: t('resources.documentation.title'), href: '/resources' },
-    { label: 'User Manual' },
+    { label: t("landing.resources"), href: "/resources" },
+    { label: t("resources.documentation.title"), href: "/resources" },
+    { label: "User Manual" },
   ];
 
   const sections = [
     {
-      title: 'Dashboard Overview',
-      description: 'Understanding your main dashboard and key metrics',
-      pages: 5
+      title: "Dashboard Overview",
+      description: "Understanding your main dashboard and key metrics",
+      pages: 5,
     },
     {
-      title: 'Employee Management',
-      description: 'Adding, editing, and managing employee profiles',
-      pages: 8
+      title: "Employee Management",
+      description: "Adding, editing, and managing employee profiles",
+      pages: 8,
     },
     {
-      title: 'Scheduling',
-      description: 'Creating schedules, managing shifts, and time tracking',
-      pages: 12
+      title: "Scheduling",
+      description: "Creating schedules, managing shifts, and time tracking",
+      pages: 12,
     },
     {
-      title: 'Task Management',
-      description: 'Creating, assigning, and tracking tasks and workflows',
-      pages: 7
+      title: "Task Management",
+      description: "Creating, assigning, and tracking tasks and workflows",
+      pages: 7,
     },
     {
-      title: 'Forms & Documents',
-      description: 'Building forms, collecting data, and document management',
-      pages: 6
+      title: "Forms & Documents",
+      description: "Building forms, collecting data, and document management",
+      pages: 6,
     },
     {
-      title: 'Reporting & Analytics',
-      description: 'Generating reports and analyzing business metrics',
-      pages: 9
-    }
+      title: "Reporting & Analytics",
+      description: "Generating reports and analyzing business metrics",
+      pages: 9,
+    },
   ];
 
   return (
@@ -55,7 +60,7 @@ export default function UserManual() {
           <Breadcrumbs items={breadcrumbItems} />
           <BackButton />
         </div>
-        
+
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
@@ -81,17 +86,23 @@ export default function UserManual() {
             <div className="prose max-w-none">
               <h3>Table of Contents</h3>
               <p>
-                This comprehensive user manual covers all aspects of using FlowForce. 
-                Click on any section below to jump to detailed instructions and examples.
+                This comprehensive user manual covers all aspects of using
+                FlowForce. Click on any section below to jump to detailed
+                instructions and examples.
               </p>
-              
+
               <div className="space-y-3 mt-6">
                 {sections.map((section, index) => (
-                  <div key={index} className="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer">
+                  <div
+                    key={index}
+                    className="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">{section.title}</h4>
+                          <h4 className="font-semibold text-gray-900">
+                            {section.title}
+                          </h4>
                           <div className="flex items-center text-sm text-gray-500">
                             {section.pages} pages
                           </div>
@@ -105,18 +116,24 @@ export default function UserManual() {
               </div>
 
               <h3 className="mt-8">Quick Start</h3>
-              <p>
-                New to FlowForce? Start with these essential sections:
-              </p>
+              <p>New to FlowForce? Start with these essential sections:</p>
               <ul>
-                <li><strong>Dashboard Overview</strong> - Get familiar with the interface</li>
-                <li><strong>Employee Management</strong> - Set up your team</li>
-                <li><strong>Scheduling</strong> - Create your first schedule</li>
+                <li>
+                  <strong>Dashboard Overview</strong> - Get familiar with the
+                  interface
+                </li>
+                <li>
+                  <strong>Employee Management</strong> - Set up your team
+                </li>
+                <li>
+                  <strong>Scheduling</strong> - Create your first schedule
+                </li>
               </ul>
 
               <h3>Advanced Features</h3>
               <p>
-                Once you're comfortable with the basics, explore advanced features like:
+                Once you're comfortable with the basics, explore advanced
+                features like:
               </p>
               <ul>
                 <li>Automated workflows and task dependencies</li>
@@ -127,7 +144,8 @@ export default function UserManual() {
 
               <h3>Need Help?</h3>
               <p>
-                Can't find what you're looking for? Check out our other resources:
+                Can't find what you're looking for? Check out our other
+                resources:
               </p>
               <ul>
                 <li>Getting Started Guide for quick setup</li>

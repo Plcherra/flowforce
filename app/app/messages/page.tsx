@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import MessagesPage from '@/screens/Messages';
+import MessagesPage from "@/screens/Messages";
 
 export default function Messages() {
   return <MessagesPage />;

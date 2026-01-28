@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { analyzeEngagement } from '@/services/ai/engagementAnalyzer';
+import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { analyzeEngagement } from "@/services/ai/engagementAnalyzer";
 
 type EngagementUpdate = {
   id: string;
@@ -27,29 +27,32 @@ type RawEngagementRow = {
   likes_count: number | null;
   comments_count: number | null;
   views_count: number | null;
-  company_update_engagement: null | {
-    engagement_score: number | null;
-    sentiment_score: number | null;
-    ai_summary: string | null;
-    likes_count: number | null;
-    comments_count: number | null;
-    views_count: number | null;
-    last_analyzed: string | null;
-  } | Array<{
-    engagement_score: number | null;
-    sentiment_score: number | null;
-    ai_summary: string | null;
-    likes_count: number | null;
-    comments_count: number | null;
-    views_count: number | null;
-    last_analyzed: string | null;
-  }>;
+  company_update_engagement:
+    | null
+    | {
+        engagement_score: number | null;
+        sentiment_score: number | null;
+        ai_summary: string | null;
+        likes_count: number | null;
+        comments_count: number | null;
+        views_count: number | null;
+        last_analyzed: string | null;
+      }
+    | Array<{
+        engagement_score: number | null;
+        sentiment_score: number | null;
+        ai_summary: string | null;
+        likes_count: number | null;
+        comments_count: number | null;
+        views_count: number | null;
+        last_analyzed: string | null;
+      }>;
 };
 
 const transformRow = (row: RawEngagementRow): EngagementUpdate => {
   const engagementData = Array.isArray(row.company_update_engagement)
     ? row.company_update_engagement[0]
-    : row.company_update_engagement ?? null;
+    : (row.company_update_engagement ?? null);
 
   const likes = row.likes_count ?? engagementData?.likes_count ?? 0;
   const comments = row.comments_count ?? engagementData?.comments_count ?? 0;
@@ -76,11 +79,12 @@ export function useEngagementAnalytics() {
   const queryClient = useQueryClient();
 
   const updatesQuery = useQuery({
-    queryKey: ['engagement-feed'],
+    queryKey: ["engagement-feed"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('company_updates')
-        .select(`
+        .from("company_updates")
+        .select(
+          `
           id,
           title,
           body,
@@ -97,8 +101,9 @@ export function useEngagementAnalytics() {
             views_count,
             last_analyzed
           )
-        `)
-        .eq('status', 'published');
+        `,
+        )
+        .eq("status", "published");
 
       if (error) {
         throw error;
@@ -116,12 +121,12 @@ export function useEngagementAnalytics() {
 
       const analysis = await analyzeEngagement({
         title: update.title,
-        body: update.body ?? '',
+        body: update.body ?? "",
         metrics: update.metrics,
       });
 
       const { error } = await supabase
-        .from('company_update_engagement')
+        .from("company_update_engagement")
         .upsert({
           update_id: update.id,
           company_id: update.companyId,
@@ -140,13 +145,13 @@ export function useEngagementAnalytics() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engagement-feed'] });
+      queryClient.invalidateQueries({ queryKey: ["engagement-feed"] });
     },
   });
 
   const analyze = useCallback(
     (update: EngagementUpdate) => mutation.mutateAsync(update),
-    [mutation]
+    [mutation],
   );
 
   return {

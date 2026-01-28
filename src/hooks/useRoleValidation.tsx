@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useAuth } from './useAuth';
-import { useProfile } from './useProfile';
-import { useCompanyRoles } from './useCompanyRoles';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from './use-toast';
-import { logger } from '@/utils/logger';
+import { useEffect } from "react";
+import { useAuth } from "./useAuth";
+import { useProfile } from "./useProfile";
+import { useCompanyRoles } from "./useCompanyRoles";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "./use-toast";
+import { logger } from "@/utils/logger";
 
 /**
  * Hook to provide role validation and auto-assignment guardrails
@@ -22,63 +22,75 @@ export function useRoleValidation() {
     const validateAndFixRole = async () => {
       try {
         // Check if user has a valid role_id that matches an existing company role
-        const hasValidRoleId = profile.role_id && roles.some(role => role.id === profile.role_id);
-        
+        const hasValidRoleId =
+          profile.role_id && roles.some((role) => role.id === profile.role_id);
+
         // Check if user's role string matches any company role name
-        const matchingRole = roles.find(role => 
-          role.name.toLowerCase() === profile.role?.toLowerCase()
+        const matchingRole = roles.find(
+          (role) => role.name.toLowerCase() === profile.role?.toLowerCase(),
         );
 
         // Auto-fix: If no valid role_id but has matching role name, update role_id
         if (!hasValidRoleId && matchingRole) {
           await supabase
-            .from('profiles')
+            .from("profiles")
             .update({ role_id: matchingRole.id })
-            .eq('id', profile.id);
+            .eq("id", profile.id);
 
           await refetchProfile();
-          
-          logger.info('[Role Validation] Auto-assigned role_id', { context: { roleId: matchingRole.id, roleName: matchingRole.name }, tags: ['role-validation'] });
+
+          logger.info("[Role Validation] Auto-assigned role_id", {
+            context: { roleId: matchingRole.id, roleName: matchingRole.name },
+            tags: ["role-validation"],
+          });
           return;
         }
 
         // Auto-fix: If no valid role at all, assign default role based on hierarchy
         if (!hasValidRoleId && !matchingRole) {
-          const defaultRole = roles.find(role => role.hierarchy_level === 0) || roles[0];
-          
+          const defaultRole =
+            roles.find((role) => role.hierarchy_level === 0) || roles[0];
+
           if (defaultRole) {
             // Map company role name to valid profile role type
             const validRoleMapping: Record<string, string> = {
-              'owner': 'owner',
-              'admin': 'admin', 
-              'manager': 'manager',
-              'supervisor': 'supervisor',
-              'employee': 'employee',
-              'staff': 'staff'
+              owner: "owner",
+              admin: "admin",
+              manager: "manager",
+              supervisor: "supervisor",
+              employee: "employee",
+              staff: "staff",
             };
-            
-            const profileRole = validRoleMapping[defaultRole.name.toLowerCase()] || 'staff';
-            
+
+            const profileRole =
+              validRoleMapping[defaultRole.name.toLowerCase()] || "staff";
+
             await supabase
-              .from('profiles')
-              .update({ 
+              .from("profiles")
+              .update({
                 role_id: defaultRole.id,
-                role: profileRole as any
+                role: profileRole as any,
               })
-              .eq('id', profile.id);
+              .eq("id", profile.id);
 
             await refetchProfile();
-            
+
             toast({
               title: "Role Assigned",
               description: `You've been assigned the ${defaultRole.name} role.`,
             });
-            
-            logger.info('[Role Validation] Auto-assigned default role', { context: { roleName: defaultRole.name }, tags: ['role-validation'] });
+
+            logger.info("[Role Validation] Auto-assigned default role", {
+              context: { roleName: defaultRole.name },
+              tags: ["role-validation"],
+            });
           }
         }
       } catch (error) {
-        logger.error('[Role Validation] Failed to validate/fix role', { error, tags: ['error', 'role-validation'] });
+        logger.error("[Role Validation] Failed to validate/fix role", {
+          error,
+          tags: ["error", "role-validation"],
+        });
       }
     };
 
@@ -88,6 +100,7 @@ export function useRoleValidation() {
   }, [user, profile, roles, refetchProfile, toast]);
 
   return {
-    isValid: profile?.role_id && roles?.some(role => role.id === profile.role_id)
+    isValid:
+      profile?.role_id && roles?.some((role) => role.id === profile.role_id),
   };
 }

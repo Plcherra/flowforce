@@ -17,16 +17,31 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
 -- Enable row level security and ensure viewer policy exists
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Admins can view audit logs" ON public.audit_logs;
-CREATE POLICY "Admins can view audit logs" ON public.audit_logs
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1
-      FROM public.profiles
-      WHERE id = auth.uid()
-        AND role IN ('admin', 'owner')
-    )
-  );
+-- Only create policy if profiles table exists and has role column
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'role'
+  ) THEN
+    DROP POLICY IF EXISTS "Admins can view audit logs" ON public.audit_logs;
+    CREATE POLICY "Admins can view audit logs" ON public.audit_logs
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1
+          FROM public.profiles
+          WHERE id = auth.uid()
+            AND role::text IN ('admin', 'owner')
+        )
+      );
+  END IF;
+END $$;
 
 -- Ensure helper function and trigger for role change auditing exist
 CREATE OR REPLACE FUNCTION public.log_role_change()
@@ -57,11 +72,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS profile_role_change_audit ON public.profiles;
-CREATE TRIGGER profile_role_change_audit
-  AFTER UPDATE ON public.profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION public.log_role_change();
+-- Only create trigger if profiles table exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles'
+  ) THEN
+    DROP TRIGGER IF EXISTS profile_role_change_audit ON public.profiles;
+    CREATE TRIGGER profile_role_change_audit
+      AFTER UPDATE ON public.profiles
+      FOR EACH ROW
+      EXECUTE FUNCTION public.log_role_change();
+  END IF;
+END $$;
 
 -- Supporting indexes (created once)
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON public.audit_logs(user_id);

@@ -1,6 +1,6 @@
 /**
  * Audit logging for Supabase Admin (service role) operations
- * 
+ *
  * Service role bypasses RLS, so all operations must be logged for security auditing.
  * This helps track:
  * - What operations were performed
@@ -9,7 +9,7 @@
  * - What data was accessed/modified
  */
 
-import { createServerLogger } from './utils/logger';
+import { createServerLogger } from "./utils/logger";
 
 interface AuditContext {
   requestId?: string;
@@ -21,7 +21,9 @@ interface AuditContext {
   metadata?: Record<string, unknown>;
 }
 
-const auditLogger = createServerLogger('supabase-admin-audit', { tags: ['security', 'audit'] });
+const auditLogger = createServerLogger("supabase-admin-audit", {
+  tags: ["security", "audit"],
+});
 
 /**
  * Log a service role operation for audit purposes
@@ -37,7 +39,7 @@ export function auditServiceRoleOperation(context: AuditContext): void {
     metadata = {},
   } = context;
 
-  auditLogger.warn('Service role operation', {
+  auditLogger.warn("Service role operation", {
     requestId,
     userId,
     companyId,
@@ -58,38 +60,55 @@ export function auditServiceRoleOperation(context: AuditContext): void {
  * Audit helper for common operations
  */
 export const auditHelpers = {
-  select: (table: string, filters: Record<string, unknown>, context: Omit<AuditContext, 'operation' | 'table'>) => {
+  select: (
+    table: string,
+    filters: Record<string, unknown>,
+    context: Omit<AuditContext, "operation" | "table">,
+  ) => {
     auditServiceRoleOperation({
       ...context,
-      operation: 'SELECT',
+      operation: "SELECT",
       table,
       metadata: { filters },
     });
   },
 
-  insert: (table: string, recordId: string, context: Omit<AuditContext, 'operation' | 'table' | 'recordId'>) => {
+  insert: (
+    table: string,
+    recordId: string,
+    context: Omit<AuditContext, "operation" | "table" | "recordId">,
+  ) => {
     auditServiceRoleOperation({
       ...context,
-      operation: 'INSERT',
+      operation: "INSERT",
       table,
       recordId,
     });
   },
 
-  update: (table: string, recordId: string, updates: Record<string, unknown>, context: Omit<AuditContext, 'operation' | 'table' | 'recordId'>) => {
+  update: (
+    table: string,
+    recordId: string,
+    updates: Record<string, unknown>,
+    context: Omit<AuditContext, "operation" | "table" | "recordId">,
+  ) => {
     auditServiceRoleOperation({
       ...context,
-      operation: 'UPDATE',
+      operation: "UPDATE",
       table,
       recordId,
       metadata: { updates },
     });
   },
 
-  delete: (table: string, recordId: string, context: Omit<AuditContext, 'operation' | 'table' | 'recordId'>) => {
+  delete: (
+    table: string,
+    recordId: string,
+    context: Omit<AuditContext, "operation" | "table" | "recordId">,
+  ) => {
     auditServiceRoleOperation({
       ...context,
-      operation: 'DELETE',
+      operation: "DELETE",
       table,
       recordId,
     });

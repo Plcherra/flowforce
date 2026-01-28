@@ -1,13 +1,20 @@
-import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
-import { useProfile } from '@/hooks/useProfile';
-import { calculateGoalProgress } from '@/services/goals/goalProgressService';
+import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
+import { useProfile } from "@/hooks/useProfile";
+import { calculateGoalProgress } from "@/features/goals/services/goalProgressService";
 
-type GoalRow = Tables<'goals'>;
-type GoalTaskRow = Tables<'goal_tasks'>;
-type TaskRow = Pick<Tables<'tasks'>, 'id' | 'title' | 'status' | 'priority' | 'due_date' | 'completed_at'>;
+type GoalRow = Tables<"goals">;
+type GoalTaskRow = Tables<"goal_tasks">;
+type TaskRow = Pick<
+  Tables<"tasks">,
+  "id" | "title" | "status" | "priority" | "due_date" | "completed_at"
+>;
 
 type RawGoalRecord = GoalRow & {
   goal_tasks?: (GoalTaskRow & { task: TaskRow | null })[] | null;
@@ -32,12 +39,15 @@ export interface UseGoalsOptions {
   enabled?: boolean;
 }
 
-export type CreateGoalInput = Omit<TablesInsert<'goals'>, 'company_id' | 'created_by'> & {
+export type CreateGoalInput = Omit<
+  TablesInsert<"goals">,
+  "company_id" | "created_by"
+> & {
   company_id?: string;
   created_by?: string;
 };
 
-export type UpdateGoalInput = TablesUpdate<'goals'>;
+export type UpdateGoalInput = TablesUpdate<"goals">;
 
 const GOALS_SELECT = `
   id,
@@ -73,7 +83,7 @@ const GOALS_SELECT = `
   )
 `;
 
-const GOALS_QUERY_SCOPE = ['gamification', 'goals'] as const;
+const GOALS_QUERY_SCOPE = ["gamification", "goals"] as const;
 
 const normalizeSearch = (value: string | null | undefined) => {
   const trimmed = value?.trim();
@@ -92,8 +102,8 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
         task: taskLink.task
           ? {
               id: taskLink.task.id,
-              title: taskLink.task.title ?? '',
-              status: taskLink.task.status ?? '',
+              title: taskLink.task.title ?? "",
+              status: taskLink.task.status ?? "",
               priority: taskLink.task.priority ?? null,
               due_date: taskLink.task.due_date ?? null,
               completed_at: taskLink.task.completed_at ?? null,
@@ -102,10 +112,14 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
       }))
     : [];
 
-  const fallbackProgress = typeof record.progress === 'number' ? record.progress : 0;
+  const fallbackProgress =
+    typeof record.progress === "number" ? record.progress : 0;
   const computedProgress =
     tasks.length > 0
-      ? calculateGoalProgress(tasks as Parameters<typeof calculateGoalProgress>[0], fallbackProgress)
+      ? calculateGoalProgress(
+          tasks as Parameters<typeof calculateGoalProgress>[0],
+          fallbackProgress,
+        )
       : fallbackProgress;
 
   const { goal_tasks, ...goalFields } = record;
@@ -131,9 +145,18 @@ export function useGoals(options: UseGoalsOptions = {}) {
       ownerId: filters?.ownerId ?? undefined,
       search: normalizeSearch(filters?.search),
     };
-  }, [filters?.companyId, filters?.status, filters?.ownerId, filters?.search, fallbackCompanyId]);
+  }, [
+    filters?.companyId,
+    filters?.status,
+    filters?.ownerId,
+    filters?.search,
+    fallbackCompanyId,
+  ]);
 
-  const filterKey = useMemo(() => JSON.stringify(normalizedFilters), [normalizedFilters]);
+  const filterKey = useMemo(
+    () => JSON.stringify(normalizedFilters),
+    [normalizedFilters],
+  );
 
   const goalsQuery = useQuery<GoalWithTasks[]>({
     queryKey: [...GOALS_QUERY_SCOPE, filterKey],
@@ -145,34 +168,36 @@ export function useGoals(options: UseGoalsOptions = {}) {
       }
 
       let query = supabase
-        .from('goals')
+        .from("goals")
         .select(GOALS_SELECT)
-        .eq('company_id', companyId)
-        .order('created_at', { ascending: false });
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false });
 
       if (normalizedFilters.status) {
         const statuses = Array.isArray(normalizedFilters.status)
           ? normalizedFilters.status
           : [normalizedFilters.status];
         if (statuses.length > 0) {
-          query = query.in('status', statuses);
+          query = query.in("status", statuses);
         }
       }
 
       if (normalizedFilters.ownerId) {
-        query = query.eq('owner_id', normalizedFilters.ownerId);
+        query = query.eq("owner_id", normalizedFilters.ownerId);
       }
 
       if (normalizedFilters.search) {
-        query = query.ilike('title', `%${normalizedFilters.search}%`);
+        query = query.ilike("title", `%${normalizedFilters.search}%`);
       }
 
       const { data, error } = await query;
       if (error) {
-        throw new Error(error.message ?? 'Failed to load goals');
+        throw new Error(error.message ?? "Failed to load goals");
       }
 
-      return (data ?? []).map((record) => mapGoalRecord(record as RawGoalRecord));
+      return (data ?? []).map((record) =>
+        mapGoalRecord(record as RawGoalRecord),
+      );
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000,
@@ -186,41 +211,47 @@ export function useGoals(options: UseGoalsOptions = {}) {
     mutationFn: async (input: CreateGoalInput) => {
       const companyId = input.company_id ?? normalizedFilters.companyId;
       if (!companyId) {
-        throw new Error('A companyId is required to create goals.');
+        throw new Error("A companyId is required to create goals.");
       }
       const creatorId = input.created_by ?? userId;
       if (!creatorId) {
-        throw new Error('Missing user context for goal creation.');
+        throw new Error("Missing user context for goal creation.");
       }
-      const payload: TablesInsert<'goals'> = {
+      const payload: TablesInsert<"goals"> = {
         ...input,
         company_id: companyId,
         created_by: creatorId,
       };
-      const { error } = await supabase.from('goals').insert(payload);
+      const { error } = await supabase.from("goals").insert(payload);
       if (error) {
-        throw new Error(error.message ?? 'Failed to create goal');
+        throw new Error(error.message ?? "Failed to create goal");
       }
     },
     onSuccess: invalidateGoalQueries,
   });
 
   const updateGoalMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: UpdateGoalInput }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: UpdateGoalInput;
+    }) => {
       if (!id) {
-        throw new Error('Goal id is required for updates.');
+        throw new Error("Goal id is required for updates.");
       }
       const companyId = normalizedFilters.companyId;
       if (!companyId) {
-        throw new Error('Company context required to update goals.');
+        throw new Error("Company context required to update goals.");
       }
       const { error } = await supabase
-        .from('goals')
+        .from("goals")
         .update(updates)
-        .eq('id', id)
-        .eq('company_id', companyId);
+        .eq("id", id)
+        .eq("company_id", companyId);
       if (error) {
-        throw new Error(error.message ?? 'Failed to update goal');
+        throw new Error(error.message ?? "Failed to update goal");
       }
     },
     onSuccess: invalidateGoalQueries,
@@ -229,19 +260,19 @@ export function useGoals(options: UseGoalsOptions = {}) {
   const deleteGoalMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!id) {
-        throw new Error('Goal id is required for deletion.');
+        throw new Error("Goal id is required for deletion.");
       }
       const companyId = normalizedFilters.companyId;
       if (!companyId) {
-        throw new Error('Company context required to delete goals.');
+        throw new Error("Company context required to delete goals.");
       }
       const { error } = await supabase
-        .from('goals')
+        .from("goals")
         .delete()
-        .eq('id', id)
-        .eq('company_id', companyId);
+        .eq("id", id)
+        .eq("company_id", companyId);
       if (error) {
-        throw new Error(error.message ?? 'Failed to delete goal');
+        throw new Error(error.message ?? "Failed to delete goal");
       }
     },
     onSuccess: invalidateGoalQueries,
@@ -252,7 +283,7 @@ export function useGoals(options: UseGoalsOptions = {}) {
     queryError instanceof Error
       ? queryError
       : queryError
-        ? new Error('Unable to load goals')
+        ? new Error("Unable to load goals")
         : null;
 
   return {

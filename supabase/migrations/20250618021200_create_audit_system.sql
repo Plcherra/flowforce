@@ -16,13 +16,29 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy for audit logs (only admins and owners can view)
-CREATE POLICY "Admins can view audit logs" ON public.audit_logs
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles 
-      WHERE id = auth.uid() AND role IN ('admin', 'owner')
-    )
-  );
+-- Make conditional to avoid enum value errors
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'role'
+  ) THEN
+    DROP POLICY IF EXISTS "Admins can view audit logs" ON public.audit_logs;
+    CREATE POLICY "Admins can view audit logs" ON public.audit_logs
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1 FROM public.profiles 
+          WHERE id = auth.uid() AND role::text IN ('admin', 'owner')
+        )
+      );
+  END IF;
+END $$;
 
 -- Create function to log role changes
 CREATE OR REPLACE FUNCTION public.log_role_change()
@@ -53,14 +69,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger for role changes
-CREATE TRIGGER profile_role_change_audit
-  AFTER UPDATE ON public.profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION public.log_role_change();
+-- Create trigger for role changes (only if profiles table exists)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles'
+  ) THEN
+    DROP TRIGGER IF EXISTS profile_role_change_audit ON public.profiles;
+    CREATE TRIGGER profile_role_change_audit
+      AFTER UPDATE ON public.profiles
+      FOR EACH ROW
+      EXECUTE FUNCTION public.log_role_change();
+  END IF;
+END $$;
 
 -- Create indexes for better performance
-CREATE INDEX idx_audit_logs_user_id ON public.audit_logs(user_id);
-CREATE INDEX idx_audit_logs_performed_by ON public.audit_logs(performed_by);
-CREATE INDEX idx_audit_logs_action ON public.audit_logs(action);
-CREATE INDEX idx_audit_logs_created_at ON public.audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON public.audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_performed_by ON public.audit_logs(performed_by);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON public.audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON public.audit_logs(created_at);

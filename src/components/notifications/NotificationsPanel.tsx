@@ -1,23 +1,36 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { Bell, BellRing, Trash2, Check, Clock, AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
-import { useTaskNotifications } from '@/features/tasks';
-import { formatDistanceToNow } from 'date-fns';
-import { logger } from '@/utils/logger';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import {
+  Bell,
+  BellRing,
+  Trash2,
+  Check,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  MessageSquare,
+} from "lucide-react";
+import { useTaskNotifications } from "@/features/tasks";
+import { formatDistanceToNow } from "date-fns";
+import { logger } from "@/utils/logger";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function NotificationsPanel() {
-  const { 
-    notifications, 
-    unreadCount, 
-    loading, 
-    markAsRead, 
-    markAllAsRead, 
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
     deleteNotification,
     error,
   } = useTaskNotifications();
@@ -25,17 +38,17 @@ export function NotificationsPanel() {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'task_assigned':
+      case "task_assigned":
         return <AlertCircle className="h-4 w-4 text-blue-500" />;
-      case 'task_completed':
+      case "task_completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'task_due_soon':
+      case "task_due_soon":
         return <Clock className="h-4 w-4 text-orange-500" />;
-      case 'task_overdue':
+      case "task_overdue":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'task_status_changed':
+      case "task_status_changed":
         return <MessageSquare className="h-4 w-4 text-purple-500" />;
-      case 'task_comment':
+      case "task_comment":
         return <MessageSquare className="h-4 w-4 text-indigo-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
@@ -44,20 +57,20 @@ export function NotificationsPanel() {
 
   const getNotificationTitle = (notification: any) => {
     switch (notification.type) {
-      case 'task_assigned':
-        return 'New Task Assignment';
-      case 'task_completed':
-        return 'Task Completed';
-      case 'task_due_soon':
-        return 'Task Due Soon';
-      case 'task_overdue':
-        return 'Task Overdue';
-      case 'task_status_changed':
-        return 'Task Status Updated';
-      case 'task_comment':
-        return 'New Comment';
+      case "task_assigned":
+        return "New Task Assignment";
+      case "task_completed":
+        return "Task Completed";
+      case "task_due_soon":
+        return "Task Due Soon";
+      case "task_overdue":
+        return "Task Overdue";
+      case "task_status_changed":
+        return "Task Status Updated";
+      case "task_comment":
+        return "New Comment";
       default:
-        return notification.title || 'Notification';
+        return notification.title || "Notification";
     }
   };
 
@@ -67,11 +80,29 @@ export function NotificationsPanel() {
     const diffHours = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     if (diffHours < 0) {
-      return <Badge variant="destructive" className="text-xs">Overdue</Badge>;
+      return (
+        <Badge variant="destructive" className="text-xs">
+          Overdue
+        </Badge>
+      );
     } else if (diffHours < 24) {
-      return <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">Due Today</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          className="text-xs bg-orange-100 text-orange-800"
+        >
+          Due Today
+        </Badge>
+      );
     } else if (diffHours < 48) {
-      return <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">Due Tomorrow</Badge>;
+      return (
+        <Badge
+          variant="secondary"
+          className="text-xs bg-yellow-100 text-yellow-800"
+        >
+          Due Tomorrow
+        </Badge>
+      );
     }
     return null;
   };
@@ -82,8 +113,10 @@ export function NotificationsPanel() {
     }
     // Navigate to task if task_id exists
     if (notification.task_id) {
-  // You can implement navigation here
-  logger.debug('Navigate to task', { context: { taskId: notification.task_id } });
+      // You can implement navigation here
+      logger.debug("Navigate to task", {
+        context: { taskId: notification.task_id },
+      });
     }
   };
 
@@ -98,7 +131,7 @@ export function NotificationsPanel() {
           )}
           {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </Button>
@@ -109,9 +142,9 @@ export function NotificationsPanel() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Notifications</CardTitle>
               {unreadCount > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => markAllAsRead()}
                   className="text-xs"
                 >
@@ -143,9 +176,11 @@ export function NotificationsPanel() {
                 <div className="space-y-1">
                   {notifications.map((notification) => (
                     <div key={notification.id}>
-                      <div 
+                      <div
                         className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
-                          !notification.read_at ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500' : ''
+                          !notification.read_at
+                            ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500"
+                            : ""
                         }`}
                         onClick={() => handleNotificationClick(notification)}
                       >
@@ -159,11 +194,13 @@ export function NotificationsPanel() {
                                 {getNotificationTitle(notification)}
                               </p>
                               <div className="flex items-center space-x-2">
-                                {notification.metadata && 
-                                 typeof notification.metadata === 'object' && 
-                                 'due_date' in notification.metadata &&
-                                 notification.metadata.due_date && 
-                                 getDueDateBadge(notification.metadata.due_date as string)}
+                                {notification.metadata &&
+                                  typeof notification.metadata === "object" &&
+                                  "due_date" in notification.metadata &&
+                                  notification.metadata.due_date &&
+                                  getDueDateBadge(
+                                    notification.metadata.due_date as string,
+                                  )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -182,7 +219,10 @@ export function NotificationsPanel() {
                             </p>
                             <div className="flex items-center justify-between mt-2">
                               <p className="text-xs text-gray-500">
-                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                                {formatDistanceToNow(
+                                  new Date(notification.created_at),
+                                  { addSuffix: true },
+                                )}
                               </p>
                               {!notification.read_at && (
                                 <Button

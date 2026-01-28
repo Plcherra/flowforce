@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+// Re-export from feature folder
+export * from "@/features/employees/hooks/useEmployeeEngagement";
 
 interface BadgeCatalogRow {
   code: string;
@@ -77,22 +76,25 @@ function pluralise(label: string, count: number) {
 function getRoleTask(role: string) {
   const normalized = role.toLowerCase();
   switch (normalized) {
-    case 'owner':
-    case 'company_admin':
-      return 'strategic review';
-    case 'admin':
-      return 'process approval';
-    case 'manager':
-      return 'coaching session';
-    case 'supervisor':
-      return 'shift audit';
+    case "owner":
+    case "company_admin":
+      return "strategic review";
+    case "admin":
+      return "process approval";
+    case "manager":
+      return "coaching session";
+    case "supervisor":
+      return "shift audit";
     default:
-      return 'closing shift';
+      return "closing shift";
   }
 }
 
 function buildMilestoneTip(role: string, snapshot: EngagementSnapshot) {
-  const xpRemaining = Math.max(snapshot.xpNeededForNextLevel - snapshot.xpIntoLevel, 0);
+  const xpRemaining = Math.max(
+    snapshot.xpNeededForNextLevel - snapshot.xpIntoLevel,
+    0,
+  );
   if (xpRemaining === 0) {
     return `Copilot tip: Queue a check-in to confirm readiness for L${snapshot.nextLevel}.`;
   }
@@ -113,7 +115,7 @@ export function useEmployeeEngagement(
   const [snapshot, setSnapshot] = useState<EngagementSnapshot>(defaultSnapshot);
   const [badges, setBadges] = useState<EngagementBadge[]>([]);
 
-  const normalizedRole = useMemo(() => role?.toLowerCase() ?? 'staff', [role]);
+  const normalizedRole = useMemo(() => role?.toLowerCase() ?? "staff", [role]);
   const { enabled = true } = options;
 
   const refresh = useCallback(async () => {
@@ -131,16 +133,18 @@ export function useEmployeeEngagement(
     try {
       const [skillResponse, badgeResponse] = await Promise.all([
         supabase
-          .from('skill_matrix')
-          .select('level, xp, role')
-          .eq('employee_id', employeeId)
-          .eq('role', normalizedRole)
+          .from("skill_matrix")
+          .select("level, xp, role")
+          .eq("employee_id", employeeId)
+          .eq("role", normalizedRole)
           .maybeSingle(),
         supabase
-          .from('employee_badge')
-          .select('badge_code, awarded_at, badge:badge_catalog ( title, description, icon, min_level )')
-          .eq('employee_id', employeeId)
-          .order('awarded_at', { ascending: false }),
+          .from("employee_badge")
+          .select(
+            "badge_code, awarded_at, badge:badge_catalog ( title, description, icon, min_level )",
+          )
+          .eq("employee_id", employeeId)
+          .order("awarded_at", { ascending: false }),
       ]);
 
       if (skillResponse.error) {
@@ -156,7 +160,9 @@ export function useEmployeeEngagement(
       const cumulativeForCurrent = getCumulativeXp(level);
       const xpIntoLevel = Math.max(rawXp - cumulativeForCurrent, 0);
       const xpNeededForNextLevel = getXpForLevel(level);
-      const progress = clamp(xpNeededForNextLevel > 0 ? xpIntoLevel / xpNeededForNextLevel : 0);
+      const progress = clamp(
+        xpNeededForNextLevel > 0 ? xpIntoLevel / xpNeededForNextLevel : 0,
+      );
 
       setSnapshot({
         level,
@@ -178,8 +184,11 @@ export function useEmployeeEngagement(
       }));
       setBadges(mappedBadges);
     } catch (err) {
-      logger.error('Failed to fetch engagement data', { error: err, tags: ['error'] });
-      setError('Unable to load engagement data right now.');
+      logger.error("Failed to fetch engagement data", {
+        error: err,
+        tags: ["error"],
+      });
+      setError("Unable to load engagement data right now.");
       setSnapshot(defaultSnapshot);
       setBadges([]);
     } finally {
@@ -199,11 +208,11 @@ export function useEmployeeEngagement(
     const channel = supabase
       .channel(`employee-engagement-${employeeId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'skill_matrix',
+          event: "*",
+          schema: "public",
+          table: "skill_matrix",
           filter: `employee_id=eq.${employeeId}`,
         },
         () => {
@@ -211,11 +220,11 @@ export function useEmployeeEngagement(
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'employee_badge',
+          event: "*",
+          schema: "public",
+          table: "employee_badge",
           filter: `employee_id=eq.${employeeId}`,
         },
         () => {
@@ -231,7 +240,7 @@ export function useEmployeeEngagement(
 
   const milestoneTip = useMemo(() => {
     if (!enabled) {
-      return 'Copilot tip: Engagement metrics will activate once the feature is enabled.';
+      return "Copilot tip: Engagement metrics will activate once the feature is enabled.";
     }
     return buildMilestoneTip(normalizedRole, snapshot);
   }, [enabled, normalizedRole, snapshot]);

@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { createTicket } from '@/repositories/ticketsRepository';
-import type { HelpDeskTicketPriority } from '@/hooks/useTickets';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { createTicket } from "@/repositories/ticketsRepository";
+import type { HelpDeskTicketPriority } from "@/hooks/useTickets";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface CreateTicketDialogProps {
   open: boolean;
@@ -25,7 +37,11 @@ interface Department {
   name: string;
 }
 
-export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: CreateTicketDialogProps) {
+export function CreateTicketDialog({
+  open,
+  onOpenChange,
+  onTicketCreated,
+}: CreateTicketDialogProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -33,11 +49,11 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
   const [departments, setDepartments] = useState<Department[]>([]);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    subject: '',
-    description: '',
-    priority: 'medium' as HelpDeskTicketPriority,
-    category: '',
-    department_id: '',
+    subject: "",
+    description: "",
+    priority: "medium" as HelpDeskTicketPriority,
+    category: "",
+    department_id: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -54,15 +70,15 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
     setDepartmentsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('departments')
-        .select('id, name')
-        .eq('company_id', companyId)
-        .order('name', { ascending: true });
+        .from("departments")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .order("name", { ascending: true });
 
       if (error) throw error;
       setDepartments(data ?? []);
     } catch (error) {
-      logger.error('Failed to load departments', { error, tags: ['error'] });
+      logger.error("Failed to load departments", { error, tags: ["error"] });
     } finally {
       setDepartmentsLoading(false);
     }
@@ -82,7 +98,7 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.subject.trim()) {
-      newErrors.subject = 'Subject is required';
+      newErrors.subject = "Subject is required";
     }
     return newErrors;
   };
@@ -97,18 +113,18 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
 
     if (!user?.id) {
       toast({
-        title: 'Error',
-        description: 'You must be signed in to create a ticket',
-        variant: 'destructive',
+        title: "Error",
+        description: "You must be signed in to create a ticket",
+        variant: "destructive",
       });
       return;
     }
 
     if (!companyId) {
       toast({
-        title: 'Error',
-        description: 'Company context is required',
-        variant: 'destructive',
+        title: "Error",
+        description: "Company context is required",
+        variant: "destructive",
       });
       return;
     }
@@ -126,27 +142,30 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
       });
 
       toast({
-        title: 'Ticket created',
-        description: 'Your support request has been submitted successfully.',
+        title: "Ticket created",
+        description: "Your support request has been submitted successfully.",
       });
 
       // Reset form
       setFormData({
-        subject: '',
-        description: '',
-        priority: 'medium',
-        category: '',
-        department_id: '',
+        subject: "",
+        description: "",
+        priority: "medium",
+        category: "",
+        department_id: "",
       });
       setErrors({});
       onOpenChange(false);
       onTicketCreated?.();
     } catch (error) {
-      logger.error('Failed to create ticket', { error, tags: ['error'] });
+      logger.error("Failed to create ticket", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create ticket. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create ticket. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -159,7 +178,8 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
         <DialogHeader>
           <DialogTitle>Create Support Ticket</DialogTitle>
           <DialogDescription>
-            Submit a support request. Our team will get back to you as soon as possible.
+            Submit a support request. Our team will get back to you as soon as
+            possible.
           </DialogDescription>
         </DialogHeader>
 
@@ -170,11 +190,13 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
               id="subject"
               placeholder="Brief description of your issue"
               value={formData.subject}
-              onChange={(e) => handleFieldChange('subject', e.target.value)}
+              onChange={(e) => handleFieldChange("subject", e.target.value)}
               aria-invalid={Boolean(errors.subject)}
               required
             />
-            {errors.subject && <p className="text-sm text-destructive">{errors.subject}</p>}
+            {errors.subject && (
+              <p className="text-sm text-destructive">{errors.subject}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -183,7 +205,7 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
               id="description"
               placeholder="Provide more details about your issue..."
               value={formData.description}
-              onChange={(e) => handleFieldChange('description', e.target.value)}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
               rows={4}
             />
           </div>
@@ -193,7 +215,9 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => handleFieldChange('priority', value as HelpDeskTicketPriority)}
+                onValueChange={(value) =>
+                  handleFieldChange("priority", value as HelpDeskTicketPriority)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -213,7 +237,7 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
                 id="category"
                 placeholder="e.g. Technical, Billing, General"
                 value={formData.category}
-                onChange={(e) => handleFieldChange('category', e.target.value)}
+                onChange={(e) => handleFieldChange("category", e.target.value)}
               />
             </div>
           </div>
@@ -223,11 +247,17 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
               <Label htmlFor="department">Department (Optional)</Label>
               <Select
                 value={formData.department_id}
-                onValueChange={(value) => handleFieldChange('department_id', value)}
+                onValueChange={(value) =>
+                  handleFieldChange("department_id", value)
+                }
                 disabled={departmentsLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={departmentsLoading ? 'Loading...' : 'Select department'} />
+                  <SelectValue
+                    placeholder={
+                      departmentsLoading ? "Loading..." : "Select department"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">None</SelectItem>
@@ -242,7 +272,12 @@ export function CreateTicketDialog({ open, onOpenChange, onTicketCreated }: Crea
           )}
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

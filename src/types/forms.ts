@@ -1,30 +1,30 @@
 // Form related types
-export type FormFieldType = 
-  | 'text' 
-  | 'textarea' 
-  | 'number' 
-  | 'email' 
-  | 'phone' 
-  | 'date' 
-  | 'datetime' 
-  | 'select' 
-  | 'radio' 
-  | 'checkbox' 
-  | 'file'
-  | 'description'
-  | 'formula'
-  | 'number_slider'
-  | 'yes_no'
-  | 'location'
-  | 'image_upload'
-  | 'video_upload'
-  | 'audio_recording'
-  | 'file_upload'
-  | 'signature'
-  | 'rating'
-  | 'scanner'
-  | 'task'
-  | 'image_selection';
+export type FormFieldType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "email"
+  | "phone"
+  | "date"
+  | "datetime"
+  | "select"
+  | "radio"
+  | "checkbox"
+  | "file"
+  | "description"
+  | "formula"
+  | "number_slider"
+  | "yes_no"
+  | "location"
+  | "image_upload"
+  | "video_upload"
+  | "audio_recording"
+  | "file_upload"
+  | "signature"
+  | "rating"
+  | "scanner"
+  | "task"
+  | "image_selection";
 
 export interface FormFieldValidationRules {
   min?: number;
@@ -56,12 +56,12 @@ export interface FormField {
 // Configuration interfaces for complex field types
 export interface RatingConfig {
   max_rating?: number;
-  rating_type?: 'stars' | 'numeric' | 'emoji';
+  rating_type?: "stars" | "numeric" | "emoji";
   labels?: string[];
 }
 
 export interface ScanConfig {
-  scan_types?: ('barcode' | 'qr_code')[];
+  scan_types?: ("barcode" | "qr_code")[];
   auto_submit?: boolean;
 }
 
@@ -72,7 +72,7 @@ export interface MediaConfig {
   compression?: boolean;
 }
 
-// Location data interface  
+// Location data interface
 export interface LocationData {
   latitude: number;
   longitude: number;
@@ -94,13 +94,13 @@ export interface SignatureData {
 export interface RatingData {
   rating_value: number;
   max_rating: number;
-  rating_type: 'stars' | 'numeric' | 'emoji';
+  rating_type: "stars" | "numeric" | "emoji";
 }
 
 // Scanner data interface
 export interface ScanData {
   scan_data: string;
-  scan_type: 'barcode' | 'qr_code';
+  scan_type: "barcode" | "qr_code";
   scan_format?: string;
 }
 
@@ -109,7 +109,7 @@ export interface FormData {
   title: string;
   description?: string;
   fields: FormField[];
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   created_at: string;
   updated_at: string;
 }
@@ -143,7 +143,7 @@ export interface FormFieldTemplate {
   label: string;
   description: string;
   icon: string;
-  category: 'basic' | 'media' | 'interactive' | 'location';
+  category: "basic" | "media" | "interactive" | "location";
   default_config?: Partial<FormField>;
 }
 
@@ -164,9 +164,9 @@ export interface TaskData {
   task_title: string;
   due_date?: string;
   assigned_to?: string[];
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   created_at: string;
 }
 

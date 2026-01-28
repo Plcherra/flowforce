@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, Plus, Search } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { SchedulingCalendar } from '@/components/scheduling/SchedulingCalendar';
-import { SchedulingProvider } from '@/contexts/SchedulingContext';
-import { useEvents } from '@/hooks/useEvents';
+import React, { useState } from "react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, Plus, Search } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { SchedulingCalendar } from "@/components/scheduling/SchedulingCalendar";
+import { SchedulingProvider } from "@/contexts/SchedulingContext";
+import { useEvents } from "@/hooks/useEvents";
 
 function demoEvent() {
   const start = new Date();
   const end = new Date(start.getTime() + 1000 * 60 * 60);
   return {
-    title: 'Demo Company Event',
-    description: 'A demo event created locally.',
+    title: "Demo Company Event",
+    description: "A demo event created locally.",
     start: start.toISOString(),
     end: end.toISOString(),
-    type: 'event' as const
+    type: "event" as const,
   };
 }
 
@@ -26,7 +26,9 @@ function EventsList() {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">{events.length} events</div>
+        <div className="text-sm text-muted-foreground">
+          {events.length} events
+        </div>
         <button
           className="text-primary text-sm underline"
           onClick={async () => {
@@ -46,7 +48,9 @@ function EventsList() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-sm">{e.title}</div>
-              <div className="text-xs text-muted-foreground">{new Date(e.start).toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground">
+                {new Date(e.start).toLocaleString()}
+              </div>
             </div>
             <div className="text-xs text-muted-foreground">{e.type}</div>
           </div>
@@ -58,7 +62,7 @@ function EventsList() {
 
 export default function EventsCalendarPage() {
   const isMobile = useIsMobile();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   return (
     <div>
@@ -71,18 +75,25 @@ export default function EventsCalendarPage() {
               </div>
               <div>
                 <h1 className="text-lg font-semibold">Events</h1>
-                <p className="text-sm text-muted-foreground">Company events, meetings and shared calendar</p>
+                <p className="text-sm text-muted-foreground">
+                  Company events, meetings and shared calendar
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events..." className="pl-10 w-56" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search events..."
+                  className="pl-10 w-56"
+                />
               </div>
-              <Button size={isMobile ? 'sm' : 'default'}>
+              <Button size={isMobile ? "sm" : "default"}>
                 <Plus className="h-4 w-4 mr-2" />
-                {isMobile ? '' : 'New Event'}
+                {isMobile ? "" : "New Event"}
               </Button>
             </div>
           </div>
@@ -120,9 +131,15 @@ export default function EventsCalendarPage() {
                 <h3 className="text-sm font-medium">Quick Actions</h3>
               </CardHeader>
               <CardContent className="p-4 space-y-2">
-                <Button variant="ghost" className="w-full justify-start">Create recurring event</Button>
-                <Button variant="ghost" className="w-full justify-start">Import from Google Calendar</Button>
-                <Button variant="ghost" className="w-full justify-start">Export calendar</Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  Create recurring event
+                </Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  Import from Google Calendar
+                </Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  Export calendar
+                </Button>
               </CardContent>
             </Card>
           </div>

@@ -1,29 +1,44 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Plus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreateUpdateDialogProps {
   children?: React.ReactNode;
 }
 
-export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps) {
+export default function CreateUpdateDialog({
+  children,
+}: CreateUpdateDialogProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    type: 'announcement' as 'announcement' | 'news' | 'event' | 'policy',
-    priority: 'medium' as 'low' | 'medium' | 'high',
-    category: '',
-    isPinned: false
+    title: "",
+    content: "",
+    type: "announcement" as "announcement" | "news" | "event" | "policy",
+    priority: "medium" as "low" | "medium" | "high",
+    category: "",
+    isPinned: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,27 +47,27 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
 
     try {
       // TODO: Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       toast({
         title: "Update Created",
-        description: "Company update has been published successfully."
+        description: "Company update has been published successfully.",
       });
-      
+
       setOpen(false);
       setFormData({
-        title: '',
-        content: '',
-        type: 'announcement',
-        priority: 'medium',
-        category: '',
-        isPinned: false
+        title: "",
+        content: "",
+        type: "announcement",
+        priority: "medium",
+        category: "",
+        isPinned: false,
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create update. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -82,7 +97,9 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="Enter update title..."
               required
             />
@@ -91,7 +108,12 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
-              <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+              <Select
+                value={formData.type}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, type: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -106,7 +128,12 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
 
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
-              <Select value={formData.priority} onValueChange={(value: any) => setFormData({ ...formData, priority: value })}>
+              <Select
+                value={formData.priority}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, priority: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -124,7 +151,9 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
             <Input
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
               placeholder="e.g., HR, Operations, General..."
               required
             />
@@ -135,7 +164,9 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
             <Textarea
               id="content"
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
               placeholder="Write your update content here..."
               rows={4}
               required
@@ -146,7 +177,9 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
             <Switch
               id="pinned"
               checked={formData.isPinned}
-              onCheckedChange={(checked) => setFormData({ ...formData, isPinned: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isPinned: checked })
+              }
             />
             <Label htmlFor="pinned" className="text-sm font-normal">
               Pin this update (shows at the top)
@@ -154,11 +187,15 @@ export default function CreateUpdateDialog({ children }: CreateUpdateDialogProps
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Publishing...' : 'Publish Update'}
+              {loading ? "Publishing..." : "Publish Update"}
             </Button>
           </div>
         </form>

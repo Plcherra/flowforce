@@ -1,22 +1,38 @@
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useCreateInventoryTransaction } from "@/hooks/useInventory";
+import { useInventoryItems } from "@/hooks/useInventory";
+import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Plus } from "lucide-react";
+import { logger } from "@/utils/logger";
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useCreateInventoryTransaction } from '@/hooks/useInventory';
-import { useInventoryItems } from '@/hooks/useInventory';
-import { useProfile } from '@/hooks/useProfile';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Plus } from 'lucide-react';
-import { logger } from '@/utils/logger';
-
-export function computeInventoryTransactionTotals(quantity: number, conversionFactor: number, unitPrice?: number) {
+export function computeInventoryTransactionTotals(
+  quantity: number,
+  conversionFactor: number,
+  unitPrice?: number,
+) {
   const normalizedQuantity = quantity * conversionFactor;
-  const totalAmount = unitPrice !== undefined ? normalizedQuantity * unitPrice : undefined;
+  const totalAmount =
+    unitPrice !== undefined ? normalizedQuantity * unitPrice : undefined;
 
   return { normalizedQuantity, totalAmount };
 }
@@ -24,13 +40,13 @@ export function computeInventoryTransactionTotals(quantity: number, conversionFa
 export default function InventoryTransactionForm() {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    item_id: '',
-    transaction_type: '',
-    quantity: '',
-    unit_id: '',
-    unit_price: '',
-    reference_number: '',
-    notes: '',
+    item_id: "",
+    transaction_type: "",
+    quantity: "",
+    unit_id: "",
+    unit_price: "",
+    reference_number: "",
+    notes: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,15 +61,28 @@ export default function InventoryTransactionForm() {
 
   const selectedItem = items.find((item) => item.id === formData.item_id);
   const itemUnits = selectedItem?.units || [];
-  const primaryUnit = itemUnits.find((unit) => unit.unit_level === 1) || itemUnits[0];
-  const selectedUnit = itemUnits.find((unit) => unit.unit_id === formData.unit_id) || primaryUnit;
-  const baseCostPerUnit = selectedItem?.calculated_cost_per_unit ?? selectedItem?.cost_per_unit ?? undefined;
+  const primaryUnit =
+    itemUnits.find((unit) => unit.unit_level === 1) || itemUnits[0];
+  const selectedUnit =
+    itemUnits.find((unit) => unit.unit_id === formData.unit_id) || primaryUnit;
+  const baseCostPerUnit =
+    selectedItem?.calculated_cost_per_unit ??
+    selectedItem?.cost_per_unit ??
+    undefined;
   const conversionFactor = selectedUnit?.conversion_factor || 1;
-  const suggestedUnitPrice = selectedUnit?.cost_per_unit ?? (baseCostPerUnit !== undefined ? baseCostPerUnit * conversionFactor : undefined);
+  const suggestedUnitPrice =
+    selectedUnit?.cost_per_unit ??
+    (baseCostPerUnit !== undefined
+      ? baseCostPerUnit * conversionFactor
+      : undefined);
   const quantityValue = parseFloat(formData.quantity);
-  const previewQuantity = Number.isFinite(quantityValue) ? quantityValue * conversionFactor : null;
-  const selectedUnitLabel = selectedUnit?.unit?.abbreviation || selectedUnit?.unit?.name || 'unit';
-  const baseUnitLabel = primaryUnit?.unit?.abbreviation || primaryUnit?.unit?.name || 'base unit';
+  const previewQuantity = Number.isFinite(quantityValue)
+    ? quantityValue * conversionFactor
+    : null;
+  const selectedUnitLabel =
+    selectedUnit?.unit?.abbreviation || selectedUnit?.unit?.name || "unit";
+  const baseUnitLabel =
+    primaryUnit?.unit?.abbreviation || primaryUnit?.unit?.name || "base unit";
   const quantityInvalid = !Number.isFinite(quantityValue) || quantityValue <= 0;
   const noItemsAvailable = !itemsLoading && items.length === 0;
   const submitInFlight = isSubmitting || createTransaction.isPending;
@@ -72,32 +101,36 @@ export default function InventoryTransactionForm() {
     setFormError(null);
 
     if (profileLoading) {
-      setFormError('Your profile is still loading. Please wait a moment and try again.');
+      setFormError(
+        "Your profile is still loading. Please wait a moment and try again.",
+      );
       return;
     }
 
     if (!profile) {
-      setFormError('We could not load your profile. Please sign in again.');
+      setFormError("We could not load your profile. Please sign in again.");
       return;
     }
 
     if (!formData.item_id) {
-      setFormError('Please select an item.');
+      setFormError("Please select an item.");
       return;
     }
 
     if (!formData.transaction_type) {
-      setFormError('Please choose the type of transaction you are recording.');
+      setFormError("Please choose the type of transaction you are recording.");
       return;
     }
 
     if (quantityInvalid) {
-      setFormError('Quantity must be greater than zero.');
+      setFormError("Quantity must be greater than zero.");
       return;
     }
 
     if (!selectedItem) {
-      setFormError('We were unable to load the selected item. Refresh and try again.');
+      setFormError(
+        "We were unable to load the selected item. Refresh and try again.",
+      );
       return;
     }
 
@@ -114,22 +147,26 @@ export default function InventoryTransactionForm() {
       // Confirm the selected inv_item is synced before attempting the insert
       // so we can surface a friendly validation error instead of an FK failure.
       const { data: legacyItem, error: legacyError } = await supabase
-        .from('inventory_items')
-        .select('id')
-        .eq('id', selectedItem.id)
+        .from("inventory_items")
+        .select("id")
+        .eq("id", selectedItem.id)
         .maybeSingle();
 
       if (legacyError) {
-        throw new Error(legacyError.message || 'Failed to confirm the legacy inventory mapping for this item.');
+        throw new Error(
+          legacyError.message ||
+            "Failed to confirm the legacy inventory mapping for this item.",
+        );
       }
 
       if (!legacyItem) {
         throw new Error(
-          'Selected item is not synced with the legacy inventory ledger. Run the inventory sync or create the item in the legacy table before recording manual transactions.',
+          "Selected item is not synced with the legacy inventory ledger. Run the inventory sync or create the item in the legacy table before recording manual transactions.",
         );
       }
 
-      const { normalizedQuantity, totalAmount } = computeInventoryTransactionTotals(quantityValue, conversion, unitPrice);
+      const { normalizedQuantity, totalAmount } =
+        computeInventoryTransactionTotals(quantityValue, conversion, unitPrice);
 
       await createTransaction.mutateAsync({
         item_id: formData.item_id,
@@ -143,19 +180,25 @@ export default function InventoryTransactionForm() {
       });
 
       setFormData({
-        item_id: '',
-        transaction_type: '',
-        quantity: '',
-        unit_id: '',
-        unit_price: '',
-        reference_number: '',
-        notes: '',
+        item_id: "",
+        transaction_type: "",
+        quantity: "",
+        unit_id: "",
+        unit_price: "",
+        reference_number: "",
+        notes: "",
       });
       setOpen(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create inventory transaction.';
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to create inventory transaction.";
       setFormError(message);
-      logger.error('Failed to create inventory transaction:', { error, tags: ['error'] });
+      logger.error("Failed to create inventory transaction:", {
+        error,
+        tags: ["error"],
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -189,13 +232,17 @@ export default function InventoryTransactionForm() {
           {itemsError && (
             <Alert variant="destructive">
               <AlertTitle>Unable to load inventory items</AlertTitle>
-              <AlertDescription>{itemsError?.message || 'Please refresh and try again.'}</AlertDescription>
+              <AlertDescription>
+                {itemsError?.message || "Please refresh and try again."}
+              </AlertDescription>
             </Alert>
           )}
           {!itemsLoading && noItemsAvailable && (
             <Alert>
               <AlertTitle>No items available</AlertTitle>
-              <AlertDescription>Create an inventory item before recording manual transactions.</AlertDescription>
+              <AlertDescription>
+                Create an inventory item before recording manual transactions.
+              </AlertDescription>
             </Alert>
           )}
           {formError && (
@@ -207,32 +254,52 @@ export default function InventoryTransactionForm() {
           {!profile && !profileLoading && (
             <Alert variant="destructive">
               <AlertTitle>Profile required</AlertTitle>
-              <AlertDescription>Sign in again to record transactions.</AlertDescription>
+              <AlertDescription>
+                Sign in again to record transactions.
+              </AlertDescription>
             </Alert>
           )}
           <div>
             <Label htmlFor="item">Item</Label>
             <Select
               value={formData.item_id}
-              disabled={itemsLoading || Boolean(itemsError) || noItemsAvailable || profileLoading || !profile || submitInFlight}
+              disabled={
+                itemsLoading ||
+                Boolean(itemsError) ||
+                noItemsAvailable ||
+                profileLoading ||
+                !profile ||
+                submitInFlight
+              }
               onValueChange={(value) => {
                 const nextItem = items.find((item) => item.id === value);
                 const nextUnits = nextItem?.units || [];
-                const nextPrimary = nextUnits.find((unit) => unit.unit_level === 1) || nextUnits[0];
-                const fallbackUnitId = nextPrimary?.unit_id || nextItem?.unit_id || '';
-                const baseCost = nextPrimary?.cost_per_unit ?? nextItem?.calculated_cost_per_unit ?? nextItem?.cost_per_unit;
+                const nextPrimary =
+                  nextUnits.find((unit) => unit.unit_level === 1) ||
+                  nextUnits[0];
+                const fallbackUnitId =
+                  nextPrimary?.unit_id || nextItem?.unit_id || "";
+                const baseCost =
+                  nextPrimary?.cost_per_unit ??
+                  nextItem?.calculated_cost_per_unit ??
+                  nextItem?.cost_per_unit;
 
                 setFormData((prev) => ({
                   ...prev,
                   item_id: value,
                   unit_id: fallbackUnitId,
-                  unit_price: baseCost !== undefined && baseCost !== null ? baseCost.toFixed(2) : '',
+                  unit_price:
+                    baseCost !== undefined && baseCost !== null
+                      ? baseCost.toFixed(2)
+                      : "",
                   quantity: prev.quantity,
                 }));
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder={itemsLoading ? 'Loading items…' : 'Select item'} />
+                <SelectValue
+                  placeholder={itemsLoading ? "Loading items…" : "Select item"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {items.length > 0 ? (
@@ -243,7 +310,7 @@ export default function InventoryTransactionForm() {
                   ))
                 ) : (
                   <SelectItem value="" disabled>
-                    {itemsError ? 'Inventory unavailable' : 'No items found'}
+                    {itemsError ? "Inventory unavailable" : "No items found"}
                   </SelectItem>
                 )}
               </SelectContent>
@@ -254,7 +321,9 @@ export default function InventoryTransactionForm() {
             <Label htmlFor="transaction_type">Transaction Type</Label>
             <Select
               value={formData.transaction_type}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, transaction_type: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, transaction_type: value }))
+              }
               disabled={submitInFlight || profileLoading || !profile}
             >
               <SelectTrigger>
@@ -280,13 +349,17 @@ export default function InventoryTransactionForm() {
                 step="0.01"
                 inputMode="decimal"
                 value={formData.quantity}
-                onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, quantity: e.target.value }))
+                }
                 required
                 aria-invalid={quantityInvalid}
                 disabled={submitInFlight || profileLoading || !profile}
               />
               {quantityInvalid && formData.quantity && (
-                <p className="mt-1 text-xs text-destructive">Enter a quantity greater than zero.</p>
+                <p className="mt-1 text-xs text-destructive">
+                  Enter a quantity greater than zero.
+                </p>
               )}
             </div>
             <div>
@@ -294,34 +367,54 @@ export default function InventoryTransactionForm() {
               <Select
                 value={formData.unit_id}
                 onValueChange={(value) => {
-                  const nextUnit = itemUnits.find((unit) => unit.unit_id === value);
+                  const nextUnit = itemUnits.find(
+                    (unit) => unit.unit_id === value,
+                  );
                   const nextConversion = nextUnit?.conversion_factor || 1;
-                  const baseCost = selectedItem?.calculated_cost_per_unit ?? selectedItem?.cost_per_unit;
-                  const nextCost = nextUnit?.cost_per_unit ?? (baseCost !== undefined ? baseCost * nextConversion : undefined);
+                  const baseCost =
+                    selectedItem?.calculated_cost_per_unit ??
+                    selectedItem?.cost_per_unit;
+                  const nextCost =
+                    nextUnit?.cost_per_unit ??
+                    (baseCost !== undefined
+                      ? baseCost * nextConversion
+                      : undefined);
 
                   setFormData((prev) => ({
                     ...prev,
                     unit_id: value,
-                    unit_price: nextCost !== undefined && nextCost !== null ? nextCost.toFixed(2) : prev.unit_price,
+                    unit_price:
+                      nextCost !== undefined && nextCost !== null
+                        ? nextCost.toFixed(2)
+                        : prev.unit_price,
                   }));
                 }}
                 disabled={!selectedItem || submitInFlight}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={selectedItem ? 'Select unit' : 'Select item first'} />
+                  <SelectValue
+                    placeholder={
+                      selectedItem ? "Select unit" : "Select item first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedItem ? (
                     itemUnits.length > 0 ? (
                       itemUnits.map((unit) => (
                         <SelectItem key={unit.id} value={unit.unit_id}>
-                          {unit.unit?.name || 'Unit'}{unit.unit?.abbreviation ? ` (${unit.unit.abbreviation})` : ''}
-                          {unit.unit_level > 1 ? ` · ${unit.conversion_factor}× base` : ''}
+                          {unit.unit?.name || "Unit"}
+                          {unit.unit?.abbreviation
+                            ? ` (${unit.unit.abbreviation})`
+                            : ""}
+                          {unit.unit_level > 1
+                            ? ` · ${unit.conversion_factor}× base`
+                            : ""}
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value={selectedItem.unit_id || ''}>
-                        {selectedItem.unit?.name || 'Default unit'}
+                      <SelectItem value={selectedItem.unit_id || ""}>
+                        {selectedItem.unit?.name || "Default unit"}
                       </SelectItem>
                     )
                   ) : (
@@ -339,25 +432,42 @@ export default function InventoryTransactionForm() {
                 type="number"
                 step="0.01"
                 value={formData.unit_price}
-                placeholder={suggestedUnitPrice !== undefined ? suggestedUnitPrice.toFixed(2) : '0.00'}
-                onChange={(e) => setFormData((prev) => ({ ...prev, unit_price: e.target.value }))}
+                placeholder={
+                  suggestedUnitPrice !== undefined
+                    ? suggestedUnitPrice.toFixed(2)
+                    : "0.00"
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    unit_price: e.target.value,
+                  }))
+                }
                 disabled={submitInFlight || !selectedItem}
               />
             </div>
           </div>
 
-          {selectedItem && previewQuantity !== null && Number.isFinite(previewQuantity) && (
-            <p className="text-xs text-muted-foreground">
-              ≈ {previewQuantity.toFixed(2)} {baseUnitLabel} ({conversionFactor} × {selectedUnitLabel})
-            </p>
-          )}
+          {selectedItem &&
+            previewQuantity !== null &&
+            Number.isFinite(previewQuantity) && (
+              <p className="text-xs text-muted-foreground">
+                ≈ {previewQuantity.toFixed(2)} {baseUnitLabel} (
+                {conversionFactor} × {selectedUnitLabel})
+              </p>
+            )}
 
           <div>
             <Label htmlFor="reference_number">Reference Number</Label>
             <Input
               id="reference_number"
               value={formData.reference_number}
-              onChange={(e) => setFormData((prev) => ({ ...prev, reference_number: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  reference_number: e.target.value,
+                }))
+              }
               placeholder="PO#, Invoice#, etc."
               disabled={submitInFlight}
             />
@@ -368,7 +478,9 @@ export default function InventoryTransactionForm() {
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, notes: e.target.value }))
+              }
               rows={3}
               placeholder="Additional notes..."
               disabled={submitInFlight}
@@ -376,11 +488,16 @@ export default function InventoryTransactionForm() {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={submitInFlight}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={submitInFlight}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitDisabled}>
-              {submitInFlight ? 'Recording...' : 'Record Transaction'}
+              {submitInFlight ? "Recording..." : "Record Transaction"}
             </Button>
           </div>
         </form>

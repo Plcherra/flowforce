@@ -1,11 +1,17 @@
-import { RotateCcw, Award } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { useEmployeeEngagement } from '@/hooks/useEmployeeEngagement';
-import { useFeatureFlag } from '@/hooks/useFeatureFlags';
+import { RotateCcw, Award } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { useEmployeeEngagement } from "@/hooks/useEmployeeEngagement";
+import { useFeatureFlag } from "@/hooks/useFeatureFlags";
 
 interface EngagementPanelProps {
   employeeId: string | null | undefined;
@@ -17,29 +23,38 @@ const formatDate = (date: string) => {
   try {
     const parsed = new Date(date);
     if (Number.isNaN(parsed.getTime())) {
-      return 'Recently awarded';
+      return "Recently awarded";
     }
     return parsed.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   } catch {
-    return 'Recently awarded';
+    return "Recently awarded";
   }
 };
 
-export function EngagementPanel({ employeeId, role, displayName }: EngagementPanelProps) {
-  const engagementFeatureEnabled = useFeatureFlag('operations.engagementMetrics');
-  const { loading, error, snapshot, badges, milestoneTip, refresh } = useEmployeeEngagement(employeeId, role, {
-    enabled: engagementFeatureEnabled,
-  });
+export function EngagementPanel({
+  employeeId,
+  role,
+  displayName,
+}: EngagementPanelProps) {
+  const engagementFeatureEnabled = useFeatureFlag(
+    "operations.engagementMetrics",
+  );
+  const { loading, error, snapshot, badges, milestoneTip, refresh } =
+    useEmployeeEngagement(employeeId, role, {
+      enabled: engagementFeatureEnabled,
+    });
 
   const progressValue = Math.round(snapshot.progress * 100);
-  const levelLabel = engagementFeatureEnabled ? `Level ${snapshot.level}` : 'Disabled';
+  const levelLabel = engagementFeatureEnabled
+    ? `Level ${snapshot.level}`
+    : "Disabled";
   const description = engagementFeatureEnabled
-    ? `${displayName ? `${displayName.split(' ')[0]}'s` : 'Employee'} gamification progress`
-    : 'Enable engagement metrics to start tracking gamification progress.';
+    ? `${displayName ? `${displayName.split(" ")[0]}'s` : "Employee"} gamification progress`
+    : "Enable engagement metrics to start tracking gamification progress.";
 
   const renderLoadingState = () => (
     <div className="space-y-4">
@@ -53,8 +68,8 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
     <div className="space-y-4 text-sm text-muted-foreground">
       <p>Engagement metrics are currently disabled for this workspace.</p>
       <p className="text-xs text-muted-foreground">
-        Turn on the engagement metrics feature to start tracking progress. Existing activity will backfill
-        automatically once enabled.
+        Turn on the engagement metrics feature to start tracking progress.
+        Existing activity will backfill automatically once enabled.
       </p>
       <div className="rounded-lg border border-dashed border-primary/20 bg-primary/5 px-4 py-3 text-primary">
         {milestoneTip}
@@ -68,8 +83,8 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
         {error}
       </div>
       <p className="text-sm text-muted-foreground">
-        We&apos;ll keep trying in the background and backfill engagement data automatically once it becomes
-        available.
+        We&apos;ll keep trying in the background and backfill engagement data
+        automatically once it becomes available.
       </p>
     </div>
   );
@@ -78,7 +93,9 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
     <>
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-muted-foreground">XP Progress · {role ?? 'role'}</span>
+          <span className="font-medium text-muted-foreground">
+            XP Progress · {role ?? "role"}
+          </span>
           <span className="text-muted-foreground">
             {snapshot.xpIntoLevel} / {snapshot.xpNeededForNextLevel} XP
           </span>
@@ -103,7 +120,9 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
         </div>
 
         {badges.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No badges yet. Keep going to earn your first badge!</p>
+          <p className="text-sm text-muted-foreground">
+            No badges yet. Keep going to earn your first badge!
+          </p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {badges.map((badge) => (
@@ -113,19 +132,29 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-lg">
-                    {badge.icon ? <span className="leading-none">{badge.icon}</span> : <Award className="h-4 w-4" />}
+                    {badge.icon ? (
+                      <span className="leading-none">{badge.icon}</span>
+                    ) : (
+                      <Award className="h-4 w-4" />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{badge.title}</p>
                     {badge.minLevel && (
-                      <p className="text-[11px] uppercase text-muted-foreground">Req. L{badge.minLevel}</p>
+                      <p className="text-[11px] uppercase text-muted-foreground">
+                        Req. L{badge.minLevel}
+                      </p>
                     )}
                   </div>
                 </div>
                 {badge.description && (
-                  <p className="mt-2 text-xs leading-snug text-muted-foreground">{badge.description}</p>
+                  <p className="mt-2 text-xs leading-snug text-muted-foreground">
+                    {badge.description}
+                  </p>
                 )}
-                <p className="mt-3 text-xs text-muted-foreground">Awarded {formatDate(badge.awardedAt)}</p>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Awarded {formatDate(badge.awardedAt)}
+                </p>
               </div>
             ))}
           </div>
@@ -153,7 +182,10 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
           <CardDescription>{description}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs uppercase tracking-wide">
+          <Badge
+            variant="secondary"
+            className="text-xs uppercase tracking-wide"
+          >
             {levelLabel}
           </Badge>
           <Button
@@ -165,7 +197,7 @@ export function EngagementPanel({ employeeId, role, displayName }: EngagementPan
             disabled={loading || !engagementFeatureEnabled}
             aria-label="Refresh engagement data"
           >
-            <RotateCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RotateCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </CardHeader>

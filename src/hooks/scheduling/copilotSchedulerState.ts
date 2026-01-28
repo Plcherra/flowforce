@@ -1,4 +1,4 @@
-import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
+import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
 import type {
   CoverageGap,
   CoverageTemplatePlan,
@@ -6,13 +6,18 @@ import type {
   ScheduleSummary,
   SwapSuggestion,
   SchedulerEmployee,
-} from '@/hooks/scheduling/copilotSchedulerTypes';
+} from "@/hooks/scheduling/copilotSchedulerTypes";
 
 export interface UseCopilotSchedulerOptions {
   weekStart: Date;
   weekEnd: Date;
   location?: string;
-  existingShifts?: Array<{ employee_id: string | null; start_time: string; end_time: string; location?: string | null }>;
+  existingShifts?: Array<{
+    employee_id: string | null;
+    start_time: string;
+    end_time: string;
+    location?: string | null;
+  }>;
   autoGenerate?: boolean;
   onPublished?: () => void | Promise<void>;
 }

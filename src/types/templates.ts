@@ -1,4 +1,3 @@
-
 export interface BusinessTemplate {
   id: string;
   name: string;
@@ -21,7 +20,7 @@ export interface CustomSection {
   permissions: string[];
   enabled: boolean;
   order: number;
-  category: 'core' | 'industry' | 'custom' | 'operations';
+  category: "core" | "industry" | "custom" | "operations";
   templateId?: string;
 }
 

@@ -11,11 +11,11 @@ import type {
   ApiMonitoringSettings,
   AICopilotSettings,
   TenantManagementSettings,
-} from '@/types/system-settings';
-import type { Company } from '@/hooks/useCompany';
+} from "@/types/system-settings";
+import type { Company } from "@/hooks/useCompany";
 
 export const DEFAULT_GENERAL: GeneralSettings = {
-  companyName: '',
+  companyName: "",
   contactEmail: null,
   contactPhone: null,
   website: null,
@@ -24,7 +24,7 @@ export const DEFAULT_GENERAL: GeneralSettings = {
   logoUrl: null,
 };
 
-export const DEFAULT_PASSWORD_POLICY: SecuritySettings['passwordPolicy'] = {
+export const DEFAULT_PASSWORD_POLICY: SecuritySettings["passwordPolicy"] = {
   minLength: 12,
   requireUppercase: true,
   requireLowercase: true,
@@ -50,13 +50,13 @@ export const DEFAULT_SECURITY: SecuritySettings = {
 };
 
 export const DEFAULT_LOCALIZATION: LocalizationSettings = {
-  timezone: 'UTC',
-  language: 'en',
-  currency: 'USD',
+  timezone: "UTC",
+  language: "en",
+  currency: "USD",
   regionalFormats: {
-    date: 'MM/DD/YYYY',
-    time: 'hh:mm A',
-    number: '1,234.56',
+    date: "MM/DD/YYYY",
+    time: "hh:mm A",
+    number: "1,234.56",
   },
 };
 
@@ -68,7 +68,7 @@ export const DEFAULT_MODULE_OVERRIDE: ModuleNotificationOverride = {
 };
 
 export const DEFAULT_NOTIFICATIONS: NotificationsSettings = {
-  deliveryChannels: ['email', 'in_app'],
+  deliveryChannels: ["email", "in_app"],
   digestEnabled: true,
   digestHour: 8,
   moduleOverrides: {},
@@ -81,10 +81,10 @@ export const DEFAULT_NOTIFICATIONS: NotificationsSettings = {
 export const DEFAULT_INTEGRATIONS: IntegrationsSettings = {
   connections: [],
   providers: {
-    toast: { status: 'disconnected', authType: 'api_key' },
-    marketman: { status: 'disconnected', authType: 'api_key' },
-    quickbooks: { status: 'disconnected', authType: 'oauth' },
-    connecteam: { status: 'disconnected', authType: 'oauth' },
+    toast: { status: "disconnected", authType: "api_key" },
+    marketman: { status: "disconnected", authType: "api_key" },
+    quickbooks: { status: "disconnected", authType: "oauth" },
+    connecteam: { status: "disconnected", authType: "oauth" },
   },
   syncMappings: {
     autoSync: {
@@ -97,16 +97,16 @@ export const DEFAULT_INTEGRATIONS: IntegrationsSettings = {
 };
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
-  theme: 'light',
-  primaryColor: '#3b82f6',
-  secondaryColor: '#1e40af',
-  accentColor: '#0ea5e9',
-  logoPlacement: 'sidebar',
+  theme: "light",
+  primaryColor: "#3b82f6",
+  secondaryColor: "#1e40af",
+  accentColor: "#0ea5e9",
+  logoPlacement: "sidebar",
   sidebarBranding: {
     enabled: true,
-    background: 'default',
+    background: "default",
   },
-  dashboardLayout: 'standard',
+  dashboardLayout: "standard",
   preview: {
     isActive: false,
     expiresAt: null,
@@ -134,7 +134,7 @@ const DEFAULT_AI_COPILOT: AICopilotSettings = {
   enabled: false,
   scopes: [],
   restrictedModules: [],
-  automationLevel: 'suggestion',
+  automationLevel: "suggestion",
   lastAuditAt: null,
 };
 
@@ -142,7 +142,7 @@ const DEFAULT_TENANT_MANAGEMENT: TenantManagementSettings = {
   primaryOwnerEmail: null,
   activeSeats: 0,
   maxSeats: 10,
-  plan: 'starter',
+  plan: "starter",
   trialEndsAt: null,
 };
 
@@ -174,8 +174,10 @@ export function seedSystemSettings(company: Company | null) {
     appearance: {
       ...DEFAULT_APPEARANCE,
       primaryColor: company?.primary_color ?? DEFAULT_APPEARANCE.primaryColor,
-      secondaryColor: company?.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
+      secondaryColor:
+        company?.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
     },
     admin_config: DEFAULT_ADMIN_CONFIG,
   };
 }
+

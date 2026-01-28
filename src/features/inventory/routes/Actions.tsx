@@ -1,29 +1,45 @@
-import { useMemo, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Factory, Trash2, Settings, ArrowRightLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useInventoryItems, useInventoryLocations, useCreateWaste } from '@/hooks/useInventory';
-import { asArray, safeArrayMap } from '@/utils/reactQueryTypes';
-import { InventoryTransfersPanel } from '@/components/inventory/InventoryTransfersPanel';
-import { InventoryLayout } from '../components/InventoryLayout';
-import { IfCan } from '@/components/permissions/IfCan';
-import { ProductionEventForm } from '@/components/inventory/ProductionEventForm';
-import { ProductionEventList } from '@/components/inventory/ProductionEventList';
-import { useInventoryFormState } from '@/features/inventory/hooks/useInventoryForm';
+import { useMemo, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Factory, Trash2, Settings, ArrowRightLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  useInventoryItems,
+  useInventoryLocations,
+  useCreateWaste,
+} from "@/hooks/useInventory";
+import { asArray, safeArrayMap } from "@/utils/reactQueryTypes";
+import { InventoryTransfersPanel } from "@/components/inventory/InventoryTransfersPanel";
+import { InventoryLayout } from "../components/InventoryLayout";
+import { IfCan } from "@/components/permissions/IfCan";
+import { ProductionEventForm } from "@/components/inventory/ProductionEventForm";
+import { ProductionEventList } from "@/components/inventory/ProductionEventList";
+import { useInventoryFormState } from "@/features/inventory/hooks/useInventoryForm";
 import {
   wasteTypes,
   type WasteTypeValue,
   submitWasteForm,
   processAdjustmentForm,
-} from './inventoryActionsHelpers';
+} from "./inventoryActionsHelpers";
 
 export default function InventoryActionsPage() {
   const { toast } = useToast();
@@ -38,6 +54,27 @@ export default function InventoryActionsPage() {
     isLoading: locationsLoading,
     error: locationsError,
   } = useInventoryLocations();
+
+  // Show error toasts for failed queries
+  useEffect(() => {
+    if (itemsError) {
+      toast({
+        title: "Unable to load items",
+        description: itemsError instanceof Error ? itemsError.message : "Please refresh the page.",
+        variant: "destructive",
+      });
+    }
+  }, [itemsError, toast]);
+
+  useEffect(() => {
+    if (locationsError) {
+      toast({
+        title: "Unable to load locations",
+        description: locationsError instanceof Error ? locationsError.message : "Please refresh the page.",
+        variant: "destructive",
+      });
+    }
+  }, [locationsError, toast]);
   const items = asArray(itemsData);
   const locations = asArray(locationsData);
   const createWaste = useCreateWaste();
@@ -51,11 +88,11 @@ export default function InventoryActionsPage() {
     reset: resetWasteForm,
     showValidationToast,
   } = useInventoryFormState({
-    item_id: '',
-    location_id: '',
-    quantity: '',
-    waste_type: '' as WasteTypeValue | '',
-    reason: '',
+    item_id: "",
+    location_id: "",
+    quantity: "",
+    waste_type: "" as WasteTypeValue | "",
+    reason: "",
   });
   type WasteFormState = typeof wasteForm;
 
@@ -66,45 +103,69 @@ export default function InventoryActionsPage() {
     setErrors: setAdjustmentErrors,
     reset: resetAdjustmentForm,
   } = useInventoryFormState({
-    item_id: '',
-    location_id: '',
-    adjustment_type: '',
-    quantity: '',
-    reason: '',
+    item_id: "",
+    location_id: "",
+    adjustment_type: "",
+    quantity: "",
+    reason: "",
   });
   type AdjustmentFormState = typeof adjustmentForm;
 
   const itemOptions = useMemo(
-    () => safeArrayMap(items, (item) => ({ id: item.id, label: `${item.name} (${item.unit?.name || 'units'})` })),
+    () =>
+      safeArrayMap(items, (item) => ({
+        id: item.id,
+        label: `${item.name} (${item.unit?.name || "units"})`,
+      })),
     [items],
   );
   const locationOptions = useMemo(
-    () => safeArrayMap(locations, (location) => ({ id: location.id, label: location.name })),
+    () =>
+      safeArrayMap(locations, (location) => ({
+        id: location.id,
+        label: location.name,
+      })),
     [locations],
   );
   const wasteFormDisabled = createWaste.isPending || isReferenceDataLoading;
   const adjustmentFormDisabled = isReferenceDataLoading;
 
   const buildSelectHandler = useCallback(
-    <Form extends Record<string, string>>(setter: (field: keyof Form, value: string) => void, field: keyof Form) =>
-      (value: string) => setter(field, value),
+    <Form extends Record<string, string>>(
+      setter: (field: keyof Form, value: string) => void,
+      field: keyof Form,
+    ) =>
+      (value: string) =>
+        setter(field, value),
     [],
   );
 
   const handleWasteSelect = useMemo(
     () => ({
-      item: buildSelectHandler<WasteFormState>(setWasteField, 'item_id'),
-      location: buildSelectHandler<WasteFormState>(setWasteField, 'location_id'),
-      type: buildSelectHandler<WasteFormState>(setWasteField, 'waste_type'),
+      item: buildSelectHandler<WasteFormState>(setWasteField, "item_id"),
+      location: buildSelectHandler<WasteFormState>(
+        setWasteField,
+        "location_id",
+      ),
+      type: buildSelectHandler<WasteFormState>(setWasteField, "waste_type"),
     }),
     [buildSelectHandler, setWasteField],
   );
 
   const handleAdjustmentSelect = useMemo(
     () => ({
-      item: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'item_id'),
-      location: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'location_id'),
-      type: buildSelectHandler<AdjustmentFormState>(setAdjustmentField, 'adjustment_type'),
+      item: buildSelectHandler<AdjustmentFormState>(
+        setAdjustmentField,
+        "item_id",
+      ),
+      location: buildSelectHandler<AdjustmentFormState>(
+        setAdjustmentField,
+        "location_id",
+      ),
+      type: buildSelectHandler<AdjustmentFormState>(
+        setAdjustmentField,
+        "adjustment_type",
+      ),
     }),
     [buildSelectHandler, setAdjustmentField],
   );
@@ -121,7 +182,14 @@ export default function InventoryActionsPage() {
         mutateWaste: createWaste.mutateAsync,
       });
     },
-    [createWaste.mutateAsync, items, resetWasteForm, setWasteErrors, showValidationToast, wasteForm],
+    [
+      createWaste.mutateAsync,
+      items,
+      resetWasteForm,
+      setWasteErrors,
+      showValidationToast,
+      wasteForm,
+    ],
   );
 
   const handleAdjustmentSubmit = useCallback(
@@ -133,15 +201,21 @@ export default function InventoryActionsPage() {
         showValidationToast,
       });
 
-      if (result === 'success') {
+      if (result === "success") {
         toast({
-          title: 'Adjustment recorded',
-          description: 'Inventory adjustment has been applied.',
+          title: "Adjustment recorded",
+          description: "Inventory adjustment has been applied.",
         });
         resetAdjustmentForm();
       }
     },
-    [adjustmentForm, resetAdjustmentForm, setAdjustmentErrors, showValidationToast, toast],
+    [
+      adjustmentForm,
+      resetAdjustmentForm,
+      setAdjustmentErrors,
+      showValidationToast,
+      toast,
+    ],
   );
 
   const renderFormSkeleton = (
@@ -161,7 +235,9 @@ export default function InventoryActionsPage() {
 
   const loadError = itemsError ?? locationsError;
   const showEmptyState =
-    !isReferenceDataLoading && !loadError && (items.length === 0 || locations.length === 0);
+    !isReferenceDataLoading &&
+    !loadError &&
+    (items.length === 0 || locations.length === 0);
 
   return (
     <InventoryLayout>
@@ -169,7 +245,9 @@ export default function InventoryActionsPage() {
         <div className="space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Inventory Actions</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Inventory Actions
+            </h1>
             <p className="text-muted-foreground">
               Record production, waste, adjustments, and transfers
             </p>
@@ -178,7 +256,9 @@ export default function InventoryActionsPage() {
           {loadError && (
             <Alert variant="destructive">
               <AlertTitle>Unable to load inventory data</AlertTitle>
-              <AlertDescription>{loadError.message ?? 'Please refresh and try again.'}</AlertDescription>
+              <AlertDescription>
+                {loadError.message ?? "Please refresh and try again."}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -186,26 +266,39 @@ export default function InventoryActionsPage() {
             <Alert>
               <AlertTitle>Inventory setup required</AlertTitle>
               <AlertDescription>
-                Add at least one inventory item and location to log waste or adjustments.
+                Add at least one inventory item and location to log waste or
+                adjustments.
               </AlertDescription>
             </Alert>
           )}
 
           <Tabs defaultValue="production" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 gap-2 md:grid-cols-4">
-              <TabsTrigger value="production" className="flex items-center justify-center gap-2 text-sm sm:text-base">
+              <TabsTrigger
+                value="production"
+                className="flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
                 <Factory className="h-4 w-4 text-primary" />
                 Production
               </TabsTrigger>
-              <TabsTrigger value="waste" className="flex items-center justify-center gap-2 text-sm sm:text-base">
+              <TabsTrigger
+                value="waste"
+                className="flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
                 <Trash2 className="h-4 w-4 text-primary" />
                 Log Waste
               </TabsTrigger>
-              <TabsTrigger value="adjustments" className="flex items-center justify-center gap-2 text-sm sm:text-base">
+              <TabsTrigger
+                value="adjustments"
+                className="flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
                 <Settings className="h-4 w-4 text-primary" />
                 Adjustments
               </TabsTrigger>
-              <TabsTrigger value="transfers" className="flex items-center justify-center gap-2 text-sm sm:text-base">
+              <TabsTrigger
+                value="transfers"
+                className="flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
                 <ArrowRightLeft className="h-4 w-4 text-primary" />
                 Transfers
               </TabsTrigger>
@@ -219,7 +312,8 @@ export default function InventoryActionsPage() {
                     Record Production Event
                   </CardTitle>
                   <CardDescription>
-                    Track material usage, yield, and costs for prep, batch, cooked, or baked production runs.
+                    Track material usage, yield, and costs for prep, batch,
+                    cooked, or baked production runs.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -230,7 +324,8 @@ export default function InventoryActionsPage() {
                 <CardHeader>
                   <CardTitle>Recent Production Events</CardTitle>
                   <CardDescription>
-                    Cost summaries and material usage for the most recent production runs.
+                    Cost summaries and material usage for the most recent
+                    production runs.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -264,8 +359,16 @@ export default function InventoryActionsPage() {
                             disabled={wasteFormDisabled || !itemOptions.length}
                             required
                           >
-                            <SelectTrigger aria-invalid={Boolean(wasteErrors.item_id)}>
-                              <SelectValue placeholder={itemOptions.length ? 'Select item' : 'No items available'} />
+                            <SelectTrigger
+                              aria-invalid={Boolean(wasteErrors.item_id)}
+                            >
+                              <SelectValue
+                                placeholder={
+                                  itemOptions.length
+                                    ? "Select item"
+                                    : "No items available"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {itemOptions.length ? (
@@ -282,7 +385,9 @@ export default function InventoryActionsPage() {
                             </SelectContent>
                           </Select>
                           {wasteErrors.item_id && (
-                            <p className="text-sm text-destructive">{wasteErrors.item_id}</p>
+                            <p className="text-sm text-destructive">
+                              {wasteErrors.item_id}
+                            </p>
                           )}
                         </div>
 
@@ -291,15 +396,26 @@ export default function InventoryActionsPage() {
                           <Select
                             value={wasteForm.location_id}
                             onValueChange={handleWasteSelect.location}
-                            disabled={wasteFormDisabled || !locationOptions.length}
+                            disabled={
+                              wasteFormDisabled || !locationOptions.length
+                            }
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder={locationOptions.length ? 'Select location' : 'No locations yet'} />
+                              <SelectValue
+                                placeholder={
+                                  locationOptions.length
+                                    ? "Select location"
+                                    : "No locations yet"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {locationOptions.length ? (
                                 locationOptions.map((location) => (
-                                  <SelectItem key={location.id} value={location.id}>
+                                  <SelectItem
+                                    key={location.id}
+                                    value={location.id}
+                                  >
                                     {location.label}
                                   </SelectItem>
                                 ))
@@ -322,13 +438,17 @@ export default function InventoryActionsPage() {
                             inputMode="decimal"
                             placeholder="0.0"
                             value={wasteForm.quantity}
-                            onChange={(e) => setWasteField('quantity', e.target.value)}
+                            onChange={(e) =>
+                              setWasteField("quantity", e.target.value)
+                            }
                             required
                             aria-invalid={Boolean(wasteErrors.quantity)}
                             disabled={wasteFormDisabled}
                           />
                           {wasteErrors.quantity && (
-                            <p className="text-sm text-destructive">{wasteErrors.quantity}</p>
+                            <p className="text-sm text-destructive">
+                              {wasteErrors.quantity}
+                            </p>
                           )}
                         </div>
 
@@ -340,7 +460,9 @@ export default function InventoryActionsPage() {
                             disabled={wasteFormDisabled}
                             required
                           >
-                            <SelectTrigger aria-invalid={Boolean(wasteErrors.waste_type)}>
+                            <SelectTrigger
+                              aria-invalid={Boolean(wasteErrors.waste_type)}
+                            >
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -352,7 +474,9 @@ export default function InventoryActionsPage() {
                             </SelectContent>
                           </Select>
                           {wasteErrors.waste_type && (
-                            <p className="text-sm text-destructive">{wasteErrors.waste_type}</p>
+                            <p className="text-sm text-destructive">
+                              {wasteErrors.waste_type}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -364,7 +488,9 @@ export default function InventoryActionsPage() {
                           placeholder="Describe the reason for waste..."
                           rows={3}
                           value={wasteForm.reason}
-                          onChange={(e) => setWasteField('reason', e.target.value)}
+                          onChange={(e) =>
+                            setWasteField("reason", e.target.value)
+                          }
                           disabled={wasteFormDisabled}
                         />
                       </div>
@@ -382,8 +508,12 @@ export default function InventoryActionsPage() {
                         >
                           Clear Form
                         </Button>
-                        <Button type="submit" className="flex-1" disabled={wasteFormDisabled}>
-                          {createWaste.isPending ? 'Recording...' : 'Log Waste'}
+                        <Button
+                          type="submit"
+                          className="flex-1"
+                          disabled={wasteFormDisabled}
+                        >
+                          {createWaste.isPending ? "Recording..." : "Log Waste"}
                         </Button>
                       </div>
                     </form>
@@ -407,18 +537,31 @@ export default function InventoryActionsPage() {
                   {isReferenceDataLoading ? (
                     renderFormSkeleton
                   ) : (
-                    <form onSubmit={handleAdjustmentSubmit} className="space-y-4">
+                    <form
+                      onSubmit={handleAdjustmentSubmit}
+                      className="space-y-4"
+                    >
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="adj-item">Item *</Label>
                           <Select
                             value={adjustmentForm.item_id}
                             onValueChange={handleAdjustmentSelect.item}
-                            disabled={adjustmentFormDisabled || !itemOptions.length}
+                            disabled={
+                              adjustmentFormDisabled || !itemOptions.length
+                            }
                             required
                           >
-                            <SelectTrigger aria-invalid={Boolean(adjustmentErrors.item_id)}>
-                              <SelectValue placeholder={itemOptions.length ? 'Select item' : 'No items available'} />
+                            <SelectTrigger
+                              aria-invalid={Boolean(adjustmentErrors.item_id)}
+                            >
+                              <SelectValue
+                                placeholder={
+                                  itemOptions.length
+                                    ? "Select item"
+                                    : "No items available"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {itemOptions.length ? (
@@ -435,7 +578,9 @@ export default function InventoryActionsPage() {
                             </SelectContent>
                           </Select>
                           {adjustmentErrors.item_id && (
-                            <p className="text-sm text-destructive">{adjustmentErrors.item_id}</p>
+                            <p className="text-sm text-destructive">
+                              {adjustmentErrors.item_id}
+                            </p>
                           )}
                         </div>
 
@@ -444,16 +589,31 @@ export default function InventoryActionsPage() {
                           <Select
                             value={adjustmentForm.location_id}
                             onValueChange={handleAdjustmentSelect.location}
-                            disabled={adjustmentFormDisabled || !locationOptions.length}
+                            disabled={
+                              adjustmentFormDisabled || !locationOptions.length
+                            }
                             required
                           >
-                            <SelectTrigger aria-invalid={Boolean(adjustmentErrors.location_id)}>
-                              <SelectValue placeholder={locationOptions.length ? 'Select location' : 'No locations yet'} />
+                            <SelectTrigger
+                              aria-invalid={Boolean(
+                                adjustmentErrors.location_id,
+                              )}
+                            >
+                              <SelectValue
+                                placeholder={
+                                  locationOptions.length
+                                    ? "Select location"
+                                    : "No locations yet"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {locationOptions.length ? (
                                 locationOptions.map((location) => (
-                                  <SelectItem key={location.id} value={location.id}>
+                                  <SelectItem
+                                    key={location.id}
+                                    value={location.id}
+                                  >
                                     {location.label}
                                   </SelectItem>
                                 ))
@@ -465,7 +625,9 @@ export default function InventoryActionsPage() {
                             </SelectContent>
                           </Select>
                           {adjustmentErrors.location_id && (
-                            <p className="text-sm text-destructive">{adjustmentErrors.location_id}</p>
+                            <p className="text-sm text-destructive">
+                              {adjustmentErrors.location_id}
+                            </p>
                           )}
                         </div>
 
@@ -477,7 +639,11 @@ export default function InventoryActionsPage() {
                             disabled={adjustmentFormDisabled}
                             required
                           >
-                            <SelectTrigger aria-invalid={Boolean(adjustmentErrors.adjustment_type)}>
+                            <SelectTrigger
+                              aria-invalid={Boolean(
+                                adjustmentErrors.adjustment_type,
+                              )}
+                            >
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -486,13 +652,15 @@ export default function InventoryActionsPage() {
                             </SelectContent>
                           </Select>
                           {adjustmentErrors.adjustment_type && (
-                            <p className="text-sm text-destructive">{adjustmentErrors.adjustment_type}</p>
+                            <p className="text-sm text-destructive">
+                              {adjustmentErrors.adjustment_type}
+                            </p>
                           )}
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="adj-quantity">Quantity *</Label>
-                        <Input
+                          <Input
                             id="adj-quantity"
                             type="number"
                             step="0.1"
@@ -500,31 +668,39 @@ export default function InventoryActionsPage() {
                             inputMode="decimal"
                             placeholder="0.0"
                             value={adjustmentForm.quantity}
-                            onChange={(e) => setAdjustmentField('quantity', e.target.value)}
+                            onChange={(e) =>
+                              setAdjustmentField("quantity", e.target.value)
+                            }
                             required
                             aria-invalid={Boolean(adjustmentErrors.quantity)}
                             disabled={adjustmentFormDisabled}
                           />
                           {adjustmentErrors.quantity && (
-                            <p className="text-sm text-destructive">{adjustmentErrors.quantity}</p>
+                            <p className="text-sm text-destructive">
+                              {adjustmentErrors.quantity}
+                            </p>
                           )}
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="adj-reason">Reason *</Label>
-                      <Textarea
+                        <Textarea
                           id="adj-reason"
                           placeholder="Describe the reason for adjustment..."
                           rows={3}
                           value={adjustmentForm.reason}
-                          onChange={(e) => setAdjustmentField('reason', e.target.value)}
+                          onChange={(e) =>
+                            setAdjustmentField("reason", e.target.value)
+                          }
                           required
                           aria-invalid={Boolean(adjustmentErrors.reason)}
                           disabled={adjustmentFormDisabled}
                         />
                         {adjustmentErrors.reason && (
-                          <p className="text-sm text-destructive">{adjustmentErrors.reason}</p>
+                          <p className="text-sm text-destructive">
+                            {adjustmentErrors.reason}
+                          </p>
                         )}
                       </div>
 
@@ -541,7 +717,11 @@ export default function InventoryActionsPage() {
                         >
                           Clear Form
                         </Button>
-                        <Button type="submit" className="flex-1" disabled={adjustmentFormDisabled}>
+                        <Button
+                          type="submit"
+                          className="flex-1"
+                          disabled={adjustmentFormDisabled}
+                        >
                           Apply Adjustment
                         </Button>
                       </div>

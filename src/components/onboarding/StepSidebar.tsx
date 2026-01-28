@@ -1,11 +1,16 @@
-
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Building2, Settings, Users, CheckCircle, FileCheck } from 'lucide-react';
-import { BusinessTemplate } from '@/types/templates';
-import { useTranslation } from 'react-i18next';
-import { I18nHelpers } from '@/utils/i18nHelpers';
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Building2,
+  Settings,
+  Users,
+  CheckCircle,
+  FileCheck,
+} from "lucide-react";
+import { BusinessTemplate } from "@/types/templates";
+import { useTranslation } from "react-i18next";
+import { I18nHelpers } from "@/utils/i18nHelpers";
 
 interface StepSidebarProps {
   currentStep: number;
@@ -26,9 +31,14 @@ const stepIcons = {
   5: FileCheck,
 };
 
-export default function StepSidebar({ currentStep, steps, selectedTemplate, isMobile = false }: StepSidebarProps) {
+export default function StepSidebar({
+  currentStep,
+  steps,
+  selectedTemplate,
+  isMobile = false,
+}: StepSidebarProps) {
   const { t } = useTranslation();
-  const currentStepData = steps.find(step => step.id === currentStep);
+  const currentStepData = steps.find((step) => step.id === currentStep);
   const IconComponent = stepIcons[currentStep as keyof typeof stepIcons];
 
   if (isMobile) {
@@ -81,16 +91,19 @@ export default function StepSidebar({ currentStep, steps, selectedTemplate, isMo
                 {currentStepData?.title}
               </CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t('onboarding.wizard.stepOf', { current: currentStep, total: steps.length })}
+                {t("onboarding.wizard.stepOf", {
+                  current: currentStep,
+                  total: steps.length,
+                })}
               </p>
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-              {t('onboarding.sidebar.whatYoureDoing')}:
+              {t("onboarding.sidebar.whatYoureDoing")}:
             </h4>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {currentStepData?.description}
@@ -100,7 +113,7 @@ export default function StepSidebar({ currentStep, steps, selectedTemplate, isMo
           {selectedTemplate && (
             <div>
               <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                {t('onboarding.sidebar.selectedTemplate')}:
+                {t("onboarding.sidebar.selectedTemplate")}:
               </h4>
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
@@ -110,7 +123,10 @@ export default function StepSidebar({ currentStep, steps, selectedTemplate, isMo
                   {I18nHelpers.getLocalizedTemplate(selectedTemplate.id).name}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {I18nHelpers.getLocalizedTemplate(selectedTemplate.id).description}
+                  {
+                    I18nHelpers.getLocalizedTemplate(selectedTemplate.id)
+                      .description
+                  }
                 </p>
               </div>
             </div>
@@ -118,7 +134,7 @@ export default function StepSidebar({ currentStep, steps, selectedTemplate, isMo
 
           <div>
             <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-              {t('onboarding.sidebar.progress')}:
+              {t("onboarding.sidebar.progress")}:
             </h4>
             <div className="space-y-2">
               {steps.map((step) => (
@@ -126,19 +142,21 @@ export default function StepSidebar({ currentStep, steps, selectedTemplate, isMo
                   key={step.id}
                   className={`flex items-center space-x-2 text-sm ${
                     step.id < currentStep
-                      ? 'text-green-600 dark:text-green-400'
+                      ? "text-green-600 dark:text-green-400"
                       : step.id === currentStep
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-400 dark:text-gray-500'
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-400 dark:text-gray-500"
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full ${
-                    step.id < currentStep
-                      ? 'bg-green-500'
-                      : step.id === currentStep
-                      ? 'bg-blue-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                  }`} />
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      step.id < currentStep
+                        ? "bg-green-500"
+                        : step.id === currentStep
+                          ? "bg-blue-500"
+                          : "bg-gray-300 dark:bg-gray-600"
+                    }`}
+                  />
                   <span>{step.title}</span>
                   {step.id < currentStep && (
                     <CheckCircle className="h-3 w-3 text-green-500" />

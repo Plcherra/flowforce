@@ -1,9 +1,12 @@
-import { useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
-import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
+import type {
+  Tables,
+  TablesInsert,
+} from "@/integrations/supabase/public-types";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 import {
   fetchCertificationContext,
   upsertCertificationProgressRows,
@@ -11,10 +14,10 @@ import {
   upsertSkillMatrixRecord,
   type CertificationRepositoryContext,
   type SkillMatrixRecord,
-} from '@/repositories/certificationsRepository';
+} from "@/repositories/certificationsRepository";
 
-type CertificationCatalogRow = Tables<'certification_catalog'>;
-type CertificationStatus = Tables<'certification_progress'>['status'];
+type CertificationCatalogRow = Tables<"certification_catalog">;
+type CertificationStatus = Tables<"certification_progress">["status"];
 
 interface RequirementConfig {
   tasks?: {
@@ -37,7 +40,7 @@ interface RequirementConfig {
 }
 
 interface RequirementDetail {
-  key: 'tasks' | 'goals' | 'xp' | 'courses';
+  key: "tasks" | "goals" | "xp" | "courses";
   labelKey: string;
   current: number;
   target: number;
@@ -75,9 +78,11 @@ interface CertificationEvaluationResult {
 const XP_BASE = 200;
 const XP_GROWTH = 150;
 
-const clamp = (value: number, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+const clamp = (value: number, min = 0, max = 1) =>
+  Math.max(min, Math.min(max, value));
 
-const getXpForLevel = (level: number) => XP_BASE + XP_GROWTH * Math.max(level - 1, 0);
+const getXpForLevel = (level: number) =>
+  XP_BASE + XP_GROWTH * Math.max(level - 1, 0);
 
 const levelFromXp = (xp: number) => {
   let level = 1;
@@ -91,18 +96,21 @@ const levelFromXp = (xp: number) => {
   return Math.max(level, 1);
 };
 
-const requirementLabelKeys: Record<RequirementDetail['key'], string> = {
-  tasks: 'certifications.requirementLabels.tasks',
-  goals: 'certifications.requirementLabels.goals',
-  xp: 'certifications.requirementLabels.xp',
-  courses: 'certifications.requirementLabels.courses',
+const requirementLabelKeys: Record<RequirementDetail["key"], string> = {
+  tasks: "certifications.requirementLabels.tasks",
+  goals: "certifications.requirementLabels.goals",
+  xp: "certifications.requirementLabels.xp",
+  courses: "certifications.requirementLabels.courses",
 };
 
 export function useCertifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => ['certifications', user?.id] as const, [user?.id]);
+  const queryKey = useMemo(
+    () => ["certifications", user?.id] as const,
+    [user?.id],
+  );
 
   const {
     data,
@@ -114,7 +122,10 @@ export function useCertifications() {
     enabled: Boolean(user?.id),
     queryFn: () => {
       if (!user?.id) {
-        return Promise.resolve<CertificationEvaluationResult>({ certifications: [], metrics: null });
+        return Promise.resolve<CertificationEvaluationResult>({
+          certifications: [],
+          metrics: null,
+        });
       }
       return evaluateCertifications(user.id);
     },
@@ -129,23 +140,25 @@ export function useCertifications() {
   }, [queryClient, queryKey, user?.id]);
 
   return {
-    certifications: user ? data?.certifications ?? [] : [],
-    metrics: user ? data?.metrics ?? null : null,
-    loading: Boolean(user) ? isLoading || isFetching : false,
+    certifications: user ? (data?.certifications ?? []) : [],
+    metrics: user ? (data?.metrics ?? null) : null,
+    loading: user ? isLoading || isFetching : false,
     error: user && queryError instanceof Error ? queryError.message : null,
     refresh,
   };
 }
 
-async function evaluateCertifications(employeeId: string): Promise<CertificationEvaluationResult> {
+async function evaluateCertifications(
+  employeeId: string,
+): Promise<CertificationEvaluationResult> {
   try {
     const context = await fetchCertificationContext(employeeId);
     return await buildCertificationEvaluation(employeeId, context);
   } catch (error) {
     if (appEnv.DEV) {
-      logger.error('Failed to load certifications', { error, tags: ['error'] });
+      logger.error("Failed to load certifications", { error, tags: ["error"] });
     }
-    throw new Error('certifications.errors.load');
+    throw new Error("certifications.errors.load");
   }
 }
 
@@ -153,9 +166,12 @@ async function buildCertificationEvaluation(
   employeeId: string,
   context: CertificationRepositoryContext,
 ): Promise<CertificationEvaluationResult> {
-  const totalXp = context.skillMatrix.reduce((sum, row) => sum + (row.xp ?? 0), 0);
+  const totalXp = context.skillMatrix.reduce(
+    (sum, row) => sum + (row.xp ?? 0),
+    0,
+  );
   const completedCourseCodes = context.courseProgress
-    .filter((row) => row.status === 'completed')
+    .filter((row) => row.status === "completed")
     .map((row) => row.course_code);
 
   const metricsSnapshot: CertificationMetrics = {
@@ -166,11 +182,13 @@ async function buildCertificationEvaluation(
     completedCourseCodes,
   };
 
-  const progressMap = new Map(context.progress.map((row) => [row.certification_code, row]));
+  const progressMap = new Map(
+    context.progress.map((row) => [row.certification_code, row]),
+  );
   const earnedBadges = new Set(context.badges.map((row) => row.badge_code));
   const profileRole = context.profile?.role ?? null;
 
-  const updates: TablesInsert<'certification_progress'>[] = [];
+  const updates: TablesInsert<"certification_progress">[] = [];
   const viewModels: CertificationViewModel[] = [];
   const viewModelMap = new Map<string, CertificationViewModel>();
   const newlyEarnedRewards: Array<{
@@ -187,7 +205,7 @@ async function buildCertificationEvaluation(
 
     if (config.tasks?.completed && config.tasks.completed > 0) {
       requirementDetails.push({
-        key: 'tasks',
+        key: "tasks",
         labelKey: requirementLabelKeys.tasks,
         current: context.completedTasks,
         target: config.tasks.completed,
@@ -197,7 +215,7 @@ async function buildCertificationEvaluation(
 
     if (config.goals?.completed && config.goals.completed > 0) {
       requirementDetails.push({
-        key: 'goals',
+        key: "goals",
         labelKey: requirementLabelKeys.goals,
         current: context.completedGoals,
         target: config.goals.completed,
@@ -207,7 +225,7 @@ async function buildCertificationEvaluation(
 
     if (config.xp?.amount && config.xp.amount > 0) {
       requirementDetails.push({
-        key: 'xp',
+        key: "xp",
         labelKey: requirementLabelKeys.xp,
         current: totalXp,
         target: config.xp.amount,
@@ -217,10 +235,12 @@ async function buildCertificationEvaluation(
 
     if (config.courses?.codes?.length) {
       const requiredCodes = config.courses.codes;
-      const completedCount = requiredCodes.filter((code) => completedCourseCodes.includes(code)).length;
+      const completedCount = requiredCodes.filter((code) =>
+        completedCourseCodes.includes(code),
+      ).length;
 
       requirementDetails.push({
-        key: 'courses',
+        key: "courses",
         labelKey: requirementLabelKeys.courses,
         current: completedCount,
         target: requiredCodes.length,
@@ -231,7 +251,7 @@ async function buildCertificationEvaluation(
       });
     } else if (config.courses?.completed && config.courses.completed > 0) {
       requirementDetails.push({
-        key: 'courses',
+        key: "courses",
         labelKey: requirementLabelKeys.courses,
         current: metricsSnapshot.completedCourses,
         target: config.courses.completed,
@@ -241,11 +261,15 @@ async function buildCertificationEvaluation(
 
     const ratios = requirementDetails.map((detail) => clamp(detail.ratio));
     const aggregateRatio =
-      ratios.length > 0 ? ratios.reduce((sum, ratio) => sum + ratio, 0) / ratios.length : 0;
+      ratios.length > 0
+        ? ratios.reduce((sum, ratio) => sum + ratio, 0) / ratios.length
+        : 0;
 
     const progressPercent = Math.round(clamp(aggregateRatio) * 100);
 
-    const allComplete = requirementDetails.length > 0 && requirementDetails.every((detail) => detail.ratio >= 1);
+    const allComplete =
+      requirementDetails.length > 0 &&
+      requirementDetails.every((detail) => detail.ratio >= 1);
     const someProgress = requirementDetails.some((detail) => detail.ratio > 0);
 
     const existingProgress = progressMap.get(catalog.code);
@@ -253,23 +277,29 @@ async function buildCertificationEvaluation(
     const badgeAwarded = badgeCode ? earnedBadges.has(badgeCode) : false;
     const expiresAt = existingProgress?.expires_at ?? null;
     const hasExpired = Boolean(
-      (existingProgress?.status === 'expired' && !allComplete) ||
+      (existingProgress?.status === "expired" && !allComplete) ||
         (expiresAt ? new Date(expiresAt).getTime() < Date.now() : false),
     );
 
-    let status: CertificationStatus = hasExpired ? 'expired' : existingProgress?.status ?? 'available';
+    let status: CertificationStatus = hasExpired
+      ? "expired"
+      : (existingProgress?.status ?? "available");
 
     if (!hasExpired && allComplete) {
-      status = 'earned';
+      status = "earned";
     } else if (!hasExpired && someProgress) {
-      status = 'in_progress';
+      status = "in_progress";
     } else if (hasExpired) {
-      status = 'expired';
-    } else if (!['earned', 'in_progress', 'available', 'expired'].includes(status)) {
-      status = 'available';
+      status = "expired";
+    } else if (
+      !["earned", "in_progress", "available", "expired"].includes(status)
+    ) {
+      status = "available";
     }
 
-    const pendingBadge = Boolean(badgeCode && status === 'earned' && !badgeAwarded);
+    const pendingBadge = Boolean(
+      badgeCode && status === "earned" && !badgeAwarded,
+    );
 
     const breakdown = requirementDetails.map((detail) => ({
       key: detail.key,
@@ -279,7 +309,7 @@ async function buildCertificationEvaluation(
       meta: detail.meta ?? null,
     }));
 
-    const upsertPayload: TablesInsert<'certification_progress'> = {
+    const upsertPayload: TablesInsert<"certification_progress"> = {
       employee_id: employeeId,
       certification_code: catalog.code,
       status,
@@ -297,14 +327,15 @@ async function buildCertificationEvaluation(
       upsertPayload.achieved_at = existingProgress.achieved_at;
     }
 
-    if (status === 'earned' && !existingProgress?.achieved_at) {
+    if (status === "earned" && !existingProgress?.achieved_at) {
       upsertPayload.achieved_at = nowIso;
     }
 
     const hasChanged =
       !existingProgress ||
       existingProgress.status !== upsertPayload.status ||
-      Math.round(existingProgress.progress_percent) !== upsertPayload.progress_percent ||
+      Math.round(existingProgress.progress_percent) !==
+        upsertPayload.progress_percent ||
       existingProgress.tasks_completed !== upsertPayload.tasks_completed ||
       existingProgress.goals_completed !== upsertPayload.goals_completed ||
       existingProgress.courses_completed !== upsertPayload.courses_completed ||
@@ -314,7 +345,7 @@ async function buildCertificationEvaluation(
       updates.push(upsertPayload);
     }
 
-    if (status === 'earned' && existingProgress?.status !== 'earned') {
+    if (status === "earned" && existingProgress?.status !== "earned") {
       newlyEarnedRewards.push({
         catalog,
         config,
@@ -327,7 +358,8 @@ async function buildCertificationEvaluation(
       status,
       progressPercent,
       requirementDetails,
-      achievedAt: upsertPayload.achieved_at ?? existingProgress?.achieved_at ?? null,
+      achievedAt:
+        upsertPayload.achieved_at ?? existingProgress?.achieved_at ?? null,
       expiresAt,
       badgeAwarded,
       pendingBadge,
@@ -347,7 +379,12 @@ async function buildCertificationEvaluation(
       const shouldAutoAward = reward.config.reward?.autoAwardBadge ?? false;
 
       if (rewardXp > 0) {
-        await applyXpReward(employeeId, profileRole, rewardXp, context.skillMatrix);
+        await applyXpReward(
+          employeeId,
+          profileRole,
+          rewardXp,
+          context.skillMatrix,
+        );
       }
 
       const badgeCode = reward.catalog.badge_code;
@@ -392,7 +429,12 @@ function sortCertifications(certifications: CertificationViewModel[]) {
   });
 }
 
-async function applyXpReward(employeeId: string, role: string | null, xpReward: number, skillMatrix: SkillMatrixRecord[]) {
+async function applyXpReward(
+  employeeId: string,
+  role: string | null,
+  xpReward: number,
+  skillMatrix: SkillMatrixRecord[],
+) {
   if (!role || xpReward <= 0) return;
 
   const existing = skillMatrix.find((row) => row.role === role);

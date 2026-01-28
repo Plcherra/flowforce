@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { logger } from '@/utils/logger';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { logger } from "@/utils/logger";
 
 interface NavigationEvent {
   route: string;
@@ -17,10 +17,10 @@ const generateSessionId = () => {
 
 // Get or create session ID
 const getSessionId = () => {
-  let sessionId = sessionStorage.getItem('navigation_session_id');
+  let sessionId = sessionStorage.getItem("navigation_session_id");
   if (!sessionId) {
     sessionId = generateSessionId();
-    sessionStorage.setItem('navigation_session_id', sessionId);
+    sessionStorage.setItem("navigation_session_id", sessionId);
   }
   return sessionId;
 };
@@ -38,22 +38,33 @@ export function useNavigationAnalytics() {
     };
 
     // Log navigation for debugging (in production, this would send to analytics service)
-    logger.info('Navigation Event', { context: navigationEvent, tags: ['analytics', 'navigation'] });
+    logger.info("Navigation Event", {
+      context: navigationEvent,
+      tags: ["analytics", "navigation"],
+    });
 
     // Store recent navigation history in sessionStorage for debugging
-    const recentNavigation = JSON.parse(sessionStorage.getItem('recent_navigation') || '[]');
+    const recentNavigation = JSON.parse(
+      sessionStorage.getItem("recent_navigation") || "[]",
+    );
     recentNavigation.push(navigationEvent);
-    
+
     // Keep only last 10 navigation events
     if (recentNavigation.length > 10) {
       recentNavigation.shift();
     }
-    
-    sessionStorage.setItem('recent_navigation', JSON.stringify(recentNavigation));
+
+    sessionStorage.setItem(
+      "recent_navigation",
+      JSON.stringify(recentNavigation),
+    );
 
     // Track page title changes for SEO
     if (document.title) {
-      logger.info('Page title', { context: { title: document.title, route: location.pathname }, tags: ['analytics', 'seo'] });
+      logger.info("Page title", {
+        context: { title: document.title, route: location.pathname },
+        tags: ["analytics", "seo"],
+      });
     }
   }, [location]);
 }

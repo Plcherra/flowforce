@@ -1,34 +1,67 @@
-import React, { useState, useMemo } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useProfile } from '@/hooks/useProfile';
-import { useTickets } from '@/hooks/useTickets';
-import { useCommunicationBootstrap } from '@/hooks/useCommunicationBootstrap';
-import { PageLoader } from '@/components/common/PageLoader';
-import { EmptyStateCard } from '@/components/common/EmptyStateCard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LifeBuoy, Plus, Search, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { CreateTicketDialog } from '@/features/helpdesk/components/CreateTicketDialog';
-import { TicketDetailsDialog } from '@/features/helpdesk/components/TicketDetailsDialog';
-import type { HelpDeskTicketStatus, HelpDeskTicket } from '@/hooks/useTickets';
+import React, { useState, useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useProfile } from "@/hooks/useProfile";
+import { useTickets } from "@/hooks/useTickets";
+import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
+import { PageLoader } from "@/components/common/PageLoader";
+import { EmptyStateCard } from "@/components/common/EmptyStateCard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  LifeBuoy,
+  Plus,
+  Search,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  XCircle,
+} from "lucide-react";
+import { CreateTicketDialog } from "@/features/helpdesk/components/CreateTicketDialog";
+import { TicketDetailsDialog } from "@/features/helpdesk/components/TicketDetailsDialog";
+import type { HelpDeskTicketStatus, HelpDeskTicket } from "@/hooks/useTickets";
 
-const STATUS_CONFIG: Record<HelpDeskTicketStatus, { label: string; icon: React.ReactNode; color: string }> = {
-  open: { label: 'Open', icon: <Clock className="h-4 w-4" />, color: 'text-blue-600' },
-  in_progress: { label: 'In Progress', icon: <AlertCircle className="h-4 w-4" />, color: 'text-amber-600' },
-  resolved: { label: 'Resolved', icon: <CheckCircle2 className="h-4 w-4" />, color: 'text-green-600' },
-  closed: { label: 'Closed', icon: <XCircle className="h-4 w-4" />, color: 'text-muted-foreground' },
+const STATUS_CONFIG: Record<
+  HelpDeskTicketStatus,
+  { label: string; icon: React.ReactNode; color: string }
+> = {
+  open: {
+    label: "Open",
+    icon: <Clock className="h-4 w-4" />,
+    color: "text-blue-600",
+  },
+  in_progress: {
+    label: "In Progress",
+    icon: <AlertCircle className="h-4 w-4" />,
+    color: "text-amber-600",
+  },
+  resolved: {
+    label: "Resolved",
+    icon: <CheckCircle2 className="h-4 w-4" />,
+    color: "text-green-600",
+  },
+  closed: {
+    label: "Closed",
+    icon: <XCircle className="h-4 w-4" />,
+    color: "text-muted-foreground",
+  },
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-gray-100 text-gray-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-amber-100 text-amber-700',
-  urgent: 'bg-red-100 text-red-700',
+  low: "bg-gray-100 text-gray-700",
+  medium: "bg-blue-100 text-blue-700",
+  high: "bg-amber-100 text-amber-700",
+  urgent: "bg-red-100 text-red-700",
 };
 
 export default function HelpDeskPage() {
@@ -36,17 +69,21 @@ export default function HelpDeskPage() {
   const { profile } = useProfile();
   const isMobile = useIsMobile();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<HelpDeskTicket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<HelpDeskTicket | null>(
+    null,
+  );
   const [ticketDetailsOpen, setTicketDetailsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<HelpDeskTicketStatus | 'all'>('all');
-  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    HelpDeskTicketStatus | "all"
+  >("all");
+  const [activeTab, setActiveTab] = useState<"all" | "my">("all");
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const { tickets, loading, error, refresh, createTicket } = useTickets({
     companyId: companyId ?? undefined,
-    statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
+    statusFilter: statusFilter !== "all" ? statusFilter : undefined,
     enabled: Boolean(companyId),
   });
 
@@ -68,10 +105,10 @@ export default function HelpDeskPage() {
 
   const ticketStats = useMemo(() => {
     return {
-      open: tickets.filter((t) => t.status === 'open').length,
-      inProgress: tickets.filter((t) => t.status === 'in_progress').length,
-      resolved: tickets.filter((t) => t.status === 'resolved').length,
-      closed: tickets.filter((t) => t.status === 'closed').length,
+      open: tickets.filter((t) => t.status === "open").length,
+      inProgress: tickets.filter((t) => t.status === "in_progress").length,
+      resolved: tickets.filter((t) => t.status === "resolved").length,
+      closed: tickets.filter((t) => t.status === "closed").length,
       total: tickets.length,
     };
   }, [tickets]);
@@ -109,7 +146,9 @@ export default function HelpDeskPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Help Desk</h1>
-            <p className="text-muted-foreground">Manage support tickets and requests</p>
+            <p className="text-muted-foreground">
+              Manage support tickets and requests
+            </p>
           </div>
           <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
@@ -127,25 +166,33 @@ export default function HelpDeskPage() {
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-blue-600">{ticketStats.open}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {ticketStats.open}
+              </div>
               <div className="text-sm text-muted-foreground">Open</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-amber-600">{ticketStats.inProgress}</div>
+              <div className="text-2xl font-bold text-amber-600">
+                {ticketStats.inProgress}
+              </div>
               <div className="text-sm text-muted-foreground">In Progress</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-green-600">{ticketStats.resolved}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {ticketStats.resolved}
+              </div>
               <div className="text-sm text-muted-foreground">Resolved</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-muted-foreground">{ticketStats.closed}</div>
+              <div className="text-2xl font-bold text-muted-foreground">
+                {ticketStats.closed}
+              </div>
               <div className="text-sm text-muted-foreground">Closed</div>
             </CardContent>
           </Card>
@@ -164,7 +211,12 @@ export default function HelpDeskPage() {
               />
             </div>
           </div>
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as HelpDeskTicketStatus | 'all')}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) =>
+              setStatusFilter(value as HelpDeskTicketStatus | "all")
+            }
+          >
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue />
             </SelectTrigger>
@@ -199,16 +251,23 @@ export default function HelpDeskPage() {
           </Alert>
         ) : filteredTickets.length === 0 ? (
           <EmptyStateCard
-            title={searchTerm || statusFilter !== 'all' ? 'No tickets found' : 'No tickets yet'}
+            title={
+              searchTerm || statusFilter !== "all"
+                ? "No tickets found"
+                : "No tickets yet"
+            }
             description={
-              searchTerm || statusFilter !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Create your first support ticket to get started'
+              searchTerm || statusFilter !== "all"
+                ? "Try adjusting your search or filters"
+                : "Create your first support ticket to get started"
             }
             icon={<LifeBuoy className="h-5 w-5" />}
             action={
-              !searchTerm && statusFilter === 'all' ? (
-                <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+              !searchTerm && statusFilter === "all" ? (
+                <Button
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="gap-2"
+                >
                   <Plus className="h-4 w-4" />
                   Create Ticket
                 </Button>
@@ -232,11 +291,18 @@ export default function HelpDeskPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-lg">{ticket.subject}</h3>
-                          <Badge className={PRIORITY_COLORS[ticket.priority] || ''}>
+                          <h3 className="font-semibold text-lg">
+                            {ticket.subject}
+                          </h3>
+                          <Badge
+                            className={PRIORITY_COLORS[ticket.priority] || ""}
+                          >
                             {ticket.priority}
                           </Badge>
-                          <Badge variant="outline" className={statusConfig.color}>
+                          <Badge
+                            variant="outline"
+                            className={statusConfig.color}
+                          >
                             {statusConfig.icon}
                             <span className="ml-1">{statusConfig.label}</span>
                           </Badge>
@@ -247,15 +313,22 @@ export default function HelpDeskPage() {
                           </p>
                         )}
                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                          {ticket.category && <span>Category: {ticket.category}</span>}
-                          <span>
-                            Created: {new Date(ticket.createdAt).toLocaleDateString()}
-                          </span>
-                          {ticket.updatedAt && ticket.updatedAt !== ticket.createdAt && (
-                            <span>
-                              Updated: {new Date(ticket.updatedAt).toLocaleDateString()}
-                            </span>
+                          {ticket.category && (
+                            <span>Category: {ticket.category}</span>
                           )}
+                          <span>
+                            Created:{" "}
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
+                          {ticket.updatedAt &&
+                            ticket.updatedAt !== ticket.createdAt && (
+                              <span>
+                                Updated:{" "}
+                                {new Date(
+                                  ticket.updatedAt,
+                                ).toLocaleDateString()}
+                              </span>
+                            )}
                         </div>
                       </div>
                     </div>

@@ -1,9 +1,9 @@
-import { useParams, Navigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import Breadcrumbs from '@/components/resources/Breadcrumbs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, User, Clock } from 'lucide-react';
+import { useParams, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "@/components/resources/Breadcrumbs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, User, Clock } from "lucide-react";
 
 export default function BlogDetail() {
   const { id } = useParams();
@@ -11,23 +11,23 @@ export default function BlogDetail() {
 
   const post = {
     id: 1,
-    title: 'Getting Started with FlowForce',
-    excerpt: 'A comprehensive guide to setting up your first operations suite.',
-    content: 'This is the full content of the blog post...',
-    author: 'Sarah Johnson',
-    publishDate: '2024-01-15',
-    readTime: '5 min read',
-    tags: ['Tutorial', 'Getting Started']
+    title: "Getting Started with FlowForce",
+    excerpt: "A comprehensive guide to setting up your first operations suite.",
+    content: "This is the full content of the blog post...",
+    author: "Sarah Johnson",
+    publishDate: "2024-01-15",
+    readTime: "5 min read",
+    tags: ["Tutorial", "Getting Started"],
   };
 
   if (!post) {
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          {t('resources.blog.title')} {t('resources.details.notFound')}
+          {t("resources.blog.title")} {t("resources.details.notFound")}
         </h1>
         <p className="text-gray-600">
-          {t('resources.details.requestedNotFound', { type: 'blog post' })}
+          {t("resources.details.requestedNotFound", { type: "blog post" })}
         </p>
       </div>
     );
@@ -37,9 +37,9 @@ export default function BlogDetail() {
     <div className="p-8">
       <Breadcrumbs
         items={[
-          { label: t('resources.title'), href: '/resources' },
-          { label: t('resources.blog.title'), href: '/resources/blog' },
-          { label: post.title }
+          { label: t("resources.title"), href: "/resources" },
+          { label: t("resources.blog.title"), href: "/resources/blog" },
+          { label: post.title },
         ]}
       />
 
@@ -72,8 +72,8 @@ export default function BlogDetail() {
           <div className="prose max-w-none">
             <p>{post.content}</p>
             <p className="mt-4 text-gray-600">
-              This is a placeholder for the actual blog post content. 
-              The full article would be displayed here.
+              This is a placeholder for the actual blog post content. The full
+              article would be displayed here.
             </p>
           </div>
         </CardContent>

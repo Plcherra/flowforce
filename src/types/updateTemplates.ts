@@ -2,7 +2,7 @@ export interface UpdateTemplate {
   id: string;
   name: string;
   description: string;
-  type: 'announcement' | 'news' | 'event' | 'policy';
+  type: "announcement" | "news" | "event" | "policy";
   preview: string;
   backgroundStyle: BackgroundStyle;
   defaultContent?: string;
@@ -10,14 +10,14 @@ export interface UpdateTemplate {
 }
 
 export interface BackgroundStyle {
-  type: 'solid' | 'gradient' | 'pattern';
+  type: "solid" | "gradient" | "pattern";
   primary: string;
   secondary?: string;
-  pattern?: 'dots' | 'lines' | 'grid' | 'waves' | 'none';
+  pattern?: "dots" | "lines" | "grid" | "waves" | "none";
 }
 
 export interface UpdateRecipient {
-  type: 'all' | 'departments' | 'roles' | 'individuals' | 'groups';
+  type: "all" | "departments" | "roles" | "individuals" | "groups";
   targets: string[];
   count?: number;
 }
@@ -54,9 +54,9 @@ export interface EnhancedCompanyUpdate {
   title: string;
   content: string;
   richContent?: string;
-  type: 'announcement' | 'news' | 'event' | 'policy';
-  priority: 'high' | 'medium' | 'low';
-  status: 'published' | 'draft' | 'scheduled' | 'archived';
+  type: "announcement" | "news" | "event" | "policy";
+  priority: "high" | "medium" | "low";
+  status: "published" | "draft" | "scheduled" | "archived";
   templateId?: string;
   backgroundStyle: BackgroundStyle;
   recipients: UpdateRecipient;

@@ -1,12 +1,25 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { CalendarIcon, CheckCircle2, Circle, Medal, PencilLine, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
-import type { Goal, GoalStatus } from '@/hooks/useGoals';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import {
+  CalendarIcon,
+  CheckCircle2,
+  Circle,
+  Medal,
+  PencilLine,
+  Trash2,
+} from "lucide-react";
+import { format } from "date-fns";
+import type { Goal, GoalStatus } from "@/hooks/useGoals";
 
 interface GoalCardProps {
   goal: Goal;
@@ -16,38 +29,48 @@ interface GoalCardProps {
 }
 
 const statusStyles: Record<GoalStatus, string> = {
-  active: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
-  completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-  cancelled: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200',
+  active: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
+  completed:
+    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  draft: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  cancelled: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200",
 };
 
-export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardProps) {
+export function GoalCard({
+  goal,
+  onEdit,
+  onToggleStatus,
+  onDelete,
+}: GoalCardProps) {
   const ownerName = goal.owner
-    ? [goal.owner.first_name, goal.owner.last_name].filter(Boolean).join(' ')
-    : 'Unassigned';
+    ? [goal.owner.first_name, goal.owner.last_name].filter(Boolean).join(" ")
+    : "Unassigned";
 
   const tasks = goal.tasks ?? [];
   const completedTasks = tasks.filter(
-    (item) => item.task?.status && item.task.status.toLowerCase() === 'completed',
+    (item) =>
+      item.task?.status && item.task.status.toLowerCase() === "completed",
   ).length;
   const totalTasks = tasks.length;
   const xpSummary = goal.xpSummary ?? { totalXp: 0, rewardCount: 0 };
-  const rewardSummary = goal.rewardSummary?.trim() ?? '';
+  const rewardSummary = goal.rewardSummary?.trim() ?? "";
 
   const ownerInitials =
     goal.owner && (goal.owner.first_name || goal.owner.last_name)
-      ? `${goal.owner.first_name?.[0] ?? ''}${goal.owner.last_name?.[0] ?? ''}`.trim().toUpperCase()
-      : 'NA';
+      ? `${goal.owner.first_name?.[0] ?? ""}${goal.owner.last_name?.[0] ?? ""}`
+          .trim()
+          .toUpperCase()
+      : "NA";
 
-  const isCompleted = goal.status === 'completed';
-  const isCancelled = goal.status === 'cancelled';
-  const nextStatus: GoalStatus = isCompleted || isCancelled ? 'active' : 'completed';
+  const isCompleted = goal.status === "completed";
+  const isCancelled = goal.status === "cancelled";
+  const nextStatus: GoalStatus =
+    isCompleted || isCancelled ? "active" : "completed";
   const primaryActionLabel = isCancelled
-    ? 'Restore'
+    ? "Restore"
     : isCompleted
-      ? 'Mark Active'
-      : 'Mark Complete';
+      ? "Mark Active"
+      : "Mark Complete";
 
   return (
     <Card className="border border-border/60 bg-background/60 shadow-sm transition hover:shadow-lg">
@@ -57,7 +80,9 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
             <Badge className={`${statusStyles[goal.status]} w-fit`}>
               {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
             </Badge>
-            <CardTitle className="text-xl font-semibold text-foreground">{goal.title}</CardTitle>
+            <CardTitle className="text-xl font-semibold text-foreground">
+              {goal.title}
+            </CardTitle>
           </div>
         </div>
         {goal.description && (
@@ -71,12 +96,11 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-semibold text-foreground">{goal.progress ?? 0}%</span>
+            <span className="font-semibold text-foreground">
+              {goal.progress ?? 0}%
+            </span>
           </div>
-          <Progress
-            value={goal.progress ?? 0}
-            className="h-2"
-          />
+          <Progress value={goal.progress ?? 0} className="h-2" />
         </div>
 
         <Separator />
@@ -93,7 +117,7 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
               <ul className="space-y-2 text-sm text-muted-foreground">
                 {tasks.slice(0, 3).map((taskLink) => {
                   const task = taskLink.task;
-                  const done = task?.status?.toLowerCase() === 'completed';
+                  const done = task?.status?.toLowerCase() === "completed";
                   return (
                     <li key={taskLink.id} className="flex items-start gap-2">
                       {done ? (
@@ -103,10 +127,10 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
                       )}
                       <div className="flex-1">
                         <p className="line-clamp-1 font-medium text-foreground">
-                          {task?.title ?? 'Untitled task'}
+                          {task?.title ?? "Untitled task"}
                         </p>
                         <p className="text-xs">
-                          {done ? 'Completed' : task?.status ?? 'In progress'}
+                          {done ? "Completed" : (task?.status ?? "In progress")}
                         </p>
                       </div>
                     </li>
@@ -114,13 +138,15 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
                 })}
                 {tasks.length > 3 && (
                   <li className="text-xs text-muted-foreground">
-                    +{tasks.length - 3} more linked task{tasks.length - 3 === 1 ? '' : 's'}
+                    +{tasks.length - 3} more linked task
+                    {tasks.length - 3 === 1 ? "" : "s"}
                   </li>
                 )}
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No tasks linked yet. Associate tasks to track progress automatically.
+                No tasks linked yet. Associate tasks to track progress
+                automatically.
               </p>
             )}
           </div>
@@ -131,15 +157,19 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
                 <Medal className="h-4 w-4 text-amber-500" />
                 <span>Recognition XP</span>
               </div>
-              <span className="font-semibold text-foreground">{xpSummary.totalXp}</span>
+              <span className="font-semibold text-foreground">
+                {xpSummary.totalXp}
+              </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {xpSummary.rewardCount > 0
-                ? `${xpSummary.rewardCount} reward${xpSummary.rewardCount === 1 ? '' : 's'} linked to this goal`
-                : 'No recognitions earned yet'}
+                ? `${xpSummary.rewardCount} reward${xpSummary.rewardCount === 1 ? "" : "s"} linked to this goal`
+                : "No recognitions earned yet"}
             </p>
             {rewardSummary && (
-              <p className="mt-2 text-xs text-muted-foreground">{rewardSummary}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {rewardSummary}
+              </p>
             )}
           </div>
         </div>
@@ -167,9 +197,9 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span>
-                Due{' '}
+                Due{" "}
                 <span className="font-medium text-foreground">
-                  {format(new Date(goal.target_completion_date), 'MMM d, yyyy')}
+                  {format(new Date(goal.target_completion_date), "MMM d, yyyy")}
                 </span>
               </span>
             </div>
@@ -179,7 +209,11 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
 
       <CardFooter className="flex items-center justify-between gap-3 border-t border-border/60 bg-muted/30 p-4">
         <div className="flex gap-2">
-          <Button variant="default" size="sm" onClick={() => onToggleStatus(goal, nextStatus)}>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => onToggleStatus(goal, nextStatus)}
+          >
             <CheckCircle2 className="mr-2 h-4 w-4" />
             {primaryActionLabel}
           </Button>
@@ -188,7 +222,12 @@ export function GoalCard({ goal, onEdit, onToggleStatus, onDelete }: GoalCardPro
             Edit
           </Button>
         </div>
-        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDelete(goal)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive"
+          onClick={() => onDelete(goal)}
+        >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </Button>

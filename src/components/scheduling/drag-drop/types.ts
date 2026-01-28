@@ -1,11 +1,11 @@
-import type { Tables } from '@/integrations/supabase/public-types';
+import type { Tables } from "@/integrations/supabase/public-types";
 import type {
   AssignmentWithUser,
   ShiftWithAssignments,
   TimeOffWithUser,
   UnavailabilityWithUser,
   VendorEventWithMetadata,
-} from '@/hooks/scheduling/useSchedulingConsolidated';
+} from "@/hooks/scheduling/useSchedulingConsolidated";
 
 export interface AIRecommendation {
   name: string;
@@ -72,10 +72,21 @@ export interface DragDropDerivedData {
 }
 
 export interface DragDropActions {
-  createSchedule: (payload: Omit<Tables<'schedules'>, 'id' | 'company_id' | 'created_by'>) => Promise<Tables<'schedules'> | null>;
-  updateSchedule: (id: string, updates: Partial<Tables<'schedules'>>) => Promise<Tables<'schedules'> | null>;
-  assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
+  createSchedule: (
+    payload: Omit<Tables<"schedules">, "id" | "company_id" | "created_by">,
+  ) => Promise<Tables<"schedules"> | null>;
+  updateSchedule: (
+    id: string,
+    updates: Partial<Tables<"schedules">>,
+  ) => Promise<Tables<"schedules"> | null>;
+  assign: (
+    shiftId: string,
+    userId: string,
+    status?: string,
+  ) => Promise<boolean>;
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
-  createVendorEvent: (payload: Tables<'vendor_event'>) => Promise<Tables<'vendor_event'> | null>;
+  createVendorEvent: (
+    payload: Tables<"vendor_event">,
+  ) => Promise<Tables<"vendor_event"> | null>;
   refetchAll: () => Promise<void>;
 }

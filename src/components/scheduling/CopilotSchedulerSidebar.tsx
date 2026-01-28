@@ -1,22 +1,36 @@
-import { useMemo } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { useCopilotScheduler } from '@/hooks/scheduling/useCopilotScheduler';
-import type { ScheduleSummary } from '@/hooks/scheduling/copilotSchedulerTypes';
-import { format } from 'date-fns';
-import { AlertTriangle, RefreshCw, Send, Sparkles, UploadCloud } from 'lucide-react';
+import { useMemo } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { useCopilotScheduler } from "@/hooks/scheduling/useCopilotScheduler";
+import type { ScheduleSummary } from "@/hooks/scheduling/copilotSchedulerTypes";
+import { format } from "date-fns";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Send,
+  Sparkles,
+  UploadCloud,
+} from "lucide-react";
 
 interface CopilotSchedulerSidebarProps {
   locationFilter?: string;
 }
 
-export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSidebarProps) {
+export function CopilotSchedulerSidebar({
+  locationFilter,
+}: CopilotSchedulerSidebarProps) {
   const { shifts, weekRange, refetchAll } = useScheduling();
 
   const existingShifts = useMemo(
@@ -51,14 +65,20 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
       <CardHeader className="flex flex-col gap-2 border-b border-border/60">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-base font-semibold">Copilot Scheduler</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Copilot Scheduler
+            </CardTitle>
             <p className="text-xs text-muted-foreground">
-              Draft coverage, resolve gaps, and publish shifts with Copilot oversight.
+              Draft coverage, resolve gaps, and publish shifts with Copilot
+              oversight.
             </p>
           </div>
           {scheduler.lastGeneratedAt ? (
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
-              {format(new Date(scheduler.lastGeneratedAt), 'MMM d, HH:mm')}
+            <Badge
+              variant="outline"
+              className="text-[10px] uppercase tracking-wide"
+            >
+              {format(new Date(scheduler.lastGeneratedAt), "MMM d, HH:mm")}
             </Badge>
           ) : null}
         </div>
@@ -67,9 +87,13 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
           <MetricPill
             label="Coverage gaps"
             value={coverageCount}
-            tone={coverageCount > 0 ? 'warning' : 'success'}
+            tone={coverageCount > 0 ? "warning" : "success"}
           />
-          <MetricPill label="Swap suggestions" value={swapCount} tone={swapCount > 0 ? 'info' : 'muted'} />
+          <MetricPill
+            label="Swap suggestions"
+            value={swapCount}
+            tone={swapCount > 0 ? "info" : "muted"}
+          />
         </div>
       </CardHeader>
 
@@ -96,16 +120,27 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
         <Separator />
 
         <ScrollArea className="px-4 pb-4">
-          <SectionHeader icon={<AlertTriangle className="h-4 w-4 text-amber-500" />} title="Coverage alerts" />
+          <SectionHeader
+            icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
+            title="Coverage alerts"
+          />
           {scheduler.coverageGaps.length === 0 ? (
-            <p className="text-sm text-muted-foreground">All coverage targets satisfied.</p>
+            <p className="text-sm text-muted-foreground">
+              All coverage targets satisfied.
+            </p>
           ) : (
             <ul className="space-y-3">
               {scheduler.coverageGaps.map((gap) => (
-                <li key={`${gap.templateId}:${gap.scheduleDate}`} className="rounded-lg border border-border/60 p-3">
-                  <p className="text-sm font-semibold text-foreground">{gap.role}</p>
+                <li
+                  key={`${gap.templateId}:${gap.scheduleDate}`}
+                  className="rounded-lg border border-border/60 p-3"
+                >
+                  <p className="text-sm font-semibold text-foreground">
+                    {gap.role}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    {gap.location} · {gap.scheduleDate} · missing {gap.missingCount} of {gap.requiredCount}
+                    {gap.location} · {gap.scheduleDate} · missing{" "}
+                    {gap.missingCount} of {gap.requiredCount}
                   </p>
                   <p className="mt-2 text-sm text-amber-600">{gap.reason}</p>
                 </li>
@@ -115,20 +150,31 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
 
           <Separator className="my-4" />
 
-          <SectionHeader icon={<Sparkles className="h-4 w-4 text-sky-500" />} title="Swap suggestions" />
+          <SectionHeader
+            icon={<Sparkles className="h-4 w-4 text-sky-500" />}
+            title="Swap suggestions"
+          />
           {scheduler.swapSuggestions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No swap recommendations required.</p>
+            <p className="text-sm text-muted-foreground">
+              No swap recommendations required.
+            </p>
           ) : (
             <ul className="space-y-3">
               {scheduler.swapSuggestions.map((swap) => (
-                <li key={swap.id} className="rounded-lg border border-border/60 p-3">
+                <li
+                  key={swap.id}
+                  className="rounded-lg border border-border/60 p-3"
+                >
                   <p className="text-sm text-foreground">
                     {swap.role} · {swap.scheduleDate}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Move {swap.toEmployeeId.slice(0, 6)} from {swap.fromLocation} → {swap.toLocation}
+                    Move {swap.toEmployeeId.slice(0, 6)} from{" "}
+                    {swap.fromLocation} → {swap.toLocation}
                   </p>
-                  <p className="mt-2 text-xs text-muted-foreground">{swap.reason}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {swap.reason}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -138,7 +184,13 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
 
       <CardFooter className="flex flex-col gap-2 border-t border-border/60 p-4">
         <div className="flex w-full flex-wrap gap-2">
-          <Button variant="secondary" size="sm" className="flex-1" onClick={scheduler.regenerate} disabled={scheduler.loading}>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex-1"
+            onClick={scheduler.regenerate}
+            disabled={scheduler.loading}
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             Regenerate
           </Button>
@@ -147,7 +199,9 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
             size="sm"
             className="flex-1"
             onClick={scheduler.enqueueCoverageGaps}
-            disabled={scheduler.loading || scheduler.coverageGapActions.length === 0}
+            disabled={
+              scheduler.loading || scheduler.coverageGapActions.length === 0
+            }
           >
             <Send className="mr-2 h-4 w-4" />
             Queue gaps
@@ -182,36 +236,46 @@ export function CopilotSchedulerSidebar({ locationFilter }: CopilotSchedulerSide
 function MetricPill({
   label,
   value,
-  tone = 'default',
+  tone = "default",
 }: {
   label: string;
   value: number;
-  tone?: 'default' | 'warning' | 'success' | 'info' | 'muted';
+  tone?: "default" | "warning" | "success" | "info" | "muted";
 }) {
   const toneClass =
-    tone === 'warning'
-      ? 'text-amber-500'
-      : tone === 'success'
-        ? 'text-emerald-500'
-        : tone === 'info'
-          ? 'text-sky-500'
-          : tone === 'muted'
-            ? 'text-muted-foreground'
-            : 'text-foreground';
+    tone === "warning"
+      ? "text-amber-500"
+      : tone === "success"
+        ? "text-emerald-500"
+        : tone === "info"
+          ? "text-sky-500"
+          : tone === "muted"
+            ? "text-muted-foreground"
+            : "text-foreground";
 
   return (
     <div className="rounded-lg border border-border/70 px-2 py-2">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
       <p className={`text-lg font-semibold ${toneClass}`}>{value}</p>
     </div>
   );
 }
 
-function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+function SectionHeader({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
   return (
     <div className="mb-2 flex items-center gap-2">
       {icon}
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h3>
     </div>
   );
 }
@@ -228,13 +292,20 @@ function SummaryList({ summary }: { summary: ScheduleSummary }) {
         <span className="font-medium">{summary.totalHours.toFixed(1)} hrs</span>
       </div>
       <div className="space-y-2">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">Top contributors</p>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          Top contributors
+        </p>
         {employeeEntries.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No assigned employees yet.</p>
+          <p className="text-xs text-muted-foreground">
+            No assigned employees yet.
+          </p>
         ) : (
           <ul className="space-y-1">
             {employeeEntries.map(([employeeId, hours]) => (
-              <li key={employeeId} className="flex items-center justify-between text-xs text-muted-foreground">
+              <li
+                key={employeeId}
+                className="flex items-center justify-between text-xs text-muted-foreground"
+              >
                 <span>Employee {employeeId.slice(0, 6)}</span>
                 <span className="text-foreground">{hours.toFixed(1)} hrs</span>
               </li>

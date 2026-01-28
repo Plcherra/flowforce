@@ -1,24 +1,23 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus } from 'lucide-react';
-import { usePositions } from '@/hooks/usePositions';
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, Plus } from "lucide-react";
+import { usePositions } from "@/hooks/usePositions";
 
 export type SchedulingFilterState = {
   positions: string[];
   users: string[];
-  status: 'all' | 'assigned' | 'unassigned' | 'understaffed' | 'overstaffed';
-  published: 'all' | 'published' | 'draft';
+  status: "all" | "assigned" | "unassigned" | "understaffed" | "overstaffed";
+  published: "all" | "published" | "draft";
 };
 
 interface SchedulingFiltersProps {
@@ -26,7 +25,10 @@ interface SchedulingFiltersProps {
   onFiltersChange: (filters: SchedulingFilterState) => void;
 }
 
-export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFiltersProps) {
+export function SchedulingFilters({
+  filters,
+  onFiltersChange,
+}: SchedulingFiltersProps) {
   const { positions } = usePositions();
   const [, setShowCustomFilter] = useState(false);
 
@@ -45,24 +47,24 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
     const newPositions = currentPositions.includes(positionId)
       ? currentPositions.filter((id: string) => id !== positionId)
       : [...currentPositions, positionId];
-    
-    handleFilterChange('positions', newPositions);
+
+    handleFilterChange("positions", newPositions);
   };
 
   const clearAllFilters = () => {
     onFiltersChange({
       positions: [],
       users: [],
-      status: 'all',
-      published: 'all',
+      status: "all",
+      published: "all",
     });
   };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.positions?.length > 0 ||
     filters.users?.length > 0 ||
-    filters.status !== 'all' ||
-    filters.published !== 'all';
+    filters.status !== "all" ||
+    filters.published !== "all";
 
   return (
     <Card>
@@ -89,7 +91,7 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
                     checked={filters.positions?.includes(position.id)}
                     onCheckedChange={() => handlePositionToggle(position.id)}
                   />
-                  <label 
+                  <label
                     htmlFor={`position-${position.id}`}
                     className="text-sm cursor-pointer"
                   >
@@ -103,7 +105,10 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
           {/* Status Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Status</label>
-            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+            <Select
+              value={filters.status}
+              onValueChange={(value) => handleFilterChange("status", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
@@ -120,7 +125,10 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
           {/* Published Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Published</label>
-            <Select value={filters.published} onValueChange={(value) => handleFilterChange('published', value)}>
+            <Select
+              value={filters.published}
+              onValueChange={(value) => handleFilterChange("published", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="All" />
               </SelectTrigger>
@@ -153,34 +161,38 @@ export function SchedulingFilters({ filters, onFiltersChange }: SchedulingFilter
             <label className="text-sm font-medium">Active Filters:</label>
             <div className="flex flex-wrap gap-2">
               {filters.positions?.map((positionId: string) => {
-                const position = positions.find(p => p.id === positionId);
+                const position = positions.find((p) => p.id === positionId);
                 return position ? (
-                  <Badge key={positionId} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={positionId}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     {position.name}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
+                    <X
+                      className="h-3 w-3 cursor-pointer"
                       onClick={() => handlePositionToggle(positionId)}
                     />
                   </Badge>
                 ) : null;
               })}
-              
-              {filters.status !== 'all' && (
+
+              {filters.status !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Status: {filters.status}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => handleFilterChange('status', 'all')}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => handleFilterChange("status", "all")}
                   />
                 </Badge>
               )}
-              
-              {filters.published !== 'all' && (
+
+              {filters.published !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.published === 'published' ? 'Published' : 'Draft'}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => handleFilterChange('published', 'all')}
+                  {filters.published === "published" ? "Published" : "Draft"}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => handleFilterChange("published", "all")}
                   />
                 </Badge>
               )}

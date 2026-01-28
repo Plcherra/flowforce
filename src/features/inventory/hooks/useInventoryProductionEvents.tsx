@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
-import type { ProductionEvent, ProductionEventInput } from './types';
-import { logger } from '@/utils/logger';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
+import type { ProductionEvent, ProductionEventInput } from "./types";
+import { logger } from "@/utils/logger";
 
-const productionEventsQueryKey = ['inventory-production-events'];
+const productionEventsQueryKey = ["inventory-production-events"];
 
 export function useInventoryProductionEvents() {
   return useQuery<ProductionEvent[]>({
@@ -18,29 +18,30 @@ export function useCreateProductionEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: ProductionEventInput) => InventoryService.createProductionEvent(payload),
+    mutationFn: (payload: ProductionEventInput) =>
+      InventoryService.createProductionEvent(payload),
     onSuccess: ({ warnings }) => {
       queryClient.invalidateQueries({ queryKey: productionEventsQueryKey });
-      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
 
       const description =
         warnings?.length && warnings.length > 0
-          ? `Recorded with ${warnings.length} warning${warnings.length > 1 ? 's' : ''}`
-          : 'Production event recorded successfully';
+          ? `Recorded with ${warnings.length} warning${warnings.length > 1 ? "s" : ""}`
+          : "Production event recorded successfully";
 
       toast({
-        title: 'Production recorded',
+        title: "Production recorded",
         description,
       });
     },
     onError: (error: any) => {
-      const message = error?.message || 'Failed to record production event';
+      const message = error?.message || "Failed to record production event";
       toast({
-        title: 'Error',
+        title: "Error",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
-      logger.error('Create production event error', { error, tags: ['error'] });
+      logger.error("Create production event error", { error, tags: ["error"] });
     },
   });
 }

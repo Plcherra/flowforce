@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -15,28 +15,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useCustomSections } from '@/hooks/useCustomSections';
-import { useToast } from '@/hooks/use-toast';
-import * as Icons from 'lucide-react';
-import { logger } from '@/utils/logger';
+} from "@/components/ui/select";
+import { useCustomSections } from "@/hooks/useCustomSections";
+import { useToast } from "@/hooks/use-toast";
+import * as Icons from "lucide-react";
+import { logger } from "@/utils/logger";
 
 const createSectionSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(50, "Name must be less than 50 characters"),
   description: z.string().optional(),
-  icon: z.string().min(1, 'Icon is required'),
-  category: z.enum(['communication', 'operations', 'hr', 'custom']),
-  path: z.string().min(1, 'Path is required').regex(/^\/[a-z0-9-]+$/, 'Path must start with / and contain only lowercase letters, numbers, and hyphens'),
+  icon: z.string().min(1, "Icon is required"),
+  category: z.enum(["communication", "operations", "hr", "custom"]),
+  path: z
+    .string()
+    .min(1, "Path is required")
+    .regex(
+      /^\/[a-z0-9-]+$/,
+      "Path must start with / and contain only lowercase letters, numbers, and hyphens",
+    ),
 });
 
 type CreateSectionForm = z.infer<typeof createSectionSchema>;
@@ -48,19 +57,42 @@ interface CreateSectionDialogProps {
 }
 
 const commonIcons = [
-  'FileText', 'Users', 'Calendar', 'MessageSquare', 'CheckSquare', 'Settings',
-  'Bell', 'Star', 'Target', 'Package', 'Award', 'Briefcase', 'Clock', 'Heart',
-  'Shield', 'BookOpen', 'Camera', 'Phone', 'Mail', 'Globe', 'Home', 'Search'
+  "FileText",
+  "Users",
+  "Calendar",
+  "MessageSquare",
+  "CheckSquare",
+  "Settings",
+  "Bell",
+  "Star",
+  "Target",
+  "Package",
+  "Award",
+  "Briefcase",
+  "Clock",
+  "Heart",
+  "Shield",
+  "BookOpen",
+  "Camera",
+  "Phone",
+  "Mail",
+  "Globe",
+  "Home",
+  "Search",
 ];
 
 const categories = [
-  { value: 'communication', label: 'Communication' },
-  { value: 'operations', label: 'Operations' },
-  { value: 'hr', label: 'HR & People' },
-  { value: 'custom', label: 'Custom' }
+  { value: "communication", label: "Communication" },
+  { value: "operations", label: "Operations" },
+  { value: "hr", label: "HR & People" },
+  { value: "custom", label: "Custom" },
 ];
 
-export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSectionDialogProps) {
+export function CreateSectionDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreateSectionDialogProps) {
   const [isCreating, setIsCreating] = useState(false);
   const { createSection } = useCustomSections();
   const { toast } = useToast();
@@ -68,11 +100,11 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
   const form = useForm<CreateSectionForm>({
     resolver: zodResolver(createSectionSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      icon: 'FileText',
-      category: 'custom',
-      path: '',
+      name: "",
+      description: "",
+      icon: "FileText",
+      category: "custom",
+      path: "",
     },
   });
 
@@ -85,7 +117,7 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
         icon: data.icon,
         category: data.category as any,
         path: data.path,
-        permissions: ['viewOwnProfile'], // Default permission
+        permissions: ["viewOwnProfile"], // Default permission
       });
 
       toast({
@@ -96,20 +128,30 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
       form.reset();
       onSuccess?.(createdSection);
     } catch (error) {
-      logger.error('Error creating section:', { error, tags: ['error'] });
+      logger.error("Error creating section:", { error, tags: ["error"] });
     } finally {
       setIsCreating(false);
     }
   };
 
   const generatePath = (name: string) => {
-    const path = '/' + name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    form.setValue('path', path);
+    const path =
+      "/" +
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    form.setValue("path", path);
   };
 
   const getIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName];
-    return IconComponent ? <IconComponent className="h-4 w-4" /> : <Icons.FileText className="h-4 w-4" />;
+    return IconComponent ? (
+      <IconComponent className="h-4 w-4" />
+    ) : (
+      <Icons.FileText className="h-4 w-4" />
+    );
   };
 
   return (
@@ -120,7 +162,10 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -128,8 +173,8 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
                 <FormItem>
                   <FormLabel>Section Name</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="My Custom Section" 
+                    <Input
+                      placeholder="My Custom Section"
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -149,8 +194,8 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
                 <FormItem>
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Brief description of this section" 
+                    <Textarea
+                      placeholder="Brief description of this section"
                       {...field}
                       rows={2}
                     />
@@ -167,7 +212,10 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
@@ -175,7 +223,10 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
                       </FormControl>
                       <SelectContent>
                         {categories.map((category) => (
-                          <SelectItem key={category.value} value={category.value}>
+                          <SelectItem
+                            key={category.value}
+                            value={category.value}
+                          >
                             {category.label}
                           </SelectItem>
                         ))}
@@ -192,7 +243,10 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Icon</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue>
@@ -235,20 +289,16 @@ export function CreateSectionDialog({ open, onOpenChange, onSuccess }: CreateSec
             />
 
             <div className="flex space-x-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isCreating}
-                className="flex-1"
-              >
-                {isCreating ? 'Creating...' : 'Create Section'}
+              <Button type="submit" disabled={isCreating} className="flex-1">
+                {isCreating ? "Creating..." : "Create Section"}
               </Button>
             </div>
           </form>

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useCompany } from '@/hooks/useCompany';
-import type { GeneralSettings } from '@/types/system-settings';
-import { showErrorToast, showSuccessToast } from '@/utils/errorHandler';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCompany } from "@/hooks/useCompany";
+import type { GeneralSettings } from "@/types/system-settings";
+import { showErrorToast, showSuccessToast } from "@/utils/errorHandler";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 type GeneralFormState = {
   companyName: string;
@@ -15,12 +15,12 @@ type GeneralFormState = {
 };
 
 const toFormState = (general: GeneralSettings): GeneralFormState => ({
-  companyName: general.companyName ?? '',
-  contactEmail: general.contactEmail ?? '',
-  contactPhone: general.contactPhone ?? '',
-  website: general.website ?? '',
-  companyDescription: general.companyDescription ?? '',
-  address: general.address ?? '',
+  companyName: general.companyName ?? "",
+  contactEmail: general.contactEmail ?? "",
+  contactPhone: general.contactPhone ?? "",
+  website: general.website ?? "",
+  companyDescription: general.companyDescription ?? "",
+  address: general.address ?? "",
 });
 
 export function useGeneralSettings(source: SystemSettingsHook) {
@@ -29,17 +29,21 @@ export function useGeneralSettings(source: SystemSettingsHook) {
   const general = settings?.general;
 
   const [state, setState] = useState<GeneralFormState>(
-    general ? toFormState(general) : toFormState({
-      companyName: '',
-      contactEmail: null,
-      contactPhone: null,
-      website: null,
-      companyDescription: null,
-      address: null,
-      logoUrl: null,
-    }),
+    general
+      ? toFormState(general)
+      : toFormState({
+          companyName: "",
+          contactEmail: null,
+          contactPhone: null,
+          website: null,
+          companyDescription: null,
+          address: null,
+          logoUrl: null,
+        }),
   );
-  const [logoUrl, setLogoUrl] = useState<string | null>(general?.logoUrl ?? null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(
+    general?.logoUrl ?? null,
+  );
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
@@ -63,10 +67,10 @@ export function useGeneralSettings(source: SystemSettingsHook) {
   const uploadLogo = useCallback(
     async (file: File): Promise<string> => {
       if (!company?.id) {
-        throw new Error('Company context unavailable for logo upload.');
+        throw new Error("Company context unavailable for logo upload.");
       }
-      const bucket = supabase.storage.from('company-assets');
-      const extension = file.name.split('.').pop()?.toLowerCase() ?? 'png';
+      const bucket = supabase.storage.from("company-assets");
+      const extension = file.name.split(".").pop()?.toLowerCase() ?? "png";
       const fileName = `logo-${Date.now()}.${extension}`;
       const filePath = `${company.id}/${fileName}`;
 
@@ -78,7 +82,7 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
       const { data } = bucket.getPublicUrl(filePath);
       if (!data?.publicUrl) {
-        throw new Error('Unable to retrieve logo URL after upload.');
+        throw new Error("Unable to retrieve logo URL after upload.");
       }
       return data.publicUrl;
     },
@@ -91,7 +95,7 @@ export function useGeneralSettings(source: SystemSettingsHook) {
     setSaveError(null);
     try {
       if (!state.companyName.trim()) {
-        throw new Error('Company name is required.');
+        throw new Error("Company name is required.");
       }
 
       let nextLogo = logoUrl ?? general.logoUrl;
@@ -127,15 +131,25 @@ export function useGeneralSettings(source: SystemSettingsHook) {
       });
 
       setLogoFile(null);
-      showSuccessToast('General settings saved');
+      showSuccessToast("General settings saved");
     } catch (err) {
       setSaveError(err as Error);
-      showErrorToast(err, 'saveGeneralSettings');
+      showErrorToast(err, "saveGeneralSettings");
       throw err;
     } finally {
       setSaving(false);
     }
-  }, [general, state, logoUrl, logoFile, uploadLogo, updateCompany, updateSettings, company, settings?.localization]);
+  }, [
+    general,
+    state,
+    logoUrl,
+    logoFile,
+    uploadLogo,
+    updateCompany,
+    updateSettings,
+    company,
+    settings?.localization,
+  ]);
 
   const reset = useCallback(() => {
     if (!general) return;

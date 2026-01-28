@@ -1,4 +1,8 @@
-import { PERMISSION_KEYS, type PermissionKey, type PermissionValue } from '@/lib/permissions/registry';
+import {
+  PERMISSION_KEYS,
+  type PermissionKey,
+  type PermissionValue,
+} from "@/lib/permissions/registry";
 
 export interface RolePermissions {
   [key: string]: boolean;
@@ -35,17 +39,17 @@ export class PermissionResolver {
   resolve(permissionKey: PermissionKey): boolean {
     // Find user override for this permission
     const override = this.context.userOverrides.find(
-      o => o.permission_key === permissionKey
+      (o) => o.permission_key === permissionKey,
     );
 
     // Apply precedence rules:
     // 1. Deny override (highest precedence)
-    if (override?.permission_value === 'deny') {
+    if (override?.permission_value === "deny") {
       return false;
     }
 
     // 2. Allow override (second precedence)
-    if (override?.permission_value === 'allow') {
+    if (override?.permission_value === "allow") {
       return true;
     }
 
@@ -61,11 +65,11 @@ export class PermissionResolver {
    */
   resolveMany(permissionKeys: PermissionKey[]): Record<string, boolean> {
     const results: Record<string, boolean> = {};
-    
+
     for (const key of permissionKeys) {
       results[key] = this.resolve(key);
     }
-    
+
     return results;
   }
 
@@ -82,20 +86,22 @@ export class PermissionResolver {
    * @param permissionKey - The permission to check
    * @returns string - Source of the permission
    */
-  getPermissionSource(permissionKey: PermissionKey): 'role' | 'allow_override' | 'deny_override' {
+  getPermissionSource(
+    permissionKey: PermissionKey,
+  ): "role" | "allow_override" | "deny_override" {
     const override = this.context.userOverrides.find(
-      o => o.permission_key === permissionKey
+      (o) => o.permission_key === permissionKey,
     );
 
-    if (override?.permission_value === 'deny') {
-      return 'deny_override';
+    if (override?.permission_value === "deny") {
+      return "deny_override";
     }
 
-    if (override?.permission_value === 'allow') {
-      return 'allow_override';
+    if (override?.permission_value === "allow") {
+      return "allow_override";
     }
 
-    return 'role';
+    return "role";
   }
 
   /**
@@ -104,7 +110,7 @@ export class PermissionResolver {
    * @returns boolean - True if user has at least one permission
    */
   hasAny(permissionKeys: PermissionKey[]): boolean {
-    return permissionKeys.some(key => this.resolve(key));
+    return permissionKeys.some((key) => this.resolve(key));
   }
 
   /**
@@ -113,7 +119,7 @@ export class PermissionResolver {
    * @returns boolean - True if user has all permissions
    */
   hasAll(permissionKeys: PermissionKey[]): boolean {
-    return permissionKeys.every(key => this.resolve(key));
+    return permissionKeys.every((key) => this.resolve(key));
   }
 
   /**
@@ -130,7 +136,9 @@ export class PermissionResolver {
  * @param context - Permission context
  * @returns PermissionResolver - New resolver instance
  */
-export function createPermissionResolver(context: PermissionContext): PermissionResolver {
+export function createPermissionResolver(
+  context: PermissionContext,
+): PermissionResolver {
   return new PermissionResolver(context);
 }
 
@@ -142,7 +150,7 @@ export function createPermissionResolver(context: PermissionContext): Permission
  */
 export function serverResolvePermission(
   context: PermissionContext,
-  permissionKey: PermissionKey
+  permissionKey: PermissionKey,
 ): boolean {
   const resolver = createPermissionResolver(context);
   return resolver.resolve(permissionKey);

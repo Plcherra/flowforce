@@ -1,2 +1,2 @@
-export { PolicyEngine } from './PolicyEngine';
-export type { PolicyDecision, PolicyEngineOptions } from './PolicyEngine';
+export { PolicyEngine } from "./PolicyEngine";
+export type { PolicyDecision, PolicyEngineOptions } from "./PolicyEngine";

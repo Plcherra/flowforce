@@ -3,6 +3,9 @@
 -- Fix mutable search_path, column reference errors, and optimize RLS policies
 
 -- First, fix all SECURITY DEFINER functions with proper search_path
+-- Drop all variants first to handle signature changes (adding DEFAULT)
+-- Note: Functions with DEFAULT parameters are dropped using the parameter type, not DEFAULT keyword
+DROP FUNCTION IF EXISTS public.get_user_role(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_role(user_uuid UUID DEFAULT auth.uid())
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -15,6 +18,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.get_user_company_id(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_company_id(user_uuid UUID DEFAULT auth.uid())
 RETURNS UUID
 LANGUAGE plpgsql
@@ -27,6 +31,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.is_company_admin(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.is_company_admin(user_uuid UUID DEFAULT auth.uid())
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -40,6 +45,7 @@ END;
 $$;
 
 -- Fix the is_admin_or_manager function to use correct column reference
+DROP FUNCTION IF EXISTS public.is_admin_or_manager(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.is_admin_or_manager(_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -57,6 +63,8 @@ END;
 $$;
 
 -- Fix has_role function with proper search_path
+DROP FUNCTION IF EXISTS public.has_role(uuid, text) CASCADE;
+DROP FUNCTION IF EXISTS public.has_role(uuid, user_role) CASCADE;
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -74,6 +82,7 @@ END;
 $$;
 
 -- Update get_company_roles function with proper search_path
+DROP FUNCTION IF EXISTS public.get_company_roles(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.get_company_roles(company_uuid UUID DEFAULT NULL)
 RETURNS TABLE (
   id UUID,

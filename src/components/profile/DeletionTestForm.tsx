@@ -1,8 +1,7 @@
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 interface DeletionTestFormProps {
   testEmail: string;
@@ -46,8 +45,8 @@ export default function DeletionTestForm({
         />
       </div>
 
-      <Button 
-        onClick={onRunTests} 
+      <Button
+        onClick={onRunTests}
         disabled={isRunningTest || !testEmail || !testPassword}
         className="w-full"
       >
@@ -57,7 +56,7 @@ export default function DeletionTestForm({
             Running Tests...
           </>
         ) : (
-          'Run Deletion Tests'
+          "Run Deletion Tests"
         )}
       </Button>
     </div>

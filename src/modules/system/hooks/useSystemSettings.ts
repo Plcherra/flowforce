@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useCompany, type Company } from '@/hooks/useCompany';
-import type { Tables } from '@/integrations/supabase/public-types';
-import type { SystemSettings as SystemSettingsModel } from '@/types/system-settings';
-import { handleError } from '@/utils/errorHandler';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useCompany, type Company } from "@/hooks/useCompany";
+import type { Tables } from "@/integrations/supabase/public-types";
+import type { SystemSettings as SystemSettingsModel } from "@/types/system-settings";
+import { handleError } from "@/utils/errorHandler";
 import {
   DEFAULT_ADMIN_CONFIG,
   DEFAULT_APPEARANCE,
@@ -14,28 +14,39 @@ import {
   DEFAULT_NOTIFICATIONS,
   DEFAULT_SECURITY,
   seedSystemSettings,
-} from './systemSettingsDefaults';
-import { normalizeSystemSettingsRow, type SystemSettingsRow } from './systemSettingsNormalizer';
+} from "./systemSettingsDefaults";
+import {
+  normalizeSystemSettingsRow,
+  type SystemSettingsRow,
+} from "./systemSettingsNormalizer";
 
-type ProfileRow = Tables<'profiles'>;
+type ProfileRow = Tables<"profiles">;
 
 type PartialUpdate = Partial<
   Pick<
     SystemSettingsRow,
-    | 'general'
-    | 'security'
-    | 'localization'
-    | 'notifications'
-    | 'integrations'
-    | 'appearance'
-    | 'admin_config'
-    | 'updated_at'
+    | "general"
+    | "security"
+    | "localization"
+    | "notifications"
+    | "integrations"
+    | "appearance"
+    | "admin_config"
+    | "updated_at"
   >
 >;
 
-const allowedManagerRoles: ProfileRow['role'][] = ['admin', 'owner', 'company_admin', 'manager'];
+const allowedManagerRoles: ProfileRow["role"][] = [
+  "admin",
+  "owner",
+  "company_admin",
+  "manager",
+];
 
-const ensureDefaults = (company: Company, companyId: string): SystemSettingsRow => {
+const ensureDefaults = (
+  company: Company,
+  companyId: string,
+): SystemSettingsRow => {
   const seeded = seedSystemSettings(company);
   return {
     id: `virtual-${companyId}`,
@@ -46,7 +57,8 @@ const ensureDefaults = (company: Company, companyId: string): SystemSettingsRow 
       businessStructure: {
         ...seeded.admin_config.businessStructure,
         workingHours:
-          company.working_hours ?? seeded.admin_config.businessStructure.workingHours,
+          company.working_hours ??
+          seeded.admin_config.businessStructure.workingHours,
       },
     },
     created_at: company.created_at ?? new Date().toISOString(),
@@ -60,17 +72,21 @@ export interface SystemSettingsHook {
   loading: boolean;
   error: Error | null;
   canEdit: boolean;
-  role: ProfileRow['role'] | null;
+  role: ProfileRow["role"] | null;
   isCompanyAdmin: boolean;
   missingCompany: boolean;
   linkingCompany: boolean;
   linkCompanyError: Error | null;
   linkCompany: () => Promise<void>;
   refresh: () => Promise<void>;
-  updateSettings: (changes: PartialUpdate) => Promise<SystemSettingsModel | null>;
+  updateSettings: (
+    changes: PartialUpdate,
+  ) => Promise<SystemSettingsModel | null>;
 }
 
-export function useSystemSettings(providedCompanyId?: string): SystemSettingsHook {
+export function useSystemSettings(
+  providedCompanyId?: string,
+): SystemSettingsHook {
   const { user } = useAuth();
   const { company, loading: companyLoading, refetchCompany } = useCompany();
 
@@ -79,7 +95,7 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
   const [settings, setSettings] = useState<SystemSettingsModel | null>(null);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [role, setRole] = useState<ProfileRow['role'] | null>(null);
+  const [role, setRole] = useState<ProfileRow["role"] | null>(null);
   const [isCompanyAdmin, setIsCompanyAdmin] = useState(false);
   const [permissionsReady, setPermissionsReady] = useState(false);
   const [missingCompany, setMissingCompany] = useState(false);
@@ -103,9 +119,9 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
     (async () => {
       try {
         const { data, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, is_company_admin')
-          .eq('id', user.id)
+          .from("profiles")
+          .select("role, is_company_admin")
+          .eq("id", user.id)
           .single();
 
         if (profileError) throw profileError;
@@ -115,7 +131,7 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
         setIsCompanyAdmin(Boolean(data.is_company_admin));
       } catch (err) {
         if (!active) return;
-        const handled = handleError(err, 'loadSystemSettingsPermissions');
+        const handled = handleError(err, "loadSystemSettingsPermissions");
         setError(new Error(handled.message));
         setRole(null);
         setIsCompanyAdmin(false);
@@ -144,16 +160,16 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
     setFetching(true);
     try {
       const { data: row, error: fetchError } = await supabase
-        .from('system_settings')
-        .select('*')
-        .eq('company_id', companyId)
+        .from("system_settings")
+        .select("*")
+        .eq("company_id", companyId)
         .maybeSingle();
 
       let workingRow = row ?? null;
 
       if (!workingRow && canEdit) {
         const { data: inserted, error: insertError } = await supabase
-          .from('system_settings')
+          .from("system_settings")
           .insert({ company_id: companyId })
           .select()
           .single();
@@ -171,10 +187,10 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
         setError(null);
       } else {
         setSettings(null);
-        setError(new Error('Unable to resolve system settings'));
+        setError(new Error("Unable to resolve system settings"));
       }
     } catch (err) {
-      const handled = handleError(err, 'fetchSystemSettings');
+      const handled = handleError(err, "fetchSystemSettings");
       setError(new Error(handled.message));
       setSettings(null);
     } finally {
@@ -192,7 +208,7 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
   const updateSettings = useCallback(
     async (changes: PartialUpdate) => {
       if (!companyId) {
-        throw new Error('Company context is required to update settings');
+        throw new Error("Company context is required to update settings");
       }
 
       const payload: PartialUpdate = {
@@ -201,9 +217,9 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
       };
 
       const { data, error: updateError } = await supabase
-        .from('system_settings')
+        .from("system_settings")
         .update(payload)
-        .eq('company_id', companyId)
+        .eq("company_id", companyId)
         .select()
         .single();
 
@@ -228,7 +244,7 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
 
   const linkCompany = useCallback(async () => {
     if (!user) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
 
     setLinkingCompany(true);
@@ -237,10 +253,10 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
       let targetCompanyId: string | null = null;
 
       const { data: existing, error: existingError } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('created_by', user.id)
-        .order('created_at', { ascending: true })
+        .from("companies")
+        .select("id")
+        .eq("created_by", user.id)
+        .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
 
@@ -251,41 +267,45 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
       if (existing?.id) {
         targetCompanyId = existing.id;
       } else {
-        const { data: created, error: createError } = await supabase.rpc('create_company_with_setup', {
-          company_data: {
-            name: 'Demo Workspace',
-            industry: null,
-            size: null,
-            description: 'Automatically generated workspace',
-            website: null,
-            phone: null,
-            primary_color: '#3b82f6',
-            secondary_color: '#1e40af',
-            template_id: null,
-            template_name: null,
-            enabled_sections: [],
-            template_config: JSON.stringify({}),
+        const { data: created, error: createError } = await supabase.rpc(
+          "create_company_with_setup",
+          {
+            company_data: {
+              name: "Demo Workspace",
+              industry: null,
+              size: null,
+              description: "Automatically generated workspace",
+              website: null,
+              phone: null,
+              primary_color: "#3b82f6",
+              secondary_color: "#1e40af",
+              template_id: null,
+              template_name: null,
+              enabled_sections: [],
+              template_config: JSON.stringify({}),
+            },
+            custom_roles: [],
+            positions_data: [],
+            owner_user_id: user.id,
           },
-          custom_roles: [],
-          positions_data: [],
-          owner_user_id: user.id,
-        });
+        );
 
         if (createError) {
           throw createError;
         }
 
-        targetCompanyId = typeof created === 'string' ? created : created?.id ?? null;
+        targetCompanyId =
+          typeof created === "string" ? created : (created?.id ?? null);
       }
 
       if (!targetCompanyId) {
-        throw new Error('Unable to determine company to link');
+        throw new Error("Unable to determine company to link");
       }
 
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ company_id: targetCompanyId })
-        .eq('id', user.id);
+        .eq("id", user.id);
 
       if (updateError) {
         throw updateError;
@@ -294,7 +314,7 @@ export function useSystemSettings(providedCompanyId?: string): SystemSettingsHoo
       setMissingCompany(false);
       await Promise.all([refetchCompany(), fetchSettings()]);
     } catch (err) {
-      const handled = handleError(err, 'linkCompany');
+      const handled = handleError(err, "linkCompany");
       setLinkCompanyError(new Error(handled.message));
       throw err;
     } finally {

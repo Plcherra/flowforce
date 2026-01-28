@@ -1,1 +1,1 @@
-export { CourseCreationWizard as default } from './CourseCreationWizard';
+export { CourseCreationWizard as default } from "./CourseCreationWizard";

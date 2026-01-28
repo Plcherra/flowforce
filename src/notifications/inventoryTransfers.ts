@@ -1,6 +1,6 @@
-import dayjs from 'dayjs';
-import type { InventoryTransferStatus } from '@/features/inventory/hooks/types';
-import { logger } from '@/utils/logger';
+import dayjs from "dayjs";
+import type { InventoryTransferStatus } from "@/features/inventory/hooks/types";
+import { logger } from "@/utils/logger";
 
 interface TransferNotificationBase {
   transferId: string;
@@ -19,16 +19,19 @@ interface StatusChangeNotification extends TransferNotificationBase {
 }
 
 const logNotification = (type: string, payload: Record<string, unknown>) => {
-  logger.info(`[notify][inventory-transfer][${type}]`, { context: payload, tags: ['info'] });
+  logger.info(`[notify][inventory-transfer][${type}]`, {
+    context: payload,
+    tags: ["info"],
+  });
 };
 
 const formatDeliveryDate = (deliveryDate?: string | null) => {
-  if (!deliveryDate) return 'unscheduled';
-  return dayjs(deliveryDate).format('MMM D, YYYY');
+  if (!deliveryDate) return "unscheduled";
+  return dayjs(deliveryDate).format("MMM D, YYYY");
 };
 
 export async function notifyTransferCreated(details: TransferNotificationBase) {
-  logNotification('created', {
+  logNotification("created", {
     transferId: details.transferId,
     fulfillerId: details.fulfillerId,
     recipientId: details.recipientId,
@@ -39,8 +42,10 @@ export async function notifyTransferCreated(details: TransferNotificationBase) {
   });
 }
 
-export async function notifyTransferStatusChange(details: StatusChangeNotification) {
-  logNotification('status-change', {
+export async function notifyTransferStatusChange(
+  details: StatusChangeNotification,
+) {
+  logNotification("status-change", {
     transferId: details.transferId,
     status: details.status,
     actorId: details.actorId,

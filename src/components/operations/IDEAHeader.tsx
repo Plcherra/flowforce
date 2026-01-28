@@ -1,9 +1,15 @@
-import { useMemo } from 'react';
-import { format } from 'date-fns';
-import { CalendarRange, RefreshCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
+import { useMemo } from "react";
+import { format } from "date-fns";
+import { CalendarRange, RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useIdeaContext } from "@/modules/operations/contexts/IdeaProvider";
 
 interface IDEAHeaderProps {
   onRefresh?: () => void;
@@ -12,12 +18,16 @@ interface IDEAHeaderProps {
 }
 
 const RANGE_PRESETS: Record<string, number> = {
-  'last-7-days': 7,
-  'last-14-days': 14,
-  'last-30-days': 30,
+  "last-7-days": 7,
+  "last-14-days": 14,
+  "last-30-days": 30,
 };
 
-export function IDEAHeader({ onRefresh, stageLoading = false, children }: IDEAHeaderProps) {
+export function IDEAHeader({
+  onRefresh,
+  stageLoading = false,
+  children,
+}: IDEAHeaderProps) {
   const { range, setRange } = useIdeaContext();
 
   const activePreset = useMemo<string>(() => {
@@ -25,8 +35,10 @@ export function IDEAHeader({ onRefresh, stageLoading = false, children }: IDEAHe
     const diffInMs = now.getTime() - range.start.getTime();
     const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24));
 
-    const presetEntry = Object.entries(RANGE_PRESETS).find(([, days]) => days === diffInDays);
-    return presetEntry?.[0] ?? 'custom';
+    const presetEntry = Object.entries(RANGE_PRESETS).find(
+      ([, days]) => days === diffInDays,
+    );
+    return presetEntry?.[0] ?? "custom";
   }, [range.start]);
 
   const handlePresetChange = (value: string) => {
@@ -41,19 +53,26 @@ export function IDEAHeader({ onRefresh, stageLoading = false, children }: IDEAHe
     <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-background/80 p-4 shadow-sm backdrop-blur-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Operations Intelligence (IDEA)</h1>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Operations Intelligence (IDEA)
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Navigate the Identify → Diagnose → Execute → Assess loop to drive continuous improvement.
+            Navigate the Identify → Diagnose → Execute → Assess loop to drive
+            continuous improvement.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
             <CalendarRange className="h-4 w-4" />
             <span>
-              {format(range.start, 'MMM d, yyyy')} – {format(range.end, 'MMM d, yyyy')}
+              {format(range.start, "MMM d, yyyy")} –{" "}
+              {format(range.end, "MMM d, yyyy")}
             </span>
           </div>
-          <Select value={activePreset === 'custom' ? undefined : activePreset} onValueChange={handlePresetChange}>
+          <Select
+            value={activePreset === "custom" ? undefined : activePreset}
+            onValueChange={handlePresetChange}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Custom range" />
             </SelectTrigger>
@@ -63,7 +82,12 @@ export function IDEAHeader({ onRefresh, stageLoading = false, children }: IDEAHe
               <SelectItem value="last-30-days">Last 30 days</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={onRefresh} disabled={stageLoading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={stageLoading}
+          >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Refresh
           </Button>

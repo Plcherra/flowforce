@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { canViewScheduleDrafts } from '@/utils/authRoles';
-import { buildSchedulingFallbackData } from './fallbackData';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { canViewScheduleDrafts } from "@/utils/authRoles";
+import { buildSchedulingFallbackData } from "./fallbackData";
+import { logger } from "@/utils/logger";
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -15,7 +15,7 @@ import type {
   VendorEventUpsertInput,
   VendorEventRow,
   ProfileSummary,
-} from './types';
+} from "./types";
 import {
   fetchSchedulingWeek,
   buildSchedulesWeekQueryKey,
@@ -23,8 +23,8 @@ import {
   unassignUserFromShift,
   upsertShiftRecord,
   upsertVendorEvent as upsertVendorEventRecord,
-} from '@/repositories/schedulingRepository';
-import type { Tables } from '@/integrations/supabase/public-types';
+} from "@/repositories/schedulingRepository";
+import type { Tables } from "@/integrations/supabase/public-types";
 
 interface SchedulingConsolidatedResult {
   shifts: ShiftWithAssignments[];
@@ -36,16 +36,26 @@ interface SchedulingConsolidatedResult {
   loading: boolean;
   error: string | null;
   refetchAll: () => Promise<void>;
-  assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
+  assign: (
+    shiftId: string,
+    userId: string,
+    status?: string,
+  ) => Promise<boolean>;
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
-  upsertShift: (payload: ShiftUpsertInput) => Promise<Tables<'schedules'> | null>;
-  upsertVendorEvent: (payload: VendorEventUpsertInput) => Promise<VendorEventRow | null>;
+  upsertShift: (
+    payload: ShiftUpsertInput,
+  ) => Promise<Tables<"schedules"> | null>;
+  upsertVendorEvent: (
+    payload: VendorEventUpsertInput,
+  ) => Promise<VendorEventRow | null>;
   isUsingFallbackData: boolean;
 }
 
-const DEFAULT_ERROR = 'Unable to load the latest scheduling data.';
+const DEFAULT_ERROR = "Unable to load the latest scheduling data.";
 
-export function useSchedulingConsolidated(params: SchedulingQueryParams): SchedulingConsolidatedResult {
+export function useSchedulingConsolidated(
+  params: SchedulingQueryParams,
+): SchedulingConsolidatedResult {
   const { companyId, start, end, enabled = true } = params;
   const { toast } = useToast();
   const { user } = useAuth();
@@ -53,7 +63,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
   const [shifts, setShifts] = useState<ShiftWithAssignments[]>([]);
   const [assignments, setAssignments] = useState<AssignmentWithUser[]>([]);
   const [timeOffRequests, setTimeOffRequests] = useState<TimeOffWithUser[]>([]);
-  const [unavailability, setUnavailability] = useState<UnavailabilityWithUser[]>([]);
+  const [unavailability, setUnavailability] = useState<
+    UnavailabilityWithUser[]
+  >([]);
   const [vendorEvents, setVendorEvents] = useState<VendorEventRow[]>([]);
   const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +83,8 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     const startDate = parseDate(start);
     const endDate = parseDate(end);
 
-    const toIsoDate = (date?: Date) => (date ? date.toISOString().split('T')[0] : undefined);
+    const toIsoDate = (date?: Date) =>
+      date ? date.toISOString().split("T")[0] : undefined;
 
     return {
       start: startDate ? startDate.toISOString() : undefined,
@@ -83,7 +96,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
 
   const ensureCompanyContext = useCallback(() => {
     if (!companyId) {
-      throw new Error('A company context is required for scheduling operations.');
+      throw new Error(
+        "A company context is required for scheduling operations.",
+      );
     }
   }, [companyId]);
 
@@ -99,7 +114,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
       : null;
 
   const schedulesQuery = useQuery({
-    queryKey: schedulesQueryKey ?? ['schedules-week', 'disabled'],
+    queryKey: schedulesQueryKey ?? ["schedules-week", "disabled"],
     enabled: Boolean(enabled && companyId && range.start && range.end),
     staleTime: 60_000,
     queryFn: () =>
@@ -130,12 +145,19 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
     if (!schedulesQuery.error || !range.start) {
       return;
     }
-    const errorMessage = schedulesQuery.error instanceof Error 
-      ? schedulesQuery.error.message 
-      : typeof schedulesQuery.error === 'object' && schedulesQuery.error !== null && 'message' in schedulesQuery.error
-        ? String(schedulesQuery.error.message)
-        : DEFAULT_ERROR;
-    logger.error('Failed to load scheduling data, using fallback data', { error: schedulesQuery.error, context: { errorMessage }, tags: ['error'] });
+    const errorMessage =
+      schedulesQuery.error instanceof Error
+        ? schedulesQuery.error.message
+        : typeof schedulesQuery.error === "object" &&
+            schedulesQuery.error !== null &&
+            "message" in schedulesQuery.error
+          ? String(schedulesQuery.error.message)
+          : DEFAULT_ERROR;
+    logger.error("Failed to load scheduling data, using fallback data", {
+      error: schedulesQuery.error,
+      context: { errorMessage },
+      tags: ["error"],
+    });
     setError(errorMessage);
     const fallback = buildSchedulingFallbackData({ start: range.start });
     setShifts(fallback.shifts);
@@ -148,9 +170,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
 
     if (!fallbackNoticeShownRef.current) {
       toast({
-        title: 'Scheduling in preview mode',
+        title: "Scheduling in preview mode",
         description:
-          'Live scheduling data is unavailable. Showing demo data so you can continue exploring the schedule experience.',
+          "Live scheduling data is unavailable. Showing demo data so you can continue exploring the schedule experience.",
       });
       fallbackNoticeShownRef.current = true;
     }
@@ -162,7 +184,7 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
   }, [queryClient, schedulesQueryKey]);
 
   const assign = useCallback(
-    async (shiftId: string, userId: string, status: string = 'assigned') => {
+    async (shiftId: string, userId: string, status: string = "assigned") => {
       try {
         ensureCompanyContext();
 
@@ -170,11 +192,14 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         await refetchAll();
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to assign teammate to shift.';
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Unable to assign teammate to shift.";
         toast({
-          title: 'Assignment error',
+          title: "Assignment error",
           description: message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return false;
       }
@@ -191,11 +216,14 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         await refetchAll();
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to unassign teammate from shift.';
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Unable to unassign teammate from shift.";
         toast({
-          title: 'Unassignment error',
+          title: "Unassignment error",
           description: message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return false;
       }
@@ -209,7 +237,9 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         ensureCompanyContext();
 
         if (!payload.start_time || !payload.end_time) {
-          throw new Error('Shift title, start_time, and end_time are required.');
+          throw new Error(
+            "Shift title, start_time, and end_time are required.",
+          );
         }
 
         const record = await upsertShiftRecord({
@@ -220,11 +250,12 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         await refetchAll();
         return record;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to save shift.';
+        const message =
+          err instanceof Error ? err.message : "Unable to save shift.";
         toast({
-          title: 'Shift save error',
+          title: "Shift save error",
           description: message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return null;
       }
@@ -244,11 +275,12 @@ export function useSchedulingConsolidated(params: SchedulingQueryParams): Schedu
         await refetchAll();
         return event;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to save vendor event.';
+        const message =
+          err instanceof Error ? err.message : "Unable to save vendor event.";
         toast({
-          title: 'Vendor event error',
+          title: "Vendor event error",
           description: message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return null;
       }
@@ -285,4 +317,4 @@ export type {
   ShiftUpsertInput,
   VendorEventUpsertInput,
   SchedulingQueryParams,
-} from './types';
+} from "./types";

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useTasks, type TaskWithRelations } from '@/hooks/useTasks';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useState } from "react";
+import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-export type TaskCommentRow = Tables<'task_comments'>;
+export type TaskCommentRow = Tables<"task_comments">;
 export type TaskCommentWithUser = TaskCommentRow & {
   user?: {
     first_name: string;
@@ -28,7 +28,7 @@ export function useTaskComments(task: TaskWithRelations | null, open: boolean) {
       const { data } = await getTaskComments(task.id);
       setComments((data as TaskCommentWithUser[]) ?? []);
     } catch (error) {
-      logger.error('Error fetching comments:', { error, tags: ['error'] });
+      logger.error("Error fetching comments:", { error, tags: ["error"] });
     } finally {
       setLoadingComments(false);
     }
@@ -51,18 +51,18 @@ export function useTaskComments(task: TaskWithRelations | null, open: boolean) {
       try {
         const { data, error } = await addComment(task.id, message.trim());
         if (error || !data) {
-          throw error ?? new Error('Unable to add comment');
+          throw error ?? new Error("Unable to add comment");
         }
         setComments((prev) => [...prev, data as TaskCommentWithUser]);
         return { success: true };
       } catch (error) {
-        logger.error('Error adding comment:', { error, tags: ['error'] });
+        logger.error("Error adding comment:", { error, tags: ["error"] });
         return { success: false, error: error as Error };
       } finally {
         setAddingComment(false);
       }
     },
-    [addComment, task?.id]
+    [addComment, task?.id],
   );
 
   return {

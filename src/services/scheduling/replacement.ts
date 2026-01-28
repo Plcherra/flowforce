@@ -1,4 +1,5 @@
-import type { Employee } from '@/hooks/useEmployees';
+// Re-export from feature folder
+export * from "@/features/scheduling/services/replacement";
 
 export interface ReplacementCandidate extends Employee {
   score: number;
@@ -19,7 +20,8 @@ export function getReplacementCandidates({
       const level = employee.skillLevel ?? 1;
       const meetsLevel = level >= requiredLevel ? 1 : 0;
       const meetsReliability = reliability >= 70 ? 1 : 0;
-      const score = reliability + meetsLevel * 25 + meetsReliability * 15 + level * 3;
+      const score =
+        reliability + meetsLevel * 25 + meetsReliability * 15 + level * 3;
       return { ...employee, score };
     })
     .sort((a, b) => b.score - a.score);

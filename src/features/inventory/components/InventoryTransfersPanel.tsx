@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
+import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import {
   ArrowRightLeft,
   CircleCheck,
@@ -7,21 +7,27 @@ import {
   PlusCircle,
   Trash2,
   XCircle,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -29,18 +35,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { useInventoryItems, useInventoryLocations } from '@/hooks/useInventory';
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useInventoryItems, useInventoryLocations } from "@/hooks/useInventory";
 import {
   useCreateInventoryTransfer,
   useInventoryTransfers,
   useUpdateInventoryTransferStatus,
-} from '@/features/inventory/hooks/useInventoryTransfers';
-import { useEmployees } from '@/hooks/useEmployees';
-import { useProfile } from '@/hooks/useProfile';
-import type { InventoryItem, InventoryTransfer, InventoryTransferStatus } from '@/features/inventory/hooks/types';
+} from "@/features/inventory/hooks/useInventoryTransfers";
+import { useEmployees } from "@/hooks/useEmployees";
+import { useProfile } from "@/hooks/useProfile";
+import type {
+  InventoryItem,
+  InventoryTransfer,
+  InventoryTransferStatus,
+} from "@/features/inventory/hooks/types";
 
 interface LineItemRow {
   key: string;
@@ -50,7 +60,7 @@ interface LineItemRow {
   unitId: string;
 }
 
-type StatusAction = 'sent' | 'received' | 'rejected';
+type StatusAction = "sent" | "received" | "rejected";
 
 type LineItemFieldErrors = {
   unit?: string;
@@ -59,86 +69,85 @@ type LineItemFieldErrors = {
 type LineItemErrors = Record<string, LineItemFieldErrors>;
 
 const statusLabels: Record<InventoryTransferStatus, string> = {
-  requested: 'Requested',
-  sent: 'In Transit',
-  received: 'Received',
-  rejected: 'Rejected',
+  requested: "Requested",
+  sent: "In Transit",
+  received: "Received",
+  rejected: "Rejected",
 };
 
 const statusStyles: Record<InventoryTransferStatus, string> = {
-  requested: 'bg-amber-100 text-amber-900 border-transparent',
-  sent: 'bg-blue-100 text-blue-900 border-transparent',
-  received: 'bg-emerald-100 text-emerald-900 border-transparent',
-  rejected: 'bg-rose-100 text-rose-900 border-transparent',
+  requested: "bg-amber-100 text-amber-900 border-transparent",
+  sent: "bg-blue-100 text-blue-900 border-transparent",
+  received: "bg-emerald-100 text-emerald-900 border-transparent",
+  rejected: "bg-rose-100 text-rose-900 border-transparent",
 };
 
 const actionLabels: Record<string, string> = {
-  created: 'Transfer created',
-  updated: 'Details updated',
-  status_changed: 'Status updated',
-  deleted: 'Transfer deleted',
+  created: "Transfer created",
+  updated: "Details updated",
+  status_changed: "Status updated",
+  deleted: "Transfer deleted",
 };
 
 const actionStatusMap: Record<StatusAction, InventoryTransferStatus> = {
-  sent: 'sent',
-  received: 'received',
-  rejected: 'rejected',
+  sent: "sent",
+  received: "received",
+  rejected: "rejected",
 };
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
 });
 
 const makeLineItemRow = (): LineItemRow => ({
   key: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-  itemId: '',
-  quantity: '',
-  costPerUnit: '',
-  unitId: '',
+  itemId: "",
+  quantity: "",
+  costPerUnit: "",
+  unitId: "",
 });
 
 const formatEmployeeName = (first?: string | null, last?: string | null) =>
-  [first, last].filter(Boolean).join(' ') || 'Unassigned';
+  [first, last].filter(Boolean).join(" ") || "Unassigned";
 
 const getItemUnitLabel = (item?: InventoryItem) =>
-  item?.unit?.abbreviation || item?.unit?.name || 'units';
+  item?.unit?.abbreviation || item?.unit?.name || "units";
 
 const formatTimestamp = (value?: string | null) =>
-  value ? dayjs(value).format('MMM D, YYYY h:mm A') : '—';
+  value ? dayjs(value).format("MMM D, YYYY h:mm A") : "—";
 
 const formatDate = (value?: string | null) =>
-  value ? dayjs(value).format('MMM D, YYYY') : 'Not scheduled';
+  value ? dayjs(value).format("MMM D, YYYY") : "Not scheduled";
 
 export function InventoryTransfersPanel() {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const currentUserId = profile?.userId ?? profile?.id ?? '';
+  const currentUserId = profile?.userId ?? profile?.id ?? "";
 
   const { data: items = [], isLoading: itemsLoading } = useInventoryItems();
-  const { data: locations = [], isLoading: locationsLoading } = useInventoryLocations();
-  const {
-    employees: teamMembers = [],
-    loading: employeesLoading,
-  } = useEmployees();
+  const { data: locations = [], isLoading: locationsLoading } =
+    useInventoryLocations();
+  const { employees: teamMembers = [], loading: employeesLoading } =
+    useEmployees();
 
-  const {
-    data: transfers = [],
-    isLoading: transfersLoading,
-  } = useInventoryTransfers();
+  const { data: transfers = [], isLoading: transfersLoading } =
+    useInventoryTransfers();
   const createTransfer = useCreateInventoryTransfer();
   const updateTransferStatus = useUpdateInventoryTransferStatus();
 
   const [form, setForm] = useState({
-    fromLocationId: '',
-    toLocationId: '',
-    fulfillerId: '',
+    fromLocationId: "",
+    toLocationId: "",
+    fulfillerId: "",
     recipientId: currentUserId,
-    deliveryDate: '',
-    comments: '',
+    deliveryDate: "",
+    comments: "",
   });
 
-  const [lineItems, setLineItems] = useState<LineItemRow[]>([makeLineItemRow()]);
+  const [lineItems, setLineItems] = useState<LineItemRow[]>([
+    makeLineItemRow(),
+  ]);
   const [lineItemErrors, setLineItemErrors] = useState<LineItemErrors>({});
 
   const [statusDialog, setStatusDialog] = useState<{
@@ -153,7 +162,7 @@ export function InventoryTransfersPanel() {
     requireNote: false,
   });
 
-  const [statusNote, setStatusNote] = useState('');
+  const [statusNote, setStatusNote] = useState("");
 
   useEffect(() => {
     if (currentUserId) {
@@ -167,7 +176,9 @@ export function InventoryTransfersPanel() {
     return lineItems.reduce((sum, row) => {
       const item = items.find((entry) => entry.id === row.itemId);
       const quantity = Number.parseFloat(row.quantity);
-      const costSource = row.costPerUnit || (item?.cost_per_unit ? String(item.cost_per_unit) : '');
+      const costSource =
+        row.costPerUnit ||
+        (item?.cost_per_unit ? String(item.cost_per_unit) : "");
       const cost = Number.parseFloat(costSource);
       if (!Number.isFinite(quantity) || quantity <= 0) return sum;
       if (!Number.isFinite(cost) || cost < 0) return sum;
@@ -177,12 +188,12 @@ export function InventoryTransfersPanel() {
 
   const resetForm = () => {
     setForm({
-      fromLocationId: '',
-      toLocationId: '',
-      fulfillerId: '',
+      fromLocationId: "",
+      toLocationId: "",
+      fulfillerId: "",
       recipientId: currentUserId,
-      deliveryDate: '',
-      comments: '',
+      deliveryDate: "",
+      comments: "",
     });
     setLineItems([makeLineItemRow()]);
     setLineItemErrors({});
@@ -191,8 +202,9 @@ export function InventoryTransfersPanel() {
   const handleItemSelect = (index: number, itemId: string) => {
     const item = items.find((entry) => entry.id === itemId);
     const units = item?.units ?? [];
-    const primaryUnit = units.find((entry) => entry.unit_level === 1) ?? units[0];
-    const fallbackUnitId = primaryUnit?.unit_id || item?.unit_id || '';
+    const primaryUnit =
+      units.find((entry) => entry.unit_level === 1) ?? units[0];
+    const fallbackUnitId = primaryUnit?.unit_id || item?.unit_id || "";
     const fallbackUnitCost =
       primaryUnit?.cost_per_unit ??
       item?.calculated_cost_per_unit ??
@@ -211,7 +223,7 @@ export function InventoryTransfersPanel() {
                   ? String(fallbackUnitCost)
                   : item?.cost_per_unit != null
                     ? String(item.cost_per_unit)
-                    : '',
+                    : "",
             }
           : row,
       ),
@@ -235,7 +247,7 @@ export function InventoryTransfersPanel() {
           ...next,
           [rowKey]: {
             ...(next[rowKey] ?? {}),
-            unit: 'This item has no units configured. Update the item before creating a transfer.',
+            unit: "This item has no units configured. Update the item before creating a transfer.",
           },
         };
       });
@@ -244,13 +256,17 @@ export function InventoryTransfersPanel() {
 
   const handleQuantityChange = (index: number, value: string) => {
     setLineItems((prev) =>
-      prev.map((row, idx) => (idx === index ? { ...row, quantity: value } : row)),
+      prev.map((row, idx) =>
+        idx === index ? { ...row, quantity: value } : row,
+      ),
     );
   };
 
   const handleCostChange = (index: number, value: string) => {
     setLineItems((prev) =>
-      prev.map((row, idx) => (idx === index ? { ...row, costPerUnit: value } : row)),
+      prev.map((row, idx) =>
+        idx === index ? { ...row, costPerUnit: value } : row,
+      ),
     );
   };
 
@@ -290,7 +306,8 @@ export function InventoryTransfersPanel() {
           ? {
               ...row,
               unitId,
-              costPerUnit: fallbackCost != null ? String(fallbackCost) : row.costPerUnit,
+              costPerUnit:
+                fallbackCost != null ? String(fallbackCost) : row.costPerUnit,
             }
           : row,
       ),
@@ -327,20 +344,20 @@ export function InventoryTransfersPanel() {
         availableUnits.add(item.unit_id);
       }
 
-      const unitId = row.unitId || item?.unit_id || '';
+      const unitId = row.unitId || item?.unit_id || "";
 
       if (!unitId) {
         nextErrors[row.key] = {
           unit:
             availableUnits.size === 0
-              ? 'This item has no units configured. Update the item before creating a transfer.'
-              : 'Select a unit for this item.',
+              ? "This item has no units configured. Update the item before creating a transfer."
+              : "Select a unit for this item.",
         };
         return;
       }
 
       if (availableUnits.size > 0 && !availableUnits.has(unitId)) {
-        nextErrors[row.key] = { unit: 'Select a valid unit option.' };
+        nextErrors[row.key] = { unit: "Select a valid unit option." };
       }
     });
 
@@ -355,7 +372,9 @@ export function InventoryTransfersPanel() {
         const item = items.find((entry) => entry.id === row.itemId);
         const quantity = Number.parseFloat(row.quantity);
         if (!Number.isFinite(quantity) || quantity <= 0) return null;
-        const costString = row.costPerUnit || (item?.cost_per_unit != null ? String(item.cost_per_unit) : '');
+        const costString =
+          row.costPerUnit ||
+          (item?.cost_per_unit != null ? String(item.cost_per_unit) : "");
         const cost = Number.parseFloat(costString);
         const unitId = row.unitId || item?.unit_id;
         if (!unitId) return null;
@@ -366,39 +385,48 @@ export function InventoryTransfersPanel() {
           cost_per_unit: Number.isFinite(cost) && cost >= 0 ? cost : undefined,
         };
       })
-      .filter((entry): entry is {
-        item_id: string;
-        unit_id: string;
-        quantity: number;
-        cost_per_unit?: number;
-      } => Boolean(entry));
+      .filter(
+        (
+          entry,
+        ): entry is {
+          item_id: string;
+          unit_id: string;
+          quantity: number;
+          cost_per_unit?: number;
+        } => Boolean(entry),
+      );
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!form.fromLocationId || !form.toLocationId || !form.fulfillerId || !form.recipientId) {
+    if (
+      !form.fromLocationId ||
+      !form.toLocationId ||
+      !form.fulfillerId ||
+      !form.recipientId
+    ) {
       toast({
-        title: 'Missing details',
-        description: 'Select locations and both fulfiller and recipient.',
-        variant: 'destructive',
+        title: "Missing details",
+        description: "Select locations and both fulfiller and recipient.",
+        variant: "destructive",
       });
       return;
     }
 
     if (form.fromLocationId === form.toLocationId) {
       toast({
-        title: 'Invalid locations',
-        description: 'From and To locations must be different.',
-        variant: 'destructive',
+        title: "Invalid locations",
+        description: "From and To locations must be different.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!validateLineItems()) {
       toast({
-        title: 'Select units',
-        description: 'Choose a unit for each transfer item before submitting.',
-        variant: 'destructive',
+        title: "Select units",
+        description: "Choose a unit for each transfer item before submitting.",
+        variant: "destructive",
       });
       return;
     }
@@ -406,9 +434,9 @@ export function InventoryTransfersPanel() {
     const payloadItems = buildLineItemPayload();
     if (payloadItems.length === 0) {
       toast({
-        title: 'Add items',
-        description: 'Include at least one valid item with quantity.',
-        variant: 'destructive',
+        title: "Add items",
+        description: "Include at least one valid item with quantity.",
+        variant: "destructive",
       });
       return;
     }
@@ -430,14 +458,17 @@ export function InventoryTransfersPanel() {
     }
   };
 
-  const openStatusDialog = (transfer: InventoryTransfer, action: StatusAction) => {
+  const openStatusDialog = (
+    transfer: InventoryTransfer,
+    action: StatusAction,
+  ) => {
     setStatusDialog({
       open: true,
       transfer,
       action,
-      requireNote: action === 'rejected',
+      requireNote: action === "rejected",
     });
-    setStatusNote('');
+    setStatusNote("");
   };
 
   const closeStatusDialog = () => {
@@ -447,7 +478,7 @@ export function InventoryTransfersPanel() {
       action: null,
       requireNote: false,
     });
-    setStatusNote('');
+    setStatusNote("");
   };
 
   const handleStatusSubmit = async () => {
@@ -456,9 +487,9 @@ export function InventoryTransfersPanel() {
 
     if (statusDialog.requireNote && !note) {
       toast({
-        title: 'Add a note',
-        description: 'Please include a note when rejecting a transfer.',
-        variant: 'destructive',
+        title: "Add a note",
+        description: "Please include a note when rejecting a transfer.",
+        variant: "destructive",
       });
       return;
     }
@@ -476,16 +507,19 @@ export function InventoryTransfersPanel() {
   };
 
   const canMarkAsSent = (transfer: InventoryTransfer) =>
-    transfer.status === 'requested' && transfer.fulfiller_id === currentUserId;
+    transfer.status === "requested" && transfer.fulfiller_id === currentUserId;
 
   const canMarkAsReceived = (transfer: InventoryTransfer) =>
-    transfer.status === 'sent' && transfer.recipient_id === currentUserId;
+    transfer.status === "sent" && transfer.recipient_id === currentUserId;
 
   const canReject = (transfer: InventoryTransfer) => {
-    if (transfer.status === 'requested') {
-      return transfer.fulfiller_id === currentUserId || transfer.recipient_id === currentUserId;
+    if (transfer.status === "requested") {
+      return (
+        transfer.fulfiller_id === currentUserId ||
+        transfer.recipient_id === currentUserId
+      );
     }
-    if (transfer.status === 'sent') {
+    if (transfer.status === "sent") {
       return transfer.recipient_id === currentUserId;
     }
     return false;
@@ -502,7 +536,8 @@ export function InventoryTransfersPanel() {
             Create Transfer
           </CardTitle>
           <CardDescription>
-            Coordinate stock movement between locations with cost tracking and approvals.
+            Coordinate stock movement between locations with cost tracking and
+            approvals.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -512,12 +547,20 @@ export function InventoryTransfersPanel() {
                 <Label htmlFor="from-location">From location</Label>
                 <Select
                   value={form.fromLocationId}
-                  onValueChange={(value) => setForm((prev) => ({ ...prev, fromLocationId: value }))}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, fromLocationId: value }))
+                  }
                   disabled={locationsLoading}
                   required
                 >
                   <SelectTrigger id="from-location">
-                    <SelectValue placeholder={locationsLoading ? 'Loading locations...' : 'Select location'} />
+                    <SelectValue
+                      placeholder={
+                        locationsLoading
+                          ? "Loading locations..."
+                          : "Select location"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((location) => (
@@ -533,12 +576,20 @@ export function InventoryTransfersPanel() {
                 <Label htmlFor="to-location">To location</Label>
                 <Select
                   value={form.toLocationId}
-                  onValueChange={(value) => setForm((prev) => ({ ...prev, toLocationId: value }))}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, toLocationId: value }))
+                  }
                   disabled={locationsLoading}
                   required
                 >
                   <SelectTrigger id="to-location">
-                    <SelectValue placeholder={locationsLoading ? 'Loading locations...' : 'Select location'} />
+                    <SelectValue
+                      placeholder={
+                        locationsLoading
+                          ? "Loading locations..."
+                          : "Select location"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {locations.map((location) => (
@@ -556,17 +607,28 @@ export function InventoryTransfersPanel() {
                 <Label htmlFor="fulfiller">Fulfiller</Label>
                 <Select
                   value={form.fulfillerId}
-                  onValueChange={(value) => setForm((prev) => ({ ...prev, fulfillerId: value }))}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, fulfillerId: value }))
+                  }
                   disabled={employeesLoading}
                   required
                 >
                   <SelectTrigger id="fulfiller">
-                    <SelectValue placeholder={employeesLoading ? 'Loading team...' : 'Select fulfiller'} />
+                    <SelectValue
+                      placeholder={
+                        employeesLoading
+                          ? "Loading team..."
+                          : "Select fulfiller"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {teamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
-                        {formatEmployeeName(member.first_name, member.last_name)}
+                        {formatEmployeeName(
+                          member.first_name,
+                          member.last_name,
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -577,17 +639,28 @@ export function InventoryTransfersPanel() {
                 <Label htmlFor="recipient">Recipient</Label>
                 <Select
                   value={form.recipientId}
-                  onValueChange={(value) => setForm((prev) => ({ ...prev, recipientId: value }))}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, recipientId: value }))
+                  }
                   disabled={employeesLoading}
                   required
                 >
                   <SelectTrigger id="recipient">
-                    <SelectValue placeholder={employeesLoading ? 'Loading team...' : 'Select recipient'} />
+                    <SelectValue
+                      placeholder={
+                        employeesLoading
+                          ? "Loading team..."
+                          : "Select recipient"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {teamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
-                        {formatEmployeeName(member.first_name, member.last_name)}
+                        {formatEmployeeName(
+                          member.first_name,
+                          member.last_name,
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -602,7 +675,12 @@ export function InventoryTransfersPanel() {
                   id="delivery-date"
                   type="date"
                   value={form.deliveryDate}
-                  onChange={(event) => setForm((prev) => ({ ...prev, deliveryDate: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      deliveryDate: event.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -611,7 +689,12 @@ export function InventoryTransfersPanel() {
                   id="comments"
                   placeholder="Add context for the fulfiller..."
                   value={form.comments}
-                  onChange={(event) => setForm((prev) => ({ ...prev, comments: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      comments: event.target.value,
+                    }))
+                  }
                   rows={3}
                 />
               </div>
@@ -620,7 +703,12 @@ export function InventoryTransfersPanel() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-medium">Transfer items</Label>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddLineItem}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddLineItem}
+                >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add item
                 </Button>
@@ -631,13 +719,20 @@ export function InventoryTransfersPanel() {
                   const item = items.find((entry) => entry.id === row.itemId);
                   const unitOptions = item?.units ?? [];
                   const includeBaseUnitOption =
-                    Boolean(item?.unit_id) && !unitOptions.some((unit) => unit.unit_id === item?.unit_id);
+                    Boolean(item?.unit_id) &&
+                    !unitOptions.some((unit) => unit.unit_id === item?.unit_id);
                   const resolvedUnit =
-                    unitOptions.find((unit) => unit.unit_id === row.unitId)?.unit ||
-                    (row.unitId && row.unitId === item?.unit_id ? item?.unit : undefined);
+                    unitOptions.find((unit) => unit.unit_id === row.unitId)
+                      ?.unit ||
+                    (row.unitId && row.unitId === item?.unit_id
+                      ? item?.unit
+                      : undefined);
                   const unitLabel =
-                    resolvedUnit?.abbreviation || resolvedUnit?.name || getItemUnitLabel(item);
-                  const hasUnitChoices = unitOptions.length > 0 || Boolean(item?.unit_id);
+                    resolvedUnit?.abbreviation ||
+                    resolvedUnit?.name ||
+                    getItemUnitLabel(item);
+                  const hasUnitChoices =
+                    unitOptions.length > 0 || Boolean(item?.unit_id);
                   const unitError = lineItemErrors[row.key]?.unit;
 
                   return (
@@ -649,17 +744,27 @@ export function InventoryTransfersPanel() {
                         <Label>Item</Label>
                         <Select
                           value={row.itemId}
-                          onValueChange={(value) => handleItemSelect(index, value)}
+                          onValueChange={(value) =>
+                            handleItemSelect(index, value)
+                          }
                           disabled={itemsLoading}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder={itemsLoading ? 'Loading items...' : 'Select item'} />
+                            <SelectValue
+                              placeholder={
+                                itemsLoading
+                                  ? "Loading items..."
+                                  : "Select item"
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {items.map((entry) => (
                               <SelectItem key={entry.id} value={entry.id}>
                                 {entry.name}
-                                {entry.unit?.name ? ` · ${entry.unit?.name}` : ''}
+                                {entry.unit?.name
+                                  ? ` · ${entry.unit?.name}`
+                                  : ""}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -670,17 +775,19 @@ export function InventoryTransfersPanel() {
                         <Label>Unit</Label>
                         <Select
                           value={row.unitId}
-                          onValueChange={(value) => handleUnitChange(index, row.key, value)}
+                          onValueChange={(value) =>
+                            handleUnitChange(index, row.key, value)
+                          }
                           disabled={!item || !hasUnitChoices}
                         >
                           <SelectTrigger>
                             <SelectValue
                               placeholder={
                                 !item
-                                  ? 'Select item first'
+                                  ? "Select item first"
                                   : hasUnitChoices
-                                    ? 'Select unit'
-                                    : 'No units configured'
+                                    ? "Select unit"
+                                    : "No units configured"
                               }
                             />
                           </SelectTrigger>
@@ -692,16 +799,25 @@ export function InventoryTransfersPanel() {
                             ) : hasUnitChoices ? (
                               <>
                                 {unitOptions.map((unit) => (
-                                  <SelectItem key={unit.id} value={unit.unit_id}>
-                                    {unit.unit?.name || 'Unit'}
-                                    {unit.unit?.abbreviation ? ` (${unit.unit.abbreviation})` : ''}
-                                    {unit.unit_level > 1 ? ` · ${unit.conversion_factor}× base` : ''}
+                                  <SelectItem
+                                    key={unit.id}
+                                    value={unit.unit_id}
+                                  >
+                                    {unit.unit?.name || "Unit"}
+                                    {unit.unit?.abbreviation
+                                      ? ` (${unit.unit.abbreviation})`
+                                      : ""}
+                                    {unit.unit_level > 1
+                                      ? ` · ${unit.conversion_factor}× base`
+                                      : ""}
                                   </SelectItem>
                                 ))}
                                 {includeBaseUnitOption && item?.unit_id ? (
                                   <SelectItem value={item.unit_id}>
-                                    {item.unit?.name || 'Default unit'}
-                                    {item.unit?.abbreviation ? ` (${item.unit.abbreviation})` : ''}
+                                    {item.unit?.name || "Default unit"}
+                                    {item.unit?.abbreviation
+                                      ? ` (${item.unit.abbreviation})`
+                                      : ""}
                                   </SelectItem>
                                 ) : null}
                               </>
@@ -713,7 +829,9 @@ export function InventoryTransfersPanel() {
                           </SelectContent>
                         </Select>
                         {unitError ? (
-                          <p className="text-xs text-destructive">{unitError}</p>
+                          <p className="text-xs text-destructive">
+                            {unitError}
+                          </p>
                         ) : null}
                       </div>
 
@@ -725,9 +843,13 @@ export function InventoryTransfersPanel() {
                             min="0"
                             step="0.01"
                             value={row.quantity}
-                            onChange={(event) => handleQuantityChange(index, event.target.value)}
+                            onChange={(event) =>
+                              handleQuantityChange(index, event.target.value)
+                            }
                           />
-                          <span className="text-xs text-muted-foreground">{unitLabel}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {unitLabel}
+                          </span>
                         </div>
                       </div>
 
@@ -738,8 +860,14 @@ export function InventoryTransfersPanel() {
                           min="0"
                           step="0.01"
                           value={row.costPerUnit}
-                          onChange={(event) => handleCostChange(index, event.target.value)}
-                          placeholder={item?.cost_per_unit != null ? String(item.cost_per_unit) : '0.00'}
+                          onChange={(event) =>
+                            handleCostChange(index, event.target.value)
+                          }
+                          placeholder={
+                            item?.cost_per_unit != null
+                              ? String(item.cost_per_unit)
+                              : "0.00"
+                          }
                         />
                       </div>
 
@@ -762,16 +890,23 @@ export function InventoryTransfersPanel() {
 
               <div className="flex items-center justify-between rounded-md bg-muted px-4 py-3 text-sm">
                 <span className="text-muted-foreground">Estimated total</span>
-                <span className="font-medium">{currencyFormatter.format(estimatedTotal || 0)}</span>
+                <span className="font-medium">
+                  {currencyFormatter.format(estimatedTotal || 0)}
+                </span>
               </div>
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={resetForm} disabled={createTransfer.isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={resetForm}
+                disabled={createTransfer.isPending}
+              >
                 Clear
               </Button>
               <Button type="submit" disabled={createTransfer.isPending}>
-                {createTransfer.isPending ? 'Submitting...' : 'Submit transfer'}
+                {createTransfer.isPending ? "Submitting..." : "Submit transfer"}
               </Button>
             </div>
           </form>
@@ -785,15 +920,19 @@ export function InventoryTransfersPanel() {
             Transfer Activity
           </CardTitle>
           <CardDescription>
-            Track requested, in-transit, and received transfers across your locations.
+            Track requested, in-transit, and received transfers across your
+            locations.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {transfersLoading ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">Loading transfers…</div>
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Loading transfers…
+            </div>
           ) : transfersList.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No transfers have been created yet. Submit a transfer above to get started.
+              No transfers have been created yet. Submit a transfer above to get
+              started.
             </div>
           ) : (
             <div className="space-y-4">
@@ -812,12 +951,16 @@ export function InventoryTransfersPanel() {
                 );
 
                 return (
-                  <div key={transfer.id} className="space-y-4 rounded-lg border p-4">
+                  <div
+                    key={transfer.id}
+                    className="space-y-4 rounded-lg border p-4"
+                  >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-semibold">
-                            {transfer.from_location?.name ?? 'Unknown'} → {transfer.to_location?.name ?? 'Unknown'}
+                            {transfer.from_location?.name ?? "Unknown"} →{" "}
+                            {transfer.to_location?.name ?? "Unknown"}
                           </h3>
                           <Badge className={cn(statusStyles[transfer.status])}>
                             {statusLabels[transfer.status]}
@@ -829,8 +972,12 @@ export function InventoryTransfersPanel() {
                           <span>Recipient: {recipientName}</span>
                         </div>
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>Requested {formatTimestamp(transfer.requested_at)}</span>
-                          <span>Target delivery {formatDate(transfer.delivery_date)}</span>
+                          <span>
+                            Requested {formatTimestamp(transfer.requested_at)}
+                          </span>
+                          <span>
+                            Target delivery {formatDate(transfer.delivery_date)}
+                          </span>
                         </div>
                         {transfer.status_note && (
                           <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
@@ -839,14 +986,16 @@ export function InventoryTransfersPanel() {
                         )}
                       </div>
                       <div className="rounded-md border px-4 py-2 text-right">
-                        <div className="text-xs uppercase text-muted-foreground">Total cost</div>
+                        <div className="text-xs uppercase text-muted-foreground">
+                          Total cost
+                        </div>
                         <div className="text-lg font-semibold">
                           {currencyFormatter.format(transfer.total_cost ?? 0)}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {Number.isFinite(Number(transfer.total_quantity))
                             ? `${Number(transfer.total_quantity).toFixed(2)} units`
-                            : '—'}
+                            : "—"}
                         </div>
                       </div>
                     </div>
@@ -855,30 +1004,49 @@ export function InventoryTransfersPanel() {
                       <table className="min-w-full divide-y divide-border text-sm">
                         <thead className="bg-muted/50">
                           <tr>
-                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">Item</th>
-                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">Quantity</th>
-                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">Cost / unit</th>
-                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">Line total</th>
+                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                              Item
+                            </th>
+                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                              Quantity
+                            </th>
+                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                              Cost / unit
+                            </th>
+                            <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                              Line total
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                           {(transfer.items ?? []).map((line) => {
                             const itemUnitLabel =
-                              line.unit?.abbreviation || line.unit?.name || getItemUnitLabel(line.item);
-                            const costPerUnit = line.cost_per_unit ?? line.item?.cost_per_unit ?? 0;
+                              line.unit?.abbreviation ||
+                              line.unit?.name ||
+                              getItemUnitLabel(line.item);
+                            const costPerUnit =
+                              line.cost_per_unit ??
+                              line.item?.cost_per_unit ??
+                              0;
                             const lineTotal =
                               line.total_cost ??
-                              (Number.isFinite(line.quantity) && Number.isFinite(costPerUnit)
+                              (Number.isFinite(line.quantity) &&
+                              Number.isFinite(costPerUnit)
                                 ? Number(line.quantity) * Number(costPerUnit)
                                 : 0);
                             return (
                               <tr key={line.id}>
-                                <td className="px-3 py-2 text-foreground">{line.item?.name ?? 'Unknown item'}</td>
-                                <td className="px-3 py-2 text-muted-foreground">
-                                  {Number(line.quantity).toFixed(2)} {itemUnitLabel}
+                                <td className="px-3 py-2 text-foreground">
+                                  {line.item?.name ?? "Unknown item"}
                                 </td>
                                 <td className="px-3 py-2 text-muted-foreground">
-                                  {currencyFormatter.format(Number(costPerUnit) || 0)}
+                                  {Number(line.quantity).toFixed(2)}{" "}
+                                  {itemUnitLabel}
+                                </td>
+                                <td className="px-3 py-2 text-muted-foreground">
+                                  {currencyFormatter.format(
+                                    Number(costPerUnit) || 0,
+                                  )}
                                 </td>
                                 <td className="px-3 py-2 text-muted-foreground">
                                   {currencyFormatter.format(lineTotal || 0)}
@@ -909,9 +1077,10 @@ export function InventoryTransfersPanel() {
                                 <div key={entry.id} className="text-xs">
                                   <span className="font-medium text-foreground">
                                     {formatTimestamp(entry.created_at)}
-                                  </span>{' '}
-                                  — {actionLabels[entry.action] || entry.action} by {actor}
-                                  {entry.note ? ` · ${entry.note}` : ''}
+                                  </span>{" "}
+                                  — {actionLabels[entry.action] || entry.action}{" "}
+                                  by {actor}
+                                  {entry.note ? ` · ${entry.note}` : ""}
                                 </div>
                               );
                             })
@@ -923,7 +1092,7 @@ export function InventoryTransfersPanel() {
                         {canMarkAsSent(transfer) && (
                           <Button
                             variant="secondary"
-                            onClick={() => openStatusDialog(transfer, 'sent')}
+                            onClick={() => openStatusDialog(transfer, "sent")}
                             disabled={updateTransferStatus.isPending}
                           >
                             Mark as sent
@@ -931,7 +1100,9 @@ export function InventoryTransfersPanel() {
                         )}
                         {canMarkAsReceived(transfer) && (
                           <Button
-                            onClick={() => openStatusDialog(transfer, 'received')}
+                            onClick={() =>
+                              openStatusDialog(transfer, "received")
+                            }
                             disabled={updateTransferStatus.isPending}
                           >
                             Mark as received
@@ -940,7 +1111,9 @@ export function InventoryTransfersPanel() {
                         {canReject(transfer) && (
                           <Button
                             variant="outline"
-                            onClick={() => openStatusDialog(transfer, 'rejected')}
+                            onClick={() =>
+                              openStatusDialog(transfer, "rejected")
+                            }
                             disabled={updateTransferStatus.isPending}
                           >
                             <XCircle className="mr-2 h-4 w-4" />
@@ -957,30 +1130,33 @@ export function InventoryTransfersPanel() {
         </CardContent>
       </Card>
 
-      <Dialog open={statusDialog.open} onOpenChange={(open) => (!open ? closeStatusDialog() : null)}>
+      <Dialog
+        open={statusDialog.open}
+        onOpenChange={(open) => (!open ? closeStatusDialog() : null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {statusDialog.action === 'sent' && 'Confirm transfer dispatch'}
-              {statusDialog.action === 'received' && 'Confirm receipt'}
-              {statusDialog.action === 'rejected' && 'Reject transfer'}
+              {statusDialog.action === "sent" && "Confirm transfer dispatch"}
+              {statusDialog.action === "received" && "Confirm receipt"}
+              {statusDialog.action === "rejected" && "Reject transfer"}
             </DialogTitle>
             <DialogDescription>
-              {statusDialog.action === 'sent' &&
-                'Let the recipient know the transfer is on the way.'}
-              {statusDialog.action === 'received' &&
-                'Confirm the items have arrived and update inventory status.'}
-              {statusDialog.action === 'rejected' &&
-                'Provide a short note explaining why this transfer is being rejected.'}
+              {statusDialog.action === "sent" &&
+                "Let the recipient know the transfer is on the way."}
+              {statusDialog.action === "received" &&
+                "Confirm the items have arrived and update inventory status."}
+              {statusDialog.action === "rejected" &&
+                "Provide a short note explaining why this transfer is being rejected."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
               {statusDialog.transfer
-                ? `${statusDialog.transfer.from_location?.name ?? 'Unknown'} → ${
-                    statusDialog.transfer.to_location?.name ?? 'Unknown'
+                ? `${statusDialog.transfer.from_location?.name ?? "Unknown"} → ${
+                    statusDialog.transfer.to_location?.name ?? "Unknown"
                   }`
-                : ''}
+                : ""}
             </div>
             <div className="space-y-2">
               <Label htmlFor="status-note">Note (optional)</Label>
@@ -997,8 +1173,11 @@ export function InventoryTransfersPanel() {
             <Button type="button" variant="outline" onClick={closeStatusDialog}>
               Cancel
             </Button>
-            <Button onClick={handleStatusSubmit} disabled={updateTransferStatus.isPending}>
-              {updateTransferStatus.isPending ? 'Updating…' : 'Confirm'}
+            <Button
+              onClick={handleStatusSubmit}
+              disabled={updateTransferStatus.isPending}
+            >
+              {updateTransferStatus.isPending ? "Updating…" : "Confirm"}
             </Button>
           </DialogFooter>
         </DialogContent>

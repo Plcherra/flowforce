@@ -1,33 +1,39 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Shield,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
   Calendar,
   Users,
   TrendingUp,
-  Settings
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+  Settings,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ComplianceViolation {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   employee?: {
     name: string;
     id: string;
   };
   date: string;
-  status: 'active' | 'resolved' | 'acknowledged';
+  status: "active" | "resolved" | "acknowledged";
 }
 
 interface ComplianceRule {
@@ -65,50 +71,52 @@ export function ComplianceMonitor() {
       // For now, simulate compliance rules until types are regenerated
       const mockRules: ComplianceRule[] = [
         {
-          id: '1',
-          rule_type: 'daily_hours',
+          id: "1",
+          rule_type: "daily_hours",
           value: 8,
           is_active: true,
-          description: 'Maximum 8 hours per day'
+          description: "Maximum 8 hours per day",
         },
         {
-          id: '2',
-          rule_type: 'weekly_hours', 
+          id: "2",
+          rule_type: "weekly_hours",
           value: 40,
           is_active: true,
-          description: 'Maximum 40 hours per week'
-        }
+          description: "Maximum 40 hours per week",
+        },
       ];
 
       // Simulate violations and metrics for demo
       const mockViolations: ComplianceViolation[] = [
         {
-          id: '1',
-          type: 'Daily Hours Exceeded',
-          severity: 'high',
-          message: 'Sarah Johnson worked 11 hours on March 15, exceeding the 10-hour daily limit',
-          employee: { name: 'Sarah Johnson', id: 'emp1' },
-          date: '2024-03-15',
-          status: 'active'
+          id: "1",
+          type: "Daily Hours Exceeded",
+          severity: "high",
+          message:
+            "Sarah Johnson worked 11 hours on March 15, exceeding the 10-hour daily limit",
+          employee: { name: "Sarah Johnson", id: "emp1" },
+          date: "2024-03-15",
+          status: "active",
         },
         {
-          id: '2',
-          type: 'Break Compliance',
-          severity: 'medium',
-          message: 'Mike Chen had insufficient break time during 8-hour shift',
-          employee: { name: 'Mike Chen', id: 'emp2' },
-          date: '2024-03-14',
-          status: 'acknowledged'
+          id: "2",
+          type: "Break Compliance",
+          severity: "medium",
+          message: "Mike Chen had insufficient break time during 8-hour shift",
+          employee: { name: "Mike Chen", id: "emp2" },
+          date: "2024-03-14",
+          status: "acknowledged",
         },
         {
-          id: '3',
-          type: 'Weekly Hours Exceeded',
-          severity: 'critical',
-          message: 'Lisa Wong has worked 45 hours this week, exceeding 40-hour limit',
-          employee: { name: 'Lisa Wong', id: 'emp3' },
-          date: '2024-03-13',
-          status: 'active'
-        }
+          id: "3",
+          type: "Weekly Hours Exceeded",
+          severity: "critical",
+          message:
+            "Lisa Wong has worked 45 hours this week, exceeding 40-hour limit",
+          employee: { name: "Lisa Wong", id: "emp3" },
+          date: "2024-03-13",
+          status: "active",
+        },
       ];
 
       const mockMetrics: ComplianceMetrics = {
@@ -118,7 +126,7 @@ export function ComplianceMonitor() {
         breakCompliance: 94,
         overtimeHours: 23.5,
         totalViolations: 8,
-        criticalViolations: 1
+        criticalViolations: 1,
       };
 
       setRules(mockRules);
@@ -137,23 +145,26 @@ export function ComplianceMonitor() {
 
   const checkCompliance = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('ai-scheduling-assistant', {
-        body: { 
-          action: 'check_compliance',
-          data: { 
-            companyId: 'current',
-            schedules: [] // This would include current week schedules
-          }
-        }
-      });
-      
+      const { data, error } = await supabase.functions.invoke(
+        "ai-scheduling-assistant",
+        {
+          body: {
+            action: "check_compliance",
+            data: {
+              companyId: "current",
+              schedules: [], // This would include current week schedules
+            },
+          },
+        },
+      );
+
       if (error) throw error;
-      
+
       toast({
         title: "Compliance check complete",
         description: `Found ${data.violations?.length || 0} potential violations`,
       });
-      
+
       await loadComplianceData();
     } catch (error) {
       toast({
@@ -165,14 +176,12 @@ export function ComplianceMonitor() {
   };
 
   const resolveViolation = async (violationId: string) => {
-    setViolations(prev => 
-      prev.map(v => 
-        v.id === violationId 
-          ? { ...v, status: 'resolved' as const }
-          : v
-      )
+    setViolations((prev) =>
+      prev.map((v) =>
+        v.id === violationId ? { ...v, status: "resolved" as const } : v,
+      ),
     );
-    
+
     toast({
       title: "Violation resolved",
       description: "Compliance violation has been marked as resolved",
@@ -181,21 +190,31 @@ export function ComplianceMonitor() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'destructive';
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
-      default: return 'secondary';
+      case "critical":
+        return "destructive";
+      case "high":
+        return "destructive";
+      case "medium":
+        return "default";
+      case "low":
+        return "secondary";
+      default:
+        return "secondary";
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'high': return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case 'medium': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'low': return <CheckCircle className="h-4 w-4 text-blue-500" />;
-      default: return <AlertTriangle className="h-4 w-4" />;
+      case "critical":
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case "high":
+        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+      case "medium":
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case "low":
+        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+      default:
+        return <AlertTriangle className="h-4 w-4" />;
     }
   };
 
@@ -249,7 +268,9 @@ export function ComplianceMonitor() {
               <Shield className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Overall Score</span>
             </div>
-            <div className="text-2xl font-bold">{metrics?.overallScore || 0}%</div>
+            <div className="text-2xl font-bold">
+              {metrics?.overallScore || 0}%
+            </div>
             <Progress value={metrics?.overallScore || 0} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
               Compliance rating
@@ -263,7 +284,9 @@ export function ComplianceMonitor() {
               <Calendar className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Weekly Hours</span>
             </div>
-            <div className="text-2xl font-bold">{metrics?.weeklyHoursCompliance || 0}%</div>
+            <div className="text-2xl font-bold">
+              {metrics?.weeklyHoursCompliance || 0}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Within weekly limits
             </p>
@@ -276,7 +299,9 @@ export function ComplianceMonitor() {
               <Clock className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Break Compliance</span>
             </div>
-            <div className="text-2xl font-bold">{metrics?.breakCompliance || 0}%</div>
+            <div className="text-2xl font-bold">
+              {metrics?.breakCompliance || 0}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Proper break coverage
             </p>
@@ -289,10 +314,10 @@ export function ComplianceMonitor() {
               <TrendingUp className="h-4 w-4 text-orange-500" />
               <span className="text-sm font-medium">Overtime Hours</span>
             </div>
-            <div className="text-2xl font-bold">{metrics?.overtimeHours || 0}h</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              This week
-            </p>
+            <div className="text-2xl font-bold">
+              {metrics?.overtimeHours || 0}h
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">This week</p>
           </CardContent>
         </Card>
       </div>
@@ -302,7 +327,8 @@ export function ComplianceMonitor() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-500" />
-            Active Violations ({violations.filter(v => v.status === 'active').length})
+            Active Violations (
+            {violations.filter((v) => v.status === "active").length})
           </CardTitle>
           <CardDescription>
             Current compliance violations requiring attention
@@ -310,46 +336,61 @@ export function ComplianceMonitor() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {violations.filter(v => v.status === 'active').length > 0 ? (
-              violations.filter(v => v.status === 'active').map((violation) => (
-                <Alert key={violation.id} className="relative">
-                  <div className="flex items-start gap-3">
-                    {getSeverityIcon(violation.severity)}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">{violation.type}</span>
-                        <Badge variant={getSeverityColor(violation.severity) as any} className="capitalize">
-                          {violation.severity}
-                        </Badge>
-                        {violation.employee && (
-                          <Badge variant="outline">{violation.employee.name}</Badge>
-                        )}
-                      </div>
-                      <AlertDescription className="text-sm">
-                        {violation.message}
-                      </AlertDescription>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs text-muted-foreground">
-                          Date: {violation.date}
-                        </span>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => resolveViolation(violation.id)}
-                          className="text-xs"
-                        >
-                          Mark Resolved
-                        </Button>
+            {violations.filter((v) => v.status === "active").length > 0 ? (
+              violations
+                .filter((v) => v.status === "active")
+                .map((violation) => (
+                  <Alert key={violation.id} className="relative">
+                    <div className="flex items-start gap-3">
+                      {getSeverityIcon(violation.severity)}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">
+                            {violation.type}
+                          </span>
+                          <Badge
+                            variant={
+                              getSeverityColor(violation.severity) as any
+                            }
+                            className="capitalize"
+                          >
+                            {violation.severity}
+                          </Badge>
+                          {violation.employee && (
+                            <Badge variant="outline">
+                              {violation.employee.name}
+                            </Badge>
+                          )}
+                        </div>
+                        <AlertDescription className="text-sm">
+                          {violation.message}
+                        </AlertDescription>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            Date: {violation.date}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => resolveViolation(violation.id)}
+                            className="text-xs"
+                          >
+                            Mark Resolved
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Alert>
-              ))
+                  </Alert>
+                ))
             ) : (
               <div className="text-center py-8">
                 <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                <h3 className="text-lg font-semibold mb-2 text-green-700">No Active Violations</h3>
-                <p className="text-muted-foreground">All scheduling is compliant with labor laws</p>
+                <h3 className="text-lg font-semibold mb-2 text-green-700">
+                  No Active Violations
+                </h3>
+                <p className="text-muted-foreground">
+                  All scheduling is compliant with labor laws
+                </p>
               </div>
             )}
           </div>
@@ -371,18 +412,22 @@ export function ComplianceMonitor() {
           <div className="space-y-4">
             {rules.length > 0 ? (
               rules.map((rule) => (
-                <div key={rule.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={rule.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div>
                     <div className="font-medium text-sm capitalize">
-                      {rule.rule_type.replace('_', ' ')} 
+                      {rule.rule_type.replace("_", " ")}
                       {rule.role && ` (${rule.role})`}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Limit: {rule.value} {rule.rule_type.includes('hours') ? 'hours' : 'minutes'}
+                      Limit: {rule.value}{" "}
+                      {rule.rule_type.includes("hours") ? "hours" : "minutes"}
                     </div>
                   </div>
-                  <Badge variant={rule.is_active ? 'default' : 'secondary'}>
-                    {rule.is_active ? 'Active' : 'Inactive'}
+                  <Badge variant={rule.is_active ? "default" : "secondary"}>
+                    {rule.is_active ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               ))

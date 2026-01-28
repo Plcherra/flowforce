@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { useProfile } from '@/hooks/useProfile';
-import type { Tables } from '@/integrations/supabase/public-types';
-import type { AppEvent, EventAttendee, ChecklistItem } from '@/hooks/useEvents';
+import { useQuery } from "@tanstack/react-query";
+import { useProfile } from "@/hooks/useProfile";
+import type { Tables } from "@/integrations/supabase/public-types";
+import type { AppEvent, EventAttendee, ChecklistItem } from "@/hooks/useEvents";
 import {
   calendarEventsRepository,
   type CalendarEventRowWithRelations,
-} from '@/features/calendar/repositories/calendarEventsRepository';
-import { queryKeys } from '@/lib/queryKeys';
-import { scheduleGateway } from '@/lib/api/scheduleGateway';
+} from "@/features/calendar/repositories/calendarEventsRepository";
+import { queryKeys } from "@/lib/queryKeys";
+import { scheduleGateway } from "@/lib/api/scheduleGateway";
 
 type CalendarEventRow = CalendarEventRowWithRelations;
 
@@ -34,7 +34,7 @@ export interface CalendarEvent {
   storeId: string | null;
   participants: CalendarEventParticipant[];
   shiftIds: string[];
-  metadata: Tables<'calendar_events'>['metadata'];
+  metadata: Tables<"calendar_events">["metadata"];
   raw: CalendarEventRow;
 }
 
@@ -55,7 +55,7 @@ const toIsoString = (value: Date | string | null | undefined) => {
   if (!value) return null;
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date value');
+    throw new Error("Invalid date value");
   }
   return date.toISOString();
 };
@@ -73,14 +73,17 @@ const toIsoRange = (range: CalendarRange) => {
     return null;
   }
 
-  const [min, max] = startDate <= endDate ? [startDate, endDate] : [endDate, startDate];
+  const [min, max] =
+    startDate <= endDate ? [startDate, endDate] : [endDate, startDate];
   return {
     start: min.toISOString(),
     end: max.toISOString(),
   };
 };
 
-const parseAttendeesJson = (value: Tables<'calendar_events'>['attendees']): CalendarEventParticipant[] => {
+const parseAttendeesJson = (
+  value: Tables<"calendar_events">["attendees"],
+): CalendarEventParticipant[] => {
   if (!value || (Array.isArray(value) && value.length === 0)) {
     return [];
   }
@@ -88,30 +91,40 @@ const parseAttendeesJson = (value: Tables<'calendar_events'>['attendees']): Cale
   const payload = Array.isArray(value) ? value : [];
 
   return payload
-    .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === 'object')
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        !!entry && typeof entry === "object",
+    )
     .map((entry) => {
-      const id = typeof entry.id === 'string' ? entry.id : '';
+      const id = typeof entry.id === "string" ? entry.id : "";
       const attendeeName =
-        typeof entry.name === 'string'
+        typeof entry.name === "string"
           ? entry.name
-          : `${typeof entry.first_name === 'string' ? entry.first_name : ''} ${
-              typeof entry.last_name === 'string' ? entry.last_name : ''
+          : `${typeof entry.first_name === "string" ? entry.first_name : ""} ${
+              typeof entry.last_name === "string" ? entry.last_name : ""
             }`.trim();
-      const fallbackName = attendeeName || (typeof entry.email === 'string' ? entry.email : 'Participant');
+      const fallbackName =
+        attendeeName ||
+        (typeof entry.email === "string" ? entry.email : "Participant");
 
       return {
         id: id || fallbackName,
         name: fallbackName,
-        avatar_url: typeof entry.avatar_url === 'string' ? entry.avatar_url : null,
-        role: typeof entry.role === 'string' ? entry.role : null,
+        avatar_url:
+          typeof entry.avatar_url === "string" ? entry.avatar_url : null,
+        role: typeof entry.role === "string" ? entry.role : null,
       };
     })
     .filter((attendee) => !!attendee.id);
 };
 
 const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
-  const participantRows = Array.isArray(row.event_participants) ? row.event_participants : [];
-  const shiftLinks = Array.isArray(row.event_shift_links) ? row.event_shift_links : [];
+  const participantRows = Array.isArray(row.event_participants)
+    ? row.event_participants
+    : [];
+  const shiftLinks = Array.isArray(row.event_shift_links)
+    ? row.event_shift_links
+    : [];
 
   const participantMap = new Map<string, CalendarEventParticipant>();
 
@@ -126,7 +139,9 @@ const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
       participant.name ??
       participant.email ??
       participant.profile_id ??
-      (participant.id ? `Participant ${participant.id.slice(0, 6)}` : 'Participant');
+      (participant.id
+        ? `Participant ${participant.id.slice(0, 6)}`
+        : "Participant");
 
     participantMap.set(key, {
       id: key,
@@ -141,19 +156,21 @@ const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
 
   const shiftIds = Array.from(
     new Set([
-      ...(Array.isArray(row.related_shift_ids) ? row.related_shift_ids.filter(Boolean) : []),
+      ...(Array.isArray(row.related_shift_ids)
+        ? row.related_shift_ids.filter(Boolean)
+        : []),
       ...shiftLinks.map((link) => link.shift_id).filter(Boolean),
     ]),
   );
 
   return {
     id: row.id,
-    title: row.title ?? 'Untitled',
+    title: row.title ?? "Untitled",
     description: row.description ?? null,
     start: row.start_time,
     end: row.end_time ?? null,
     location: row.location ?? null,
-    type: row.event_type ?? 'event',
+    type: row.event_type ?? "event",
     color: row.color ?? null,
     storeId: row.store_id ?? null,
     participants: Array.from(participantMap.values()),
@@ -163,7 +180,9 @@ const mapRowToEvent = (row: CalendarEventRow): CalendarEvent => {
   };
 };
 
-export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarEventsResult {
+export function useCalendarEvents(
+  params: UseCalendarEventsParams,
+): UseCalendarEventsResult {
   const { storeId = null, range, enabled = true } = params;
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -172,9 +191,15 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
   const queryEnabled = Boolean(enabled && companyId && isoRange);
 
   const eventsQuery = useQuery({
-    queryKey: queryEnabled && companyId && isoRange
-      ? queryKeys.calendarEventsRange(companyId, isoRange.start, isoRange.end, normalizedStoreId)
-      : queryKeys.calendarEventsDisabled,
+    queryKey:
+      queryEnabled && companyId && isoRange
+        ? queryKeys.calendarEventsRange(
+            companyId,
+            isoRange.start,
+            isoRange.end,
+            normalizedStoreId,
+          )
+        : queryKeys.calendarEventsDisabled,
     queryFn: async () => {
       if (!companyId || !isoRange) {
         return [] as CalendarEvent[];
@@ -193,12 +218,14 @@ export function useCalendarEvents(params: UseCalendarEventsParams): UseCalendarE
   });
 
   const events = Array.isArray(eventsQuery.data) ? eventsQuery.data : [];
-  const loading = queryEnabled ? eventsQuery.isLoading || eventsQuery.isFetching : false;
+  const loading = queryEnabled
+    ? eventsQuery.isLoading || eventsQuery.isFetching
+    : false;
   const error =
     eventsQuery.error instanceof Error
       ? eventsQuery.error.message
       : eventsQuery.error
-        ? 'Unable to load events'
+        ? "Unable to load events"
         : null;
 
   const refresh = async () => {
@@ -217,7 +244,7 @@ export interface CalendarEventCreateInput {
   title: string;
   description?: string | null;
   location?: string | null;
-  type?: 'event' | 'meeting' | 'vendor_visit';
+  type?: "event" | "meeting" | "vendor_visit";
   color?: string | null;
   start: string | Date;
   end?: string | Date | null;
@@ -225,7 +252,7 @@ export interface CalendarEventCreateInput {
   attendees?: EventAttendee[];
   relatedShiftIds?: string[];
   checklist?: ChecklistItem[];
-  vendor?: AppEvent['vendor'];
+  vendor?: AppEvent["vendor"];
   metadata?: Record<string, unknown>;
 }
 
@@ -235,9 +262,13 @@ export interface CreateEventOptions {
   createdBy: string | null;
 }
 
-export const createEvent = async ({ payload, companyId, createdBy }: CreateEventOptions): Promise<CalendarEvent> => {
+export const createEvent = async ({
+  payload,
+  companyId,
+  createdBy,
+}: CreateEventOptions): Promise<CalendarEvent> => {
   if (!companyId) {
-    throw new Error('Company context is required to create events.');
+    throw new Error("Company context is required to create events.");
   }
 
   const insertPayload = {
@@ -247,7 +278,7 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
     title: payload.title,
     description: payload.description ?? null,
     location: payload.location ?? null,
-    event_type: payload.type ?? 'event',
+    event_type: payload.type ?? "event",
     color: payload.color ?? null,
     start_time: toIsoString(payload.start),
     end_time: toIsoString(payload.end),
@@ -259,9 +290,9 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
   };
 
   const eventType = insertPayload.event_type;
-  if (eventType === 'vendor_visit') {
+  if (eventType === "vendor_visit") {
     const { event } = await scheduleGateway.createVendorVisit({
-      calendar: { ...insertPayload, event_type: 'vendor_visit' },
+      calendar: { ...insertPayload, event_type: "vendor_visit" },
       vendor: {
         company_id: companyId,
         vendor_name: payload.vendor?.name ?? payload.title,
@@ -272,14 +303,14 @@ export const createEvent = async ({ payload, companyId, createdBy }: CreateEvent
         start_time: insertPayload.start_time,
         end_time: insertPayload.end_time ?? insertPayload.start_time,
         description: insertPayload.description ?? null,
-        integration_id: (payload.vendor as Record<string, unknown> | undefined)?.integration_id as
-          | string
-          | undefined
-          | null,
-        integration_type: (payload.vendor as Record<string, unknown> | undefined)?.integration_type as
-          | 'website'
-          | 'partner_api'
-          | 'manual'
+        integration_id: (payload.vendor as Record<string, unknown> | undefined)
+          ?.integration_id as string | undefined | null,
+        integration_type: (
+          payload.vendor as Record<string, unknown> | undefined
+        )?.integration_type as
+          | "website"
+          | "partner_api"
+          | "manual"
           | undefined
           | null,
       },
@@ -301,26 +332,32 @@ export const upsertEventShiftLinks = async ({
   companyId: string | null;
 }) => {
   if (!eventId || !companyId) return;
-  await calendarEventsRepository.replaceEventShiftLinks(companyId, eventId, shiftIds);
+  await calendarEventsRepository.replaceEventShiftLinks(
+    companyId,
+    eventId,
+    shiftIds,
+  );
 };
 
 export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
-  const participants: CalendarEventParticipant[] = (event.attendees ?? []).map((attendee) => ({
-    id: attendee.id,
-    name: attendee.name,
-    avatar_url: attendee.avatar_url ?? null,
-    role: attendee.role ?? null,
-  }));
+  const participants: CalendarEventParticipant[] = (event.attendees ?? []).map(
+    (attendee) => ({
+      id: attendee.id,
+      name: attendee.name,
+      avatar_url: attendee.avatar_url ?? null,
+      role: attendee.role ?? null,
+    }),
+  );
 
   const rawRow: CalendarEventRow = {
     id: event.id,
     company_id: null,
     store_id: null,
     created_by: null,
-    title: event.title ?? 'Untitled',
+    title: event.title ?? "Untitled",
     description: event.description ?? null,
     location: event.location ?? null,
-    event_type: event.type ?? 'event',
+    event_type: event.type ?? "event",
     color: event.color ?? null,
     start_time: event.start,
     end_time: event.end ?? null,
@@ -328,7 +365,7 @@ export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
     related_shift_ids: event.related_shift_ids ?? [],
     checklist: event.checklist ?? [],
     vendor: event.vendor ?? null,
-    metadata: { source: event.source ?? 'local' } as Record<string, unknown>,
+    metadata: { source: event.source ?? "local" } as Record<string, unknown>,
     created_at: event.created_at ?? new Date().toISOString(),
     updated_at: event.created_at ?? new Date().toISOString(),
     event_participants: [],
@@ -337,12 +374,12 @@ export const mapAppEventToCalendarEvent = (event: AppEvent): CalendarEvent => {
 
   return {
     id: event.id,
-    title: event.title ?? 'Untitled',
+    title: event.title ?? "Untitled",
     description: event.description ?? null,
     start: event.start,
     end: event.end ?? null,
     location: event.location ?? null,
-    type: event.type ?? 'event',
+    type: event.type ?? "event",
     color: event.color ?? null,
     storeId: null,
     participants,

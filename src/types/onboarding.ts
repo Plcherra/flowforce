@@ -1,5 +1,5 @@
 // Centralized type definitions for onboarding
-import { OnboardingPosition } from '@/types/templates';
+import { OnboardingPosition } from "@/types/templates";
 export interface UserInfo {
   firstName: string;
   lastName: string;
@@ -44,22 +44,22 @@ export interface OnboardingStepData {
 
 // Constants
 export const COMPANY_SIZES = [
-  '1-10 employees',
-  '11-50 employees', 
-  '51-200 employees',
-  '201-500 employees',
-  '500+ employees'
+  "1-10 employees",
+  "11-50 employees",
+  "51-200 employees",
+  "201-500 employees",
+  "500+ employees",
 ] as const;
 
 export const INDUSTRIES = [
-  'Technology',
-  'Healthcare',
-  'Finance',
-  'Education',
-  'Manufacturing',
-  'Retail',
-  'Food & Beverage',
-  'Professional Services',
-  'Construction',
-  'Other'
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Education",
+  "Manufacturing",
+  "Retail",
+  "Food & Beverage",
+  "Professional Services",
+  "Construction",
+  "Other",
 ] as const;

@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Megaphone } from 'lucide-react';
-import { format } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon, Megaphone } from "lucide-react";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface CreateAnnouncementProps {
   open: boolean;
@@ -21,16 +37,20 @@ interface CreateAnnouncementProps {
   onAnnouncementCreated?: () => void;
 }
 
-export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: CreateAnnouncementProps) {
+export function CreateAnnouncement({
+  open,
+  onClose,
+  onAnnouncementCreated,
+}: CreateAnnouncementProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    priority: 'normal',
-    target_audience: 'all',
-    is_published: true
+    title: "",
+    content: "",
+    priority: "normal",
+    target_audience: "all",
+    is_published: true,
   });
   const [expiresAt, setExpiresAt] = useState<Date>();
 
@@ -41,7 +61,7 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('announcements')
+        .from("announcements")
         .insert({
           title: formData.title.trim(),
           content: formData.content.trim(),
@@ -50,7 +70,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
           is_published: formData.is_published,
           expires_at: expiresAt?.toISOString() || null,
           created_by: user.id,
-          company_id: user.user_metadata?.company_id || '00000000-0000-0000-0000-000000000000' // Fallback
+          company_id:
+            user.user_metadata?.company_id ||
+            "00000000-0000-0000-0000-000000000000", // Fallback
         })
         .select()
         .single();
@@ -58,28 +80,28 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Announcement created successfully',
+        title: "Success",
+        description: "Announcement created successfully",
       });
 
       // Reset form
       setFormData({
-        title: '',
-        content: '',
-        priority: 'normal',
-        target_audience: 'all',
-        is_published: true
+        title: "",
+        content: "",
+        priority: "normal",
+        target_audience: "all",
+        is_published: true,
       });
       setExpiresAt(undefined);
 
       onAnnouncementCreated?.();
       onClose();
     } catch (error) {
-      logger.error('Error creating announcement:', { error, tags: ['error'] });
+      logger.error("Error creating announcement:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to create announcement',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to create announcement",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -95,7 +117,8 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
             Create Announcement
           </DialogTitle>
           <DialogDescription>
-            Create a new announcement to share important information with your team.
+            Create a new announcement to share important information with your
+            team.
           </DialogDescription>
         </DialogHeader>
 
@@ -105,7 +128,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="Announcement title"
               required
               className="rounded-xl"
@@ -117,7 +142,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
             <Textarea
               id="content"
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
               placeholder="Write your announcement content here..."
               rows={4}
               required
@@ -130,7 +157,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => setFormData({ ...formData, priority: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, priority: value })
+                }
               >
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
@@ -148,7 +177,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
               <Label htmlFor="audience">Audience</Label>
               <Select
                 value={formData.target_audience}
-                onValueChange={(value) => setFormData({ ...formData, target_audience: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, target_audience: value })
+                }
               >
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
@@ -172,7 +203,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
                   className="w-full justify-start text-left font-normal rounded-xl"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {expiresAt ? format(expiresAt, 'PPP') : 'Select expiration date'}
+                  {expiresAt
+                    ? format(expiresAt, "PPP")
+                    : "Select expiration date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -207,7 +240,9 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
             <Switch
               id="published"
               checked={formData.is_published}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_published: checked })
+              }
             />
           </div>
 
@@ -215,8 +250,13 @@ export function CreateAnnouncement({ open, onClose, onAnnouncementCreated }: Cre
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !formData.title.trim() || !formData.content.trim()}>
-              {loading ? 'Creating...' : 'Create Announcement'}
+            <Button
+              type="submit"
+              disabled={
+                loading || !formData.title.trim() || !formData.content.trim()
+              }
+            >
+              {loading ? "Creating..." : "Create Announcement"}
             </Button>
           </div>
         </form>

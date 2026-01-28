@@ -1,46 +1,81 @@
-import { addDays, differenceInCalendarDays, differenceInMinutes, isValid, subDays } from 'date-fns';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
-import type { ScenarioBaseline } from '@/lib/ai/scenarioEngine';
+import {
+  addDays,
+  differenceInCalendarDays,
+  differenceInMinutes,
+  isValid,
+  subDays,
+} from "date-fns";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/public-types";
+import type { ScenarioBaseline } from "@/lib/ai/scenarioEngine";
 
-type ScheduleRow = Pick<Tables<'schedules'>, 'id' | 'company_id' | 'start_time' | 'end_time' | 'required_headcount' | 'is_published'>;
-type AssignmentRow = Pick<Tables<'schedule_assignments'>, 'schedule_id'>;
-type TaskRow = Pick<Tables<'tasks'>, 'id' | 'status' | 'due_date' | 'created_at' | 'completed_at' | 'created_by' | 'assigned_to'>;
-type GoalRow = Pick<Tables<'goals'>, 'id' | 'status' | 'progress' | 'company_id' | 'target_date' | 'created_at'>;
-type InventoryTransactionRow = Pick<Tables<'inventory_transactions'>, 'transaction_type' | 'total_amount' | 'created_at' | 'performed_by'>;
-type ExpenseRow = Pick<Tables<'expenses'>, 'amount' | 'status' | 'expense_date' | 'created_by'>;
-type ProfileRow = Pick<Tables<'profiles'>, 'id'>;
+type ScheduleRow = Pick<
+  Tables<"schedules">,
+  | "id"
+  | "company_id"
+  | "start_time"
+  | "end_time"
+  | "required_headcount"
+  | "is_published"
+>;
+type AssignmentRow = Pick<Tables<"schedule_assignments">, "schedule_id">;
+type TaskRow = Pick<
+  Tables<"tasks">,
+  | "id"
+  | "status"
+  | "due_date"
+  | "created_at"
+  | "completed_at"
+  | "created_by"
+  | "assigned_to"
+>;
+type GoalRow = Pick<
+  Tables<"goals">,
+  "id" | "status" | "progress" | "company_id" | "target_date" | "created_at"
+>;
+type InventoryTransactionRow = Pick<
+  Tables<"inventory_transactions">,
+  "transaction_type" | "total_amount" | "created_at" | "performed_by"
+>;
+type ExpenseRow = Pick<
+  Tables<"expenses">,
+  "amount" | "status" | "expense_date" | "created_by"
+>;
+type ProfileRow = Pick<Tables<"profiles">, "id">;
 
-const ACTIVE_TASK_STATUSES = new Set(['todo', 'in_progress', 'review']);
+const ACTIVE_TASK_STATUSES = new Set(["todo", "in_progress", "review"]);
 const DEFAULT_HORIZON_DAYS = 21;
 const TARGET_REVENUE_PER_LABOR_HOUR = 135;
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
   maximumFractionDigits: 0,
 });
 
-const detailedCurrencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
+const detailedCurrencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
   maximumFractionDigits: 2,
 });
 
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
 
 const toNumber = (value: unknown, fallback = 0): number => {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string') {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
   }
   return fallback;
 };
 
-const formatCurrency = (value: number) => currencyFormatter.format(Math.round(value));
-const formatDetailedCurrency = (value: number) => detailedCurrencyFormatter.format(value);
+const formatCurrency = (value: number) =>
+  currencyFormatter.format(Math.round(value));
+const formatDetailedCurrency = (value: number) =>
+  detailedCurrencyFormatter.format(value);
 
 export interface OperationalMetrics {
   generatedAt: string;
@@ -87,7 +122,7 @@ export interface BusinessAnalyticsPrediction {
   description: string;
   value: string;
   confidence: number;
-  impact: 'positive' | 'neutral' | 'negative';
+  impact: "positive" | "neutral" | "negative";
 }
 
 export interface BusinessAnalyticsSnapshot {
@@ -103,10 +138,10 @@ export interface BusinessAnalyticsSnapshot {
     taskThroughputRatio: number;
   };
   breakdown: {
-    scheduling: OperationalMetrics['scheduling'];
-    tasks: OperationalMetrics['tasks'];
-    goals: OperationalMetrics['goals'];
-    revenue: OperationalMetrics['revenue'];
+    scheduling: OperationalMetrics["scheduling"];
+    tasks: OperationalMetrics["tasks"];
+    goals: OperationalMetrics["goals"];
+    revenue: OperationalMetrics["revenue"];
   };
   summary: {
     headline: string;
@@ -172,7 +207,9 @@ function buildScenarioBaseline(metrics: OperationalMetrics): ScenarioBaseline {
       coverageRate: Number(metrics.scheduling.coverageRate.toFixed(4)),
       totalShifts: metrics.scheduling.totalShifts,
       openShifts: metrics.scheduling.openShifts,
-      averageShiftHours: Number(metrics.scheduling.averageShiftHours.toFixed(2)),
+      averageShiftHours: Number(
+        metrics.scheduling.averageShiftHours.toFixed(2),
+      ),
       overtimeRisk: Number(metrics.scheduling.overtimeRisk.toFixed(3)),
     },
     tasks: {
@@ -196,13 +233,22 @@ function buildScenarioBaseline(metrics: OperationalMetrics): ScenarioBaseline {
 }
 
 function computeGoalVelocity(goals: GoalRow[], reference: Date): number {
-  const activeGoals = goals.filter((goal) => (goal.status ?? '').toLowerCase() === 'active');
+  const activeGoals = goals.filter(
+    (goal) => (goal.status ?? "").toLowerCase() === "active",
+  );
   if (!activeGoals.length) return 0;
 
   const velocities = activeGoals.map((goal) => {
-    const createdAt = goal.created_at ? new Date(goal.created_at) : subDays(reference, 45);
-    const validCreated = isValid(createdAt) ? createdAt : subDays(reference, 45);
-    const daysActive = Math.max(1, differenceInCalendarDays(reference, validCreated));
+    const createdAt = goal.created_at
+      ? new Date(goal.created_at)
+      : subDays(reference, 45);
+    const validCreated = isValid(createdAt)
+      ? createdAt
+      : subDays(reference, 45);
+    const daysActive = Math.max(
+      1,
+      differenceInCalendarDays(reference, validCreated),
+    );
     const progress = toNumber(goal.progress, 0);
     return (progress / daysActive) * 7; // percent progress per week
   });
@@ -222,13 +268,15 @@ function computeTaskMetrics(taskData: TaskRow[], reference: Date) {
   let createdLast30 = 0;
 
   taskData.forEach((task) => {
-    const status = (task.status ?? '').toLowerCase();
+    const status = (task.status ?? "").toLowerCase();
     const createdAt = task.created_at ? new Date(task.created_at) : null;
     if (createdAt && isValid(createdAt) && createdAt >= last30) {
       createdLast30 += 1;
     }
-    if (status === 'completed') {
-      const completedAt = task.completed_at ? new Date(task.completed_at) : null;
+    if (status === "completed") {
+      const completedAt = task.completed_at
+        ? new Date(task.completed_at)
+        : null;
       if (completedAt && isValid(completedAt) && completedAt >= last30) {
         completedLast30 += 1;
       }
@@ -262,12 +310,16 @@ function computeTaskMetrics(taskData: TaskRow[], reference: Date) {
   };
 }
 
-function computeSchedulingMetrics(scheduleData: ScheduleRow[], assignments: AssignmentRow[]) {
+function computeSchedulingMetrics(
+  scheduleData: ScheduleRow[],
+  assignments: AssignmentRow[],
+) {
   const scheduleIds = new Set(scheduleData.map((row) => row.id));
   const assignmentsBySchedule = new Map<string, number>();
 
   assignments.forEach((assignment) => {
-    if (!assignment.schedule_id || !scheduleIds.has(assignment.schedule_id)) return;
+    if (!assignment.schedule_id || !scheduleIds.has(assignment.schedule_id))
+      return;
     assignmentsBySchedule.set(
       assignment.schedule_id,
       (assignmentsBySchedule.get(assignment.schedule_id) ?? 0) + 1,
@@ -275,7 +327,9 @@ function computeSchedulingMetrics(scheduleData: ScheduleRow[], assignments: Assi
   });
 
   const totalRequired = scheduleData.reduce(
-    (acc, row) => acc + (typeof row.required_headcount === 'number' ? row.required_headcount : 1),
+    (acc, row) =>
+      acc +
+      (typeof row.required_headcount === "number" ? row.required_headcount : 1),
     0,
   );
   const totalAssigned = assignments.length;
@@ -292,16 +346,20 @@ function computeSchedulingMetrics(scheduleData: ScheduleRow[], assignments: Assi
     const durationMinutes = Math.max(0, differenceInMinutes(end, start));
     totalShiftMinutes += durationMinutes;
 
-    const requiredHeadcount = typeof row.required_headcount === 'number' ? row.required_headcount : 1;
+    const requiredHeadcount =
+      typeof row.required_headcount === "number" ? row.required_headcount : 1;
     const assignedCount = assignmentsBySchedule.get(row.id) ?? 0;
     plannedLaborHours += (durationMinutes / 60) * requiredHeadcount;
-    actualLaborHours += (durationMinutes / 60) * (assignedCount > 0 ? assignedCount : requiredHeadcount);
+    actualLaborHours +=
+      (durationMinutes / 60) *
+      (assignedCount > 0 ? assignedCount : requiredHeadcount);
   });
 
   const coverageRate = totalRequired > 0 ? totalAssigned / totalRequired : 1;
   const openShifts = Math.max(0, totalRequired - totalAssigned);
   const overtimeRisk = totalRequired > 0 ? openShifts / totalRequired : 0;
-  const averageShiftHours = scheduleData.length > 0 ? totalShiftMinutes / scheduleData.length / 60 : 0;
+  const averageShiftHours =
+    scheduleData.length > 0 ? totalShiftMinutes / scheduleData.length / 60 : 0;
 
   return {
     coverageRate: Number(coverageRate.toFixed(4)),
@@ -314,15 +372,22 @@ function computeSchedulingMetrics(scheduleData: ScheduleRow[], assignments: Assi
   };
 }
 
-export async function fetchOperationalMetrics(params: FetchOperationalMetricsParams): Promise<OperationalMetricsResult> {
-  const { companyId, horizonDays = DEFAULT_HORIZON_DAYS, now = new Date(), supabaseClient } = params;
+export async function fetchOperationalMetrics(
+  params: FetchOperationalMetricsParams,
+): Promise<OperationalMetricsResult> {
+  const {
+    companyId,
+    horizonDays = DEFAULT_HORIZON_DAYS,
+    now = new Date(),
+    supabaseClient,
+  } = params;
   const client = supabaseClient ?? supabase;
 
   if (!companyId) {
     return {
       metrics: createFallbackMetrics(now),
       isFallback: true,
-      message: 'Select or create a company to load live data.',
+      message: "Select or create a company to load live data.",
     };
   }
 
@@ -336,9 +401,9 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
 
     // Legacy method: Multiple sequential queries (fallback)
     const { data: memberRows, error: membersError } = await client
-      .from('profiles')
-      .select('id')
-      .eq('company_id', companyId);
+      .from("profiles")
+      .select("id")
+      .eq("company_id", companyId);
 
     if (membersError) throw membersError;
 
@@ -348,17 +413,20 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
       return {
         metrics: createFallbackMetrics(now),
         isFallback: true,
-        message: 'No team members found for this company. Using simulator defaults.',
+        message:
+          "No team members found for this company. Using simulator defaults.",
       };
     }
 
     const { data: scheduleRows, error: schedulesError } = await client
-      .from('schedules')
-      .select('id, company_id, start_time, end_time, required_headcount, is_published')
-      .eq('company_id', companyId)
-      .gte('start_time', scheduleStart)
-      .lt('start_time', scheduleEnd)
-      .order('start_time', { ascending: true })
+      .from("schedules")
+      .select(
+        "id, company_id, start_time, end_time, required_headcount, is_published",
+      )
+      .eq("company_id", companyId)
+      .gte("start_time", scheduleStart)
+      .lt("start_time", scheduleEnd)
+      .order("start_time", { ascending: true })
       .limit(400);
 
     if (schedulesError) throw schedulesError;
@@ -369,9 +437,9 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
 
     if (scheduleIds.length > 0) {
       const { data: assignmentsData, error: assignmentsError } = await client
-        .from('schedule_assignments')
-        .select('schedule_id')
-        .in('schedule_id', scheduleIds);
+        .from("schedule_assignments")
+        .select("schedule_id")
+        .in("schedule_id", scheduleIds);
 
       if (assignmentsError) throw assignmentsError;
       assignmentRows = (assignmentsData ?? []) as AssignmentRow[];
@@ -379,74 +447,94 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
 
     // Filter tasks by company_id directly for security, with fallback to memberIds
     const tasksPromise = client
-      .from('tasks')
-      .select('id, status, due_date, created_at, completed_at, created_by, assigned_to, company_id')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false })
+      .from("tasks")
+      .select(
+        "id, status, due_date, created_at, completed_at, created_by, assigned_to, company_id",
+      )
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
       .limit(600);
 
     const goalsPromise = client
-      .from('goals')
-      .select('id, status, progress, target_date, created_at, company_id')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false })
+      .from("goals")
+      .select("id, status, progress, target_date, created_at, company_id")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
       .limit(200);
 
     // Filter inventory transactions by memberIds (table doesn't have company_id column)
     // Security: memberIds are already filtered by company_id, ensuring tenant isolation
     const transactionsPromise = client
-      .from('inventory_transactions')
-      .select('transaction_type, total_amount, created_at, performed_by')
-      .in('performed_by', memberIds)
-      .gte('created_at', financialStart.toISOString())
+      .from("inventory_transactions")
+      .select("transaction_type, total_amount, created_at, performed_by")
+      .in("performed_by", memberIds)
+      .gte("created_at", financialStart.toISOString())
       .limit(600);
 
     // Filter expenses by memberIds (table doesn't have company_id column)
     // Security: memberIds are already filtered by company_id, ensuring tenant isolation
     const expensesPromise = client
-      .from('expenses')
-      .select('amount, status, expense_date, created_by')
-      .in('created_by', memberIds)
-      .gte('expense_date', financialStart.toISOString().split('T')[0])
+      .from("expenses")
+      .select("amount, status, expense_date, created_by")
+      .in("created_by", memberIds)
+      .gte("expense_date", financialStart.toISOString().split("T")[0])
       .limit(600);
 
-    const [tasksResult, goalsResult, transactionsResult, expensesResult] = await Promise.all([
-      tasksPromise,
-      goalsPromise,
-      transactionsPromise,
-      expensesPromise,
-    ]);
+    const [tasksResult, goalsResult, transactionsResult, expensesResult] =
+      await Promise.all([
+        tasksPromise,
+        goalsPromise,
+        transactionsPromise,
+        expensesPromise,
+      ]);
 
     if (tasksResult.error) throw tasksResult.error;
     if (goalsResult.error) throw goalsResult.error;
     if (transactionsResult.error) throw transactionsResult.error;
     if (expensesResult.error) throw expensesResult.error;
 
-    const taskMetrics = computeTaskMetrics((tasksResult.data ?? []) as TaskRow[], now);
-    const schedulingMetrics = computeSchedulingMetrics(scheduleData, assignmentRows);
+    const taskMetrics = computeTaskMetrics(
+      (tasksResult.data ?? []) as TaskRow[],
+      now,
+    );
+    const schedulingMetrics = computeSchedulingMetrics(
+      scheduleData,
+      assignmentRows,
+    );
 
     const goalsData = (goalsResult.data ?? []) as GoalRow[];
     const goalVelocity = computeGoalVelocity(goalsData, now);
     const totalGoals = goalsData.length;
-    const activeGoals = goalsData.filter((goal) => (goal.status ?? '').toLowerCase() === 'active').length;
+    const activeGoals = goalsData.filter(
+      (goal) => (goal.status ?? "").toLowerCase() === "active",
+    ).length;
     const avgProgress =
       totalGoals > 0
-        ? goalsData.reduce((acc, goal) => acc + toNumber(goal.progress, 0), 0) / totalGoals
+        ? goalsData.reduce((acc, goal) => acc + toNumber(goal.progress, 0), 0) /
+          totalGoals
         : 0;
-    const atRiskGoals = goalsData.filter((goal) => toNumber(goal.progress, 0) < 60).length;
+    const atRiskGoals = goalsData.filter(
+      (goal) => toNumber(goal.progress, 0) < 60,
+    ).length;
 
-    const transactionData = (transactionsResult.data ?? []) as InventoryTransactionRow[];
+    const transactionData = (transactionsResult.data ??
+      []) as InventoryTransactionRow[];
     const expenseData = (expensesResult.data ?? []) as ExpenseRow[];
-    const salesTransactions = transactionData.filter((row) => row.transaction_type === 'sale');
+    const salesTransactions = transactionData.filter(
+      (row) => row.transaction_type === "sale",
+    );
     const trailingRevenue = salesTransactions.reduce(
       (acc, row) => acc + toNumber(row.total_amount, 0),
       0,
     );
 
     const paidExpenses = expenseData.filter((row) =>
-      ['approved', 'paid'].includes((row.status ?? '').toLowerCase()),
+      ["approved", "paid"].includes((row.status ?? "").toLowerCase()),
     );
-    const operatingCost30 = paidExpenses.reduce((acc, row) => acc + toNumber(row.amount, 0), 0);
+    const operatingCost30 = paidExpenses.reduce(
+      (acc, row) => acc + toNumber(row.amount, 0),
+      0,
+    );
 
     const forecastNext30 = trailingRevenue * 1.05;
     const marginRate =
@@ -476,11 +564,14 @@ export async function fetchOperationalMetrics(params: FetchOperationalMetricsPar
 
     return { metrics, isFallback: false };
   } catch (error) {
-    logger.error('Business analytics metrics error', { error, tags: ['error'] });
+    logger.error("Business analytics metrics error", {
+      error,
+      tags: ["error"],
+    });
     return {
       metrics: createFallbackMetrics(now),
       isFallback: true,
-      message: 'Unable to load live analytics. Showing simulator defaults.',
+      message: "Unable to load live analytics. Showing simulator defaults.",
     };
   }
 }
@@ -495,19 +586,31 @@ function buildForecastConfidence(metrics: OperationalMetrics): number {
   );
   const overtimePenalty = metrics.scheduling.overtimeRisk * 45;
   const rawConfidence =
-    34 + coverageScore * 0.22 + marginScore * 0.35 + goalScore * 0.2 - backlogPenalty - overtimePenalty;
+    34 +
+    coverageScore * 0.22 +
+    marginScore * 0.35 +
+    goalScore * 0.2 -
+    backlogPenalty -
+    overtimePenalty;
   return Number(clamp(rawConfidence, 18, 96).toFixed(0));
 }
 
-function buildSummary(metrics: OperationalMetrics, snapshotMetrics: BusinessAnalyticsSnapshot['metrics']) {
+function buildSummary(
+  metrics: OperationalMetrics,
+  snapshotMetrics: BusinessAnalyticsSnapshot["metrics"],
+) {
   const headline = `Forecast confidence ${snapshotMetrics.forecastConfidence}% with ${formatCurrency(metrics.revenue.forecastNext30)} projected revenue and ${Math.round(metrics.revenue.marginRate * 100)}% margin.`;
 
   const focusAreas: string[] = [];
   if (metrics.tasks.overdue > Math.max(6, metrics.tasks.backlog * 0.35)) {
-    focusAreas.push(`Task backlog pressure: ${metrics.tasks.overdue} overdue items require intervention.`);
+    focusAreas.push(
+      `Task backlog pressure: ${metrics.tasks.overdue} overdue items require intervention.`,
+    );
   }
   if (metrics.scheduling.overtimeRisk > 0.25) {
-    focusAreas.push(`Overtime risk elevated at ${(metrics.scheduling.overtimeRisk * 100).toFixed(0)}% due to ${metrics.scheduling.openShifts} open shifts.`);
+    focusAreas.push(
+      `Overtime risk elevated at ${(metrics.scheduling.overtimeRisk * 100).toFixed(0)}% due to ${metrics.scheduling.openShifts} open shifts.`,
+    );
   }
   if (snapshotMetrics.laborEfficiencyIndex < 90) {
     focusAreas.push(
@@ -515,71 +618,109 @@ function buildSummary(metrics: OperationalMetrics, snapshotMetrics: BusinessAnal
     );
   }
   if (!focusAreas.length) {
-    focusAreas.push('Operational metrics look stable. Maintain monitoring cadence and capture incremental improvements.');
+    focusAreas.push(
+      "Operational metrics look stable. Maintain monitoring cadence and capture incremental improvements.",
+    );
   }
 
   const positiveSignals: string[] = [];
   if (snapshotMetrics.goalVelocity >= 10) {
-    positiveSignals.push(`Goal execution momentum tracking at ${snapshotMetrics.goalVelocity.toFixed(1)} pts/week across ${metrics.goals.active} active goals.`);
+    positiveSignals.push(
+      `Goal execution momentum tracking at ${snapshotMetrics.goalVelocity.toFixed(1)} pts/week across ${metrics.goals.active} active goals.`,
+    );
   }
   if (snapshotMetrics.forecastConfidence >= 70) {
-    positiveSignals.push('Financial outlook remains strong with healthy margin resilience.');
+    positiveSignals.push(
+      "Financial outlook remains strong with healthy margin resilience.",
+    );
   }
   if (metrics.scheduling.coverageRate >= 0.93) {
-    positiveSignals.push('Shift coverage is sustaining above 93%, reducing service disruption risk.');
+    positiveSignals.push(
+      "Shift coverage is sustaining above 93%, reducing service disruption risk.",
+    );
   }
 
   return { headline, focusAreas, positiveSignals };
 }
 
-function buildPredictions(snapshotMetrics: BusinessAnalyticsSnapshot['metrics'], metrics: OperationalMetrics): BusinessAnalyticsPrediction[] {
+function buildPredictions(
+  snapshotMetrics: BusinessAnalyticsSnapshot["metrics"],
+  metrics: OperationalMetrics,
+): BusinessAnalyticsPrediction[] {
   const backlogRatio = snapshotMetrics.taskThroughputRatio;
-  const backlogTrend = backlogRatio >= 1 ? 'absorbing intake' : 'backlog growth risk';
+  const backlogTrend =
+    backlogRatio >= 1 ? "absorbing intake" : "backlog growth risk";
   const throughputConfidence = clamp(Math.round(backlogRatio * 90), 25, 92);
 
   return [
     {
-      title: 'Revenue Outlook',
+      title: "Revenue Outlook",
       description: `Projected revenue of ${formatCurrency(metrics.revenue.forecastNext30)} with margin holding at ${Math.round(metrics.revenue.marginRate * 100)}%.`,
       value: formatCurrency(metrics.revenue.forecastNext30),
       confidence: snapshotMetrics.forecastConfidence,
-      impact: snapshotMetrics.forecastConfidence >= 70 ? 'positive' : snapshotMetrics.forecastConfidence >= 55 ? 'neutral' : 'negative',
+      impact:
+        snapshotMetrics.forecastConfidence >= 70
+          ? "positive"
+          : snapshotMetrics.forecastConfidence >= 55
+            ? "neutral"
+            : "negative",
     },
     {
-      title: 'Goal Completion Trajectory',
+      title: "Goal Completion Trajectory",
       description: `Average goal progress at ${metrics.goals.avgProgress}% with velocity ${snapshotMetrics.goalVelocity.toFixed(1)} pts/week.`,
       value: `${metrics.goals.avgProgress.toFixed(0)}%`,
-      confidence: clamp(Math.round(metrics.goals.avgProgress + snapshotMetrics.goalVelocity), 35, 95),
-      impact: snapshotMetrics.goalVelocity >= 9 ? 'positive' : 'neutral',
+      confidence: clamp(
+        Math.round(metrics.goals.avgProgress + snapshotMetrics.goalVelocity),
+        35,
+        95,
+      ),
+      impact: snapshotMetrics.goalVelocity >= 9 ? "positive" : "neutral",
     },
     {
-      title: 'Labor Efficiency',
+      title: "Labor Efficiency",
       description: `Revenue per labor hour tracking ${formatDetailedCurrency(snapshotMetrics.revenuePerLaborHour)} (${snapshotMetrics.laborEfficiencyIndex.toFixed(0)} index vs target ${TARGET_REVENUE_PER_LABOR_HOUR}).`,
       value: `${snapshotMetrics.laborEfficiencyIndex.toFixed(0)} index`,
-      confidence: clamp(Math.round(snapshotMetrics.laborEfficiencyIndex), 40, 95),
-      impact: snapshotMetrics.laborEfficiencyIndex >= 90 ? 'neutral' : 'negative',
+      confidence: clamp(
+        Math.round(snapshotMetrics.laborEfficiencyIndex),
+        40,
+        95,
+      ),
+      impact:
+        snapshotMetrics.laborEfficiencyIndex >= 90 ? "neutral" : "negative",
     },
     {
-      title: 'Task Throughput',
-      description: `Team is ${backlogRatio >= 1 ? 'keeping pace with' : 'lagging'} intake (${(snapshotMetrics.taskThroughputRatio * 100).toFixed(0)}% completion/capture ratio, ${backlogTrend}).`,
+      title: "Task Throughput",
+      description: `Team is ${backlogRatio >= 1 ? "keeping pace with" : "lagging"} intake (${(snapshotMetrics.taskThroughputRatio * 100).toFixed(0)}% completion/capture ratio, ${backlogTrend}).`,
       value: `${(snapshotMetrics.taskThroughputRatio * 100).toFixed(0)}%`,
       confidence: throughputConfidence,
-      impact: backlogRatio >= 1 ? 'positive' : 'negative',
+      impact: backlogRatio >= 1 ? "positive" : "negative",
     },
   ];
 }
 
-function buildBusinessSnapshotFromMetrics(metrics: OperationalMetrics): BusinessAnalyticsSnapshot {
+function buildBusinessSnapshotFromMetrics(
+  metrics: OperationalMetrics,
+): BusinessAnalyticsSnapshot {
   const baseline = buildScenarioBaseline(metrics);
-  const laborHours = metrics.scheduling.actualLaborHours || metrics.scheduling.plannedLaborHours;
-  const revenuePerLaborHour = laborHours > 0 ? metrics.revenue.trailing30 / laborHours : 0;
+  const laborHours =
+    metrics.scheduling.actualLaborHours || metrics.scheduling.plannedLaborHours;
+  const revenuePerLaborHour =
+    laborHours > 0 ? metrics.revenue.trailing30 / laborHours : 0;
   const laborEfficiencyIndex = Number(
-    clamp((revenuePerLaborHour / TARGET_REVENUE_PER_LABOR_HOUR) * 100, 45, 155).toFixed(0),
+    clamp(
+      (revenuePerLaborHour / TARGET_REVENUE_PER_LABOR_HOUR) * 100,
+      45,
+      155,
+    ).toFixed(0),
   );
   const forecastConfidence = buildForecastConfidence(metrics);
   const taskThroughputRatio =
     metrics.tasks.createdLast30 > 0
-      ? Number((metrics.tasks.completedLast30 / metrics.tasks.createdLast30).toFixed(2))
+      ? Number(
+          (metrics.tasks.completedLast30 / metrics.tasks.createdLast30).toFixed(
+            2,
+          ),
+        )
       : metrics.tasks.completedLast30 > 0
         ? 1.05
         : 0.82;
@@ -624,7 +765,9 @@ export async function fetchBusinessAnalyticsSnapshot(
   };
 }
 
-export function getFallbackBusinessSnapshot(now?: Date): BusinessAnalyticsSnapshot {
+export function getFallbackBusinessSnapshot(
+  now?: Date,
+): BusinessAnalyticsSnapshot {
   const metrics = createFallbackMetrics(now);
   return buildBusinessSnapshotFromMetrics(metrics);
 }

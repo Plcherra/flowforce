@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import ItemsSetupPage from '@/screens/ItemsSetup';
+import ItemsSetupPage from "@/screens/ItemsSetup";
 
 export default function ItemsSetup() {
   return <ItemsSetupPage />;

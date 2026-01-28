@@ -1,46 +1,50 @@
-import { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { calculateCourseWorkload } from '@/services/learning/learningService';
-import type { CourseCreationPayload, CourseModuleInput, LearningDeliveryMode } from '@/types/learning';
-import { logger } from '@/utils/logger';
-import CourseWizardHeader from './CourseWizardHeader';
-import CourseWizardSteps from './CourseWizardSteps';
-import CourseWizardFooter from './CourseWizardFooter';
-import { StepGeneralInfo } from './StepGeneralInfo';
-import { StepRolesAndTargets } from './StepRolesAndTargets';
-import { StepXPRewards } from './StepXPRewards';
-import { StepSummary } from './StepSummary';
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { calculateCourseWorkload } from "@/features/learning/services/learningService";
+import type {
+  CourseCreationPayload,
+  CourseModuleInput,
+  LearningDeliveryMode,
+} from "@/types/learning";
+import { logger } from "@/utils/logger";
+import CourseWizardHeader from "./CourseWizardHeader";
+import CourseWizardSteps from "./CourseWizardSteps";
+import CourseWizardFooter from "./CourseWizardFooter";
+import { StepGeneralInfo } from "./StepGeneralInfo";
+import { StepRolesAndTargets } from "./StepRolesAndTargets";
+import { StepXPRewards } from "./StepXPRewards";
+import { StepSummary } from "./StepSummary";
 
 const CATEGORY_OPTIONS = [
-  'Onboarding',
-  'Compliance',
-  'Leadership',
-  'Operations',
-  'Customer Experience',
-  'Safety',
-  'Technology',
-  'Product Knowledge',
+  "Onboarding",
+  "Compliance",
+  "Leadership",
+  "Operations",
+  "Customer Experience",
+  "Safety",
+  "Technology",
+  "Product Knowledge",
 ];
 
 const ROLE_OPTIONS = [
-  { value: 'staff', label: 'Staff' },
-  { value: 'barista', label: 'Barista' },
-  { value: 'supervisor', label: 'Supervisor' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'company_admin', label: 'Company Admin' },
-  { value: 'owner', label: 'Owner' },
+  { value: "staff", label: "Staff" },
+  { value: "barista", label: "Barista" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "manager", label: "Manager" },
+  { value: "company_admin", label: "Company Admin" },
+  { value: "owner", label: "Owner" },
 ];
 
 const ROLE_UNLOCK_OPTIONS = [
-  { value: 'staff', label: 'Staff' },
-  { value: 'barista', label: 'Barista' },
-  { value: 'supervisor', label: 'Supervisor' },
-  { value: 'manager', label: 'Manager' },
+  { value: "staff", label: "Staff" },
+  { value: "barista", label: "Barista" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "manager", label: "Manager" },
 ];
 
-const NO_CERTIFICATION_VALUE = 'none';
+const NO_CERTIFICATION_VALUE = "none";
 
 type WizardStep = 0 | 1 | 2 | 3;
 
@@ -65,11 +69,11 @@ interface WizardFormState {
 }
 
 const initialState: WizardFormState = {
-  title: '',
-  description: '',
+  title: "",
+  description: "",
   category: CATEGORY_OPTIONS[0],
-  deliveryMode: 'self_paced',
-  targetRoles: ['staff'],
+  deliveryMode: "self_paced",
+  targetRoles: ["staff"],
   levelRequirement: 1,
   certificationId: null,
   roleUnlock: [],
@@ -85,11 +89,18 @@ export interface CourseCreationWizardProps {
   loading?: boolean;
 }
 
-export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = false }: CourseCreationWizardProps) {
+export function CourseCreationWizard({
+  open,
+  onOpenChange,
+  onCreate,
+  loading = false,
+}: CourseCreationWizardProps) {
   const { toast } = useToast();
   const [step, setStep] = useState<WizardStep>(0);
   const [form, setForm] = useState<WizardFormState>(initialState);
-  const [certificationOptions, setCertificationOptions] = useState<CertificationOption[]>([]);
+  const [certificationOptions, setCertificationOptions] = useState<
+    CertificationOption[]
+  >([]);
   const [loadingCertifications, setLoadingCertifications] = useState(false);
 
   useEffect(() => {
@@ -100,12 +111,15 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
     }
     setLoadingCertifications(true);
     supabase
-      .from('certification_catalog')
-      .select('id, title, unlocks_role')
-      .order('title', { ascending: true })
+      .from("certification_catalog")
+      .select("id, title, unlocks_role")
+      .order("title", { ascending: true })
       .then(({ data, error }) => {
         if (error) {
-          logger.warn('Unable to load certification catalog', { error, tags: ['warning'] });
+          logger.warn("Unable to load certification catalog", {
+            error,
+            tags: ["warning"],
+          });
           setCertificationOptions([]);
           return;
         }
@@ -122,9 +136,14 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
 
   useEffect(() => {
     if (!form.certificationId) return;
-    const match = certificationOptions.find((option) => option.id === form.certificationId);
+    const match = certificationOptions.find(
+      (option) => option.id === form.certificationId,
+    );
     if (match?.unlocksRole && !form.roleUnlock.includes(match.unlocksRole)) {
-      setForm((prev) => ({ ...prev, roleUnlock: [...prev.roleUnlock, match.unlocksRole!] }));
+      setForm((prev) => ({
+        ...prev,
+        roleUnlock: [...prev.roleUnlock, match.unlocksRole!],
+      }));
     }
   }, [form.certificationId, certificationOptions, form.roleUnlock]);
 
@@ -133,10 +152,30 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
   const xpReward = Math.max(form.manualXpReward, workload.totalXp);
 
   const steps = [
-    { id: 0, label: 'General info', title: 'Launch new training', description: 'Set the basics for your course.' },
-    { id: 1, label: 'Audience', title: 'Define audience', description: 'Target roles and certification behaviour.' },
-    { id: 2, label: 'XP & modules', title: 'Configure XP rewards', description: 'Add modules and XP details.' },
-    { id: 3, label: 'Summary', title: 'Review and launch', description: 'Confirm everything looks right.' },
+    {
+      id: 0,
+      label: "General info",
+      title: "Launch new training",
+      description: "Set the basics for your course.",
+    },
+    {
+      id: 1,
+      label: "Audience",
+      title: "Define audience",
+      description: "Target roles and certification behaviour.",
+    },
+    {
+      id: 2,
+      label: "XP & modules",
+      title: "Configure XP rewards",
+      description: "Add modules and XP details.",
+    },
+    {
+      id: 3,
+      label: "Summary",
+      title: "Review and launch",
+      description: "Confirm everything looks right.",
+    },
   ];
 
   const header = steps[step];
@@ -148,9 +187,9 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
   const handleAddModule = (module: CourseModuleInput) => {
     if (!module.title.trim()) {
       toast({
-        title: 'Module title required',
-        description: 'Add a module title before saving it.',
-        variant: 'destructive',
+        title: "Module title required",
+        description: "Add a module title before saving it.",
+        variant: "destructive",
       });
       return;
     }
@@ -187,9 +226,9 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
   const handleSubmit = async () => {
     if (form.modules.length === 0) {
       toast({
-        title: 'Add at least one module',
-        description: 'Courses need at least one module to publish.',
-        variant: 'destructive',
+        title: "Add at least one module",
+        description: "Courses need at least one module to publish.",
+        variant: "destructive",
       });
       return;
     }
@@ -202,7 +241,7 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
       xpReward,
       estimatedHours,
       deliveryMode: form.deliveryMode,
-      targetRoles: form.targetRoles.length > 0 ? form.targetRoles : ['staff'],
+      targetRoles: form.targetRoles.length > 0 ? form.targetRoles : ["staff"],
       certificationId: form.certificationId ?? undefined,
       roleUnlock: form.roleUnlock,
       autoScheduleEligible: form.autoScheduleEligible,
@@ -216,7 +255,10 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-screen flex-col overflow-hidden border border-border bg-background p-0 sm:h-[85vh] sm:max-w-4xl">
-        <CourseWizardHeader title={header.title} description={header.description} />
+        <CourseWizardHeader
+          title={header.title}
+          description={header.description}
+        />
         <CourseWizardSteps steps={steps} current={step} />
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -253,7 +295,9 @@ export function CourseCreationWizard({ open, onOpenChange, onCreate, loading = f
               modules={form.modules}
               workloadMinutes={workload.totalMinutes}
               totalXp={workload.totalXp}
-              onManualXpChange={(value) => updateForm({ manualXpReward: value })}
+              onManualXpChange={(value) =>
+                updateForm({ manualXpReward: value })
+              }
               onAddModule={handleAddModule}
               onRemoveModule={handleRemoveModule}
             />

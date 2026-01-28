@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import TemplateDetailPage from '@/screens/TemplateDetail';
+import TemplateDetailPage from "@/screens/TemplateDetail";
 
 export default function TemplateDetail() {
   return <TemplateDetailPage />;

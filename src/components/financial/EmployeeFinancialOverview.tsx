@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useEmployeeFinancialMetrics } from '@/hooks/useFinancialManagement';
-import { format } from 'date-fns';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEmployeeFinancialMetrics } from "@/hooks/useFinancialManagement";
+import { format } from "date-fns";
 import {
   Clock,
   DollarSign,
@@ -17,7 +17,7 @@ import {
   Timer,
   TrendingDown,
   TrendingUp,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -28,7 +28,7 @@ import {
   YAxis,
   Area,
   AreaChart,
-} from 'recharts';
+} from "recharts";
 
 const loadingSkeleton = (
   <div className="space-y-4">
@@ -55,11 +55,11 @@ export function EmployeeFinancialOverview() {
 
   const lastPaymentLabel = useMemo(() => {
     if (metrics.lastPaymentAmount === null || !metrics.lastPaymentDate) {
-      return 'No payments recorded yet';
+      return "No payments recorded yet";
     }
     return `$${metrics.lastPaymentAmount.toFixed(2)} on ${format(
       new Date(metrics.lastPaymentDate),
-      'MMM d, yyyy',
+      "MMM d, yyyy",
     )}`;
   }, [metrics.lastPaymentAmount, metrics.lastPaymentDate]);
 
@@ -77,7 +77,9 @@ export function EmployeeFinancialOverview() {
                 <Clock className="h-4 w-4 text-primary" />
                 Hours This Week
               </CardTitle>
-              <CardDescription>Tracked via connected time entries</CardDescription>
+              <CardDescription>
+                Tracked via connected time entries
+              </CardDescription>
             </div>
             {metrics.clockedInToday ? (
               <Badge variant="secondary" className="text-xs">
@@ -92,7 +94,7 @@ export function EmployeeFinancialOverview() {
               </span>
               <span
                 className={`flex items-center text-sm ${
-                  hoursDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                  hoursDelta >= 0 ? "text-emerald-600" : "text-rose-600"
                 }`}
               >
                 {hoursDelta >= 0 ? (
@@ -100,7 +102,7 @@ export function EmployeeFinancialOverview() {
                 ) : (
                   <TrendingDown className="mr-1 h-4 w-4" />
                 )}
-                {hoursDelta >= 0 ? '+' : ''}
+                {hoursDelta >= 0 ? "+" : ""}
                 {hoursDelta.toFixed(1)} vs last week
               </span>
             </div>
@@ -125,7 +127,9 @@ export function EmployeeFinancialOverview() {
             <div className="text-3xl font-semibold">
               ${metrics.totalEarnings30d.toFixed(2)}
             </div>
-            <div className="text-sm text-muted-foreground">Last payment {lastPaymentLabel}</div>
+            <div className="text-sm text-muted-foreground">
+              Last payment {lastPaymentLabel}
+            </div>
           </CardContent>
         </Card>
 
@@ -153,8 +157,12 @@ export function EmployeeFinancialOverview() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">Weekly Hour Trend</CardTitle>
-            <CardDescription>Automatic sync from the Toast labor feed</CardDescription>
+            <CardTitle className="text-base font-semibold">
+              Weekly Hour Trend
+            </CardTitle>
+            <CardDescription>
+              Automatic sync from the Toast labor feed
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -163,7 +171,12 @@ export function EmployeeFinancialOverview() {
                 <XAxis dataKey="weekLabel" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="hours" stroke="#2563eb" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="hours"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -171,8 +184,12 @@ export function EmployeeFinancialOverview() {
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">Earnings History</CardTitle>
-            <CardDescription>Payouts from payroll and reimbursements</CardDescription>
+            <CardTitle className="text-base font-semibold">
+              Earnings History
+            </CardTitle>
+            <CardDescription>
+              Payouts from payroll and reimbursements
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -186,7 +203,9 @@ export function EmployeeFinancialOverview() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                <Tooltip
+                  formatter={(value: number) => `$${value.toFixed(2)}`}
+                />
                 <Area
                   type="monotone"
                   dataKey="amount"
@@ -202,9 +221,12 @@ export function EmployeeFinancialOverview() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">AI Financial Tips</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            AI Financial Tips
+          </CardTitle>
           <CardDescription>
-            Personalized suggestions generated from your logged hours and payouts
+            Personalized suggestions generated from your logged hours and
+            payouts
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

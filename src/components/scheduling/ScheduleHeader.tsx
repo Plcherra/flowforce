@@ -1,10 +1,9 @@
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { SchedulingToolbar } from "./SchedulingToolbar";
+import { useCan } from "@/hooks/useCan";
 
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { SchedulingToolbar } from './SchedulingToolbar';
-import { useCan } from '@/hooks/useCan';
-
-type ScheduleMode = 'scheduling' | 'events';
+type ScheduleMode = "scheduling" | "events";
 
 interface ScheduleHeaderProps {
   dateRangeText: string;
@@ -29,14 +28,15 @@ export function ScheduleHeader({
   currentView,
   isMobile = false,
   hideToolbar = false,
-  mode = 'scheduling',
+  mode = "scheduling",
 }: ScheduleHeaderProps) {
   const { can } = useCan();
-  const isScheduling = mode === 'scheduling';
-  const heading = isScheduling ? 'Schedule' : 'Events Calendar';
+  const isScheduling = mode === "scheduling";
+  const heading = isScheduling ? "Schedule" : "Events Calendar";
   const filtersEnabled = isScheduling && Boolean(onToggleFilters);
   const filtersActive = filtersEnabled && showFilters;
-  const shouldShowToolbar = isScheduling && !hideToolbar && can('editSchedules');
+  const shouldShowToolbar =
+    isScheduling && !hideToolbar && can("editSchedules");
 
   if (isMobile) {
     return (
@@ -45,7 +45,7 @@ export function ScheduleHeader({
           <h1 className="text-2xl font-bold text-gray-900">{heading}</h1>
           {filtersEnabled && (
             <Button
-              variant={filtersActive ? 'default' : 'outline'}
+              variant={filtersActive ? "default" : "outline"}
               size="sm"
               onClick={onToggleFilters}
             >
@@ -53,7 +53,7 @@ export function ScheduleHeader({
             </Button>
           )}
         </div>
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={onPrevDate}>
@@ -63,13 +63,13 @@ export function ScheduleHeader({
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <span className="text-sm font-medium text-center flex-1 mx-4">
             {dateRangeText}
           </span>
-          
+
           {shouldShowToolbar && (
-            <SchedulingToolbar 
+            <SchedulingToolbar
               selectedDate={selectedDate}
               currentView={currentView}
             />
@@ -99,7 +99,7 @@ export function ScheduleHeader({
       <div className="flex items-center space-x-2">
         {filtersEnabled && (
           <Button
-            variant={filtersActive ? 'default' : 'outline'}
+            variant={filtersActive ? "default" : "outline"}
             size="sm"
             onClick={onToggleFilters}
           >
@@ -108,7 +108,7 @@ export function ScheduleHeader({
           </Button>
         )}
         {shouldShowToolbar && (
-          <SchedulingToolbar 
+          <SchedulingToolbar
             selectedDate={selectedDate}
             currentView={currentView}
           />

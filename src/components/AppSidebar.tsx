@@ -1,24 +1,26 @@
-import React from 'react';
-import { Building2 } from 'lucide-react';
+import React from "react";
+import { Building2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-} from '@/components/ui/sidebar';
-import { useNavigationData } from '@/hooks/useNavigationData';
-import { NavigationSection } from '@/components/navigation/NavigationSection';
-import { DashboardNavigation } from '@/components/navigation/DashboardNavigation';
-import { useSidebarScroll } from '@/hooks/useSidebarScroll';
+} from "@/components/ui/sidebar";
+import { useNavigationData } from "@/hooks/useNavigationData";
+import { NavigationSection } from "@/components/navigation/NavigationSection";
+import { DashboardNavigation } from "@/components/navigation/DashboardNavigation";
+import { useSidebarScroll } from "@/hooks/useSidebarScroll";
 
 export function AppSidebar() {
-  const { processedSections, canManageSections, getIsActive } = useNavigationData();
+  const { processedSections, canManageSections, getIsActive } =
+    useNavigationData();
   const { scrollContainerRef } = useSidebarScroll();
   const sections = Array.isArray(processedSections) ? processedSections : [];
   const canManage = Boolean(canManageSections);
-  const isActiveFn = typeof getIsActive === 'function' ? getIsActive : () => false;
+  const isActiveFn =
+    typeof getIsActive === "function" ? getIsActive : () => false;
 
   return (
-    <Sidebar 
+    <Sidebar
       collapsible="icon"
       className="border-r border-primary/20 animate-fade-in animate-reduced-motion-safe"
     >
@@ -31,28 +33,28 @@ export function AppSidebar() {
         </div>
 
         {/* Dashboard Navigation - More accessible position */}
-        <DashboardNavigation isActive={isActiveFn('/dashboard')} />
+        <DashboardNavigation isActive={isActiveFn("/dashboard")} />
       </SidebarHeader>
 
-      <SidebarContent 
+      <SidebarContent
         ref={scrollContainerRef}
         className="px-4 py-6 border-t border-primary/10 scroll-smooth overflow-y-auto"
-        style={{ 
-          scrollBehavior: 'smooth',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'hsl(var(--primary) / 0.3) transparent'
+        style={{
+          scrollBehavior: "smooth",
+          scrollbarWidth: "thin",
+          scrollbarColor: "hsl(var(--primary) / 0.3) transparent",
         }}
       >
         {/* Navigation Sections with staggered animation */}
         <div className="space-y-6">
           {sections.map((section, index) => (
-            <div 
+            <div
               key={section.id}
               className="animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <NavigationSection 
-                section={section} 
+              <NavigationSection
+                section={section}
                 canManageSections={canManage}
               />
             </div>

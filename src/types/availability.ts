@@ -1,6 +1,6 @@
-export type AvailabilityLockMode = 'auto' | 'open' | 'lock';
+export type AvailabilityLockMode = "auto" | "open" | "lock";
 
-export type AvailabilityRequestStatus = 'pending' | 'approved' | 'denied';
+export type AvailabilityRequestStatus = "pending" | "approved" | "denied";
 
 export interface OrgPrefs {
   id: string;

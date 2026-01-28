@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigation } from 'react-router-dom';
-import { LoadingSpinner } from '@/components/ui/loading-states';
+import { useState, useEffect } from "react";
+import { useNavigation } from "react-router-dom";
+import { LoadingSpinner } from "@/components/ui/loading-states";
 
 export function ContentLoader({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation();
@@ -9,7 +9,7 @@ export function ContentLoader({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    if ((navigation.state as string) === 'loading') {
+    if ((navigation.state as string) === "loading") {
       // Show loader after 100ms to avoid flash for fast transitions
       timeoutId = setTimeout(() => setShowLoader(true), 100);
     } else {

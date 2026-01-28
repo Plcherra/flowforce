@@ -1,16 +1,18 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   createPurchaseOrder,
   listPurchaseOrders,
   receivePurchaseOrder,
   type CreatePurchaseOrderInput,
   type ReceivePurchaseOrderInput,
-} from '../purchasingRepository';
+} from "../purchasingRepository";
 
-const defaultUser = { id: 'user-1' };
+const defaultUser = { id: "user-1" };
 
-function createMockSupabaseClient(responses: Record<string, Array<{ data: any; error: any }>>): SupabaseClient & {
+function createMockSupabaseClient(
+  responses: Record<string, Array<{ data: any; error: any }>>,
+): SupabaseClient & {
   from: ReturnType<typeof vi.fn>;
   auth: { getUser: ReturnType<typeof vi.fn> };
   operations: Record<string, any[]>;
@@ -19,7 +21,11 @@ function createMockSupabaseClient(responses: Record<string, Array<{ data: any; e
   const client = {
     from: vi.fn((table: string) => {
       if (!operations[table]) operations[table] = [];
-      return buildQueryBuilder(table, responses[table] ?? [], operations[table]);
+      return buildQueryBuilder(
+        table,
+        responses[table] ?? [],
+        operations[table],
+      );
     }),
     auth: {
       getUser: vi.fn(async () => ({ data: { user: defaultUser } })),
@@ -33,56 +39,66 @@ function createMockSupabaseClient(responses: Record<string, Array<{ data: any; e
   return client;
 }
 
-function buildQueryBuilder(table: string, queue: Array<{ data: any; error: any }>, ops: any[]) {
+function buildQueryBuilder(
+  table: string,
+  queue: Array<{ data: any; error: any }>,
+  ops: any[],
+) {
   const builder: any = {
     insert: vi.fn((payload: unknown) => {
-      ops.push({ type: 'insert', table, payload });
+      ops.push({ type: "insert", table, payload });
       return builder;
     }),
     update: vi.fn((payload: unknown) => {
-      ops.push({ type: 'update', table, payload });
+      ops.push({ type: "update", table, payload });
       return builder;
     }),
     delete: vi.fn((payload?: unknown) => {
-      ops.push({ type: 'delete', table, payload });
+      ops.push({ type: "delete", table, payload });
       return builder;
     }),
     select: vi.fn(() => builder),
     eq: vi.fn((field: string, value: unknown) => {
-      ops.push({ type: 'eq', table, field, value });
+      ops.push({ type: "eq", table, field, value });
       return builder;
     }),
     order: vi.fn((field: string, config?: unknown) => {
-      ops.push({ type: 'order', table, field, config });
+      ops.push({ type: "order", table, field, config });
       return builder;
     }),
     in: vi.fn(() => builder),
     upsert: vi.fn((payload: unknown) => {
-      ops.push({ type: 'upsert', table, payload });
+      ops.push({ type: "upsert", table, payload });
       return builder;
     }),
-    single: vi.fn(() => Promise.resolve(queue.shift() ?? { data: null, error: null })),
-    maybeSingle: vi.fn(() => Promise.resolve(queue.shift() ?? { data: null, error: null })),
+    single: vi.fn(() =>
+      Promise.resolve(queue.shift() ?? { data: null, error: null }),
+    ),
+    maybeSingle: vi.fn(() =>
+      Promise.resolve(queue.shift() ?? { data: null, error: null }),
+    ),
     then: (resolve: (value: unknown) => void) =>
-      Promise.resolve(queue.shift() ?? { data: null, error: null }).then(resolve),
+      Promise.resolve(queue.shift() ?? { data: null, error: null }).then(
+        resolve,
+      ),
   };
   return builder;
 }
 
-describe('purchasingRepository', () => {
+describe("purchasingRepository", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('lists purchase orders', async () => {
+  it("lists purchase orders", async () => {
     const mockClient = createMockSupabaseClient({
       purchase_orders: [
         {
           data: [
             {
-              id: 'po-1',
-              po_number: 'PO-1',
-              status: 'pending',
+              id: "po-1",
+              po_number: "PO-1",
+              status: "pending",
               purchase_order_items: [],
             },
           ],
@@ -93,18 +109,18 @@ describe('purchasingRepository', () => {
 
     const orders = await listPurchaseOrders({ supabaseClient: mockClient });
     expect(orders).toHaveLength(1);
-    expect(mockClient.from).toHaveBeenCalledWith('purchase_orders');
+    expect(mockClient.from).toHaveBeenCalledWith("purchase_orders");
   });
 
-  it('creates a purchase order with items', async () => {
+  it("creates a purchase order with items", async () => {
     const responses = {
       purchase_orders: [
-        { data: { id: 'po-1' }, error: null },
+        { data: { id: "po-1" }, error: null },
         {
           data: {
-            id: 'po-1',
-            po_number: 'PO-123',
-            status: 'pending',
+            id: "po-1",
+            po_number: "PO-123",
+            status: "pending",
             purchase_order_items: [],
           },
           error: null,
@@ -117,43 +133,49 @@ describe('purchasingRepository', () => {
 
     const payload: CreatePurchaseOrderInput = {
       supplier: {
-        id: 'sup-1',
-        name: 'ACME',
-        contact_name: 'Alex',
-        email: 'a@acme.com',
-        phone: '555-0100',
+        id: "sup-1",
+        name: "ACME",
+        contact_name: "Alex",
+        email: "a@acme.com",
+        phone: "555-0100",
         address: null,
-        payment_terms: 'NET30',
+        payment_terms: "NET30",
         integration: null,
       },
       items: [
         {
-          item_id: 'item-1',
-          item_name: 'Flour',
+          item_id: "item-1",
+          item_name: "Flour",
           quantity: 2,
           unit_price: 5,
         },
       ],
     };
 
-    const order = await createPurchaseOrder(payload, { supabaseClient: mockClient });
-    expect(order?.id).toBe('po-1');
-    expect(mockClient.operations.purchase_order_items.some((op) => op.type === 'insert')).toBe(true);
+    const order = await createPurchaseOrder(payload, {
+      supabaseClient: mockClient,
+    });
+    expect(order?.id).toBe("po-1");
+    expect(
+      mockClient.operations.purchase_order_items.some(
+        (op) => op.type === "insert",
+      ),
+    ).toBe(true);
   });
 
-  it('receives a purchase order and records transactions', async () => {
+  it("receives a purchase order and records transactions", async () => {
     const responses = {
       purchase_orders: [
         {
           data: {
-            id: 'po-1',
-            po_number: 'PO-1',
-            status: 'pending',
-            currency: 'USD',
+            id: "po-1",
+            po_number: "PO-1",
+            status: "pending",
+            currency: "USD",
             purchase_order_items: [
               {
-                id: 'line-1',
-                item_id: 'item-1',
+                id: "line-1",
+                item_id: "item-1",
                 quantity: 5,
                 unit_price: 10,
                 received_quantity: 0,
@@ -164,14 +186,14 @@ describe('purchasingRepository', () => {
         },
         {
           data: {
-            id: 'po-1',
-            po_number: 'PO-1',
-            status: 'pending',
-            currency: 'USD',
+            id: "po-1",
+            po_number: "PO-1",
+            status: "pending",
+            currency: "USD",
             purchase_order_items: [
               {
-                id: 'line-1',
-                item_id: 'item-1',
+                id: "line-1",
+                item_id: "item-1",
                 quantity: 5,
                 unit_price: 10,
                 received_quantity: 3,
@@ -180,17 +202,17 @@ describe('purchasingRepository', () => {
           },
           error: null,
         },
-        { data: { id: 'po-1' }, error: null },
+        { data: { id: "po-1" }, error: null },
         {
           data: {
-            id: 'po-1',
-            po_number: 'PO-1',
-            status: 'received',
-            currency: 'USD',
+            id: "po-1",
+            po_number: "PO-1",
+            status: "received",
+            currency: "USD",
             purchase_order_items: [
               {
-                id: 'line-1',
-                item_id: 'item-1',
+                id: "line-1",
+                item_id: "item-1",
                 quantity: 5,
                 unit_price: 10,
                 received_quantity: 3,
@@ -200,7 +222,7 @@ describe('purchasingRepository', () => {
           error: null,
         },
       ],
-      purchase_order_items: [{ data: { id: 'line-1' }, error: null }],
+      purchase_order_items: [{ data: { id: "line-1" }, error: null }],
       inventory_transactions: [{ data: null, error: null }],
     } satisfies Record<string, Array<{ data: any; error: any }>>;
 
@@ -209,15 +231,19 @@ describe('purchasingRepository', () => {
     const payload: ReceivePurchaseOrderInput = {
       items: [
         {
-          id: 'line-1',
+          id: "line-1",
           received_quantity: 3,
         },
       ],
       closeOrder: true,
     };
 
-    const updated = await receivePurchaseOrder('po-1', payload, { supabaseClient: mockClient });
-    expect(updated?.status).toBe('received');
-    expect(mockClient.operations.inventory_transactions[0]?.type).toBe('insert');
+    const updated = await receivePurchaseOrder("po-1", payload, {
+      supabaseClient: mockClient,
+    });
+    expect(updated?.status).toBe("received");
+    expect(mockClient.operations.inventory_transactions[0]?.type).toBe(
+      "insert",
+    );
   });
 });

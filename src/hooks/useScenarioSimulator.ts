@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   calculateScenarioOutcome,
   mapImpactToPriority,
@@ -8,9 +8,12 @@ import {
   type ScenarioAdjustments,
   type ScenarioBaseline,
   type ScenarioOutcome,
-} from '@/lib/ai/scenarioEngine';
-import { fetchBusinessAnalyticsSnapshot, getFallbackBusinessSnapshot } from '@/services/analytics/businessAnalyticsService';
-import { logger } from '@/utils/logger';
+} from "@/lib/ai/scenarioEngine";
+import {
+  fetchBusinessAnalyticsSnapshot,
+  getFallbackBusinessSnapshot,
+} from "@/services/analytics/businessAnalyticsService";
+import { logger } from "@/utils/logger";
 
 export interface UseScenarioSimulatorOptions {
   companyId?: string | null;
@@ -23,7 +26,9 @@ export interface ScenarioSimulatorResult {
   error: string | null;
   isUsingFallback: boolean;
   simulate: (adjustments: ScenarioAdjustments) => ScenarioOutcome;
-  triggerCopilot: (actions: CopilotAction[]) => Promise<{ created: number; taskIds: string[] }>;
+  triggerCopilot: (
+    actions: CopilotAction[],
+  ) => Promise<{ created: number; taskIds: string[] }>;
   lastTriggeredAt: string | null;
   lastTriggeredCount: number | null;
   lastGeneratedActions: CopilotAction[];
@@ -34,7 +39,9 @@ export interface ScenarioSimulatorResult {
 const DEFAULT_HORIZON_DAYS = 21;
 type CreatedTaskRow = { id: string };
 
-export function useScenarioSimulator(options: UseScenarioSimulatorOptions): ScenarioSimulatorResult {
+export function useScenarioSimulator(
+  options: UseScenarioSimulatorOptions,
+): ScenarioSimulatorResult {
   const { companyId, horizonDays = DEFAULT_HORIZON_DAYS } = options;
   const { user } = useAuth();
 
@@ -43,16 +50,26 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
   const [error, setError] = useState<string | null>(null);
   const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
   const [lastTriggeredAt, setLastTriggeredAt] = useState<string | null>(null);
-  const [lastTriggeredCount, setLastTriggeredCount] = useState<number | null>(null);
-  const [lastGeneratedActions, setLastGeneratedActions] = useState<CopilotAction[]>([]);
-  const [lastTriggeredTaskIds, setLastTriggeredTaskIds] = useState<string[]>([]);
+  const [lastTriggeredCount, setLastTriggeredCount] = useState<number | null>(
+    null,
+  );
+  const [lastGeneratedActions, setLastGeneratedActions] = useState<
+    CopilotAction[]
+  >([]);
+  const [lastTriggeredTaskIds, setLastTriggeredTaskIds] = useState<string[]>(
+    [],
+  );
 
   const fetchBaseline = useCallback(async () => {
     if (!user || !companyId) {
       const fallbackSnapshot = getFallbackBusinessSnapshot();
       setBaseline(fallbackSnapshot.baseline);
       setIsUsingFallback(true);
-      setError(companyId ? 'Sign in required to load live data. Showing simulator defaults.' : 'Select or create a company to load live data.');
+      setError(
+        companyId
+          ? "Sign in required to load live data. Showing simulator defaults."
+          : "Select or create a company to load live data.",
+      );
       setLoading(false);
       return;
     }
@@ -61,22 +78,26 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
     setError(null);
 
     try {
-      const { snapshot, isFallback, notice } = await fetchBusinessAnalyticsSnapshot({
-        companyId,
-        horizonDays,
-        supabaseClient: supabase,
-      });
+      const { snapshot, isFallback, notice } =
+        await fetchBusinessAnalyticsSnapshot({
+          companyId,
+          horizonDays,
+          supabaseClient: supabase,
+        });
 
       setBaseline(snapshot.baseline);
       setIsUsingFallback(isFallback);
-      setError(isFallback ? notice ?? 'Using simulator defaults.' : null);
+      setError(isFallback ? (notice ?? "Using simulator defaults.") : null);
       setLoading(false);
     } catch (err) {
-      logger.error('Scenario simulator baseline error', { error: err, tags: ['error'] });
+      logger.error("Scenario simulator baseline error", {
+        error: err,
+        tags: ["error"],
+      });
       const fallbackSnapshot = getFallbackBusinessSnapshot();
       setBaseline(fallbackSnapshot.baseline);
       setIsUsingFallback(true);
-      setError('Unable to load live data; using simulator defaults.');
+      setError("Unable to load live data; using simulator defaults.");
       setLoading(false);
     }
   }, [companyId, horizonDays, user]);
@@ -87,7 +108,10 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
 
   const simulate = useCallback(
     (adjustments: ScenarioAdjustments) =>
-      calculateScenarioOutcome(baseline ?? getFallbackBusinessSnapshot().baseline, adjustments),
+      calculateScenarioOutcome(
+        baseline ?? getFallbackBusinessSnapshot().baseline,
+        adjustments,
+      ),
     [baseline],
   );
 
@@ -100,7 +124,7 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
       }
 
       if (!user) {
-        throw new Error('Sign in to trigger Co-Pilot actions.');
+        throw new Error("Sign in to trigger Co-Pilot actions.");
       }
 
       setLastGeneratedActions(actions);
@@ -108,20 +132,23 @@ export function useScenarioSimulator(options: UseScenarioSimulatorOptions): Scen
       const payload = actions.map((action) => ({
         title: `[Co-Pilot] ${action.title}`,
         description: action.summary,
-        status: 'todo',
+        status: "todo",
         priority: mapImpactToPriority(action.impact),
         created_by: user.id,
         due_date: action.suggestedDueDate,
-        tags: ['copilot', 'scenario', `scenario:${action.type}`],
+        tags: ["copilot", "scenario", `scenario:${action.type}`],
       }));
 
       const { data: insertedRows, error: insertError } = await supabase
-        .from('tasks')
+        .from("tasks")
         .insert(payload)
-        .select('id');
+        .select("id");
 
       if (insertError) {
-        logger.error('Failed to push Co-Pilot actions', { error: insertError, tags: ['error'] });
+        logger.error("Failed to push Co-Pilot actions", {
+          error: insertError,
+          tags: ["error"],
+        });
         throw insertError;
       }
 

@@ -1,3 +1,3 @@
-export async function runAvailabilityDetector(orgId: string) {
+export async function runAvailabilityDetector(_orgId: string) {
   return [];
 }

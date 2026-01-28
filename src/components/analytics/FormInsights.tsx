@@ -1,17 +1,22 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Lightbulb, TrendingUp, AlertCircle, CheckCircle, Target } from 'lucide-react';
-import { FormAnalyticsData } from '@/types/common';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Lightbulb,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Target,
+} from "lucide-react";
+import { FormAnalyticsData } from "@/types/common";
 
 interface Insight {
   id: string;
-  type: 'improvement' | 'success' | 'warning' | 'trend';
+  type: "improvement" | "success" | "warning" | "trend";
   title: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   actionable: boolean;
 }
 
@@ -19,81 +24,83 @@ interface FormInsightsProps {
   formId: string;
   submissionCount: number;
   completionRate: number;
-  fieldData?: FormAnalyticsData['fieldAnalytics'];
+  fieldData?: FormAnalyticsData["fieldAnalytics"];
 }
 
-export default function FormInsights({ 
-  formId, 
-  submissionCount, 
-  completionRate, 
-  fieldData = [] 
+export default function FormInsights({
+  formId,
+  submissionCount,
+  completionRate,
+  fieldData = [],
 }: FormInsightsProps) {
-  
   const generateInsights = (): Insight[] => {
     const insights: Insight[] = [];
 
     // Completion rate insights
     if (completionRate < 60) {
       insights.push({
-        id: '1',
-        type: 'warning',
-        title: 'Low Completion Rate',
+        id: "1",
+        type: "warning",
+        title: "Low Completion Rate",
         description: `Your form has a ${completionRate}% completion rate. Consider reducing the number of fields or making optional fields clearer.`,
-        impact: 'high',
-        actionable: true
+        impact: "high",
+        actionable: true,
       });
     } else if (completionRate > 85) {
       insights.push({
-        id: '2',
-        type: 'success',
-        title: 'Excellent Completion Rate',
+        id: "2",
+        type: "success",
+        title: "Excellent Completion Rate",
         description: `Great job! Your form has a ${completionRate}% completion rate, which is above industry average.`,
-        impact: 'high',
-        actionable: false
+        impact: "high",
+        actionable: false,
       });
     }
 
     // Submission volume insights
     if (submissionCount < 10) {
       insights.push({
-        id: '3',
-        type: 'improvement',
-        title: 'Increase Form Visibility',
-        description: 'Your form has received few submissions. Consider promoting it through email campaigns or social media.',
-        impact: 'medium',
-        actionable: true
+        id: "3",
+        type: "improvement",
+        title: "Increase Form Visibility",
+        description:
+          "Your form has received few submissions. Consider promoting it through email campaigns or social media.",
+        impact: "medium",
+        actionable: true,
       });
     } else if (submissionCount > 100) {
       insights.push({
-        id: '4',
-        type: 'trend',
-        title: 'High Engagement',
+        id: "4",
+        type: "trend",
+        title: "High Engagement",
         description: `Your form is performing well with ${submissionCount} submissions. Consider creating similar forms.`,
-        impact: 'medium',
-        actionable: true
+        impact: "medium",
+        actionable: true,
       });
     }
 
     // Field-specific insights
     if (fieldData.length > 10) {
       insights.push({
-        id: '5',
-        type: 'warning',
-        title: 'Form Length Optimization',
-        description: 'Your form has many fields. Consider breaking it into multiple steps or removing non-essential fields.',
-        impact: 'medium',
-        actionable: true
+        id: "5",
+        type: "warning",
+        title: "Form Length Optimization",
+        description:
+          "Your form has many fields. Consider breaking it into multiple steps or removing non-essential fields.",
+        impact: "medium",
+        actionable: true,
       });
     }
 
     // Add some general insights
     insights.push({
-      id: '6',
-      type: 'improvement',
-      title: 'Mobile Optimization',
-      description: 'Ensure your form is mobile-friendly as 60% of users access forms on mobile devices.',
-      impact: 'high',
-      actionable: true
+      id: "6",
+      type: "improvement",
+      title: "Mobile Optimization",
+      description:
+        "Ensure your form is mobile-friendly as 60% of users access forms on mobile devices.",
+      impact: "high",
+      actionable: true,
     });
 
     return insights;
@@ -103,13 +110,13 @@ export default function FormInsights({
 
   const getInsightIcon = (type: string) => {
     switch (type) {
-      case 'improvement':
+      case "improvement":
         return <Lightbulb className="h-4 w-4" />;
-      case 'success':
+      case "success":
         return <CheckCircle className="h-4 w-4" />;
-      case 'warning':
+      case "warning":
         return <AlertCircle className="h-4 w-4" />;
-      case 'trend':
+      case "trend":
         return <TrendingUp className="h-4 w-4" />;
       default:
         return <Target className="h-4 w-4" />;
@@ -118,29 +125,29 @@ export default function FormInsights({
 
   const getInsightColor = (type: string) => {
     switch (type) {
-      case 'improvement':
-        return 'text-blue-500';
-      case 'success':
-        return 'text-green-500';
-      case 'warning':
-        return 'text-orange-500';
-      case 'trend':
-        return 'text-purple-500';
+      case "improvement":
+        return "text-blue-500";
+      case "success":
+        return "text-green-500";
+      case "warning":
+        return "text-orange-500";
+      case "trend":
+        return "text-purple-500";
       default:
-        return 'text-gray-500';
+        return "text-gray-500";
     }
   };
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high':
-        return 'destructive';
-      case 'medium':
-        return 'default';
-      case 'low':
-        return 'secondary';
+      case "high":
+        return "destructive";
+      case "medium":
+        return "default";
+      case "low":
+        return "secondary";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
@@ -156,7 +163,10 @@ export default function FormInsights({
         {insights.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No insights available yet. Submit more data to get recommendations.</p>
+            <p>
+              No insights available yet. Submit more data to get
+              recommendations.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -178,18 +188,24 @@ export default function FormInsights({
                     )}
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {insight.description}
                 </p>
 
-                {insight.type === 'improvement' && insight.actionable && (
+                {insight.type === "improvement" && insight.actionable && (
                   <div className="pt-2">
                     <div className="text-xs text-muted-foreground mb-1">
                       Implementation Priority
                     </div>
-                    <Progress 
-                      value={insight.impact === 'high' ? 85 : insight.impact === 'medium' ? 60 : 30} 
+                    <Progress
+                      value={
+                        insight.impact === "high"
+                          ? 85
+                          : insight.impact === "medium"
+                            ? 60
+                            : 30
+                      }
                       className="h-2"
                     />
                   </div>
@@ -210,16 +226,20 @@ export default function FormInsights({
               <span className="font-medium">{completionRate}%</span>
             </div>
             <Progress value={completionRate} className="h-2" />
-            
+
             <div className="flex justify-between text-sm">
               <span>Engagement Score</span>
               <span className="font-medium">
-                {submissionCount > 50 ? '85%' : submissionCount > 20 ? '70%' : '45%'}
+                {submissionCount > 50
+                  ? "85%"
+                  : submissionCount > 20
+                    ? "70%"
+                    : "45%"}
               </span>
             </div>
-            <Progress 
-              value={submissionCount > 50 ? 85 : submissionCount > 20 ? 70 : 45} 
-              className="h-2" 
+            <Progress
+              value={submissionCount > 50 ? 85 : submissionCount > 20 ? 70 : 45}
+              className="h-2"
             />
           </div>
         </div>

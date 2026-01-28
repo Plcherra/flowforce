@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 import type {
   DocumentEvent,
   DocumentProcessingState,
@@ -8,9 +8,9 @@ import type {
   ExtractedDocument,
   IngestedFile,
   TaskRecord,
-} from '@/types/ingestion';
+} from "@/types/ingestion";
 
-const REPORTS_BUCKET = 'operations-reports';
+const REPORTS_BUCKET = "operations-reports";
 
 const companyIdCache = new Map<string, string>();
 
@@ -53,7 +53,7 @@ export interface ParsedEventInput {
 
 function toDateString(value: NullableDate): string | null {
   if (!value) return null;
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) return null;
     return trimmed.slice(0, 10);
@@ -65,7 +65,10 @@ function toDateString(value: NullableDate): string | null {
   }
 }
 
-async function resolveCompanyId(userId: string, explicit?: string): Promise<string> {
+async function resolveCompanyId(
+  userId: string,
+  explicit?: string,
+): Promise<string> {
   if (explicit) {
     companyIdCache.set(userId, explicit);
     return explicit;
@@ -75,9 +78,9 @@ async function resolveCompanyId(userId: string, explicit?: string): Promise<stri
   if (cached) return cached;
 
   const { data, error } = await supabase
-    .from('profiles')
-    .select('company_id')
-    .eq('id', userId)
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
     .single();
 
   if (error) {
@@ -85,7 +88,7 @@ async function resolveCompanyId(userId: string, explicit?: string): Promise<stri
   }
 
   if (!data?.company_id) {
-    throw new Error('No company assigned to current user');
+    throw new Error("No company assigned to current user");
   }
 
   companyIdCache.set(userId, data.company_id);
@@ -95,21 +98,33 @@ async function resolveCompanyId(userId: string, explicit?: string): Promise<stri
 function buildStoragePath(companyId: string, fileName: string) {
   const sanitized = fileName
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-zA-Z0-9._-]+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
     .toLowerCase();
-  const cryptoRef = (typeof globalThis !== 'undefined' && 'crypto' in globalThis)
-    ? (globalThis.crypto as Crypto | undefined)
-    : undefined;
-  const uniqueId = cryptoRef && 'randomUUID' in cryptoRef
-    ? cryptoRef.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const cryptoRef =
+    typeof globalThis !== "undefined" && "crypto" in globalThis
+      ? (globalThis.crypto as Crypto | undefined)
+      : undefined;
+  const uniqueId =
+    cryptoRef && "randomUUID" in cryptoRef
+      ? cryptoRef.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${companyId}/${uniqueId}-${sanitized}`;
 }
 
-export async function uploadReportFile(file: File, params: UploadReportParams): Promise<UploadReportResult> {
-  const { userId, companyId: explicitCompany, docDate, source, language, metadata } = params;
+export async function uploadReportFile(
+  file: File,
+  params: UploadReportParams,
+): Promise<UploadReportResult> {
+  const {
+    userId,
+    companyId: explicitCompany,
+    docDate,
+    source,
+    language,
+    metadata,
+  } = params;
   const companyId = await resolveCompanyId(userId, explicitCompany);
 
   const storagePath = buildStoragePath(companyId, file.name);
@@ -117,7 +132,7 @@ export async function uploadReportFile(file: File, params: UploadReportParams): 
   const uploadResult = await supabase.storage
     .from(REPORTS_BUCKET)
     .upload(storagePath, file, {
-      contentType: file.type || 'application/octet-stream',
+      contentType: file.type || "application/octet-stream",
       upsert: false,
     });
 
@@ -129,12 +144,12 @@ export async function uploadReportFile(file: File, params: UploadReportParams): 
     originalName: file.name,
     fileSize: file.size,
     lastModified: file.lastModified,
-    uploadedFrom: 'web',
+    uploadedFrom: "web",
     ...metadata,
   };
 
   const { data: fileRow, error: fileError } = await supabase
-    .from('files')
+    .from("files")
     .insert({
       company_id: companyId,
       uploader_id: userId,
@@ -148,17 +163,19 @@ export async function uploadReportFile(file: File, params: UploadReportParams): 
     .single();
 
   if (fileError || !fileRow) {
-    throw new Error(`Failed to register file: ${fileError?.message ?? 'unknown error'}`);
+    throw new Error(
+      `Failed to register file: ${fileError?.message ?? "unknown error"}`,
+    );
   }
 
   const { data: documentRow, error: documentError } = await supabase
-    .from('documents')
+    .from("documents")
     .insert({
       company_id: companyId,
       file_id: fileRow.id,
       title: file.name,
       doc_date: toDateString(docDate),
-      source: source ?? 'uploaded-report',
+      source: source ?? "uploaded-report",
       language: language ?? null,
       meta: {
         originalFilename: file.name,
@@ -171,7 +188,9 @@ export async function uploadReportFile(file: File, params: UploadReportParams): 
     .single();
 
   if (documentError || !documentRow) {
-    throw new Error(`Failed to create document: ${documentError?.message ?? 'unknown error'}`);
+    throw new Error(
+      `Failed to create document: ${documentError?.message ?? "unknown error"}`,
+    );
   }
 
   return {
@@ -181,26 +200,30 @@ export async function uploadReportFile(file: File, params: UploadReportParams): 
   };
 }
 
-export async function listDocuments(options: DocumentListOptions = {}): Promise<DocumentWithRelations[]> {
+export async function listDocuments(
+  options: DocumentListOptions = {},
+): Promise<DocumentWithRelations[]> {
   const { limit = 25, states, companyId } = options;
 
   let query = supabase
-    .from('documents')
-    .select(`
+    .from("documents")
+    .select(
+      `
       *,
       file:files(*),
       events(*),
       originating_tasks:tasks!tasks_origin_document_id_fkey(*)
-    `)
-    .order('created_at', { ascending: false })
+    `,
+    )
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (states?.length) {
-    query = query.in('processing_state', states);
+    query = query.in("processing_state", states);
   }
 
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
 
   const { data, error } = await query;
@@ -225,12 +248,12 @@ export async function listDocuments(options: DocumentListOptions = {}): Promise<
 
 export async function markDocumentProcessing(documentId: string) {
   const { error } = await supabase
-    .from('documents')
+    .from("documents")
     .update({
-      processing_state: 'processing',
+      processing_state: "processing",
       processing_error: null,
     })
-    .eq('id', documentId);
+    .eq("id", documentId);
 
   if (error) {
     throw new Error(`Failed to mark document as processing: ${error.message}`);
@@ -244,9 +267,12 @@ export interface CompleteDocumentParams {
   doc_date?: NullableDate;
 }
 
-export async function markDocumentReady(documentId: string, params: CompleteDocumentParams = {}) {
+export async function markDocumentReady(
+  documentId: string,
+  params: CompleteDocumentParams = {},
+) {
   const updates = {
-    processing_state: 'ready' as DocumentProcessingState,
+    processing_state: "ready" as DocumentProcessingState,
     processing_error: null,
     text_extracted: params.text_extracted ?? null,
     language: params.language ?? null,
@@ -255,23 +281,26 @@ export async function markDocumentReady(documentId: string, params: CompleteDocu
   };
 
   const { error } = await supabase
-    .from('documents')
+    .from("documents")
     .update(updates)
-    .eq('id', documentId);
+    .eq("id", documentId);
 
   if (error) {
     throw new Error(`Failed to complete document processing: ${error.message}`);
   }
 }
 
-export async function markDocumentFailed(documentId: string, errorMessage: string) {
+export async function markDocumentFailed(
+  documentId: string,
+  errorMessage: string,
+) {
   const { error } = await supabase
-    .from('documents')
+    .from("documents")
     .update({
-      processing_state: 'error',
+      processing_state: "error",
       processing_error: errorMessage,
     })
-    .eq('id', documentId);
+    .eq("id", documentId);
 
   if (error) {
     throw new Error(`Failed to record processing error: ${error.message}`);
@@ -288,24 +317,21 @@ export async function persistExtractedEvents(
   }
 
   if (!companyId) {
-    throw new Error('companyId is required when persisting events');
+    throw new Error("companyId is required when persisting events");
   }
 
   const mapped = events.map((event) => ({
     document_id: documentId,
     company_id: companyId,
     event_type: event.event_type,
-    severity: event.severity ?? 'medium',
+    severity: event.severity ?? "medium",
     occurred_at: toDateString(event.occurred_at),
     summary: event.summary,
     details: event.details ?? {},
     tags: event.tags ?? [],
   }));
 
-  const { data, error } = await supabase
-    .from('events')
-    .insert(mapped)
-    .select();
+  const { data, error } = await supabase.from("events").insert(mapped).select();
 
   if (error) {
     throw new Error(`Failed to persist events: ${error.message}`);

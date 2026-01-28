@@ -1,10 +1,10 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { PenTool, RotateCcw, Check, X } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import React, { useRef, useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PenTool, RotateCcw, Check, X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface SignatureData {
   signature_data: string; // Base64 encoded
@@ -30,64 +30,78 @@ export function SignatureField({
   onChange,
   required = false,
   signerName,
-  className = ""
+  className = "",
 }: SignatureFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!canvasRef.current) return;
+  const startDrawing = useCallback(
+    (
+      event:
+        | React.MouseEvent<HTMLCanvasElement>
+        | React.TouchEvent<HTMLCanvasElement>,
+    ) => {
+      if (!canvasRef.current) return;
 
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    
-    let clientX: number, clientY: number;
-    if ('touches' in event) {
-      clientX = event.touches[0].clientX;
-      clientY = event.touches[0].clientY;
-    } else {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    }
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
 
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
+      let clientX: number, clientY: number;
+      if ("touches" in event) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+      } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
-    setHasDrawn(true);
-  }, []);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-  const draw = useCallback((event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current) return;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      setIsDrawing(true);
+      setHasDrawn(true);
+    },
+    [],
+  );
 
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    
-    let clientX: number, clientY: number;
-    if ('touches' in event) {
-      clientX = event.touches[0].clientX;
-      clientY = event.touches[0].clientY;
-    } else {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    }
+  const draw = useCallback(
+    (
+      event:
+        | React.MouseEvent<HTMLCanvasElement>
+        | React.TouchEvent<HTMLCanvasElement>,
+    ) => {
+      if (!isDrawing || !canvasRef.current) return;
 
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      let clientX: number, clientY: number;
+      if ("touches" in event) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+      } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      }
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }, [isDrawing]);
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    },
+    [isDrawing],
+  );
 
   const stopDrawing = useCallback(() => {
     setIsDrawing(false);
@@ -97,7 +111,7 @@ export function SignatureField({
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -109,7 +123,7 @@ export function SignatureField({
     if (!canvasRef.current || !hasDrawn) return;
 
     const canvas = canvasRef.current;
-    const signatureData = canvas.toDataURL('image/png');
+    const signatureData = canvas.toDataURL("image/png");
 
     setUploading(true);
 
@@ -123,14 +137,14 @@ export function SignatureField({
       const filePath = `form-signatures/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('form-signatures')
+        .from("form-signatures")
         .upload(filePath, blob, {
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: "3600",
+          upsert: false,
         });
 
       if (uploadError) {
-        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
+        logger.error("Upload error:", { error: uploadError, tags: ["error"] });
         toast({
           title: "Error",
           description: "Failed to save signature",
@@ -140,7 +154,7 @@ export function SignatureField({
       }
 
       const { data } = supabase.storage
-        .from('form-signatures')
+        .from("form-signatures")
         .getPublicUrl(filePath);
 
       const signature: SignatureData = {
@@ -156,7 +170,7 @@ export function SignatureField({
         description: "Signature saved successfully",
       });
     } catch (error) {
-      logger.error('Error saving signature:', { error, tags: ['error'] });
+      logger.error("Error saving signature:", { error, tags: ["error"] });
       toast({
         title: "Error",
         description: "Failed to save signature",
@@ -172,14 +186,14 @@ export function SignatureField({
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set up canvas styling
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = "#000000";
     ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     // Set canvas size
     const rect = canvas.getBoundingClientRect();
@@ -188,7 +202,7 @@ export function SignatureField({
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     // Fill with white background
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
 
@@ -212,7 +226,9 @@ export function SignatureField({
                 <Check className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground">Signature Captured</p>
+                <p className="font-medium text-foreground">
+                  Signature Captured
+                </p>
                 {value.signer_name && (
                   <p className="text-sm text-muted-foreground">
                     Signed by: {value.signer_name}
@@ -273,7 +289,7 @@ export function SignatureField({
                   e.preventDefault();
                   stopDrawing();
                 }}
-                style={{ touchAction: 'none' }}
+                style={{ touchAction: "none" }}
               />
             </div>
 
@@ -310,7 +326,7 @@ export function SignatureField({
 export function SignatureFieldPreview({
   label = "Signature",
   description = "Please provide your digital signature",
-  className = ""
+  className = "",
 }: Partial<SignatureFieldProps>) {
   return (
     <SignatureField

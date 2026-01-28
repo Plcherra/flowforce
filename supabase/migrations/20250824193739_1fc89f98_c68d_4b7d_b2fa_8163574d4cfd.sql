@@ -169,48 +169,66 @@ ALTER TABLE ai_insights ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 -- Shift templates
+DROP POLICY IF EXISTS "Company members can view shift templates" ON shift_templates;
 CREATE POLICY "Company members can view shift templates" ON shift_templates FOR SELECT USING (company_id = get_user_company_id());
+DROP POLICY IF EXISTS "Company admins can manage shift templates" ON shift_templates;
 CREATE POLICY "Company admins can manage shift templates" ON shift_templates FOR ALL USING ((company_id = get_user_company_id()) AND is_company_admin());
 
 -- Staff availability
+DROP POLICY IF EXISTS "Users can manage their own availability" ON staff_availability;
 CREATE POLICY "Users can manage their own availability" ON staff_availability FOR ALL USING (user_id = auth.uid());
+DROP POLICY IF EXISTS "Admins can view all availability" ON staff_availability;
 CREATE POLICY "Admins can view all availability" ON staff_availability FOR SELECT USING (is_company_admin());
 
 -- Schedules
+DROP POLICY IF EXISTS "Company members can view schedules" ON schedules;
 CREATE POLICY "Company members can view schedules" ON schedules FOR SELECT USING (company_id = get_user_company_id());
+DROP POLICY IF EXISTS "Admins can manage schedules" ON schedules;
 CREATE POLICY "Admins can manage schedules" ON schedules FOR ALL USING ((company_id = get_user_company_id()) AND is_company_admin());
 
 -- Schedule assignments
+DROP POLICY IF EXISTS "Users can view their assignments" ON schedule_assignments;
 CREATE POLICY "Users can view their assignments" ON schedule_assignments FOR SELECT USING (
   user_id = auth.uid() OR 
   EXISTS (SELECT 1 FROM schedules s WHERE s.id = schedule_assignments.schedule_id AND s.company_id = get_user_company_id())
 );
+DROP POLICY IF EXISTS "Admins can manage assignments" ON schedule_assignments;
 CREATE POLICY "Admins can manage assignments" ON schedule_assignments FOR ALL USING (
   EXISTS (SELECT 1 FROM schedules s WHERE s.id = schedule_assignments.schedule_id AND s.company_id = get_user_company_id() AND is_company_admin())
 );
 
 -- Shift swaps
+DROP POLICY IF EXISTS "Users can manage their shift swaps" ON shift_swaps;
 CREATE POLICY "Users can manage their shift swaps" ON shift_swaps FOR ALL USING (
   requesting_user_id = auth.uid() OR target_user_id = auth.uid() OR is_company_admin()
 );
 
 -- Time off requests
+DROP POLICY IF EXISTS "Users can manage their time off" ON time_off_requests;
 CREATE POLICY "Users can manage their time off" ON time_off_requests FOR ALL USING (user_id = auth.uid() OR is_company_admin());
 
 -- Staff performance
+DROP POLICY IF EXISTS "Admins can manage performance data" ON staff_performance;
 CREATE POLICY "Admins can manage performance data" ON staff_performance FOR ALL USING (is_company_admin());
+DROP POLICY IF EXISTS "Users can view their own performance" ON staff_performance;
 CREATE POLICY "Users can view their own performance" ON staff_performance FOR SELECT USING (user_id = auth.uid());
 
 -- Compliance rules
+DROP POLICY IF EXISTS "Company members can view compliance rules" ON compliance_rules;
 CREATE POLICY "Company members can view compliance rules" ON compliance_rules FOR SELECT USING (company_id = get_user_company_id());
+DROP POLICY IF EXISTS "Admins can manage compliance rules" ON compliance_rules;
 CREATE POLICY "Admins can manage compliance rules" ON compliance_rules FOR ALL USING ((company_id = get_user_company_id()) AND is_company_admin());
 
 -- Scheduling notifications
+DROP POLICY IF EXISTS "Users can view their notifications" ON scheduling_notifications;
 CREATE POLICY "Users can view their notifications" ON scheduling_notifications FOR SELECT USING (user_id = auth.uid());
+DROP POLICY IF EXISTS "Admins can manage notifications" ON scheduling_notifications;
 CREATE POLICY "Admins can manage notifications" ON scheduling_notifications FOR ALL USING (is_company_admin());
 
 -- AI insights
+DROP POLICY IF EXISTS "Company members can view AI insights" ON ai_insights;
 CREATE POLICY "Company members can view AI insights" ON ai_insights FOR SELECT USING (company_id = get_user_company_id());
+DROP POLICY IF EXISTS "Admins can manage AI insights" ON ai_insights;
 CREATE POLICY "Admins can manage AI insights" ON ai_insights FOR ALL USING ((company_id = get_user_company_id()) AND is_company_admin());
 
 -- Indexes for performance

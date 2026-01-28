@@ -1,14 +1,20 @@
-import { Calendar, Clock, Users, Plus, Zap, BarChart3 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { ShiftTemplate, VendorPaletteItem } from './types';
+import { Calendar, Clock, Users, Plus, Zap, BarChart3 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { ShiftTemplate, VendorPaletteItem } from "./types";
 
 interface ScheduleTemplatesPanelProps {
   templates: ShiftTemplate[];
   vendors: VendorPaletteItem[];
-  onTemplateDragStart: (event: React.DragEvent, template: ShiftTemplate) => void;
-  onVendorDragStart: (event: React.DragEvent, vendor: VendorPaletteItem) => void;
+  onTemplateDragStart: (
+    event: React.DragEvent,
+    template: ShiftTemplate,
+  ) => void;
+  onVendorDragStart: (
+    event: React.DragEvent,
+    vendor: VendorPaletteItem,
+  ) => void;
   onAutoFillWeek: () => void;
   onQuickVendorVisit: () => Promise<void>;
 }
@@ -49,7 +55,7 @@ export function ScheduleTemplatesPanel({
             draggable
             onDragStart={(event) => onTemplateDragStart(event, template)}
             className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
-            style={{ borderLeftColor: template.color, borderLeftWidth: '4px' }}
+            style={{ borderLeftColor: template.color, borderLeftWidth: "4px" }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium text-sm">{template.name}</span>
@@ -77,15 +83,21 @@ export function ScheduleTemplatesPanel({
               draggable
               onDragStart={(event) => onVendorDragStart(event, vendor)}
               className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/40 transition-colors"
-              style={{ borderLeftColor: vendor.color, borderLeftWidth: '4px' }}
+              style={{ borderLeftColor: vendor.color, borderLeftWidth: "4px" }}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="font-medium text-sm">{vendor.label}</span>
-                <Badge variant="secondary" className="text-[10px]" style={{ backgroundColor: vendor.color, color: '#fff' }}>
+                <Badge
+                  variant="secondary"
+                  className="text-[10px]"
+                  style={{ backgroundColor: vendor.color, color: "#fff" }}
+                >
                   Vendor
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">Default duration · {vendor.defaultDurationHours}h</p>
+              <p className="text-xs text-muted-foreground">
+                Default duration · {vendor.defaultDurationHours}h
+              </p>
             </div>
           ))}
         </div>

@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
-import { logger } from '@/utils/logger';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
+import { logger } from "@/utils/logger";
 
 // Re-export interfaces for compatibility
 export interface InventoryWaste {
@@ -10,7 +10,14 @@ export interface InventoryWaste {
   location_id?: string;
   quantity: number;
   unit_id?: string;
-  waste_type: 'spoilage' | 'prep_error' | 'accident' | 'theft' | 'expired' | 'damaged' | 'other';
+  waste_type:
+    | "spoilage"
+    | "prep_error"
+    | "accident"
+    | "theft"
+    | "expired"
+    | "damaged"
+    | "other";
   reason?: string;
   cost_impact?: number;
   recorded_by: string;
@@ -35,7 +42,14 @@ export interface CreateWasteData {
   location_id?: string;
   quantity: number;
   unit_id?: string;
-  waste_type: 'spoilage' | 'prep_error' | 'accident' | 'theft' | 'expired' | 'damaged' | 'other';
+  waste_type:
+    | "spoilage"
+    | "prep_error"
+    | "accident"
+    | "theft"
+    | "expired"
+    | "damaged"
+    | "other";
   reason?: string;
   cost_impact?: number;
   waste_date?: string;
@@ -44,8 +58,8 @@ export interface CreateWasteData {
 // Fetch waste records
 export function useInventoryWaste() {
   return useQuery({
-    queryKey: ['inventory-waste'],
-    queryFn: () => InventoryService.getWasteEvents()
+    queryKey: ["inventory-waste"],
+    queryFn: () => InventoryService.getWasteEvents(),
   });
 }
 
@@ -55,23 +69,24 @@ export function useCreateWaste() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (wasteData: CreateWasteData) => InventoryService.logWaste(wasteData),
+    mutationFn: (wasteData: CreateWasteData) =>
+      InventoryService.logWaste(wasteData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-waste'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: 'Waste Recorded',
-        description: 'Waste entry has been successfully logged',
+        title: "Waste Recorded",
+        description: "Waste entry has been successfully logged",
       });
     },
     onError: (error) => {
-      logger.error('Error creating waste record', { error, tags: ['error'] });
+      logger.error("Error creating waste record", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to record waste. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to record waste. Please try again.",
+        variant: "destructive",
       });
-    }
+    },
   });
 }
 
@@ -81,24 +96,27 @@ export function useUpdateWaste() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({ id, ...updates }: { id: string } & Partial<CreateWasteData>) => 
+    mutationFn: ({
+      id,
+      ...updates
+    }: { id: string } & Partial<CreateWasteData>) =>
       InventoryService.updateWaste(id, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-waste'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: 'Updated',
-        description: 'Waste record has been updated',
+        title: "Updated",
+        description: "Waste record has been updated",
       });
     },
     onError: (error) => {
-      logger.error('Error updating waste record', { error, tags: ['error'] });
+      logger.error("Error updating waste record", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to update waste record. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update waste record. Please try again.",
+        variant: "destructive",
       });
-    }
+    },
   });
 }
 
@@ -110,20 +128,20 @@ export function useDeleteWaste() {
   return useMutation({
     mutationFn: (id: string) => InventoryService.deleteWaste(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-waste'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: 'Deleted',
-        description: 'Waste record has been deleted',
+        title: "Deleted",
+        description: "Waste record has been deleted",
       });
     },
     onError: (error) => {
-      logger.error('Error deleting waste record', { error, tags: ['error'] });
+      logger.error("Error deleting waste record", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to delete waste record. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete waste record. Please try again.",
+        variant: "destructive",
       });
-    }
+    },
   });
 }

@@ -1,13 +1,12 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { WeekView } from "./WeekView";
+import { MonthView } from "./MonthView";
+import { DayView } from "./DayView";
+import type { SchedulingFilterState } from "./SchedulingFilters";
+import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { WeekView } from './WeekView';
-import { MonthView } from './MonthView';
-import { DayView } from './DayView';
-import type { SchedulingFilterState } from './SchedulingFilters';
-import type { ShiftWithAssignments } from '@/hooks/scheduling/useSchedulingConsolidated';
-import type { CalendarEvent } from '@/hooks/useCalendarEvents';
-
-type ViewType = 'month' | 'week' | 'day' | 'year';
+type ViewType = "month" | "week" | "day" | "year";
 
 interface CalendarGridProps {
   currentView: ViewType;
@@ -34,7 +33,7 @@ export function CalendarGrid({
   isMobile = false,
   overlayEvents,
   hideShiftActions = false,
-  selectedEventId = null
+  selectedEventId = null,
 }: CalendarGridProps) {
   const renderCalendarView = () => {
     const commonProps = {
@@ -46,15 +45,15 @@ export function CalendarGrid({
       isMobile,
       overlayEvents,
       hideShiftActions,
-      selectedEventId
+      selectedEventId,
     };
 
     switch (currentView) {
-      case 'week':
+      case "week":
         return <WeekView {...commonProps} />;
-      case 'month':
+      case "month":
         return <MonthView {...commonProps} />;
-      case 'day':
+      case "day":
         return <DayView {...commonProps} />;
       default:
         return <WeekView {...commonProps} />;

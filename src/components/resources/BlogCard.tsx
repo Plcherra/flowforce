@@ -1,9 +1,14 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Clock, User, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Clock, User, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface BlogCardProps {
   title: string;
@@ -15,7 +20,15 @@ interface BlogCardProps {
   publishDate: string;
 }
 
-export default function BlogCard({ title, description, type, author, readTime, url, publishDate }: BlogCardProps) {
+export default function BlogCard({
+  title,
+  description,
+  type,
+  author,
+  readTime,
+  url,
+  publishDate,
+}: BlogCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
       <CardHeader>

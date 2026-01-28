@@ -1,4 +1,4 @@
-import type { InventoryUnit } from '@/features/inventory/hooks/types';
+import type { InventoryUnit } from "@/features/inventory/hooks/types";
 
 interface UnitMeta {
   baseUnitId: string;
@@ -22,7 +22,7 @@ const ensureUnitIndex = (units: InventoryUnit[]): UnitIndex => {
 const resolveUnitMeta = (
   unitId: string,
   units: UnitIndex,
-  cache: UnitMetaCache
+  cache: UnitMetaCache,
 ): UnitMeta | null => {
   if (cache[unitId] !== undefined) {
     return cache[unitId];
@@ -90,7 +90,7 @@ export const buildUnitMetaIndex = (units: InventoryUnit[]): UnitMetaCache => {
 export const getConversionFactor = (
   unitMeta: UnitMetaCache,
   fromUnitId?: string | null,
-  toUnitId?: string | null
+  toUnitId?: string | null,
 ): number => {
   if (!fromUnitId || !toUnitId || fromUnitId === toUnitId) {
     return 1;
@@ -118,7 +118,7 @@ export const convertQuantity = (
   unitMeta: UnitMetaCache,
   quantity: number,
   fromUnitId?: string | null,
-  toUnitId?: string | null
+  toUnitId?: string | null,
 ): number => {
   if (!Number.isFinite(quantity)) {
     return 0;
@@ -129,7 +129,9 @@ export const convertQuantity = (
 };
 
 export const collectUnits = (
-  sources: Array<InventoryUnit | undefined | null | InventoryUnit[] | undefined | null>
+  sources: Array<
+    InventoryUnit | undefined | null | InventoryUnit[] | undefined | null
+  >,
 ): InventoryUnit[] => {
   const bucket: Record<string, InventoryUnit> = {};
 

@@ -1,43 +1,49 @@
-import { ArrowRight, Sparkles, Target, Award, Shield } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, Sparkles, Target, Award, Shield } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   XPBar,
   BadgesGallery,
   RecognitionFeed,
   GamificationLeaderboard,
-} from '@/features/gamification/components';
+} from "@/features/gamification/components";
 
 const summaryBadges = [
   {
-    id: 'goal-architect',
-    name: 'Goal Architect',
-    description: 'Designed five multi-team OKRs with automated nudges.',
+    id: "goal-architect",
+    name: "Goal Architect",
+    description: "Designed five multi-team OKRs with automated nudges.",
     xpValue: 320,
     icon: Target,
-    earnedAt: '2 days ago',
+    earnedAt: "2 days ago",
   },
   {
-    id: 'culture-champion',
-    name: 'Culture Champion',
-    description: 'Launched peer-to-peer recognition pilots this quarter.',
+    id: "culture-champion",
+    name: "Culture Champion",
+    description: "Launched peer-to-peer recognition pilots this quarter.",
     xpValue: 180,
     icon: Sparkles,
-    earnedAt: 'Last week',
+    earnedAt: "Last week",
   },
   {
-    id: 'learning-pilot',
-    name: 'Learning Pilot',
-    description: 'Completed advanced onboarding tracks in under 14 days.',
+    id: "learning-pilot",
+    name: "Learning Pilot",
+    description: "Completed advanced onboarding tracks in under 14 days.",
     xpValue: 210,
     icon: Shield,
-    earnedAt: '4 days ago',
+    earnedAt: "4 days ago",
   },
   {
-    id: 'automation-wave',
-    name: 'Automation Wave',
-    description: 'Triggered 10 Copilot challenges via HR automations.',
+    id: "automation-wave",
+    name: "Automation Wave",
+    description: "Triggered 10 Copilot challenges via HR automations.",
     xpValue: 150,
     icon: Award,
     earnedAt: null,
@@ -47,29 +53,29 @@ const summaryBadges = [
 
 const recognitionDemoFeed = [
   {
-    id: 'rec-1',
-    name: 'Jordan Chen',
-    badgeLabel: 'Goal Milestone',
-    badgeClassName: 'bg-blue-100 text-blue-700',
-    message: 'Closed FY24 Revenue OKR with cross-functional partnership.',
+    id: "rec-1",
+    name: "Jordan Chen",
+    badgeLabel: "Goal Milestone",
+    badgeClassName: "bg-blue-100 text-blue-700",
+    message: "Closed FY24 Revenue OKR with cross-functional partnership.",
     xpSnapshot: 180,
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'rec-2',
-    name: 'Priya Malik',
-    badgeLabel: 'Training Completed',
-    badgeClassName: 'bg-purple-100 text-purple-700',
-    message: 'Completed CX onboarding with a perfect QA score.',
+    id: "rec-2",
+    name: "Priya Malik",
+    badgeLabel: "Training Completed",
+    badgeClassName: "bg-purple-100 text-purple-700",
+    message: "Completed CX onboarding with a perfect QA score.",
     xpSnapshot: 120,
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'rec-3',
-    name: 'Marcus Hall',
-    badgeLabel: 'Manual Recognition',
-    badgeClassName: 'bg-amber-100 text-amber-700',
-    message: 'Recognized for mentoring peer coaching group.',
+    id: "rec-3",
+    name: "Marcus Hall",
+    badgeLabel: "Manual Recognition",
+    badgeClassName: "bg-amber-100 text-amber-700",
+    message: "Recognized for mentoring peer coaching group.",
     xpSnapshot: 90,
     createdAt: new Date().toISOString(),
   },
@@ -77,39 +83,39 @@ const recognitionDemoFeed = [
 
 const leaderboardShowcase = [
   {
-    id: 'leader-1',
-    name: 'Alicia Patel',
+    id: "leader-1",
+    name: "Alicia Patel",
     xp: 4820,
     goalsCompleted: 7,
-    role: 'People Partner',
-    department: 'Operations',
+    role: "People Partner",
+    department: "Operations",
     rank: 1,
   },
   {
-    id: 'leader-2',
-    name: 'Noah Griffin',
+    id: "leader-2",
+    name: "Noah Griffin",
     xp: 4380,
     goalsCompleted: 5,
-    role: 'Store Manager',
-    department: 'Retail',
+    role: "Store Manager",
+    department: "Retail",
     rank: 2,
   },
   {
-    id: 'leader-3',
-    name: 'Lucia Mendes',
+    id: "leader-3",
+    name: "Lucia Mendes",
     xp: 4050,
     goalsCompleted: 6,
-    role: 'Learning Lead',
-    department: 'HR',
+    role: "Learning Lead",
+    department: "HR",
     rank: 3,
   },
   {
-    id: 'leader-4',
-    name: 'Devon Wright',
+    id: "leader-4",
+    name: "Devon Wright",
     xp: 3760,
     goalsCompleted: 4,
-    role: 'Ops Specialist',
-    department: 'Field Ops',
+    role: "Ops Specialist",
+    department: "Field Ops",
     rank: 4,
   },
 ];
@@ -126,7 +132,8 @@ export default function HrDevelopment() {
             Unified XP, Recognition, and Growth
           </h1>
           <p className="text-lg text-slate-600">
-            Showcase the culture engine for your teams with XP progress, live recognitions, and leaderboard insights connected across modules.
+            Showcase the culture engine for your teams with XP progress, live
+            recognitions, and leaderboard insights connected across modules.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Button size="lg" className="gap-2">
@@ -143,11 +150,11 @@ export default function HrDevelopment() {
           <XPBar
             currentXP={6120}
             nextMilestone={{
-              label: 'Engagement Tier',
+              label: "Engagement Tier",
               xpRequired: 8000,
-              description: 'Unlock company-wide recognition broadcasts.',
+              description: "Unlock company-wide recognition broadcasts.",
             }}
-            previousMilestone={{ label: 'Momentum Reached', xpRequired: 5000 }}
+            previousMilestone={{ label: "Momentum Reached", xpRequired: 5000 }}
             className="h-full"
           />
           <Card className="bg-white">
@@ -156,17 +163,29 @@ export default function HrDevelopment() {
                 <Sparkles className="h-4 w-4 text-primary" />
                 HR & Development Summary
               </CardTitle>
-              <CardDescription>Copilot-ready overview of XP, badges, and workforce momentum.</CardDescription>
+              <CardDescription>
+                Copilot-ready overview of XP, badges, and workforce momentum.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-slate-600">
               <p>
-                Connect recognition automation, training completions, and goal progress to a single XP graph. HR & Development
-                keeps every win visible while surfacing who is ready for the next challenge.
+                Connect recognition automation, training completions, and goal
+                progress to a single XP graph. HR & Development keeps every win
+                visible while surfacing who is ready for the next challenge.
               </p>
               <ul className="space-y-2">
-                <li>• Auto-syncs XP from Goals, Tasks, Learning Center, and Manual shout-outs.</li>
-                <li>• Highlights badges earned in the last 30 days with locked tiers for upcoming challenges.</li>
-                <li>• Provides leader-ready reports and Copilot recommendations instantly.</li>
+                <li>
+                  • Auto-syncs XP from Goals, Tasks, Learning Center, and Manual
+                  shout-outs.
+                </li>
+                <li>
+                  • Highlights badges earned in the last 30 days with locked
+                  tiers for upcoming challenges.
+                </li>
+                <li>
+                  • Provides leader-ready reports and Copilot recommendations
+                  instantly.
+                </li>
               </ul>
             </CardContent>
           </Card>
@@ -196,4 +215,3 @@ export default function HrDevelopment() {
     </div>
   );
 }
-

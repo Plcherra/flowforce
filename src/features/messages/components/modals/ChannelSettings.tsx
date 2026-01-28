@@ -1,15 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Hash, Users, Lock, Globe } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useChannelActions } from '@/features/messages/hooks/useChannelActions';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Settings, Hash, Users, Lock, Globe } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useChannelActions } from "@/features/messages/hooks/useChannelActions";
+import { logger } from "@/utils/logger";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +31,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface Channel {
   id: string;
@@ -38,24 +50,30 @@ interface ChannelSettingsProps {
   onDeleteChannel?: (channelId: string) => Promise<void>;
 }
 
-export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDeleteChannel }: ChannelSettingsProps) {
+export function ChannelSettings({
+  open,
+  onClose,
+  channel,
+  onChannelUpdated,
+  onDeleteChannel,
+}: ChannelSettingsProps) {
   const { toast } = useToast();
   const { updateChannel: updateChannelSettings } = useChannelActions();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: 'group',
-    is_private: false
+    name: "",
+    description: "",
+    type: "group",
+    is_private: false,
   });
 
   useEffect(() => {
     if (channel) {
       setFormData({
         name: channel.name,
-        description: channel.description || '',
+        description: channel.description || "",
         type: channel.type,
-        is_private: channel.is_private
+        is_private: channel.is_private,
       });
     }
   }, [channel]);
@@ -74,18 +92,18 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
       });
 
       toast({
-        title: 'Success',
-        description: 'Channel settings updated successfully',
+        title: "Success",
+        description: "Channel settings updated successfully",
       });
 
       await onChannelUpdated?.();
       onClose();
     } catch (error) {
-      logger.error('Error updating channel:', { error, tags: ['error'] });
+      logger.error("Error updating channel:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to update channel settings',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update channel settings",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -103,11 +121,11 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
       await onChannelUpdated?.();
       onClose();
     } catch (error) {
-      logger.error('Error deleting channel:', { error, tags: ['error'] });
+      logger.error("Error deleting channel:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'Failed to delete channel',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete channel",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -136,7 +154,9 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="e.g. general, project-updates"
               required
               className="rounded-xl"
@@ -148,7 +168,9 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="What's this channel about?"
               rows={3}
               className="rounded-xl"
@@ -159,7 +181,9 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
             <Label htmlFor="type">Channel Type</Label>
             <Select
               value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, type: value })
+              }
             >
               <SelectTrigger className="rounded-xl">
                 <SelectValue />
@@ -198,16 +222,17 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
                 Private Channel
               </Label>
               <p className="text-xs text-muted-foreground">
-                {formData.is_private 
-                  ? 'Only invited members can see this channel'
-                  : 'Everyone in the workspace can see this channel'
-                }
+                {formData.is_private
+                  ? "Only invited members can see this channel"
+                  : "Everyone in the workspace can see this channel"}
               </p>
             </div>
             <Switch
               id="private"
               checked={formData.is_private}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_private: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_private: checked })
+              }
             />
           </div>
 
@@ -221,13 +246,13 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
             >
               Delete Channel
             </Button>
-            
+
             <div className="space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={loading || !formData.name.trim()}>
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
@@ -238,7 +263,8 @@ export function ChannelSettings({ open, onClose, channel, onChannelUpdated, onDe
           <AlertDialogHeader>
             <AlertDialogTitle>Delete channel</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete #{channel?.name}. All messages in this channel will be removed and this action cannot be undone.
+              This will permanently delete #{channel?.name}. All messages in
+              this channel will be removed and this action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

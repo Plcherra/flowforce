@@ -1,10 +1,10 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Search, Plus } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Search, Plus } from "lucide-react";
 
-type ViewMode = 'feed' | 'grid' | 'list';
+type ViewMode = "feed" | "grid" | "list";
 
 interface CompanyUpdatesHeaderProps {
   isMobile: boolean;
@@ -37,19 +37,21 @@ export function CompanyUpdatesHeader({
             </div>
             <div>
               <h1 className="text-xl font-bold">Company Updates</h1>
-              <p className="text-sm text-muted-foreground">Latest news & announcements</p>
+              <p className="text-sm text-muted-foreground">
+                Latest news & announcements
+              </p>
             </div>
           </div>
           {canCreateUpdate && (
             <Button
-              size={isMobile ? 'sm' : 'default'}
+              size={isMobile ? "sm" : "default"}
               className="shrink-0"
               onClick={onCreate}
               aria-expanded={wizardOpen}
               aria-controls="company-updates-wizard"
             >
               <Plus className="h-4 w-4 mr-1" />
-              {isMobile ? '' : 'New Update'}
+              {isMobile ? "" : "New Update"}
             </Button>
           )}
         </div>

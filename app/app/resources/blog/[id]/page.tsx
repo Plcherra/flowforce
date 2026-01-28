@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import BlogDetailPage from '@/screens/resources/BlogDetail';
+import BlogDetailPage from "@/screens/resources/BlogDetail";
 
 export default function BlogDetail() {
   return <BlogDetailPage />;

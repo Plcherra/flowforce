@@ -1,4 +1,21 @@
 -- Fix the remaining search path warnings
+-- Drop all variants of get_company_roles first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'get_company_roles'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.get_company_roles(company_uuid uuid DEFAULT NULL::uuid)
 RETURNS TABLE(id uuid, name text, description text, color text, icon text, hierarchy_level integer, permissions jsonb, is_system_role boolean, is_active boolean)
 LANGUAGE plpgsql

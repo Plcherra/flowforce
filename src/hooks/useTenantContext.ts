@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useAuth } from './useAuth';
+import { useMemo } from "react";
+import { useAuth } from "./useAuth";
 
 type TenantContextOptions = {
   companyId?: string | null;
@@ -10,7 +10,9 @@ export function useTenantContext(options: TenantContextOptions = {}) {
 
   return useMemo(() => {
     const metadataCompanyId =
-      typeof user?.user_metadata?.company_id === 'string' ? (user.user_metadata.company_id as string) : null;
+      typeof user?.user_metadata?.company_id === "string"
+        ? (user.user_metadata.company_id as string)
+        : null;
 
     return {
       userId: user?.id ?? null,

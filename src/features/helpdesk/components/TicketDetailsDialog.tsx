@@ -1,17 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { useTickets } from '@/hooks/useTickets';
-import { useEmployees } from '@/hooks/useEmployees';
-import type { HelpDeskTicket, HelpDeskTicketStatus, HelpDeskTicketPriority } from '@/hooks/useTickets';
-import { Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { useTickets } from "@/hooks/useTickets";
+import { useEmployees } from "@/hooks/useEmployees";
+import type {
+  HelpDeskTicket,
+  HelpDeskTicketStatus,
+  HelpDeskTicketPriority,
+} from "@/hooks/useTickets";
+import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { logger } from "@/utils/logger";
 
 interface TicketDetailsDialogProps {
   open: boolean;
@@ -20,15 +36,24 @@ interface TicketDetailsDialogProps {
   onTicketUpdated?: () => void;
 }
 
-export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdated }: TicketDetailsDialogProps) {
+export function TicketDetailsDialog({
+  open,
+  onOpenChange,
+  ticket,
+  onTicketUpdated,
+}: TicketDetailsDialogProps) {
   const { profile } = useProfile();
   const { toast } = useToast();
-  const { updateTicket, updating } = useTickets({ companyId: profile?.companyId ?? profile?.company_id ?? null });
-  const { employees } = useEmployees({ companyId: profile?.companyId ?? profile?.company_id ?? null });
+  const { updateTicket, updating } = useTickets({
+    companyId: profile?.companyId ?? profile?.company_id ?? null,
+  });
+  const { employees } = useEmployees({
+    companyId: profile?.companyId ?? profile?.company_id ?? null,
+  });
   const [formData, setFormData] = useState({
-    status: 'open' as HelpDeskTicketStatus,
-    priority: 'medium' as HelpDeskTicketPriority,
-    assignedTo: '',
+    status: "open" as HelpDeskTicketStatus,
+    priority: "medium" as HelpDeskTicketPriority,
+    assignedTo: "",
   });
 
   useEffect(() => {
@@ -36,7 +61,7 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
       setFormData({
         status: ticket.status,
         priority: ticket.priority,
-        assignedTo: ticket.assignedTo ?? '',
+        assignedTo: ticket.assignedTo ?? "",
       });
     }
   }, [ticket, open]);
@@ -52,17 +77,20 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
       });
 
       toast({
-        title: 'Ticket updated',
-        description: 'Changes have been saved successfully.',
+        title: "Ticket updated",
+        description: "Changes have been saved successfully.",
       });
 
       onTicketUpdated?.();
     } catch (error) {
-      logger.error('Failed to update ticket', { error, tags: ['error'] });
+      logger.error("Failed to update ticket", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update ticket. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update ticket. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -77,9 +105,14 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
         <DialogHeader>
           <DialogTitle>{ticket.subject}</DialogTitle>
           <DialogDescription>
-            Created {format(new Date(ticket.createdAt), 'MMM dd, yyyy at h:mm a')}
+            Created{" "}
+            {format(new Date(ticket.createdAt), "MMM dd, yyyy at h:mm a")}
             {ticket.updatedAt && ticket.updatedAt !== ticket.createdAt && (
-              <> • Updated {format(new Date(ticket.updatedAt), 'MMM dd, yyyy at h:mm a')}</>
+              <>
+                {" "}
+                • Updated{" "}
+                {format(new Date(ticket.updatedAt), "MMM dd, yyyy at h:mm a")}
+              </>
             )}
           </DialogDescription>
         </DialogHeader>
@@ -88,7 +121,7 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
           <div className="space-y-2">
             <Label>Description</Label>
             <div className="rounded-md border p-3 text-sm text-muted-foreground">
-              {ticket.description || 'No description provided'}
+              {ticket.description || "No description provided"}
             </div>
           </div>
 
@@ -97,7 +130,12 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, status: value as HelpDeskTicketStatus }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    status: value as HelpDeskTicketStatus,
+                  }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -116,7 +154,10 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, priority: value as HelpDeskTicketPriority }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    priority: value as HelpDeskTicketPriority,
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -136,7 +177,9 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
             <Label htmlFor="assignedTo">Assign To</Label>
             <Select
               value={formData.assignedTo}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, assignedTo: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, assignedTo: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Unassigned" />
@@ -153,7 +196,8 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
             </Select>
             {assignedEmployee && (
               <p className="text-xs text-muted-foreground">
-                Currently assigned to: {assignedEmployee.first_name} {assignedEmployee.last_name}
+                Currently assigned to: {assignedEmployee.first_name}{" "}
+                {assignedEmployee.last_name}
               </p>
             )}
           </div>
@@ -161,12 +205,19 @@ export function TicketDetailsDialog({ open, onOpenChange, ticket, onTicketUpdate
           {ticket.category && (
             <div className="space-y-2">
               <Label>Category</Label>
-              <div className="text-sm text-muted-foreground">{ticket.category}</div>
+              <div className="text-sm text-muted-foreground">
+                {ticket.category}
+              </div>
             </div>
           )}
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={updating}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={updating}
+            >
               Close
             </Button>
             <Button onClick={handleSave} disabled={updating}>

@@ -1,11 +1,14 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import dayjs from 'dayjs';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
-import type { LeaderboardEntry, LeaderboardPeriod } from '@/features/leaderboard/types';
-import { mapToLeaderboardEntry } from '@/features/leaderboard/useLeaderboardData';
-import type { LeaderboardRowRecord } from '@/features/leaderboard/leaderboardRepository';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import type {
+  LeaderboardEntry,
+  LeaderboardPeriod,
+} from "@/features/leaderboard/types";
+import { mapToLeaderboardEntry } from "@/features/leaderboard/useLeaderboardData";
+import type { LeaderboardRowRecord } from "@/features/leaderboard/leaderboardRepository";
 
 export interface UseLeaderboardFilters {
   companyId?: string | null;
@@ -29,7 +32,7 @@ export interface UseLeaderboardResult {
   refetch: () => Promise<unknown>;
 }
 
-const LEADERBOARD_SCOPE = ['gamification', 'leaderboard'] as const;
+const LEADERBOARD_SCOPE = ["gamification", "leaderboard"] as const;
 
 const LEADERBOARD_SELECT = `
   id,
@@ -72,14 +75,21 @@ const LEADERBOARD_SELECT = `
   )
 `;
 
-const normalizeDateFilter = (value: string | Date | undefined, unit: 'month' | 'week') => {
+const normalizeDateFilter = (
+  value: string | Date | undefined,
+  unit: "month" | "week",
+) => {
   if (!value) return null;
-  const parsed = typeof value === 'string' ? dayjs(value) : dayjs(value);
+  const parsed = typeof value === "string" ? dayjs(value) : dayjs(value);
   if (!parsed.isValid()) return null;
-  return unit === 'month' ? parsed.startOf('month').format('YYYY-MM-DD') : parsed.startOf('week').format('YYYY-MM-DD');
+  return unit === "month"
+    ? parsed.startOf("month").format("YYYY-MM-DD")
+    : parsed.startOf("week").format("YYYY-MM-DD");
 };
 
-export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderboardResult {
+export function useLeaderboard(
+  options: UseLeaderboardOptions = {},
+): UseLeaderboardResult {
   const { filters, enabled = true } = options;
   const { profile } = useProfile();
 
@@ -88,10 +98,16 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
   const departmentId = filters?.departmentId ?? null;
   const limit = filters?.limit ?? 25;
 
-  const requestedPeriod = filters?.period ?? 'monthly';
-  const effectivePeriod = filters?.week ? 'weekly' : requestedPeriod;
-  const monthStart = effectivePeriod === 'monthly' ? normalizeDateFilter(filters?.month, 'month') : null;
-  const weekStart = effectivePeriod === 'weekly' ? normalizeDateFilter(filters?.week, 'week') : null;
+  const requestedPeriod = filters?.period ?? "monthly";
+  const effectivePeriod = filters?.week ? "weekly" : requestedPeriod;
+  const monthStart =
+    effectivePeriod === "monthly"
+      ? normalizeDateFilter(filters?.month, "month")
+      : null;
+  const weekStart =
+    effectivePeriod === "weekly"
+      ? normalizeDateFilter(filters?.week, "week")
+      : null;
 
   const filterKey = useMemo(
     () =>
@@ -115,20 +131,20 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
       }
 
       let query = supabase
-        .from('gamification_leaderboard')
+        .from("gamification_leaderboard")
         .select(LEADERBOARD_SELECT)
-        .eq('company_id', companyId)
-        .eq('period', effectivePeriod)
-        .order('xp_total', { ascending: false });
+        .eq("company_id", companyId)
+        .eq("period", effectivePeriod)
+        .order("xp_total", { ascending: false });
 
       if (departmentId) {
-        query = query.eq('department_id', departmentId);
+        query = query.eq("department_id", departmentId);
       }
       if (monthStart) {
-        query = query.eq('period_start', monthStart);
+        query = query.eq("period_start", monthStart);
       }
       if (weekStart) {
-        query = query.eq('period_start', weekStart);
+        query = query.eq("period_start", weekStart);
       }
       if (limit > 0) {
         query = query.limit(limit);
@@ -136,7 +152,7 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
 
       const { data, error } = await query;
       if (error) {
-        throw new Error(error.message ?? 'Failed to load leaderboard');
+        throw new Error(error.message ?? "Failed to load leaderboard");
       }
 
       const rows = (data ?? []) as LeaderboardRowRecord[];
@@ -144,7 +160,8 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
         .map((row, index) => mapToLeaderboardEntry(row, index, undefined))
         .filter((entry): entry is LeaderboardEntry => Boolean(entry));
 
-      const lastUpdated = rows[0]?.updated_at ?? rows[0]?.last_synced_at ?? null;
+      const lastUpdated =
+        rows[0]?.updated_at ?? rows[0]?.last_synced_at ?? null;
 
       return {
         entries: mappedEntries,
@@ -159,7 +176,7 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
     queryError instanceof Error
       ? queryError
       : queryError
-        ? new Error('Unable to load leaderboard data')
+        ? new Error("Unable to load leaderboard data")
         : null;
 
   return {

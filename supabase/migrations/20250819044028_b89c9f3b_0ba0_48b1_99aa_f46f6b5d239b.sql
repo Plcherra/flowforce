@@ -5,6 +5,7 @@ DROP POLICY IF EXISTS "Users can manage channel members" ON public.channel_membe
 DROP POLICY IF EXISTS "Channel admins can manage members" ON public.channel_members;
 
 -- Create simple, non-recursive policies for channel_members
+DROP POLICY IF EXISTS "Users can view channel members where they are members" ON public.channel_members;
 CREATE POLICY "Users can view channel members where they are members"
 ON public.channel_members FOR SELECT
 USING (
@@ -15,15 +16,18 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Users can join channels (insert themselves)" ON public.channel_members;
 CREATE POLICY "Users can join channels (insert themselves)"
 ON public.channel_members FOR INSERT
 WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can leave channels (delete themselves)" ON public.channel_members;
 CREATE POLICY "Users can leave channels (delete themselves)"
 ON public.channel_members FOR DELETE
 USING (user_id = auth.uid());
 
 -- Channel creators and admins can manage members
+DROP POLICY IF EXISTS "Channel creators can manage members" ON public.channel_members;
 CREATE POLICY "Channel creators can manage members"
 ON public.channel_members FOR ALL
 USING (
@@ -35,9 +39,20 @@ USING (
 );
 
 -- Fix announcements foreign key relationship
--- First, check if the announcements table exists and has the proper structure
-ALTER TABLE public.announcements 
-ADD CONSTRAINT announcements_created_by_fkey 
-FOREIGN KEY (created_by) 
-REFERENCES public.profiles(id) 
-ON DELETE CASCADE;
+-- Note: This migration runs after 20250819042330 which should have already fixed the constraint
+-- This is a safety check - drop and recreate if needed
+DO $$ 
+BEGIN
+  -- Drop existing constraint if it exists
+  ALTER TABLE public.announcements DROP CONSTRAINT IF EXISTS announcements_created_by_fkey;
+  
+  -- Add constraint referencing profiles
+  ALTER TABLE public.announcements 
+  ADD CONSTRAINT announcements_created_by_fkey 
+  FOREIGN KEY (created_by) 
+  REFERENCES public.profiles(id) 
+  ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN
+  -- Constraint already exists, ignore
+  NULL;
+END $$;

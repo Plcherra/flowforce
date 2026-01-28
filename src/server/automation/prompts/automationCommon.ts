@@ -5,9 +5,11 @@ export interface AutomationPromptContext {
   kpiKey?: string | null;
 }
 
-export function serializeAutomationContext(context: AutomationPromptContext): string {
+export function serializeAutomationContext(
+  context: AutomationPromptContext,
+): string {
   return `Issue: ${context.issueTitle}
-Severity: ${context.severity ?? 'unknown'}
-KPI: ${context.kpiKey ?? 'n/a'}
-Details: ${context.issueDescription ?? 'n/a'}`;
+Severity: ${context.severity ?? "unknown"}
+KPI: ${context.kpiKey ?? "n/a"}
+Details: ${context.issueDescription ?? "n/a"}`;
 }

@@ -1,12 +1,13 @@
-import type { CopilotActionPayload } from '@/server/copilot/CopilotDTO';
+import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
 import type {
   CoverageGap,
   CoverageTemplatePlan,
   SchedulerEmployee,
   SwapSuggestion,
-} from '@/hooks/scheduling/copilotSchedulerTypes';
+} from "@/hooks/scheduling/copilotSchedulerTypes";
 
-const clampConfidence = (value: number) => Math.min(0.95, Math.max(0.15, value));
+const clampConfidence = (value: number) =>
+  Math.min(0.95, Math.max(0.15, value));
 
 export const buildCoverageGapActions = (
   companyId: string,
@@ -17,10 +18,10 @@ export const buildCoverageGapActions = (
   gaps.map((gap) => ({
     companyId,
     actorUserId,
-    source: 'scheduler',
+    source: "scheduler",
     dedupeKey: `coverage::${gap.templateId}:${gap.scheduleDate}`,
-    actionType: 'coverage.gap',
-    status: 'queued',
+    actionType: "coverage.gap",
+    status: "queued",
     payload: {
       templateId: gap.templateId,
       scheduleDate: gap.scheduleDate,
@@ -35,13 +36,13 @@ export const buildCoverageGapActions = (
     metadata: {
       priority: Math.min(5, 2 + gap.missingCount),
       location: gap.location,
-      requiredRoles: ['manager', 'scheduler'],
+      requiredRoles: ["manager", "scheduler"],
     },
     notes: [gap.reason],
     confidence: clampConfidence(1 - gap.missingCount * 0.1),
     impacts: [
       {
-        metric: 'coverage_gaps',
+        metric: "coverage_gaps",
         delta: -gap.missingCount,
         confidence: 0.45,
       },
@@ -58,10 +59,10 @@ export const buildSwapActions = (
   swaps.map((swap) => ({
     companyId,
     actorUserId,
-    source: 'scheduler',
+    source: "scheduler",
     dedupeKey: `swap::${swap.id}`,
-    actionType: 'schedule.swap_suggested',
-    status: 'queued',
+    actionType: "schedule.swap_suggested",
+    status: "queued",
     payload: {
       templateId: swap.templateId,
       scheduleDate: swap.scheduleDate,
@@ -75,7 +76,7 @@ export const buildSwapActions = (
     },
     metadata: {
       priority: 5,
-      requiredRoles: ['manager', 'scheduler'],
+      requiredRoles: ["manager", "scheduler"],
     },
     notes: [swap.reason],
     confidence: 0.55,
@@ -83,15 +84,18 @@ export const buildSwapActions = (
   }));
 
 const normaliseAvailability = (raw: unknown) => {
-  if (!raw || typeof raw !== 'object') return {} as SchedulerEmployee['availability'];
+  if (!raw || typeof raw !== "object")
+    return {} as SchedulerEmployee["availability"];
   const entries = raw as Record<string, { start: string; end: string }[]>;
-  const map: SchedulerEmployee['availability'] = {};
+  const map: SchedulerEmployee["availability"] = {};
   for (const [key, windows] of Object.entries(entries)) {
     const normalisedKey = key.toLowerCase().slice(0, 3);
     map[normalisedKey] = Array.isArray(windows)
       ? windows
-          .filter((window): window is { start: string; end: string } =>
-            typeof window?.start === 'string' && typeof window?.end === 'string',
+          .filter(
+            (window): window is { start: string; end: string } =>
+              typeof window?.start === "string" &&
+              typeof window?.end === "string",
           )
           .map((window) => ({ start: window.start, end: window.end }))
       : [];
@@ -107,9 +111,13 @@ export const mapEmployeeRow = (row: any): SchedulerEmployee => ({
   role: row.role,
   secondaryRoles: Array.isArray(row.secondary_roles) ? row.secondary_roles : [],
   homeStore: row.home_store,
-  weeklyMaxHours: typeof row.weekly_max_hours === 'number' ? row.weekly_max_hours : 38,
+  weeklyMaxHours:
+    typeof row.weekly_max_hours === "number" ? row.weekly_max_hours : 38,
   availability: normaliseAvailability(row.availability),
-  metadata: typeof row.metadata === 'object' && row.metadata !== null ? row.metadata : {},
+  metadata:
+    typeof row.metadata === "object" && row.metadata !== null
+      ? row.metadata
+      : {},
 });
 
 export const mapCoverageTemplateRow = (row: any): CoverageTemplatePlan => ({
@@ -117,13 +125,16 @@ export const mapCoverageTemplateRow = (row: any): CoverageTemplatePlan => ({
   companyId: row.company_id,
   name: row.name,
   role: row.role,
-  location: row.location ?? 'Store 1',
+  location: row.location ?? "Store 1",
   dayOfWeek: Number(row.day_of_week) || 0,
   startTime: row.start_time,
   endTime: row.end_time,
   requiredCount: Number(row.required_count) || 0,
-  forecastMultiplier: typeof row.forecast_multiplier === 'number' ? row.forecast_multiplier : null,
-  metadata: typeof row.metadata === 'object' ? row.metadata : null,
+  forecastMultiplier:
+    typeof row.forecast_multiplier === "number"
+      ? row.forecast_multiplier
+      : null,
+  metadata: typeof row.metadata === "object" ? row.metadata : null,
   priority: Number(row.priority) || 5,
   flexMinutes: Number(row.flex_minutes) || 0,
 });

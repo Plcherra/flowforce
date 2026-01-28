@@ -1,7 +1,11 @@
-
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface StepProgressProps {
   currentStep: number;
@@ -13,7 +17,11 @@ interface StepProgressProps {
   }>;
 }
 
-export default function StepProgress({ currentStep, totalSteps, steps }: StepProgressProps) {
+export default function StepProgress({
+  currentStep,
+  totalSteps,
+  steps,
+}: StepProgressProps) {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
   return (
@@ -22,19 +30,19 @@ export default function StepProgress({ currentStep, totalSteps, steps }: StepPro
         <div className="flex items-center justify-between relative">
           {/* Progress line background */}
           <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -translate-y-1/2 z-0" />
-          
+
           {/* Animated progress line */}
           <motion.div
             className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 -translate-y-1/2 z-10"
-            initial={{ width: '0%' }}
-            animate={{ 
-              width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` 
+            initial={{ width: "0%" }}
+            animate={{
+              width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%`,
             }}
-            transition={{ 
-              duration: 0.6, 
-              ease: 'easeInOut',
-              type: 'spring',
-              stiffness: 100
+            transition={{
+              duration: 0.6,
+              ease: "easeInOut",
+              type: "spring",
+              stiffness: 100,
             }}
           />
 
@@ -54,24 +62,29 @@ export default function StepProgress({ currentStep, totalSteps, steps }: StepPro
                     className={`
                       w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold
                       transition-all duration-300 relative overflow-hidden
-                      ${step.id <= currentStep 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                        : 'bg-white dark:bg-gray-800 text-gray-400 border-2 border-gray-200 dark:border-gray-600'
+                      ${
+                        step.id <= currentStep
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                          : "bg-white dark:bg-gray-800 text-gray-400 border-2 border-gray-200 dark:border-gray-600"
                       }
                     `}
                     whileTap={{ scale: 0.95 }}
-                    animate={step.id === currentStep ? {
-                      boxShadow: [
-                        '0 0 0 0 rgba(59, 130, 246, 0.7)',
-                        '0 0 0 10px rgba(59, 130, 246, 0)',
-                      ]
-                    } : {}}
-                    transition={{ 
-                      boxShadow: { 
-                        duration: 1.5, 
+                    animate={
+                      step.id === currentStep
+                        ? {
+                            boxShadow: [
+                              "0 0 0 0 rgba(59, 130, 246, 0.7)",
+                              "0 0 0 10px rgba(59, 130, 246, 0)",
+                            ],
+                          }
+                        : {}
+                    }
+                    transition={{
+                      boxShadow: {
+                        duration: 1.5,
                         repeat: step.id === currentStep ? Infinity : 0,
-                        repeatType: 'loop'
-                      }
+                        repeatType: "loop",
+                      },
                     }}
                   >
                     {step.id <= currentStep ? (
@@ -91,15 +104,16 @@ export default function StepProgress({ currentStep, totalSteps, steps }: StepPro
                   <motion.span
                     className={`
                       mt-2 text-xs font-medium text-center max-w-20 leading-tight
-                      ${step.id <= currentStep 
-                        ? 'text-blue-600 dark:text-blue-400' 
-                        : 'text-gray-500 dark:text-gray-400'
+                      ${
+                        step.id <= currentStep
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-500 dark:text-gray-400"
                       }
-                      ${hoveredStep === step.id ? 'text-blue-700 dark:text-blue-300' : ''}
+                      ${hoveredStep === step.id ? "text-blue-700 dark:text-blue-300" : ""}
                     `}
-                    animate={{ 
+                    animate={{
                       y: hoveredStep === step.id ? -2 : 0,
-                      scale: hoveredStep === step.id ? 1.05 : 1
+                      scale: hoveredStep === step.id ? 1.05 : 1,
                     }}
                     transition={{ duration: 0.2 }}
                   >
@@ -107,8 +121,8 @@ export default function StepProgress({ currentStep, totalSteps, steps }: StepPro
                   </motion.span>
                 </motion.div>
               </TooltipTrigger>
-              <TooltipContent 
-                side="top" 
+              <TooltipContent
+                side="top"
                 className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
               >
                 <p className="font-medium">{step.title}</p>

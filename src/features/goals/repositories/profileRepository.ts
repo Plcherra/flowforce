@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const profileSchema = z.object({
   id: z.string(),
@@ -20,10 +20,10 @@ export async function fetchProfilesByIds(
   }
 
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, avatar_url, company_id')
-    .in('id', profileIds)
-    .eq('company_id', companyId);
+    .from("profiles")
+    .select("id, first_name, last_name, avatar_url, company_id")
+    .in("id", profileIds)
+    .eq("company_id", companyId);
 
   if (error) {
     throw error;

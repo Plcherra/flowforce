@@ -3,10 +3,15 @@ import type {
   UpdateTemplate,
   BackgroundStyle,
   PublishingSettings,
-} from '@/types/updateTemplates';
-import type { LucideIcon } from 'lucide-react';
+} from "@/types/updateTemplates";
+import type { LucideIcon } from "lucide-react";
 
-export type WizardStepId = 'template' | 'design' | 'recipients' | 'publish' | 'summary';
+export type WizardStepId =
+  | "template"
+  | "design"
+  | "recipients"
+  | "publish"
+  | "summary";
 
 export interface WizardStepMeta {
   id: WizardStepId;
@@ -21,8 +26,8 @@ export interface WizardFormData {
   body: string;
   bodyPlainText?: string;
   richContent?: string;
-  type: 'announcement' | 'news' | 'event' | 'policy';
-  priority: 'high' | 'medium' | 'low';
+  type: "announcement" | "news" | "event" | "policy";
+  priority: "high" | "medium" | "low";
   backgroundStyle: BackgroundStyle;
   recipients: UpdateRecipient;
   publishingSettings: PublishingSettings;
@@ -33,7 +38,7 @@ export interface WizardFormData {
 export interface UpdateMediaItem {
   id: string;
   url: string;
-  type: 'image' | 'video' | 'file';
+  type: "image" | "video" | "file";
   name: string;
   mimeType: string;
   size: number;

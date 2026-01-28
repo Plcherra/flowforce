@@ -1,8 +1,15 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { z } from 'zod';
-import { notifyTransferCreated, notifyTransferStatusChange } from '@/notifications/inventoryTransfers';
-import type { InventoryTransfer, InventoryTransferItem, InventoryTransferStatus } from '@/features/inventory/hooks/types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import {
+  notifyTransferCreated,
+  notifyTransferStatusChange,
+} from "@/notifications/inventoryTransfers";
+import type {
+  InventoryTransfer,
+  InventoryTransferItem,
+  InventoryTransferStatus,
+} from "@/features/inventory/hooks/types";
 
 const TRANSFER_SELECT = `
   *,
@@ -60,46 +67,59 @@ const updateTransferStatusSchema = z.object({
   status_note: z.string().nullable().optional(),
 });
 
-export type CreateInventoryTransferPayload = z.infer<typeof createTransferPayloadSchema>;
-export type UpdateInventoryTransferStatusPayload = z.infer<typeof updateTransferStatusSchema>;
+export type CreateInventoryTransferPayload = z.infer<
+  typeof createTransferPayloadSchema
+>;
+export type UpdateInventoryTransferStatusPayload = z.infer<
+  typeof updateTransferStatusSchema
+>;
 
 interface TransferRepositoryOptions {
   supabaseClient?: SupabaseClient;
 }
 
-export async function listInventoryTransfers(companyId: string, options: TransferRepositoryOptions = {}) {
+export async function listInventoryTransfers(
+  companyId: string,
+  options: TransferRepositoryOptions = {},
+) {
   if (!companyId) {
-    throw new Error('Company ID is required to list transfers.');
+    throw new Error("Company ID is required to list transfers.");
   }
   const client = options.supabaseClient ?? supabase;
 
   const { data, error } = await client
-    .from('inv_transfers')
+    .from("inv_transfers")
     .select(TRANSFER_SELECT)
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false })
-    .order('created_at', { ascending: true, foreignTable: 'items' })
-    .order('created_at', { ascending: false, foreignTable: 'audit' });
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: true, foreignTable: "items" })
+    .order("created_at", { ascending: false, foreignTable: "audit" });
 
   if (error) throw error;
   return (data ?? []) as InventoryTransfer[];
 }
 
-export async function getInventoryTransferById(id: string, options: TransferRepositoryOptions = {}) {
+export async function getInventoryTransferById(
+  id: string,
+  options: TransferRepositoryOptions = {},
+) {
   const client = options.supabaseClient ?? supabase;
   const { data, error } = await client
-    .from('inv_transfers')
+    .from("inv_transfers")
     .select(TRANSFER_SELECT)
-    .eq('id', id)
-    .order('created_at', { ascending: true, foreignTable: 'items' })
-    .order('created_at', { ascending: false, foreignTable: 'audit' })
+    .eq("id", id)
+    .order("created_at", { ascending: true, foreignTable: "items" })
+    .order("created_at", { ascending: false, foreignTable: "audit" })
     .maybeSingle();
 
   if (error) throw error;
   return (data as InventoryTransfer | null) ?? null;
 }
 
-export async function createInventoryTransfer(payload: CreateInventoryTransferPayload, options: TransferRepositoryOptions = {}) {
+export async function createInventoryTransfer(
+  payload: CreateInventoryTransferPayload,
+  options: TransferRepositoryOptions = {},
+) {
   const body = createTransferPayloadSchema.parse(payload);
   const client = options.supabaseClient ?? supabase;
 
@@ -108,7 +128,7 @@ export async function createInventoryTransfer(payload: CreateInventoryTransferPa
   const { items, comments, status_note, delivery_date, ...rest } = body;
 
   const { data, error } = await client
-    .from('inv_transfers')
+    .from("inv_transfers")
     .insert({
       ...rest,
       delivery_date: delivery_date ?? null,
@@ -129,24 +149,28 @@ export async function createInventoryTransfer(payload: CreateInventoryTransferPa
       cost_per_unit: item.cost_per_unit ?? null,
     }));
 
-    const { error: itemsError } = await client.from('inv_transfer_items').insert(formattedItems);
+    const { error: itemsError } = await client
+      .from("inv_transfer_items")
+      .insert(formattedItems);
     if (itemsError) {
-      await client.from('inv_transfers').delete().eq('id', data.id);
+      await client.from("inv_transfers").delete().eq("id", data.id);
       throw itemsError;
     }
   }
 
-  await client.from('inv_transfer_audit').insert({
+  await client.from("inv_transfer_audit").insert({
     transfer_id: data.id,
-    action: 'created',
-    new_status: 'requested',
+    action: "created",
+    new_status: "requested",
     actor_id: body.requested_by,
     note: status_note ?? null,
   });
 
-  const transfer = await getInventoryTransferById(data.id, { supabaseClient: client });
+  const transfer = await getInventoryTransferById(data.id, {
+    supabaseClient: client,
+  });
   if (!transfer) {
-    throw new Error('Transfer created but not found.');
+    throw new Error("Transfer created but not found.");
   }
 
   await notifyTransferCreated({
@@ -170,9 +194,11 @@ export async function updateInventoryTransferStatus(
   const body = updateTransferStatusSchema.parse(payload);
   const client = options.supabaseClient ?? supabase;
 
-  const existing = await getInventoryTransferById(id, { supabaseClient: client });
+  const existing = await getInventoryTransferById(id, {
+    supabaseClient: client,
+  });
   if (!existing) {
-    throw new Error('Transfer not found');
+    throw new Error("Transfer not found");
   }
 
   await assertUserBelongsToCompany(client, body.actor_id, existing.company_id);
@@ -180,30 +206,35 @@ export async function updateInventoryTransferStatus(
   const updateData: Record<string, unknown> = {
     status: body.status,
   };
-  if (typeof body.status_note !== 'undefined') {
+  if (typeof body.status_note !== "undefined") {
     updateData.status_note = body.status_note;
   }
 
   const nowIso = new Date().toISOString();
-  if (body.status === 'sent') updateData.sent_at = nowIso;
-  if (body.status === 'received') updateData.received_at = nowIso;
-  if (body.status === 'rejected') updateData.rejected_at = nowIso;
+  if (body.status === "sent") updateData.sent_at = nowIso;
+  if (body.status === "received") updateData.received_at = nowIso;
+  if (body.status === "rejected") updateData.rejected_at = nowIso;
 
-  const { error } = await client.from('inv_transfers').update(updateData).eq('id', id);
+  const { error } = await client
+    .from("inv_transfers")
+    .update(updateData)
+    .eq("id", id);
   if (error) throw error;
 
-  await client.from('inv_transfer_audit').insert({
+  await client.from("inv_transfer_audit").insert({
     transfer_id: id,
-    action: 'status_changed',
+    action: "status_changed",
     old_status: existing.status,
     new_status: body.status,
     note: body.status_note ?? null,
     actor_id: body.actor_id,
   });
 
-  const transfer = await getInventoryTransferById(id, { supabaseClient: client });
+  const transfer = await getInventoryTransferById(id, {
+    supabaseClient: client,
+  });
   if (!transfer) {
-    throw new Error('Transfer updated but not found');
+    throw new Error("Transfer updated but not found");
   }
 
   await notifyTransferStatusChange({
@@ -222,10 +253,18 @@ export async function updateInventoryTransferStatus(
   return transfer;
 }
 
-async function assertUserBelongsToCompany(client: SupabaseClient, userId: string, companyId: string) {
-  const { data, error } = await client.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+async function assertUserBelongsToCompany(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+) {
+  const { data, error } = await client
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .maybeSingle();
   if (error) throw error;
   if (!data || data.company_id !== companyId) {
-    throw new Error('User is not authorized for this transfer.');
+    throw new Error("User is not authorized for this transfer.");
   }
 }

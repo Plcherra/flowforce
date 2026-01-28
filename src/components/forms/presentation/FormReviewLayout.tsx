@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
-import { FormMetaCard, type FormMetaCardProps } from './FormMetaCard';
-import { FormSection } from './FormSection';
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { FormMetaCard, type FormMetaCardProps } from "./FormMetaCard";
+import { FormSection } from "./FormSection";
 
 export interface FormReviewLayoutSection {
   id: string;
@@ -17,12 +17,27 @@ export interface FormReviewLayoutProps {
   className?: string;
 }
 
-export function FormReviewLayout({ headerTitle, headerSubtitle, meta, sections, className }: FormReviewLayoutProps) {
+export function FormReviewLayout({
+  headerTitle,
+  headerSubtitle,
+  meta,
+  sections,
+  className,
+}: FormReviewLayoutProps) {
   return (
-    <div className={cn('space-y-6 bg-background px-6 py-8 text-foreground sm:px-10', className)}>
+    <div
+      className={cn(
+        "space-y-6 bg-background px-6 py-8 text-foreground sm:px-10",
+        className,
+      )}
+    >
       <header className="space-y-1 border-b border-border/70 pb-4">
-        {headerTitle && <h1 className="text-2xl font-bold text-foreground">{headerTitle}</h1>}
-        {headerSubtitle && <p className="text-sm text-muted-foreground">{headerSubtitle}</p>}
+        {headerTitle && (
+          <h1 className="text-2xl font-bold text-foreground">{headerTitle}</h1>
+        )}
+        {headerSubtitle && (
+          <p className="text-sm text-muted-foreground">{headerSubtitle}</p>
+        )}
       </header>
 
       <FormMetaCard {...meta} />

@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
 
 type Props = { title?: string; description?: string };
 
-export function CalendarPage({ title = 'Calendar', description }: Props) {
+export function CalendarPage({ title = "Calendar", description }: Props) {
   return (
     <Card>
       <CardHeader>
@@ -14,7 +14,8 @@ export function CalendarPage({ title = 'Calendar', description }: Props) {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          {description || 'This is a starter calendar view. Hook up your data source to show events.'}
+          {description ||
+            "This is a starter calendar view. Hook up your data source to show events."}
         </div>
         <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs text-muted-foreground">
           {Array.from({ length: 35 }).map((_, i) => (
@@ -25,4 +26,3 @@ export function CalendarPage({ title = 'Calendar', description }: Props) {
     </Card>
   );
 }
-

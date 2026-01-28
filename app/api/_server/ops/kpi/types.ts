@@ -3,6 +3,6 @@ export interface OpsKpiSnapshot {
   value: number;
   unit?: string;
   trend?: number;
-  severity?: 'normal' | 'warning' | 'critical';
+  severity?: "normal" | "warning" | "critical";
   metadata?: Record<string, unknown>;
 }

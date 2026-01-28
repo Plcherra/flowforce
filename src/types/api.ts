@@ -13,7 +13,16 @@ export interface FormFieldValidationRules {
 export interface FormFieldData {
   id: string;
   form_id: string;
-  field_type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'date' | 'file';
+  field_type:
+    | "text"
+    | "email"
+    | "number"
+    | "textarea"
+    | "select"
+    | "checkbox"
+    | "radio"
+    | "date"
+    | "file";
   field_label: string;
   placeholder?: string;
   is_required: boolean;
@@ -39,7 +48,7 @@ export interface PositionPermissions {
 export interface Position {
   id: string;
   name: string;
-  role: 'staff' | 'supervisor' | 'manager' | 'admin';
+  role: "staff" | "supervisor" | "manager" | "admin";
   department_id?: string;
   description?: string;
   permissions?: PositionPermissions;
@@ -58,7 +67,7 @@ export interface PurchaseOrderItem {
   quantity: number;
   unit_price: number;
   total_price: number;
-  status: 'pending' | 'received' | 'cancelled';
+  status: "pending" | "received" | "cancelled";
   notes?: string;
 }
 
@@ -68,7 +77,7 @@ export interface PurchaseOrder {
   supplier_name: string;
   order_date: string;
   expected_delivery: string;
-  status: 'draft' | 'sent' | 'confirmed' | 'delivered' | 'cancelled';
+  status: "draft" | "sent" | "confirmed" | "delivered" | "cancelled";
   total_amount: number;
   notes?: string;
   created_by: string;
@@ -83,7 +92,7 @@ export interface ResourceItem {
   id: string;
   title: string;
   description: string;
-  type: 'documentation' | 'blog' | 'video' | 'download';
+  type: "documentation" | "blog" | "video" | "download";
   url?: string;
   category: string;
   tags: string[];

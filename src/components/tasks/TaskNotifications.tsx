@@ -1,28 +1,52 @@
-import { useState } from 'react';
-import { Bell, BellRing, CheckCircle, Clock, AlertTriangle, User, Flag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { useTaskNotifications } from '@/features/tasks';
-import { NotificationListSkeleton } from '@/components/loading/TaskSkeletons';
-import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { logger } from '@/utils/logger';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useState } from "react";
+import {
+  Bell,
+  BellRing,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  User,
+  Flag,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { useTaskNotifications } from "@/features/tasks";
+import { NotificationListSkeleton } from "@/components/loading/TaskSkeletons";
+import {
+  format,
+  formatDistanceToNow,
+  isToday,
+  isTomorrow,
+  isThisWeek,
+} from "date-fns";
+import { logger } from "@/utils/logger";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type TaskNotificationsProps = {
   onTaskNavigate?: (taskId: string) => void;
 };
 
 export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
-  const { 
-    notifications, 
-    unreadCount, 
-    loading, 
-    markAsRead, 
-    markAllAsRead, 
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
     deleteNotification,
     error,
   } = useTaskNotifications();
@@ -30,17 +54,17 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'task_assigned':
+      case "task_assigned":
         return <User className="h-4 w-4 text-blue-500" />;
-      case 'task_due_soon':
+      case "task_due_soon":
         return <Clock className="h-4 w-4 text-orange-500" />;
-      case 'task_overdue':
+      case "task_overdue":
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'task_completed':
+      case "task_completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'task_status_changed':
+      case "task_status_changed":
         return <Flag className="h-4 w-4 text-purple-500" />;
-      case 'task_comment':
+      case "task_comment":
         return <Bell className="h-4 w-4 text-indigo-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
@@ -49,35 +73,60 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
 
   const getNotificationTitle = (notification: any) => {
     switch (notification.type) {
-      case 'task_assigned':
-        return 'New Task Assignment';
-      case 'task_due_soon':
-        return 'Task Due Soon';
-      case 'task_overdue':
-        return 'Task Overdue';
-      case 'task_completed':
-        return 'Task Completed';
-      case 'task_status_changed':
-        return 'Task Status Updated';
-      case 'task_comment':
-        return 'New Comment';
+      case "task_assigned":
+        return "New Task Assignment";
+      case "task_due_soon":
+        return "Task Due Soon";
+      case "task_overdue":
+        return "Task Overdue";
+      case "task_completed":
+        return "Task Completed";
+      case "task_status_changed":
+        return "Task Status Updated";
+      case "task_comment":
+        return "New Comment";
       default:
-        return 'Task Notification';
+        return "Task Notification";
     }
   };
 
   const getDueDateBadge = (dueDate: string) => {
     const due = new Date(dueDate);
     const now = new Date();
-    
+
     if (due < now) {
-      return <Badge variant="destructive" className="text-xs">Overdue</Badge>;
+      return (
+        <Badge variant="destructive" className="text-xs">
+          Overdue
+        </Badge>
+      );
     } else if (isToday(due)) {
-      return <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">Due Today</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs bg-orange-50 text-orange-700 border-orange-200"
+        >
+          Due Today
+        </Badge>
+      );
     } else if (isTomorrow(due)) {
-      return <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">Due Tomorrow</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200"
+        >
+          Due Tomorrow
+        </Badge>
+      );
     } else if (isThisWeek(due)) {
-      return <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">Due This Week</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+        >
+          Due This Week
+        </Badge>
+      );
     }
     return null;
   };
@@ -92,7 +141,9 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
         onTaskNavigate(notification.task_id);
         setIsOpen(false);
       } else {
-        logger.debug('Navigate to task', { context: { taskId: notification.task_id } });
+        logger.debug("Navigate to task", {
+          context: { taskId: notification.task_id },
+        });
       }
     }
   };
@@ -104,7 +155,11 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           variant="outline"
           size="sm"
           className="relative"
-          aria-label={unreadCount > 0 ? `${unreadCount} unread task notifications` : 'Open task notifications'}
+          aria-label={
+            unreadCount > 0
+              ? `${unreadCount} unread task notifications`
+              : "Open task notifications"
+          }
           data-testid="task-notifications-trigger"
         >
           {unreadCount > 0 ? (
@@ -113,11 +168,11 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
             <Bell className="h-4 w-4" />
           )}
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0"
             >
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}
         </Button>
@@ -128,9 +183,9 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Task Notifications</CardTitle>
               {unreadCount > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={markAllAsRead}
                   className="text-xs"
                 >
@@ -140,11 +195,12 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
             </div>
             {unreadCount > 0 && (
               <CardDescription>
-                You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                You have {unreadCount} unread notification
+                {unreadCount !== 1 ? "s" : ""}
               </CardDescription>
             )}
           </CardHeader>
-          
+
           <ScrollArea className="h-80">
             <CardContent className="p-0">
               {error && (
@@ -160,11 +216,18 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Bell className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No notifications yet</p>
-                  <p className="text-xs text-muted-foreground">You'll see task updates here</p>
+                  <p className="text-sm text-muted-foreground">
+                    No notifications yet
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    You'll see task updates here
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-0" data-testid="task-notifications-list">
+                <div
+                  className="space-y-0"
+                  data-testid="task-notifications-list"
+                >
                   {notifications.map((notification, index) => (
                     <div key={notification.id}>
                       <button
@@ -173,8 +236,8 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                         onClick={() => handleNotificationClick(notification)}
                         className={`w-full text-left p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                           !notification.read_at
-                            ? 'bg-primary/5 border-l-2 border-l-primary hover:bg-primary/10'
-                            : 'hover:bg-muted/50'
+                            ? "bg-primary/5 border-l-2 border-l-primary hover:bg-primary/10"
+                            : "hover:bg-muted/50"
                         }`}
                       >
                         <div className="flex items-start space-x-3">
@@ -183,20 +246,32 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium">{getNotificationTitle(notification)}</p>
+                              <p className="text-sm font-medium">
+                                {getNotificationTitle(notification)}
+                              </p>
                               {!notification.read_at && (
-                                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" aria-hidden />
+                                <div
+                                  className="w-2 h-2 bg-primary rounded-full flex-shrink-0"
+                                  aria-hidden
+                                />
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{notification.message}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                              {notification.message}
+                            </p>
                             <div className="flex items-center justify-between">
                               <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                                {formatDistanceToNow(
+                                  new Date(notification.created_at),
+                                  { addSuffix: true },
+                                )}
                               </p>
                               {notification.metadata &&
-                                typeof notification.metadata === 'object' &&
+                                typeof notification.metadata === "object" &&
                                 (notification.metadata as any)?.due_date &&
-                                getDueDateBadge((notification.metadata as any).due_date)}
+                                getDueDateBadge(
+                                  (notification.metadata as any).due_date,
+                                )}
                             </div>
                           </div>
                         </div>

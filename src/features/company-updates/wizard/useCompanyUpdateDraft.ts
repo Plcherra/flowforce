@@ -1,22 +1,22 @@
-import { useRef, useState } from 'react';
+import { useRef, useState } from "react";
 
-import type { WizardFormData, WizardStepId } from './types';
-import { WIZARD_STEPS } from './steps';
-import { logger } from '@/utils/logger';
+import type { WizardFormData, WizardStepId } from "./types";
+import { WIZARD_STEPS } from "./steps";
+import { logger } from "@/utils/logger";
 
 const DEFAULT_FORM_DATA: WizardFormData = {
-  title: '',
-  body: '',
-  bodyPlainText: '',
-  richContent: '',
-  type: 'announcement',
-  priority: 'medium',
+  title: "",
+  body: "",
+  bodyPlainText: "",
+  richContent: "",
+  type: "announcement",
+  priority: "medium",
   backgroundStyle: {
-    type: 'solid',
-    primary: '#3b82f6',
+    type: "solid",
+    primary: "#3b82f6",
   },
   recipients: {
-    type: 'all',
+    type: "all",
     targets: [],
   },
   publishingSettings: {
@@ -39,19 +39,23 @@ const DEFAULT_FORM_DATA: WizardFormData = {
   updateMedia: [],
 };
 
-const STEP_VALIDATORS: Record<WizardStepId, (data: WizardFormData) => boolean> = {
-  template: () => true,
-  design: (data) => Boolean(data.title.trim() && (data.bodyPlainText ?? '').trim()),
-  recipients: (data) =>
-    data.recipients.type === 'all' || (Array.isArray(data.recipients.targets) && data.recipients.targets.length > 0),
-  publish: (data) => {
-    if (data.publishingSettings.publishNow) return true;
-    return Boolean(data.publishingSettings.scheduledDate);
-  },
-  summary: () => true,
-};
+const STEP_VALIDATORS: Record<WizardStepId, (data: WizardFormData) => boolean> =
+  {
+    template: () => true,
+    design: (data) =>
+      Boolean(data.title.trim() && (data.bodyPlainText ?? "").trim()),
+    recipients: (data) =>
+      data.recipients.type === "all" ||
+      (Array.isArray(data.recipients.targets) &&
+        data.recipients.targets.length > 0),
+    publish: (data) => {
+      if (data.publishingSettings.publishNow) return true;
+      return Boolean(data.publishingSettings.scheduledDate);
+    },
+    summary: () => true,
+  };
 
-const STORAGE_KEY = 'company-update:draft';
+const STORAGE_KEY = "company-update:draft";
 
 type PersistedDraft = {
   data: WizardFormData;
@@ -59,7 +63,7 @@ type PersistedDraft = {
 };
 
 const loadPersistedDraft = (): PersistedDraft | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -82,7 +86,9 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(() =>
-    persistedRef.current?.savedAt ? new Date(persistedRef.current.savedAt) : null,
+    persistedRef.current?.savedAt
+      ? new Date(persistedRef.current.savedAt)
+      : null,
   );
 
   const steps = WIZARD_STEPS;
@@ -112,14 +118,14 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
   };
 
   const clearDraft = () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.removeItem(STORAGE_KEY);
     persistedRef.current = null;
     setLastSavedAt(null);
   };
 
   const persistDraft = (data: WizardFormData) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const payload: PersistedDraft = {
       data,
       savedAt: new Date().toISOString(),
@@ -129,20 +135,25 @@ export function useCompanyUpdateDraft(initialState?: Partial<WizardFormData>) {
       persistedRef.current = payload;
       setLastSavedAt(new Date(payload.savedAt));
     } catch (error) {
-      logger.warn('Failed to persist update draft', { error, tags: ['warning'] });
+      logger.warn("Failed to persist update draft", {
+        error,
+        tags: ["warning"],
+      });
     }
   };
 
   const scheduleSaveRef = useRef<number>();
 
   const handleAutoSave = (data: WizardFormData) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     if (scheduleSaveRef.current) {
       window.clearTimeout(scheduleSaveRef.current);
     }
 
     scheduleSaveRef.current = window.setTimeout(() => {
-      const isDefaultState = JSON.stringify({ ...DEFAULT_FORM_DATA, ...initialState }) === JSON.stringify(data);
+      const isDefaultState =
+        JSON.stringify({ ...DEFAULT_FORM_DATA, ...initialState }) ===
+        JSON.stringify(data);
       if (isDefaultState) {
         clearDraft();
         return;

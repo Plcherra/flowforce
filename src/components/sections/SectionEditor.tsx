@@ -1,33 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  Save, 
-  X, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Save,
+  X,
   Plus,
   GripVertical,
-  Megaphone, 
-  Users, 
-  Calendar, 
-  MessageSquare, 
-  BarChart3, 
+  Megaphone,
+  Users,
+  Calendar,
+  MessageSquare,
+  BarChart3,
   BookOpen,
   FileText,
   Settings,
   Shield,
   DollarSign,
   Package,
-  Clock
-} from 'lucide-react';
-import { CustomSection, CustomSectionPage, SectionTemplate } from '@/hooks/useCustomSections';
-import { logger } from '@/utils/logger';
+  Clock,
+} from "lucide-react";
+import {
+  CustomSection,
+  CustomSectionPage,
+  SectionTemplate,
+} from "@/hooks/useCustomSections";
+import { logger } from "@/utils/logger";
 
 interface SectionEditorProps {
   section?: CustomSection;
@@ -49,42 +71,42 @@ const iconOptions = {
   Shield,
   DollarSign,
   Package,
-  Clock
+  Clock,
 };
 
 const categoryOptions = [
-  { value: 'communication', label: 'Communication' },
-  { value: 'operations', label: 'Operations' },
-  { value: 'hr', label: 'HR & Development' },
-  { value: 'analytics', label: 'Analytics & Reports' },
-  { value: 'admin', label: 'Admin & Setup' },
-  { value: 'custom', label: 'Custom' }
+  { value: "communication", label: "Communication" },
+  { value: "operations", label: "Operations" },
+  { value: "hr", label: "HR & Development" },
+  { value: "analytics", label: "Analytics & Reports" },
+  { value: "admin", label: "Admin & Setup" },
+  { value: "custom", label: "Custom" },
 ];
 
 const permissionOptions = [
-  'viewOwnProfile',
-  'viewTeamProfiles',
-  'editOwnProfile',
-  'editTeamProfiles',
-  'manageUsers',
-  'createPosts',
-  'editPosts',
-  'deletePosts',
-  'viewOwnTasks',
-  'createTasks',
-  'editTasks',
-  'deleteTasks',
-  'viewOwnSchedules',
-  'createEvents',
-  'manageSchedules',
-  'sendMessages',
-  'createChannels',
-  'manageChannels',
-  'createPolls',
-  'viewReports',
-  'createReports',
-  'editDocs',
-  'manageSettings'
+  "viewOwnProfile",
+  "viewTeamProfiles",
+  "editOwnProfile",
+  "editTeamProfiles",
+  "manageUsers",
+  "createPosts",
+  "editPosts",
+  "deletePosts",
+  "viewOwnTasks",
+  "createTasks",
+  "editTasks",
+  "deleteTasks",
+  "viewOwnSchedules",
+  "createEvents",
+  "manageSchedules",
+  "sendMessages",
+  "createChannels",
+  "manageChannels",
+  "createPolls",
+  "viewReports",
+  "createReports",
+  "editDocs",
+  "manageSettings",
 ];
 
 export default function SectionEditor({
@@ -92,17 +114,17 @@ export default function SectionEditor({
   template,
   isOpen,
   onClose,
-  onSave
+  onSave,
 }: SectionEditorProps) {
   const [formData, setFormData] = useState<Partial<CustomSection>>({
-    name: '',
-    description: '',
-    icon: 'FileText',
-    category: 'custom',
-    path: '',
+    name: "",
+    description: "",
+    icon: "FileText",
+    category: "custom",
+    path: "",
     permissions: [],
     is_active: true,
-    template_config: {}
+    template_config: {},
   });
 
   const [pages, setPages] = useState<Partial<CustomSectionPage>[]>([]);
@@ -118,7 +140,7 @@ export default function SectionEditor({
         path: section.path,
         permissions: section.permissions,
         is_active: section.is_active,
-        template_config: section.template_config
+        template_config: section.template_config,
       });
       setPages(section.pages || []);
     } else if (template) {
@@ -127,10 +149,10 @@ export default function SectionEditor({
         description: template.description,
         icon: template.icon,
         category: template.category,
-        path: `/${template.name.toLowerCase().replace(/\s+/g, '-')}`,
+        path: `/${template.name.toLowerCase().replace(/\s+/g, "-")}`,
         permissions: template.default_permissions,
         is_active: true,
-        template_config: template.config
+        template_config: template.config,
       });
       setPages(template.default_pages || []);
     }
@@ -144,7 +166,7 @@ export default function SectionEditor({
       await onSave(formData);
       onClose();
     } catch (error) {
-      logger.error('Error saving section:', { error, tags: ['error'] });
+      logger.error("Error saving section:", { error, tags: ["error"] });
     } finally {
       setSaving(false);
     }
@@ -152,15 +174,15 @@ export default function SectionEditor({
 
   const addPage = () => {
     const newPage: Partial<CustomSectionPage> = {
-      name: 'New Page',
-      title: 'New Page',
-      description: '',
-      icon: 'FileText',
+      name: "New Page",
+      title: "New Page",
+      description: "",
+      icon: "FileText",
       route: `${formData.path}/new-page-${pages.length + 1}`,
       content: [],
       permissions: [],
       is_active: true,
-      sort_order: pages.length
+      sort_order: pages.length,
     };
     setPages([...pages, newPage]);
   };
@@ -170,19 +192,22 @@ export default function SectionEditor({
   };
 
   const updatePage = (index: number, updates: Partial<CustomSectionPage>) => {
-    setPages(pages.map((page, i) => i === index ? { ...page, ...updates } : page));
+    setPages(
+      pages.map((page, i) => (i === index ? { ...page, ...updates } : page)),
+    );
   };
 
   const togglePermission = (permission: string) => {
     const current = formData.permissions || [];
     const updated = current.includes(permission)
-      ? current.filter(p => p !== permission)
+      ? current.filter((p) => p !== permission)
       : [...current, permission];
     setFormData({ ...formData, permissions: updated });
   };
 
   const getIconComponent = (iconName: string) => {
-    const IconComponent = iconOptions[iconName as keyof typeof iconOptions] || FileText;
+    const IconComponent =
+      iconOptions[iconName as keyof typeof iconOptions] || FileText;
     return <IconComponent className="h-4 w-4" />;
   };
 
@@ -191,7 +216,11 @@ export default function SectionEditor({
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {section ? 'Edit Section' : template ? `Create from ${template.name}` : 'Create Custom Section'}
+            {section
+              ? "Edit Section"
+              : template
+                ? `Create from ${template.name}`
+                : "Create Custom Section"}
           </DialogTitle>
           <DialogDescription>
             Configure your section settings, pages, and permissions
@@ -210,21 +239,25 @@ export default function SectionEditor({
                   <Label>Section Name *</Label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     placeholder="e.g., Customer Management"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, category: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categoryOptions.map(option => (
+                      {categoryOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -238,7 +271,9 @@ export default function SectionEditor({
                 <Label>Description</Label>
                 <Textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   placeholder="Describe what this section is for..."
                   rows={2}
                 />
@@ -249,7 +284,9 @@ export default function SectionEditor({
                   <Label>Path *</Label>
                   <Input
                     value={formData.path}
-                    onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, path: e.target.value })
+                    }
                     placeholder="/custom-section"
                   />
                 </div>
@@ -259,9 +296,13 @@ export default function SectionEditor({
                     {Object.keys(iconOptions).map((iconName) => (
                       <Button
                         key={iconName}
-                        variant={formData.icon === iconName ? "default" : "outline"}
+                        variant={
+                          formData.icon === iconName ? "default" : "outline"
+                        }
                         size="sm"
-                        onClick={() => setFormData({ ...formData, icon: iconName })}
+                        onClick={() =>
+                          setFormData({ ...formData, icon: iconName })
+                        }
                         className="h-10"
                       >
                         {getIconComponent(iconName)}
@@ -283,12 +324,14 @@ export default function SectionEditor({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-2">
-                {permissionOptions.map(permission => (
+                {permissionOptions.map((permission) => (
                   <div key={permission} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       id={permission}
-                      checked={formData.permissions?.includes(permission) || false}
+                      checked={
+                        formData.permissions?.includes(permission) || false
+                      }
                       onChange={() => togglePermission(permission)}
                       className="rounded"
                     />
@@ -329,30 +372,40 @@ export default function SectionEditor({
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                          {getIconComponent(page.icon || 'FileText')}
+                          {getIconComponent(page.icon || "FileText")}
                           <span className="font-medium">{page.name}</span>
                         </div>
-                        <Button size="sm" variant="ghost" onClick={() => removePage(index)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removePage(index)}
+                        >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-3">
                         <Input
                           value={page.name}
-                          onChange={(e) => updatePage(index, { name: e.target.value })}
+                          onChange={(e) =>
+                            updatePage(index, { name: e.target.value })
+                          }
                           placeholder="Page name"
                         />
                         <Input
                           value={page.route}
-                          onChange={(e) => updatePage(index, { route: e.target.value })}
+                          onChange={(e) =>
+                            updatePage(index, { route: e.target.value })
+                          }
                           placeholder="Route path"
                         />
                       </div>
-                      
+
                       <Textarea
                         value={page.description}
-                        onChange={(e) => updatePage(index, { description: e.target.value })}
+                        onChange={(e) =>
+                          updatePage(index, { description: e.target.value })
+                        }
                         placeholder="Page description"
                         rows={2}
                         className="mt-3"
@@ -371,7 +424,7 @@ export default function SectionEditor({
             </Button>
             <Button onClick={handleSubmit} disabled={!formData.name || saving}>
               <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Section'}
+              {saving ? "Saving..." : "Save Section"}
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import IdeaMetricCard from '../IdeaMetricCard';
+import IdeaMetricCard from "../IdeaMetricCard";
 
 const meta = {
-  title: 'Operations/IDEA/MetricCard',
+  title: "Operations/IDEA/MetricCard",
   component: IdeaMetricCard,
 };
 

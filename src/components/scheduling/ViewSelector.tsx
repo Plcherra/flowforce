@@ -1,43 +1,47 @@
+import { Button } from "@/components/ui/button";
 
-import { Button } from '@/components/ui/button';
-
-type ViewType = 'month' | 'week' | 'day' | 'year';
+type ViewType = "month" | "week" | "day" | "year";
 
 interface ViewSelectorProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
   isMobile?: boolean;
-  mode?: 'scheduling' | 'events';
+  mode?: "scheduling" | "events";
 }
 
-export function ViewSelector({ currentView, onViewChange, isMobile = false, mode = 'scheduling' }: ViewSelectorProps) {
-  const isScheduling = mode === 'scheduling';
+export function ViewSelector({
+  currentView,
+  onViewChange,
+  isMobile = false,
+  mode = "scheduling",
+}: ViewSelectorProps) {
+  const isScheduling = mode === "scheduling";
 
   if (isMobile) {
     return (
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
           <Button
-            variant={currentView === 'day' ? 'default' : 'outline'}
+            variant={currentView === "day" ? "default" : "outline"}
             size="sm"
             className="flex-1"
-            onClick={() => onViewChange('day')}
+            onClick={() => onViewChange("day")}
           >
             Day
           </Button>
           <Button
-            variant={currentView === 'week' ? 'default' : 'outline'}
+            variant={currentView === "week" ? "default" : "outline"}
             size="sm"
             className="flex-1"
-            onClick={() => onViewChange('week')}
+            onClick={() => onViewChange("week")}
           >
             Week
           </Button>
           <Button
-            variant={currentView === 'month' ? 'default' : 'outline'}
+            variant={currentView === "month" ? "default" : "outline"}
             size="sm"
             className="flex-1"
-            onClick={() => onViewChange('month')}
+            onClick={() => onViewChange("month")}
           >
             Month
           </Button>
@@ -67,31 +71,31 @@ export function ViewSelector({ currentView, onViewChange, isMobile = false, mode
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
         <Button
-          variant={currentView === 'day' ? 'default' : 'outline'}
+          variant={currentView === "day" ? "default" : "outline"}
           size="sm"
-          onClick={() => onViewChange('day')}
+          onClick={() => onViewChange("day")}
         >
           Day
         </Button>
         <Button
-          variant={currentView === 'week' ? 'default' : 'outline'}
+          variant={currentView === "week" ? "default" : "outline"}
           size="sm"
-          onClick={() => onViewChange('week')}
+          onClick={() => onViewChange("week")}
         >
           Week
         </Button>
         <Button
-          variant={currentView === 'month' ? 'default' : 'outline'}
+          variant={currentView === "month" ? "default" : "outline"}
           size="sm"
-          onClick={() => onViewChange('month')}
+          onClick={() => onViewChange("month")}
         >
           Month
         </Button>
         {isScheduling && (
           <Button
-            variant={currentView === 'year' ? 'default' : 'outline'}
+            variant={currentView === "year" ? "default" : "outline"}
             size="sm"
-            onClick={() => onViewChange('year')}
+            onClick={() => onViewChange("year")}
           >
             Year
           </Button>

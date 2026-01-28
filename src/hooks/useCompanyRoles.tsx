@@ -1,10 +1,9 @@
-
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from './use-toast';
-import { logger } from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "./use-toast";
+import { logger } from "@/utils/logger";
 
 export interface CompanyRole {
   id: string;
@@ -39,35 +38,38 @@ export interface UseCompanyRolesOptions {
 
 const MINIMAL_ONBOARDING_ROLES: CompanyRole[] = [
   {
-    id: 'onboarding-basic',
-    name: 'Onboarding Staff',
-    description: 'Temporary access during onboarding setup',
-    color: '#6b7280',
-    icon: 'Users',
+    id: "onboarding-basic",
+    name: "Onboarding Staff",
+    description: "Temporary access during onboarding setup",
+    color: "#6b7280",
+    icon: "Users",
     hierarchy_level: 1,
     permissions: {
       viewOwnProfile: true,
       editOwnProfile: true,
-      viewOwnSchedules: true
+      viewOwnSchedules: true,
     },
     is_system_role: true,
-    is_active: true
-  }
+    is_active: true,
+  },
 ];
 
-const UNKNOWN_ERROR_MESSAGE = 'Unable to load company roles';
+const UNKNOWN_ERROR_MESSAGE = "Unable to load company roles";
 
 const normalizeError = (error: unknown): CompanyRolesError => {
-  if (error && typeof error === 'object') {
+  if (error && typeof error === "object") {
     const err = error as { message?: string; code?: string; status?: number };
     return {
-      message: typeof err.message === 'string' && err.message.length > 0 ? err.message : UNKNOWN_ERROR_MESSAGE,
-      code: typeof err.code === 'string' ? err.code : undefined,
-      status: typeof err.status === 'number' ? err.status : undefined
+      message:
+        typeof err.message === "string" && err.message.length > 0
+          ? err.message
+          : UNKNOWN_ERROR_MESSAGE,
+      code: typeof err.code === "string" ? err.code : undefined,
+      status: typeof err.status === "number" ? err.status : undefined,
     };
   }
 
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return { message: error };
   }
 
@@ -75,12 +77,12 @@ const normalizeError = (error: unknown): CompanyRolesError => {
 };
 
 const isMissingCompanyError = (error: CompanyRolesError) => {
-  if (error.code === 'PGRST116') {
+  if (error.code === "PGRST116") {
     return true;
   }
 
   const lowerMessage = error.message.toLowerCase();
-  return lowerMessage.includes('company');
+  return lowerMessage.includes("company");
 };
 
 export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
@@ -100,29 +102,36 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
     try {
       const metadataCompanyId =
-        typeof user.user_metadata?.company_id === 'string'
+        typeof user.user_metadata?.company_id === "string"
           ? (user.user_metadata.company_id as string)
           : null;
 
-      const { data: currentProfile, error: currentProfileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
+      const { data: currentProfile, error: currentProfileError } =
+        await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", user.id)
+          .single();
 
       if (currentProfileError) {
-        logger.error('Error resolving current profile for company roles', { error: currentProfileError, tags: ['error'] });
+        logger.error("Error resolving current profile for company roles", {
+          error: currentProfileError,
+          tags: ["error"],
+        });
       }
 
       const companyId = currentProfile?.company_id ?? metadataCompanyId;
 
       if (!companyId) {
-        throw new Error('No company context available for role listing');
+        throw new Error("No company context available for role listing");
       }
 
-      const { data, error: rpcError } = await supabase.rpc('get_company_roles', {
-        company_uuid: companyId,
-      });
+      const { data, error: rpcError } = await supabase.rpc(
+        "get_company_roles",
+        {
+          company_uuid: companyId,
+        },
+      );
 
       if (rpcError) {
         throw rpcError;
@@ -130,14 +139,18 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
       const parsedRoles = (data || []).map((role: any) => ({
         ...role,
-        permissions: typeof role.permissions === 'string'
-          ? JSON.parse(role.permissions)
-          : (role.permissions || {})
+        permissions:
+          typeof role.permissions === "string"
+            ? JSON.parse(role.permissions)
+            : role.permissions || {},
       }));
 
       setRoles(parsedRoles);
     } catch (err: unknown) {
-      logger.error('Error fetching company roles', { error: err, tags: ['error'] });
+      logger.error("Error fetching company roles", {
+        error: err,
+        tags: ["error"],
+      });
       const normalizedError = normalizeError(err);
       setError(normalizedError);
 
@@ -154,7 +167,10 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
   useEffect(() => {
     if (user) {
       fetchRoles().catch((err) => {
-        logger.error('Unhandled error while fetching company roles', { error: err, tags: ['error'] });
+        logger.error("Unhandled error while fetching company roles", {
+          error: err,
+          tags: ["error"],
+        });
       });
     } else {
       setRoles([]);
@@ -165,42 +181,45 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
   const createRole = useMutation({
     mutationFn: async (roleData: CreateRoleData) => {
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error("User not authenticated");
 
       // Creating role...
 
       // Get the user's company_id from their profile
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
         .single();
 
       if (profileError) {
-        logger.error('Error fetching user profile', { error: profileError, tags: ['error'] });
+        logger.error("Error fetching user profile", {
+          error: profileError,
+          tags: ["error"],
+        });
         throw profileError;
       }
 
       if (!profile?.company_id) {
-        throw new Error('No company found for user');
+        throw new Error("No company found for user");
       }
 
       const { data, error } = await supabase
-        .from('company_roles')
+        .from("company_roles")
         .insert({
           ...roleData,
           company_id: profile.company_id,
           permissions: roleData.permissions,
-          created_by: user.id
+          created_by: user.id,
         })
         .select()
         .single();
 
       if (error) {
-        logger.error('Error creating role', { error, tags: ['error'] });
+        logger.error("Error creating role", { error, tags: ["error"] });
         throw error;
       }
-      
+
       // Role created successfully
       return data;
     },
@@ -212,34 +231,37 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       fetchRoles();
     },
     onError: (error: unknown) => {
-      logger.error('Create role mutation error', { error, tags: ['error'] });
+      logger.error("Create role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
         description: error.message || "Failed to create role",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const updateRole = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<CompanyRole> & { id: string }) => {
+    mutationFn: async ({
+      id,
+      ...updates
+    }: Partial<CompanyRole> & { id: string }) => {
       // Updating role...
-      
+
       const { data, error } = await supabase
-        .from('company_roles')
+        .from("company_roles")
         .update({
           ...updates,
-          permissions: updates.permissions || undefined
+          permissions: updates.permissions || undefined,
         })
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
       if (error) {
-        logger.error('Error updating role', { error, tags: ['error'] });
+        logger.error("Error updating role", { error, tags: ["error"] });
         throw error;
       }
-      
+
       // Role updated successfully
       return data;
     },
@@ -251,29 +273,29 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       fetchRoles();
     },
     onError: (error: unknown) => {
-      logger.error('Update role mutation error', { error, tags: ['error'] });
+      logger.error("Update role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
         description: error.message || "Failed to update role",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const deleteRole = useMutation({
     mutationFn: async (roleId: string) => {
       // Deactivating role...
-      
+
       const { error } = await supabase
-        .from('company_roles')
+        .from("company_roles")
         .update({ is_active: false })
-        .eq('id', roleId);
+        .eq("id", roleId);
 
       if (error) {
-        logger.error('Error deactivating role', { error, tags: ['error'] });
+        logger.error("Error deactivating role", { error, tags: ["error"] });
         throw error;
       }
-      
+
       // Role deactivated successfully
     },
     onSuccess: () => {
@@ -284,13 +306,13 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       fetchRoles();
     },
     onError: (error: unknown) => {
-      logger.error('Delete role mutation error', { error, tags: ['error'] });
+      logger.error("Delete role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
         description: error.message || "Failed to deactivate role",
         variant: "destructive",
       });
-    }
+    },
   });
 
   return {
@@ -301,6 +323,6 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     createRole,
     updateRole,
     deleteRole,
-    refetchRoles: fetchRoles
+    refetchRoles: fetchRoles,
   };
 }

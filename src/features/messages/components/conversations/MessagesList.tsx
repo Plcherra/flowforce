@@ -1,14 +1,19 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { MessageCircle, Trash2, Edit2, Check, X } from 'lucide-react';
-import { MessageReactions } from './MessageReactions';
-import { format } from 'date-fns';
-import type { Message, ThreadMessage } from '@/types/messages';
-import { Skeleton } from '@/components/ui/skeleton';
-import { logger } from '@/utils/logger';
+import React, { useRef, useEffect, useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MessageCircle, Trash2, Edit2, Check, X } from "lucide-react";
+import { MessageReactions } from "./MessageReactions";
+import { format } from "date-fns";
+import type { Message, ThreadMessage } from "@/types/messages";
+import { Skeleton } from "@/components/ui/skeleton";
+import { logger } from "@/utils/logger";
+import {
+  safeArrayLength,
+  safeArrayMap,
+  asArray,
+} from "@/utils/reactQueryTypes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +23,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface MessagesListProps {
   messages: Message[];
@@ -30,17 +35,29 @@ interface MessagesListProps {
   channelMembers?: Array<{ user_id: string; last_read_at: string | null }>;
 }
 
-export function MessagesList({ messages, loading, onThreadMessage, currentUserId, onDeleteMessage, onUpdateMessage, channelMembers = [] }: MessagesListProps) {
+export function MessagesList({
+  messages,
+  loading,
+  onThreadMessage,
+  currentUserId,
+  onDeleteMessage,
+  onUpdateMessage,
+  channelMembers = [],
+}: MessagesListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messagePendingDelete, setMessagePendingDelete] = useState<Message | null>(null);
+  const [messagePendingDelete, setMessagePendingDelete] =
+    useState<Message | null>(null);
+  const safeMessages = asArray(messages);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (safeArrayLength(safeMessages) > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [safeMessages]);
 
   const handleSaveEdit = async (messageId: string) => {
     if (!onUpdateMessage || !editContent.trim()) return;
@@ -48,9 +65,9 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
     try {
       await onUpdateMessage(messageId, editContent.trim());
       setEditingMessageId(null);
-      setEditContent('');
+      setEditContent("");
     } catch (error) {
-      logger.error('Failed to update message', { error, tags: ['error'] });
+      logger.error("Failed to update message", { error, tags: ["error"] });
     } finally {
       setUpdating(false);
     }
@@ -58,7 +75,10 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
 
   if (loading) {
     return (
-      <ScrollArea className="flex-1 p-4" aria-label="Loading conversation messages">
+      <ScrollArea
+        className="flex-1 p-4"
+        aria-label="Loading conversation messages"
+      >
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={`messages-skeleton-${index}`} className="flex gap-3">
@@ -78,30 +98,42 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4" role="log" aria-live="polite">
-        {messages.length === 0 ? (
+        {safeArrayLength(safeMessages) === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No messages yet. Be the first to send one!</p>
+            <p className="text-muted-foreground">
+              No messages yet. Be the first to send one!
+            </p>
           </div>
         ) : (
-          messages.map((message) => {
-            const senderProfile = message.sender_profile ?? { first_name: '', last_name: '', avatar_url: null };
-            const firstName = senderProfile.first_name ?? '';
-            const lastName = senderProfile.last_name ?? '';
-            const displayName = `${firstName} ${lastName}`.trim() || 'Team member';
+          safeArrayMap(safeMessages, (message) => {
+            const senderProfile = message.sender_profile ?? {
+              first_name: "",
+              last_name: "",
+              avatar_url: null,
+            };
+            const firstName = senderProfile.first_name ?? "";
+            const lastName = senderProfile.last_name ?? "";
+            const displayName =
+              `${firstName} ${lastName}`.trim() || "Team member";
             const initials =
-              `${firstName.charAt(0) ?? ''}${lastName.charAt(0) ?? ''}`.trim() ||
+              `${firstName.charAt(0) ?? ""}${lastName.charAt(0) ?? ""}`.trim() ||
               displayName.charAt(0).toUpperCase() ||
-              'U';
-            const createdAt = message.created_at ? new Date(message.created_at) : null;
+              "U";
+            const createdAt = message.created_at
+              ? new Date(message.created_at)
+              : null;
             const formattedTimestamp =
               createdAt && !Number.isNaN(createdAt.getTime())
-                ? format(createdAt, 'MMM dd, yyyy at h:mm a')
-                : '';
+                ? format(createdAt, "MMM dd, yyyy at h:mm a")
+                : "";
 
             const replyProfile = message.reply_to_message?.sender_profile;
             const replyName = replyProfile
-              ? [replyProfile.first_name, replyProfile.last_name].filter(Boolean).join(' ').trim() || 'a teammate'
-              : 'a teammate';
+              ? [replyProfile.first_name, replyProfile.last_name]
+                  .filter(Boolean)
+                  .join(" ")
+                  .trim() || "a teammate"
+              : "a teammate";
 
             // Calculate read receipts
             const messageTime = createdAt ? createdAt.getTime() : 0;
@@ -126,18 +158,26 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium text-foreground">{displayName}</p>
-                    {formattedTimestamp && <p className="text-xs text-muted-foreground">{formattedTimestamp}</p>}
+                    <p className="text-sm font-medium text-foreground">
+                      {displayName}
+                    </p>
+                    {formattedTimestamp && (
+                      <p className="text-xs text-muted-foreground">
+                        {formattedTimestamp}
+                      </p>
+                    )}
                   </div>
                   {message.reply_to_message && (
                     <div className="mt-1 rounded border-l-2 border-border bg-muted/50 p-2">
-                      <p className="text-xs text-muted-foreground">Replying to {replyName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Replying to {replyName}
+                      </p>
                       <p className="truncate text-sm text-foreground/80">
-                        {message.reply_to_message.content || 'Shared a message'}
+                        {message.reply_to_message.content || "Shared a message"}
                       </p>
                     </div>
                   )}
-                  
+
                   {/* Message Content - Edit or Display */}
                   {editingMessageId === message.id ? (
                     <div className="mt-2 space-y-2">
@@ -145,13 +185,13 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
+                          if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
                             handleSaveEdit(message.id);
                           }
-                          if (e.key === 'Escape') {
+                          if (e.key === "Escape") {
                             setEditingMessageId(null);
-                            setEditContent('');
+                            setEditContent("");
                           }
                         }}
                         autoFocus
@@ -172,7 +212,7 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                           variant="ghost"
                           onClick={() => {
                             setEditingMessageId(null);
-                            setEditContent('');
+                            setEditContent("");
                           }}
                           disabled={updating}
                         >
@@ -186,7 +226,9 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                       <p className="mt-1 text-sm text-foreground">
                         {message.content}
                         {message.edited_at && (
-                          <span className="ml-2 text-xs text-muted-foreground italic">(edited)</span>
+                          <span className="ml-2 text-xs text-muted-foreground italic">
+                            (edited)
+                          </span>
                         )}
                       </p>
 
@@ -212,19 +254,20 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
-                        {message.sender_id === currentUserId && onUpdateMessage && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            aria-label="Edit message"
-                            onClick={() => {
-                              setEditingMessageId(message.id);
-                              setEditContent(message.content);
-                            }}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                        )}
+                        {message.sender_id === currentUserId &&
+                          onUpdateMessage && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              aria-label="Edit message"
+                              onClick={() => {
+                                setEditingMessageId(message.id);
+                                setEditContent(message.content);
+                              }}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         {message.sender_id === currentUserId && (
                           <Button
                             variant="ghost"
@@ -255,12 +298,16 @@ export function MessagesList({ messages, loading, onThreadMessage, currentUserId
           })
         )}
         <div ref={messagesEndRef} />
-        <AlertDialog open={Boolean(messagePendingDelete)} onOpenChange={(open) => !open && setMessagePendingDelete(null)}>
+        <AlertDialog
+          open={Boolean(messagePendingDelete)}
+          onOpenChange={(open) => !open && setMessagePendingDelete(null)}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete message</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete your message. This action cannot be undone.
+                This will permanently delete your message. This action cannot be
+                undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

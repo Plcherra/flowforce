@@ -1,5 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchBusinessAnalyticsSnapshot, type BusinessAnalyticsSnapshotResult } from '@/services/analytics/businessAnalyticsService';
+import { useQuery } from "@tanstack/react-query";
+import {
+  fetchBusinessAnalyticsSnapshot,
+  type BusinessAnalyticsSnapshotResult,
+} from "@/services/analytics/businessAnalyticsService";
 
 export interface UseBusinessAnalyticsOptions {
   companyId?: string | null;
@@ -7,11 +10,13 @@ export interface UseBusinessAnalyticsOptions {
   enabled?: boolean;
 }
 
-export function useBusinessAnalytics(options: UseBusinessAnalyticsOptions = {}) {
+export function useBusinessAnalytics(
+  options: UseBusinessAnalyticsOptions = {},
+) {
   const { companyId = null, horizonDays = 28, enabled = true } = options;
 
   return useQuery<BusinessAnalyticsSnapshotResult>({
-    queryKey: ['business-analytics', companyId ?? 'demo', horizonDays],
+    queryKey: ["business-analytics", companyId ?? "demo", horizonDays],
     queryFn: () =>
       fetchBusinessAnalyticsSnapshot({
         companyId,

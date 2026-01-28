@@ -1,22 +1,27 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useManagerFinancialMetrics } from '@/hooks/useFinancialManagement';
-import { useSystemSettings } from '@/modules/system/hooks/useSystemSettings';
-import { useIntegrationSettings } from '@/modules/system/hooks/useIntegrationSettings';
-import { useToast } from '@/hooks/use-toast';
-import { generateFinancialDemoData } from '@/services/financialDemoData';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useManagerFinancialMetrics } from "@/hooks/useFinancialManagement";
+import { useSystemSettings } from "@/modules/system/hooks/useSystemSettings";
+import { useIntegrationSettings } from "@/modules/system/hooks/useIntegrationSettings";
+import { useToast } from "@/hooks/use-toast";
+import { generateFinancialDemoData } from "@/services/financialDemoData";
 import {
   Area,
   Bar,
@@ -27,7 +32,7 @@ import {
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from "recharts";
 import {
   ArrowRight,
   Briefcase,
@@ -40,9 +45,9 @@ import {
   Store,
   TrendingDown,
   TrendingUp,
-} from 'lucide-react';
+} from "lucide-react";
 
-type IntegrationId = 'toast' | 'quickbooks' | 'marketman';
+type IntegrationId = "toast" | "quickbooks" | "marketman";
 
 const INTEGRATION_META: Array<{
   id: IntegrationId;
@@ -51,21 +56,23 @@ const INTEGRATION_META: Array<{
   defaultAutoSync: boolean;
 }> = [
   {
-    id: 'toast',
-    name: 'Toast POS',
-    description: 'Sync hours worked and labor cost data directly from Toast.',
+    id: "toast",
+    name: "Toast POS",
+    description: "Sync hours worked and labor cost data directly from Toast.",
     defaultAutoSync: true,
   },
   {
-    id: 'quickbooks',
-    name: 'QuickBooks Online',
-    description: 'Push payroll and expense records for accounting reconciliation.',
+    id: "quickbooks",
+    name: "QuickBooks Online",
+    description:
+      "Push payroll and expense records for accounting reconciliation.",
     defaultAutoSync: false,
   },
   {
-    id: 'marketman',
-    name: 'MarketMan',
-    description: 'Import food cost, inventory, and waste adjustments automatically.',
+    id: "marketman",
+    name: "MarketMan",
+    description:
+      "Import food cost, inventory, and waste adjustments automatically.",
     defaultAutoSync: true,
   },
 ];
@@ -86,24 +93,30 @@ const loadingSkeleton = (
 );
 
 const statusStyleMap: Record<
-  'connected' | 'pending' | 'disconnected' | 'error',
+  "connected" | "pending" | "disconnected" | "error",
   { label: string; className: string }
 > = {
-  connected: { label: 'Connected', className: 'bg-emerald-100 text-emerald-700' },
-  pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
-  disconnected: { label: 'Disconnected', className: 'bg-rose-100 text-rose-700' },
-  error: { label: 'Error', className: 'bg-rose-100 text-rose-700' },
+  connected: {
+    label: "Connected",
+    className: "bg-emerald-100 text-emerald-700",
+  },
+  pending: { label: "Pending", className: "bg-amber-100 text-amber-700" },
+  disconnected: {
+    label: "Disconnected",
+    className: "bg-rose-100 text-rose-700",
+  },
+  error: { label: "Error", className: "bg-rose-100 text-rose-700" },
 };
 
 const formatCategoryLabel = (label: string) =>
   label
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 
 const getUuid = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+  typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `tmp-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
@@ -120,39 +133,45 @@ export function ManagerFinancialOverview() {
   const { toast } = useToast();
 
   const [autoSyncBusy, setAutoSyncBusy] = useState<IntegrationId | null>(null);
-  const [syncingIntegration, setSyncingIntegration] = useState<IntegrationId | null>(null);
+  const [syncingIntegration, setSyncingIntegration] =
+    useState<IntegrationId | null>(null);
   const [seeding, setSeeding] = useState(false);
 
   const autoSyncMap = useMemo(() => {
     const raw = integrationSettings?.syncMappings?.autoSync;
     const resolved: Record<string, boolean> = {};
-    if (raw && typeof raw === 'object') {
+    if (raw && typeof raw === "object") {
       Object.entries(raw).forEach(([key, value]) => {
-        if (typeof value === 'boolean') {
+        if (typeof value === "boolean") {
           resolved[key] = value;
         }
       });
     }
-    return INTEGRATION_META.reduce<Record<IntegrationId, boolean>>((acc, meta) => {
-      acc[meta.id] = resolved[meta.id] ?? meta.defaultAutoSync;
-      return acc;
-    }, {} as Record<IntegrationId, boolean>);
+    return INTEGRATION_META.reduce<Record<IntegrationId, boolean>>(
+      (acc, meta) => {
+        acc[meta.id] = resolved[meta.id] ?? meta.defaultAutoSync;
+        return acc;
+      },
+      {} as Record<IntegrationId, boolean>,
+    );
   }, [integrationSettings?.syncMappings]);
 
   const integrationMetaById = useMemo(
-    () => Object.fromEntries(INTEGRATION_META.map(meta => [meta.id, meta])),
+    () => Object.fromEntries(INTEGRATION_META.map((meta) => [meta.id, meta])),
     [],
   );
 
   const integrationCards = useMemo(
     () =>
-      INTEGRATION_META.map(meta => {
+      INTEGRATION_META.map((meta) => {
         const provider = integrationSettings?.providers?.[meta.id];
         const connection = integrationSettings?.connections?.find(
-          candidate => candidate.provider === meta.id,
+          (candidate) => candidate.provider === meta.id,
         );
-        const status = (provider?.status ?? 'disconnected') as keyof typeof statusStyleMap;
-        const lastSync = connection?.lastSyncedAt ?? integrationSettings?.lastSyncedAt ?? null;
+        const status = (provider?.status ??
+          "disconnected") as keyof typeof statusStyleMap;
+        const lastSync =
+          connection?.lastSyncedAt ?? integrationSettings?.lastSyncedAt ?? null;
 
         return {
           ...meta,
@@ -166,11 +185,14 @@ export function ManagerFinancialOverview() {
 
   const chartData = useMemo(
     () =>
-      metrics.profitLossTrend.map(point => ({
+      metrics.profitLossTrend.map((point) => ({
         month: point.monthLabel,
         revenue: point.revenue,
         costs:
-          point.payroll + point.operatingExpenses + point.wasteImpact + point.inventoryPurchases,
+          point.payroll +
+          point.operatingExpenses +
+          point.wasteImpact +
+          point.inventoryPurchases,
         profit: point.profit,
       })),
     [metrics.profitLossTrend],
@@ -199,17 +221,17 @@ export function ManagerFinancialOverview() {
       });
 
       toast({
-        title: value ? 'Auto-sync enabled' : 'Auto-sync disabled',
+        title: value ? "Auto-sync enabled" : "Auto-sync disabled",
         description: `Integration '${integrationMetaById[id]?.name ?? id}' will ${
-          value ? 'sync automatically' : 'require manual sync'
+          value ? "sync automatically" : "require manual sync"
         } going forward.`,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : "Unknown error";
       toast({
-        title: 'Unable to update auto-sync',
+        title: "Unable to update auto-sync",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setAutoSyncBusy(null);
@@ -221,7 +243,7 @@ export function ManagerFinancialOverview() {
     setSyncingIntegration(id);
     const providerConfig = integrationSettings.providers?.[id];
     const existingConnection = integrationSettings.connections?.find(
-      connection => connection.provider === id,
+      (connection) => connection.provider === id,
     );
     const nowIso = new Date().toISOString();
     const connectionId = existingConnection?.id ?? getUuid();
@@ -230,16 +252,16 @@ export function ManagerFinancialOverview() {
       await updateIntegrations({
         providers: {
           [id]: {
-            status: 'connected',
-            authType: providerConfig?.authType ?? 'api_key',
+            status: "connected",
+            authType: providerConfig?.authType ?? "api_key",
           },
         },
         connections: [
           {
             id: connectionId,
             provider: id,
-            status: 'connected',
-            authType: providerConfig?.authType ?? 'api_key',
+            status: "connected",
+            authType: providerConfig?.authType ?? "api_key",
             connectedAt: existingConnection?.connectedAt ?? nowIso,
             lastSyncedAt: nowIso,
             metadata: {
@@ -258,15 +280,15 @@ export function ManagerFinancialOverview() {
       });
 
       toast({
-        title: 'Sync started',
+        title: "Sync started",
         description: `Triggered data synchronization for ${integrationMetaById[id]?.name ?? id}.`,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : "Unknown error";
       toast({
-        title: 'Sync failed',
+        title: "Sync failed",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setSyncingIntegration(null);
@@ -280,17 +302,20 @@ export function ManagerFinancialOverview() {
       await metrics.refresh();
 
       const created: string[] = [];
-      if (result.paymentsInserted) created.push(`${result.paymentsInserted} payments`);
-      if (result.expensesInserted) created.push(`${result.expensesInserted} expenses`);
-      if (result.transactionsInserted) created.push(`${result.transactionsInserted} inventory transactions`);
+      if (result.paymentsInserted)
+        created.push(`${result.paymentsInserted} payments`);
+      if (result.expensesInserted)
+        created.push(`${result.expensesInserted} expenses`);
+      if (result.transactionsInserted)
+        created.push(`${result.transactionsInserted} inventory transactions`);
 
       const parts: string[] = [];
       if (result.alreadySeeded && created.length === 0) {
-        parts.push('Demo financial records already exist for this workspace.');
+        parts.push("Demo financial records already exist for this workspace.");
       } else if (created.length) {
-        parts.push(`Inserted ${created.join(', ')}.`);
+        parts.push(`Inserted ${created.join(", ")}.`);
       } else {
-        parts.push('No financial data was added.');
+        parts.push("No financial data was added.");
       }
 
       if (result.skippedTransactions) {
@@ -298,15 +323,15 @@ export function ManagerFinancialOverview() {
       }
 
       toast({
-        title: 'Demo financial data ready',
-        description: parts.join(' '),
+        title: "Demo financial data ready",
+        description: parts.join(" "),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : "Unknown error";
       toast({
-        title: 'Unable to generate demo data',
+        title: "Unable to generate demo data",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setSeeding(false);
@@ -338,7 +363,8 @@ export function ManagerFinancialOverview() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Prefill demo payroll, expenses, and inventory transactions to validate analytics.
+                Prefill demo payroll, expenses, and inventory transactions to
+                validate analytics.
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -377,7 +403,9 @@ export function ManagerFinancialOverview() {
                 <Building2 className="h-4 w-4 text-primary" />
                 Operating Spend
               </CardTitle>
-              <CardDescription>Expenses & reimbursements (30 days)</CardDescription>
+              <CardDescription>
+                Expenses & reimbursements (30 days)
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -402,7 +430,9 @@ export function ManagerFinancialOverview() {
                 <Factory className="h-4 w-4 text-primary" />
                 Labor & Waste
               </CardTitle>
-              <CardDescription>Labor cost this week & waste impact</CardDescription>
+              <CardDescription>
+                Labor cost this week & waste impact
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -427,7 +457,9 @@ export function ManagerFinancialOverview() {
                 <Store className="h-4 w-4 text-primary" />
                 Sales vs Purchasing
               </CardTitle>
-              <CardDescription>Inventory transactions (30 days)</CardDescription>
+              <CardDescription>
+                Inventory transactions (30 days)
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -437,14 +469,14 @@ export function ManagerFinancialOverview() {
               </span>
               <Badge
                 variant="outline"
-                className={`text-xs ${inventoryTrendPositive ? 'text-emerald-600' : 'text-rose-600'}`}
+                className={`text-xs ${inventoryTrendPositive ? "text-emerald-600" : "text-rose-600"}`}
               >
                 {inventoryTrendPositive ? (
                   <TrendingUp className="mr-1 h-3 w-3" />
                 ) : (
                   <TrendingDown className="mr-1 h-3 w-3" />
                 )}
-                Net {inventoryTrendPositive ? '+' : ''}
+                Net {inventoryTrendPositive ? "+" : ""}
                 {netInventory.toFixed(2)}
               </Badge>
             </div>
@@ -460,8 +492,12 @@ export function ManagerFinancialOverview() {
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-base font-semibold">Profit & Loss Overview</CardTitle>
-              <CardDescription>Combines revenue, labor, operating, and waste costs</CardDescription>
+              <CardTitle className="text-base font-semibold">
+                Profit & Loss Overview
+              </CardTitle>
+              <CardDescription>
+                Combines revenue, labor, operating, and waste costs
+              </CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
               Forecast next month ${metrics.profitForecastNextMonth.toFixed(2)}
@@ -475,9 +511,10 @@ export function ManagerFinancialOverview() {
               <XAxis dataKey="month" />
               <YAxis />
               <RechartsTooltip
-                formatter={(value: number, name: string) =>
-                  [`$${value.toFixed(2)}`, name.toUpperCase()]
-                }
+                formatter={(value: number, name: string) => [
+                  `$${value.toFixed(2)}`,
+                  name.toUpperCase(),
+                ]}
               />
               <Area
                 type="monotone"
@@ -486,8 +523,19 @@ export function ManagerFinancialOverview() {
                 stroke="#2563eb"
                 strokeWidth={2}
               />
-              <Bar dataKey="costs" barSize={24} fill="#f97316cc" radius={[6, 6, 0, 0]} />
-              <Line type="monotone" dataKey="profit" stroke="#16a34a" strokeWidth={2} dot />
+              <Bar
+                dataKey="costs"
+                barSize={24}
+                fill="#f97316cc"
+                radius={[6, 6, 0, 0]}
+              />
+              <Line
+                type="monotone"
+                dataKey="profit"
+                stroke="#16a34a"
+                strokeWidth={2}
+                dot
+              />
             </ComposedChart>
           </ResponsiveContainer>
         </CardContent>
@@ -496,15 +544,19 @@ export function ManagerFinancialOverview() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">Expense Breakdown</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Expense Breakdown
+            </CardTitle>
             <CardDescription>
               Shipping, utilities, purchasing, and other tracked categories
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {metrics.expenseBreakdown.slice(0, 6).map(item => {
+            {metrics.expenseBreakdown.slice(0, 6).map((item) => {
               const ratio =
-                totalExpenseBreakdown === 0 ? 0 : (item.total / totalExpenseBreakdown) * 100;
+                totalExpenseBreakdown === 0
+                  ? 0
+                  : (item.total / totalExpenseBreakdown) * 100;
               return (
                 <div key={item.label} className="space-y-2">
                   <div className="flex items-center justify-between text-sm font-medium">
@@ -525,8 +577,12 @@ export function ManagerFinancialOverview() {
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">Approvals Queue</CardTitle>
-            <CardDescription>Manage expense and payroll approvals for your team</CardDescription>
+            <CardTitle className="text-base font-semibold">
+              Approvals Queue
+            </CardTitle>
+            <CardDescription>
+              Manage expense and payroll approvals for your team
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-dashed border-muted p-3">
@@ -544,7 +600,8 @@ export function ManagerFinancialOverview() {
               <div>
                 <p className="text-sm font-medium">Expense Approvals</p>
                 <p className="text-sm text-muted-foreground">
-                  ${metrics.pendingExpenseTotal.toFixed(2)} pending reimbursement
+                  ${metrics.pendingExpenseTotal.toFixed(2)} pending
+                  reimbursement
                 </p>
               </div>
               <Badge variant="secondary" className="text-xs">
@@ -572,7 +629,9 @@ export function ManagerFinancialOverview() {
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-base font-semibold">External Integrations</CardTitle>
+              <CardTitle className="text-base font-semibold">
+                External Integrations
+              </CardTitle>
               <CardDescription>
                 Automate synchronization with Toast, QuickBooks, and MarketMan
               </CardDescription>
@@ -580,13 +639,13 @@ export function ManagerFinancialOverview() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {integrationCards.map(integration => {
+          {integrationCards.map((integration) => {
             const statusStyle =
               statusStyleMap[integration.status] ?? statusStyleMap.disconnected;
             const lastSynced =
               integration.lastSync != null
                 ? new Date(integration.lastSync).toLocaleString()
-                : 'No sync history yet';
+                : "No sync history yet";
 
             return (
               <div
@@ -595,20 +654,31 @@ export function ManagerFinancialOverview() {
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-sm font-semibold">{integration.name}</h3>
-                    <Badge className={`text-xs ${statusStyle.className}`} variant="outline">
+                    <h3 className="text-sm font-semibold">
+                      {integration.name}
+                    </h3>
+                    <Badge
+                      className={`text-xs ${statusStyle.className}`}
+                      variant="outline"
+                    >
                       {statusStyle.label}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {integration.description}
+                  </p>
                   <p className="text-xs text-muted-foreground">{lastSynced}</p>
                 </div>
                 <div className="flex flex-col gap-3 md:w-56">
                   <div className="flex items-center justify-between rounded-md border px-3 py-2">
-                    <span className="text-xs font-medium text-muted-foreground">Auto-sync</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Auto-sync
+                    </span>
                     <Switch
                       checked={integration.autoSync}
-                      onCheckedChange={value => handleToggleAutoSync(integration.id, value)}
+                      onCheckedChange={(value) =>
+                        handleToggleAutoSync(integration.id, value)
+                      }
                       disabled={
                         !canEdit ||
                         autoSyncBusy === integration.id ||

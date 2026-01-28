@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { AICopilotSettings } from '@/types/system-settings';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { AICopilotSettings } from "@/types/system-settings";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useAICopilotSettings(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
@@ -8,7 +8,7 @@ export function useAICopilotSettings(source: SystemSettingsHook) {
     enabled: false,
     scopes: [],
     restrictedModules: [],
-    automationLevel: 'suggestion' as AICopilotSettings['automationLevel'],
+    automationLevel: "suggestion" as AICopilotSettings["automationLevel"],
     lastAuditAt: null,
   };
 
@@ -45,7 +45,7 @@ export function useAICopilotSettings(source: SystemSettingsHook) {
   }, []);
 
   const updateAutomationLevel = useCallback(
-    (level: AICopilotSettings['automationLevel']) => {
+    (level: AICopilotSettings["automationLevel"]) => {
       setState((prev) => ({ ...prev, automationLevel: level }));
     },
     [],
@@ -55,7 +55,10 @@ export function useAICopilotSettings(source: SystemSettingsHook) {
     setState((prev) => ({ ...prev, enabled: next }));
   }, []);
 
-  const dirty = useMemo(() => JSON.stringify(state) !== JSON.stringify(base), [state, base]);
+  const dirty = useMemo(
+    () => JSON.stringify(state) !== JSON.stringify(base),
+    [state, base],
+  );
 
   const save = useCallback(async () => {
     if (!settings || !dirty) return;

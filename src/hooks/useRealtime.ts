@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { useEffect, useRef, useState } from "react";
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
-type PostgresEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+type PostgresEvent = "INSERT" | "UPDATE" | "DELETE" | "*";
 
 export interface RealtimeEventConfig {
   event: PostgresEvent;
@@ -45,44 +48,49 @@ export function useRealtime<T = Record<string, unknown>>({
     try {
       events.forEach((eventConfig) => {
         realtimeChannel.on(
-          'postgres_changes',
+          "postgres_changes",
           {
             event: eventConfig.event,
-            schema: eventConfig.schema ?? 'public',
+            schema: eventConfig.schema ?? "public",
             table: eventConfig.table,
             filter: eventConfig.filter,
           },
           (payload) => {
             // Phase 5: Error handling for payload processing
             try {
-              handlerRef.current?.(payload as RealtimePostgresChangesPayload<T>);
+              handlerRef.current?.(
+                payload as RealtimePostgresChangesPayload<T>,
+              );
             } catch (error) {
-              logger.error('[useRealtime] Error processing payload', { 
-                error, 
-                channel, 
+              logger.error("[useRealtime] Error processing payload", {
+                error,
+                channel,
                 table: eventConfig.table,
-                tags: ['error', 'realtime'] 
+                tags: ["error", "realtime"],
               });
             }
           },
         );
       });
     } catch (error) {
-      logger.error('[useRealtime] Failed to register event handlers', { error, tags: ['error'] });
+      logger.error("[useRealtime] Failed to register event handlers", {
+        error,
+        tags: ["error"],
+      });
     }
 
     realtimeChannel.subscribe((status, err) => {
       // Phase 5: Error handling for subscription failures
       if (err) {
-        logger.error('[useRealtime] Subscription error', { 
-          error: err, 
-          channel, 
-          tags: ['error', 'realtime'] 
+        logger.error("[useRealtime] Subscription error", {
+          error: err,
+          channel,
+          tags: ["error", "realtime"],
         });
         setSubscribed(false);
         return;
       }
-      setSubscribed(status === 'SUBSCRIBED');
+      setSubscribed(status === "SUBSCRIBED");
     });
 
     return () => {

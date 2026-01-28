@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Check, X, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, X, CheckCircle, XCircle } from "lucide-react";
 
 interface YesNoFieldProps {
   label: string;
   description?: string;
   value?: boolean | null;
   required?: boolean;
-  variant?: 'switch' | 'buttons' | 'cards';
+  variant?: "switch" | "buttons" | "cards";
   yesLabel?: string;
   noLabel?: string;
   onChange?: (value: boolean | null) => void;
@@ -22,11 +22,11 @@ export function YesNoField({
   description,
   value = null,
   required = false,
-  variant = 'switch',
-  yesLabel = 'Yes',
-  noLabel = 'No',
+  variant = "switch",
+  yesLabel = "Yes",
+  noLabel = "No",
   onChange,
-  className = ""
+  className = "",
 }: YesNoFieldProps) {
   const [currentValue, setCurrentValue] = useState<boolean | null>(value);
 
@@ -43,7 +43,11 @@ export function YesNoField({
         onCheckedChange={(checked) => handleChange(checked)}
       />
       <Label htmlFor={`yesno-${label}`} className="text-sm">
-        {currentValue === true ? yesLabel : currentValue === false ? noLabel : 'Select an option'}
+        {currentValue === true
+          ? yesLabel
+          : currentValue === false
+            ? noLabel
+            : "Select an option"}
       </Label>
     </div>
   );
@@ -76,33 +80,33 @@ export function YesNoField({
       <Card
         className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
           currentValue === true
-            ? 'ring-2 ring-primary bg-primary/5'
-            : 'hover:bg-muted/50'
+            ? "ring-2 ring-primary bg-primary/5"
+            : "hover:bg-muted/50"
         }`}
         onClick={() => handleChange(true)}
       >
         <CardContent className="p-4 text-center">
           <CheckCircle
             className={`h-8 w-8 mx-auto mb-2 ${
-              currentValue === true ? 'text-primary' : 'text-muted-foreground'
+              currentValue === true ? "text-primary" : "text-muted-foreground"
             }`}
           />
           <span className="font-medium">{yesLabel}</span>
         </CardContent>
       </Card>
-      
+
       <Card
         className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
           currentValue === false
-            ? 'ring-2 ring-primary bg-primary/5'
-            : 'hover:bg-muted/50'
+            ? "ring-2 ring-primary bg-primary/5"
+            : "hover:bg-muted/50"
         }`}
         onClick={() => handleChange(false)}
       >
         <CardContent className="p-4 text-center">
           <XCircle
             className={`h-8 w-8 mx-auto mb-2 ${
-              currentValue === false ? 'text-primary' : 'text-muted-foreground'
+              currentValue === false ? "text-primary" : "text-muted-foreground"
             }`}
           />
           <span className="font-medium">{noLabel}</span>
@@ -123,9 +127,9 @@ export function YesNoField({
       )}
 
       <div className="mt-3">
-        {variant === 'switch' && renderSwitch()}
-        {variant === 'buttons' && renderButtons()}
-        {variant === 'cards' && renderCards()}
+        {variant === "switch" && renderSwitch()}
+        {variant === "buttons" && renderButtons()}
+        {variant === "cards" && renderCards()}
       </div>
 
       {/* Clear selection option for non-required fields */}
@@ -148,8 +152,8 @@ export function YesNoField({
 export function YesNoFieldPreview({
   label = "Do you agree to the terms?",
   description = "Please select yes or no",
-  variant = 'cards',
-  className = ""
+  variant = "cards",
+  className = "",
 }: Partial<YesNoFieldProps>) {
   return (
     <YesNoField

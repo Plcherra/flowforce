@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calculator, Info, Plus, X, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calculator, Info, Plus, X, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface FormulaFieldProps {
   label: string;
@@ -23,7 +33,7 @@ interface FormulaFieldProps {
 }
 
 interface FormulaElement {
-  type: 'field' | 'operator' | 'number';
+  type: "field" | "operator" | "number";
   value: string;
   fieldName?: string;
   multiplier?: number;
@@ -40,7 +50,7 @@ export function FormulaField({
   onChange,
   onFormulaChange,
   isBuilding = false,
-  className = ""
+  className = "",
 }: FormulaFieldProps) {
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
@@ -48,17 +58,23 @@ export function FormulaField({
   const [showBuilder, setShowBuilder] = useState(isBuilding);
 
   // Simple formula evaluation function
-  const evaluateFormula = (expr: string, data: Record<string, any>): number | null => {
+  const evaluateFormula = (
+    expr: string,
+    data: Record<string, any>,
+  ): number | null => {
     try {
       let processedFormula = expr;
-      
+
       // Replace field references with actual values
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         const value = data[key];
-        if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)))) {
+        if (
+          typeof value === "number" ||
+          (typeof value === "string" && !isNaN(Number(value)))
+        ) {
           processedFormula = processedFormula.replace(
-            new RegExp(`\\{${key}\\}`, 'g'), 
-            String(Number(value))
+            new RegExp(`\\{${key}\\}`, "g"),
+            String(Number(value)),
           );
         }
       });
@@ -69,9 +85,11 @@ export function FormulaField({
       }
 
       // Use Function constructor for safe evaluation (limited to arithmetic)
-      const result = new Function(`"use strict"; return (${processedFormula})`)();
-      
-      if (typeof result !== 'number' || !isFinite(result)) {
+      const result = new Function(
+        `"use strict"; return (${processedFormula})`,
+      )();
+
+      if (typeof result !== "number" || !isFinite(result)) {
         throw new Error("Formula result is not a valid number");
       }
 
@@ -105,64 +123,68 @@ export function FormulaField({
 
   const parseFormulaToElements = (formulaStr: string) => {
     const elements: FormulaElement[] = [];
-    const tokens = formulaStr.split(/(\+|\-|\*|\/|\(|\))/).filter(token => token.trim());
-    
-    tokens.forEach(token => {
+    const tokens = formulaStr
+      .split(/(\+|\-|\*|\/|\(|\))/)
+      .filter((token) => token.trim());
+
+    tokens.forEach((token) => {
       const trimmed = token.trim();
       if (trimmed.match(/^\{.*\}$/)) {
         // Field reference
         const fieldName = trimmed.slice(1, -1);
-        const field = availableFields.find(f => f.name === fieldName);
+        const field = availableFields.find((f) => f.name === fieldName);
         elements.push({
-          type: 'field',
+          type: "field",
           value: field?.label || fieldName,
-          fieldName: fieldName
+          fieldName: fieldName,
         });
       } else if (trimmed.match(/^[\+\-\*\/]$/)) {
-        elements.push({ type: 'operator', value: trimmed });
+        elements.push({ type: "operator", value: trimmed });
       } else if (trimmed.match(/^\d+(\.\d+)?$/)) {
-        elements.push({ type: 'number', value: trimmed });
+        elements.push({ type: "number", value: trimmed });
       }
     });
-    
+
     setFormulaElements(elements);
   };
 
   const buildFormulaFromElements = (elements: FormulaElement[]): string => {
-    return elements.map(element => {
-      if (element.type === 'field') {
-        if (element.multiplier) {
-          return `{${element.fieldName}} * ${element.multiplier}`;
+    return elements
+      .map((element) => {
+        if (element.type === "field") {
+          if (element.multiplier) {
+            return `{${element.fieldName}} * ${element.multiplier}`;
+          }
+          return `{${element.fieldName}}`;
         }
-        return `{${element.fieldName}}`;
-      }
-      return element.value;
-    }).join(' ');
+        return element.value;
+      })
+      .join(" ");
   };
 
   const addFieldToFormula = (fieldName: string, multiplier?: number) => {
-    const field = availableFields.find(f => f.name === fieldName);
+    const field = availableFields.find((f) => f.name === fieldName);
     if (!field) return;
 
     const newElements: FormulaElement[] = [...formulaElements];
-    
+
     // Add operator if not empty
     if (newElements.length > 0) {
-      newElements.push({ type: 'operator', value: '+' });
+      newElements.push({ type: "operator", value: "+" });
     }
 
     // Add field
     newElements.push({
-      type: 'field',
+      type: "field",
       value: field.label,
       fieldName: fieldName,
-      multiplier: multiplier
+      multiplier: multiplier,
     });
 
     // If multiplier is provided, add multiplication
     if (multiplier) {
-      newElements.push({ type: 'operator', value: '*' });
-      newElements.push({ type: 'number', value: multiplier.toString() });
+      newElements.push({ type: "operator", value: "*" });
+      newElements.push({ type: "number", value: multiplier.toString() });
     }
 
     setFormulaElements(newElements);
@@ -178,17 +200,17 @@ export function FormulaField({
   };
 
   const cashDenominations = [
-    { label: '$100 Bills', value: 100 },
-    { label: '$50 Bills', value: 50 },
-    { label: '$20 Bills', value: 20 },
-    { label: '$10 Bills', value: 10 },
-    { label: '$5 Bills', value: 5 },
-    { label: '$1 Bills', value: 1 },
-    { label: '$1 Coins', value: 1 },
-    { label: '$0.25 Coins', value: 0.25 },
-    { label: '$0.10 Coins', value: 0.10 },
-    { label: '$0.05 Coins', value: 0.05 },
-    { label: '$0.01 Coins', value: 0.01 }
+    { label: "$100 Bills", value: 100 },
+    { label: "$50 Bills", value: 50 },
+    { label: "$20 Bills", value: 20 },
+    { label: "$10 Bills", value: 10 },
+    { label: "$5 Bills", value: 5 },
+    { label: "$1 Bills", value: 1 },
+    { label: "$1 Coins", value: 1 },
+    { label: "$0.25 Coins", value: 0.25 },
+    { label: "$0.10 Coins", value: 0.1 },
+    { label: "$0.05 Coins", value: 0.05 },
+    { label: "$0.01 Coins", value: 0.01 },
   ];
 
   const getFormulaHelp = () => (
@@ -205,7 +227,9 @@ export function FormulaField({
       </div>
       <div>
         <strong>Reference other fields:</strong>
-        <p className="mt-1">Use {`{field_name}`} to reference values from other form fields.</p>
+        <p className="mt-1">
+          Use {`{field_name}`} to reference values from other form fields.
+        </p>
       </div>
       <div>
         <strong>Example:</strong>
@@ -232,9 +256,7 @@ export function FormulaField({
               <Info className="h-3 w-3" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80">
-            {getFormulaHelp()}
-          </PopoverContent>
+          <PopoverContent className="w-80">{getFormulaHelp()}</PopoverContent>
         </Popover>
         {isBuilding && (
           <Button
@@ -244,11 +266,11 @@ export function FormulaField({
             className="ml-auto"
           >
             <Calculator className="h-3 w-3 mr-1" />
-            {showBuilder ? 'Hide' : 'Show'} Builder
+            {showBuilder ? "Hide" : "Show"} Builder
           </Button>
         )}
       </div>
-      
+
       {description && (
         <p className="text-sm text-muted-foreground mb-3">{description}</p>
       )}
@@ -261,7 +283,9 @@ export function FormulaField({
           <CardContent className="space-y-3">
             {/* Quick Cash Counting Templates */}
             <div>
-              <Label className="text-xs text-muted-foreground">Quick Templates</Label>
+              <Label className="text-xs text-muted-foreground">
+                Quick Templates
+              </Label>
               <div className="flex flex-wrap gap-1 mt-1">
                 <Button
                   variant="outline"
@@ -269,7 +293,10 @@ export function FormulaField({
                   onClick={() => {
                     setFormulaElements([]);
                     cashDenominations.forEach((denom, index) => {
-                      const fieldName = denom.label.toLowerCase().replace(/[\$\s\.]/g, '_').replace('__', '_');
+                      const fieldName = denom.label
+                        .toLowerCase()
+                        .replace(/[\$\s\.]/g, "_")
+                        .replace("__", "_");
                       if (index > 0) {
                         addFieldToFormula(fieldName, denom.value);
                       } else {
@@ -287,16 +314,20 @@ export function FormulaField({
             <div>
               <Label className="text-xs text-muted-foreground">Add Field</Label>
               <div className="flex gap-2 mt-1">
-                <Select onValueChange={(fieldName) => addFieldToFormula(fieldName)}>
+                <Select
+                  onValueChange={(fieldName) => addFieldToFormula(fieldName)}
+                >
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select a field" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableFields.filter(f => f.type === 'number').map(field => (
-                      <SelectItem key={field.name} value={field.name}>
-                        {field.label}
-                      </SelectItem>
-                    ))}
+                    {availableFields
+                      .filter((f) => f.type === "number")
+                      .map((field) => (
+                        <SelectItem key={field.name} value={field.name}>
+                          {field.label}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -304,7 +335,9 @@ export function FormulaField({
 
             {/* Cash Denominations */}
             <div>
-              <Label className="text-xs text-muted-foreground">Add Cash Denomination</Label>
+              <Label className="text-xs text-muted-foreground">
+                Add Cash Denomination
+              </Label>
               <div className="grid grid-cols-3 gap-1 mt-1">
                 {cashDenominations.map((denom) => (
                   <Button
@@ -312,7 +345,10 @@ export function FormulaField({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const fieldName = denom.label.toLowerCase().replace(/[\$\s\.]/g, '_').replace('__', '_');
+                      const fieldName = denom.label
+                        .toLowerCase()
+                        .replace(/[\$\s\.]/g, "_")
+                        .replace("__", "_");
                       addFieldToFormula(fieldName, denom.value);
                     }}
                     className="text-xs h-8"
@@ -326,12 +362,16 @@ export function FormulaField({
             {/* Formula Preview */}
             {formulaElements.length > 0 && (
               <div>
-                <Label className="text-xs text-muted-foreground">Formula Preview</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Formula Preview
+                </Label>
                 <div className="flex flex-wrap gap-1 mt-1 p-2 bg-muted/30 rounded">
                   {formulaElements.map((element, index) => (
                     <div key={index} className="flex items-center">
-                      <Badge 
-                        variant={element.type === 'field' ? 'default' : 'secondary'}
+                      <Badge
+                        variant={
+                          element.type === "field" ? "default" : "secondary"
+                        }
                         className="relative group"
                       >
                         {element.value}
@@ -369,9 +409,7 @@ export function FormulaField({
         </div>
       </div>
 
-      {error && (
-        <p className="text-sm text-destructive mt-1">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive mt-1">{error}</p>}
 
       {formula && !showBuilder && (
         <Card className="mt-2 bg-muted/30">
@@ -390,13 +428,13 @@ export function FormulaField({
 export function FormulaFieldPreview({
   label = "Total Cash Count",
   description = "Automatically calculated based on cash denominations",
-  className = ""
+  className = "",
 }: Partial<FormulaFieldProps>) {
   const sampleFields = [
-    { label: '$20 Bills', name: 'twenty_bills', type: 'number' },
-    { label: '$10 Bills', name: 'ten_bills', type: 'number' },
-    { label: '$5 Bills', name: 'five_bills', type: 'number' },
-    { label: '$1 Bills', name: 'one_bills', type: 'number' }
+    { label: "$20 Bills", name: "twenty_bills", type: "number" },
+    { label: "$10 Bills", name: "ten_bills", type: "number" },
+    { label: "$5 Bills", name: "five_bills", type: "number" },
+    { label: "$1 Bills", name: "one_bills", type: "number" },
   ];
 
   return (

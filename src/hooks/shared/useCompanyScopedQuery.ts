@@ -1,20 +1,20 @@
 /**
  * Shared query utilities for company-scoped queries
- * 
+ *
  * Phase 7: Code Duplication - Provides reusable query patterns to reduce duplication
- * 
+ *
  * Common patterns:
  * - Company-scoped queries (`.eq('company_id', companyId)`)
  * - User-scoped queries (`.eq('user_id', userId)`)
  * - Date-range queries (`.gte()`, `.lte()`)
  */
 
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { useProfile } from '../useProfile';
-import { useAuth } from '../useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { useProfile } from "../useProfile";
+import { useAuth } from "../useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type CompanyQueryBuilder<T> = (
   client: SupabaseClient,
@@ -29,7 +29,9 @@ interface UseCompanyScopedQueryOptions<TData> {
   staleTime?: number;
   gcTime?: number;
   companyId?: string | null;
-  additionalFilters?: (query: PostgrestFilterBuilder<any, any, T[], unknown>) => PostgrestFilterBuilder<any, any, T[], unknown>;
+  additionalFilters?: (
+    query: PostgrestFilterBuilder<any, any, T[], unknown>,
+  ) => PostgrestFilterBuilder<any, any, T[], unknown>;
   orderBy?: { column: string; ascending?: boolean };
 }
 
@@ -38,10 +40,10 @@ const DEFAULT_GC_TIME = 10 * 60 * 1000; // 10 minutes
 
 /**
  * useCompanyScopedQuery - Hook for company-scoped Supabase queries
- * 
+ *
  * Automatically adds `.eq('company_id', companyId)` filter and provides
  * consistent caching defaults. Reduces code duplication across hooks.
- * 
+ *
  * @example
  * ```typescript
  * const { data, isLoading } = useCompanyScopedQuery<Employee>({
@@ -55,7 +57,7 @@ const DEFAULT_GC_TIME = 10 * 60 * 1000; // 10 minutes
 export function useCompanyScopedQuery<TData>({
   queryKey,
   table,
-  select = '*',
+  select = "*",
   enabled = true,
   staleTime = DEFAULT_STALE_TIME,
   gcTime = DEFAULT_GC_TIME,
@@ -64,7 +66,8 @@ export function useCompanyScopedQuery<TData>({
   orderBy,
 }: UseCompanyScopedQueryOptions<TData>) {
   const { profile } = useProfile();
-  const companyId = companyIdOverride ?? profile?.companyId ?? profile?.company_id ?? null;
+  const companyId =
+    companyIdOverride ?? profile?.companyId ?? profile?.company_id ?? null;
 
   return useQuery<TData[]>({
     queryKey: [...queryKey, companyId],
@@ -73,20 +76,22 @@ export function useCompanyScopedQuery<TData>({
     gcTime,
     queryFn: async () => {
       if (!companyId) {
-        throw new Error('Company ID is required');
+        throw new Error("Company ID is required");
       }
 
       let query = supabase
         .from(table)
         .select(select)
-        .eq('company_id', companyId);
+        .eq("company_id", companyId);
 
       if (additionalFilters) {
         query = additionalFilters(query);
       }
 
       if (orderBy) {
-        query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+        query = query.order(orderBy.column, {
+          ascending: orderBy.ascending ?? true,
+        });
       }
 
       const { data, error } = await query;
@@ -102,9 +107,9 @@ export function useCompanyScopedQuery<TData>({
 
 /**
  * useUserScopedQuery - Hook for user-scoped Supabase queries
- * 
+ *
  * Automatically adds user filter (`.eq('user_id', userId)` or `.eq('created_by', userId)`).
- * 
+ *
  * @example
  * ```typescript
  * const { data, isLoading } = useUserScopedQuery<TimeEntry>({
@@ -117,8 +122,8 @@ export function useCompanyScopedQuery<TData>({
 export function useUserScopedQuery<TData>({
   queryKey,
   table,
-  select = '*',
-  userIdField = 'user_id',
+  select = "*",
+  userIdField = "user_id",
   enabled = true,
   staleTime = DEFAULT_STALE_TIME,
   gcTime = DEFAULT_GC_TIME,
@@ -129,12 +134,14 @@ export function useUserScopedQuery<TData>({
   queryKey: readonly unknown[];
   table: string;
   select?: string;
-  userIdField?: 'user_id' | 'created_by' | 'sender_id' | 'requester_id';
+  userIdField?: "user_id" | "created_by" | "sender_id" | "requester_id";
   enabled?: boolean;
   staleTime?: number;
   gcTime?: number;
   userId?: string | null;
-  additionalFilters?: (query: PostgrestFilterBuilder<any, any, T[], unknown>) => PostgrestFilterBuilder<any, any, T[], unknown>;
+  additionalFilters?: (
+    query: PostgrestFilterBuilder<any, any, T[], unknown>,
+  ) => PostgrestFilterBuilder<any, any, T[], unknown>;
   orderBy?: { column: string; ascending?: boolean };
 }) {
   // Phase 7: Use useAuth hook properly
@@ -148,20 +155,19 @@ export function useUserScopedQuery<TData>({
     gcTime,
     queryFn: async () => {
       if (!userId) {
-        throw new Error('User ID is required');
+        throw new Error("User ID is required");
       }
 
-      let query = supabase
-        .from(table)
-        .select(select)
-        .eq(userIdField, userId);
+      let query = supabase.from(table).select(select).eq(userIdField, userId);
 
       if (additionalFilters) {
         query = additionalFilters(query);
       }
 
       if (orderBy) {
-        query = query.order(orderBy.column, { ascending: orderBy.ascending ?? true });
+        query = query.order(orderBy.column, {
+          ascending: orderBy.ascending ?? true,
+        });
       }
 
       const { data, error } = await query;

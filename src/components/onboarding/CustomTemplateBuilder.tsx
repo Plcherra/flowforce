@@ -1,25 +1,42 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Palette, 
-  Layout, 
-  Save, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import {
+  Palette,
+  Layout,
+  Save,
   Eye,
   Building2,
   Users,
-  Settings
-} from 'lucide-react';
-import { CustomTemplate, CustomBranding, CustomSection, CustomRole } from '@/types/customTemplate';
-import BrandingCustomizer from './BrandingCustomizer';
-import SectionBuilder from './SectionBuilder';
+  Settings,
+} from "lucide-react";
+import {
+  CustomTemplate,
+  CustomBranding,
+  CustomSection,
+  CustomRole,
+} from "@/types/customTemplate";
+import BrandingCustomizer from "./BrandingCustomizer";
+import SectionBuilder from "./SectionBuilder";
 
 interface CustomTemplateBuilderProps {
   template: Partial<CustomTemplate>;
@@ -29,27 +46,39 @@ interface CustomTemplateBuilderProps {
 }
 
 const industries = [
-  'Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing',
-  'Education', 'Real Estate', 'Legal', 'Consulting', 'Non-profit',
-  'Hospitality', 'Transportation', 'Media', 'Government', 'Other'
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Retail",
+  "Manufacturing",
+  "Education",
+  "Real Estate",
+  "Legal",
+  "Consulting",
+  "Non-profit",
+  "Hospitality",
+  "Transportation",
+  "Media",
+  "Government",
+  "Other",
 ];
 
 const companySizes = [
-  '1-10 employees',
-  '11-50 employees', 
-  '51-200 employees',
-  '201-500 employees',
-  '501-1000 employees',
-  '1000+ employees'
+  "1-10 employees",
+  "11-50 employees",
+  "51-200 employees",
+  "201-500 employees",
+  "501-1000 employees",
+  "1000+ employees",
 ];
 
-export default function CustomTemplateBuilder({ 
-  template, 
-  onTemplateChange, 
-  onSave, 
-  onPreview 
+export default function CustomTemplateBuilder({
+  template,
+  onTemplateChange,
+  onSave,
+  onPreview,
 }: CustomTemplateBuilderProps) {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState("basic");
 
   const updateTemplate = (updates: Partial<CustomTemplate>) => {
     onTemplateChange({ ...template, ...updates });
@@ -67,7 +96,7 @@ export default function CustomTemplateBuilder({
     const currentSizes = template.companySize || [];
     const newSizes = checked
       ? [...currentSizes, size]
-      : currentSizes.filter(s => s !== size);
+      : currentSizes.filter((s) => s !== size);
     updateTemplate({ companySize: newSizes });
   };
 
@@ -117,16 +146,18 @@ export default function CustomTemplateBuilder({
                 <div className="space-y-2">
                   <Label>Template Name</Label>
                   <Input
-                    value={template.name || ''}
+                    value={template.name || ""}
                     onChange={(e) => updateTemplate({ name: e.target.value })}
                     placeholder="e.g., Custom Retail Template"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Industry</Label>
-                  <Select 
-                    value={template.industry || ''} 
-                    onValueChange={(value) => updateTemplate({ industry: value })}
+                  <Select
+                    value={template.industry || ""}
+                    onValueChange={(value) =>
+                      updateTemplate({ industry: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select industry" />
@@ -145,8 +176,10 @@ export default function CustomTemplateBuilder({
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Textarea
-                  value={template.description || ''}
-                  onChange={(e) => updateTemplate({ description: e.target.value })}
+                  value={template.description || ""}
+                  onChange={(e) =>
+                    updateTemplate({ description: e.target.value })
+                  }
                   placeholder="Describe what this template is designed for..."
                   rows={3}
                 />
@@ -161,14 +194,15 @@ export default function CustomTemplateBuilder({
                   <Checkbox
                     id="isPublic"
                     checked={template.isPublic || false}
-                    onCheckedChange={(checked) => updateTemplate({ isPublic: checked as boolean })}
+                    onCheckedChange={(checked) =>
+                      updateTemplate({ isPublic: checked as boolean })
+                    }
                   />
-                  <Label htmlFor="isPublic">
-                    Make this template public
-                  </Label>
+                  <Label htmlFor="isPublic">Make this template public</Label>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Public templates can be used by other companies as a starting point
+                  Public templates can be used by other companies as a starting
+                  point
                 </p>
               </div>
             </CardContent>
@@ -177,21 +211,21 @@ export default function CustomTemplateBuilder({
 
         <TabsContent value="branding">
           <BrandingCustomizer
-            branding={template.branding || {
-              primaryColor: '#3b82f6',
-              secondaryColor: '#1e40af',
-              accentColor: '#10b981',
-              fontFamily: 'Inter, sans-serif',
-              headerStyle: 'modern',
-              sidebarStyle: 'expanded',
-              cardStyle: 'rounded',
-              backgroundPattern: 'none'
-            }}
+            branding={
+              template.branding || {
+                primaryColor: "#3b82f6",
+                secondaryColor: "#1e40af",
+                accentColor: "#10b981",
+                fontFamily: "Inter, sans-serif",
+                headerStyle: "modern",
+                sidebarStyle: "expanded",
+                cardStyle: "rounded",
+                backgroundPattern: "none",
+              }
+            }
             onBrandingChange={updateBranding}
           />
         </TabsContent>
-
-
       </Tabs>
     </div>
   );

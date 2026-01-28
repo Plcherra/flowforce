@@ -1,9 +1,15 @@
-import React, { Component, ComponentType, ErrorInfo, ReactNode } from 'react';
-import { useNavigate } from '@/lib/router-adapter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import React, { Component, ComponentType, ErrorInfo, ReactNode } from "react";
+import { useNavigate } from "@/lib/router-adapter";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 export interface ErrorBoundaryRenderProps {
   error: Error;
@@ -42,7 +48,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('ErrorBoundary caught:', { error, errorInfo, tags: ['error'] });
+    logger.error("ErrorBoundary caught:", {
+      error,
+      errorInfo,
+      tags: ["error"],
+    });
 
     this.setState({
       hasError: true,
@@ -62,7 +72,8 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     const { hasError, error } = this.state;
-    const { children, fallback, fallbackRender, FallbackComponent } = this.props;
+    const { children, fallback, fallbackRender, FallbackComponent } =
+      this.props;
 
     if (hasError && error) {
       const renderProps = {
@@ -112,7 +123,7 @@ function DefaultErrorFallback({
   const navigate = useNavigate();
 
   const handleGoHome = () => {
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (
@@ -123,7 +134,9 @@ function DefaultErrorFallback({
             <AlertTriangle className="h-12 w-12 text-destructive" />
           </div>
           <CardTitle className="text-xl">Something went wrong</CardTitle>
-          <CardDescription>An unexpected error occurred. Please try again.</CardDescription>
+          <CardDescription>
+            An unexpected error occurred. Please try again.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -142,7 +155,9 @@ function DefaultErrorFallback({
                 Error Details
               </summary>
               <div className="mt-2 space-y-2 rounded-md bg-muted p-3">
-                <p className="text-sm font-mono text-destructive">{error.message}</p>
+                <p className="text-sm font-mono text-destructive">
+                  {error.message}
+                </p>
                 {errorInfo?.componentStack && (
                   <pre className="max-h-48 overflow-auto whitespace-pre-wrap text-xs text-muted-foreground">
                     {errorInfo.componentStack}

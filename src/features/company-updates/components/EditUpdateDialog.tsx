@@ -1,17 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
-import { RichTextEditor } from '@/features/company-updates/wizard/RichTextEditor';
-import type { CompanyUpdate } from '@/types/companyUpdates';
-import { Loader2 } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
+import { RichTextEditor } from "@/features/company-updates/wizard/RichTextEditor";
+import type { CompanyUpdate } from "@/types/companyUpdates";
+import { Loader2 } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface EditUpdateDialogProps {
   open: boolean;
@@ -20,17 +32,22 @@ interface EditUpdateDialogProps {
   onUpdateComplete?: () => void;
 }
 
-export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete }: EditUpdateDialogProps) {
+export function EditUpdateDialog({
+  open,
+  onOpenChange,
+  update,
+  onUpdateComplete,
+}: EditUpdateDialogProps) {
   const { profile } = useProfile();
   const { toast } = useToast();
   const { updateUpdate } = useCompanyUpdateMutations();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    body: '',
-    richContent: '',
-    type: 'announcement' as CompanyUpdate['type'],
-    priority: 'medium' as CompanyUpdate['priority'],
+    title: "",
+    body: "",
+    richContent: "",
+    type: "announcement" as CompanyUpdate["type"],
+    priority: "medium" as CompanyUpdate["priority"],
   });
 
   useEffect(() => {
@@ -38,7 +55,7 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
       setFormData({
         title: update.title,
         body: update.body,
-        richContent: update.richContent ?? '',
+        richContent: update.richContent ?? "",
         type: update.type,
         priority: update.priority,
       });
@@ -51,9 +68,9 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
 
     if (!formData.title.trim()) {
       toast({
-        title: 'Error',
-        description: 'Title is required',
-        variant: 'destructive',
+        title: "Error",
+        description: "Title is required",
+        variant: "destructive",
       });
       return;
     }
@@ -69,18 +86,21 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
       });
 
       toast({
-        title: 'Update edited',
-        description: 'Your changes have been saved successfully.',
+        title: "Update edited",
+        description: "Your changes have been saved successfully.",
       });
 
       onOpenChange(false);
       onUpdateComplete?.();
     } catch (error) {
-      logger.error('Failed to update', { error, tags: ['error'] });
+      logger.error("Failed to update", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -94,7 +114,9 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Company Update</DialogTitle>
-          <DialogDescription>Make changes to your company update</DialogDescription>
+          <DialogDescription>
+            Make changes to your company update
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +126,9 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
               id="title"
               placeholder="Update title"
               value={formData.title}
-              onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
               required
             />
           </div>
@@ -115,7 +139,9 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
               id="body"
               placeholder="Update content"
               value={formData.body}
-              onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, body: e.target.value }))
+              }
               rows={6}
             />
           </div>
@@ -124,7 +150,9 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
             <Label htmlFor="richContent">Rich Content (HTML)</Label>
             <RichTextEditor
               value={formData.richContent}
-              onChange={(value) => setFormData((prev) => ({ ...prev, richContent: value }))}
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, richContent: value }))
+              }
               placeholder="Write your update content..."
             />
           </div>
@@ -134,7 +162,12 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
               <Label htmlFor="type">Type</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, type: value as CompanyUpdate['type'] }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    type: value as CompanyUpdate["type"],
+                  }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -153,7 +186,10 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, priority: value as CompanyUpdate['priority'] }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    priority: value as CompanyUpdate["priority"],
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -169,7 +205,12 @@ export function EditUpdateDialog({ open, onOpenChange, update, onUpdateComplete 
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { Outlet, ScrollRestoration } from '@/lib/router-adapter';
-import { useRoutePreloader } from '@/hooks/useRoutePreloader';
-import { useNavigationAnalytics } from '@/hooks/useNavigationAnalytics';
-import { NavigationGuard } from '@/components/navigation/NavigationGuard';
-import { RouteLoadingBoundary } from '@/components/navigation/RouteLoadingBoundary';
+import { useEffect } from "react";
+import { Outlet, ScrollRestoration } from "@/lib/router-adapter";
+import { useRoutePreloader } from "@/hooks/useRoutePreloader";
+import { useNavigationAnalytics } from "@/hooks/useNavigationAnalytics";
+import { NavigationGuard } from "@/components/navigation/NavigationGuard";
+import { RouteLoadingBoundary } from "@/components/navigation/RouteLoadingBoundary";
 
 export function AppLayout() {
   // These hooks now run INSIDE the router context

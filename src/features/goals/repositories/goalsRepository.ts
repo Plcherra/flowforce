@@ -1,8 +1,12 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/public-types';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/integrations/supabase/public-types";
 
-const goalStatusEnum = z.enum(['draft', 'active', 'completed', 'cancelled']);
+const goalStatusEnum = z.enum(["draft", "active", "completed", "cancelled"]);
 
 const goalRowSchema = z
   .object({
@@ -55,12 +59,14 @@ export type GoalRecord = z.infer<typeof goalRowSchema>;
 export type GoalTaskRecord = z.infer<typeof goalTaskSchema>;
 export type GoalRewardRecord = z.infer<typeof goalRewardSchema>;
 
-export async function fetchGoalsByCompany(companyId: string): Promise<GoalRecord[]> {
+export async function fetchGoalsByCompany(
+  companyId: string,
+): Promise<GoalRecord[]> {
   const { data, error } = await supabase
-    .from('goals')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false });
+    .from("goals")
+    .select("*")
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw error;
@@ -69,13 +75,15 @@ export async function fetchGoalsByCompany(companyId: string): Promise<GoalRecord
   return goalRowSchema.array().parse(data ?? []);
 }
 
-export async function fetchGoalTasks(goalIds: string[]): Promise<GoalTaskRecord[]> {
+export async function fetchGoalTasks(
+  goalIds: string[],
+): Promise<GoalTaskRecord[]> {
   if (goalIds.length === 0) {
     return [];
   }
 
   const { data, error } = await supabase
-    .from('goal_tasks')
+    .from("goal_tasks")
     .select(
       `
         id,
@@ -91,7 +99,7 @@ export async function fetchGoalTasks(goalIds: string[]): Promise<GoalTaskRecord[
         )
       `,
     )
-    .in('goal_id', goalIds);
+    .in("goal_id", goalIds);
 
   if (error) {
     throw error;
@@ -109,10 +117,12 @@ export async function fetchGoalRewards(
   }
 
   const { data, error } = await supabase
-    .from('goal_rewards')
-    .select('id, goal_id, reward_type, reward_details, awarded_at, user_id, company_id')
-    .in('goal_id', goalIds)
-    .eq('company_id', companyId);
+    .from("goal_rewards")
+    .select(
+      "id, goal_id, reward_type, reward_details, awarded_at, user_id, company_id",
+    )
+    .in("goal_id", goalIds)
+    .eq("company_id", companyId);
 
   if (error) {
     throw error;
@@ -121,8 +131,14 @@ export async function fetchGoalRewards(
   return goalRewardSchema.array().parse(data ?? []);
 }
 
-export async function insertGoalRow(payload: TablesInsert<'goals'>): Promise<GoalRecord> {
-  const { data, error } = await supabase.from('goals').insert(payload).select('*').single();
+export async function insertGoalRow(
+  payload: TablesInsert<"goals">,
+): Promise<GoalRecord> {
+  const { data, error } = await supabase
+    .from("goals")
+    .insert(payload)
+    .select("*")
+    .single();
 
   if (error) {
     throw error;
@@ -133,18 +149,29 @@ export async function insertGoalRow(payload: TablesInsert<'goals'>): Promise<Goa
 
 export async function updateGoalRow(
   id: string,
-  updates: TablesUpdate<'goals'>,
+  updates: TablesUpdate<"goals">,
   companyId: string,
 ): Promise<void> {
-  const { error } = await supabase.from('goals').update(updates).eq('id', id).eq('company_id', companyId);
+  const { error } = await supabase
+    .from("goals")
+    .update(updates)
+    .eq("id", id)
+    .eq("company_id", companyId);
 
   if (error) {
     throw error;
   }
 }
 
-export async function deleteGoalRow(id: string, companyId: string): Promise<void> {
-  const { error } = await supabase.from('goals').delete().eq('id', id).eq('company_id', companyId);
+export async function deleteGoalRow(
+  id: string,
+  companyId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("goals")
+    .delete()
+    .eq("id", id)
+    .eq("company_id", companyId);
 
   if (error) {
     throw error;
@@ -153,13 +180,13 @@ export async function deleteGoalRow(id: string, companyId: string): Promise<void
 
 export async function updateGoalStatusRow(
   id: string,
-  status: Tables<'goals'>['status'],
+  status: Tables<"goals">["status"],
   companyId: string,
 ): Promise<void> {
-  const updates: TablesUpdate<'goals'> = {
+  const updates: TablesUpdate<"goals"> = {
     status,
-    progress: status === 'completed' ? 100 : undefined,
-    completed_at: status === 'completed' ? new Date().toISOString() : null,
+    progress: status === "completed" ? 100 : undefined,
+    completed_at: status === "completed" ? new Date().toISOString() : null,
   };
 
   await updateGoalRow(id, updates, companyId);

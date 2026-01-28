@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "@/lib/router-adapter";
 
-const STORAGE_KEY = 'company-updates:filters';
+const STORAGE_KEY = "company-updates:filters";
 
-export type ViewMode = 'feed' | 'grid' | 'list';
+export type ViewMode = "feed" | "grid" | "list";
 
 export function useCompanyUpdateFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const readInitialState = () => {
     const fromStorage = (() => {
-      if (typeof window === 'undefined') {
+      if (typeof window === "undefined") {
         return null;
       }
       try {
@@ -22,10 +22,15 @@ export function useCompanyUpdateFilters() {
     })();
 
     return {
-      searchTerm: searchParams.get('search') ?? fromStorage?.searchTerm ?? '',
-      page: Number(searchParams.get('page') ?? fromStorage?.page ?? 1),
-      pageSize: Number(searchParams.get('pageSize') ?? fromStorage?.pageSize ?? 10),
-      viewMode: (searchParams.get('view') as ViewMode) ?? fromStorage?.viewMode ?? 'feed',
+      searchTerm: searchParams.get("search") ?? fromStorage?.searchTerm ?? "",
+      page: Number(searchParams.get("page") ?? fromStorage?.page ?? 1),
+      pageSize: Number(
+        searchParams.get("pageSize") ?? fromStorage?.pageSize ?? 10,
+      ),
+      viewMode:
+        (searchParams.get("view") as ViewMode) ??
+        fromStorage?.viewMode ??
+        "feed",
     };
   };
 
@@ -38,17 +43,17 @@ export function useCompanyUpdateFilters() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set('page', String(page));
-    params.set('pageSize', String(pageSize));
-    params.set('view', viewMode);
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+    params.set("view", viewMode);
     if (searchTerm) {
-      params.set('search', searchTerm);
+      params.set("search", searchTerm);
     } else {
-      params.delete('search');
+      params.delete("search");
     }
-    setSearchParams(params, { replace: true });
+    setSearchParams(params);
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({ searchTerm, page, pageSize, viewMode }),
@@ -58,15 +63,21 @@ export function useCompanyUpdateFilters() {
 
   const resetPage = useCallback(() => setPage(1), []);
 
-  const updateSearchTerm = useCallback((value: string) => {
-    setSearchTerm(value);
-    resetPage();
-  }, [resetPage]);
+  const updateSearchTerm = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      resetPage();
+    },
+    [resetPage],
+  );
 
-  const updatePageSize = useCallback((size: number) => {
-    setPageSize(size);
-    resetPage();
-  }, [resetPage]);
+  const updatePageSize = useCallback(
+    (size: number) => {
+      setPageSize(size);
+      resetPage();
+    },
+    [resetPage],
+  );
 
   const updateViewMode = useCallback((mode: ViewMode) => {
     setViewMode(mode);

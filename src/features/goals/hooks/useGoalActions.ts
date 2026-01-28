@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
-import type { Goal, GoalStatus, UseGoalsReturn } from '@/hooks/useGoals';
-import type { GoalFormValues } from '@/features/goals/components/CreateGoalModal';
-import { buildRewardDetails } from '@/features/goals/utils/rewardUtils';
+import { useCallback } from "react";
+import type { Goal, GoalStatus, UseGoalsReturn } from "@/hooks/useGoals";
+import type { GoalFormValues } from "@/features/goals/components/CreateGoalModal";
+import { buildRewardDetails } from "@/features/goals/utils/rewardUtils";
 
 type GoalActionHandlers = Pick<
   UseGoalsReturn,
-  'createGoal' | 'updateGoal' | 'deleteGoal' | 'toggleStatus'
+  "createGoal" | "updateGoal" | "deleteGoal" | "toggleStatus"
 >;
 
 function mapFormValuesToPayload(values: GoalFormValues) {
@@ -14,7 +14,9 @@ function mapFormValuesToPayload(values: GoalFormValues) {
     description: values.description ?? null,
     status: values.status,
     priority: values.priority,
-    target_completion_date: values.dueDate ? values.dueDate.toISOString().split('T')[0] : null,
+    target_completion_date: values.dueDate
+      ? values.dueDate.toISOString().split("T")[0]
+      : null,
     progress: values.progress,
     reward_type: values.rewardType,
     reward_details: buildRewardDetails({

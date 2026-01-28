@@ -4,13 +4,19 @@ export interface OrderableFormField {
 }
 
 const normalizeOrder = (value: number | null) =>
-  typeof value === 'number' && Number.isFinite(value) ? value : Number.MAX_SAFE_INTEGER;
+  typeof value === "number" && Number.isFinite(value)
+    ? value
+    : Number.MAX_SAFE_INTEGER;
 
-export function orderFormFields<T extends OrderableFormField>(fields: T[]): T[] {
+export function orderFormFields<T extends OrderableFormField>(
+  fields: T[],
+): T[] {
   return fields
     .map((field, index) => ({ field, index }))
     .sort((a, b) => {
-      const orderDifference = normalizeOrder(a.field.field_order) - normalizeOrder(b.field.field_order);
+      const orderDifference =
+        normalizeOrder(a.field.field_order) -
+        normalizeOrder(b.field.field_order);
       if (orderDifference !== 0) {
         return orderDifference;
       }
@@ -18,4 +24,3 @@ export function orderFormFields<T extends OrderableFormField>(fields: T[]): T[] 
     })
     .map(({ field }) => field);
 }
-

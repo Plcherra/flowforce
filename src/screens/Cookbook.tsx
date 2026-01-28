@@ -1,16 +1,30 @@
-import { useMemo, useState, type ReactNode } from 'react';
-import { BookOpen, Filter, Search, FileDown, Activity, AlertTriangle, Plus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCookbook } from '@/hooks/useCookbook';
-import { CookbookGrid } from '@/components/cookbook/CookbookGrid';
-import { PrepList } from '@/components/cookbook/PrepList';
-import { DailyCountDialog } from '@/components/cookbook/DailyCountDialog';
-import { RecipeDetailDialog } from '@/components/cookbook/RecipeDetailDialog';
-import { CreateRecipeDialog } from '@/components/cookbook/CreateRecipeDialog';
-import type { CookbookRecipe } from '@/services/cookbook';
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  BookOpen,
+  Filter,
+  Search,
+  FileDown,
+  Activity,
+  AlertTriangle,
+  Plus,
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useCookbook } from "@/hooks/useCookbook";
+import { CookbookGrid } from "@/components/cookbook/CookbookGrid";
+import { PrepList } from "@/components/cookbook/PrepList";
+import { DailyCountDialog } from "@/components/cookbook/DailyCountDialog";
+import { RecipeDetailDialog } from "@/components/cookbook/RecipeDetailDialog";
+import { CreateRecipeDialog } from "@/components/cookbook/CreateRecipeDialog";
+import type { CookbookRecipe } from "@/services/cookbook";
 
 export default function Cookbook() {
   const {
@@ -31,8 +45,10 @@ export default function Cookbook() {
     inventoryItems,
   } = useCookbook();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRecipe, setSelectedRecipe] = useState<CookbookRecipe | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRecipe, setSelectedRecipe] = useState<CookbookRecipe | null>(
+    null,
+  );
   const [createOpen, setCreateOpen] = useState(false);
 
   const recipeMap = useMemo(() => {
@@ -43,17 +59,26 @@ export default function Cookbook() {
 
   const filteredRecipes = useMemo(() => {
     if (!searchTerm) return recipes;
-    return recipes.filter((recipe) => recipe.item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return recipes.filter((recipe) =>
+      recipe.item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
   }, [recipes, searchTerm]);
 
   const filteredFavorites = useMemo(() => {
     if (!searchTerm) return favorites;
-    return favorites.filter((recipe) => recipe.item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return favorites.filter((recipe) =>
+      recipe.item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
   }, [favorites, searchTerm]);
 
   const prepItemsForCount = useMemo(
-    () => prepItems.map((item) => ({ id: item.id, name: item.name, uom: item.uom })),
-    [prepItems]
+    () =>
+      prepItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        uom: item.uom,
+      })),
+    [prepItems],
   );
 
   const handleExportRecipe = (recipeId: string) => {
@@ -77,7 +102,8 @@ export default function Cookbook() {
             Inventory Cookbook
           </h1>
           <p className="text-muted-foreground">
-            Merge recipes with Items &amp; Setup inventory for live costing, smart prep, and waste tracking.
+            Merge recipes with Items &amp; Setup inventory for live costing,
+            smart prep, and waste tracking.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -96,15 +122,28 @@ export default function Cookbook() {
       {error && (
         <Card className="border-destructive/40 bg-destructive/5">
           <CardContent className="py-4 text-sm text-destructive">
-            {error}. Showing synced demo data so you can continue designing the cookbook experience.
+            {error}. Showing synced demo data so you can continue designing the
+            cookbook experience.
           </CardContent>
         </Card>
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Linked Recipes" value={recipes.length} subtitle="Inventory-backed and costed" />
-        <StatCard title="Favorites" value={favoriteIds.length} subtitle="Go-to recipes for quick access" />
-        <StatCard title="Prep Items" value={prepItems.length} subtitle="Prep planner ready items" />
+        <StatCard
+          title="Linked Recipes"
+          value={recipes.length}
+          subtitle="Inventory-backed and costed"
+        />
+        <StatCard
+          title="Favorites"
+          value={favoriteIds.length}
+          subtitle="Go-to recipes for quick access"
+        />
+        <StatCard
+          title="Prep Items"
+          value={prepItems.length}
+          subtitle="Prep planner ready items"
+        />
         <StatCard
           title="Events (7d)"
           value={productionEvents.length + wasteEvents.length}
@@ -129,8 +168,12 @@ export default function Cookbook() {
 
       <Tabs defaultValue="recipes" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="recipes">Recipes ({filteredRecipes.length})</TabsTrigger>
-          <TabsTrigger value="favorites">Favorites ({filteredFavorites.length})</TabsTrigger>
+          <TabsTrigger value="recipes">
+            Recipes ({filteredRecipes.length})
+          </TabsTrigger>
+          <TabsTrigger value="favorites">
+            Favorites ({filteredFavorites.length})
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="recipes">
           <CookbookGrid
@@ -159,7 +202,8 @@ export default function Cookbook() {
           <div>
             <h2 className="text-xl font-semibold">Daily Prep Planner</h2>
             <p className="text-sm text-muted-foreground">
-              Suggested make quantities with instant production logging and waste tracking.
+              Suggested make quantities with instant production logging and
+              waste tracking.
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleExportDailyPrep}>
@@ -172,7 +216,9 @@ export default function Cookbook() {
           suggestToMake={suggestToMake}
           onLogProduction={createProduction}
           onLogWaste={logWaste}
-          onViewRecipe={(recipeId) => setSelectedRecipe(recipeMap.get(recipeId) ?? null)}
+          onViewRecipe={(recipeId) =>
+            setSelectedRecipe(recipeMap.get(recipeId) ?? null)
+          }
         />
       </section>
 
@@ -183,8 +229,8 @@ export default function Cookbook() {
           empty="Production batches log once Supabase migrations run."
           items={productionEvents.map((event) => ({
             id: event.id,
-            title: event.item?.name ?? 'Unknown item',
-            description: `${event.actual_quantity ?? event.planned_quantity} ${event.item?.unit?.abbreviation || ''} • ${event.status}`,
+            title: event.item?.name ?? "Unknown item",
+            description: `${event.actual_quantity ?? event.planned_quantity} ${event.item?.unit?.abbreviation || ""} • ${event.status}`,
             timestamp: event.prep_date,
           }))}
         />
@@ -194,8 +240,8 @@ export default function Cookbook() {
           empty="Waste events log locally when Supabase is unavailable."
           items={wasteEvents.slice(0, 5).map((event) => ({
             id: event.id,
-            title: event.item?.name ?? 'Unknown item',
-            description: `${event.quantity} ${event.item?.unit?.name || ''} • ${event.waste_type}`,
+            title: event.item?.name ?? "Unknown item",
+            description: `${event.quantity} ${event.item?.unit?.name || ""} • ${event.waste_type}`,
             timestamp: event.waste_date,
           }))}
         />
@@ -206,7 +252,9 @@ export default function Cookbook() {
         open={!!selectedRecipe}
         onOpenChange={(open) => setSelectedRecipe(open ? selectedRecipe : null)}
         onExport={handleExportRecipe}
-        isFavorite={selectedRecipe ? favoriteIds.includes(selectedRecipe.item.id) : false}
+        isFavorite={
+          selectedRecipe ? favoriteIds.includes(selectedRecipe.item.id) : false
+        }
       />
 
       <CreateRecipeDialog
@@ -220,8 +268,8 @@ export default function Cookbook() {
 }
 
 function downloadCsv(csv: string, filename: string) {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.href = url;
   link.download = filename;
@@ -229,11 +277,21 @@ function downloadCsv(csv: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-function StatCard({ title, value, subtitle }: { title: string; value: number; subtitle: string }) {
+function StatCard({
+  title,
+  value,
+  subtitle,
+}: {
+  title: string;
+  value: number;
+  subtitle: string;
+}) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-semibold">{value}</div>
@@ -247,17 +305,26 @@ interface EventCardProps {
   title: string;
   icon: ReactNode;
   empty: string;
-  items: Array<{ id: string; title: string; description: string; timestamp: string }>;
+  items: Array<{
+    id: string;
+    title: string;
+    description: string;
+    timestamp: string;
+  }>;
 }
 
 function EventCard({ title, icon, empty, items }: EventCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
-        <div className="p-2 rounded-md bg-muted text-muted-foreground">{icon}</div>
+        <div className="p-2 rounded-md bg-muted text-muted-foreground">
+          {icon}
+        </div>
         <div>
           <CardTitle className="text-base">{title}</CardTitle>
-          <CardDescription>Live once Supabase tables are configured—sample data shown today.</CardDescription>
+          <CardDescription>
+            Live once Supabase tables are configured—sample data shown today.
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -265,11 +332,18 @@ function EventCard({ title, icon, empty, items }: EventCardProps) {
           <p className="text-sm text-muted-foreground">{empty}</p>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="text-sm border-b pb-2 last:border-0 last:pb-0">
+            <div
+              key={item.id}
+              className="text-sm border-b pb-2 last:border-0 last:pb-0"
+            >
               <div className="font-medium">{item.title}</div>
               <div className="text-muted-foreground text-xs flex items-center justify-between">
                 <span>{item.description}</span>
-                <span>{item.timestamp ? new Date(item.timestamp).toLocaleDateString() : '—'}</span>
+                <span>
+                  {item.timestamp
+                    ? new Date(item.timestamp).toLocaleDateString()
+                    : "—"}
+                </span>
               </div>
             </div>
           ))

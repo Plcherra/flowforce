@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-type TaskNotificationRow = Tables<'task_notifications'>;
-type TaskRow = Tables<'tasks'>;
+type TaskNotificationRow = Tables<"task_notifications">;
+type TaskRow = Tables<"tasks">;
 
 const notificationSchema: z.ZodType<TaskNotificationRow> = z
   .object({
@@ -22,7 +22,10 @@ const notificationSchema: z.ZodType<TaskNotificationRow> = z
   .passthrough();
 
 const taskSummarySchema: z.ZodType<
-  Pick<TaskRow, 'id' | 'title' | 'due_date' | 'priority' | 'assigned_to' | 'status'>
+  Pick<
+    TaskRow,
+    "id" | "title" | "due_date" | "priority" | "assigned_to" | "status"
+  >
 > = z
   .object({
     id: z.string(),
@@ -37,12 +40,14 @@ const taskSummarySchema: z.ZodType<
 export type TaskNotification = z.infer<typeof notificationSchema>;
 export type TaskSummary = z.infer<typeof taskSummarySchema>;
 
-export async function fetchNotificationsForUser(userId: string): Promise<TaskNotification[]> {
+export async function fetchNotificationsForUser(
+  userId: string,
+): Promise<TaskNotification[]> {
   const { data, error } = await supabase
-    .from('task_notifications')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .from("task_notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
     .limit(50);
 
   if (error) {
@@ -52,13 +57,18 @@ export async function fetchNotificationsForUser(userId: string): Promise<TaskNot
   return notificationSchema.array().parse(data ?? []);
 }
 
-export type NewNotificationInput = Omit<TaskNotificationRow, 'id' | 'created_at' | 'read_at'> & {
+export type NewNotificationInput = Omit<
+  TaskNotificationRow,
+  "id" | "created_at" | "read_at"
+> & {
   read_at?: string | null;
 };
 
-export async function createTaskNotification(input: NewNotificationInput): Promise<TaskNotification> {
+export async function createTaskNotification(
+  input: NewNotificationInput,
+): Promise<TaskNotification> {
   const { data, error } = await supabase
-    .from('task_notifications')
+    .from("task_notifications")
     .insert(input)
     .select()
     .single();
@@ -70,31 +80,40 @@ export async function createTaskNotification(input: NewNotificationInput): Promi
   return notificationSchema.parse(data);
 }
 
-export async function markNotificationAsRead(notificationId: string): Promise<void> {
+export async function markNotificationAsRead(
+  notificationId: string,
+): Promise<void> {
   const { error } = await supabase
-    .from('task_notifications')
+    .from("task_notifications")
     .update({ read_at: new Date().toISOString() })
-    .eq('id', notificationId);
+    .eq("id", notificationId);
 
   if (error) {
     throw error;
   }
 }
 
-export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+export async function markAllNotificationsAsRead(
+  userId: string,
+): Promise<void> {
   const { error } = await supabase
-    .from('task_notifications')
+    .from("task_notifications")
     .update({ read_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .is('read_at', null);
+    .eq("user_id", userId)
+    .is("read_at", null);
 
   if (error) {
     throw error;
   }
 }
 
-export async function deleteNotification(notificationId: string): Promise<void> {
-  const { error } = await supabase.from('task_notifications').delete().eq('id', notificationId);
+export async function deleteNotification(
+  notificationId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("task_notifications")
+    .delete()
+    .eq("id", notificationId);
 
   if (error) {
     throw error;
@@ -105,21 +124,21 @@ export async function findRecentNotification(
   userId: string,
   taskId: string,
   type: string,
-  sinceIso: string
+  sinceIso: string,
 ): Promise<TaskNotification | null> {
   const { data, error } = await supabase
-    .from('task_notifications')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('task_id', taskId)
-    .eq('type', type)
-    .gte('created_at', sinceIso)
-    .order('created_at', { ascending: false })
+    .from("task_notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("task_id", taskId)
+    .eq("type", type)
+    .gte("created_at", sinceIso)
+    .order("created_at", { ascending: false })
     .limit(1)
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       return null;
     }
     throw error;
@@ -128,21 +147,27 @@ export async function findRecentNotification(
   return data ? notificationSchema.parse(data) : null;
 }
 
-export async function fetchTasksDueSoon(userId: string, upperBoundIso: string): Promise<TaskSummary[]> {
+export async function fetchTasksDueSoon(
+  userId: string,
+  upperBoundIso: string,
+): Promise<TaskSummary[]> {
   // Use explicit status filter to avoid enum validation errors
   // Only query for active task statuses (exclude completed/cancelled)
   const { data, error } = await supabase
-    .from('tasks')
-    .select('id, title, due_date, priority, assigned_to, status')
-    .eq('assigned_to', userId)
-    .gte('due_date', new Date().toISOString())
-    .lte('due_date', upperBoundIso)
-    .in('status', ['todo', 'in_progress', 'review']);
+    .from("tasks")
+    .select("id, title, due_date, priority, assigned_to, status")
+    .eq("assigned_to", userId)
+    .gte("due_date", new Date().toISOString())
+    .lte("due_date", upperBoundIso)
+    .in("status", ["todo", "in_progress", "review"]);
 
   if (error) {
     // Handle enum validation errors gracefully
-    if (error.message?.includes('invalid input value for enum task_status')) {
-      logger.warn('Some tasks have invalid status values. Filtering them out.', { error, tags: ['warning'] });
+    if (error.message?.includes("invalid input value for enum task_status")) {
+      logger.warn(
+        "Some tasks have invalid status values. Filtering them out.",
+        { error, tags: ["warning"] },
+      );
       // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
       return [];
     }
@@ -150,26 +175,39 @@ export async function fetchTasksDueSoon(userId: string, upperBoundIso: string): 
   }
 
   // Additional client-side filtering as safety net
-  const validStatuses = ['todo', 'in_progress', 'review', 'completed', 'cancelled'];
-  const validData = (data ?? []).filter(task => validStatuses.includes(task.status));
+  const validStatuses = [
+    "todo",
+    "in_progress",
+    "review",
+    "completed",
+    "cancelled",
+  ];
+  const validData = (data ?? []).filter((task) =>
+    validStatuses.includes(task.status),
+  );
 
   return taskSummarySchema.array().parse(validData);
 }
 
-export async function fetchOverdueTasks(userId: string): Promise<TaskSummary[]> {
+export async function fetchOverdueTasks(
+  userId: string,
+): Promise<TaskSummary[]> {
   // Use explicit status filter to avoid enum validation errors
   // Only query for active task statuses (exclude completed/cancelled)
   const { data, error } = await supabase
-    .from('tasks')
-    .select('id, title, due_date, priority, assigned_to, status')
-    .eq('assigned_to', userId)
-    .lt('due_date', new Date().toISOString())
-    .in('status', ['todo', 'in_progress', 'review']);
+    .from("tasks")
+    .select("id, title, due_date, priority, assigned_to, status")
+    .eq("assigned_to", userId)
+    .lt("due_date", new Date().toISOString())
+    .in("status", ["todo", "in_progress", "review"]);
 
   if (error) {
     // Handle enum validation errors gracefully
-    if (error.message?.includes('invalid input value for enum task_status')) {
-      logger.warn('Some tasks have invalid status values. Filtering them out.', { error, tags: ['warning'] });
+    if (error.message?.includes("invalid input value for enum task_status")) {
+      logger.warn(
+        "Some tasks have invalid status values. Filtering them out.",
+        { error, tags: ["warning"] },
+      );
       // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
       return [];
     }
@@ -177,8 +215,16 @@ export async function fetchOverdueTasks(userId: string): Promise<TaskSummary[]> 
   }
 
   // Additional client-side filtering as safety net
-  const validStatuses = ['todo', 'in_progress', 'review', 'completed', 'cancelled'];
-  const validData = (data ?? []).filter(task => validStatuses.includes(task.status));
+  const validStatuses = [
+    "todo",
+    "in_progress",
+    "review",
+    "completed",
+    "cancelled",
+  ];
+  const validData = (data ?? []).filter((task) =>
+    validStatuses.includes(task.status),
+  );
 
   return taskSummarySchema.array().parse(validData);
 }

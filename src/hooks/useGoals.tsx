@@ -1,1 +1,1 @@
-export * from '@/features/goals/hooks/useGoals';
+export * from "@/features/goals/hooks/useGoals";

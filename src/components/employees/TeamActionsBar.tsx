@@ -1,11 +1,11 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Download } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Download } from "lucide-react";
 
 type TeamActionsBarProps = {
   isAdmin: boolean;
@@ -33,7 +33,9 @@ export function TeamActionsBar({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onExportFiltered}>CSV (filtered)</DropdownMenuItem>
+          <DropdownMenuItem onClick={onExportFiltered}>
+            CSV (filtered)
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={onExportAll}>CSV (all)</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

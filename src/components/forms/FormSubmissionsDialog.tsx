@@ -1,14 +1,19 @@
-
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, FileText, User, Calendar } from 'lucide-react';
-import { useForms } from '@/hooks/useForms';
-import FormFillDialog from './FormFillDialog';
-import { FormSubmission, FormField } from '@/types/common';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, FileText, User, Calendar } from "lucide-react";
+import { useForms } from "@/hooks/useForms";
+import FormFillDialog from "./FormFillDialog";
+import { FormSubmission, FormField } from "@/types/common";
 
 interface FormSubmissionsDialogProps {
   open: boolean;
@@ -16,7 +21,11 @@ interface FormSubmissionsDialogProps {
   formId: string;
 }
 
-export default function FormSubmissionsDialog({ open, onOpenChange, formId }: FormSubmissionsDialogProps) {
+export default function FormSubmissionsDialog({
+  open,
+  onOpenChange,
+  formId,
+}: FormSubmissionsDialogProps) {
   const { getFormSubmissions, getFormFields } = useForms();
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [fields, setFields] = useState<FormField[]>([]);
@@ -33,9 +42,9 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
     setLoading(true);
     const [submissionsResult, fieldsResult] = await Promise.all([
       getFormSubmissions(formId),
-      getFormFields(formId)
+      getFormFields(formId),
     ]);
-    
+
     if (!submissionsResult.error) {
       setSubmissions(submissionsResult.data);
     }
@@ -49,35 +58,41 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
     if (submissions.length === 0) return;
 
     // Create CSV headers
-    const headers = ['Submission Date', 'Submitted By', ...fields.map(f => f.label)];
-    
+    const headers = [
+      "Submission Date",
+      "Submitted By",
+      ...fields.map((f) => f.label),
+    ];
+
     // Create CSV rows
-    const rows = submissions.map(submission => {
-      const submitterName = submission.submitted_profile 
+    const rows = submissions.map((submission) => {
+      const submitterName = submission.submitted_profile
         ? `${submission.submitted_profile.first_name} ${submission.submitted_profile.last_name}`
-        : 'Anonymous';
-      
+        : "Anonymous";
+
       const row = [
         new Date(submission.submitted_at).toLocaleString(),
         submitterName,
-        ...fields.map(field => {
+        ...fields.map((field) => {
           const value = submission.submission_data[field.id];
-          return Array.isArray(value) ? value.join(', ') : (value || '');
-        })
+          return Array.isArray(value) ? value.join(", ") : value || "";
+        }),
       ];
       return row;
     });
 
     // Convert to CSV string
     const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
 
     // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `form-submissions-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `form-submissions-${new Date().toISOString().split("T")[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -103,7 +118,8 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
               </div>
             </div>
             <DialogDescription>
-              View and manage all form submissions. Export data or fill out the form directly.
+              View and manage all form submissions. Export data or fill out the
+              form directly.
             </DialogDescription>
           </DialogHeader>
 
@@ -113,7 +129,9 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
             <Card>
               <CardContent className="py-8 text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No submissions yet</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No submissions yet
+                </h3>
                 <p className="text-muted-foreground mb-4">
                   This form hasn't received any submissions yet
                 </p>
@@ -126,7 +144,8 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
-                  {submissions.length} submission{submissions.length !== 1 ? 's' : ''}
+                  {submissions.length} submission
+                  {submissions.length !== 1 ? "s" : ""}
                 </p>
               </div>
 
@@ -141,10 +160,9 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            {submission.submitted_profile 
+                            {submission.submitted_profile
                               ? `${submission.submitted_profile.first_name} ${submission.submitted_profile.last_name}`
-                              : 'Anonymous'
-                            }
+                              : "Anonymous"}
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
@@ -173,7 +191,7 @@ export default function FormSubmissionsDialog({ open, onOpenChange, formId }: Fo
                                       </Badge>
                                     ))}
                                   </div>
-                                ) : field.field_type === 'file' ? (
+                                ) : field.field_type === "file" ? (
                                   <Badge variant="outline">File uploaded</Badge>
                                 ) : (
                                   <p className="text-sm">{String(value)}</p>

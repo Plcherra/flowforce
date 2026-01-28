@@ -1,7 +1,6 @@
-
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
 
 interface OnboardingRole {
   id: string;
@@ -21,13 +20,15 @@ interface SuggestedPositionsProps {
   onAddPosition: (positionName: string) => void;
 }
 
-export default function SuggestedPositions({ 
-  role, 
-  selectedTemplate, 
-  existingPositions, 
-  onAddPosition 
+export default function SuggestedPositions({
+  role,
+  selectedTemplate,
+  existingPositions,
+  onAddPosition,
 }: SuggestedPositionsProps) {
-  const suggestedPositions = selectedTemplate?.suggestedPositions?.[role.id.replace('custom-', '')] || [];
+  const suggestedPositions =
+    selectedTemplate?.suggestedPositions?.[role.id.replace("custom-", "")] ||
+    [];
 
   if (suggestedPositions.length === 0) {
     return null;
@@ -45,7 +46,7 @@ export default function SuggestedPositions({
             variant="outline"
             size="sm"
             onClick={() => onAddPosition(suggestion)}
-            disabled={existingPositions.some(p => p.name === suggestion)}
+            disabled={existingPositions.some((p) => p.name === suggestion)}
             className="text-xs"
           >
             <Plus className="h-3 w-3 mr-1" />

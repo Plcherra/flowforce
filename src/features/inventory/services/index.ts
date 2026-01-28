@@ -1,4 +1,4 @@
-import { InventoryService } from './inventoryService';
+import { InventoryService } from "./inventoryService";
 
 /**
  * Lightweight facade so feature code can depend on a stable service surface

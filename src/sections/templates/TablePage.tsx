@@ -1,5 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = {
   title?: string;
@@ -8,12 +15,17 @@ type Props = {
   description?: string;
 };
 
-export function TablePage({ title = 'Table', columns = ['Name', 'Status', 'Updated'], rows = [], description }: Props) {
+export function TablePage({
+  title = "Table",
+  columns = ["Name", "Status", "Updated"],
+  rows = [],
+  description,
+}: Props) {
   const demo = rows.length === 0;
   const data = demo
     ? [
-        { Name: 'Example A', Status: 'Active', Updated: 'Today' },
-        { Name: 'Example B', Status: 'Inactive', Updated: 'Yesterday' },
+        { Name: "Example A", Status: "Active", Updated: "Today" },
+        { Name: "Example B", Status: "Inactive", Updated: "Yesterday" },
       ]
     : rows;
 
@@ -23,7 +35,9 @@ export function TablePage({ title = 'Table', columns = ['Name', 'Status', 'Updat
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        {description && <p className="text-sm text-muted-foreground mb-3">{description}</p>}
+        {description && (
+          <p className="text-sm text-muted-foreground mb-3">{description}</p>
+        )}
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -37,7 +51,7 @@ export function TablePage({ title = 'Table', columns = ['Name', 'Status', 'Updat
               {data.map((row, idx) => (
                 <TableRow key={idx}>
                   {columns.map((c) => (
-                    <TableCell key={c}>{row[c] ?? '-'}</TableCell>
+                    <TableCell key={c}>{row[c] ?? "-"}</TableCell>
                   ))}
                 </TableRow>
               ))}
@@ -48,4 +62,3 @@ export function TablePage({ title = 'Table', columns = ['Name', 'Status', 'Updat
     </Card>
   );
 }
-

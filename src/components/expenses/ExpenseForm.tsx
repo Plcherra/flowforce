@@ -1,11 +1,16 @@
-
-import { ChangeEvent, FormEvent, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { logger } from '@/utils/logger';
+import { ChangeEvent, FormEvent, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { logger } from "@/utils/logger";
 
 interface ExpenseData {
   category: string;
@@ -28,18 +33,20 @@ type ExpenseFormState = {
   notes: string;
 };
 
-type ExpenseFormErrors = Partial<Record<'category' | 'amount', string>>;
+type ExpenseFormErrors = Partial<Record<"category" | "amount", string>>;
 
 const createInitialFormState = (): ExpenseFormState => ({
-  category: '',
-  description: '',
-  amount: '',
-  expense_date: '',
-  notes: '',
+  category: "",
+  description: "",
+  amount: "",
+  expense_date: "",
+  notes: "",
 });
 
 export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
-  const [formData, setFormData] = useState<ExpenseFormState>(createInitialFormState());
+  const [formData, setFormData] = useState<ExpenseFormState>(
+    createInitialFormState(),
+  );
   const [errors, setErrors] = useState<ExpenseFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,13 +74,13 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
     const parsedAmount = Number(trimmedAmountInput);
 
     if (!formData.category) {
-      validationErrors.category = 'Select a category.';
+      validationErrors.category = "Select a category.";
     }
 
     if (!trimmedAmountInput) {
-      validationErrors.amount = 'Enter an amount.';
+      validationErrors.amount = "Enter an amount.";
     } else if (!Number.isFinite(parsedAmount)) {
-      validationErrors.amount = 'Enter a valid number.';
+      validationErrors.amount = "Enter a valid number.";
     }
 
     if (Object.keys(validationErrors).length > 0) {
@@ -95,7 +102,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       });
       resetForm();
     } catch (error) {
-      logger.error('Failed to create expense:', { error, tags: ['error'] });
+      logger.error("Failed to create expense:", { error, tags: ["error"] });
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +111,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
     if (value) {
-      clearFieldError('category');
+      clearFieldError("category");
     }
   };
 
@@ -118,7 +125,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
 
     const trimmedValue = value.trim();
     if (trimmedValue && Number.isFinite(Number(trimmedValue))) {
-      clearFieldError('amount');
+      clearFieldError("amount");
     }
   };
 
@@ -130,7 +137,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
           <SelectTrigger
             id="category"
             aria-invalid={Boolean(errors.category)}
-            aria-describedby={errors.category ? 'category-error' : undefined}
+            aria-describedby={errors.category ? "category-error" : undefined}
           >
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
@@ -157,7 +164,10 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
           id="description"
           value={formData.description}
           onChange={(event) =>
-            setFormData((prev) => ({ ...prev, description: event.target.value }))
+            setFormData((prev) => ({
+              ...prev,
+              description: event.target.value,
+            }))
           }
           required
         />
@@ -172,7 +182,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
           value={formData.amount}
           inputMode="decimal"
           aria-invalid={Boolean(errors.amount)}
-          aria-describedby={errors.amount ? 'amount-error' : undefined}
+          aria-describedby={errors.amount ? "amount-error" : undefined}
           onChange={handleAmountChange}
           required
         />
@@ -190,7 +200,10 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
           type="date"
           value={formData.expense_date}
           onChange={(event) =>
-            setFormData((prev) => ({ ...prev, expense_date: event.target.value }))
+            setFormData((prev) => ({
+              ...prev,
+              expense_date: event.target.value,
+            }))
           }
           required
         />
@@ -201,7 +214,9 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
         <Textarea
           id="notes"
           value={formData.notes}
-          onChange={(event) => setFormData((prev) => ({ ...prev, notes: event.target.value }))}
+          onChange={(event) =>
+            setFormData((prev) => ({ ...prev, notes: event.target.value }))
+          }
           rows={3}
         />
       </div>
@@ -211,7 +226,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Expense'}
+          {isSubmitting ? "Creating..." : "Create Expense"}
         </Button>
       </div>
     </form>

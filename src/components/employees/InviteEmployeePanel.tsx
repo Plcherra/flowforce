@@ -1,18 +1,18 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRoles } from '@/hooks/useRoles';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRoles } from "@/hooks/useRoles";
+import { useToast } from "@/hooks/use-toast";
 
 type InviteForm = {
   first: string;
@@ -22,10 +22,10 @@ type InviteForm = {
 };
 
 const defaultForm: InviteForm = {
-  first: '',
-  last: '',
-  email: '',
-  role: 'staff',
+  first: "",
+  last: "",
+  email: "",
+  role: "staff",
 };
 
 export function InviteEmployeePanel() {
@@ -37,9 +37,9 @@ export function InviteEmployeePanel() {
   const roleOptions = useMemo(() => {
     if (!roles.length) {
       return [
-        { label: 'Staff', value: 'staff' },
-        { label: 'Manager', value: 'manager' },
-        { label: 'Supervisor', value: 'supervisor' },
+        { label: "Staff", value: "staff" },
+        { label: "Manager", value: "manager" },
+        { label: "Supervisor", value: "supervisor" },
       ];
     }
 
@@ -61,9 +61,9 @@ export function InviteEmployeePanel() {
 
     if (!form.email) {
       toast({
-        variant: 'destructive',
-        title: 'Email required',
-        description: 'Add an email address before sending an invitation.',
+        variant: "destructive",
+        title: "Email required",
+        description: "Add an email address before sending an invitation.",
       });
       return;
     }
@@ -71,29 +71,33 @@ export function InviteEmployeePanel() {
     setIsSubmitting(true);
     try {
       const rolePayload = deriveRolePayload(form.role, roles);
-      const { error } = await supabase.auth.admin.inviteUserByEmail(form.email, {
-        data: {
-          first_name: form.first,
-          last_name: form.last,
-          role: rolePayload.roleKey,
-          role_id: rolePayload.roleId,
+      const { error } = await supabase.auth.admin.inviteUserByEmail(
+        form.email,
+        {
+          data: {
+            first_name: form.first,
+            last_name: form.last,
+            role: rolePayload.roleKey,
+            role_id: rolePayload.roleId,
+          },
         },
-      });
+      );
 
       if (error) {
         throw error;
       }
 
       toast({
-        title: 'Invitation sent',
-        description: 'We emailed the invite and let the teammate know.',
+        title: "Invitation sent",
+        description: "We emailed the invite and let the teammate know.",
       });
       setForm(defaultForm);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to send invitation';
+      const message =
+        err instanceof Error ? err.message : "Failed to send invitation";
       toast({
-        variant: 'destructive',
-        title: 'Unable to send invite',
+        variant: "destructive",
+        title: "Unable to send invite",
         description: message,
       });
     } finally {
@@ -114,7 +118,9 @@ export function InviteEmployeePanel() {
               <Input
                 id="first-name"
                 value={form.first}
-                onChange={(event) => setForm((prev) => ({ ...prev, first: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, first: event.target.value }))
+                }
                 placeholder="Taylor"
               />
             </div>
@@ -123,7 +129,9 @@ export function InviteEmployeePanel() {
               <Input
                 id="last-name"
                 value={form.last}
-                onChange={(event) => setForm((prev) => ({ ...prev, last: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, last: event.target.value }))
+                }
                 placeholder="Rivera"
               />
             </div>
@@ -136,7 +144,9 @@ export function InviteEmployeePanel() {
               type="email"
               required
               value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, email: event.target.value }))
+              }
               placeholder="taylor@example.com"
             />
           </div>
@@ -145,7 +155,9 @@ export function InviteEmployeePanel() {
             <Label>Role</Label>
             <Select
               value={form.role}
-              onValueChange={(value) => setForm((prev) => ({ ...prev, role: value }))}
+              onValueChange={(value) =>
+                setForm((prev) => ({ ...prev, role: value }))
+              }
               disabled={rolesLoading || isSubmitting}
             >
               <SelectTrigger>
@@ -163,7 +175,7 @@ export function InviteEmployeePanel() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending...' : 'Send Invite'}
+              {isSubmitting ? "Sending..." : "Send Invite"}
             </Button>
           </div>
         </form>
@@ -172,7 +184,10 @@ export function InviteEmployeePanel() {
   );
 }
 
-function deriveRolePayload(selectedValue: string, roles: Array<{ id: string; name: string }>) {
+function deriveRolePayload(
+  selectedValue: string,
+  roles: Array<{ id: string; name: string }>,
+) {
   const match = roles.find((role) => role.id === selectedValue);
   if (!match) {
     return {
@@ -189,9 +204,16 @@ function deriveRolePayload(selectedValue: string, roles: Array<{ id: string; nam
 
 function normalizeRole(value: string) {
   const normalized = value.toLowerCase();
-  const allowed = ['admin', 'manager', 'employee', 'staff', 'supervisor', 'owner'];
+  const allowed = [
+    "admin",
+    "manager",
+    "employee",
+    "staff",
+    "supervisor",
+    "owner",
+  ];
   if (allowed.includes(normalized)) {
     return normalized;
   }
-  return 'staff';
+  return "staff";
 }

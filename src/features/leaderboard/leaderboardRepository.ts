@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { LeaderboardPeriod } from './types';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type { LeaderboardPeriod } from "./types";
 
 const stringOrNullSchema = z.union([z.string(), z.null()]);
 
@@ -25,7 +25,7 @@ const leaderboardPositionSchema = z
 const numberLikeSchema = z
   .union([z.number(), z.string()])
   .transform((value) => {
-    if (typeof value === 'number') return value;
+    if (typeof value === "number") return value;
     const parsed = Number(value);
     return Number.isNaN(parsed) ? 0 : parsed;
   })
@@ -34,23 +34,25 @@ const numberLikeSchema = z
 const leaderboardAchievementSchema = z
   .object({
     code: z.string(),
-    label: z.string().optional().default(''),
+    label: z.string().optional().default(""),
     value: numberLikeSchema.nullable().optional(),
     context: stringOrNullSchema.optional(),
   })
   .passthrough()
   .transform((payload) => ({
     code: payload.code,
-    label: payload.label ?? '',
-    value: typeof payload.value === 'number' ? payload.value : 0,
+    label: payload.label ?? "",
+    value: typeof payload.value === "number" ? payload.value : 0,
     context: payload.context ?? undefined,
   }));
 
-const insightTypeSchema = z.enum(['growth', 'strength', 'risk']);
+const insightTypeSchema = z.enum(["growth", "strength", "risk"]);
 
 const leaderboardInsightSchema = z
   .object({
-    type: z.union([insightTypeSchema, z.string().transform(() => 'growth')]).default('growth'),
+    type: z
+      .union([insightTypeSchema, z.string().transform(() => "growth")])
+      .default("growth"),
     message: z.string(),
     value: numberLikeSchema.nullable().optional(),
   })
@@ -58,10 +60,16 @@ const leaderboardInsightSchema = z
   .transform((payload) => ({
     type: insightTypeSchema.parse(payload.type),
     message: payload.message,
-    value: typeof payload.value === 'number' ? payload.value : undefined,
+    value: typeof payload.value === "number" ? payload.value : undefined,
   }));
 
-const challengeFocusSchema = z.enum(['skills', 'recognition', 'training', 'promotion', 'goals']);
+const challengeFocusSchema = z.enum([
+  "skills",
+  "recognition",
+  "training",
+  "promotion",
+  "goals",
+]);
 
 const leaderboardChallengeSchema = z
   .object({
@@ -71,7 +79,7 @@ const leaderboardChallengeSchema = z
     description: z.string(),
     reward: z.string(),
     confidence: z.number().min(0).max(1),
-    period: z.enum(['weekly', 'monthly', 'all_time']),
+    period: z.enum(["weekly", "monthly", "all_time"]),
     periodStart: stringOrNullSchema.optional(),
     suggestedBadge: stringOrNullSchema.optional(),
   })
@@ -138,20 +146,26 @@ const leaderboardRowSchema = z.object({
   employee_id: z.string(),
   department_id: stringOrNullSchema,
   role: z.string().nullable(),
-  period: z.enum(['weekly', 'monthly', 'all_time']),
+  period: z.enum(["weekly", "monthly", "all_time"]),
   period_start: stringOrNullSchema,
   xp_total: z.number(),
   xp_tasks: z.number(),
   xp_goals: z.number(),
   xp_recognitions: z.number(),
   xp_training: z.number(),
-  badge_tier: z.enum(['Bronze', 'Silver', 'Gold', 'Platinum']).catch('Bronze'),
-  badge_codes: z.preprocess((value) => (Array.isArray(value) ? value : []), z.array(z.string())),
+  badge_tier: z.enum(["Bronze", "Silver", "Gold", "Platinum"]).catch("Bronze"),
+  badge_codes: z.preprocess(
+    (value) => (Array.isArray(value) ? value : []),
+    z.array(z.string()),
+  ),
   achievements: z.preprocess(
     (value) => (Array.isArray(value) ? value : []),
     z.array(leaderboardAchievementSchema),
   ),
-  insights: z.preprocess((value) => (Array.isArray(value) ? value : []), z.array(leaderboardInsightSchema)),
+  insights: z.preprocess(
+    (value) => (Array.isArray(value) ? value : []),
+    z.array(leaderboardInsightSchema),
+  ),
   challenges: z.preprocess(
     (value) => (Array.isArray(value) ? value : []),
     z.array(leaderboardChallengeSchema),
@@ -189,11 +203,11 @@ export async function fetchLeaderboardRows(params: {
 }): Promise<LeaderboardRowRecord[]> {
   const { companyId, period } = params;
   const { data, error } = await supabase
-    .from('gamification_leaderboard')
+    .from("gamification_leaderboard")
     .select(LEADERBOARD_SELECT)
-    .eq('company_id', companyId)
-    .eq('period', period)
-    .order('xp_total', { ascending: false });
+    .eq("company_id", companyId)
+    .eq("period", period)
+    .order("xp_total", { ascending: false });
 
   if (error) {
     throw error;
@@ -212,7 +226,7 @@ export async function fetchLeaderboardProfiles(params: {
   }
 
   const { data, error } = await supabase
-    .from('profiles')
+    .from("profiles")
     .select(
       `
         id,
@@ -234,8 +248,8 @@ export async function fetchLeaderboardProfiles(params: {
         )
       `,
     )
-    .eq('company_id', companyId)
-    .in('id', ids);
+    .eq("company_id", companyId)
+    .in("id", ids);
 
   if (error) {
     throw error;

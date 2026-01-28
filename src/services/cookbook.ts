@@ -1,6 +1,10 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { InventoryItem, InventoryRecipeLine, InventoryUnit } from '@/features/inventory/hooks/types';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  InventoryItem,
+  InventoryRecipeLine,
+  InventoryUnit,
+} from "@/features/inventory/hooks/types";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
 
 export interface RecipeNutrition {
   calories?: number;
@@ -50,7 +54,7 @@ export class CookbookService {
    * Falls back to an empty array if no data exists.
    */
   static async listRecipes(): Promise<CookbookRecipe[]> {
-    const { data, error } = await supabase.from('inv_recipes').select(`
+    const { data, error } = await supabase.from("inv_recipes").select(`
       id,
       item_id,
       ingredient_id,
@@ -76,7 +80,10 @@ export class CookbookService {
       return [];
     }
 
-    const grouped = new Map<string, { item: InventoryItem; lines: InventoryRecipeLine[] }>();
+    const grouped = new Map<
+      string,
+      { item: InventoryItem; lines: InventoryRecipeLine[] }
+    >();
 
     (data as unknown as RawRecipeRecord[]).forEach((row) => {
       if (!row.recipe_item) {
@@ -105,17 +112,21 @@ export class CookbookService {
     });
 
     return Array.from(grouped.values()).map(({ item, lines }) =>
-      CookbookService.enrichRecipeFromLines(item, lines)
+      CookbookService.enrichRecipeFromLines(item, lines),
     );
   }
 
   /**
    * Compute helpful aggregates for a recipe such as costing and yield metadata.
    */
-  static enrichRecipeFromLines(item: InventoryItem, lines: InventoryRecipeLine[]): CookbookRecipe {
+  static enrichRecipeFromLines(
+    item: InventoryItem,
+    lines: InventoryRecipeLine[],
+  ): CookbookRecipe {
     const yieldQuantity =
       item.unit_quantity ||
-      lines.find((line) => typeof line.yield_amount === 'number')?.yield_amount ||
+      lines.find((line) => typeof line.yield_amount === "number")
+        ?.yield_amount ||
       1;
 
     const totalCost = lines.reduce((acc, line) => {
@@ -146,30 +157,30 @@ export class CookbookService {
     const nutrition: RecipeNutrition = {};
     const matches = description.split(/;|\n/).map((section) => section.trim());
     matches.forEach((section) => {
-      const [keyRaw, valueRaw] = section.split(':').map((part) => part.trim());
+      const [keyRaw, valueRaw] = section.split(":").map((part) => part.trim());
       if (!keyRaw || !valueRaw) return;
 
-      const valueNumeric = Number.parseFloat(valueRaw.replace(/[^\d.]/g, ''));
+      const valueNumeric = Number.parseFloat(valueRaw.replace(/[^\d.]/g, ""));
       if (Number.isNaN(valueNumeric)) return;
 
       switch (keyRaw.toLowerCase()) {
-        case 'calories':
+        case "calories":
           nutrition.calories = valueNumeric;
           break;
-        case 'protein':
+        case "protein":
           nutrition.protein = valueNumeric;
           break;
-        case 'carbs':
-        case 'carbohydrates':
+        case "carbs":
+        case "carbohydrates":
           nutrition.carbs = valueNumeric;
           break;
-        case 'fat':
+        case "fat":
           nutrition.fat = valueNumeric;
           break;
-        case 'sodium':
+        case "sodium":
           nutrition.sodium = valueNumeric;
           break;
-        case 'fiber':
+        case "fiber":
           nutrition.fiber = valueNumeric;
           break;
         default:
@@ -188,24 +199,24 @@ export class CookbookService {
     const userId = auth.user?.id;
 
     if (!userId) {
-      throw new Error('Authentication required to log production events');
+      throw new Error("Authentication required to log production events");
     }
 
     const payload = {
       item_id: event.item_id,
-      prep_date: new Date().toISOString().split('T')[0],
+      prep_date: new Date().toISOString().split("T")[0],
       planned_quantity: event.quantity,
       actual_quantity: event.quantity,
       batch_size: event.quantity,
       batches_made: 1,
-      status: 'completed',
+      status: "completed",
       notes: event.note ?? null,
       prep_location_id: event.location_id ?? null,
       created_by: userId,
     };
 
     const { data, error } = await supabase
-      .from('inv_prep_batches')
+      .from("inv_prep_batches")
       .insert(payload)
       .select()
       .single();
@@ -222,8 +233,9 @@ export class CookbookService {
     since.setDate(since.getDate() - days);
 
     const { data, error } = await supabase
-      .from('inv_prep_batches')
-      .select(`
+      .from("inv_prep_batches")
+      .select(
+        `
         *,
         item:inv_items(
           id,
@@ -231,9 +243,10 @@ export class CookbookService {
           unit_id,
           unit:inv_units(*)
         )
-      `)
-      .gte('prep_date', since.toISOString().split('T')[0])
-      .order('prep_date', { ascending: false })
+      `,
+      )
+      .gte("prep_date", since.toISOString().split("T")[0])
+      .order("prep_date", { ascending: false })
       .limit(100);
 
     if (error) throw error;
@@ -254,11 +267,11 @@ export class CookbookService {
           if (deductionQty <= 0) return Promise.resolve();
           return InventoryService.adjustQuantity({
             item_id: line.ingredient_id,
-            adjustment_type: 'decrease',
+            adjustment_type: "decrease",
             quantity: deductionQty,
             reason: `Recipe production: ${recipe.item.name}`,
           });
-        })
+        }),
     );
   }
 
@@ -266,13 +279,19 @@ export class CookbookService {
    * Create a CSV payload for a recipe sheet that can be downloaded client-side.
    */
   static buildRecipeSheetCsv(recipe: CookbookRecipe) {
-    const headers = ['Ingredient', 'Quantity', 'Unit', 'Unit Cost', 'Line Cost'];
+    const headers = [
+      "Ingredient",
+      "Quantity",
+      "Unit",
+      "Unit Cost",
+      "Line Cost",
+    ];
     const rows = recipe.lines.map((line) => {
-      const unitName = line.unit?.abbreviation || line.unit?.name || '';
+      const unitName = line.unit?.abbreviation || line.unit?.name || "";
       const ingredientCost = line.ingredient?.cost_per_unit ?? 0;
       const lineCost = ingredientCost * line.quantity_needed;
       return [
-        line.ingredient?.name ?? 'Unknown',
+        line.ingredient?.name ?? "Unknown",
         line.quantity_needed,
         unitName,
         ingredientCost.toFixed(2),
@@ -281,37 +300,52 @@ export class CookbookService {
     });
 
     rows.push([]);
-    rows.push(['Total Cost', '', '', '', recipe.totalCost.toFixed(2)]);
-    rows.push(['Yield Quantity', recipe.yieldQuantity, recipe.yieldUnit?.abbreviation || '', '', '']);
-    rows.push(['Cost Per Unit', '', '', '', recipe.costPerUnit.toFixed(2)]);
+    rows.push(["Total Cost", "", "", "", recipe.totalCost.toFixed(2)]);
+    rows.push([
+      "Yield Quantity",
+      recipe.yieldQuantity,
+      recipe.yieldUnit?.abbreviation || "",
+      "",
+      "",
+    ]);
+    rows.push(["Cost Per Unit", "", "", "", recipe.costPerUnit.toFixed(2)]);
 
-    return [headers, ...rows].map((row) => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 
   /**
    * Build a CSV payload representing a daily prep summary for the provided recipes.
    */
-  static buildPrepSummaryCsv(summary: Array<{
-    recipeId: string;
-    recipeName: string;
-    scheduledQty: number;
-    uom?: string;
-    ingredients: Array<{ name: string; quantity: number; unit?: string }>;
-  }>) {
-    const headers = ['Recipe', 'Scheduled Qty', 'UOM', 'Ingredient', 'Ingredient Qty', 'Ingredient Unit'];
+  static buildPrepSummaryCsv(
+    summary: Array<{
+      recipeId: string;
+      recipeName: string;
+      scheduledQty: number;
+      uom?: string;
+      ingredients: Array<{ name: string; quantity: number; unit?: string }>;
+    }>,
+  ) {
+    const headers = [
+      "Recipe",
+      "Scheduled Qty",
+      "UOM",
+      "Ingredient",
+      "Ingredient Qty",
+      "Ingredient Unit",
+    ];
     const rows = summary.flatMap((entry) =>
       entry.ingredients.length
         ? entry.ingredients.map((ing) => [
             entry.recipeName,
             entry.scheduledQty,
-            entry.uom || '',
+            entry.uom || "",
             ing.name,
             ing.quantity,
-            ing.unit || '',
+            ing.unit || "",
           ])
-        : [[entry.recipeName, entry.scheduledQty, entry.uom || '', '', '', '']]
+        : [[entry.recipeName, entry.scheduledQty, entry.uom || "", "", "", ""]],
     );
 
-    return [headers, ...rows].map((row) => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 }

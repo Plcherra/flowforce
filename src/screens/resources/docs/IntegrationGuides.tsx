@@ -1,24 +1,29 @@
-
-import { useTranslation } from 'react-i18next';
-import Breadcrumbs from '@/components/resources/Breadcrumbs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Puzzle, Clock } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
-import { useToast } from '@/hooks/use-toast';
-import { IntegrationCard } from '@/components/resources/integrations/IntegrationCard';
-import { CustomIntegrationsSection } from '@/components/resources/integrations/CustomIntegrationsSection';
-import { GettingStartedSection } from '@/components/resources/integrations/GettingStartedSection';
-import { integrations } from '@/data/integrations';
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "@/components/resources/Breadcrumbs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Puzzle, Clock } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
+import { useToast } from "@/hooks/use-toast";
+import { IntegrationCard } from "@/components/resources/integrations/IntegrationCard";
+import { CustomIntegrationsSection } from "@/components/resources/integrations/CustomIntegrationsSection";
+import { GettingStartedSection } from "@/components/resources/integrations/GettingStartedSection";
+import { integrations } from "@/data/integrations";
 
 export default function IntegrationGuides() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
   const breadcrumbItems = [
-    { label: t('landing.resources'), href: '/resources' },
-    { label: t('resources.documentation.title'), href: '/resources' },
-    { label: 'Integration Guides' },
+    { label: t("landing.resources"), href: "/resources" },
+    { label: t("resources.documentation.title"), href: "/resources" },
+    { label: "Integration Guides" },
   ];
 
   const handleStartIntegration = (integrationName: string) => {
@@ -26,7 +31,7 @@ export default function IntegrationGuides() {
       title: "Integration Started",
       description: `Starting ${integrationName} integration setup. You would typically be redirected to the integration flow or settings page.`,
     });
-    
+
     // Here you would typically redirect to the actual integration page or open a modal
   };
 
@@ -37,7 +42,7 @@ export default function IntegrationGuides() {
           <Breadcrumbs items={breadcrumbItems} />
           <BackButton />
         </div>
-        
+
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
@@ -63,15 +68,16 @@ export default function IntegrationGuides() {
             <div className="prose max-w-none">
               <h3>Popular Integrations</h3>
               <p>
-                FlowForce integrates seamlessly with popular business tools to streamline your workflow. 
-                Choose from our pre-built integrations or create custom connections using our API.
+                FlowForce integrates seamlessly with popular business tools to
+                streamline your workflow. Choose from our pre-built integrations
+                or create custom connections using our API.
               </p>
-              
+
               <div className="space-y-8 mt-8">
                 {integrations.map((integration, index) => (
-                  <IntegrationCard 
-                    key={index} 
-                    integration={integration} 
+                  <IntegrationCard
+                    key={index}
+                    integration={integration}
                     onStartIntegration={handleStartIntegration}
                   />
                 ))}

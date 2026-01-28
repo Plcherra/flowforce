@@ -1,8 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import type { InventoryLocation } from '@/features/inventory/hooks/types';
-import { logger } from '@/utils/logger';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import type { InventoryLocation } from "@/features/inventory/hooks/types";
+import { logger } from "@/utils/logger";
 
 const inventoryLocationSchema: z.ZodType<InventoryLocation> = z.object({
   id: z.string().uuid(),
@@ -30,16 +30,19 @@ export async function listInventoryLocations({
   const scopedCompanyId = companyId ?? (await resolveCompanyId());
 
   if (!scopedCompanyId) {
-    logger.warn('[inventory] listLocations called without an active company context', { tags: ['warning'] });
+    logger.warn(
+      "[inventory] listLocations called without an active company context",
+      { tags: ["warning"] },
+    );
     return [];
   }
 
   const { data, error } = await client
-    .from('inv_locations')
-    .select('*')
-    .eq('company_id', scopedCompanyId)
-    .eq('is_active', true)
-    .order('name');
+    .from("inv_locations")
+    .select("*")
+    .eq("company_id", scopedCompanyId)
+    .eq("is_active", true)
+    .order("name");
 
   if (error) throw error;
   return (data ?? []).map((row) => inventoryLocationSchema.parse(row));
@@ -59,14 +62,17 @@ export async function createInventoryLocation({
   companyId,
 }: CreateInventoryLocationInput): Promise<InventoryLocation> {
   const { data, error } = await supabase
-    .from('inv_locations')
+    .from("inv_locations")
     .insert({
       name,
       location_type,
-      temperature_controlled: typeof temperature_controlled === 'boolean' ? temperature_controlled : null,
+      temperature_controlled:
+        typeof temperature_controlled === "boolean"
+          ? temperature_controlled
+          : null,
       company_id: companyId,
     })
-    .select('*')
+    .select("*")
     .single();
 
   if (error) throw error;
@@ -74,6 +80,6 @@ export async function createInventoryLocation({
 }
 
 export async function deleteInventoryLocation(id: string): Promise<void> {
-  const { error } = await supabase.from('inv_locations').delete().eq('id', id);
+  const { error } = await supabase.from("inv_locations").delete().eq("id", id);
   if (error) throw error;
 }

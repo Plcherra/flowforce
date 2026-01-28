@@ -1,7 +1,6 @@
-
-import { ReactNode } from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useCan } from '@/hooks/useCan';
+import { ReactNode } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useCan } from "@/hooks/useCan";
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -10,7 +9,12 @@ interface RoleGuardProps {
   fallback?: ReactNode;
 }
 
-export default function RoleGuard({ children, roles, permission, fallback = null }: RoleGuardProps) {
+export default function RoleGuard({
+  children,
+  roles,
+  permission,
+  fallback = null,
+}: RoleGuardProps) {
   const { hasRole } = usePermissions();
   const { can, isLoading } = useCan();
 

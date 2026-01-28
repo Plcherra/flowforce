@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ImageIcon, Upload, X, Camera } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import React, { useState, useCallback, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ImageIcon, Upload, X, Camera } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface ImageUploadFieldProps {
   label: string;
@@ -25,119 +25,127 @@ export function ImageUploadField({
   required = false,
   maxFiles = 5,
   maxSize = 10,
-  className = ""
+  className = "",
 }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFile = useCallback(async (file: File): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `form-images/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('form-images')
+        .from("form-images")
         .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: "3600",
+          upsert: false,
         });
 
       if (uploadError) {
-        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
+        logger.error("Upload error:", { error: uploadError, tags: ["error"] });
         return null;
       }
 
       const { data } = supabase.storage
-        .from('form-images')
+        .from("form-images")
         .getPublicUrl(filePath);
 
       return data.publicUrl;
     } catch (error) {
-      logger.error('Error uploading file:', { error, tags: ['error'] });
+      logger.error("Error uploading file:", { error, tags: ["error"] });
       return null;
     }
   }, []);
 
-  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    
-    if (files.length === 0) return;
+  const handleFileSelect = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []);
 
-    // Check file count limit
-    if (value.length + files.length > maxFiles) {
-      toast({
-        title: "Error",
-        description: `Maximum ${maxFiles} images allowed`,
-        variant: "destructive",
-      });
-      return;
-    }
+      if (files.length === 0) return;
 
-    // Check file size and type
-    for (const file of files) {
-      if (file.size > maxSize * 1024 * 1024) {
+      // Check file count limit
+      if (value.length + files.length > maxFiles) {
         toast({
           title: "Error",
-          description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+          description: `Maximum ${maxFiles} images allowed`,
           variant: "destructive",
         });
         return;
       }
 
-      if (!file.type.startsWith('image/')) {
+      // Check file size and type
+      for (const file of files) {
+        if (file.size > maxSize * 1024 * 1024) {
+          toast({
+            title: "Error",
+            description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          toast({
+            title: "Error",
+            description: `File ${file.name} is not an image`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      setUploading(true);
+
+      try {
+        const uploadPromises = files.map((file) => uploadFile(file));
+        const results = await Promise.all(uploadPromises);
+
+        const successfulUploads = results.filter(
+          (url): url is string => url !== null,
+        );
+        const failedUploads = results.length - successfulUploads.length;
+
+        if (successfulUploads.length > 0) {
+          onChange([...value, ...successfulUploads]);
+          toast({
+            title: "Success",
+            description: `${successfulUploads.length} image(s) uploaded successfully`,
+          });
+        }
+
+        if (failedUploads > 0) {
+          toast({
+            title: "Warning",
+            description: `${failedUploads} image(s) failed to upload`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        logger.error("Error handling file upload:", { error, tags: ["error"] });
         toast({
           title: "Error",
-          description: `File ${file.name} is not an image`,
+          description: "Failed to upload images",
           variant: "destructive",
         });
-        return;
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
-    }
+    },
+    [value, onChange, maxFiles, maxSize, uploadFile],
+  );
 
-    setUploading(true);
-
-    try {
-      const uploadPromises = files.map(file => uploadFile(file));
-      const results = await Promise.all(uploadPromises);
-      
-      const successfulUploads = results.filter((url): url is string => url !== null);
-      const failedUploads = results.length - successfulUploads.length;
-
-      if (successfulUploads.length > 0) {
-        onChange([...value, ...successfulUploads]);
-        toast({
-          title: "Success",
-          description: `${successfulUploads.length} image(s) uploaded successfully`,
-        });
-      }
-
-      if (failedUploads > 0) {
-        toast({
-          title: "Warning",
-          description: `${failedUploads} image(s) failed to upload`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      logger.error('Error handling file upload:', { error, tags: ['error'] });
-      toast({
-        title: "Error",
-        description: "Failed to upload images",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [value, onChange, maxFiles, maxSize, uploadFile]);
-
-  const removeImage = useCallback((index: number) => {
-    const newValue = value.filter((_, i) => i !== index);
-    onChange(newValue);
-  }, [value, onChange]);
+  const removeImage = useCallback(
+    (index: number) => {
+      const newValue = value.filter((_, i) => i !== index);
+      onChange(newValue);
+    },
+    [value, onChange],
+  );
 
   const openFileDialog = useCallback(() => {
     fileInputRef.current?.click();
@@ -195,10 +203,9 @@ export function ImageUploadField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            {value.length === 0 
-              ? "No images uploaded yet" 
-              : `${value.length} of ${maxFiles} images uploaded`
-            }
+            {value.length === 0
+              ? "No images uploaded yet"
+              : `${value.length} of ${maxFiles} images uploaded`}
           </p>
           <div className="flex gap-2 justify-center">
             <Button
@@ -225,7 +232,7 @@ export function ImageUploadField({
 export function ImageUploadFieldPreview({
   label = "Image Upload",
   description = "Upload images for this form field",
-  className = ""
+  className = "",
 }: Partial<ImageUploadFieldProps>) {
   return (
     <ImageUploadField

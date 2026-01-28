@@ -3,17 +3,24 @@ import type {
   IntegrationStatus,
   IntegrationAuthType,
   IntegrationConnection,
-} from '@/types/system-settings';
-import { DEFAULT_INTEGRATIONS } from '../systemSettingsDefaults';
-import { asString, isRecord } from './helpers';
+} from "@/types/system-settings";
+import { DEFAULT_INTEGRATIONS } from "../systemSettingsDefaults";
+import { asString, isRecord } from "./helpers";
 
 export const normalizeIntegrations = (value: unknown): IntegrationsSettings => {
   const source = isRecord(value) ? value : {};
   const providersSource = isRecord(source.providers) ? source.providers : {};
-  const syncMappingsSource = isRecord(source.syncMappings) ? source.syncMappings : {};
-  const connectionsSource = Array.isArray(source.connections) ? source.connections : [];
+  const syncMappingsSource = isRecord(source.syncMappings)
+    ? source.syncMappings
+    : {};
+  const connectionsSource = Array.isArray(source.connections)
+    ? source.connections
+    : [];
 
-  const providers: Record<string, { status: IntegrationStatus; authType: IntegrationAuthType }> = {
+  const providers: Record<
+    string,
+    { status: IntegrationStatus; authType: IntegrationAuthType }
+  > = {
     ...DEFAULT_INTEGRATIONS.providers,
   };
 
@@ -23,13 +30,14 @@ export const normalizeIntegrations = (value: unknown): IntegrationsSettings => {
     const authCandidate = asString(providerRecord.authType);
     if (!providers[key]) {
       providers[key] = {
-        status: 'disconnected',
-        authType: 'api_key',
+        status: "disconnected",
+        authType: "api_key",
       };
     }
     providers[key] = {
       status: (statusCandidate as IntegrationStatus) ?? providers[key].status,
-      authType: (authCandidate as IntegrationAuthType) ?? providers[key].authType,
+      authType:
+        (authCandidate as IntegrationAuthType) ?? providers[key].authType,
     };
   });
 
@@ -38,9 +46,9 @@ export const normalizeIntegrations = (value: unknown): IntegrationsSettings => {
     .filter((entry): entry is Record<string, unknown> => entry !== null)
     .map((value) => ({
       id: asString(value.id) ?? `tmp-${Date.now()}`,
-      provider: asString(value.provider) ?? 'unknown',
-      status: (asString(value.status) as IntegrationStatus) ?? 'disconnected',
-      authType: (asString(value.authType) as IntegrationAuthType) ?? 'api_key',
+      provider: asString(value.provider) ?? "unknown",
+      status: (asString(value.status) as IntegrationStatus) ?? "disconnected",
+      authType: (asString(value.authType) as IntegrationAuthType) ?? "api_key",
       connectedAt: asString(value.connectedAt),
       lastSyncedAt: asString(value.lastSyncedAt),
       metadata: isRecord(value.metadata) ? value.metadata : undefined,

@@ -1,12 +1,24 @@
-import type { KeyboardEvent } from 'react';
-import { Edit, Loader2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { FormWithMeta } from '@/hooks/useForms';
-import { formatDate, getOwnerName, getStatusColor, getTypeLabel } from '@/components/forms/form-utils';
+import type { KeyboardEvent } from "react";
+import { Edit, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { FormWithMeta } from "@/hooks/useForms";
+import {
+  formatDate,
+  getOwnerName,
+  getStatusColor,
+  getTypeLabel,
+} from "@/components/forms/form-utils";
 
 interface FormsSectionProps {
   title: string;
@@ -25,14 +37,17 @@ export function FormsSection({
   loading,
   refreshing = false,
   canEdit = true,
-  emptyMessage = 'No forms to display.',
+  emptyMessage = "No forms to display.",
   onFill,
   onEdit,
 }: FormsSectionProps) {
   const skeletonRows = Array.from({ length: 3 });
 
-  const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, formId: string) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+  const handleRowKeyDown = (
+    event: KeyboardEvent<HTMLTableRowElement>,
+    formId: string,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onFill(formId);
     }
@@ -53,7 +68,9 @@ export function FormsSection({
                   <TableHead>Created</TableHead>
                   <TableHead>Last edited</TableHead>
                   <TableHead>Owner</TableHead>
-                  {canEdit && <TableHead className="w-[60px] text-center">Edit</TableHead>}
+                  {canEdit && (
+                    <TableHead className="w-[60px] text-center">Edit</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -88,7 +105,9 @@ export function FormsSection({
             </Table>
           </div>
         ) : forms.length === 0 ? (
-          <div className="p-6 text-sm text-muted-foreground">{emptyMessage}</div>
+          <div className="p-6 text-sm text-muted-foreground">
+            {emptyMessage}
+          </div>
         ) : (
           <div className="relative">
             {refreshing && (
@@ -97,7 +116,11 @@ export function FormsSection({
                 Syncing
               </div>
             )}
-            <Table className={refreshing ? 'opacity-60 transition-opacity' : undefined}>
+            <Table
+              className={
+                refreshing ? "opacity-60 transition-opacity" : undefined
+              }
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -106,7 +129,9 @@ export function FormsSection({
                   <TableHead>Created</TableHead>
                   <TableHead>Last edited</TableHead>
                   <TableHead>Owner</TableHead>
-                  {canEdit && <TableHead className="w-[60px] text-center">Edit</TableHead>}
+                  {canEdit && (
+                    <TableHead className="w-[60px] text-center">Edit</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -123,10 +148,16 @@ export function FormsSection({
                     <TableCell className="font-medium">{form.title}</TableCell>
                     <TableCell>{getTypeLabel(form)}</TableCell>
                     <TableCell>
-                      <Badge className={`${getStatusColor(form.status)} capitalize`}>{form.status}</Badge>
+                      <Badge
+                        className={`${getStatusColor(form.status)} capitalize`}
+                      >
+                        {form.status}
+                      </Badge>
                     </TableCell>
                     <TableCell>{formatDate(form.created_at)}</TableCell>
-                    <TableCell>{formatDate(form.updated_at || form.created_at)}</TableCell>
+                    <TableCell>
+                      {formatDate(form.updated_at || form.created_at)}
+                    </TableCell>
                     <TableCell>{getOwnerName(form)}</TableCell>
                     {canEdit && (
                       <TableCell onClick={(event) => event.stopPropagation()}>

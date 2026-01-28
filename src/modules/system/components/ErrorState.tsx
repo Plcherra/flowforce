@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 type ErrorStateProps = {
   title?: string;
@@ -6,7 +6,11 @@ type ErrorStateProps = {
   onRetry?: () => void;
 };
 
-export function ErrorState({ title = 'Something went wrong', message, onRetry }: ErrorStateProps) {
+export function ErrorState({
+  title = "Something went wrong",
+  message,
+  onRetry,
+}: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center">
       <div>

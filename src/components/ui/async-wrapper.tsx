@@ -1,8 +1,14 @@
-import React, { ReactNode } from 'react';
-import { LoadingSpinner, PageLoading } from './loading-states';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
-import { Button } from './button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { ReactNode } from "react";
+import { LoadingSpinner, PageLoading } from "./loading-states";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
+import { Button } from "./button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface AsyncWrapperProps {
   children: ReactNode;
@@ -28,9 +34,9 @@ export function AsyncWrapper({
   errorComponent,
   emptyState,
   isEmpty = false,
-  loadingText = 'Loading...',
-  errorTitle = 'Something went wrong',
-  errorDescription = 'An error occurred while loading the data.'
+  loadingText = "Loading...",
+  errorTitle = "Something went wrong",
+  errorDescription = "An error occurred while loading the data.",
 }: AsyncWrapperProps) {
   // Loading state
   if (isLoading) {
@@ -45,9 +51,9 @@ export function AsyncWrapper({
     if (errorComponent) {
       return <>{errorComponent}</>;
     }
-    
-    const errorMessage = typeof error === 'string' ? error : error.message;
-    
+
+    const errorMessage = typeof error === "string" ? error : error.message;
+
     return (
       <Card className="w-full">
         <CardHeader className="text-center">
@@ -88,9 +94,9 @@ export function DataListWrapper({
   error,
   onRetry,
   data,
-  emptyTitle = 'No data found',
-  emptyDescription = 'There is no data to display at the moment.',
-  loadingText = 'Loading data...'
+  emptyTitle = "No data found",
+  emptyDescription = "There is no data to display at the moment.",
+  loadingText = "Loading data...",
 }: {
   children: ReactNode;
   isLoading: boolean;
@@ -102,7 +108,7 @@ export function DataListWrapper({
   loadingText?: string;
 }) {
   const isEmpty = !data || data.length === 0;
-  
+
   const emptyState = (
     <Card className="w-full">
       <CardContent className="text-center py-8">
@@ -138,8 +144,8 @@ export function PageAsyncWrapper({
   isLoading,
   error,
   onRetry,
-  loadingTitle = 'Loading...',
-  loadingDescription
+  loadingTitle = "Loading...",
+  loadingDescription,
 }: {
   children: ReactNode;
   isLoading: boolean;

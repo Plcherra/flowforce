@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import type { RecognitionRecord } from '@/types/recognition';
+import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import type { RecognitionRecord } from "@/types/recognition";
 import {
   recognitionRepository,
   type ManualRecognitionInput,
-} from '@/features/recognitions/api/recognitionRepository';
+} from "@/features/recognitions/api/recognitionRepository";
 
 const DEFAULT_LOOKBACK_DAYS = 365;
-const RECOGNITIONS_QUERY_KEY = 'recognitions';
+const RECOGNITIONS_QUERY_KEY = "recognitions";
 
 type UseRecognitionsOptions = {
   lookbackDays?: number | null;
@@ -24,8 +24,8 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
   const requestedLookback = options?.lookbackDays;
   const lookbackKey =
     requestedLookback === null
-      ? 'all'
-      : typeof requestedLookback === 'number'
+      ? "all"
+      : typeof requestedLookback === "number"
         ? requestedLookback
         : DEFAULT_LOOKBACK_DAYS;
 
@@ -60,7 +60,7 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
   const createManualRecognitionMutation = useMutation({
     mutationFn: async (input: ManualRecognitionInput) => {
       if (!companyId || !user?.id) {
-        throw new Error('You must be signed in to create recognitions.');
+        throw new Error("You must be signed in to create recognitions.");
       }
       await recognitionRepository.createManualRecognition({
         companyId,
@@ -74,7 +74,7 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
   const automationMutation = useMutation({
     mutationFn: async () => {
       if (!companyId || !user?.id) {
-        throw new Error('You must be signed in to sync recognitions.');
+        throw new Error("You must be signed in to sync recognitions.");
       }
       await recognitionRepository.syncRecognitionAutomation({
         companyId,
@@ -88,7 +88,9 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
     recognitions: recognitionsQuery.data ?? [],
     loading: recognitionsQuery.isLoading,
     syncing: automationMutation.isPending,
-    error: recognitionsQuery.error ? (recognitionsQuery.error as Error).message : null,
+    error: recognitionsQuery.error
+      ? (recognitionsQuery.error as Error).message
+      : null,
     refresh: () => recognitionsQuery.refetch(),
     syncAutomation: automationMutation.mutateAsync,
     createManualRecognition: createManualRecognitionMutation.mutateAsync,

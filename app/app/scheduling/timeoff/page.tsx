@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import TimeOffPage from '@/screens/TimeOff';
+import TimeOffPage from "@/screens/TimeOff";
 
 export default function TimeOff() {
   return <TimeOffPage />;

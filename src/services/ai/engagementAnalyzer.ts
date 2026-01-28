@@ -1,5 +1,5 @@
-import OpenAI from 'openai';
-import { appEnv } from '@/lib/env';
+import OpenAI from "openai";
+import { appEnv } from "@/lib/env";
 
 const apiKey = appEnv.VITE_OPENAI_API_KEY;
 
@@ -24,9 +24,15 @@ type AnalyzeEngagementResult = {
   summary: string;
 };
 
-export async function analyzeEngagement({ title, body, metrics }: AnalyzeEngagementInput): Promise<AnalyzeEngagementResult> {
+export async function analyzeEngagement({
+  title,
+  body,
+  metrics,
+}: AnalyzeEngagementInput): Promise<AnalyzeEngagementResult> {
   const { likes, comments, views } = metrics;
-  const engagementScore = Math.round((likes * 2 + comments * 3 + views * 0.5) / 10);
+  const engagementScore = Math.round(
+    (likes * 2 + comments * 3 + views * 0.5) / 10,
+  );
 
   const prompt = `
   You are an HR analytics assistant.
@@ -45,15 +51,15 @@ export async function analyzeEngagement({ title, body, metrics }: AnalyzeEngagem
   `;
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
   });
 
-  const text = completion.choices[0]?.message?.content ?? '';
+  const text = completion.choices[0]?.message?.content ?? "";
   const normalizedText = text.toLowerCase();
-  const sentimentScore = normalizedText.includes('positive')
+  const sentimentScore = normalizedText.includes("positive")
     ? 0.8
-    : normalizedText.includes('neutral')
+    : normalizedText.includes("neutral")
       ? 0.0
       : -0.5;
 

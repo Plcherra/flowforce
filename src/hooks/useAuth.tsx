@@ -1,36 +1,51 @@
 /**
  * Authentication hooks and context provider
- * 
+ *
  * Provides authentication state management, sign-in, sign-up, password reset,
  * and session management functionality for the application.
- * 
+ *
  * @module hooks/useAuth
  * @example
  * ```typescript
  * const { user, signIn, signOut } = useAuth();
- * 
+ *
  * // Sign in
  * const { error } = await signIn('user@example.com', 'password');
- * 
+ *
  * // Sign out
  * await signOut();
  * ```
  */
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { AuthError, UserMetadata } from '@/types/common';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/config';
-import { logger } from '@/utils/logger';
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { AuthError, UserMetadata } from "@/types/common";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/config";
+import { logger } from "@/utils/logger";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, metadata?: UserMetadata) => Promise<{ error: AuthError | null }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ error: AuthError | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    metadata?: UserMetadata,
+  ) => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   updatePassword: (password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -39,20 +54,29 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_ERROR_FALLBACK: AuthError = {
-  message: 'Something went wrong while communicating with the authentication service.',
+  message:
+    "Something went wrong while communicating with the authentication service.",
 };
 
 const normalizeAuthError = (error: unknown): AuthError => {
-  if (error && typeof error === 'object') {
-    const authError = error as { message?: string; status?: number; code?: string };
+  if (error && typeof error === "object") {
+    const authError = error as {
+      message?: string;
+      status?: number;
+      code?: string;
+    };
     return {
-      message: typeof authError.message === 'string' && authError.message.length > 0 ? authError.message : AUTH_ERROR_FALLBACK.message,
-      status: typeof authError.status === 'number' ? authError.status : undefined,
-      code: typeof authError.code === 'string' ? authError.code : undefined,
+      message:
+        typeof authError.message === "string" && authError.message.length > 0
+          ? authError.message
+          : AUTH_ERROR_FALLBACK.message,
+      status:
+        typeof authError.status === "number" ? authError.status : undefined,
+      code: typeof authError.code === "string" ? authError.code : undefined,
     };
   }
 
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return { message: error };
   }
 
@@ -67,7 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!isMounted) return;
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
@@ -82,7 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(data.session);
         setUser(data.session?.user ?? null);
       } catch (error) {
-        logger.error('Failed to hydrate auth session', { error, tags: ['error'] });
+        logger.error("Failed to hydrate auth session", {
+          error,
+          tags: ["error"],
+        });
         if (isMounted) {
           setSession(null);
           setUser(null);
@@ -95,7 +124,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     hydrateSession().catch((error) => {
-      logger.error('Unexpected auth initialization error', { error, tags: ['error'] });
+      logger.error("Unexpected auth initialization error", {
+        error,
+        tags: ["error"],
+      });
       if (isMounted) {
         setLoading(false);
       }
@@ -109,11 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Sign in with email and password
-   * 
+   *
    * @param email - User email address
    * @param password - User password
    * @returns Object with error property (null if successful)
-   * 
+   *
    * @example
    * ```typescript
    * const { error } = await signIn('user@example.com', 'password123');
@@ -125,16 +157,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       // Check if Supabase is configured by checking the config values
-      if (!SUPABASE_URL || !SUPABASE_ANON_KEY || 
-          SUPABASE_URL.includes('placeholder') || 
-          SUPABASE_ANON_KEY.includes('placeholder')) {
+      if (
+        !SUPABASE_URL ||
+        !SUPABASE_ANON_KEY ||
+        SUPABASE_URL.includes("placeholder") ||
+        SUPABASE_ANON_KEY.includes("placeholder")
+      ) {
         const error = {
-          message: 'Supabase is not configured. Please create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for details.',
+          message:
+            "Supabase is not configured. Please create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for details.",
         };
         toast({
-          title: 'Configuration Error',
+          title: "Configuration Error",
           description: error.message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return { error };
       }
@@ -147,14 +183,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         // Provide more helpful error messages
         let errorMessage = error.message;
-        if (error.message.includes('Invalid API key') || error.message.includes('invalid_api_key')) {
-          errorMessage = 'Invalid API key. Please check your .env.local file has the correct NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for help.';
+        if (
+          error.message.includes("Invalid API key") ||
+          error.message.includes("invalid_api_key")
+        ) {
+          errorMessage =
+            "Invalid API key. Please check your .env.local file has the correct NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for help.";
         }
-        
+
         toast({
-          title: 'Sign In Failed',
+          title: "Sign In Failed",
           description: errorMessage,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return { error: { ...error, message: errorMessage } };
       }
@@ -163,9 +203,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: 'Sign In Failed',
+        title: "Sign In Failed",
         description: normalizedError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error: normalizedError };
     }
@@ -173,14 +213,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Sign up a new user with email and password
-   * 
+   *
    * @param email - User email address
    * @param password - User password
    * @param firstName - User first name
    * @param lastName - User last name
    * @param metadata - Optional user metadata
    * @returns Object with error property (null if successful)
-   * 
+   *
    * @example
    * ```typescript
    * const { error } = await signUp(
@@ -199,7 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     metadata: UserMetadata = {} as UserMetadata,
   ) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -216,25 +256,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: 'Sign Up Failed',
+          title: "Sign Up Failed",
           description: error.message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return { error };
       }
 
       toast({
-        title: 'Check your email',
-        description: "We've sent you a confirmation link to complete your registration.",
+        title: "Check your email",
+        description:
+          "We've sent you a confirmation link to complete your registration.",
       });
 
       return { error: null };
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: 'Sign Up Failed',
+        title: "Sign Up Failed",
         description: normalizedError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error: normalizedError };
     }
@@ -248,15 +289,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: 'Reset Failed',
+          title: "Reset Failed",
           description: error.message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return { error };
       }
 
       toast({
-        title: 'Check your email',
+        title: "Check your email",
         description: "We've sent you a password reset link.",
       });
 
@@ -264,9 +305,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: 'Reset Failed',
+        title: "Reset Failed",
         description: normalizedError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error: normalizedError };
     }
@@ -278,25 +319,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: 'Password Update Failed',
+          title: "Password Update Failed",
           description: error.message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         return { error };
       }
 
       toast({
-        title: 'Password Updated',
-        description: 'Your password has been successfully updated.',
+        title: "Password Updated",
+        description: "Your password has been successfully updated.",
       });
 
       return { error: null };
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: 'Password Update Failed',
+        title: "Password Update Failed",
         description: normalizedError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
       return { error: normalizedError };
     }
@@ -310,15 +351,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: 'Signed out',
-        description: 'You have been successfully signed out.',
+        title: "Signed out",
+        description: "You have been successfully signed out.",
       });
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: 'Sign out failed',
+        title: "Sign out failed",
         description: normalizedError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   };
@@ -335,35 +376,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 
 /**
  * useAuth - Hook to access authentication context
- * 
+ *
  * Provides access to current user, session, loading state, and authentication methods.
  * Must be used within an AuthProvider.
- * 
+ *
  * @returns Authentication context with user, session, loading state, and auth methods
  * @throws Error if used outside AuthProvider
- * 
+ *
  * @example
  * ```typescript
  * const { user, loading, signIn, signOut } = useAuth();
- * 
+ *
  * if (loading) return <Loading />;
  * if (!user) return <LoginForm />;
- * 
+ *
  * return <Dashboard user={user} />;
  * ```
  */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

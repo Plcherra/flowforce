@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useEffect, useMemo, useRef } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Heart,
   MessageCircle,
@@ -12,11 +12,22 @@ import {
   MoreHorizontal,
   Archive,
   Trash2,
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
-import { getBackgroundCss, getTypeColor, getUpdateIcon, getEngagementSettings } from '@/features/company-updates/utils';
-import type { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { formatDistanceToNow } from "date-fns";
+import {
+  getBackgroundCss,
+  getTypeColor,
+  getUpdateIcon,
+  getEngagementSettings,
+} from "@/features/company-updates/utils";
+import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 
 interface UpdateFeedCardProps {
   update: CompanyUpdate;
@@ -89,9 +100,15 @@ export function UpdateFeedCard({
   }, [onView, update.id, viewerHasViewed]);
 
   return (
-    <Card ref={cardRef} className={update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}>
+    <Card
+      ref={cardRef}
+      className={update.isPinned ? "ring-2 ring-primary/20 bg-primary/5" : ""}
+    >
       {update.backgroundStyle && (
-        <div className="h-2 w-full" style={{ background: getBackgroundCss(update.backgroundStyle) }} />
+        <div
+          className="h-2 w-full"
+          style={{ background: getBackgroundCss(update.backgroundStyle) }}
+        />
       )}
       <CardHeader className="pb-3 px-4 pt-4">
         <div className="flex items-start justify-between gap-3">
@@ -100,26 +117,34 @@ export function UpdateFeedCard({
               <AvatarImage src={update.author.avatar} />
               <AvatarFallback className="text-xs">
                 {update.author.name
-                  .split(' ')
+                  .split(" ")
                   .map((part) => part[0])
-                  .join('')}
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-sm truncate">{update.author.name}</h3>
+                <h3 className="font-semibold text-sm truncate">
+                  {update.author.name}
+                </h3>
                 {update.author.role && (
                   <Badge variant="outline" className="text-xs shrink-0">
                     {update.author.role}
                   </Badge>
                 )}
-                {update.isPinned && <Pin className="h-3 w-3 text-primary shrink-0" />}
+                {update.isPinned && (
+                  <Pin className="h-3 w-3 text-primary shrink-0" />
+                )}
               </div>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(update.publishDate), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(update.publishDate), {
+                    addSuffix: true,
+                  })}
                 </span>
-                <Badge className={`text-xs ${getTypeColor(update.type)} flex items-center gap-1`}>
+                <Badge
+                  className={`text-xs ${getTypeColor(update.type)} flex items-center gap-1`}
+                >
                   {getUpdateIcon(update.type)}
                   <span className="capitalize">{update.type}</span>
                 </Badge>
@@ -156,14 +181,18 @@ export function UpdateFeedCard({
       <CardContent className="px-4 pb-4">
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-bold mb-2 leading-tight">{update.title}</h2>
+            <h2 className="text-lg font-bold mb-2 leading-tight">
+              {update.title}
+            </h2>
             {update.richContent ? (
               <div
                 className="prose prose-sm max-w-none dark:prose-invert"
                 dangerouslySetInnerHTML={{ __html: update.richContent }}
               />
             ) : (
-              <p className="text-foreground leading-relaxed text-sm">{update.body}</p>
+              <p className="text-foreground leading-relaxed text-sm">
+                {update.body}
+              </p>
             )}
           </div>
 
@@ -193,9 +222,11 @@ export function UpdateFeedCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => onLike(update.id)}
-                  className={`h-8 px-3 ${isLiked ? 'text-red-600 hover:text-red-700' : ''}`}
+                  className={`h-8 px-3 ${isLiked ? "text-red-600 hover:text-red-700" : ""}`}
                 >
-                  <Heart className={`h-4 w-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+                  <Heart
+                    className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`}
+                  />
                   <span className="text-xs">Like</span>
                 </Button>
               )}
@@ -219,7 +250,9 @@ export function UpdateFeedCard({
                 <Textarea
                   placeholder="Write a comment..."
                   value={commentValue}
-                  onChange={(event) => onCommentChange(update.id, event.target.value)}
+                  onChange={(event) =>
+                    onCommentChange(update.id, event.target.value)
+                  }
                   className="min-h-[60px] resize-none text-sm"
                   aria-invalid={Boolean(commentError)}
                 />
@@ -246,20 +279,26 @@ export function UpdateFeedCard({
                     <AvatarImage src={comment.author.avatar} />
                     <AvatarFallback className="text-xs">
                       {comment.author.name
-                        .split(' ')
+                        .split(" ")
                         .map((part) => part[0])
-                        .join('')}
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="bg-muted/50 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-xs truncate">{comment.author.name}</span>
+                        <span className="font-medium text-xs truncate">
+                          {comment.author.name}
+                        </span>
                         <span className="text-xs text-muted-foreground shrink-0">
-                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(comment.createdAt), {
+                            addSuffix: true,
+                          })}
                         </span>
                       </div>
-                      <p className="text-xs leading-relaxed">{comment.content}</p>
+                      <p className="text-xs leading-relaxed">
+                        {comment.content}
+                      </p>
                     </div>
                     <Button variant="ghost" size="sm" className="h-6 px-2 mt-1">
                       <Heart className="h-3 w-3 mr-1" />

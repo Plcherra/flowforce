@@ -1,28 +1,44 @@
-import { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Gift, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Goal, GoalStatus } from '@/hooks/useGoals';
-import { useProfile } from '@/hooks/useProfile';
-import { parseRewardDetails } from '@/features/goals/utils/rewardUtils';
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon, Gift, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { Goal, GoalStatus } from "@/hooks/useGoals";
+import { useProfile } from "@/hooks/useProfile";
+import { parseRewardDetails } from "@/features/goals/utils/rewardUtils";
 
 const REWARD_TYPES = [
-  { value: 'recognition', label: 'Recognition XP' },
-  { value: 'bonus', label: 'Bonus' },
-  { value: 'badge', label: 'Badge' },
-  { value: 'time_off', label: 'Time Off' },
-  { value: 'custom', label: 'Custom' },
+  { value: "recognition", label: "Recognition XP" },
+  { value: "bonus", label: "Bonus" },
+  { value: "badge", label: "Badge" },
+  { value: "time_off", label: "Time Off" },
+  { value: "custom", label: "Custom" },
 ] as const;
 
-export type GoalRewardType = (typeof REWARD_TYPES)[number]['value'];
+export type GoalRewardType = (typeof REWARD_TYPES)[number]["value"];
 
 export interface GoalFormValues {
   title: string;
@@ -46,15 +62,15 @@ interface CreateGoalModalProps {
 }
 
 const defaultForm: GoalFormValues = {
-  title: '',
-  description: '',
-  status: 'active',
-  priority: 'medium',
+  title: "",
+  description: "",
+  status: "active",
+  priority: "medium",
   dueDate: null,
   progress: 0,
-  rewardType: 'recognition',
+  rewardType: "recognition",
   xpValue: 110,
-  rewardSummary: '',
+  rewardSummary: "",
 };
 
 export function CreateGoalModal({
@@ -74,22 +90,23 @@ export function CreateGoalModal({
       if (initialGoal) {
         const rewardDetails = parseRewardDetails(initialGoal.reward_details);
         setValues({
-          title: initialGoal.title ?? '',
-          description: initialGoal.description ?? '',
-          status: (initialGoal.status as GoalStatus) ?? 'active',
-          priority: initialGoal.priority ?? 'medium',
+          title: initialGoal.title ?? "",
+          description: initialGoal.description ?? "",
+          status: (initialGoal.status as GoalStatus) ?? "active",
+          priority: initialGoal.priority ?? "medium",
           dueDate: initialGoal.target_completion_date
             ? new Date(initialGoal.target_completion_date)
             : null,
           progress: initialGoal.progress ?? 0,
-          rewardType: (initialGoal.reward_type as GoalRewardType) ?? 'recognition',
+          rewardType:
+            (initialGoal.reward_type as GoalRewardType) ?? "recognition",
           xpValue:
-            typeof rewardDetails.xp === 'number'
+            typeof rewardDetails.xp === "number"
               ? rewardDetails.xp
-              : (initialGoal.reward_type as GoalRewardType) === 'recognition'
+              : (initialGoal.reward_type as GoalRewardType) === "recognition"
                 ? 110
                 : null,
-          rewardSummary: rewardDetails.summary ?? '',
+          rewardSummary: rewardDetails.summary ?? "",
         });
       } else if (aiSuggestion) {
         setValues({
@@ -107,25 +124,31 @@ export function CreateGoalModal({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!values.title.trim()) {
-      setError('A title is required');
-      return;
-    }
-
-    if (Number.isNaN(values.progress) || values.progress < 0 || values.progress > 100) {
-      setError('Progress must be between 0 and 100');
+      setError("A title is required");
       return;
     }
 
     if (
-      values.rewardType === 'recognition' &&
-      (values.xpValue == null || Number.isNaN(values.xpValue) || values.xpValue < 0)
+      Number.isNaN(values.progress) ||
+      values.progress < 0 ||
+      values.progress > 100
     ) {
-      setError('Recognition goals require a non-negative XP reward value.');
+      setError("Progress must be between 0 and 100");
+      return;
+    }
+
+    if (
+      values.rewardType === "recognition" &&
+      (values.xpValue == null ||
+        Number.isNaN(values.xpValue) ||
+        values.xpValue < 0)
+    ) {
+      setError("Recognition goals require a non-negative XP reward value.");
       return;
     }
 
     if (values.xpValue != null && values.xpValue < 0) {
-      setError('XP reward cannot be negative.');
+      setError("XP reward cannot be negative.");
       return;
     }
 
@@ -139,7 +162,10 @@ export function CreateGoalModal({
       setError(null);
       onOpenChange(false);
     } catch (submitError) {
-      const message = submitError instanceof Error ? submitError.message : 'Failed to save goal';
+      const message =
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to save goal";
       setError(message);
     }
   };
@@ -149,10 +175,11 @@ export function CreateGoalModal({
       <DialogContent className="max-w-lg space-y-6">
         <DialogHeader className="space-y-1">
           <DialogTitle className="text-xl font-semibold">
-            {initialGoal ? 'Edit Goal' : 'Create Goal'}
+            {initialGoal ? "Edit Goal" : "Create Goal"}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Outline objectives, set expectations, and keep momentum visible to the entire team.
+            Outline objectives, set expectations, and keep momentum visible to
+            the entire team.
           </DialogDescription>
         </DialogHeader>
 
@@ -163,7 +190,9 @@ export function CreateGoalModal({
               id="goal-title"
               value={values.title}
               placeholder="Launch onboarding checklist for retail team"
-              onChange={(event) => setValues((prev) => ({ ...prev, title: event.target.value }))}
+              onChange={(event) =>
+                setValues((prev) => ({ ...prev, title: event.target.value }))
+              }
               required
             />
           </div>
@@ -176,7 +205,10 @@ export function CreateGoalModal({
               placeholder="Describe what success looks like, the why behind the goal, or key milestones."
               rows={4}
               onChange={(event) =>
-                setValues((prev) => ({ ...prev, description: event.target.value }))
+                setValues((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
               }
             />
           </div>
@@ -231,12 +263,14 @@ export function CreateGoalModal({
                     variant="outline"
                     type="button"
                     className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !values.dueDate && 'text-muted-foreground',
+                      "w-full justify-start text-left font-normal",
+                      !values.dueDate && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {values.dueDate ? format(values.dueDate, 'PPP') : 'Select date'}
+                    {values.dueDate
+                      ? format(values.dueDate, "PPP")
+                      : "Select date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -275,7 +309,9 @@ export function CreateGoalModal({
           <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
             <div className="flex items-center gap-2 text-sm">
               <Gift className="h-4 w-4 text-amber-500" />
-              <span className="font-medium text-foreground">Rewards &amp; XP</span>
+              <span className="font-medium text-foreground">
+                Rewards &amp; XP
+              </span>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -289,8 +325,8 @@ export function CreateGoalModal({
                         ...prev,
                         rewardType: nextType,
                         xpValue:
-                          nextType === 'recognition'
-                            ? prev.xpValue ?? 110
+                          nextType === "recognition"
+                            ? (prev.xpValue ?? 110)
                             : null,
                       };
                     })
@@ -314,13 +350,14 @@ export function CreateGoalModal({
                   id="goal-xp"
                   type="number"
                   min={0}
-                  value={values.xpValue ?? ''}
+                  value={values.xpValue ?? ""}
                   onChange={(event) => {
                     const raw = event.target.value;
                     const parsed = Number(raw);
                     setValues((prev) => ({
                       ...prev,
-                      xpValue: raw === '' || Number.isNaN(parsed) ? null : parsed,
+                      xpValue:
+                        raw === "" || Number.isNaN(parsed) ? null : parsed,
                     }));
                   }}
                   placeholder="110"
@@ -333,7 +370,10 @@ export function CreateGoalModal({
                 id="goal-reward-summary"
                 value={values.rewardSummary}
                 onChange={(event) =>
-                  setValues((prev) => ({ ...prev, rewardSummary: event.target.value }))
+                  setValues((prev) => ({
+                    ...prev,
+                    rewardSummary: event.target.value,
+                  }))
                 }
                 placeholder="Describe how recognition or rewards will be granted for this goal."
                 rows={3}
@@ -345,10 +385,10 @@ export function CreateGoalModal({
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
               <div>
-                <p className="font-medium text-foreground">
-                  Owner
+                <p className="font-medium text-foreground">Owner</p>
+                <p>
+                  {profile?.firstName ?? profile?.first_name ?? "Your profile"}
                 </p>
-                <p>{profile?.firstName ?? profile?.first_name ?? 'Your profile'}</p>
               </div>
             </div>
           </div>
@@ -356,11 +396,19 @@ export function CreateGoalModal({
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? 'Saving…' : initialGoal ? 'Save changes' : 'Create goal'}
+              {saving
+                ? "Saving…"
+                : initialGoal
+                  ? "Save changes"
+                  : "Create goal"}
             </Button>
           </div>
         </form>

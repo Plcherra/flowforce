@@ -1,6 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { addDays, addMinutes, differenceInCalendarDays, formatDistanceToNow } from 'date-fns';
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  addDays,
+  addMinutes,
+  differenceInCalendarDays,
+  formatDistanceToNow,
+} from "date-fns";
 import {
   AlarmClock,
   ClipboardList,
@@ -8,27 +13,33 @@ import {
   Sparkles,
   Target,
   Zap,
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import { useTasks } from '@/hooks/useTasks';
-import { useGoals } from '@/hooks/useGoals';
-import { useReminders } from '@/hooks/useReminders';
-import { useScenarioSimulator } from '@/hooks/useScenarioSimulator';
-import { useProfile } from '@/hooks/useProfile';
-import { useAuth } from '@/hooks/useAuth';
-import { DEFAULT_ADJUSTMENTS } from '@/lib/ai/scenarioEngine';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { useTasks } from "@/hooks/useTasks";
+import { useGoals } from "@/hooks/useGoals";
+import { useReminders } from "@/hooks/useReminders";
+import { useScenarioSimulator } from "@/hooks/useScenarioSimulator";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { DEFAULT_ADJUSTMENTS } from "@/lib/ai/scenarioEngine";
+import { cn } from "@/lib/utils";
 
-type QuickActionSource = 'copilot' | 'tasks' | 'reminders' | 'goals';
+type QuickActionSource = "copilot" | "tasks" | "reminders" | "goals";
 
 interface QuickActionMetric {
   label: string;
   value: string;
-  tone?: 'default' | 'success' | 'warning' | 'danger';
+  tone?: "default" | "success" | "warning" | "danger";
 }
 
 interface QuickActionDescriptor {
@@ -45,11 +56,14 @@ interface QuickActionDescriptor {
   disabled?: boolean;
 }
 
-const toneClassNames: Record<Exclude<QuickActionMetric['tone'], undefined>, string> = {
-  default: 'border-border/70 bg-muted/40 text-foreground',
-  success: 'border-emerald-200/70 bg-emerald-50/60 text-emerald-700',
-  warning: 'border-amber-200/70 bg-amber-50/60 text-amber-700',
-  danger: 'border-destructive/40 bg-destructive/10 text-destructive',
+const toneClassNames: Record<
+  Exclude<QuickActionMetric["tone"], undefined>,
+  string
+> = {
+  default: "border-border/70 bg-muted/40 text-foreground",
+  success: "border-emerald-200/70 bg-emerald-50/60 text-emerald-700",
+  warning: "border-amber-200/70 bg-amber-50/60 text-amber-700",
+  danger: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
 export function AIQuickActions({ className }: { className?: string }) {
@@ -58,12 +72,7 @@ export function AIQuickActions({ className }: { className?: string }) {
   const { profile } = useProfile();
   const { user } = useAuth();
 
-  const {
-    tasks,
-    loading: tasksLoading,
-    createTask,
-    refetchTasks,
-  } = useTasks();
+  const { tasks, loading: tasksLoading, createTask, refetchTasks } = useTasks();
   const {
     goals,
     loading: goalsLoading,
@@ -84,8 +93,12 @@ export function AIQuickActions({ className }: { className?: string }) {
     refresh: refreshSimulator,
   } = useScenarioSimulator({ companyId: profile?.companyId ?? undefined });
 
-  const [pendingAction, setPendingAction] = useState<QuickActionSource | null>(null);
-  const [metricsSnapshot, setMetricsSnapshot] = useState<Record<QuickActionSource, QuickActionMetric[]>>({
+  const [pendingAction, setPendingAction] = useState<QuickActionSource | null>(
+    null,
+  );
+  const [metricsSnapshot, setMetricsSnapshot] = useState<
+    Record<QuickActionSource, QuickActionMetric[]>
+  >({
     copilot: [],
     tasks: [],
     reminders: [],
@@ -95,7 +108,7 @@ export function AIQuickActions({ className }: { className?: string }) {
   const activeTasks = useMemo(
     () =>
       tasks.filter(
-        (task) => task.status !== 'completed' && task.status !== 'cancelled',
+        (task) => task.status !== "completed" && task.status !== "cancelled",
       ),
     [tasks],
   );
@@ -150,7 +163,7 @@ export function AIQuickActions({ className }: { className?: string }) {
   }, [pendingReminders]);
 
   const activeGoals = useMemo(
-    () => goals.filter((goal) => goal.status === 'active'),
+    () => goals.filter((goal) => goal.status === "active"),
     [goals],
   );
 
@@ -174,7 +187,9 @@ export function AIQuickActions({ className }: { className?: string }) {
           return progress < 100;
         }
 
-        return differenceInCalendarDays(dueDate, new Date()) <= 30 && progress < 70;
+        return (
+          differenceInCalendarDays(dueDate, new Date()) <= 30 && progress < 70
+        );
       }),
     [activeGoals, calculateGoalProgress],
   );
@@ -196,80 +211,80 @@ export function AIQuickActions({ className }: { className?: string }) {
 
     const copilotMetrics: QuickActionMetric[] = [
       {
-        label: 'Coverage delta',
-        value: `${coverageDelta >= 0 ? '+' : ''}${coverageDelta}%`,
-        tone: coverageDelta >= 0 ? 'success' : 'warning',
+        label: "Coverage delta",
+        value: `${coverageDelta >= 0 ? "+" : ""}${coverageDelta}%`,
+        tone: coverageDelta >= 0 ? "success" : "warning",
       },
       {
-        label: 'Backlog shift',
+        label: "Backlog shift",
         value:
           backlogDelta < 0
             ? `${Math.abs(backlogDelta)} tasks cleared`
             : `${backlogDelta} tasks added`,
-        tone: backlogDelta < 0 ? 'success' : 'warning',
+        tone: backlogDelta < 0 ? "success" : "warning",
       },
       {
-        label: 'Margin change',
-        value: `${marginDelta >= 0 ? '+' : ''}${marginDelta}%`,
-        tone: marginDelta >= 0 ? 'success' : 'warning',
+        label: "Margin change",
+        value: `${marginDelta >= 0 ? "+" : ""}${marginDelta}%`,
+        tone: marginDelta >= 0 ? "success" : "warning",
       },
     ];
 
     const tasksMetrics: QuickActionMetric[] = [
       {
-        label: 'Active backlog',
+        label: "Active backlog",
         value: `${activeTasks.length} open`,
-        tone: activeTasks.length > 20 ? 'warning' : 'default',
+        tone: activeTasks.length > 20 ? "warning" : "default",
       },
       {
-        label: 'Overdue',
+        label: "Overdue",
         value: `${overdueTasks.length}`,
-        tone: overdueTasks.length > 0 ? 'danger' : 'success',
+        tone: overdueTasks.length > 0 ? "danger" : "success",
       },
       {
-        label: 'Due soon (≤3d)',
+        label: "Due soon (≤3d)",
         value: `${dueSoonTasks.length}`,
-        tone: dueSoonTasks.length > 3 ? 'warning' : 'default',
+        tone: dueSoonTasks.length > 3 ? "warning" : "default",
       },
     ];
 
     const remindersMetrics: QuickActionMetric[] = [
       {
-        label: 'Pending',
+        label: "Pending",
         value: `${pendingReminders.length}`,
-        tone: pendingReminders.length > 5 ? 'warning' : 'default',
+        tone: pendingReminders.length > 5 ? "warning" : "default",
       },
       {
-        label: 'Overdue reminders',
+        label: "Overdue reminders",
         value: `${overdueReminders.length}`,
-        tone: overdueReminders.length > 0 ? 'danger' : 'success',
+        tone: overdueReminders.length > 0 ? "danger" : "success",
       },
       {
-        label: 'Next alert',
+        label: "Next alert",
         value: nextReminder
           ? formatDistanceToNow(new Date(nextReminder.remind_at), {
               addSuffix: true,
             })
-          : 'None scheduled',
-        tone: nextReminder ? 'default' : 'warning',
+          : "None scheduled",
+        tone: nextReminder ? "default" : "warning",
       },
     ];
 
     const goalsMetrics: QuickActionMetric[] = [
       {
-        label: 'Active goals',
+        label: "Active goals",
         value: `${activeGoals.length}`,
-        tone: activeGoals.length === 0 ? 'warning' : 'default',
+        tone: activeGoals.length === 0 ? "warning" : "default",
       },
       {
-        label: 'At risk',
+        label: "At risk",
         value: `${atRiskGoals.length}`,
-        tone: atRiskGoals.length > 0 ? 'danger' : 'success',
+        tone: atRiskGoals.length > 0 ? "danger" : "success",
       },
       {
-        label: 'Average progress',
+        label: "Average progress",
         value: `${averageGoalProgress}%`,
-        tone: averageGoalProgress >= 75 ? 'success' : 'warning',
+        tone: averageGoalProgress >= 75 ? "success" : "warning",
       },
     ];
 
@@ -293,73 +308,82 @@ export function AIQuickActions({ className }: { className?: string }) {
   ]);
 
   const handleTriggerCopilot = async () => {
-    setPendingAction('copilot');
+    setPendingAction("copilot");
     try {
       const outcome = simulate(DEFAULT_ADJUSTMENTS);
       const actions = outcome.copilotActions;
 
       if (!actions || actions.length === 0) {
-        throw new Error('Co-Pilot did not generate any automation tasks.');
+        throw new Error("Co-Pilot did not generate any automation tasks.");
       }
 
       const result = await triggerCopilot(actions);
 
       toast({
-        title: 'Co-Pilot automation queued',
-        description: `Created ${result.created} task${result.created === 1 ? '' : 's'} for automation follow-up.`,
+        title: "Co-Pilot automation queued",
+        description: `Created ${result.created} task${result.created === 1 ? "" : "s"} for automation follow-up.`,
       });
 
       await Promise.allSettled([refreshSimulator(), refetchTasks?.()]);
     } catch (error) {
       toast({
-        title: 'Unable to trigger Co-Pilot',
-        description: error instanceof Error ? error.message : 'Unexpected automation failure.',
-        variant: 'destructive',
+        title: "Unable to trigger Co-Pilot",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unexpected automation failure.",
+        variant: "destructive",
       });
     } finally {
-      setPendingAction((current) => (current === 'copilot' ? null : current));
+      setPendingAction((current) => (current === "copilot" ? null : current));
     }
   };
 
   const handleCreateBacklogTask = async () => {
     if (!user) {
       toast({
-        title: 'Sign-in required',
-        description: 'You must be signed in to assign follow-up tasks.',
-        variant: 'destructive',
+        title: "Sign-in required",
+        description: "You must be signed in to assign follow-up tasks.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!createTask) {
       toast({
-        title: 'Task service unavailable',
-        description: 'Unable to reach the task service right now.',
-        variant: 'destructive',
+        title: "Task service unavailable",
+        description: "Unable to reach the task service right now.",
+        variant: "destructive",
       });
       return;
     }
 
-    setPendingAction('tasks');
+    setPendingAction("tasks");
     try {
-      const dueDate = addDays(new Date(), overdueTasks.length > 0 ? 1 : 2).toISOString();
-      const priority = (overdueTasks.length >= 5 ? 'urgent' : overdueTasks.length > 0 ? 'high' : 'medium') as
-        | 'urgent'
-        | 'high'
-        | 'medium';
+      const dueDate = addDays(
+        new Date(),
+        overdueTasks.length > 0 ? 1 : 2,
+      ).toISOString();
+      const priority = (
+        overdueTasks.length >= 5
+          ? "urgent"
+          : overdueTasks.length > 0
+            ? "high"
+            : "medium"
+      ) as "urgent" | "high" | "medium";
 
       const payload = {
-        title: '[AI] Backlog recovery sprint',
+        title: "[AI] Backlog recovery sprint",
         description: `AI quick actions detected ${
           overdueTasks.length
-        } overdue task${overdueTasks.length === 1 ? '' : 's'} and ${
+        } overdue task${overdueTasks.length === 1 ? "" : "s"} and ${
           dueSoonTasks.length
         } due soon. Coordinate owners and unblock progress.`,
-        status: 'todo' as const,
+        status: "todo" as const,
         priority,
         created_by: user.id,
         due_date: dueDate,
-        tags: ['ai', 'quick-action'],
+        tags: ["ai", "quick-action"],
       };
 
       const { error } = await createTask(payload);
@@ -369,37 +393,41 @@ export function AIQuickActions({ className }: { className?: string }) {
       }
 
       toast({
-        title: 'Follow-up task created',
-        description: 'Backlog recovery task assigned. Track progress from the task board.',
+        title: "Follow-up task created",
+        description:
+          "Backlog recovery task assigned. Track progress from the task board.",
       });
 
       await refetchTasks?.();
     } catch (error) {
       toast({
-        title: 'Unable to create task',
-        description: error instanceof Error ? error.message : 'Unexpected task creation error.',
-        variant: 'destructive',
+        title: "Unable to create task",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unexpected task creation error.",
+        variant: "destructive",
       });
     } finally {
-      setPendingAction((current) => (current === 'tasks' ? null : current));
+      setPendingAction((current) => (current === "tasks" ? null : current));
     }
   };
 
   const handleCreateReminder = async () => {
-    setPendingAction('reminders');
+    setPendingAction("reminders");
     try {
       await createReminder({
-        title: 'AI follow-up: backlog check-in',
+        title: "AI follow-up: backlog check-in",
         description:
           overdueTasks.length > 0
-            ? `Coordinate a quick sync to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? '' : 's'}.`
-            : 'Confirm backlog owners are progressing as planned.',
+            ? `Coordinate a quick sync to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? "" : "s"}.`
+            : "Confirm backlog owners are progressing as planned.",
         remind_at: addMinutes(new Date(), 45).toISOString(),
-        type: 'task',
-        priority: overdueTasks.length > 0 ? 'high' : 'medium',
+        type: "task",
+        priority: overdueTasks.length > 0 ? "high" : "medium",
         sound_enabled: true,
-        sound_type: 'notify',
-        notification_methods: ['in_app'],
+        sound_type: "notify",
+        notification_methods: ["in_app"],
         repeat_enabled: false,
         repeat_interval: null,
         snooze_enabled: true,
@@ -411,123 +439,129 @@ export function AIQuickActions({ className }: { className?: string }) {
       } as any);
 
       toast({
-        title: 'Reminder scheduled',
-        description: 'We will remind you shortly to close the loop on these insights.',
+        title: "Reminder scheduled",
+        description:
+          "We will remind you shortly to close the loop on these insights.",
       });
 
       await refetchReminders?.();
     } catch (error) {
       toast({
-        title: 'Unable to create reminder',
-        description: error instanceof Error ? error.message : 'Unexpected reminder error.',
-        variant: 'destructive',
+        title: "Unable to create reminder",
+        description:
+          error instanceof Error ? error.message : "Unexpected reminder error.",
+        variant: "destructive",
       });
     } finally {
-      setPendingAction((current) => (current === 'reminders' ? null : current));
+      setPendingAction((current) => (current === "reminders" ? null : current));
     }
   };
 
   const handleCreateGoal = async () => {
     if (!user) {
       toast({
-        title: 'Sign-in required',
-        description: 'You must be signed in to create goals.',
-        variant: 'destructive',
+        title: "Sign-in required",
+        description: "You must be signed in to create goals.",
+        variant: "destructive",
       });
       return;
     }
 
-    setPendingAction('goals');
+    setPendingAction("goals");
     try {
       const targetCompletion = addDays(new Date(), 28).toISOString();
 
       await createGoal({
-        title: '[AI] Goal checkpoint sprint',
+        title: "[AI] Goal checkpoint sprint",
         description:
           atRiskGoals.length > 0
-            ? `Stabilise ${atRiskGoals.length} at-risk goal${atRiskGoals.length === 1 ? '' : 's'} with milestone owners.`
-            : 'Lock in current momentum by aligning the team on a short sprint objective.',
-        status: 'active',
-        priority: atRiskGoals.length > 0 ? 'high' : 'medium',
+            ? `Stabilise ${atRiskGoals.length} at-risk goal${atRiskGoals.length === 1 ? "" : "s"} with milestone owners.`
+            : "Lock in current momentum by aligning the team on a short sprint objective.",
+        status: "active",
+        priority: atRiskGoals.length > 0 ? "high" : "medium",
         target_completion_date: targetCompletion,
       });
 
       toast({
-        title: 'Goal launched',
-        description: 'New checkpoint goal created. Assign tasks from the goal workspace.',
+        title: "Goal launched",
+        description:
+          "New checkpoint goal created. Assign tasks from the goal workspace.",
       });
 
       await refetchGoals?.();
     } catch (error) {
       toast({
-        title: 'Unable to create goal',
-        description: error instanceof Error ? error.message : 'Unexpected goal creation error.',
-        variant: 'destructive',
+        title: "Unable to create goal",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unexpected goal creation error.",
+        variant: "destructive",
       });
     } finally {
-      setPendingAction((current) => (current === 'goals' ? null : current));
+      setPendingAction((current) => (current === "goals" ? null : current));
     }
   };
 
   const quickActions: QuickActionDescriptor[] = [
     {
-      id: 'copilot',
-      badge: 'Co-Pilot',
-      title: 'Trigger automation playbook',
+      id: "copilot",
+      badge: "Co-Pilot",
+      title: "Trigger automation playbook",
       description:
-        'Generate recommended follow-up tasks from Co-Pilot and push them to the automation queue.',
+        "Generate recommended follow-up tasks from Co-Pilot and push them to the automation queue.",
       icon: <Sparkles className="h-5 w-5 text-primary" />,
       metrics: metricsSnapshot.copilot,
-      primaryLabel: 'Trigger Co-Pilot',
-      secondaryLabel: 'Open simulator',
+      primaryLabel: "Trigger Co-Pilot",
+      secondaryLabel: "Open simulator",
       onPrimary: handleTriggerCopilot,
-      onSecondary: () => navigate('/ai-insights?tab=simulator'),
+      onSecondary: () => navigate("/ai-insights?tab=simulator"),
       disabled: simulatorLoading,
     },
     {
-      id: 'tasks',
-      badge: 'Tasks',
-      title: 'Assign backlog recovery',
+      id: "tasks",
+      badge: "Tasks",
+      title: "Assign backlog recovery",
       description:
         overdueTasks.length > 0
-          ? `Coordinate owners to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? '' : 's'}.`
-          : 'Stay ahead of upcoming deadlines by issuing a quick checkpoint task.',
+          ? `Coordinate owners to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? "" : "s"}.`
+          : "Stay ahead of upcoming deadlines by issuing a quick checkpoint task.",
       icon: <ClipboardList className="h-5 w-5 text-blue-600" />,
       metrics: metricsSnapshot.tasks,
-      primaryLabel: 'Create follow-up task',
-      secondaryLabel: 'Open tasks',
+      primaryLabel: "Create follow-up task",
+      secondaryLabel: "Open tasks",
       onPrimary: handleCreateBacklogTask,
-      onSecondary: () => navigate('/tasks'),
+      onSecondary: () => navigate("/tasks"),
     },
     {
-      id: 'reminders',
-      badge: 'Reminders',
-      title: 'Schedule follow-up reminder',
+      id: "reminders",
+      badge: "Reminders",
+      title: "Schedule follow-up reminder",
       description:
         overdueReminders.length > 0
-          ? `There are ${overdueReminders.length} overdue reminder${overdueReminders.length === 1 ? '' : 's'}. Queue a short follow-up.`
-          : 'Keep the loop tight by setting a quick reminder to review progress.',
+          ? `There are ${overdueReminders.length} overdue reminder${overdueReminders.length === 1 ? "" : "s"}. Queue a short follow-up.`
+          : "Keep the loop tight by setting a quick reminder to review progress.",
       icon: <AlarmClock className="h-5 w-5 text-rose-600" />,
       metrics: metricsSnapshot.reminders,
-      primaryLabel: 'Set reminder',
-      secondaryLabel: 'View reminders',
+      primaryLabel: "Set reminder",
+      secondaryLabel: "View reminders",
       onPrimary: handleCreateReminder,
-      onSecondary: () => navigate('/tasks#reminders'),
+      onSecondary: () => navigate("/tasks#reminders"),
     },
     {
-      id: 'goals',
-      badge: 'Goals',
-      title: 'Launch checkpoint goal',
+      id: "goals",
+      badge: "Goals",
+      title: "Launch checkpoint goal",
       description:
         atRiskGoals.length > 0
-          ? `Stabilise ${atRiskGoals.length} goal${atRiskGoals.length === 1 ? '' : 's'} trending behind.`
-          : 'Lock in velocity by capturing a short checkpoint goal with linked tasks.',
+          ? `Stabilise ${atRiskGoals.length} goal${atRiskGoals.length === 1 ? "" : "s"} trending behind.`
+          : "Lock in velocity by capturing a short checkpoint goal with linked tasks.",
       icon: <Target className="h-5 w-5 text-purple-600" />,
       metrics: metricsSnapshot.goals,
-      primaryLabel: 'Create goal sprint',
-      secondaryLabel: 'Review goals',
+      primaryLabel: "Create goal sprint",
+      secondaryLabel: "Review goals",
       onPrimary: handleCreateGoal,
-      onSecondary: () => navigate('/goals'),
+      onSecondary: () => navigate("/goals"),
     },
   ];
 
@@ -575,8 +609,9 @@ export function AIQuickActions({ className }: { className?: string }) {
               <div
                 key={action.id}
                 className={cn(
-                  'rounded-lg border border-border/60 bg-muted/30 p-4',
-                  pendingAction === action.id && 'border-primary/60 bg-primary/5',
+                  "rounded-lg border border-border/60 bg-muted/30 p-4",
+                  pendingAction === action.id &&
+                    "border-primary/60 bg-primary/5",
                 )}
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -586,29 +621,45 @@ export function AIQuickActions({ className }: { className?: string }) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs uppercase tracking-wide">
+                        <Badge
+                          variant="secondary"
+                          className="text-xs uppercase tracking-wide"
+                        >
                           {action.badge}
                         </Badge>
                         {pendingAction === action.id && (
-                          <Badge variant="outline" className="text-xs text-primary">
+                          <Badge
+                            variant="outline"
+                            className="text-xs text-primary"
+                          >
                             Working…
                           </Badge>
                         )}
                       </div>
-                      <h3 className="text-sm font-semibold text-foreground">{action.title}</h3>
-                      <p className="text-sm text-muted-foreground">{action.description}</p>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {action.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {action.description}
+                      </p>
                       {action.metrics.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {action.metrics.map((metric, index) => (
                             <div
                               key={`${action.id}-metric-${index}`}
                               className={cn(
-                                'rounded-full border px-3 py-1 text-xs font-medium',
-                                metric.tone ? toneClassNames[metric.tone] : toneClassNames.default,
+                                "rounded-full border px-3 py-1 text-xs font-medium",
+                                metric.tone
+                                  ? toneClassNames[metric.tone]
+                                  : toneClassNames.default,
                               )}
                             >
-                              <span className="text-muted-foreground/80">{metric.label}:</span>{' '}
-                              <span className="text-foreground">{metric.value}</span>
+                              <span className="text-muted-foreground/80">
+                                {metric.label}:
+                              </span>{" "}
+                              <span className="text-foreground">
+                                {metric.value}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -630,7 +681,9 @@ export function AIQuickActions({ className }: { className?: string }) {
                           );
                       }}
                     >
-                      {pendingAction === action.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {pendingAction === action.id && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       {action.primaryLabel}
                     </Button>
                     {action.secondaryLabel && action.onSecondary && (

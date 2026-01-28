@@ -1,7 +1,7 @@
-import { differenceInMinutes } from 'date-fns';
-import type { SchedulerEmployee } from '@/hooks/scheduling/copilotSchedulerTypes';
+import { differenceInMinutes } from "date-fns";
+import type { SchedulerEmployee } from "@/hooks/scheduling/copilotSchedulerTypes";
 
-export const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+export const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 export const MAX_STORE_WEEKLY_HOURS = 38;
 
 export interface EmployeeState {
@@ -15,10 +15,11 @@ export interface SupervisorLedger {
   totalAssignments: number;
 }
 
-export const isSupervisorRole = (role: string) => role.toLowerCase().includes('supervisor');
+export const isSupervisorRole = (role: string) =>
+  role.toLowerCase().includes("supervisor");
 
 export const timeStringToMinutes = (value: string) => {
-  const [hourStr = '0', minuteStr = '0'] = value.split(':');
+  const [hourStr = "0", minuteStr = "0"] = value.split(":");
   const hour = Number.parseInt(hourStr, 10);
   const minute = Number.parseInt(minuteStr, 10);
   if (Number.isNaN(hour) || Number.isNaN(minute)) return 0;
@@ -27,7 +28,7 @@ export const timeStringToMinutes = (value: string) => {
 
 export const combineDateAndTime = (date: Date, time: string) => {
   const result = new Date(date);
-  const [hourStr, minuteStr = '0'] = time.split(':');
+  const [hourStr, minuteStr = "0"] = time.split(":");
   const hour = Number.parseInt(hourStr, 10);
   const minute = Number.parseInt(minuteStr, 10);
   if (Number.isNaN(hour) || Number.isNaN(minute)) {
@@ -38,10 +39,15 @@ export const combineDateAndTime = (date: Date, time: string) => {
   return result;
 };
 
-export const employeeMatchesRole = (employee: SchedulerEmployee, role: string) => {
+export const employeeMatchesRole = (
+  employee: SchedulerEmployee,
+  role: string,
+) => {
   const normalized = role.toLowerCase();
   if (employee.role.toLowerCase() === normalized) return true;
-  return employee.secondaryRoles.some((secondary) => secondary.toLowerCase() === normalized);
+  return employee.secondaryRoles.some(
+    (secondary) => secondary.toLowerCase() === normalized,
+  );
 };
 
 export const cloneHoursByStore = (source?: Record<string, number>) => {
@@ -63,7 +69,12 @@ export const getShiftHours = (start: Date, end: Date) => {
   return Math.max(0, minutes) / 60;
 };
 
-export const isEmployeeAvailable = (employee: SchedulerEmployee, scheduleDate: Date, start: Date, end: Date) => {
+export const isEmployeeAvailable = (
+  employee: SchedulerEmployee,
+  scheduleDate: Date,
+  start: Date,
+  end: Date,
+) => {
   const dayKey = DAY_KEYS[scheduleDate.getDay()];
   const windows = employee.availability?.[dayKey] ?? [];
   if (windows.length === 0) return true;
@@ -78,26 +89,43 @@ export const isEmployeeAvailable = (employee: SchedulerEmployee, scheduleDate: D
   });
 };
 
-export const hasCapacity = (state: EmployeeState, store: string, shiftHours: number) => {
+export const hasCapacity = (
+  state: EmployeeState,
+  store: string,
+  shiftHours: number,
+) => {
   if (state.hours + shiftHours > state.employee.weeklyMaxHours) return false;
   const currentStoreHours = state.hoursByStore[store] ?? 0;
   return currentStoreHours + shiftHours <= MAX_STORE_WEEKLY_HOURS;
 };
 
-export const buildDedupeKey = (templateId: string, scheduleDate: string, employeeId: string | null, slot: number) =>
-  `${templateId}:${scheduleDate}:${employeeId ?? 'open'}:${slot}`;
+export const buildDedupeKey = (
+  templateId: string,
+  scheduleDate: string,
+  employeeId: string | null,
+  slot: number,
+) => `${templateId}:${scheduleDate}:${employeeId ?? "open"}:${slot}`;
 
-const supervisorScore = (state: EmployeeState, store: string, ledger: Map<string, SupervisorLedger>) => {
-  const entry = ledger.get(state.employee.id) ?? { assignmentsByStore: {}, totalAssignments: 0 };
+const supervisorScore = (
+  state: EmployeeState,
+  store: string,
+  ledger: Map<string, SupervisorLedger>,
+) => {
+  const entry = ledger.get(state.employee.id) ?? {
+    assignmentsByStore: {},
+    totalAssignments: 0,
+  };
   const storeLoad = entry.assignmentsByStore[store] ?? 0;
   const otherLoad = entry.totalAssignments - storeLoad;
-  const locationPenalty = state.employee.homeStore && state.employee.homeStore !== store ? 0.75 : 0;
+  const locationPenalty =
+    state.employee.homeStore && state.employee.homeStore !== store ? 0.75 : 0;
   return storeLoad * 2 + otherLoad + state.hours * 0.1 + locationPenalty;
 };
 
 const standardScore = (state: EmployeeState, store: string) => {
   const storeHours = state.hoursByStore[store] ?? 0;
-  const storePenalty = state.employee.homeStore && state.employee.homeStore !== store ? 2 : 0;
+  const storePenalty =
+    state.employee.homeStore && state.employee.homeStore !== store ? 2 : 0;
   return state.hours + storeHours * 0.75 + storePenalty;
 };
 
@@ -106,7 +134,10 @@ export function rotateSupervisors(
   store: string,
   ledger: Map<string, SupervisorLedger>,
 ): EmployeeState[] {
-  return [...candidates].sort((a, b) => supervisorScore(a, store, ledger) - supervisorScore(b, store, ledger));
+  return [...candidates].sort(
+    (a, b) =>
+      supervisorScore(a, store, ledger) - supervisorScore(b, store, ledger),
+  );
 }
 
 export const recordSupervisorAssignment = (
@@ -114,7 +145,10 @@ export const recordSupervisorAssignment = (
   employeeId: string,
   store: string,
 ) => {
-  const entry = ledger.get(employeeId) ?? { assignmentsByStore: {}, totalAssignments: 0 };
+  const entry = ledger.get(employeeId) ?? {
+    assignmentsByStore: {},
+    totalAssignments: 0,
+  };
   entry.assignmentsByStore[store] = (entry.assignmentsByStore[store] ?? 0) + 1;
   entry.totalAssignments += 1;
   ledger.set(employeeId, entry);

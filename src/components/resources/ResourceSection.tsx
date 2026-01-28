@@ -1,9 +1,8 @@
-
-import DocCard from './DocCard';
-import BlogCard from './BlogCard';
-import VideoCard from './VideoCard';
-import DownloadCard from './DownloadCard';
-import { ResourceItem } from '@/types/common';
+import DocCard from "./DocCard";
+import BlogCard from "./BlogCard";
+import VideoCard from "./VideoCard";
+import DownloadCard from "./DownloadCard";
+import { ResourceItem } from "@/types/common";
 
 interface ResourceCategory {
   title: string;
@@ -11,7 +10,7 @@ interface ResourceCategory {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   bgColor: string;
-  key: 'documentation' | 'blog' | 'videos' | 'downloads';
+  key: "documentation" | "blog" | "videos" | "downloads";
 }
 
 interface ResourceSectionProps {
@@ -19,10 +18,13 @@ interface ResourceSectionProps {
   resources: ResourceItem[];
 }
 
-export default function ResourceSection({ category, resources }: ResourceSectionProps) {
+export default function ResourceSection({
+  category,
+  resources,
+}: ResourceSectionProps) {
   const renderResourceCard = (resource: ResourceItem) => {
     switch (category.key) {
-      case 'documentation':
+      case "documentation":
         return (
           <DocCard
             key={resource.id}
@@ -33,7 +35,7 @@ export default function ResourceSection({ category, resources }: ResourceSection
             url={resource.url}
           />
         );
-      case 'blog':
+      case "blog":
         return (
           <BlogCard
             key={resource.id}
@@ -46,7 +48,7 @@ export default function ResourceSection({ category, resources }: ResourceSection
             publishDate={resource.publishDate}
           />
         );
-      case 'videos':
+      case "videos":
         return (
           <VideoCard
             key={resource.id}
@@ -58,7 +60,7 @@ export default function ResourceSection({ category, resources }: ResourceSection
             embedUrl={resource.embedUrl}
           />
         );
-      case 'downloads':
+      case "downloads":
         return (
           <DownloadCard
             key={resource.id}
@@ -78,7 +80,9 @@ export default function ResourceSection({ category, resources }: ResourceSection
   return (
     <section>
       <div className="flex items-center mb-8">
-        <div className={`w-12 h-12 ${category.bgColor} rounded-xl flex items-center justify-center mr-4`}>
+        <div
+          className={`w-12 h-12 ${category.bgColor} rounded-xl flex items-center justify-center mr-4`}
+        >
           <category.icon className={`h-6 w-6 ${category.color}`} />
         </div>
         <div>

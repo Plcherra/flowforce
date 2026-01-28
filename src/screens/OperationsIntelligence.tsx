@@ -1,8 +1,11 @@
-import { IdeaProvider, useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
-import IdeaLayout from '@/modules/operations/components/idea/IdeaLayout';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import { useEffect, useRef } from 'react';
+import {
+  IdeaProvider,
+  useIdeaContext,
+} from "@/modules/operations/contexts/IdeaProvider";
+import IdeaLayout from "@/modules/operations/components/idea/IdeaLayout";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useRef } from "react";
 
 export default function OperationsIntelligence() {
   return (
@@ -21,9 +24,10 @@ function IdeaRouteContent() {
     if (!loading && !companyId && !notifiedRef.current) {
       notifiedRef.current = true;
       toast({
-        variant: 'destructive',
-        title: 'Company context missing',
-        description: 'Connect your profile to a company to activate Operations Intelligence.',
+        variant: "destructive",
+        title: "Company context missing",
+        description:
+          "Connect your profile to a company to activate Operations Intelligence.",
       });
     }
   }, [companyId, loading, toast]);
@@ -57,7 +61,10 @@ function IdeaSkeleton({ loading }: { loading: boolean }) {
       </div>
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="rounded-xl border border-border/50 bg-background/60 p-4">
+          <div
+            key={index}
+            className="rounded-xl border border-border/50 bg-background/60 p-4"
+          >
             <Skeleton className="h-5 w-48" />
             <Skeleton className="mt-3 h-4 w-full" />
             <Skeleton className="mt-2 h-4 w-2/3" />

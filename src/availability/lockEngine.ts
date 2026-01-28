@@ -1,10 +1,11 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-export const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001';
+export const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
-type AvailabilityLockMode = Database['public']['Enums']['availability_lock_mode'];
+type AvailabilityLockMode =
+  Database["public"]["Enums"]["availability_lock_mode"];
 interface OrgPreferenceRow {
   id: string;
   availability_lock_mode: AvailabilityLockMode;
@@ -20,29 +21,41 @@ interface AvailabilityExceptionRow {
 }
 
 export type LockState =
-  | 'locked'
-  | 'open'
+  | "locked"
+  | "open"
   | {
-      mode: 'open-with-exceptions';
+      mode: "open-with-exceptions";
       exceptEmployeeIds: string[];
     };
 
 interface LockEngineDeps {
   getOrgPref(orgId: string): Promise<OrgPreferenceRow | null>;
-  getApprovedExceptions(orgId: string, range: { start: string; end: string }): Promise<AvailabilityExceptionRow[]>;
-  hasApprovedException(orgId: string, employeeId: string, date: string): Promise<boolean>;
+  getApprovedExceptions(
+    orgId: string,
+    range: { start: string; end: string },
+  ): Promise<AvailabilityExceptionRow[]>;
+  hasApprovedException(
+    orgId: string,
+    employeeId: string,
+    date: string,
+  ): Promise<boolean>;
 }
 
 const defaultDeps: LockEngineDeps = {
   async getOrgPref(orgId) {
     const { data, error } = await supabase
-      .from('org_prefs')
-      .select('id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour')
-      .eq('id', orgId)
+      .from("org_prefs")
+      .select(
+        "id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour",
+      )
+      .eq("id", orgId)
       .maybeSingle();
 
     if (error) {
-      logger.error('[lockEngine] Failed to fetch org preferences', { error, tags: ['error'] });
+      logger.error("[lockEngine] Failed to fetch org preferences", {
+        error,
+        tags: ["error"],
+      });
       throw error;
     }
 
@@ -50,14 +63,17 @@ const defaultDeps: LockEngineDeps = {
   },
   async getApprovedExceptions(_orgId, range) {
     const { data, error } = await supabase
-      .from('availability_exception' as any)
-      .select('employee_id,start_date,end_date,approved_by')
-      .lte('start_date', range.end)
-      .gte('end_date', range.start)
-      .not('approved_by', 'is', null);
+      .from("availability_exception" as any)
+      .select("employee_id,start_date,end_date,approved_by")
+      .lte("start_date", range.end)
+      .gte("end_date", range.start)
+      .not("approved_by", "is", null);
 
     if (error) {
-      logger.error('[lockEngine] Failed to fetch availability exceptions', { error, tags: ['error'] });
+      logger.error("[lockEngine] Failed to fetch availability exceptions", {
+        error,
+        tags: ["error"],
+      });
       throw error;
     }
 
@@ -65,16 +81,19 @@ const defaultDeps: LockEngineDeps = {
   },
   async hasApprovedException(_orgId, employeeId, date) {
     const { data, error } = await supabase
-      .from('availability_exception' as any)
-      .select('id')
-      .eq('employee_id', employeeId)
-      .lte('start_date', date)
-      .gte('end_date', date)
-      .not('approved_by', 'is', null)
+      .from("availability_exception" as any)
+      .select("id")
+      .eq("employee_id", employeeId)
+      .lte("start_date", date)
+      .gte("end_date", date)
+      .not("approved_by", "is", null)
       .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      logger.error('[lockEngine] Failed to check availability exception', { error, tags: ['error'] });
+    if (error && error.code !== "PGRST116") {
+      logger.error("[lockEngine] Failed to check availability exception", {
+        error,
+        tags: ["error"],
+      });
       throw error;
     }
 
@@ -84,19 +103,31 @@ const defaultDeps: LockEngineDeps = {
 
 const mergeDeps = (overrides?: Partial<LockEngineDeps>): LockEngineDeps => ({
   getOrgPref: overrides?.getOrgPref ?? defaultDeps.getOrgPref,
-  getApprovedExceptions: overrides?.getApprovedExceptions ?? defaultDeps.getApprovedExceptions,
-  hasApprovedException: overrides?.hasApprovedException ?? defaultDeps.hasApprovedException,
+  getApprovedExceptions:
+    overrides?.getApprovedExceptions ?? defaultDeps.getApprovedExceptions,
+  hasApprovedException:
+    overrides?.hasApprovedException ?? defaultDeps.hasApprovedException,
 });
 
 const toISODate = (date: Date): string => date.toISOString().slice(0, 10);
 
 const parseISODateUTC = (value: string): Date => {
-  const [year, month, day] = value.split('-').map(Number);
+  const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, (month ?? 1) - 1, day ?? 1, 0, 0, 0, 0));
 };
 
 export const startOfIsoWeek = (date: Date): Date => {
-  const result = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
+  const result = new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
   const day = result.getUTCDay();
   const diff = day === 0 ? -6 : 1 - day; // shift to Monday
   result.setUTCDate(result.getUTCDate() + diff);
@@ -111,7 +142,7 @@ export const addWeeks = (date: Date, weeks: number): Date => {
 
 export const computeAutoLockThreshold = (
   weekStartISO: string,
-  prefs: Pick<OrgPreferenceRow, 'auto_lock_day_of_week' | 'auto_lock_hour'>,
+  prefs: Pick<OrgPreferenceRow, "auto_lock_day_of_week" | "auto_lock_hour">,
 ): Date => {
   const weekStart = parseISODateUTC(weekStartISO);
   const threshold = new Date(weekStart.getTime());
@@ -131,23 +162,25 @@ const buildWeekRange = (weekStartISO: string) => {
   return { start: toISODate(start), end: toISODate(end) };
 };
 
-export async function getLockStateForWeek(
-  params: { orgId: string; weekStart: string; deps?: Partial<LockEngineDeps> },
-): Promise<LockState> {
+export async function getLockStateForWeek(params: {
+  orgId: string;
+  weekStart: string;
+  deps?: Partial<LockEngineDeps>;
+}): Promise<LockState> {
   const deps = mergeDeps(params.deps);
   const prefs = await deps.getOrgPref(params.orgId);
 
   if (!prefs) {
-    return 'open';
+    return "open";
   }
 
   const baseMode = prefs.availability_lock_mode;
   const now = new Date();
 
   let isLocked = false;
-  if (baseMode === 'lock') {
+  if (baseMode === "lock") {
     isLocked = true;
-  } else if (baseMode === 'auto') {
+  } else if (baseMode === "auto") {
     const threshold = computeAutoLockThreshold(params.weekStart, prefs);
     isLocked = now >= threshold;
   } else {
@@ -155,7 +188,7 @@ export async function getLockStateForWeek(
   }
 
   if (!isLocked) {
-    return 'open';
+    return "open";
   }
 
   const range = buildWeekRange(params.weekStart);
@@ -169,11 +202,11 @@ export async function getLockStateForWeek(
   );
 
   if (exceptEmployeeIds.length === 0) {
-    return 'locked';
+    return "locked";
   }
 
   return {
-    mode: 'open-with-exceptions',
+    mode: "open-with-exceptions",
     exceptEmployeeIds,
   };
 }
@@ -191,13 +224,17 @@ export async function allowEdit(params: {
 
   const state = await getLockStateForWeek({ orgId, weekStart, deps });
 
-  if (state === 'open') {
+  if (state === "open") {
     return true;
   }
 
-  const hasException = await deps.hasApprovedException(orgId, params.employeeId, dateISO);
+  const hasException = await deps.hasApprovedException(
+    orgId,
+    params.employeeId,
+    dateISO,
+  );
 
-  if (state === 'locked') {
+  if (state === "locked") {
     return hasException;
   }
 

@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Video, Upload, X, Play } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import React, { useState, useCallback, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Video, Upload, X, Play } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface VideoUploadFieldProps {
   label: string;
@@ -25,130 +25,138 @@ export function VideoUploadField({
   required = false,
   maxFiles = 3,
   maxSize = 100,
-  className = ""
+  className = "",
 }: VideoUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFile = useCallback(async (file: File): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `form-videos/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('form-videos')
+        .from("form-videos")
         .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+          cacheControl: "3600",
+          upsert: false,
         });
 
       if (uploadError) {
-        logger.error('Upload error:', { error: uploadError, tags: ['error'] });
+        logger.error("Upload error:", { error: uploadError, tags: ["error"] });
         return null;
       }
 
       const { data } = supabase.storage
-        .from('form-videos')
+        .from("form-videos")
         .getPublicUrl(filePath);
 
       return data.publicUrl;
     } catch (error) {
-      logger.error('Error uploading file:', { error, tags: ['error'] });
+      logger.error("Error uploading file:", { error, tags: ["error"] });
       return null;
     }
   }, []);
 
-  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    
-    if (files.length === 0) return;
+  const handleFileSelect = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []);
 
-    // Check file count limit
-    if (value.length + files.length > maxFiles) {
-      toast({
-        title: "Error",
-        description: `Maximum ${maxFiles} videos allowed`,
-        variant: "destructive",
-      });
-      return;
-    }
+      if (files.length === 0) return;
 
-    // Check file size and type
-    for (const file of files) {
-      if (file.size > maxSize * 1024 * 1024) {
+      // Check file count limit
+      if (value.length + files.length > maxFiles) {
         toast({
           title: "Error",
-          description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+          description: `Maximum ${maxFiles} videos allowed`,
           variant: "destructive",
         });
         return;
       }
 
-      if (!file.type.startsWith('video/')) {
+      // Check file size and type
+      for (const file of files) {
+        if (file.size > maxSize * 1024 * 1024) {
+          toast({
+            title: "Error",
+            description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!file.type.startsWith("video/")) {
+          toast({
+            title: "Error",
+            description: `File ${file.name} is not a video`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      setUploading(true);
+
+      try {
+        const uploadPromises = files.map((file) => uploadFile(file));
+        const results = await Promise.all(uploadPromises);
+
+        const successfulUploads = results.filter(
+          (url): url is string => url !== null,
+        );
+        const failedUploads = results.length - successfulUploads.length;
+
+        if (successfulUploads.length > 0) {
+          onChange([...value, ...successfulUploads]);
+          toast({
+            title: "Success",
+            description: `${successfulUploads.length} video(s) uploaded successfully`,
+          });
+        }
+
+        if (failedUploads > 0) {
+          toast({
+            title: "Warning",
+            description: `${failedUploads} video(s) failed to upload`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        logger.error("Error handling file upload:", { error, tags: ["error"] });
         toast({
           title: "Error",
-          description: `File ${file.name} is not a video`,
+          description: "Failed to upload videos",
           variant: "destructive",
         });
-        return;
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
-    }
+    },
+    [value, onChange, maxFiles, maxSize, uploadFile],
+  );
 
-    setUploading(true);
-
-    try {
-      const uploadPromises = files.map(file => uploadFile(file));
-      const results = await Promise.all(uploadPromises);
-      
-      const successfulUploads = results.filter((url): url is string => url !== null);
-      const failedUploads = results.length - successfulUploads.length;
-
-      if (successfulUploads.length > 0) {
-        onChange([...value, ...successfulUploads]);
-        toast({
-          title: "Success",
-          description: `${successfulUploads.length} video(s) uploaded successfully`,
-        });
-      }
-
-      if (failedUploads > 0) {
-        toast({
-          title: "Warning",
-          description: `${failedUploads} video(s) failed to upload`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      logger.error('Error handling file upload:', { error, tags: ['error'] });
-      toast({
-        title: "Error",
-        description: "Failed to upload videos",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [value, onChange, maxFiles, maxSize, uploadFile]);
-
-  const removeVideo = useCallback((index: number) => {
-    const newValue = value.filter((_, i) => i !== index);
-    onChange(newValue);
-  }, [value, onChange]);
+  const removeVideo = useCallback(
+    (index: number) => {
+      const newValue = value.filter((_, i) => i !== index);
+      onChange(newValue);
+    },
+    [value, onChange],
+  );
 
   const openFileDialog = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -189,7 +197,9 @@ export function VideoUploadField({
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm">Video {index + 1}</p>
+                    <p className="font-medium text-foreground text-sm">
+                      Video {index + 1}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Click to play • Uploaded video
                     </p>
@@ -214,10 +224,9 @@ export function VideoUploadField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <Video className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            {value.length === 0 
-              ? "No videos uploaded yet" 
-              : `${value.length} of ${maxFiles} videos uploaded`
-            }
+            {value.length === 0
+              ? "No videos uploaded yet"
+              : `${value.length} of ${maxFiles} videos uploaded`}
           </p>
           <Button
             type="button"
@@ -242,7 +251,7 @@ export function VideoUploadField({
 export function VideoUploadFieldPreview({
   label = "Video Upload",
   description = "Upload videos for this form field",
-  className = ""
+  className = "",
 }: Partial<VideoUploadFieldProps>) {
   return (
     <VideoUploadField

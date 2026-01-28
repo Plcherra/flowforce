@@ -1,6 +1,6 @@
 // Centralized error handling utilities
-import { toast } from '@/hooks/use-toast';
-import { captureError } from '@/utils/logger';
+import { toast } from "@/hooks/use-toast";
+import { captureError } from "@/utils/logger";
 
 export interface AppError {
   message: string;
@@ -13,10 +13,10 @@ export interface AppError {
  */
 function isErrorWithMessage(error: unknown): error is { message: string } {
   return (
-    typeof error === 'object' &&
+    typeof error === "object" &&
     error !== null &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
   );
 }
 
@@ -25,10 +25,10 @@ function isErrorWithMessage(error: unknown): error is { message: string } {
  */
 function isErrorWithCode(error: unknown): error is { code: string } {
   return (
-    typeof error === 'object' &&
+    typeof error === "object" &&
     error !== null &&
-    'code' in error &&
-    typeof (error as { code: unknown }).code === 'string'
+    "code" in error &&
+    typeof (error as { code: unknown }).code === "string"
   );
 }
 
@@ -42,10 +42,10 @@ function extractErrorMessage(error: unknown): string {
   if (isErrorWithMessage(error)) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 }
 
 /**
@@ -55,20 +55,24 @@ function extractErrorCode(error: unknown): string {
   if (isErrorWithCode(error)) {
     return error.code;
   }
-  if (error instanceof Error && 'code' in error && typeof error.code === 'string') {
+  if (
+    error instanceof Error &&
+    "code" in error &&
+    typeof error.code === "string"
+  ) {
     return error.code;
   }
-  return 'UNKNOWN_ERROR';
+  return "UNKNOWN_ERROR";
 }
 
 export function handleError(error: unknown, context?: string): AppError {
   const errorMessage = extractErrorMessage(error);
   const errorCode = extractErrorCode(error);
-  
+
   const appError: AppError = {
     message: errorMessage,
     code: errorCode,
-    details: error
+    details: error,
   };
 
   captureError(error, {
@@ -84,7 +88,7 @@ export function handleError(error: unknown, context?: string): AppError {
 
 export function showErrorToast(error: unknown, context?: string) {
   const appError = handleError(error, context);
-  
+
   toast({
     title: "Error",
     description: appError.message,

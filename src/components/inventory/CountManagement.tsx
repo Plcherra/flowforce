@@ -1,10 +1,24 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, CheckCircle, Clock, AlertCircle, Edit, Trash, Play } from 'lucide-react';
-import { useInventoryCounts } from '@/features/inventory/hooks/useInventoryCounts';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Edit,
+  Trash,
+  Play,
+} from "lucide-react";
+import { useInventoryCounts } from "@/features/inventory/hooks/useInventoryCounts";
+import { useToast } from "@/hooks/use-toast";
 
 interface Count {
   id: string;
@@ -27,52 +41,69 @@ interface CountManagementProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'approved':
-      return 'default';
-    case 'completed': return 'default';
-    case 'awaiting_review': return 'secondary';
-    case 'in_progress': return 'secondary';
-    case 'planned': return 'outline';
-    default: return 'outline';
+    case "approved":
+      return "default";
+    case "completed":
+      return "default";
+    case "awaiting_review":
+      return "secondary";
+    case "in_progress":
+      return "secondary";
+    case "planned":
+      return "outline";
+    default:
+      return "outline";
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'approved': return CheckCircle;
-    case 'completed': return CheckCircle;
-    case 'in_progress': return Clock;
-    case 'awaiting_review': return Clock;
-    case 'planned': return AlertCircle;
-    default: return AlertCircle;
+    case "approved":
+      return CheckCircle;
+    case "completed":
+      return CheckCircle;
+    case "in_progress":
+      return Clock;
+    case "awaiting_review":
+      return Clock;
+    case "planned":
+      return AlertCircle;
+    default:
+      return AlertCircle;
   }
 };
 
 const formatCountType = (type?: string | null) => {
-  if (!type) return 'Count';
+  if (!type) return "Count";
   return type
-    .split('_')
+    .split("_")
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
+    .join(" ");
 };
 
 const getPeriodLabel = (period?: string | null) => {
   switch (period) {
-    case 'day_start':
-      return 'Day Start';
-    case 'day_end':
-      return 'Day End';
+    case "day_start":
+      return "Day Start";
+    case "day_end":
+      return "Day End";
     default:
-      return 'Custom';
+      return "Custom";
   }
 };
 
-const REVIEW_STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
-  pending: { label: 'Pending Review', variant: 'outline' },
-  under_review: { label: 'Under Review', variant: 'secondary' },
-  approved: { label: 'Approved', variant: 'default' },
-  rejected: { label: 'Needs Revision', variant: 'destructive' },
+const REVIEW_STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    variant: "default" | "secondary" | "outline" | "destructive";
+  }
+> = {
+  pending: { label: "Pending Review", variant: "outline" },
+  under_review: { label: "Under Review", variant: "secondary" },
+  approved: { label: "Approved", variant: "default" },
+  rejected: { label: "Needs Revision", variant: "destructive" },
 };
 
 export function CountManagement({ onViewCount }: CountManagementProps) {
@@ -80,7 +111,9 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
   const { toast } = useToast();
 
   const handleDelete = async (countId: string, countType: string) => {
-    if (window.confirm(`Are you sure you want to delete the ${countType} count?`)) {
+    if (
+      window.confirm(`Are you sure you want to delete the ${countType} count?`)
+    ) {
       try {
         await deleteCount(countId);
         toast({
@@ -101,7 +134,12 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
     return <div>Loading counts...</div>;
   }
 
-  const groupedCounts = counts.reduce<Record<string, { date: string; day_start: Count[]; day_end: Count[]; other: Count[] }>>((acc, count) => {
+  const groupedCounts = counts.reduce<
+    Record<
+      string,
+      { date: string; day_start: Count[]; day_end: Count[]; other: Count[] }
+    >
+  >((acc, count) => {
     const dateKey = count.count_date || count.created_at;
     if (!acc[dateKey]) {
       acc[dateKey] = {
@@ -112,11 +150,12 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
       };
     }
 
-    const bucket = count.count_period === 'day_start'
-      ? 'day_start'
-      : count.count_period === 'day_end'
-      ? 'day_end'
-      : 'other';
+    const bucket =
+      count.count_period === "day_start"
+        ? "day_start"
+        : count.count_period === "day_end"
+          ? "day_end"
+          : "other";
 
     acc[dateKey][bucket].push(count);
     return acc;
@@ -142,16 +181,19 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
         </Card>
       ) : (
         sortedGroups.map((group) => {
-          const formattedDate = new Date(group.date).toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric',
-          });
+          const formattedDate = new Date(group.date).toLocaleDateString(
+            undefined,
+            {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            },
+          );
 
           const sections: Array<{ title: string; counts: Count[] }> = [
-            { title: 'Day Start', counts: group.day_start },
-            { title: 'Day End', counts: group.day_end },
-            { title: 'Other Counts', counts: group.other },
+            { title: "Day Start", counts: group.day_start },
+            { title: "Day End", counts: group.day_end },
+            { title: "Other Counts", counts: group.other },
           ].filter((section) => section.counts.length > 0);
 
           return (
@@ -159,7 +201,11 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{formattedDate}</h3>
                 <span className="text-sm text-muted-foreground">
-                  {sections.reduce((total, section) => total + section.counts.length, 0)} counts
+                  {sections.reduce(
+                    (total, section) => total + section.counts.length,
+                    0,
+                  )}{" "}
+                  counts
                 </span>
               </div>
 
@@ -171,16 +217,22 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                         {section.title}
                       </h4>
                       <span className="text-xs text-muted-foreground">
-                        {section.counts.length} {section.counts.length === 1 ? 'count' : 'counts'}
+                        {section.counts.length}{" "}
+                        {section.counts.length === 1 ? "count" : "counts"}
                       </span>
                     </div>
 
                     {section.counts.map((count) => {
                       const StatusIcon = getStatusIcon(count.status);
-                      const reviewConfig = REVIEW_STATUS_CONFIG[count.review_status] || REVIEW_STATUS_CONFIG.pending;
+                      const reviewConfig =
+                        REVIEW_STATUS_CONFIG[count.review_status] ||
+                        REVIEW_STATUS_CONFIG.pending;
 
                       return (
-                        <Card key={count.id} className="transition-all hover:shadow-md">
+                        <Card
+                          key={count.id}
+                          className="transition-all hover:shadow-md"
+                        >
                           <CardContent className="p-4 space-y-3">
                             <div className="flex items-start justify-between">
                               <div className="space-y-1">
@@ -188,16 +240,23 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   <h3 className="font-semibold">
                                     {formatCountType(count.count_type)}
                                   </h3>
-                                  <Badge variant={getStatusColor(count.status)} className="flex items-center gap-1 capitalize">
+                                  <Badge
+                                    variant={getStatusColor(count.status)}
+                                    className="flex items-center gap-1 capitalize"
+                                  >
                                     <StatusIcon className="h-3 w-3" />
-                                    {count.status.replace(/_/g, ' ')}
+                                    {count.status.replace(/_/g, " ")}
                                   </Badge>
-                                  <Badge variant={reviewConfig.variant} className="capitalize">
+                                  <Badge
+                                    variant={reviewConfig.variant}
+                                    className="capitalize"
+                                  >
                                     {reviewConfig.label}
                                   </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                  Created {new Date(count.created_at).toLocaleString()}
+                                  Created{" "}
+                                  {new Date(count.created_at).toLocaleString()}
                                 </p>
                               </div>
                               <div className="flex gap-2">
@@ -212,7 +271,12 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                  onClick={() => handleDelete(count.id, formatCountType(count.count_type))}
+                                  onClick={() =>
+                                    handleDelete(
+                                      count.id,
+                                      formatCountType(count.count_type),
+                                    )
+                                  }
                                   className="flex items-center gap-2"
                                 >
                                   <Trash className="h-3 w-3" />
@@ -223,25 +287,38 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
 
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 bg-muted/30 rounded-lg p-3 text-xs">
                               <div>
-                                <div className="text-muted-foreground">Scheduled</div>
+                                <div className="text-muted-foreground">
+                                  Scheduled
+                                </div>
                                 <div className="font-medium">
-                                  {new Date(count.count_date).toLocaleDateString()} • {getPeriodLabel(count.count_period)}
+                                  {new Date(
+                                    count.count_date,
+                                  ).toLocaleDateString()}{" "}
+                                  • {getPeriodLabel(count.count_period)}
                                 </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Submitted</div>
+                                <div className="text-muted-foreground">
+                                  Submitted
+                                </div>
                                 <div>
                                   {count.submitted_at
-                                    ? new Date(count.submitted_at).toLocaleString()
-                                    : 'Not submitted'}
+                                    ? new Date(
+                                        count.submitted_at,
+                                      ).toLocaleString()
+                                    : "Not submitted"}
                                 </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Completed</div>
+                                <div className="text-muted-foreground">
+                                  Completed
+                                </div>
                                 <div>
                                   {count.completed_at
-                                    ? new Date(count.completed_at).toLocaleString()
-                                    : 'Not completed'}
+                                    ? new Date(
+                                        count.completed_at,
+                                      ).toLocaleString()
+                                    : "Not completed"}
                                 </div>
                               </div>
                             </div>
@@ -258,15 +335,21 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
 
                             {count.description && (
                               <div className="text-sm">
-                                <span className="font-medium">Description: </span>
-                                <span className="text-muted-foreground">{count.description}</span>
+                                <span className="font-medium">
+                                  Description:{" "}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {count.description}
+                                </span>
                               </div>
                             )}
 
                             {count.notes && (
                               <div className="text-sm">
                                 <span className="font-medium">Notes: </span>
-                                <span className="text-muted-foreground">{count.notes}</span>
+                                <span className="text-muted-foreground">
+                                  {count.notes}
+                                </span>
                               </div>
                             )}
                           </CardContent>

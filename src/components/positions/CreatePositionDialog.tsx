@@ -1,13 +1,30 @@
-
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { usePositions } from '@/hooks/usePositions';
+import React from "react";
+import { useForm } from "react-hook-form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { usePositions } from "@/hooks/usePositions";
 
 interface CreatePositionDialogProps {
   open: boolean;
@@ -15,20 +32,23 @@ interface CreatePositionDialogProps {
 }
 
 const ROLES = [
-  { value: 'staff', label: 'Staff' },
-  { value: 'supervisor', label: 'Supervisor' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'admin', label: 'Admin' },
+  { value: "staff", label: "Staff" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "manager", label: "Manager" },
+  { value: "admin", label: "Admin" },
 ];
 
-export default function CreatePositionDialog({ open, onOpenChange }: CreatePositionDialogProps) {
+export default function CreatePositionDialog({
+  open,
+  onOpenChange,
+}: CreatePositionDialogProps) {
   const { createPosition } = usePositions();
 
   const form = useForm({
     defaultValues: {
-      name: '',
-      role: '',
-      description: '',
+      name: "",
+      role: "",
+      description: "",
     },
   });
 
@@ -52,12 +72,15 @@ export default function CreatePositionDialog({ open, onOpenChange }: CreatePosit
             <FormField
               control={form.control}
               name="name"
-              rules={{ required: 'Position name is required' }}
+              rules={{ required: "Position name is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Position Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Runner, Cashier, FOH Supervisor" {...field} />
+                    <Input
+                      placeholder="e.g., Runner, Cashier, FOH Supervisor"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -67,11 +90,14 @@ export default function CreatePositionDialog({ open, onOpenChange }: CreatePosit
             <FormField
               control={form.control}
               name="role"
-              rules={{ required: 'Role is required' }}
+              rules={{ required: "Role is required" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select role level" />
@@ -97,7 +123,7 @@ export default function CreatePositionDialog({ open, onOpenChange }: CreatePosit
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Describe the responsibilities and duties of this position"
                       className="min-h-[100px]"
                       {...field}
@@ -109,11 +135,17 @@ export default function CreatePositionDialog({ open, onOpenChange }: CreatePosit
             />
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Creating...' : 'Create Position'}
+                {form.formState.isSubmitting
+                  ? "Creating..."
+                  : "Create Position"}
               </Button>
             </div>
           </form>

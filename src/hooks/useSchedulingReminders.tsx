@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { format, isSameDay, addDays, startOfWeek } from 'date-fns';
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { format, isSameDay, addDays, startOfWeek } from "date-fns";
 
 interface ReminderSchedule {
   day: string;
@@ -12,47 +12,50 @@ interface ReminderSchedule {
 
 const defaultReminders: ReminderSchedule[] = [
   {
-    day: 'thursday',
-    title: 'Staff Availability Reminder',
-    message: 'Please update your availability by tonight for next week\'s schedule.',
-    time: '10:00',
+    day: "thursday",
+    title: "Staff Availability Reminder",
+    message:
+      "Please update your availability by tonight for next week's schedule.",
+    time: "10:00",
     enabled: true,
   },
   {
-    day: 'friday',
-    title: 'Schedule Building',
-    message: 'Time to collect availability updates and build the draft schedule.',
-    time: '09:00',
+    day: "friday",
+    title: "Schedule Building",
+    message:
+      "Time to collect availability updates and build the draft schedule.",
+    time: "09:00",
     enabled: true,
   },
   {
-    day: 'saturday',
-    title: 'Schedule Review',
-    message: 'Review and finalize the schedule for publication.',
-    time: '09:00',
+    day: "saturday",
+    title: "Schedule Review",
+    message: "Review and finalize the schedule for publication.",
+    time: "09:00",
     enabled: true,
   },
   {
-    day: 'saturday',
-    title: 'Schedule Publication',
-    message: 'Post the finalized schedule to all channels.',
-    time: '14:00',
+    day: "saturday",
+    title: "Schedule Publication",
+    message: "Post the finalized schedule to all channels.",
+    time: "14:00",
     enabled: true,
   },
   {
-    day: 'sunday',
-    title: 'Week Start Reminder',
-    message: 'Schedule starts tomorrow. Please review your shifts.',
-    time: '18:00',
+    day: "sunday",
+    title: "Week Start Reminder",
+    message: "Schedule starts tomorrow. Please review your shifts.",
+    time: "18:00",
     enabled: true,
   },
 ];
 
 export function useSchedulingReminders() {
   const { toast } = useToast();
-  const [reminders, setReminders] = useState<ReminderSchedule[]>(defaultReminders);
+  const [reminders, setReminders] =
+    useState<ReminderSchedule[]>(defaultReminders);
   const [isEnabled, setIsEnabled] = useState(() => {
-    const stored = localStorage.getItem('scheduling-reminders-enabled');
+    const stored = localStorage.getItem("scheduling-reminders-enabled");
     return stored ? JSON.parse(stored) : true;
   });
 
@@ -62,17 +65,17 @@ export function useSchedulingReminders() {
 
     const checkReminders = () => {
       const now = new Date();
-      const today = format(now, 'EEEE').toLowerCase();
-      const currentTime = format(now, 'HH:mm');
-      
+      const today = format(now, "EEEE").toLowerCase();
+      const currentTime = format(now, "HH:mm");
+
       reminders.forEach((reminder) => {
         if (reminder.enabled && reminder.day === today) {
-          const reminderKey = `reminder-${reminder.day}-${reminder.time}-${format(now, 'yyyy-MM-dd')}`;
+          const reminderKey = `reminder-${reminder.day}-${reminder.time}-${format(now, "yyyy-MM-dd")}`;
           const wasShown = localStorage.getItem(reminderKey);
-          
+
           if (!wasShown && currentTime >= reminder.time) {
             showReminder(reminder);
-            localStorage.setItem(reminderKey, 'true');
+            localStorage.setItem(reminderKey, "true");
           }
         }
       });
@@ -94,33 +97,34 @@ export function useSchedulingReminders() {
     });
 
     // Browser notification if supported and permitted
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if ("Notification" in window && Notification.permission === "granted") {
       new Notification(reminder.title, {
         body: reminder.message,
-        icon: '/favicon.ico',
+        icon: "/favicon.ico",
       });
     }
   };
 
   const toggleReminder = (day: string, time: string, enabled: boolean) => {
-    setReminders(prev => 
-      prev.map(r => 
-        r.day === day && r.time === time 
-          ? { ...r, enabled }
-          : r
-      )
+    setReminders((prev) =>
+      prev.map((r) =>
+        r.day === day && r.time === time ? { ...r, enabled } : r,
+      ),
     );
   };
 
   const toggleReminders = (enabled: boolean) => {
     setIsEnabled(enabled);
-    localStorage.setItem('scheduling-reminders-enabled', JSON.stringify(enabled));
+    localStorage.setItem(
+      "scheduling-reminders-enabled",
+      JSON.stringify(enabled),
+    );
   };
 
   const requestNotificationPermission = async () => {
-    if ('Notification' in window) {
+    if ("Notification" in window) {
       const permission = await Notification.requestPermission();
-      return permission === 'granted';
+      return permission === "granted";
     }
     return false;
   };
@@ -132,12 +136,20 @@ export function useSchedulingReminders() {
 
     reminders.forEach((reminder) => {
       if (!reminder.enabled) return;
-      
-      const dayIndex = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(reminder.day);
+
+      const dayIndex = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ].indexOf(reminder.day);
       const reminderDate = addDays(weekStart, dayIndex);
-      const [hours, minutes] = reminder.time.split(':').map(Number);
+      const [hours, minutes] = reminder.time.split(":").map(Number);
       reminderDate.setHours(hours, minutes, 0, 0);
-      
+
       if (reminderDate > now) {
         upcoming.push({ ...reminder, date: reminderDate });
       }

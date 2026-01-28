@@ -1,63 +1,68 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Check, Users, Calculator } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Check, Users, Calculator } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const pricingTiers = [
   {
-    name: 'Free',
-    description: 'Perfect for small teams getting started',
+    name: "Free",
+    description: "Perfect for small teams getting started",
     monthlyPrice: 0,
     annualPrice: 0,
     userLimit: 5,
     features: [
-      'Up to 5 users',
-      'Basic scheduling',
-      'Task management',
-      'Internal messaging',
-      'Standard support'
+      "Up to 5 users",
+      "Basic scheduling",
+      "Task management",
+      "Internal messaging",
+      "Standard support",
     ],
-    cta: 'Start Free Trial',
-    popular: false
+    cta: "Start Free Trial",
+    popular: false,
   },
   {
-    name: 'Pro',
-    description: 'Best for growing businesses',
+    name: "Pro",
+    description: "Best for growing businesses",
     monthlyPrice: 29,
     annualPrice: 25,
     userLimit: 50,
     features: [
-      'Up to 50 users',
-      'Advanced scheduling',
-      'Custom forms',
-      'Analytics & reporting',
-      'Priority support',
-      'API access'
+      "Up to 50 users",
+      "Advanced scheduling",
+      "Custom forms",
+      "Analytics & reporting",
+      "Priority support",
+      "API access",
     ],
-    cta: 'Start Free Trial',
-    popular: true
+    cta: "Start Free Trial",
+    popular: true,
   },
   {
-    name: 'Enterprise',
-    description: 'For large organizations',
+    name: "Enterprise",
+    description: "For large organizations",
     monthlyPrice: null,
     annualPrice: null,
     userLimit: null,
     features: [
-      'Unlimited users',
-      'Custom integrations',
-      'Advanced analytics',
-      'Dedicated support',
-      'SSO & SAML',
-      'Custom onboarding'
+      "Unlimited users",
+      "Custom integrations",
+      "Advanced analytics",
+      "Dedicated support",
+      "SSO & SAML",
+      "Custom onboarding",
     ],
-    cta: 'Contact Sales',
-    popular: false
-  }
+    cta: "Contact Sales",
+    popular: false,
+  },
 ];
 
 export default function Pricing() {
@@ -68,7 +73,7 @@ export default function Pricing() {
   const calculatePrice = (users: number) => {
     if (users <= 5) return 0;
     if (users <= 50) return (users - 5) * 5;
-    return 'Contact Sales';
+    return "Contact Sales";
   };
 
   const calculatedPrice = calculatePrice(calculatorUsers);
@@ -82,12 +87,15 @@ export default function Pricing() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Choose the plan that fits your team size and needs. Start free and scale as you grow.
+            Choose the plan that fits your team size and needs. Start free and
+            scale as you grow.
           </p>
-          
+
           {/* Billing Toggle */}
           <div className="flex items-center justify-center space-x-4">
-            <span className={`font-medium ${!isAnnual ? 'text-[#3F51B5]' : 'text-gray-500'}`}>
+            <span
+              className={`font-medium ${!isAnnual ? "text-[#3F51B5]" : "text-gray-500"}`}
+            >
               Monthly
             </span>
             <Switch
@@ -95,7 +103,9 @@ export default function Pricing() {
               onCheckedChange={setIsAnnual}
               className="data-[state=checked]:bg-[#3F51B5]"
             />
-            <span className={`font-medium ${isAnnual ? 'text-[#3F51B5]' : 'text-gray-500'}`}>
+            <span
+              className={`font-medium ${isAnnual ? "text-[#3F51B5]" : "text-gray-500"}`}
+            >
               Annual
             </span>
             <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -107,16 +117,16 @@ export default function Pricing() {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {pricingTiers.map((tier, index) => (
-            <Card 
+            <Card
               key={tier.name}
-              className={`relative ${tier.popular ? 'border-[#3F51B5] border-2 shadow-xl scale-105' : 'border shadow-lg'} hover:shadow-xl transition-all duration-300`}
+              className={`relative ${tier.popular ? "border-[#3F51B5] border-2 shadow-xl scale-105" : "border shadow-lg"} hover:shadow-xl transition-all duration-300`}
             >
               {tier.popular && (
                 <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#3F51B5] text-white">
                   Most Popular
                 </Badge>
               )}
-              
+
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
                   {tier.name}
@@ -128,17 +138,21 @@ export default function Pricing() {
                   {tier.monthlyPrice !== null ? (
                     <>
                       ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
-                      <span className="text-lg font-normal text-gray-500">/mo</span>
+                      <span className="text-lg font-normal text-gray-500">
+                        /mo
+                      </span>
                     </>
                   ) : (
                     <span className="text-2xl">Custom</span>
                   )}
                 </div>
-                {isAnnual && tier.monthlyPrice !== null && tier.monthlyPrice > 0 && (
-                  <p className="text-sm text-green-600 font-medium">
-                    Save ${(tier.monthlyPrice - tier.annualPrice) * 12}/year
-                  </p>
-                )}
+                {isAnnual &&
+                  tier.monthlyPrice !== null &&
+                  tier.monthlyPrice > 0 && (
+                    <p className="text-sm text-green-600 font-medium">
+                      Save ${(tier.monthlyPrice - tier.annualPrice) * 12}/year
+                    </p>
+                  )}
               </CardHeader>
 
               <CardContent className="space-y-4">
@@ -151,15 +165,17 @@ export default function Pricing() {
                   ))}
                 </ul>
 
-                <Button 
-                  className={`w-full ${tier.popular ? 'bg-[#3F51B5] hover:bg-[#3F51B5]/90' : 'bg-gray-900 hover:bg-gray-800'} text-white`}
+                <Button
+                  className={`w-full ${tier.popular ? "bg-[#3F51B5] hover:bg-[#3F51B5]/90" : "bg-gray-900 hover:bg-gray-800"} text-white`}
                   size="lg"
                   onClick={() => {
-                    if (tier.cta === 'Contact Sales') {
+                    if (tier.cta === "Contact Sales") {
                       // In a real app, this would open a contact form
-                      alert('Contact sales functionality would be implemented here');
+                      alert(
+                        "Contact sales functionality would be implemented here",
+                      );
                     } else {
-                      navigate('/company-registration');
+                      navigate("/company-registration");
                     }
                   }}
                 >
@@ -204,26 +220,31 @@ export default function Pricing() {
 
             <div className="text-center p-6 bg-gray-50 rounded-lg">
               <div className="text-3xl font-bold text-gray-900 mb-2">
-                {typeof calculatedPrice === 'number' ? (
+                {typeof calculatedPrice === "number" ? (
                   <>
                     ${calculatedPrice}
-                    <span className="text-lg font-normal text-gray-500">/month</span>
+                    <span className="text-lg font-normal text-gray-500">
+                      /month
+                    </span>
                   </>
                 ) : (
                   calculatedPrice
                 )}
               </div>
               <p className="text-gray-600">
-                {calculatorUsers <= 5 && 'Free tier - perfect for small teams'}
-                {calculatorUsers > 5 && calculatorUsers <= 50 && `$5 per user above 5 users (${calculatorUsers - 5} × $5)`}
-                {calculatorUsers > 50 && 'Enterprise pricing - contact us for a custom quote'}
+                {calculatorUsers <= 5 && "Free tier - perfect for small teams"}
+                {calculatorUsers > 5 &&
+                  calculatorUsers <= 50 &&
+                  `$5 per user above 5 users (${calculatorUsers - 5} × $5)`}
+                {calculatorUsers > 50 &&
+                  "Enterprise pricing - contact us for a custom quote"}
               </p>
             </div>
 
-            <Button 
+            <Button
               className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90 text-white"
               size="lg"
-              onClick={() => navigate('/company-registration')}
+              onClick={() => navigate("/company-registration")}
             >
               <Users className="mr-2 h-5 w-5" />
               Get Started with {calculatorUsers} Users

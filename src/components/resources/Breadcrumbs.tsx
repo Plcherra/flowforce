@@ -1,4 +1,3 @@
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,8 +5,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { Link } from 'react-router-dom';
+} from "@/components/ui/breadcrumb";
+import { Link } from "react-router-dom";
 
 interface BreadcrumbsProps {
   items: {

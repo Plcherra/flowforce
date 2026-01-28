@@ -1,15 +1,24 @@
-import { useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 
 // Preload common routes the user is likely to visit
 const routePreloadMap: Record<string, string[]> = {
-  '/': ['/auth', '/register', '/features', '/templates', '/pricing'],
-  '/auth': ['/app/dashboard', '/register'],
-  '/register': ['/onboarding', '/company-registration'],
-  '/app/dashboard': ['/app/messages', '/app/employees', '/app/calendar', '/app/settings'],
-  '/app/messages': ['/app/calendar', '/app/employees'],
-  '/app/employees': ['/app/position-management'],
-  '/templates': ['/templates/retail', '/templates/healthcare', '/templates/manufacturing'],
+  "/": ["/auth", "/register", "/features", "/templates", "/pricing"],
+  "/auth": ["/app/dashboard", "/register"],
+  "/register": ["/onboarding", "/company-registration"],
+  "/app/dashboard": [
+    "/app/messages",
+    "/app/employees",
+    "/app/calendar",
+    "/app/settings",
+  ],
+  "/app/messages": ["/app/calendar", "/app/employees"],
+  "/app/employees": ["/app/position-management"],
+  "/templates": [
+    "/templates/retail",
+    "/templates/healthcare",
+    "/templates/manufacturing",
+  ],
 };
 
 export function useRoutePreloader() {
@@ -23,10 +32,10 @@ export function useRoutePreloader() {
         // Use link prefetch to preload the route
         const existingLink = document.querySelector(`link[href="${route}"]`);
         if (!existingLink) {
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
+          const link = document.createElement("link");
+          link.rel = "prefetch";
           link.href = route;
-          link.setAttribute('data-preloaded', 'true');
+          link.setAttribute("data-preloaded", "true");
           document.head.appendChild(link);
         }
       }, index * 100);
@@ -50,12 +59,14 @@ export function useRoutePreloader() {
   // Clean up old preload links periodically
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
-      const preloadLinks = document.querySelectorAll('link[data-preloaded="true"]');
+      const preloadLinks = document.querySelectorAll(
+        'link[data-preloaded="true"]',
+      );
       if (preloadLinks.length > 20) {
         // Remove oldest preload links if we have too many
         Array.from(preloadLinks)
           .slice(0, preloadLinks.length - 15)
-          .forEach(link => link.remove());
+          .forEach((link) => link.remove());
       }
     }, 30000);
 

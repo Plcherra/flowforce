@@ -44,7 +44,8 @@ CREATE INDEX IF NOT EXISTS idx_schedules_type_status ON public.schedules(schedul
 CREATE INDEX IF NOT EXISTS idx_form_fields_type_required ON public.form_fields(field_type, is_required);
 
 -- Optimize analytics and reporting queries
-CREATE INDEX IF NOT EXISTS idx_analytics_cache_key_expires ON public.analytics_cache(cache_key, expires_at) WHERE expires_at > now();
+-- Note: Removed idx_analytics_cache_key_expires index because now() is not IMMUTABLE and cannot be used in index predicates
+-- Consider creating this index manually after migration if needed, or use a different approach
 
 -- Add unique constraint indexes that might be missing
 CREATE UNIQUE INDEX IF NOT EXISTS idx_company_invites_email_company_unique ON public.company_invites(email, company_id) WHERE status = 'pending';

@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,9 +6,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Play, X } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 
 interface DemoModalProps {
   children: React.ReactNode;
@@ -20,9 +19,7 @@ export function DemoModal({ children }: DemoModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-4xl w-full h-[80vh] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center">
@@ -30,10 +27,11 @@ export function DemoModal({ children }: DemoModalProps) {
             FlowForce Product Demo
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            See how FlowForce can transform your business operations in just 2 minutes
+            See how FlowForce can transform your business operations in just 2
+            minutes
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="px-6 pb-6 h-full">
           <div className="w-full h-full bg-gradient-to-br from-[#3F51B5] to-[#FF4081] rounded-lg flex items-center justify-center relative overflow-hidden">
             {/* Video placeholder - in a real app, this would be an embedded video */}
@@ -61,11 +59,15 @@ export function DemoModal({ children }: DemoModalProps) {
                 </div>
               </div>
             </div>
-            
+
             {/* Simulated video controls */}
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4">
               <div className="flex items-center space-x-4">
-                <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white hover:bg-white/20"
+                >
                   <Play className="h-4 w-4" />
                 </Button>
                 <div className="flex-1 h-1 bg-white/30 rounded-full">

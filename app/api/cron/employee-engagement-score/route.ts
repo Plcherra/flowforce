@@ -1,12 +1,12 @@
-import { randomUUID } from 'node:crypto';
-import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../_server/supabaseAdmin';
-import { createServerLogger } from '../../_server/utils/logger';
-import { verifyCronRequest } from '@/lib/cron/verifyCron';
+import { randomUUID } from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "../../_server/supabaseAdmin";
+import { createServerLogger } from "../../_server/utils/logger";
+import { verifyCronRequest } from "@/lib/cron/verifyCron";
 
-const loggerScope = 'cron-employee-engagement-score';
+const loggerScope = "cron-employee-engagement-score";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const toPlainHeaders = (headers: Headers) => {
   const plain: Record<string, string> = {};
@@ -17,72 +17,93 @@ const toPlainHeaders = (headers: Headers) => {
 };
 
 async function handle(request: NextRequest) {
-  const requestId = request.headers.get('x-request-id') ?? randomUUID();
-  const logger = createServerLogger(loggerScope, { requestId, tags: ['cron', 'engagement'] });
+  const requestId = request.headers.get("x-request-id") ?? randomUUID();
+  const logger = createServerLogger(loggerScope, {
+    requestId,
+    tags: ["cron", "engagement"],
+  });
   const auth = verifyCronRequest(toPlainHeaders(request.headers));
 
   if (!auth.ok) {
-    logger.warn('Cron authentication failed', { context: { reason: auth.reason } });
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    logger.warn("Cron authentication failed", {
+      context: { reason: auth.reason },
+    });
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
-  const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const periodEnd = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
   const periodStart = new Date(periodEnd);
   periodStart.setUTCDate(periodStart.getUTCDate() - 7);
 
-  logger.info('Engagement score run started', {
-    context: { periodStart: periodStart.toISOString(), periodEnd: periodEnd.toISOString() },
+  logger.info("Engagement score run started", {
+    context: {
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+    },
   });
 
   try {
     const periodStartIso = periodStart.toISOString();
     const periodEndIso = periodEnd.toISOString();
 
-    const [recognitionCount, checklistCompletions, scheduledShifts, completedShifts] = await Promise.all([
+    const [
+      recognitionCount,
+      checklistCompletions,
+      scheduledShifts,
+      completedShifts,
+    ] = await Promise.all([
       safeCount(
-        'recognition_events',
-        (query) => query.gte('earned_at', periodStartIso).lt('earned_at', periodEndIso),
+        "recognition_events",
+        (query) =>
+          query.gte("earned_at", periodStartIso).lt("earned_at", periodEndIso),
         logger,
-        'recognitions',
+        "recognitions",
       ),
       safeCount(
-        'tasks',
+        "tasks",
         (query) =>
           query
-            .eq('status', 'completed')
-            .gte('completed_at', periodStartIso)
-            .lt('completed_at', periodEndIso),
+            .eq("status", "completed")
+            .gte("completed_at", periodStartIso)
+            .lt("completed_at", periodEndIso),
         logger,
-        'checklist_completions',
+        "checklist_completions",
       ),
       safeCount(
-        'schedules',
+        "schedules",
         (query) =>
           query
-            .eq('schedule_type', 'shift')
-            .gte('start_time', periodStartIso)
-            .lt('start_time', periodEndIso),
+            .eq("schedule_type", "shift")
+            .gte("start_time", periodStartIso)
+            .lt("start_time", periodEndIso),
         logger,
-        'scheduled_shifts',
+        "scheduled_shifts",
       ),
       safeCount(
-        'schedules',
+        "schedules",
         (query) =>
           query
-            .eq('schedule_type', 'shift')
-            .eq('status', 'completed')
-            .gte('start_time', periodStartIso)
-            .lt('start_time', periodEndIso),
+            .eq("schedule_type", "shift")
+            .eq("status", "completed")
+            .gte("start_time", periodStartIso)
+            .lt("start_time", periodEndIso),
         logger,
-        'completed_shifts',
+        "completed_shifts",
       ),
     ]);
 
-    const punctualityScore = scheduledShifts > 0 ? Math.round((completedShifts / scheduledShifts) * 100) : 100;
+    const punctualityScore =
+      scheduledShifts > 0
+        ? Math.round((completedShifts / scheduledShifts) * 100)
+        : 100;
     const recognitionScore = Math.min(100, recognitionCount * 10);
     const checklistScore = Math.min(100, checklistCompletions * 5);
-    const engagementScore = Math.round(recognitionScore * 0.35 + checklistScore * 0.35 + punctualityScore * 0.3);
+    const engagementScore = Math.round(
+      recognitionScore * 0.35 + checklistScore * 0.35 + punctualityScore * 0.3,
+    );
 
     const payload = {
       period_start: periodStartIso,
@@ -94,14 +115,19 @@ async function handle(request: NextRequest) {
       calculated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabaseAdmin.from('engagement_scores').insert(payload);
+    const { error } = await supabaseAdmin
+      .from("engagement_scores")
+      .insert(payload);
 
     if (error) {
-      logger.error('Failed to persist engagement score', { error, context: payload });
+      logger.error("Failed to persist engagement score", {
+        error,
+        context: payload,
+      });
       throw error;
     }
 
-    logger.info('Engagement score run finished', {
+    logger.info("Engagement score run finished", {
       context: {
         engagementScore,
         recognitionCount,
@@ -120,8 +146,11 @@ async function handle(request: NextRequest) {
       periodEnd: periodEndIso,
     });
   } catch (error) {
-    logger.error('Engagement score cron failed', { error });
-    return NextResponse.json({ error: 'engagement_score_failed' }, { status: 500 });
+    logger.error("Engagement score cron failed", { error });
+    return NextResponse.json(
+      { error: "engagement_score_failed" },
+      { status: 500 },
+    );
   }
 }
 
@@ -137,7 +166,7 @@ async function safeCount(
 ): Promise<number> {
   try {
     const { count, error } = await applyFilters(
-      supabaseAdmin.from(table).select('id', { count: 'exact', head: true }),
+      supabaseAdmin.from(table).select("id", { count: "exact", head: true }),
     );
 
     if (error) {
@@ -146,7 +175,10 @@ async function safeCount(
 
     return count ?? 0;
   } catch (error) {
-    logger.warn('Count query failed', { error, context: { table, metricName } });
+    logger.warn("Count query failed", {
+      error,
+      context: { table, metricName },
+    });
     return 0;
   }
 }

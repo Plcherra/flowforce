@@ -1,24 +1,22 @@
-import { Suspense, ReactNode } from 'react';
-import { useNavigation } from '@/lib/router-adapter';
-import { LoadingSpinner } from '@/components/ui/loading-states';
-import { motion, AnimatePresence } from 'framer-motion';
-import ErrorBoundary from '@/components/ui/error-boundary';
-import { appEnv } from '@/lib/env';
+import { Suspense, ReactNode } from "react";
+import { useNavigation } from "@/lib/router-adapter";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { motion, AnimatePresence } from "framer-motion";
+import ErrorBoundary from "@/components/ui/error-boundary";
+import { appEnv } from "@/lib/env";
 
 interface RouteLoadingBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
 }
 
-export function RouteLoadingBoundary({ children, fallback }: RouteLoadingBoundaryProps) {
-  let navigationState: ReturnType<typeof useNavigation>['state'] = 'idle';
-  try {
-    navigationState = useNavigation().state;
-  } catch {
-    navigationState = 'idle';
-  }
-
-  const isLoading = navigationState === 'loading';
+export function RouteLoadingBoundary({
+  children,
+  fallback,
+}: RouteLoadingBoundaryProps) {
+  // Always call hooks unconditionally - hooks must be called at the top level
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
   const defaultFallback = (
     <div className="flex flex-col h-screen overflow-hidden">
       <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center p-6">
@@ -31,8 +29,12 @@ export function RouteLoadingBoundary({ children, fallback }: RouteLoadingBoundar
   const inlineErrorFallback = (
     <div className="p-6">
       <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center text-sm text-muted-foreground">
-        <p className="font-medium text-foreground">This view is temporarily unavailable.</p>
-        <p className="mt-1 text-xs text-muted-foreground">Please refresh or try a different section.</p>
+        <p className="font-medium text-foreground">
+          This view is temporarily unavailable.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Please refresh or try a different section.
+        </p>
       </div>
     </div>
   );

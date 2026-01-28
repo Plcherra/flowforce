@@ -1,19 +1,32 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  Megaphone, 
-  Users, 
-  Calendar, 
-  MessageSquare, 
-  BarChart3, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Megaphone,
+  Users,
+  Calendar,
+  MessageSquare,
+  BarChart3,
   BookOpen,
   FileText,
-  Plus
-} from 'lucide-react';
-import { SectionTemplate } from '@/hooks/useCustomSections';
+  Plus,
+} from "lucide-react";
+import { SectionTemplate } from "@/hooks/useCustomSections";
 
 interface SectionTemplateSelectorProps {
   templates: SectionTemplate[];
@@ -28,28 +41,29 @@ const iconMap = {
   MessageSquare,
   BarChart3,
   BookOpen,
-  FileText
+  FileText,
 };
 
 const categoryColors = {
-  communication: 'bg-blue-100 text-blue-800',
-  operations: 'bg-green-100 text-green-800',
-  hr: 'bg-purple-100 text-purple-800',
-  analytics: 'bg-orange-100 text-orange-800',
-  custom: 'bg-gray-100 text-gray-800'
+  communication: "bg-blue-100 text-blue-800",
+  operations: "bg-green-100 text-green-800",
+  hr: "bg-purple-100 text-purple-800",
+  analytics: "bg-orange-100 text-orange-800",
+  custom: "bg-gray-100 text-gray-800",
 };
 
 export default function SectionTemplateSelector({
   templates,
   onSelectTemplate,
-  onCreateCustom
+  onCreateCustom,
 }: SectionTemplateSelectorProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  const categories = Array.from(new Set(templates.map(t => t.category)));
-  const filteredTemplates = selectedCategory === 'all' 
-    ? templates 
-    : templates.filter(t => t.category === selectedCategory);
+  const categories = Array.from(new Set(templates.map((t) => t.category)));
+  const filteredTemplates =
+    selectedCategory === "all"
+      ? templates
+      : templates.filter((t) => t.category === selectedCategory);
 
   const getIconComponent = (iconName: string) => {
     const IconComponent = iconMap[iconName as keyof typeof iconMap] || FileText;
@@ -68,7 +82,8 @@ export default function SectionTemplateSelector({
         <DialogHeader>
           <DialogTitle>Choose a Section Template</DialogTitle>
           <DialogDescription>
-            Select a pre-built template to get started quickly, or create a custom section from scratch
+            Select a pre-built template to get started quickly, or create a
+            custom section from scratch
           </DialogDescription>
         </DialogHeader>
 
@@ -76,16 +91,16 @@ export default function SectionTemplateSelector({
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
+              variant={selectedCategory === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedCategory('all')}
+              onClick={() => setSelectedCategory("all")}
             >
               All
             </Button>
-            {categories.map(category => (
+            {categories.map((category) => (
               <Button
                 key={category}
-                variant={selectedCategory === category ? 'default' : 'outline'}
+                variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
                 className="capitalize"
@@ -97,17 +112,22 @@ export default function SectionTemplateSelector({
 
           {/* Templates Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map(template => (
-              <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            {filteredTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {getIconComponent(template.icon)}
                       <div>
-                        <CardTitle className="text-base">{template.name}</CardTitle>
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs mt-1 ${categoryColors[template.category as keyof typeof categoryColors] || 'bg-gray-100 text-gray-800'}`}
+                        <CardTitle className="text-base">
+                          {template.name}
+                        </CardTitle>
+                        <Badge
+                          variant="secondary"
+                          className={`text-xs mt-1 ${categoryColors[template.category as keyof typeof categoryColors] || "bg-gray-100 text-gray-800"}`}
                         >
                           {template.category}
                         </Badge>
@@ -119,17 +139,25 @@ export default function SectionTemplateSelector({
                   <CardDescription className="text-sm mb-4">
                     {template.description}
                   </CardDescription>
-                  
+
                   {/* Template Features */}
                   {template.config?.features && (
                     <div className="mb-4">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Features:</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                        Features:
+                      </p>
                       <div className="flex flex-wrap gap-1">
-                        {template.config.features.slice(0, 3).map((feature: string, index: number) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {feature}
-                          </Badge>
-                        ))}
+                        {template.config.features
+                          .slice(0, 3)
+                          .map((feature: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {feature}
+                            </Badge>
+                          ))}
                         {template.config.features.length > 3 && (
                           <Badge variant="outline" className="text-xs">
                             +{template.config.features.length - 3} more
@@ -139,8 +167,8 @@ export default function SectionTemplateSelector({
                     </div>
                   )}
 
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="sm"
                     onClick={() => onSelectTemplate(template)}
                   >

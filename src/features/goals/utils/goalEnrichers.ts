@@ -1,16 +1,18 @@
-import type { RecognitionDetails } from '@/types/recognition';
+import type { RecognitionDetails } from "@/types/recognition";
 import type {
   GoalRecognition,
   GoalTaskWithDetails,
   OwnerProfile,
-} from '@/features/goals/types';
+} from "@/features/goals/types";
 import type {
   GoalRewardRecord,
   GoalTaskRecord,
-} from '@/features/goals/repositories/goalsRepository';
-import type { ProfileRecord } from '@/features/goals/repositories/profileRepository';
+} from "@/features/goals/repositories/goalsRepository";
+import type { ProfileRecord } from "@/features/goals/repositories/profileRepository";
 
-export function buildOwnerMap(profiles: ProfileRecord[]): Record<string, OwnerProfile> {
+export function buildOwnerMap(
+  profiles: ProfileRecord[],
+): Record<string, OwnerProfile> {
   return profiles.reduce<Record<string, OwnerProfile>>((acc, profile) => {
     acc[profile.id] = {
       id: profile.id,
@@ -22,7 +24,9 @@ export function buildOwnerMap(profiles: ProfileRecord[]): Record<string, OwnerPr
   }, {});
 }
 
-export function groupGoalTasks(records: GoalTaskRecord[]): Map<string, GoalTaskWithDetails[]> {
+export function groupGoalTasks(
+  records: GoalTaskRecord[],
+): Map<string, GoalTaskWithDetails[]> {
   const map = new Map<string, GoalTaskWithDetails[]>();
   records.forEach((record, index) => {
     const goalId = record.goal_id;
@@ -39,16 +43,18 @@ export function groupGoalTasks(records: GoalTaskRecord[]): Map<string, GoalTaskW
   return map;
 }
 
-export function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
+export function parseRecognitionDetailsValue(
+  raw: unknown,
+): RecognitionDetails | null {
   if (!raw) return null;
-  if (typeof raw === 'string') {
+  if (typeof raw === "string") {
     try {
       return JSON.parse(raw) as RecognitionDetails;
     } catch {
       return null;
     }
   }
-  if (typeof raw === 'object') {
+  if (typeof raw === "object") {
     return raw as RecognitionDetails;
   }
   return null;
@@ -60,7 +66,11 @@ interface BuildRecognitionMapOptions {
   defaultXp: number;
 }
 
-export function buildRecognitionMap({ rewards, rewardUsers, defaultXp }: BuildRecognitionMapOptions) {
+export function buildRecognitionMap({
+  rewards,
+  rewardUsers,
+  defaultXp,
+}: BuildRecognitionMapOptions) {
   const map = new Map<string, GoalRecognition[]>();
   rewards.forEach((reward) => {
     const goalId = reward.goal_id;
@@ -68,19 +78,22 @@ export function buildRecognitionMap({ rewards, rewardUsers, defaultXp }: BuildRe
     const existing = map.get(goalId) ?? [];
     const details = parseRecognitionDetailsValue(reward.reward_details);
     const explicitXp =
-      typeof details?.xp_awarded === 'number'
+      typeof details?.xp_awarded === "number"
         ? details.xp_awarded
-        : details && typeof (details as Record<string, unknown>)?.xp === 'number'
+        : details &&
+            typeof (details as Record<string, unknown>)?.xp === "number"
           ? ((details as Record<string, unknown>).xp as number)
           : null;
     const xp =
       explicitXp != null
         ? explicitXp
-        : reward.reward_type === 'recognition'
+        : reward.reward_type === "recognition"
           ? defaultXp
           : 0;
 
-    const normalizedUser = reward.user_id ? rewardUsers[reward.user_id] ?? null : null;
+    const normalizedUser = reward.user_id
+      ? (rewardUsers[reward.user_id] ?? null)
+      : null;
 
     existing.push({
       id: reward.id,

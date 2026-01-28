@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import CompanyUpdatesPage from '@/screens/CompanyUpdates';
+import CompanyUpdatesPage from "@/screens/CompanyUpdates";
 
 export default function CompanyUpdates() {
   return <CompanyUpdatesPage />;

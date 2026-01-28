@@ -4,20 +4,27 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
-import { ErrorState } from './ErrorState';
-import { useSystemSettingsContext } from '../hooks/SystemSettingsContext';
-import { useAdminSettings } from '../hooks/useAdminSettings';
-import { useAuditLogs } from '@/hooks/useAuditLogs';
-import { DEFAULT_ADMIN_CONFIG } from '../hooks/systemSettingsDefaults';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Loader2 } from "lucide-react";
+import { ErrorState } from "./ErrorState";
+import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
+import { useAdminSettings } from "../hooks/useAdminSettings";
+import { useAuditLogs } from "@/hooks/useAuditLogs";
+import { DEFAULT_ADMIN_CONFIG } from "../hooks/systemSettingsDefaults";
 
-const PLAN_OPTIONS = ['starter', 'growth', 'enterprise'];
+const PLAN_OPTIONS = ["starter", "growth", "enterprise"];
 
 export function AdminSettingsPanel() {
   const system = useSystemSettingsContext();
@@ -42,7 +49,8 @@ export function AdminSettingsPanel() {
     return <ErrorState message={globalError.message} />;
   }
 
-  const tenant = state.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement;
+  const tenant =
+    state.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement;
 
   return (
     <div className="space-y-6">
@@ -50,7 +58,8 @@ export function AdminSettingsPanel() {
         <CardHeader>
           <CardTitle>Tenant management</CardTitle>
           <CardDescription>
-            Update ownership, seat allocation, and billing configuration for this workspace.
+            Update ownership, seat allocation, and billing configuration for
+            this workspace.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
@@ -58,12 +67,13 @@ export function AdminSettingsPanel() {
             <Label htmlFor="tenant-owner">Primary owner email</Label>
             <Input
               id="tenant-owner"
-              value={tenant?.primaryOwnerEmail ?? ''}
+              value={tenant?.primaryOwnerEmail ?? ""}
               onChange={(event) =>
                 setState((prev) => ({
                   ...prev,
                   tenantManagement: {
-                    ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
                     primaryOwnerEmail: event.target.value || null,
                   },
                 }))
@@ -77,12 +87,13 @@ export function AdminSettingsPanel() {
             <select
               id="tenant-plan"
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={tenant?.plan ?? 'starter'}
+              value={tenant?.plan ?? "starter"}
               onChange={(event) =>
                 setState((prev) => ({
                   ...prev,
                   tenantManagement: {
-                    ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
                     plan: event.target.value,
                   },
                 }))
@@ -107,7 +118,8 @@ export function AdminSettingsPanel() {
                 setState((prev) => ({
                   ...prev,
                   tenantManagement: {
-                    ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
                     activeSeats: Number(event.target.value) || 0,
                   },
                 }))
@@ -126,10 +138,14 @@ export function AdminSettingsPanel() {
                 setState((prev) => ({
                   ...prev,
                   tenantManagement: {
-                    ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
                     maxSeats:
                       Number(event.target.value) ||
-                      (prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement).maxSeats,
+                      (
+                        prev.tenantManagement ??
+                        DEFAULT_ADMIN_CONFIG.tenantManagement
+                      ).maxSeats,
                   },
                 }))
               }
@@ -144,10 +160,15 @@ export function AdminSettingsPanel() {
           <div>
             <CardTitle>Business structure snapshot</CardTitle>
             <CardDescription>
-              Sync locations and role templates from live company data for downstream governance.
+              Sync locations and role templates from live company data for
+              downstream governance.
             </CardDescription>
           </div>
-          <Button onClick={refreshSnapshot} disabled={syncing || !canEdit} variant="outline">
+          <Button
+            onClick={refreshSnapshot}
+            disabled={syncing || !canEdit}
+            variant="outline"
+          >
             {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Refresh snapshot
           </Button>
@@ -155,13 +176,20 @@ export function AdminSettingsPanel() {
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
             <span>
-              Locations: <Badge variant="outline">{state.businessStructure.locations.length}</Badge>
+              Locations:{" "}
+              <Badge variant="outline">
+                {state.businessStructure.locations.length}
+              </Badge>
             </span>
             <span>
-              Departments: <Badge variant="outline">{state.businessStructure.departments.length}</Badge>
+              Departments:{" "}
+              <Badge variant="outline">
+                {state.businessStructure.departments.length}
+              </Badge>
             </span>
             <span>
-              Role templates: <Badge variant="outline">{state.roleTemplates.length}</Badge>
+              Role templates:{" "}
+              <Badge variant="outline">{state.roleTemplates.length}</Badge>
             </span>
           </div>
           {syncError && <ErrorState message={syncError.message} />}
@@ -178,7 +206,8 @@ export function AdminSettingsPanel() {
         <CardContent className="space-y-3">
           {auditLogs.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading audit history…
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading audit
+              history…
             </div>
           ) : auditLogs.error ? (
             <ErrorState message={(auditLogs.error as Error).message} />
@@ -194,9 +223,13 @@ export function AdminSettingsPanel() {
               <TableBody>
                 {auditLogs.data.slice(0, 5).map((entry) => (
                   <TableRow key={entry.id}>
-                    <TableCell className="font-medium">{entry.action}</TableCell>
+                    <TableCell className="font-medium">
+                      {entry.action}
+                    </TableCell>
                     <TableCell>
-                      {entry.performed_by_profile?.email ?? entry.performed_by ?? 'Unknown'}
+                      {entry.performed_by_profile?.email ??
+                        entry.performed_by ??
+                        "Unknown"}
                     </TableCell>
                     <TableCell>
                       {new Date(entry.created_at).toLocaleString()}
@@ -206,7 +239,9 @@ export function AdminSettingsPanel() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground">No audit events recorded.</p>
+            <p className="text-sm text-muted-foreground">
+              No audit events recorded.
+            </p>
           )}
         </CardContent>
       </Card>
@@ -214,16 +249,23 @@ export function AdminSettingsPanel() {
       {saveError && <ErrorState message={saveError.message} />}
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" disabled={!dirty || saving || !canEdit} onClick={reset}>
+        <Button
+          variant="outline"
+          disabled={!dirty || saving || !canEdit}
+          onClick={reset}
+        >
           Discard
         </Button>
-        <Button onClick={save} disabled={!canEdit || !dirty || saving || loading}>
+        <Button
+          onClick={save}
+          disabled={!canEdit || !dirty || saving || loading}
+        >
           {saving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
             </>
           ) : (
-            'Save admin settings'
+            "Save admin settings"
           )}
         </Button>
       </div>

@@ -1,3 +1,3 @@
-export async function runOvertimeDetector(orgId: string) {
+export async function runOvertimeDetector(_orgId: string) {
   return [];
 }

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const profileSchema = z
   .object({
@@ -68,7 +68,7 @@ export async function fetchShiftSwaps(params: {
 }): Promise<ShiftSwapRecord[]> {
   const { companyId, limit = 50, offset = 0 } = params;
   let query = supabase
-    .from('shift_swaps')
+    .from("shift_swaps")
     .select(
       `
         *,
@@ -77,10 +77,10 @@ export async function fetchShiftSwaps(params: {
         schedule:schedules(id, company_id, title, start_time, end_time, role)
       `,
     )
-    .order('created_at', { ascending: false })
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  query = query.eq('schedule.company_id', companyId);
+  query = query.eq("schedule.company_id", companyId);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -94,15 +94,15 @@ export async function fetchTimeOffRequests(params: {
 }): Promise<TimeOffRequestRecord[]> {
   const { companyId, limit = 50, offset = 0 } = params;
   const { data, error } = await supabase
-    .from('time_off_requests')
+    .from("time_off_requests")
     .select(
       `
         *,
         user:profiles(id, first_name, last_name, avatar_url, company_id)
       `,
     )
-    .eq('user.company_id', companyId)
-    .order('created_at', { ascending: false })
+    .eq("user.company_id", companyId)
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) throw error;
@@ -111,35 +111,35 @@ export async function fetchTimeOffRequests(params: {
 
 export async function updateShiftSwapStatus(params: {
   swapId: string;
-  status: 'approved' | 'rejected';
+  status: "approved" | "rejected";
   actorId?: string | null;
 }): Promise<void> {
   const { swapId, status, actorId } = params;
   const { error } = await supabase
-    .from('shift_swaps')
+    .from("shift_swaps")
     .update({
       status,
       approved_at: new Date().toISOString(),
       approved_by: actorId ?? null,
     })
-    .eq('id', swapId);
+    .eq("id", swapId);
   if (error) throw error;
 }
 
 export async function updateTimeOffStatus(params: {
   requestId: string;
-  action: 'approve' | 'reject';
+  action: "approve" | "reject";
   actorId?: string | null;
 }): Promise<void> {
   const { requestId, action, actorId } = params;
-  const isApprove = action === 'approve';
+  const isApprove = action === "approve";
   const { error } = await supabase
-    .from('time_off_requests')
+    .from("time_off_requests")
     .update({
-      status: isApprove ? 'approved' : 'denied',
+      status: isApprove ? "approved" : "denied",
       approved_at: isApprove ? new Date().toISOString() : null,
-      approved_by: isApprove ? actorId ?? null : null,
+      approved_by: isApprove ? (actorId ?? null) : null,
     })
-    .eq('id', requestId);
+    .eq("id", requestId);
   if (error) throw error;
 }

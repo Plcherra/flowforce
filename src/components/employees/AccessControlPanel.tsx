@@ -1,14 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { Loader2, ShieldCheck } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ErrorState } from '@/modules/system/components/ErrorState';
-import { usePermission } from '@/hooks/usePermission';
-import type { Tables } from '@/integrations/supabase/public-types';
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/modules/system/components/ErrorState";
+import { usePermission } from "@/hooks/usePermission";
+import type { Tables } from "@/integrations/supabase/public-types";
 
-type Profile = Tables<'profiles'>;
+type Profile = Tables<"profiles">;
 
 export type EmployeeAccessRole = {
   id: string;
@@ -26,8 +26,9 @@ interface AccessControlPanelProps {
 }
 
 export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
-  const canManage = usePermission('manage_roles');
-  const { data, isLoading, isError, error, refetch } = useEmployeeAccess(employeeId);
+  const canManage = usePermission("manage_roles");
+  const { data, isLoading, isError, error, refetch } =
+    useEmployeeAccess(employeeId);
 
   if (isLoading) {
     return (
@@ -38,7 +39,14 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
   }
 
   if (isError) {
-    return <ErrorState message={error instanceof Error ? error.message : 'Failed to load access data'} onRetry={refetch} />;
+    return (
+      <ErrorState
+        message={
+          error instanceof Error ? error.message : "Failed to load access data"
+        }
+        onRetry={refetch}
+      />
+    );
   }
 
   if (!data?.roles.length) {
@@ -52,7 +60,8 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            This team member does not have any roles assigned yet. Assign a role to grant system access.
+            This team member does not have any roles assigned yet. Assign a role
+            to grant system access.
           </p>
           {canManage && <Button onClick={() => refetch()}>Refresh</Button>}
         </CardContent>
@@ -71,7 +80,11 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {data.roles.map((role) => (
-            <AccessCard key={role.id} title={role.name} permissions={role.permissions} />
+            <AccessCard
+              key={role.id}
+              title={role.name}
+              permissions={role.permissions}
+            />
           ))}
         </CardContent>
       </Card>
@@ -89,7 +102,7 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
 
 export function useEmployeeAccess(employeeId: string) {
   return useQuery<EmployeeAccessResponse>({
-    queryKey: ['employee-access', employeeId],
+    queryKey: ["employee-access", employeeId],
     enabled: Boolean(employeeId),
     queryFn: async () => {
       if (!employeeId) {
@@ -97,9 +110,9 @@ export function useEmployeeAccess(employeeId: string) {
       }
 
       const { data: roleAssignments, error: assignmentsError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', employeeId);
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", employeeId);
 
       if (assignmentsError) {
         throw assignmentsError;
@@ -107,16 +120,18 @@ export function useEmployeeAccess(employeeId: string) {
 
       const roleNames = (roleAssignments ?? [])
         .map((assignment) => assignment.role)
-        .filter((role): role is string => Boolean(role));
+        .filter((role): role is "admin" | "manager" | "employee" | "staff" | "supervisor" | "owner" => 
+          typeof role === "string" && ["admin", "manager", "employee", "staff", "supervisor", "owner"].includes(role)
+        );
 
       if (!roleNames.length) {
         return { roles: [] };
       }
 
       const { data: roleDetails, error: rolesError } = await supabase
-        .from('company_roles')
-        .select('id, name, permissions')
-        .in('name', roleNames);
+        .from("company_roles")
+        .select("id, name, permissions")
+        .in("name", roleNames);
 
       if (rolesError) {
         throw rolesError;
@@ -145,7 +160,13 @@ export function useEmployeeAccess(employeeId: string) {
   });
 }
 
-function AccessCard({ title, permissions }: { title: string; permissions: string[] }) {
+function AccessCard({
+  title,
+  permissions,
+}: {
+  title: string;
+  permissions: string[];
+}) {
   return (
     <Card className="border border-muted/30">
       <CardHeader className="pb-2">
@@ -161,7 +182,9 @@ function AccessCard({ title, permissions }: { title: string; permissions: string
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No individual permissions defined for this role.</p>
+          <p className="text-sm text-muted-foreground">
+            No individual permissions defined for this role.
+          </p>
         )}
       </CardContent>
     </Card>
@@ -172,21 +195,21 @@ function extractPermissions(raw: unknown): string[] {
   if (!raw) return [];
 
   if (Array.isArray(raw)) {
-    return raw.filter((item): item is string => typeof item === 'string');
+    return raw.filter((item): item is string => typeof item === "string");
   }
 
-  if (typeof raw === 'object') {
+  if (typeof raw === "object") {
     return Object.entries(raw as Record<string, boolean>)
       .filter(([, enabled]) => Boolean(enabled))
       .map(([permission]) => permission);
   }
 
-  if (typeof raw === 'string') {
+  if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw);
       return extractPermissions(parsed);
     } catch {
-      return raw.split(',').map((item) => item.trim());
+      return raw.split(",").map((item) => item.trim());
     }
   }
 
@@ -197,10 +220,10 @@ function formatPermission(permission: string) {
   return permission
     .split(/[_.-]/)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(' ');
+    .join(" ");
 }
 
 function capitalize(value: string) {
-  if (!value) return '';
+  if (!value) return "";
   return value.charAt(0).toUpperCase() + value.slice(1);
 }

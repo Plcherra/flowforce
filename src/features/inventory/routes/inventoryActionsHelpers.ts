@@ -1,17 +1,17 @@
-import type { InventoryItem } from '@/features/inventory/hooks/types';
-import type { CreateWasteData } from '@/hooks/inventory/useInventoryWaste';
+import type { InventoryItem } from "@/features/inventory/hooks/types";
+import type { CreateWasteData } from "@/hooks/inventory/useInventoryWaste";
 
 export const wasteTypes = [
-  { value: 'spoilage', label: 'Spoilage' },
-  { value: 'prep_error', label: 'Prep Error' },
-  { value: 'accident', label: 'Accident' },
-  { value: 'theft', label: 'Theft' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'damaged', label: 'Damaged' },
-  { value: 'other', label: 'Other' },
+  { value: "spoilage", label: "Spoilage" },
+  { value: "prep_error", label: "Prep Error" },
+  { value: "accident", label: "Accident" },
+  { value: "theft", label: "Theft" },
+  { value: "expired", label: "Expired" },
+  { value: "damaged", label: "Damaged" },
+  { value: "other", label: "Other" },
 ] as const;
 
-export type WasteTypeValue = (typeof wasteTypes)[number]['value'];
+export type WasteTypeValue = (typeof wasteTypes)[number]["value"];
 
 export const isWasteTypeValue = (value: string): value is WasteTypeValue =>
   wasteTypes.some((type) => type.value === value);
@@ -20,7 +20,7 @@ export type WasteFormValues = {
   item_id: string;
   location_id: string;
   quantity: string;
-  waste_type: WasteTypeValue | '';
+  waste_type: WasteTypeValue | "";
   reason: string;
 };
 
@@ -34,36 +34,41 @@ export type AdjustmentFormValues = {
 
 export type FormErrors<T> = Partial<Record<keyof T, string>>;
 
-export function validateWasteForm(form: WasteFormValues): FormErrors<WasteFormValues> {
+export function validateWasteForm(
+  form: WasteFormValues,
+): FormErrors<WasteFormValues> {
   const errors: FormErrors<WasteFormValues> = {};
 
-  if (!form.item_id) errors.item_id = 'Select an item to log waste.';
+  if (!form.item_id) errors.item_id = "Select an item to log waste.";
 
   const quantityValue = Number(form.quantity);
   if (!form.quantity || !Number.isFinite(quantityValue) || quantityValue <= 0) {
-    errors.quantity = 'Quantity must be greater than zero.';
+    errors.quantity = "Quantity must be greater than zero.";
   }
 
   if (!form.waste_type || !isWasteTypeValue(form.waste_type)) {
-    errors.waste_type = 'Choose the type of waste.';
+    errors.waste_type = "Choose the type of waste.";
   }
 
   return errors;
 }
 
-export function validateAdjustmentForm(form: AdjustmentFormValues): FormErrors<AdjustmentFormValues> {
+export function validateAdjustmentForm(
+  form: AdjustmentFormValues,
+): FormErrors<AdjustmentFormValues> {
   const errors: FormErrors<AdjustmentFormValues> = {};
 
-  if (!form.item_id) errors.item_id = 'Select an item to adjust.';
-  if (!form.location_id) errors.location_id = 'Select a location.';
-  if (!form.adjustment_type) errors.adjustment_type = 'Choose an adjustment type.';
+  if (!form.item_id) errors.item_id = "Select an item to adjust.";
+  if (!form.location_id) errors.location_id = "Select a location.";
+  if (!form.adjustment_type)
+    errors.adjustment_type = "Choose an adjustment type.";
 
   const quantityValue = Number(form.quantity);
   if (!form.quantity || !Number.isFinite(quantityValue) || quantityValue <= 0) {
-    errors.quantity = 'Quantity must be greater than zero.';
+    errors.quantity = "Quantity must be greater than zero.";
   }
 
-  if (!form.reason) errors.reason = 'Provide a brief reason.';
+  if (!form.reason) errors.reason = "Provide a brief reason.";
 
   return errors;
 }
@@ -84,12 +89,12 @@ export async function submitWasteForm({
   showValidationToast,
   resetForm,
   mutateWaste,
-}: WasteSubmitDeps): Promise<'validation_error' | 'success'> {
+}: WasteSubmitDeps): Promise<"validation_error" | "success"> {
   const validationErrors = validateWasteForm(form);
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
     showValidationToast();
-    return 'validation_error';
+    return "validation_error";
   }
 
   const quantityValue = Number(form.quantity);
@@ -110,7 +115,7 @@ export async function submitWasteForm({
   });
 
   resetForm();
-  return 'success';
+  return "success";
 }
 
 type AdjustmentSubmitDeps = {
@@ -123,13 +128,13 @@ export function processAdjustmentForm({
   form,
   setErrors,
   showValidationToast,
-}: AdjustmentSubmitDeps): 'validation_error' | 'success' {
+}: AdjustmentSubmitDeps): "validation_error" | "success" {
   const validationErrors = validateAdjustmentForm(form);
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
     showValidationToast();
-    return 'validation_error';
+    return "validation_error";
   }
 
-  return 'success';
+  return "success";
 }

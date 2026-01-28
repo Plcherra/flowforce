@@ -1,8 +1,13 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Download } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Download } from "lucide-react";
 
 interface DownloadCardProps {
   title: string;
@@ -13,9 +18,16 @@ interface DownloadCardProps {
   downloadUrl: string;
 }
 
-export default function DownloadCard({ title, description, type, platforms, format, downloadUrl }: DownloadCardProps) {
+export default function DownloadCard({
+  title,
+  description,
+  type,
+  platforms,
+  format,
+  downloadUrl,
+}: DownloadCardProps) {
   const handleDownload = () => {
-    window.open(downloadUrl, '_blank');
+    window.open(downloadUrl, "_blank");
   };
 
   return (
@@ -25,9 +37,7 @@ export default function DownloadCard({ title, description, type, platforms, form
           <Badge variant="outline" className="text-xs">
             {type}
           </Badge>
-          {format && (
-            <span className="text-xs text-gray-500">{format}</span>
-          )}
+          {format && <span className="text-xs text-gray-500">{format}</span>}
         </div>
         <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -42,7 +52,10 @@ export default function DownloadCard({ title, description, type, platforms, form
             ))}
           </div>
         )}
-        <Button className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90" onClick={handleDownload}>
+        <Button
+          className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90"
+          onClick={handleDownload}
+        >
           <Download className="mr-2 h-4 w-4" />
           Download
         </Button>

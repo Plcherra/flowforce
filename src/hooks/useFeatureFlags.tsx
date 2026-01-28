@@ -1,5 +1,9 @@
-import { useMemo } from 'react';
-import { DEFAULT_FEATURE_FLAGS, type FeatureFlags, getFeatureFlag } from '@/config/featureFlags';
+import { useMemo } from "react";
+import {
+  DEFAULT_FEATURE_FLAGS,
+  type FeatureFlags,
+  getFeatureFlag,
+} from "@/config/featureFlags";
 
 // Hook to access feature flags throughout the application
 export function useFeatureFlags() {
@@ -8,7 +12,7 @@ export function useFeatureFlags() {
     // 1. Fetch user-specific or company-specific feature flags from the server
     // 2. Merge with environment-based flags
     // 3. Support runtime toggles for admins
-    
+
     return DEFAULT_FEATURE_FLAGS;
   }, []);
 

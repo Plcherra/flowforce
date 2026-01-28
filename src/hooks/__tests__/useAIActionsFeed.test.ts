@@ -1,7 +1,7 @@
-import { act, renderHook } from '@testing-library/react';
-import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest';
+import { act, renderHook } from "@testing-library/react";
+import { describe, expect, beforeEach, afterEach, it, vi } from "vitest";
 
-import { useAIActionsFeed } from '@/hooks/useAIActionsFeed';
+import { useAIActionsFeed } from "@/hooks/useAIActionsFeed";
 
 const useTasksMock = vi.fn();
 const useGoalsMock = vi.fn();
@@ -11,38 +11,39 @@ const useProfileMock = vi.fn();
 const useSchedulingConsolidatedMock = vi.fn();
 const useExpensesMock = vi.fn();
 
-vi.mock('@/hooks/useTasks', () => ({
+vi.mock("@/hooks/useTasks", () => ({
   useTasks: () => useTasksMock(),
 }));
 
-vi.mock('@/hooks/useGoals', () => ({
+vi.mock("@/hooks/useGoals", () => ({
   useGoals: () => useGoalsMock(),
 }));
 
-vi.mock('@/hooks/useReminders', () => ({
+vi.mock("@/hooks/useReminders", () => ({
   useReminders: () => useRemindersMock(),
 }));
 
-vi.mock('@/features/tasks', () => ({
+vi.mock("@/features/tasks", () => ({
   useTaskNotifications: () => useTaskNotificationsMock(),
 }));
 
-vi.mock('@/hooks/useProfile', () => ({
+vi.mock("@/hooks/useProfile", () => ({
   useProfile: () => useProfileMock(),
 }));
 
-vi.mock('@/hooks/scheduling/useSchedulingConsolidated', () => ({
-  useSchedulingConsolidated: (params: unknown) => useSchedulingConsolidatedMock(params),
+vi.mock("@/hooks/scheduling/useSchedulingConsolidated", () => ({
+  useSchedulingConsolidated: (params: unknown) =>
+    useSchedulingConsolidatedMock(params),
 }));
 
-vi.mock('@/hooks/useExpenses', () => ({
+vi.mock("@/hooks/useExpenses", () => ({
   useExpenses: () => useExpensesMock(),
 }));
 
 const defaultProfileValue = {
   profile: {
-    userId: 'user-1',
-    companyId: 'company-1',
+    userId: "user-1",
+    companyId: "company-1",
   },
   loading: false,
   error: null,
@@ -105,7 +106,7 @@ const baseNotificationsResult = {
   refetchNotifications: vi.fn().mockResolvedValue(undefined),
 };
 
-describe('useAIActionsFeed', () => {
+describe("useAIActionsFeed", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useProfileMock.mockReturnValue(defaultProfileValue);
@@ -121,14 +122,14 @@ describe('useAIActionsFeed', () => {
     vi.clearAllMocks();
   });
 
-  it('skips scheduling and expenses refresh when no company context is available', async () => {
+  it("skips scheduling and expenses refresh when no company context is available", async () => {
     const schedulingRefetch = vi.fn().mockResolvedValue(undefined);
     const expensesRefetch = vi.fn().mockResolvedValue(undefined);
 
     useProfileMock.mockReturnValue({
       ...defaultProfileValue,
       profile: {
-        userId: 'user-1',
+        userId: "user-1",
         companyId: null,
       },
     });
@@ -137,10 +138,10 @@ describe('useAIActionsFeed', () => {
       ...baseTasksResult,
       tasks: [
         {
-          id: 'task-1',
-          title: 'Follow up',
+          id: "task-1",
+          title: "Follow up",
           due_date: new Date().toISOString(),
-          status: 'open',
+          status: "open",
         },
       ],
     });
@@ -150,7 +151,7 @@ describe('useAIActionsFeed', () => {
         refetchAll: schedulingRefetch,
         shifts: [
           {
-            id: 'shift-1',
+            id: "shift-1",
             start_time: new Date().toISOString(),
             assignments: [],
             required_headcount: 2,
@@ -164,10 +165,10 @@ describe('useAIActionsFeed', () => {
         refetch: expensesRefetch,
         data: [
           {
-            id: 'expense-1',
+            id: "expense-1",
             amount: 500,
             expense_date: new Date().toISOString(),
-            category: 'Travel',
+            category: "Travel",
           },
         ],
       }),
@@ -188,7 +189,7 @@ describe('useAIActionsFeed', () => {
     expect(expensesRefetch).not.toHaveBeenCalled();
   });
 
-  it('enables scheduling and expenses refresh when company context exists', async () => {
+  it("enables scheduling and expenses refresh when company context exists", async () => {
     const schedulingRefetch = vi.fn().mockResolvedValue(undefined);
     const expensesRefetch = vi.fn().mockResolvedValue(undefined);
 

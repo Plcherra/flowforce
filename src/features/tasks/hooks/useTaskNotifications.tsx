@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { logger } from '@/utils/logger';
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 import {
   createTaskNotification,
   deleteNotification as deleteNotificationRecord,
@@ -16,9 +16,9 @@ import {
   markNotificationAsRead,
   type NewNotificationInput,
   type TaskNotification,
-} from '@/repositories/taskNotificationsRepository';
+} from "@/repositories/taskNotificationsRepository";
 
-const NOTIFICATION_QUERY_KEY = 'task-notifications';
+const NOTIFICATION_QUERY_KEY = "task-notifications";
 
 export function useTaskNotifications() {
   const { user } = useAuth();
@@ -39,15 +39,19 @@ export function useTaskNotifications() {
   const notifications = notificationsQuery.data ?? [];
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.read_at).length,
-    [notifications]
+    [notifications],
   );
   const loading = notificationsQuery.isLoading && Boolean(user);
-  const queryError = notificationsQuery.error ? (notificationsQuery.error as Error).message : null;
+  const queryError = notificationsQuery.error
+    ? (notificationsQuery.error as Error).message
+    : null;
   const error = serviceError ?? queryError;
 
   const invalidateNotifications = () => {
     if (!user?.id) return Promise.resolve();
-    return queryClient.invalidateQueries({ queryKey: [NOTIFICATION_QUERY_KEY, user.id] });
+    return queryClient.invalidateQueries({
+      queryKey: [NOTIFICATION_QUERY_KEY, user.id],
+    });
   };
 
   useEffect(() => {
@@ -61,11 +65,11 @@ export function useTaskNotifications() {
       channel = supabase
         .channel(`task-notifications-${user.id}`)
         .on(
-          'postgres_changes',
+          "postgres_changes",
           {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'task_notifications',
+            event: "INSERT",
+            schema: "public",
+            table: "task_notifications",
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
@@ -78,40 +82,60 @@ export function useTaskNotifications() {
               });
               invalidateNotifications();
             } catch (error) {
-              const errorMessage = error instanceof Error 
-                ? error.message 
-                : typeof error === 'object' && error !== null && 'message' in error
-                  ? String(error.message)
-                  : 'Unknown error handling notification';
-              logger.error('Error handling notification INSERT:', { error, context: { errorMessage }, tags: ['error'] });
+              const errorMessage =
+                error instanceof Error
+                  ? error.message
+                  : typeof error === "object" &&
+                      error !== null &&
+                      "message" in error
+                    ? String(error.message)
+                    : "Unknown error handling notification";
+              logger.error("Error handling notification INSERT:", {
+                error,
+                context: { errorMessage },
+                tags: ["error"],
+              });
             }
-          }
+          },
         )
         .on(
-          'postgres_changes',
+          "postgres_changes",
           {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'task_notifications',
+            event: "UPDATE",
+            schema: "public",
+            table: "task_notifications",
             filter: `user_id=eq.${user.id}`,
           },
           () => {
             try {
               invalidateNotifications();
             } catch (error) {
-              logger.error('Error handling notification UPDATE:', { error, tags: ['error'] });
+              logger.error("Error handling notification UPDATE:", {
+                error,
+                tags: ["error"],
+              });
             }
-          }
+          },
         )
         .subscribe((status, err) => {
-          if (status === 'SUBSCRIBED') {
+          if (status === "SUBSCRIBED") {
             // Successfully subscribed
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            logger.warn(`Task notifications subscription ${status}:`, { error: err, tags: ['warning'] });
+          } else if (
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT" ||
+            status === "CLOSED"
+          ) {
+            logger.warn(`Task notifications subscription ${status}:`, {
+              error: err,
+              tags: ["warning"],
+            });
           }
         });
     } catch (error) {
-      logger.error('Error setting up task notifications subscription:', { error, tags: ['error'] });
+      logger.error("Error setting up task notifications subscription:", {
+        error,
+        tags: ["error"],
+      });
     }
 
     return () => {
@@ -134,28 +158,32 @@ export function useTaskNotifications() {
         }
       } catch (error) {
         // Handle various error types and extract meaningful messages
-        let errorMessage = 'Unable to check due tasks.';
-        
+        let errorMessage = "Unable to check due tasks.";
+
         if (error instanceof Error) {
           errorMessage = error.message || errorMessage;
-        } else if (error && typeof error === 'object') {
+        } else if (error && typeof error === "object") {
           // Try to extract message from error object
-          if ('message' in error && typeof error.message === 'string') {
+          if ("message" in error && typeof error.message === "string") {
             errorMessage = error.message;
-          } else if ('error' in error && typeof error.error === 'string') {
+          } else if ("error" in error && typeof error.error === "string") {
             errorMessage = error.error;
-          } else if ('code' in error) {
+          } else if ("code" in error) {
             errorMessage = `Error code: ${String(error.code)}`;
           }
-        } else if (typeof error === 'string') {
+        } else if (typeof error === "string") {
           errorMessage = error;
         }
-        
+
         // Only log if there's a meaningful error message
-        if (errorMessage !== 'Unable to check due tasks.' || error) {
-          logger.error('Error checking due tasks:', { error, context: { errorMessage }, tags: ['error'] });
+        if (errorMessage !== "Unable to check due tasks." || error) {
+          logger.error("Error checking due tasks:", {
+            error,
+            context: { errorMessage },
+            tags: ["error"],
+          });
         }
-        
+
         if (isMounted) {
           setServiceError(errorMessage);
         }
@@ -179,13 +207,18 @@ export function useTaskNotifications() {
     const dueSoon = await fetchTasksDueSoon(userId, tomorrow.toISOString());
     for (const task of dueSoon) {
       if (!task.due_date) continue;
-      const existing = await findRecentNotification(userId, task.id, 'task_due_soon', lastDayIso);
+      const existing = await findRecentNotification(
+        userId,
+        task.id,
+        "task_due_soon",
+        lastDayIso,
+      );
       if (!existing) {
         await createTaskNotification({
           user_id: userId,
           task_id: task.id,
-          type: 'task_due_soon',
-          title: 'Task Due Soon',
+          type: "task_due_soon",
+          title: "Task Due Soon",
           message: `"${task.title}" is due soon`,
           metadata: {
             task_title: task.title,
@@ -199,13 +232,18 @@ export function useTaskNotifications() {
     const overdue = await fetchOverdueTasks(userId);
     for (const task of overdue) {
       if (!task.due_date) continue;
-      const existing = await findRecentNotification(userId, task.id, 'task_overdue', lastDayIso);
+      const existing = await findRecentNotification(
+        userId,
+        task.id,
+        "task_overdue",
+        lastDayIso,
+      );
       if (!existing) {
         await createTaskNotification({
           user_id: userId,
           task_id: task.id,
-          type: 'task_overdue',
-          title: 'Task Overdue',
+          type: "task_overdue",
+          title: "Task Overdue",
           message: `"${task.title}" is overdue`,
           metadata: {
             task_title: task.title,
@@ -224,8 +262,13 @@ export function useTaskNotifications() {
       await markNotificationAsRead(notificationId);
       await invalidateNotifications();
     } catch (error) {
-      logger.error('Error marking notification as read:', { error, tags: ['error'] });
-      setServiceError((error as Error)?.message ?? 'Unable to update notification.');
+      logger.error("Error marking notification as read:", {
+        error,
+        tags: ["error"],
+      });
+      setServiceError(
+        (error as Error)?.message ?? "Unable to update notification.",
+      );
     }
   };
 
@@ -235,8 +278,13 @@ export function useTaskNotifications() {
       await markAllNotificationsAsRead(user.id);
       await invalidateNotifications();
     } catch (error) {
-      logger.error('Error marking notifications as read:', { error, tags: ['error'] });
-      setServiceError((error as Error)?.message ?? 'Unable to update notifications.');
+      logger.error("Error marking notifications as read:", {
+        error,
+        tags: ["error"],
+      });
+      setServiceError(
+        (error as Error)?.message ?? "Unable to update notifications.",
+      );
     }
   };
 
@@ -245,8 +293,10 @@ export function useTaskNotifications() {
       await deleteNotificationRecord(notificationId);
       await invalidateNotifications();
     } catch (error) {
-      logger.error('Error deleting notification:', { error, tags: ['error'] });
-      setServiceError((error as Error)?.message ?? 'Unable to delete notification.');
+      logger.error("Error deleting notification:", { error, tags: ["error"] });
+      setServiceError(
+        (error as Error)?.message ?? "Unable to delete notification.",
+      );
     }
   };
 
@@ -255,17 +305,24 @@ export function useTaskNotifications() {
       await createTaskNotification(input);
       await invalidateNotifications();
     } catch (error) {
-      logger.error('Error creating notification:', { error, tags: ['error'] });
-      setServiceError((error as Error)?.message ?? 'Unable to create notification.');
+      logger.error("Error creating notification:", { error, tags: ["error"] });
+      setServiceError(
+        (error as Error)?.message ?? "Unable to create notification.",
+      );
     }
   };
 
-  const notifyTaskAssigned = async (taskId: string, assigneeId: string, taskTitle: string, assigneeName: string) => {
+  const notifyTaskAssigned = async (
+    taskId: string,
+    assigneeId: string,
+    taskTitle: string,
+    assigneeName: string,
+  ) => {
     await createNotification({
       user_id: assigneeId,
       task_id: taskId,
-      type: 'task_assigned',
-      title: 'New Task Assignment',
+      type: "task_assigned",
+      title: "New Task Assignment",
       message: `You have been assigned to "${taskTitle}"`,
       metadata: {
         task_title: taskTitle,
@@ -274,13 +331,18 @@ export function useTaskNotifications() {
     });
   };
 
-  const notifyTaskCompleted = async (taskId: string, creatorId: string, taskTitle: string, completedBy: string) => {
+  const notifyTaskCompleted = async (
+    taskId: string,
+    creatorId: string,
+    taskTitle: string,
+    completedBy: string,
+  ) => {
     if (creatorId === user?.id) return;
     await createNotification({
       user_id: creatorId,
       task_id: taskId,
-      type: 'task_completed',
-      title: 'Task Completed',
+      type: "task_completed",
+      title: "Task Completed",
       message: `"${taskTitle}" has been completed by ${completedBy}`,
       metadata: {
         task_title: taskTitle,
@@ -288,13 +350,18 @@ export function useTaskNotifications() {
     });
   };
 
-  const notifyTaskStatusChanged = async (taskId: string, assigneeId: string, taskTitle: string, newStatus: string) => {
+  const notifyTaskStatusChanged = async (
+    taskId: string,
+    assigneeId: string,
+    taskTitle: string,
+    newStatus: string,
+  ) => {
     await createNotification({
       user_id: assigneeId,
       task_id: taskId,
-      type: 'task_status_changed',
-      title: 'Task Status Updated',
-      message: `"${taskTitle}" status changed to ${newStatus.replace('_', ' ')}`,
+      type: "task_status_changed",
+      title: "Task Status Updated",
+      message: `"${taskTitle}" status changed to ${newStatus.replace("_", " ")}`,
       metadata: {
         task_title: taskTitle,
         status: newStatus,
@@ -302,13 +369,18 @@ export function useTaskNotifications() {
     });
   };
 
-  const notifyTaskComment = async (taskId: string, assigneeId: string, taskTitle: string, commenterName: string) => {
+  const notifyTaskComment = async (
+    taskId: string,
+    assigneeId: string,
+    taskTitle: string,
+    commenterName: string,
+  ) => {
     if (assigneeId === user?.id) return;
     await createNotification({
       user_id: assigneeId,
       task_id: taskId,
-      type: 'task_comment',
-      title: 'New Comment',
+      type: "task_comment",
+      title: "New Comment",
       message: `${commenterName} commented on "${taskTitle}"`,
       metadata: {
         task_title: taskTitle,

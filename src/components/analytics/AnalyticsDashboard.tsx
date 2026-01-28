@@ -1,33 +1,32 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useAnalytics, useEmployeePerformance } from '@/hooks/useAnalytics';
-import { 
-  Users, 
-  Clock, 
-  CheckSquare, 
-  AlertTriangle, 
-  FileText, 
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useAnalytics, useEmployeePerformance } from "@/hooks/useAnalytics";
+import {
+  Users,
+  Clock,
+  CheckSquare,
+  AlertTriangle,
+  FileText,
   TrendingUp,
-  TrendingDown 
-} from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+  TrendingDown,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
   Line,
   PieChart,
   Pie,
-  Cell 
-} from 'recharts';
+  Cell,
+} from "recharts";
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
+const COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"];
 
 export default function AnalyticsDashboard() {
   const { data: analytics, isLoading } = useAnalytics();
@@ -50,16 +49,17 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const performanceData = performance?.slice(0, 10).map(emp => ({
-    name: `${emp.first_name} ${emp.last_name}`,
-    completion_rate: emp.completion_rate,
-    tasks: emp.tasks
-  })) || [];
+  const performanceData =
+    performance?.slice(0, 10).map((emp) => ({
+      name: `${emp.first_name} ${emp.last_name}`,
+      completion_rate: emp.completion_rate,
+      tasks: emp.tasks,
+    })) || [];
 
   const statusData = [
-    { name: 'Active', value: analytics?.activeEmployees || 0 },
-    { name: 'Pending Requests', value: analytics?.pendingTimeOffRequests || 0 },
-    { name: 'Overdue Tasks', value: analytics?.overdueTasks || 0 },
+    { name: "Active", value: analytics?.activeEmployees || 0 },
+    { name: "Pending Requests", value: analytics?.pendingTimeOffRequests || 0 },
+    { name: "Overdue Tasks", value: analytics?.overdueTasks || 0 },
   ];
 
   return (
@@ -70,14 +70,20 @@ export default function AnalyticsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
-                <p className="text-2xl font-bold">{analytics?.totalEmployees || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Employees
+                </p>
+                <p className="text-2xl font-bold">
+                  {analytics?.totalEmployees || 0}
+                </p>
               </div>
               <Users className="h-8 w-8 text-blue-500" />
             </div>
             <div className="flex items-center mt-2">
               <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-500">+12% from last month</span>
+              <span className="text-sm text-green-500">
+                +12% from last month
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -86,15 +92,24 @@ export default function AnalyticsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Employees</p>
-                <p className="text-2xl font-bold">{analytics?.activeEmployees || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Active Employees
+                </p>
+                <p className="text-2xl font-bold">
+                  {analytics?.activeEmployees || 0}
+                </p>
               </div>
               <CheckSquare className="h-8 w-8 text-green-500" />
             </div>
             <div className="flex items-center mt-2">
               <Badge variant="outline" className="text-xs">
-                {analytics?.totalEmployees ? 
-                  Math.round((analytics.activeEmployees / analytics.totalEmployees) * 100) : 0}% Active
+                {analytics?.totalEmployees
+                  ? Math.round(
+                      (analytics.activeEmployees / analytics.totalEmployees) *
+                        100,
+                    )
+                  : 0}
+                % Active
               </Badge>
             </div>
           </CardContent>
@@ -104,14 +119,26 @@ export default function AnalyticsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending Requests</p>
-                <p className="text-2xl font-bold">{analytics?.pendingTimeOffRequests || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Pending Requests
+                </p>
+                <p className="text-2xl font-bold">
+                  {analytics?.pendingTimeOffRequests || 0}
+                </p>
               </div>
               <Clock className="h-8 w-8 text-orange-500" />
             </div>
             <div className="flex items-center mt-2">
-              <Badge variant={analytics?.pendingTimeOffRequests === 0 ? 'outline' : 'destructive'}>
-                {analytics?.pendingTimeOffRequests === 0 ? 'All Clear' : 'Needs Review'}
+              <Badge
+                variant={
+                  analytics?.pendingTimeOffRequests === 0
+                    ? "outline"
+                    : "destructive"
+                }
+              >
+                {analytics?.pendingTimeOffRequests === 0
+                  ? "All Clear"
+                  : "Needs Review"}
               </Badge>
             </div>
           </CardContent>
@@ -121,8 +148,12 @@ export default function AnalyticsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Overdue Tasks</p>
-                <p className="text-2xl font-bold">{analytics?.overdueTasks || 0}</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Overdue Tasks
+                </p>
+                <p className="text-2xl font-bold">
+                  {analytics?.overdueTasks || 0}
+                </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-500" />
             </div>
@@ -132,8 +163,12 @@ export default function AnalyticsDashboard() {
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
               )}
-              <span className={`text-sm ${analytics?.overdueTasks === 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {analytics?.overdueTasks === 0 ? 'Great work!' : 'Needs attention'}
+              <span
+                className={`text-sm ${analytics?.overdueTasks === 0 ? "text-green-500" : "text-red-500"}`}
+              >
+                {analytics?.overdueTasks === 0
+                  ? "Great work!"
+                  : "Needs attention"}
               </span>
             </div>
           </CardContent>
@@ -153,9 +188,24 @@ export default function AnalyticsDashboard() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="employees" stroke="#3b82f6" name="Employees" />
-                <Line type="monotone" dataKey="tasks" stroke="#10b981" name="Tasks" />
-                <Line type="monotone" dataKey="timeOff" stroke="#f59e0b" name="Time Off" />
+                <Line
+                  type="monotone"
+                  dataKey="employees"
+                  stroke="#3b82f6"
+                  name="Employees"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="tasks"
+                  stroke="#10b981"
+                  name="Tasks"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="timeOff"
+                  stroke="#f59e0b"
+                  name="Time Off"
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -169,10 +219,19 @@ export default function AnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="completion_rate" fill="#3b82f6" name="Completion Rate %" />
+                <Bar
+                  dataKey="completion_rate"
+                  fill="#3b82f6"
+                  name="Completion Rate %"
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -195,10 +254,13 @@ export default function AnalyticsDashboard() {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({name, value}) => `${name}: ${value}`}
+                  label={({ name, value }) => `${name}: ${value}`}
                 >
                   {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -239,8 +301,14 @@ export default function AnalyticsDashboard() {
                 Task Completion Rate
               </span>
               <Badge variant="outline">
-                {analytics?.completedTasks && analytics?.overdueTasks ? 
-                  Math.round((analytics.completedTasks / (analytics.completedTasks + analytics.overdueTasks)) * 100) : 0}%
+                {analytics?.completedTasks && analytics?.overdueTasks
+                  ? Math.round(
+                      (analytics.completedTasks /
+                        (analytics.completedTasks + analytics.overdueTasks)) *
+                        100,
+                    )
+                  : 0}
+                %
               </Badge>
             </div>
           </CardContent>

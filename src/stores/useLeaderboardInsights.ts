@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface LeaderboardInsightRecord {
   employeeId: string;
@@ -15,14 +15,18 @@ export interface LeaderboardInsightRecord {
 interface LeaderboardInsightsState {
   insights: LeaderboardInsightRecord[];
   lastUpdated: string | null;
-  setInsights: (insights: LeaderboardInsightRecord[], lastUpdated: string) => void;
+  setInsights: (
+    insights: LeaderboardInsightRecord[],
+    lastUpdated: string,
+  ) => void;
   clear: () => void;
 }
 
-export const useLeaderboardInsightsStore = create<LeaderboardInsightsState>((set) => ({
-  insights: [],
-  lastUpdated: null,
-  setInsights: (insights, lastUpdated) => set({ insights, lastUpdated }),
-  clear: () => set({ insights: [], lastUpdated: null }),
-}));
-
+export const useLeaderboardInsightsStore = create<LeaderboardInsightsState>(
+  (set) => ({
+    insights: [],
+    lastUpdated: null,
+    setInsights: (insights, lastUpdated) => set({ insights, lastUpdated }),
+    clear: () => set({ insights: [], lastUpdated: null }),
+  }),
+);

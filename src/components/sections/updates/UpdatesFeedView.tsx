@@ -1,24 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  Heart, 
-  MessageCircle, 
-  Eye, 
-  Pin, 
+import React, { useEffect, useRef, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Heart,
+  MessageCircle,
+  Eye,
+  Pin,
   Calendar,
   Bell,
   Newspaper,
   FileText,
-  Globe
-} from 'lucide-react';
-import { CompanyUpdate, UpdateComment } from '@/types/companyUpdates';
-import { formatDistanceToNow } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useCommentForm } from '@/features/company-updates/hooks/useCommentForm';
+  Globe,
+} from "lucide-react";
+import { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
+import { formatDistanceToNow } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
 
 interface UpdatesFeedViewProps {
   updates: CompanyUpdate[];
@@ -29,11 +29,11 @@ interface UpdatesFeedViewProps {
   loading?: boolean;
 }
 
-export function UpdatesFeedView({ 
-  updates, 
-  comments, 
-  onLike, 
-  onComment, 
+export function UpdatesFeedView({
+  updates,
+  comments,
+  onLike,
+  onComment,
   onView,
   loading = false,
 }: UpdatesFeedViewProps) {
@@ -84,33 +84,33 @@ export function UpdatesFeedView({
     };
   }, [updates, onView]);
 
-  const getUpdateIcon = (type: CompanyUpdate['type']) => {
+  const getUpdateIcon = (type: CompanyUpdate["type"]) => {
     switch (type) {
-      case 'announcement':
+      case "announcement":
         return <Bell className="h-5 w-5" />;
-      case 'news':
+      case "news":
         return <Newspaper className="h-5 w-5" />;
-      case 'event':
+      case "event":
         return <Calendar className="h-5 w-5" />;
-      case 'policy':
+      case "policy":
         return <FileText className="h-5 w-5" />;
       default:
         return <Bell className="h-5 w-5" />;
     }
   };
 
-  const getTypeColor = (type: CompanyUpdate['type']) => {
+  const getTypeColor = (type: CompanyUpdate["type"]) => {
     switch (type) {
-      case 'announcement':
-        return 'text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400';
-      case 'news':
-        return 'text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400';
-      case 'event':
-        return 'text-purple-600 bg-purple-50 dark:bg-purple-950 dark:text-purple-400';
-      case 'policy':
-        return 'text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-400';
+      case "announcement":
+        return "text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400";
+      case "news":
+        return "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400";
+      case "event":
+        return "text-purple-600 bg-purple-50 dark:bg-purple-950 dark:text-purple-400";
+      case "policy":
+        return "text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-400";
       default:
-        return 'text-gray-600 bg-gray-50 dark:bg-gray-950 dark:text-gray-400';
+        return "text-gray-600 bg-gray-50 dark:bg-gray-950 dark:text-gray-400";
     }
   };
 
@@ -128,26 +128,29 @@ export function UpdatesFeedView({
       await Promise.resolve(onComment?.(updateId, content));
       clearComment(updateId);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to post comment.';
+      const message =
+        error instanceof Error ? error.message : "Unable to post comment.";
       setCommentError(updateId, message);
     }
   };
 
   const toggleComments = (updateId: string) => {
-    setShowComments(prev => ({ ...prev, [updateId]: !prev[updateId] }));
+    setShowComments((prev) => ({ ...prev, [updateId]: !prev[updateId] }));
   };
 
   const getUpdateComments = (updateId: string) => {
-    return comments.filter(comment => comment.updateId === updateId);
+    return comments.filter((comment) => comment.updateId === updateId);
   };
 
   // Sort updates by pinned first, then by publish date
   const sortedUpdates = [...updates]
-    .filter((update) => update.status === 'published')
+    .filter((update) => update.status === "published")
     .sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
+      return (
+        new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
+      );
     });
 
   if (loading) {
@@ -159,7 +162,7 @@ export function UpdatesFeedView({
       {sortedUpdates.map((update) => {
         const updateComments = getUpdateComments(update.id);
         const isLiked = Boolean(update.viewerHasLiked);
-        
+
         return (
           <Card
             key={update.id}
@@ -170,7 +173,7 @@ export function UpdatesFeedView({
                 delete cardRefs.current[update.id];
               }
             }}
-            className={`${update.isPinned ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}
+            className={`${update.isPinned ? "ring-2 ring-primary/20 bg-primary/5" : ""}`}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -178,7 +181,10 @@ export function UpdatesFeedView({
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={update.author.avatar} />
                     <AvatarFallback>
-                      {update.author.name.split(' ').map(n => n[0]).join('')}
+                      {update.author.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -194,11 +200,19 @@ export function UpdatesFeedView({
                       )}
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <span>{formatDistanceToNow(new Date(update.publishDate), { addSuffix: true })}</span>
+                      <span>
+                        {formatDistanceToNow(new Date(update.publishDate), {
+                          addSuffix: true,
+                        })}
+                      </span>
                       <span>•</span>
-                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${getTypeColor(update.type)}`}>
+                      <div
+                        className={`flex items-center space-x-1 px-2 py-1 rounded-full ${getTypeColor(update.type)}`}
+                      >
                         {getUpdateIcon(update.type)}
-                        <span className="text-xs font-medium capitalize">{update.type}</span>
+                        <span className="text-xs font-medium capitalize">
+                          {update.type}
+                        </span>
                       </div>
                       <Globe className="h-3 w-3" />
                     </div>
@@ -212,12 +226,14 @@ export function UpdatesFeedView({
                 <div>
                   <h2 className="text-xl font-bold mb-2">{update.title}</h2>
                   {update.richContent ? (
-                    <div 
+                    <div
                       className="prose prose-sm max-w-none dark:prose-invert"
                       dangerouslySetInnerHTML={{ __html: update.richContent }}
                     />
                   ) : (
-                    <p className="text-foreground leading-relaxed">{update.body}</p>
+                    <p className="text-foreground leading-relaxed">
+                      {update.body}
+                    </p>
                   )}
                 </div>
 
@@ -245,9 +261,11 @@ export function UpdatesFeedView({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(update.id)}
-                    className={isLiked ? 'text-red-600 hover:text-red-700' : ''}
+                    className={isLiked ? "text-red-600 hover:text-red-700" : ""}
                   >
-                    <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                    <Heart
+                      className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}
+                    />
                     Like
                   </Button>
                   <Button
@@ -269,30 +287,30 @@ export function UpdatesFeedView({
                         <AvatarFallback>You</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 space-y-2">
-                <Textarea
-                  placeholder="Write a comment..."
-                  value={commentInputs[update.id] || ''}
-                  onChange={(e) =>
-                    handleCommentInputChange(update.id, e.target.value)
-                  }
-                  className="min-h-[60px] resize-none"
-                  aria-invalid={Boolean(commentErrors[update.id])}
-                />
-                <div className="flex justify-end">
-                  <Button
-                    size="sm"
-                    onClick={() => handleComment(update.id)}
-                    disabled={!commentInputs[update.id]?.trim()}
-                  >
-                    Comment
-                  </Button>
-                </div>
-                {commentErrors[update.id] && (
-                  <p className="text-xs text-destructive" role="alert">
-                    {commentErrors[update.id]}
-                  </p>
-                )}
-              </div>
+                        <Textarea
+                          placeholder="Write a comment..."
+                          value={commentInputs[update.id] || ""}
+                          onChange={(e) =>
+                            handleCommentInputChange(update.id, e.target.value)
+                          }
+                          className="min-h-[60px] resize-none"
+                          aria-invalid={Boolean(commentErrors[update.id])}
+                        />
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            onClick={() => handleComment(update.id)}
+                            disabled={!commentInputs[update.id]?.trim()}
+                          >
+                            Comment
+                          </Button>
+                        </div>
+                        {commentErrors[update.id] && (
+                          <p className="text-xs text-destructive" role="alert">
+                            {commentErrors[update.id]}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     {/* Existing Comments */}
@@ -301,21 +319,33 @@ export function UpdatesFeedView({
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={comment.author.avatar} />
                           <AvatarFallback>
-                            {comment.author.name.split(' ').map(n => n[0]).join('')}
+                            {comment.author.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="bg-muted/50 rounded-lg px-3 py-2">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium text-sm">{comment.author.name}</span>
+                              <span className="font-medium text-sm">
+                                {comment.author.name}
+                              </span>
                               <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                                {formatDistanceToNow(
+                                  new Date(comment.createdAt),
+                                  { addSuffix: true },
+                                )}
                               </span>
                             </div>
                             <p className="text-sm">{comment.content}</p>
                           </div>
                           <div className="flex items-center space-x-2 mt-2">
-                            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs"
+                            >
                               <Heart className="h-3 w-3 mr-1" />
                               {comment.likes}
                             </Button>

@@ -1,16 +1,24 @@
-import { useMemo, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { endOfMonth, format, isAfter, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
+import { useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import type { Tables } from "@/integrations/supabase/public-types";
+import {
+  endOfMonth,
+  format,
+  isAfter,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+  subWeeks,
+} from "date-fns";
 
-type TimeEntry = Tables<'time_entries'>;
-type Payment = Tables<'payments'>;
-type Expense = Tables<'expenses'>;
-type InventoryTransaction = Tables<'inventory_transactions'>;
-type WasteEvent = Tables<'inv_waste'>;
+type TimeEntry = Tables<"time_entries">;
+type Payment = Tables<"payments">;
+type Expense = Tables<"expenses">;
+type InventoryTransaction = Tables<"inventory_transactions">;
+type WasteEvent = Tables<"inv_waste">;
 
 type HoursTrendPoint = {
   weekLabel: string;
@@ -53,10 +61,10 @@ type ExpenseBreakdown = {
 };
 
 type IntegrationStatus = {
-  id: 'toast' | 'quickbooks' | 'marketman';
+  id: "toast" | "quickbooks" | "marketman";
   name: string;
   description: string;
-  status: 'connected' | 'pending' | 'disconnected';
+  status: "connected" | "pending" | "disconnected";
   lastSync: string | null;
   autoSync: boolean;
 };
@@ -84,7 +92,10 @@ export type ManagerFinancialMetrics = {
   refreshing: boolean;
 };
 
-type ManagerFinancialSnapshot = Omit<ManagerFinancialMetrics, 'refresh' | 'refreshing'>;
+type ManagerFinancialSnapshot = Omit<
+  ManagerFinancialMetrics,
+  "refresh" | "refreshing"
+>;
 
 const HOURS_IN_MILLISECOND = 1000 * 60 * 60;
 
@@ -104,23 +115,23 @@ function calculateWeeklyHours(entries: TimeEntry[]) {
     const entryDate = new Date(entry.timestamp);
 
     switch (entry.entry_type) {
-      case 'clock_in':
+      case "clock_in":
         currentClockIn = entryDate;
         breakDurationMs = 0;
         activeBreakStart = null;
         break;
-      case 'break_start':
+      case "break_start":
         if (currentClockIn) {
           activeBreakStart = entryDate;
         }
         break;
-      case 'break_end':
+      case "break_end":
         if (currentClockIn && activeBreakStart) {
           breakDurationMs += entryDate.getTime() - activeBreakStart.getTime();
           activeBreakStart = null;
         }
         break;
-      case 'clock_out':
+      case "clock_out":
         if (currentClockIn) {
           const rawDurationMs = entryDate.getTime() - currentClockIn.getTime();
           const netDurationMs = Math.max(rawDurationMs - breakDurationMs, 0);
@@ -130,8 +141,11 @@ function calculateWeeklyHours(entries: TimeEntry[]) {
           shiftCount += 1;
 
           const weekStart = startOfWeek(entryDate, { weekStartsOn: 1 });
-          const weekLabel = format(weekStart, 'MMM d');
-          weeklyTotals.set(weekLabel, (weeklyTotals.get(weekLabel) || 0) + hours);
+          const weekLabel = format(weekStart, "MMM d");
+          weeklyTotals.set(
+            weekLabel,
+            (weeklyTotals.get(weekLabel) || 0) + hours,
+          );
 
           currentClockIn = null;
           breakDurationMs = 0;
@@ -158,8 +172,10 @@ function buildWeeklyTrend(
   const trend: HoursTrendPoint[] = [];
 
   for (let i = weeksBack; i >= 0; i -= 1) {
-    const weekStart = startOfWeek(subWeeks(referenceDate, i), { weekStartsOn: 1 });
-    const label = format(weekStart, 'MMM d');
+    const weekStart = startOfWeek(subWeeks(referenceDate, i), {
+      weekStartsOn: 1,
+    });
+    const label = format(weekStart, "MMM d");
     trend.push({
       weekLabel: label,
       hours: Number((weeklyTotals.get(label) || 0).toFixed(2)),
@@ -169,14 +185,19 @@ function buildWeeklyTrend(
   return trend;
 }
 
-function calculateEarningsTrend(payments: Payment[], daysBack: number): EarningsTrendPoint[] {
+function calculateEarningsTrend(
+  payments: Payment[],
+  daysBack: number,
+): EarningsTrendPoint[] {
   const today = new Date();
   const start = subWeeks(today, Math.ceil(daysBack / 7));
-  const filtered = payments.filter(payment => new Date(payment.created_at) >= start);
+  const filtered = payments.filter(
+    (payment) => new Date(payment.created_at) >= start,
+  );
 
   const byDate = new Map<string, number>();
-  filtered.forEach(payment => {
-    const date = format(new Date(payment.created_at), 'yyyy-MM-dd');
+  filtered.forEach((payment) => {
+    const date = format(new Date(payment.created_at), "yyyy-MM-dd");
     byDate.set(date, (byDate.get(date) || 0) + Number(payment.amount || 0));
   });
 
@@ -185,7 +206,7 @@ function calculateEarningsTrend(payments: Payment[], daysBack: number): Earnings
   const end = new Date(today);
 
   while (!isAfter(cursor, end)) {
-    const dateKey = format(cursor, 'yyyy-MM-dd');
+    const dateKey = format(cursor, "yyyy-MM-dd");
     result.push({
       date: dateKey,
       amount: Number((byDate.get(dateKey) || 0).toFixed(2)),
@@ -213,7 +234,10 @@ function deriveEmployeeTips(metrics: {
     );
   }
 
-  if (metrics.hoursThisWeek < metrics.hoursLastWeek && metrics.hoursLastWeek > 0) {
+  if (
+    metrics.hoursThisWeek < metrics.hoursLastWeek &&
+    metrics.hoursLastWeek > 0
+  ) {
     const delta = metrics.hoursLastWeek - metrics.hoursThisWeek;
     tips.push(
       `Hours are down by ${delta.toFixed(
@@ -239,7 +263,7 @@ function deriveEmployeeTips(metrics: {
   }
 
   if (!tips.length) {
-    tips.push('Great work! Your hours and payouts look stable this month.');
+    tips.push("Great work! Your hours and payouts look stable this month.");
   }
 
   return tips;
@@ -249,7 +273,7 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
   const { user } = useAuth();
 
   const query = useQuery({
-    queryKey: ['financial-management', 'employee', user?.id],
+    queryKey: ["financial-management", "employee", user?.id],
     enabled: Boolean(user?.id),
     queryFn: async () => {
       if (!user?.id) {
@@ -262,26 +286,27 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
 
       const fourWeeksAgo = subWeeks(new Date(), 8).toISOString();
 
-      const [timeEntriesResponse, earningsResponse, pendingResponse] = await Promise.all([
-        supabase
-          .from('time_entries')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('timestamp', fourWeeksAgo)
-          .order('timestamp', { ascending: true }),
-        supabase
-          .from('payments')
-          .select('*')
-          .eq('recipient_id', user.id)
-          .in('status', ['approved', 'paid'])
-          .in('payment_type', ['wage', 'bonus', 'expense_reimbursement']),
-        supabase
-          .from('payments')
-          .select('*')
-          .eq('recipient_id', user.id)
-          .eq('status', 'pending')
-          .in('payment_type', ['wage', 'bonus', 'expense_reimbursement']),
-      ]);
+      const [timeEntriesResponse, earningsResponse, pendingResponse] =
+        await Promise.all([
+          supabase
+            .from("time_entries")
+            .select("*")
+            .eq("user_id", user.id)
+            .gte("timestamp", fourWeeksAgo)
+            .order("timestamp", { ascending: true }),
+          supabase
+            .from("payments")
+            .select("*")
+            .eq("recipient_id", user.id)
+            .in("status", ["approved", "paid"])
+            .in("payment_type", ["wage", "bonus", "expense_reimbursement"]),
+          supabase
+            .from("payments")
+            .select("*")
+            .eq("recipient_id", user.id)
+            .eq("status", "pending")
+            .in("payment_type", ["wage", "bonus", "expense_reimbursement"]),
+        ]);
 
       if (timeEntriesResponse.error) throw timeEntriesResponse.error;
       if (earningsResponse.error) throw earningsResponse.error;
@@ -323,24 +348,34 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
 
     const { weeklyTotals, averageShift } = calculateWeeklyHours(timeEntries);
     const now = new Date();
-    const thisWeekLabel = format(startOfWeek(now, { weekStartsOn: 1 }), 'MMM d');
-    const lastWeekLabel = format(startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 }), 'MMM d');
+    const thisWeekLabel = format(
+      startOfWeek(now, { weekStartsOn: 1 }),
+      "MMM d",
+    );
+    const lastWeekLabel = format(
+      startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 }),
+      "MMM d",
+    );
 
-    const hoursThisWeek = Number((weeklyTotals.get(thisWeekLabel) || 0).toFixed(2));
-    const hoursLastWeek = Number((weeklyTotals.get(lastWeekLabel) || 0).toFixed(2));
+    const hoursThisWeek = Number(
+      (weeklyTotals.get(thisWeekLabel) || 0).toFixed(2),
+    );
+    const hoursLastWeek = Number(
+      (weeklyTotals.get(lastWeekLabel) || 0).toFixed(2),
+    );
     const weeklyHourTrend = buildWeeklyTrend(weeklyTotals, 5, now);
 
-    const todayKey = format(now, 'yyyy-MM-dd');
-    const todaysEntries = timeEntries.filter(entry => {
-      const entryDateKey = format(new Date(entry.timestamp), 'yyyy-MM-dd');
+    const todayKey = format(now, "yyyy-MM-dd");
+    const todaysEntries = timeEntries.filter((entry) => {
+      const entryDateKey = format(new Date(entry.timestamp), "yyyy-MM-dd");
       return entryDateKey === todayKey;
     });
 
     let openShiftCount = 0;
     for (const entry of todaysEntries) {
-      if (entry.entry_type === 'clock_in') {
+      if (entry.entry_type === "clock_in") {
         openShiftCount += 1;
-      } else if (entry.entry_type === 'clock_out') {
+      } else if (entry.entry_type === "clock_out") {
         openShiftCount = Math.max(openShiftCount - 1, 0);
       }
       // break events do not change the clock-in balance
@@ -350,14 +385,20 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
 
     const thirtyDaysAgo = subWeeks(now, 4);
     const totalEarnings30d = earnings
-      .filter(payment => new Date(payment.created_at) >= thirtyDaysAgo)
+      .filter((payment) => new Date(payment.created_at) >= thirtyDaysAgo)
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
-    const pendingEarnings = pending.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+    const pendingEarnings = pending.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0,
+    );
 
     const lastPayment = earnings
       .slice()
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )[0];
 
     const earningsTrend = calculateEarningsTrend(earnings, 30);
 
@@ -389,9 +430,12 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
 function summariseExpenses(expenses: Expense[]): ExpenseBreakdown[] {
   const breakdown = new Map<string, number>();
 
-  expenses.forEach(expense => {
-    const label = expense.category ?? 'other';
-    breakdown.set(label, (breakdown.get(label) || 0) + Number(expense.amount || 0));
+  expenses.forEach((expense) => {
+    const label = expense.category ?? "other";
+    breakdown.set(
+      label,
+      (breakdown.get(label) || 0) + Number(expense.amount || 0),
+    );
   });
 
   return Array.from(breakdown.entries())
@@ -417,48 +461,56 @@ function buildProfitLossTrend(params: {
     const monthStart = startOfMonth(subMonths(now, i));
     const monthEnd = endOfMonth(subMonths(now, i));
 
-    const label = format(monthStart, 'MMM yyyy');
+    const label = format(monthStart, "MMM yyyy");
 
     const monthRevenue = transactions
-      .filter(transaction => {
-        if (transaction.transaction_type !== 'sale') return false;
+      .filter((transaction) => {
+        if (transaction.transaction_type !== "sale") return false;
         const createdAt = new Date(transaction.created_at);
         return createdAt >= monthStart && createdAt <= monthEnd;
       })
-      .reduce((sum, transaction) => sum + Number(transaction.total_amount || 0), 0);
+      .reduce(
+        (sum, transaction) => sum + Number(transaction.total_amount || 0),
+        0,
+      );
 
     const monthPurchases = transactions
-      .filter(transaction => {
-        if (transaction.transaction_type !== 'purchase') return false;
+      .filter((transaction) => {
+        if (transaction.transaction_type !== "purchase") return false;
         const createdAt = new Date(transaction.created_at);
         return createdAt >= monthStart && createdAt <= monthEnd;
       })
-      .reduce((sum, transaction) => sum + Number(transaction.total_amount || 0), 0);
+      .reduce(
+        (sum, transaction) => sum + Number(transaction.total_amount || 0),
+        0,
+      );
 
     const monthPayroll = payments
-      .filter(payment => {
-        if (!['wage', 'bonus'].includes(payment.payment_type || '')) return false;
+      .filter((payment) => {
+        if (!["wage", "bonus"].includes(payment.payment_type || ""))
+          return false;
         const paymentDate = new Date(payment.created_at);
         return paymentDate >= monthStart && paymentDate <= monthEnd;
       })
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     const monthOperatingExpenses = expenses
-      .filter(expense => {
+      .filter((expense) => {
         const expenseDate = new Date(expense.created_at);
         return expenseDate >= monthStart && expenseDate <= monthEnd;
       })
       .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
 
     const monthWaste = wasteEvents
-      .filter(event => {
+      .filter((event) => {
         const wasteDate = new Date(event.created_at);
         return wasteDate >= monthStart && wasteDate <= monthEnd;
       })
       .reduce((sum, event) => sum + Number(event.cost_impact || 0), 0);
 
     const profit =
-      monthRevenue - (monthPayroll + monthOperatingExpenses + monthWaste + monthPurchases);
+      monthRevenue -
+      (monthPayroll + monthOperatingExpenses + monthWaste + monthPurchases);
 
     points.push({
       monthLabel: label,
@@ -477,26 +529,28 @@ function buildProfitLossTrend(params: {
 function defaultIntegrations(): IntegrationStatus[] {
   return [
     {
-      id: 'toast',
-      name: 'Toast POS',
-      description: 'Sync hours worked and labor cost data directly from Toast.',
-      status: 'pending',
+      id: "toast",
+      name: "Toast POS",
+      description: "Sync hours worked and labor cost data directly from Toast.",
+      status: "pending",
       lastSync: null,
       autoSync: true,
     },
     {
-      id: 'quickbooks',
-      name: 'QuickBooks Online',
-      description: 'Push payroll and expense records for accounting reconciliation.',
-      status: 'disconnected',
+      id: "quickbooks",
+      name: "QuickBooks Online",
+      description:
+        "Push payroll and expense records for accounting reconciliation.",
+      status: "disconnected",
       lastSync: null,
       autoSync: false,
     },
     {
-      id: 'marketman',
-      name: 'MarketMan',
-      description: 'Import food cost, inventory, and waste adjustments automatically.',
-      status: 'pending',
+      id: "marketman",
+      name: "MarketMan",
+      description:
+        "Import food cost, inventory, and waste adjustments automatically.",
+      status: "pending",
       lastSync: null,
       autoSync: true,
     },
@@ -531,7 +585,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['financial-management', 'manager', companyId ?? 'no-company'],
+    queryKey: ["financial-management", "manager", companyId ?? "no-company"],
     enabled: Boolean(companyId),
     queryFn: async () => {
       if (!companyId) {
@@ -545,29 +599,33 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
 
       const sixMonthsAgo = subMonths(new Date(), 6).toISOString();
 
-      const [paymentsResponse, expensesResponse, transactionsResponse, wasteResponse] =
-        await Promise.all([
-          supabase
-            .from('payments')
-            .select('*')
-            .eq('company_id', companyId)
-            .gte('created_at', sixMonthsAgo),
-          supabase
-            .from('expenses')
-            .select('*')
-            .eq('company_id', companyId)
-            .gte('created_at', sixMonthsAgo),
-          supabase
-            .from('inventory_transactions')
-            .select('*')
-            .eq('company_id', companyId)
-            .gte('created_at', sixMonthsAgo),
-          supabase
-            .from('inv_waste')
-            .select('*')
-            .eq('company_id', companyId)
-            .gte('created_at', sixMonthsAgo),
-        ]);
+      const [
+        paymentsResponse,
+        expensesResponse,
+        transactionsResponse,
+        wasteResponse,
+      ] = await Promise.all([
+        supabase
+          .from("payments")
+          .select("*")
+          .eq("company_id", companyId)
+          .gte("created_at", sixMonthsAgo),
+        supabase
+          .from("expenses")
+          .select("*")
+          .eq("company_id", companyId)
+          .gte("created_at", sixMonthsAgo),
+        supabase
+          .from("inventory_transactions")
+          .select("*")
+          .eq("company_id", companyId)
+          .gte("created_at", sixMonthsAgo),
+        supabase
+          .from("inv_waste")
+          .select("*")
+          .eq("company_id", companyId)
+          .gte("created_at", sixMonthsAgo),
+      ]);
 
       if (paymentsResponse.error) throw paymentsResponse.error;
       if (expensesResponse.error) throw expensesResponse.error;
@@ -577,7 +635,8 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
       return {
         payments: (paymentsResponse.data as Payment[]) ?? [],
         expenses: (expensesResponse.data as Expense[]) ?? [],
-        transactions: (transactionsResponse.data as InventoryTransaction[]) ?? [],
+        transactions:
+          (transactionsResponse.data as InventoryTransaction[]) ?? [],
         waste: (wasteResponse.data as WasteEvent[]) ?? [],
       };
     },
@@ -600,39 +659,41 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
     const thirtyDaysAgo = subWeeks(now, 4);
 
-    const payrollPayments = payments.filter(payment =>
-      ['wage', 'bonus'].includes(payment.payment_type || ''),
+    const payrollPayments = payments.filter((payment) =>
+      ["wage", "bonus"].includes(payment.payment_type || ""),
     );
     const payrollTotal30d = payrollPayments
-      .filter(payment => new Date(payment.created_at) >= thirtyDaysAgo)
+      .filter((payment) => new Date(payment.created_at) >= thirtyDaysAgo)
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     const payrollPendingApproval = payrollPayments
-      .filter(payment => payment.status === 'pending')
+      .filter((payment) => payment.status === "pending")
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
     const payrollPendingApprovalCount = payrollPayments.filter(
-      payment => payment.status === 'pending',
+      (payment) => payment.status === "pending",
     ).length;
 
     const payrollApproved = payrollPayments
-      .filter(payment => ['approved', 'paid'].includes(payment.status || ''))
+      .filter((payment) => ["approved", "paid"].includes(payment.status || ""))
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     const laborCostThisWeek = payrollPayments
-      .filter(payment => new Date(payment.created_at) >= weekStart)
+      .filter((payment) => new Date(payment.created_at) >= weekStart)
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     const vendorSpending30d = payments
-      .filter(payment => payment.payment_type === 'vendor')
-      .filter(payment => new Date(payment.created_at) >= thirtyDaysAgo)
+      .filter((payment) => payment.payment_type === "vendor")
+      .filter((payment) => new Date(payment.created_at) >= thirtyDaysAgo)
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     const reimbursementVolume30d = payments
-      .filter(payment => payment.payment_type === 'expense_reimbursement')
-      .filter(payment => new Date(payment.created_at) >= thirtyDaysAgo)
+      .filter((payment) => payment.payment_type === "expense_reimbursement")
+      .filter((payment) => new Date(payment.created_at) >= thirtyDaysAgo)
       .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
-    const pendingExpenses = expenses.filter(expense => expense.status === 'pending');
+    const pendingExpenses = expenses.filter(
+      (expense) => expense.status === "pending",
+    );
     const pendingExpenseTotal = pendingExpenses.reduce(
       (sum, expense) => sum + Number(expense.amount || 0),
       0,
@@ -640,7 +701,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
     const pendingExpenseCount = pendingExpenses.length;
 
     const recentExpenses = expenses.filter(
-      expense => new Date(expense.created_at) >= thirtyDaysAgo,
+      (expense) => new Date(expense.created_at) >= thirtyDaysAgo,
     );
     const expenseBreakdown = summariseExpenses(recentExpenses);
     const operatingExpenses30d = recentExpenses.reduce(
@@ -649,24 +710,30 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
     );
 
     const wasteCost30d = waste
-      .filter(event => new Date(event.created_at) >= thirtyDaysAgo)
+      .filter((event) => new Date(event.created_at) >= thirtyDaysAgo)
       .reduce((sum, event) => sum + Number(event.cost_impact || 0), 0);
 
     const inventoryPurchase30d = transactions
       .filter(
-        transaction =>
-          transaction.transaction_type === 'purchase' &&
+        (transaction) =>
+          transaction.transaction_type === "purchase" &&
           new Date(transaction.created_at) >= thirtyDaysAgo,
       )
-      .reduce((sum, transaction) => sum + Number(transaction.total_amount || 0), 0);
+      .reduce(
+        (sum, transaction) => sum + Number(transaction.total_amount || 0),
+        0,
+      );
 
     const inventorySales30d = transactions
       .filter(
-        transaction =>
-          transaction.transaction_type === 'sale' &&
+        (transaction) =>
+          transaction.transaction_type === "sale" &&
           new Date(transaction.created_at) >= thirtyDaysAgo,
       )
-      .reduce((sum, transaction) => sum + Number(transaction.total_amount || 0), 0);
+      .reduce(
+        (sum, transaction) => sum + Number(transaction.total_amount || 0),
+        0,
+      );
 
     const profitLossTrend = buildProfitLossTrend({
       transactions,

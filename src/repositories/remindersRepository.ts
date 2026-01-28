@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/public-types";
 
-type ReminderRow = Tables<'reminders'>;
+type ReminderRow = Tables<"reminders">;
 
-export type ReminderRecord = Omit<ReminderRow, 'notification_methods'> & {
+export type ReminderRecord = Omit<ReminderRow, "notification_methods"> & {
   notification_methods: string[];
 };
 
@@ -36,34 +36,42 @@ const reminderRowSchema: z.ZodType<ReminderRow> = z
   })
   .passthrough();
 
-const reminderSchema: z.ZodType<ReminderRecord> = reminderRowSchema.transform((reminder) => ({
-  ...reminder,
-  notification_methods: normalizeNotificationMethods(reminder.notification_methods),
-}));
+const reminderSchema: z.ZodType<ReminderRecord> = reminderRowSchema.transform(
+  (reminder) => ({
+    ...reminder,
+    notification_methods: normalizeNotificationMethods(
+      reminder.notification_methods,
+    ),
+  }),
+);
 
-function normalizeNotificationMethods(value: ReminderRow['notification_methods']): string[] {
+function normalizeNotificationMethods(
+  value: ReminderRow["notification_methods"],
+): string[] {
   if (Array.isArray(value)) {
     return value.map(String);
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     try {
       const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed.map(String) : ['in_app'];
+      return Array.isArray(parsed) ? parsed.map(String) : ["in_app"];
     } catch {
-      return ['in_app'];
+      return ["in_app"];
     }
   }
 
-  return ['in_app'];
+  return ["in_app"];
 }
 
-export async function fetchRemindersForUser(userId: string): Promise<ReminderRecord[]> {
+export async function fetchRemindersForUser(
+  userId: string,
+): Promise<ReminderRecord[]> {
   const { data, error } = await supabase
-    .from('reminders')
-    .select('*')
-    .eq('user_id', userId)
-    .order('remind_at', { ascending: true });
+    .from("reminders")
+    .select("*")
+    .eq("user_id", userId)
+    .order("remind_at", { ascending: true });
 
   if (error) {
     throw error;
@@ -72,18 +80,29 @@ export async function fetchRemindersForUser(userId: string): Promise<ReminderRec
   return reminderSchema.array().parse(data ?? []);
 }
 
-export type NewReminderInput = Omit<ReminderRow, 'id' | 'created_at' | 'updated_at'>;
+export type NewReminderInput = Omit<
+  ReminderRow,
+  "id" | "created_at" | "updated_at"
+>;
 
-export async function createReminderRecord(input: NewReminderInput): Promise<void> {
-  const { error } = await supabase.from('reminders').insert(input);
+export async function createReminderRecord(
+  input: NewReminderInput,
+): Promise<void> {
+  const { error } = await supabase.from("reminders").insert(input);
 
   if (error) {
     throw error;
   }
 }
 
-export async function updateReminderRecord(id: string, updates: Partial<ReminderRow>): Promise<void> {
-  const { error } = await supabase.from('reminders').update(updates).eq('id', id);
+export async function updateReminderRecord(
+  id: string,
+  updates: Partial<ReminderRow>,
+): Promise<void> {
+  const { error } = await supabase
+    .from("reminders")
+    .update(updates)
+    .eq("id", id);
 
   if (error) {
     throw error;
@@ -91,7 +110,7 @@ export async function updateReminderRecord(id: string, updates: Partial<Reminder
 }
 
 export async function deleteReminderRecord(id: string): Promise<void> {
-  const { error } = await supabase.from('reminders').delete().eq('id', id);
+  const { error } = await supabase.from("reminders").delete().eq("id", id);
 
   if (error) {
     throw error;

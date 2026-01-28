@@ -1,9 +1,17 @@
-import { createContext, useContext, useEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
-import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { appEnv } from '@/lib/env';
-import { logger } from '@/utils/logger';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+  type ReactNode,
+} from "react";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { appEnv } from "@/lib/env";
+import { logger } from "@/utils/logger";
 
 type LegacyProfileFields = {
   id: string;
@@ -45,16 +53,21 @@ type ProfileContextValue = {
   refetchProfile: () => Promise<void>;
 };
 
-const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
+const ProfileContext = createContext<ProfileContextValue | undefined>(
+  undefined,
+);
 
 const profileCache = new Map<string, ProfileDetails>();
 
 const buildCacheKey = (userId: string, companyId: string | null | undefined) =>
-  `${userId}:${companyId ?? 'none'}`;
+  `${userId}:${companyId ?? "none"}`;
 
-const readMetadataValue = (source: Record<string, unknown> | undefined, key: string) => {
+const readMetadataValue = (
+  source: Record<string, unknown> | undefined,
+  key: string,
+) => {
   const value = source?.[key];
-  return typeof value === 'string' && value.trim().length > 0 ? value : null;
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
 };
 
 const resolveActiveCompanyIdFromUser = (user: User | null) => {
@@ -62,25 +75,29 @@ const resolveActiveCompanyIdFromUser = (user: User | null) => {
   const appMeta = user.app_metadata as Record<string, unknown> | undefined;
   const userMeta = user.user_metadata as Record<string, unknown> | undefined;
   return (
-    readMetadataValue(appMeta, 'active_company_id') ??
-    readMetadataValue(appMeta, 'company_id') ??
-    readMetadataValue(userMeta, 'active_company_id') ??
-    readMetadataValue(userMeta, 'company_id') ??
+    readMetadataValue(appMeta, "active_company_id") ??
+    readMetadataValue(appMeta, "company_id") ??
+    readMetadataValue(userMeta, "active_company_id") ??
+    readMetadataValue(userMeta, "company_id") ??
     null
   );
 };
 
 const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
-  const fallbackId = user?.id ?? 'anonymous-user';
+  const fallbackId = user?.id ?? "anonymous-user";
   const companyId = resolveActiveCompanyIdFromUser(user);
-  const userMetadata = user?.user_metadata as Record<string, unknown> | undefined;
+  const userMetadata = user?.user_metadata as
+    | Record<string, unknown>
+    | undefined;
   const placeholderFirstName =
-    readMetadataValue(userMetadata, 'first_name') ?? (typeof user?.email === 'string' ? user.email.split('@')[0] : 'New');
-  const placeholderLastName = readMetadataValue(userMetadata, 'last_name') ?? 'Teammate';
+    readMetadataValue(userMetadata, "first_name") ??
+    (typeof user?.email === "string" ? user.email.split("@")[0] : "New");
+  const placeholderLastName =
+    readMetadataValue(userMetadata, "last_name") ?? "Teammate";
   const resolvedRole =
-    readMetadataValue(userMetadata, 'role') ??
-    readMetadataValue(userMetadata, 'position_role') ??
-    'staff';
+    readMetadataValue(userMetadata, "role") ??
+    readMetadataValue(userMetadata, "position_role") ??
+    "staff";
 
   return {
     userId: fallbackId,
@@ -93,7 +110,7 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
     first_name: placeholderFirstName,
     last_name: placeholderLastName,
     email: user?.email ?? null,
-    avatar_url: readMetadataValue(userMetadata, 'avatar_url'),
+    avatar_url: readMetadataValue(userMetadata, "avatar_url"),
     employeeId: null,
     employee_id: null,
     employment_status: null,
@@ -107,27 +124,30 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
   };
 };
 
-async function fetchProfileFromSupabase(userId: string, companyId: string | null): Promise<ProfileDetails | null> {
+async function fetchProfileFromSupabase(
+  userId: string,
+  companyId: string | null,
+): Promise<ProfileDetails | null> {
   try {
     let query = supabase
-      .from('profiles')
+      .from("profiles")
       .select(
-        'id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date',
+        "id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date",
       )
-      .eq('id', userId);
+      .eq("id", userId);
 
     if (companyId) {
-      query = query.eq('company_id', companyId);
+      query = query.eq("company_id", companyId);
     }
 
     const { data, error } = await query.maybeSingle();
 
     if (error) {
       if (appEnv.DEV) {
-        logger.error('[ProfileProvider] Failed to load profile', {
+        logger.error("[ProfileProvider] Failed to load profile", {
           context: { userId, companyId },
           error,
-          tags: ['error'],
+          tags: ["error"],
         });
       }
       return null;
@@ -135,9 +155,9 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
 
     if (!data) {
       if (appEnv.DEV) {
-        logger.error('[ProfileProvider] Missing profile row', {
+        logger.error("[ProfileProvider] Missing profile row", {
           context: { userId, companyId },
-          tags: ['error'],
+          tags: ["error"],
         });
       }
       return null;
@@ -168,17 +188,21 @@ async function fetchProfileFromSupabase(userId: string, companyId: string | null
     };
   } catch (error) {
     if (appEnv.DEV) {
-      logger.error('[ProfileProvider] Unexpected profile fetch error', {
+      logger.error("[ProfileProvider] Unexpected profile fetch error", {
         context: { userId, companyId },
         error,
-        tags: ['error'],
+        tags: ["error"],
       });
     }
     return null;
   }
 }
 
-async function getProfile(userId: string, companyId: string | null, _forceRefresh = false): Promise<ProfileDetails | null> {
+async function getProfile(
+  userId: string,
+  companyId: string | null,
+  _forceRefresh = false,
+): Promise<ProfileDetails | null> {
   return fetchProfileFromSupabase(userId, companyId);
 }
 
@@ -234,7 +258,11 @@ async function loadProfileState({
   }
 
   try {
-    const fetchedProfile = await getProfile(user.id, activeCompanyId, forceRefresh);
+    const fetchedProfile = await getProfile(
+      user.id,
+      activeCompanyId,
+      forceRefresh,
+    );
     if (signal?.cancelled) return;
 
     const resolvedProfile = fetchedProfile ?? buildProfilePlaceholder(user);
@@ -249,7 +277,8 @@ async function loadProfileState({
     const placeholder = buildProfilePlaceholder(user);
     profileCache.set(cacheKey, placeholder);
     setProfile(placeholder);
-    const message = error instanceof Error ? error.message : 'Failed to load profile';
+    const message =
+      error instanceof Error ? error.message : "Failed to load profile";
     setError(message);
   } finally {
     if (!signal?.cancelled) {
@@ -309,13 +338,17 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     refetchProfile: refreshProfile,
   };
 
-  return <ProfileContext.Provider value={contextValue}>{children}</ProfileContext.Provider>;
+  return (
+    <ProfileContext.Provider value={contextValue}>
+      {children}
+    </ProfileContext.Provider>
+  );
 }
 
 export function useProfile(): ProfileContextValue {
   const context = useContext(ProfileContext);
   if (!context) {
-    throw new Error('useProfile must be used within a ProfileProvider');
+    throw new Error("useProfile must be used within a ProfileProvider");
   }
   return context;
 }

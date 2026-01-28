@@ -1,12 +1,18 @@
-import { AlertTriangle, Stethoscope, Target } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
-import type { useIdeaDiagnostics } from '@/modules/operations/hooks/useIdeaDiagnostics';
-import { useIdeaContext } from '@/modules/operations/contexts/IdeaProvider';
-import { useAIKPIInsights } from '@/hooks/useAIKPIInsights';
+import { AlertTriangle, Stethoscope, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import type { IdeaKpiInsight } from "@/modules/operations/hooks/useIdeaInsights";
+import type { useIdeaDiagnostics } from "@/modules/operations/hooks/useIdeaDiagnostics";
+import { useIdeaContext } from "@/modules/operations/contexts/IdeaProvider";
+import { useAIKPIInsights } from "@/hooks/useAIKPIInsights";
 
 interface DiagnosePanelProps {
   insights: IdeaKpiInsight[];
@@ -15,14 +21,21 @@ interface DiagnosePanelProps {
   onRecommend: () => void;
 }
 
-export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecommend }: DiagnosePanelProps) {
+export function DiagnosePanel({
+  insights,
+  diagnostics,
+  stageDescription,
+  onRecommend,
+}: DiagnosePanelProps) {
   const { companyId, range } = useIdeaContext();
   const aiInsightsQuery = useAIKPIInsights(companyId, {
     start: range.start,
     end: range.end,
   });
   const aiInsights = aiInsightsQuery.data ?? [];
-  const anomalies = insights.filter((insight) => Math.abs(insight.delta ?? 0) >= 1);
+  const anomalies = insights.filter(
+    (insight) => Math.abs(insight.delta ?? 0) >= 1,
+  );
 
   return (
     <section className="space-y-6">
@@ -31,7 +44,9 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
           <Stethoscope className="h-4 w-4 text-sky-500" aria-hidden="true" />
           Diagnose
         </div>
-        <h2 className="text-xl font-semibold text-foreground">Investigate root causes</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          Investigate root causes
+        </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div>
           <Button onClick={onRecommend} disabled={diagnostics.loading}>
@@ -67,20 +82,35 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">Top anomalies</CardTitle>
-              <CardDescription>KPIs with the largest deviations.</CardDescription>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+                Top anomalies
+              </CardTitle>
+              <CardDescription>
+                KPIs with the largest deviations.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {anomalies.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No significant anomalies detected.</p>
+                <p className="text-sm text-muted-foreground">
+                  No significant anomalies detected.
+                </p>
               ) : (
                 anomalies.slice(0, 6).map((anomaly) => (
-                  <div key={anomaly.id} className="rounded-md border border-border/60 bg-muted/20 p-3">
-                    <div className="text-sm font-medium text-foreground">{anomaly.label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Change: {anomaly.delta ? anomaly.delta.toFixed(2) : '0.00'} {anomaly.unit ?? ''}
+                  <div
+                    key={anomaly.id}
+                    className="rounded-md border border-border/60 bg-muted/20 p-3"
+                  >
+                    <div className="text-sm font-medium text-foreground">
+                      {anomaly.label}
                     </div>
-                    <div className="text-xs text-muted-foreground">Trend: {anomaly.trend ?? 'unknown'}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Change:{" "}
+                      {anomaly.delta ? anomaly.delta.toFixed(2) : "0.00"}{" "}
+                      {anomaly.unit ?? ""}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Trend: {anomaly.trend ?? "unknown"}
+                    </div>
                   </div>
                 ))
               )}
@@ -89,16 +119,25 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
 
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI intelligence</CardTitle>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+                AI intelligence
+              </CardTitle>
               <CardDescription>Probable causes and narratives.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {diagnostics.data.causes.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Run diagnostics to surface potential causes.</p>
+                <p className="text-sm text-muted-foreground">
+                  Run diagnostics to surface potential causes.
+                </p>
               ) : (
                 diagnostics.data.causes.map((cause) => (
-                  <div key={cause.id} className="rounded-md border border-border/40 bg-muted/20 p-3">
-                    <div className="text-sm font-medium text-foreground">{cause.summary}</div>
+                  <div
+                    key={cause.id}
+                    className="rounded-md border border-border/40 bg-muted/20 p-3"
+                  >
+                    <div className="text-sm font-medium text-foreground">
+                      {cause.summary}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       Confidence {Math.round(cause.confidence * 100)}%
                     </div>
@@ -110,15 +149,20 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
 
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">AI KPI insights</CardTitle>
-              <CardDescription>Signals surfaced by GPT co-pilot.</CardDescription>
+              <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
+                AI KPI insights
+              </CardTitle>
+              <CardDescription>
+                Signals surfaced by GPT co-pilot.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {aiInsightsQuery.isLoading ? (
                 <AiInsightsSkeleton />
               ) : aiInsightsQuery.isError ? (
                 <p className="text-sm text-muted-foreground">
-                  Unable to load AI KPI insights right now. Try again after refreshing.
+                  Unable to load AI KPI insights right now. Try again after
+                  refreshing.
                 </p>
               ) : aiInsights.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
@@ -126,15 +170,27 @@ export function DiagnosePanel({ insights, diagnostics, stageDescription, onRecom
                 </p>
               ) : (
                 aiInsights.map((entry) => {
-                  const changeValue = typeof entry.change === 'number' ? entry.change : 0;
-                  const formattedChange = `${changeValue > 0 ? '+' : ''}${changeValue.toFixed(1)}`;
+                  const changeValue =
+                    typeof entry.change === "number" ? entry.change : 0;
+                  const formattedChange = `${changeValue > 0 ? "+" : ""}${changeValue.toFixed(1)}`;
 
                   return (
-                    <div key={entry.metric} className="space-y-1 rounded-md border border-border/50 bg-muted/20 p-3">
-                      <div className="text-sm font-medium text-foreground">{entry.metric}</div>
-                      <div className="text-xs text-muted-foreground capitalize">Signal: {entry.signal}</div>
-                      <div className="text-xs text-muted-foreground">Change: {formattedChange}%</div>
-                      <div className="text-xs text-muted-foreground">Impact: {entry.impact}</div>
+                    <div
+                      key={entry.metric}
+                      className="space-y-1 rounded-md border border-border/50 bg-muted/20 p-3"
+                    >
+                      <div className="text-sm font-medium text-foreground">
+                        {entry.metric}
+                      </div>
+                      <div className="text-xs text-muted-foreground capitalize">
+                        Signal: {entry.signal}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Change: {formattedChange}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Impact: {entry.impact}
+                      </div>
                     </div>
                   );
                 })
@@ -151,7 +207,10 @@ function AiInsightsSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3 dark:border-border/30 dark:bg-muted/10">
+        <div
+          key={index}
+          className="space-y-2 rounded-md border border-border/50 bg-muted/20 p-3 dark:border-border/30 dark:bg-muted/10"
+        >
           <Skeleton className="h-3 w-32" />
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-3 w-20" />

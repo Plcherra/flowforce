@@ -1,4 +1,4 @@
-export type AssistantMetricTrend = 'up' | 'down' | 'steady';
+export type AssistantMetricTrend = "up" | "down" | "steady";
 
 export interface AssistantMetric {
   label: string;
@@ -15,10 +15,10 @@ export interface AssistantInsight {
 export interface AssistantAction {
   label: string;
   action: string;
-  intent?: 'analysis' | 'optimization' | 'copilot';
+  intent?: "analysis" | "optimization" | "copilot";
 }
 
-export type AssistantContextType = 'form' | 'report' | 'combined';
+export type AssistantContextType = "form" | "report" | "combined";
 
 export interface AssistantContext {
   type: AssistantContextType;

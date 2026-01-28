@@ -1,21 +1,38 @@
-import dayjs from 'dayjs';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables, TablesInsert, Json } from '@/integrations/supabase/public-types';
-import { determineReviewStatus } from './performanceService';
-import type { PerformanceReviewStatus } from './performanceTypes';
+import dayjs from "dayjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Tables,
+  TablesInsert,
+  Json,
+} from "@/integrations/supabase/public-types";
+import { determineReviewStatus } from "./performanceService";
+import type { PerformanceReviewStatus } from "./performanceTypes";
 
-type ProfileRow = Pick<Tables<'profiles'>, 'id' | 'first_name' | 'last_name' | 'company_id'>;
-type ReviewRow = Pick<Tables<'employee_report'>, 'id' | 'employee_id' | 'date' | 'severity' | 'notes' | 'created_by'>;
-type TaskRow = Pick<Tables<'tasks'>, 'id' | 'status' | 'tags'>;
-type ReminderRow = Pick<Tables<'reminders'>, 'id' | 'description' | 'completed' | 'task_id'>;
+type ProfileRow = Pick<
+  Tables<"profiles">,
+  "id" | "first_name" | "last_name" | "company_id"
+>;
+type ReviewRow = Pick<
+  Tables<"employee_report">,
+  "id" | "employee_id" | "date" | "severity" | "notes" | "created_by"
+>;
+type TaskRow = Pick<Tables<"tasks">, "id" | "status" | "tags">;
+type ReminderRow = Pick<
+  Tables<"reminders">,
+  "id" | "description" | "completed" | "task_id"
+>;
 
-const ACTIVE_TASK_STATUSES: Set<Tables<'tasks'>['status']> = new Set(['todo', 'in_progress', 'review']);
+const ACTIVE_TASK_STATUSES: Set<Tables<"tasks">["status"]> = new Set([
+  "todo",
+  "in_progress",
+  "review",
+]);
 
 interface ExistingAutomationTask {
   id: string;
   employeeId: string;
-  status: Tables<'tasks'>['status'] | null;
+  status: Tables<"tasks">["status"] | null;
 }
 
 interface ExistingAutomationReminder {
@@ -28,7 +45,7 @@ interface ReviewTaskTemplate {
   employeeId: string;
   title: string;
   description: string;
-  priority: Tables<'tasks'>['priority'];
+  priority: Tables<"tasks">["priority"];
   dueInDays: number;
   tags: string[];
   originReviewId: string | null;
@@ -77,41 +94,51 @@ export interface SyncCopilotReviewAutomationResult {
   plan: ReviewAutomationPlan;
 }
 
-const EMPLOYEE_TAG_PREFIX = 'employee:';
+const EMPLOYEE_TAG_PREFIX = "employee:";
 
 function buildDisplayName(profile: ProfileRow): string {
-  const first = profile.first_name?.trim() ?? '';
-  const last = profile.last_name?.trim() ?? '';
+  const first = profile.first_name?.trim() ?? "";
+  const last = profile.last_name?.trim() ?? "";
   const combined = `${first} ${last}`.trim();
-  return combined || 'Team Member';
+  return combined || "Team Member";
 }
 
-function extractEmployeeIdFromTags(tags: string[] | null | undefined): string | null {
+function extractEmployeeIdFromTags(
+  tags: string[] | null | undefined,
+): string | null {
   if (!Array.isArray(tags)) return null;
-  const match = tags.find((tag) => typeof tag === 'string' && tag.startsWith(EMPLOYEE_TAG_PREFIX));
+  const match = tags.find(
+    (tag) => typeof tag === "string" && tag.startsWith(EMPLOYEE_TAG_PREFIX),
+  );
   return match ? match.slice(EMPLOYEE_TAG_PREFIX.length) : null;
 }
 
-function extractEmployeeIdFromDescription(description: string | null): string | null {
+function extractEmployeeIdFromDescription(
+  description: string | null,
+): string | null {
   if (!description) return null;
   const match = description.match(/employee:([A-Za-z0-9-]+)/);
   return match ? match[1] : null;
 }
 
-function isTaskActive(status: Tables<'tasks'>['status'] | null | undefined): boolean {
+function isTaskActive(
+  status: Tables<"tasks">["status"] | null | undefined,
+): boolean {
   if (!status) return false;
   return ACTIVE_TASK_STATUSES.has(status);
 }
 
 function formatLatestReviewSummary(review: ReviewRow | null): string {
   if (!review || !review.date) {
-    return 'Latest review: none recorded.';
+    return "Latest review: none recorded.";
   }
-  const dateLabel = dayjs(review.date).isValid() ? dayjs(review.date).format('MMM D, YYYY') : review.date;
+  const dateLabel = dayjs(review.date).isValid()
+    ? dayjs(review.date).format("MMM D, YYYY")
+    : review.date;
   const scoreLabel =
-    typeof review.severity === 'number' && !Number.isNaN(review.severity)
+    typeof review.severity === "number" && !Number.isNaN(review.severity)
       ? `Score ${review.severity}/5`
-      : 'Score unavailable';
+      : "Score unavailable";
   return `Latest review ${dateLabel} · ${scoreLabel}`;
 }
 
@@ -121,9 +148,9 @@ function buildTaskTemplate(
   latestReview: ReviewRow | null,
 ): ReviewTaskTemplate {
   const name = buildDisplayName(employee);
-  const isOverdue = status === 'overdue';
+  const isOverdue = status === "overdue";
   const dueInDays = isOverdue ? 3 : 5;
-  const priority: Tables<'tasks'>['priority'] = isOverdue ? 'urgent' : 'high';
+  const priority: Tables<"tasks">["priority"] = isOverdue ? "urgent" : "high";
   const title = isOverdue
     ? `Schedule performance review for ${name}`
     : `Create coaching plan for ${name}`;
@@ -137,10 +164,10 @@ function buildTaskTemplate(
   return {
     employeeId: employee.id,
     title,
-    description: descriptionParts.join(' '),
+    description: descriptionParts.join(" "),
     priority,
     dueInDays,
-    tags: ['copilot', 'review', `${EMPLOYEE_TAG_PREFIX}${employee.id}`],
+    tags: ["copilot", "review", `${EMPLOYEE_TAG_PREFIX}${employee.id}`],
     originReviewId: latestReview?.id ?? null,
     assignTo: latestReview?.created_by ?? null,
   };
@@ -153,14 +180,14 @@ function buildReminderTemplate(
   linkToTask: boolean,
 ): ReviewReminderTemplate {
   const name = buildDisplayName(employee);
-  const isOverdue = status === 'overdue';
+  const isOverdue = status === "overdue";
   const remindInDays = isOverdue ? 1 : 5;
-  const priority = isOverdue ? 'high' : 'medium';
+  const priority = isOverdue ? "high" : "medium";
   const description = [
     `Copilot review reminder for employee:${employee.id}.`,
     `Current status "${status}".`,
     formatLatestReviewSummary(latestReview),
-  ].join(' ');
+  ].join(" ");
   return {
     employeeId: employee.id,
     title: `Review follow-up for ${name}`,
@@ -171,8 +198,16 @@ function buildReminderTemplate(
   };
 }
 
-export function buildReviewAutomationPlan(options: BuildReviewAutomationPlanOptions): ReviewAutomationPlan {
-  const { employees, reviews, existingTasks, existingReminders, now = new Date() } = options;
+export function buildReviewAutomationPlan(
+  options: BuildReviewAutomationPlanOptions,
+): ReviewAutomationPlan {
+  const {
+    employees,
+    reviews,
+    existingTasks,
+    existingReminders,
+    now = new Date(),
+  } = options;
   const reviewMap = new Map<string, ReviewRow[]>();
 
   reviews.forEach((review) => {
@@ -197,11 +232,15 @@ export function buildReviewAutomationPlan(options: BuildReviewAutomationPlanOpti
   };
 
   const activeTaskByEmployee = new Set(
-    existingTasks.filter((task) => isTaskActive(task.status)).map((task) => task.employeeId),
+    existingTasks
+      .filter((task) => isTaskActive(task.status))
+      .map((task) => task.employeeId),
   );
 
   const activeReminderByEmployee = new Set(
-    existingReminders.filter((reminder) => !reminder.completed).map((reminder) => reminder.employeeId),
+    existingReminders
+      .filter((reminder) => !reminder.completed)
+      .map((reminder) => reminder.employeeId),
   );
 
   employees.forEach((employee) => {
@@ -218,15 +257,20 @@ export function buildReviewAutomationPlan(options: BuildReviewAutomationPlanOpti
       latestReviewId: latestReview?.id ?? null,
     };
 
-    const needsTask = (status === 'needs_coaching' || status === 'overdue') && !activeTaskByEmployee.has(employee.id);
+    const needsTask =
+      (status === "needs_coaching" || status === "overdue") &&
+      !activeTaskByEmployee.has(employee.id);
     if (needsTask) {
-      plan.taskTemplates.push(buildTaskTemplate(employee, status, latestReview));
+      plan.taskTemplates.push(
+        buildTaskTemplate(employee, status, latestReview),
+      );
     }
 
     const needsReminder =
-      (status === 'due_soon' || status === 'overdue') && !activeReminderByEmployee.has(employee.id);
+      (status === "due_soon" || status === "overdue") &&
+      !activeReminderByEmployee.has(employee.id);
     if (needsReminder) {
-      const linkToTask = status === 'overdue';
+      const linkToTask = status === "overdue";
       plan.reminderTemplates.push(
         buildReminderTemplate(employee, status, latestReview, linkToTask),
       );
@@ -239,36 +283,46 @@ export function buildReviewAutomationPlan(options: BuildReviewAutomationPlanOpti
 export async function syncCopilotReviewAutomation(
   params: SyncCopilotReviewAutomationParams,
 ): Promise<SyncCopilotReviewAutomationResult> {
-  const { actorId, companyId, supabaseClient = supabase, now = new Date() } = params;
+  const {
+    actorId,
+    companyId,
+    supabaseClient = supabase,
+    now = new Date(),
+  } = params;
   if (!actorId) {
-    throw new Error('actorId is required to run Copilot automation.');
+    throw new Error("actorId is required to run Copilot automation.");
   }
   if (!companyId) {
-    throw new Error('companyId is required to run Copilot automation.');
+    throw new Error("companyId is required to run Copilot automation.");
   }
 
-  const [profilesResult, reviewsResult, existingTasksResult, existingRemindersResult] = await Promise.all([
+  const [
+    profilesResult,
+    reviewsResult,
+    existingTasksResult,
+    existingRemindersResult,
+  ] = await Promise.all([
     supabaseClient
-      .from('profiles')
-      .select('id, first_name, last_name, company_id')
-      .eq('company_id', companyId)
-      .eq('employment_status', 'active'),
+      .from("profiles")
+      .select("id, first_name, last_name, company_id")
+      .eq("company_id", companyId)
+      .eq("employment_status", "active"),
     supabaseClient
-      .from('employee_report')
-      .select('id, employee_id, date, severity, notes, created_by')
-      .eq('category', 'performance')
-      .order('date', { ascending: false }),
+      .from("employee_report")
+      .select("id, employee_id, date, severity, notes, created_by")
+      .eq("category", "performance")
+      .order("date", { ascending: false }),
     supabaseClient
-      .from('tasks')
-      .select('id, status, tags')
-      .eq('created_by', actorId)
-      .eq('source', 'auto')
-      .contains('tags', ['copilot', 'review']),
+      .from("tasks")
+      .select("id, status, tags")
+      .eq("created_by", actorId)
+      .eq("source", "auto")
+      .contains("tags", ["copilot", "review"]),
     supabaseClient
-      .from('reminders')
-      .select('id, description, completed, task_id')
-      .eq('user_id', actorId)
-      .eq('type', 'copilot_review'),
+      .from("reminders")
+      .select("id, description, completed, task_id")
+      .eq("user_id", actorId)
+      .eq("type", "copilot_review"),
   ]);
 
   if (profilesResult.error) throw profilesResult.error;
@@ -281,11 +335,17 @@ export async function syncCopilotReviewAutomation(
   );
 
   if (employees.length === 0) {
-    const emptyPlan: ReviewAutomationPlan = { taskTemplates: [], reminderTemplates: [], statuses: {} };
+    const emptyPlan: ReviewAutomationPlan = {
+      taskTemplates: [],
+      reminderTemplates: [],
+      statuses: {},
+    };
     return { createdTasks: [], createdReminders: [], plan: emptyPlan };
   }
 
-  const normalizedExistingTasks: ExistingAutomationTask[] = (existingTasksResult.data ?? [])
+  const normalizedExistingTasks: ExistingAutomationTask[] = (
+    existingTasksResult.data ?? []
+  )
     .map((task: TaskRow) => {
       const employeeId = extractEmployeeIdFromTags(task.tags ?? null);
       if (!employeeId) return null;
@@ -297,9 +357,13 @@ export async function syncCopilotReviewAutomation(
     })
     .filter((value): value is ExistingAutomationTask => Boolean(value));
 
-  const normalizedExistingReminders: ExistingAutomationReminder[] = (existingRemindersResult.data ?? [])
+  const normalizedExistingReminders: ExistingAutomationReminder[] = (
+    existingRemindersResult.data ?? []
+  )
     .map((reminder: ReminderRow) => {
-      const employeeId = extractEmployeeIdFromDescription(reminder.description ?? null);
+      const employeeId = extractEmployeeIdFromDescription(
+        reminder.description ?? null,
+      );
       if (!employeeId) return null;
       return {
         id: reminder.id,
@@ -319,40 +383,41 @@ export async function syncCopilotReviewAutomation(
 
   const nowIso = new Date(now).toISOString();
 
-  const taskPayloads: Array<{ employeeId: string; payload: TablesInsert<'tasks'> }> = plan.taskTemplates.map(
-    (template) => {
-      const dueDate = dayjs(now).add(template.dueInDays, 'day').toISOString();
-      const payload: TablesInsert<'tasks'> = {
-        title: `[Co-Pilot] ${template.title}`,
-        description: template.description,
-        priority: template.priority,
-        due_date: dueDate,
-        status: 'todo',
-        created_by: actorId,
-        assigned_to: template.assignTo ?? actorId,
-        tags: template.tags,
-        links: [] as Json,
-        source: 'auto',
-        origin_event_id: template.originReviewId,
-        goal_id: null,
-        department_id: null,
-        parent_task_id: null,
-        workflow_id: null,
-        actual_hours: null,
-        estimated_hours: null,
-        created_at: nowIso,
-        updated_at: nowIso,
-      };
-      return { employeeId: template.employeeId, payload };
-    },
-  );
+  const taskPayloads: Array<{
+    employeeId: string;
+    payload: TablesInsert<"tasks">;
+  }> = plan.taskTemplates.map((template) => {
+    const dueDate = dayjs(now).add(template.dueInDays, "day").toISOString();
+    const payload: TablesInsert<"tasks"> = {
+      title: `[Co-Pilot] ${template.title}`,
+      description: template.description,
+      priority: template.priority,
+      due_date: dueDate,
+      status: "todo",
+      created_by: actorId,
+      assigned_to: template.assignTo ?? actorId,
+      tags: template.tags,
+      links: [] as Json,
+      source: "auto",
+      origin_event_id: template.originReviewId,
+      goal_id: null,
+      department_id: null,
+      parent_task_id: null,
+      workflow_id: null,
+      actual_hours: null,
+      estimated_hours: null,
+      created_at: nowIso,
+      updated_at: nowIso,
+    };
+    return { employeeId: template.employeeId, payload };
+  });
 
   let insertedTaskRows: { id: string }[] = [];
   if (taskPayloads.length > 0) {
     const insertResult = await supabaseClient
-      .from('tasks')
+      .from("tasks")
       .insert(taskPayloads.map((entry) => entry.payload))
-      .select('id');
+      .select("id");
     if (insertResult.error) throw insertResult.error;
     insertedTaskRows = insertResult.data ?? [];
   }
@@ -365,55 +430,57 @@ export async function syncCopilotReviewAutomation(
     }
   });
 
-  const reminderPayloads: Array<{ employeeId: string; payload: TablesInsert<'reminders'> }> =
-    plan.reminderTemplates.map((template) => {
-      const remindAt = dayjs(now).add(template.remindInDays, 'day').toISOString();
-      const payload: TablesInsert<'reminders'> = {
-        user_id: actorId,
-        task_id: null,
-        title: `[Co-Pilot] ${template.title}`,
-        description: template.description,
-        remind_at: remindAt,
-        notification_methods: ['in_app'] as Json,
-        priority: template.priority,
-        type: 'copilot_review',
-        completed: false,
-        sound_enabled: true,
-        sound_type: 'default',
-        repeat_enabled: false,
-        repeat_interval: null,
-        snooze_enabled: true,
-        snooze_count: 0,
-        auto_complete: false,
-        last_triggered_at: null,
-        next_reminder_at: null,
-        created_at: nowIso,
-        updated_at: nowIso,
-      };
-      if (template.linkToTask) {
-        payload.task_id = taskIdByEmployee.get(template.employeeId) ?? null;
-      }
-      return { employeeId: template.employeeId, payload };
-    });
+  const reminderPayloads: Array<{
+    employeeId: string;
+    payload: TablesInsert<"reminders">;
+  }> = plan.reminderTemplates.map((template) => {
+    const remindAt = dayjs(now).add(template.remindInDays, "day").toISOString();
+    const payload: TablesInsert<"reminders"> = {
+      user_id: actorId,
+      task_id: null,
+      title: `[Co-Pilot] ${template.title}`,
+      description: template.description,
+      remind_at: remindAt,
+      notification_methods: ["in_app"] as Json,
+      priority: template.priority,
+      type: "copilot_review",
+      completed: false,
+      sound_enabled: true,
+      sound_type: "default",
+      repeat_enabled: false,
+      repeat_interval: null,
+      snooze_enabled: true,
+      snooze_count: 0,
+      auto_complete: false,
+      last_triggered_at: null,
+      next_reminder_at: null,
+      created_at: nowIso,
+      updated_at: nowIso,
+    };
+    if (template.linkToTask) {
+      payload.task_id = taskIdByEmployee.get(template.employeeId) ?? null;
+    }
+    return { employeeId: template.employeeId, payload };
+  });
 
   let insertedReminderRows: { id: string }[] = [];
   if (reminderPayloads.length > 0) {
     const insertResult = await supabaseClient
-      .from('reminders')
+      .from("reminders")
       .insert(reminderPayloads.map((entry) => entry.payload))
-      .select('id');
+      .select("id");
     if (insertResult.error) throw insertResult.error;
     insertedReminderRows = insertResult.data ?? [];
   }
 
   const createdTasks = insertedTaskRows.map((row, index) => ({
     id: row.id,
-    employeeId: taskPayloads[index]?.employeeId ?? '',
+    employeeId: taskPayloads[index]?.employeeId ?? "",
   }));
 
   const createdReminders = insertedReminderRows.map((row, index) => ({
     id: row.id,
-    employeeId: reminderPayloads[index]?.employeeId ?? '',
+    employeeId: reminderPayloads[index]?.employeeId ?? "",
   }));
 
   return {

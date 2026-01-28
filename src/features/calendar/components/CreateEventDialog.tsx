@@ -1,31 +1,31 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { useEvents, type EventAttendee } from '@/hooks/useEvents';
-import { useProfile } from '@/hooks/useProfile';
-import type { Schedule } from '@/types/common';
-import { useCreateCalendarEvent } from '@/features/calendar/hooks/useCreateCalendarEvent';
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { useEvents, type EventAttendee } from "@/hooks/useEvents";
+import { useProfile } from "@/hooks/useProfile";
+import type { Schedule } from "@/types/common";
+import { useCreateCalendarEvent } from "@/features/calendar/hooks/useCreateCalendarEvent";
 
-type SessionType = 'meeting' | 'event';
+type SessionType = "meeting" | "event";
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -36,21 +36,31 @@ interface CreateEventDialogProps {
 
 type SelectionRecord = Record<string, boolean>;
 
-export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting', onCreated }: CreateEventDialogProps) {
+export function CreateEventDialog({
+  open,
+  onOpenChange,
+  defaultType = "meeting",
+  onCreated,
+}: CreateEventDialogProps) {
   const { toast } = useToast();
-  const { shifts, teamMembers: roster, loading: schedulingLoading } = useScheduling();
+  const {
+    shifts,
+    teamMembers: roster,
+    loading: schedulingLoading,
+  } = useScheduling();
   const { events } = useEvents();
   const { profile } = useProfile();
   const { createEvent } = useCreateCalendarEvent();
 
   const [sessionType, setSessionType] = useState<SessionType>(defaultType);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
-  const [participantQuery, setParticipantQuery] = useState('');
-  const [selectedParticipants, setSelectedParticipants] = useState<SelectionRecord>({});
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [participantQuery, setParticipantQuery] = useState("");
+  const [selectedParticipants, setSelectedParticipants] =
+    useState<SelectionRecord>({});
   const [selectedShiftIds, setSelectedShiftIds] = useState<SelectionRecord>({});
 
   const employees = roster ?? [];
@@ -60,14 +70,14 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
   useEffect(() => {
     if (open) {
       setSessionType(defaultType);
-      setTitle(defaultType === 'meeting' ? 'New Meeting' : 'New Event');
-      setDescription('');
-      setLocation('');
+      setTitle(defaultType === "meeting" ? "New Meeting" : "New Event");
+      setDescription("");
+      setLocation("");
       const now = new Date();
       const soon = new Date(now.getTime() + 60 * 60 * 1000);
       setStart(now.toISOString().slice(0, 16));
       setEnd(soon.toISOString().slice(0, 16));
-      setParticipantQuery('');
+      setParticipantQuery("");
       setSelectedParticipants({});
       setSelectedShiftIds({});
     }
@@ -79,9 +89,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     employees.forEach((employee) => {
       if (!employee.id) return;
       const name =
-        `${employee.first_name ?? ''} ${employee.last_name ?? ''}`.trim() ||
+        `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() ||
         employee.email ||
-        'Team member';
+        "Team member";
       map.set(employee.id, {
         id: employee.id,
         name,
@@ -102,13 +112,17 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
       });
     });
 
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }, [employees, events]);
 
   const filteredAttendees = !participantQuery.trim()
     ? attendeeOptions
     : attendeeOptions.filter((attendee) =>
-        attendee.name.toLowerCase().includes(participantQuery.trim().toLowerCase()),
+        attendee.name
+          .toLowerCase()
+          .includes(participantQuery.trim().toLowerCase()),
       );
 
   const attendeeMap = useMemo(() => {
@@ -129,18 +143,25 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
         const shiftStart = new Date(shift.start_time);
         const shiftEnd = new Date(shift.end_time);
         const timeOverlap = overlaps(startDate, endDate, shiftStart, shiftEnd);
-        const locationMatch = !location || (shift.location ?? '').toLowerCase().includes(location.toLowerCase());
+        const locationMatch =
+          !location ||
+          (shift.location ?? "").toLowerCase().includes(location.toLowerCase());
         return timeOverlap && locationMatch;
       })
       .slice(0, 20);
   }, [end, location, safeShifts, start]);
 
-  const toggleSelection = (setState: (value: SelectionRecord) => void) => (id: string, next: boolean | string) => {
-    const value = Boolean(next);
-    setState((prev) => ({ ...prev, [id]: value }));
-  };
+  const toggleSelection =
+    (setState: (value: SelectionRecord) => void) =>
+    (id: string, next: boolean | string) => {
+      const value = Boolean(next);
+      setState((prev) => ({ ...prev, [id]: value }));
+    };
 
-  const buildAttendeesFromSelections = (participantIds: string[], shiftIds: string[]): EventAttendee[] => {
+  const buildAttendeesFromSelections = (
+    participantIds: string[],
+    shiftIds: string[],
+  ): EventAttendee[] => {
     const map = new Map<string, EventAttendee>();
     const push = (attendee: EventAttendee) => {
       if (!attendee.id) return;
@@ -161,7 +182,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
           shift.assignments?.forEach((assignment) => {
             if (!assignment.user?.id) return;
             const user = assignment.user;
-            const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || 'Team member';
+            const name =
+              `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
+              "Team member";
             push({
               id: user.id,
               name,
@@ -178,9 +201,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
   const handleCreate = async () => {
     if (!title.trim() || !start || !end) {
       toast({
-        title: 'Missing information',
-        description: 'Title, start time and end time are required.',
-        variant: 'destructive',
+        title: "Missing information",
+        description: "Title, start time and end time are required.",
+        variant: "destructive",
       });
       return;
     }
@@ -188,9 +211,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
       toast({
-        title: 'Missing company context',
-        description: 'You need an active company to create events.',
-        variant: 'destructive',
+        title: "Missing company context",
+        description: "You need an active company to create events.",
+        variant: "destructive",
       });
       return;
     }
@@ -201,13 +224,13 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
       startIso = new Date(start);
       endIso = new Date(end);
       if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
-        throw new Error('Invalid date');
+        throw new Error("Invalid date");
       }
     } catch (error) {
       toast({
-        title: 'Invalid date',
-        description: 'Please provide valid start and end times.',
-        variant: 'destructive',
+        title: "Invalid date",
+        description: "Please provide valid start and end times.",
+        variant: "destructive",
       });
       return;
     }
@@ -219,7 +242,10 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
       .filter(([, value]) => value)
       .map(([id]) => id);
 
-    const attendees = buildAttendeesFromSelections(selectedParticipantIds, selectedShiftList);
+    const attendees = buildAttendeesFromSelections(
+      selectedParticipantIds,
+      selectedShiftList,
+    );
 
     try {
       const created = await createEvent({
@@ -238,7 +264,8 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
       }
 
       toast({
-        title: sessionType === 'meeting' ? 'Meeting scheduled' : 'Event created',
+        title:
+          sessionType === "meeting" ? "Meeting scheduled" : "Event created",
         description: `${title.trim()} on ${new Date(startIso).toLocaleString()}`,
       });
 
@@ -246,9 +273,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       toast({
-        title: 'Event not saved',
+        title: "Event not saved",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   };
@@ -257,9 +284,12 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{sessionType === 'meeting' ? 'Schedule meeting' : 'Create event'}</DialogTitle>
+          <DialogTitle>
+            {sessionType === "meeting" ? "Schedule meeting" : "Create event"}
+          </DialogTitle>
           <DialogDescription>
-            Capture details, invite teammates from your directory, and optionally link related shifts.
+            Capture details, invite teammates from your directory, and
+            optionally link related shifts.
           </DialogDescription>
         </DialogHeader>
 
@@ -270,12 +300,19 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
               id="session-title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder={sessionType === 'meeting' ? 'Quarterly planning meeting' : 'All hands event'}
+              placeholder={
+                sessionType === "meeting"
+                  ? "Quarterly planning meeting"
+                  : "All hands event"
+              }
             />
           </div>
           <div>
             <Label>Type</Label>
-            <Select value={sessionType} onValueChange={(value) => setSessionType(value as SessionType)}>
+            <Select
+              value={sessionType}
+              onValueChange={(value) => setSessionType(value as SessionType)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -337,21 +374,38 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
             </div>
             <div className="mt-2 max-h-48 overflow-auto space-y-2 pr-2">
               {employeesLoading ? (
-                <div className="text-xs text-muted-foreground px-1 py-2">Loading team directory…</div>
+                <div className="text-xs text-muted-foreground px-1 py-2">
+                  Loading team directory…
+                </div>
               ) : filteredAttendees.length === 0 ? (
                 <div className="text-xs text-muted-foreground px-1 py-2">
-                  No matching people found. Update your directory or adjust the search to invite teammates.
+                  No matching people found. Update your directory or adjust the
+                  search to invite teammates.
                 </div>
               ) : (
                 filteredAttendees.map((attendee) => (
-                  <label key={attendee.id} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={attendee.id}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <Checkbox
                       checked={!!selectedParticipants[attendee.id]}
-                      onCheckedChange={(value) => toggleSelection(setSelectedParticipants)(attendee.id, value)}
+                      onCheckedChange={(value) =>
+                        toggleSelection(setSelectedParticipants)(
+                          attendee.id,
+                          value,
+                        )
+                      }
                     />
                     <div>
-                      <div className="font-medium leading-none">{attendee.name}</div>
-                      {attendee.role && <div className="text-xs text-muted-foreground">{attendee.role}</div>}
+                      <div className="font-medium leading-none">
+                        {attendee.name}
+                      </div>
+                      {attendee.role && (
+                        <div className="text-xs text-muted-foreground">
+                          {attendee.role}
+                        </div>
+                      )}
                     </div>
                   </label>
                 ))
@@ -362,28 +416,42 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
           <div>
             <Label>Link to scheduled shifts (optional)</Label>
             <p className="text-xs text-muted-foreground mb-2">
-              Select the shifts this session supports. Linked shifts will surface the meeting to assigned staff.
+              Select the shifts this session supports. Linked shifts will
+              surface the meeting to assigned staff.
             </p>
             <div className="max-h-48 overflow-auto space-y-2 pr-2 border rounded-md p-2">
               {shiftSuggestions.length === 0 && (
                 <div className="text-xs text-muted-foreground px-1 py-2">
-                  No overlapping shifts found for the selected time window. You can still create the event without linking.
+                  No overlapping shifts found for the selected time window. You
+                  can still create the event without linking.
                 </div>
               )}
               {shiftSuggestions.map((shift) => (
-                <label key={shift.id} className="flex items-start gap-2 text-sm">
+                <label
+                  key={shift.id}
+                  className="flex items-start gap-2 text-sm"
+                >
                   <Checkbox
                     checked={!!selectedShiftIds[shift.id]}
-                    onCheckedChange={(value) => toggleSelection(setSelectedShiftIds)(shift.id, value)}
+                    onCheckedChange={(value) =>
+                      toggleSelection(setSelectedShiftIds)(shift.id, value)
+                    }
                   />
                   <div>
                     <div className="font-medium leading-none">
-                      {shift.title || shift.job_position?.name || 'Shift'}
+                      {shift.title || shift.job_position?.name || "Shift"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {new Date(shift.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
-                      {new Date(shift.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      {shift.location ? ` • ${shift.location}` : ''}
+                      {new Date(shift.start_time).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      –{" "}
+                      {new Date(shift.end_time).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {shift.location ? ` • ${shift.location}` : ""}
                     </div>
                   </div>
                 </label>
@@ -396,7 +464,9 @@ export function CreateEventDialog({ open, onOpenChange, defaultType = 'meeting',
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCreate}>Create {sessionType === 'meeting' ? 'meeting' : 'event'}</Button>
+          <Button onClick={handleCreate}>
+            Create {sessionType === "meeting" ? "meeting" : "event"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,14 +1,16 @@
-
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface BackButtonProps {
   className?: string;
   fallbackHref?: string;
 }
 
-export function BackButton({ className = "", fallbackHref = "/" }: BackButtonProps) {
+export function BackButton({
+  className = "",
+  fallbackHref = "/",
+}: BackButtonProps) {
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -20,9 +22,9 @@ export function BackButton({ className = "", fallbackHref = "/" }: BackButtonPro
   };
 
   return (
-    <Button 
-      variant="ghost" 
-      size="sm" 
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleBack}
       className={`text-gray-600 hover:text-gray-900 hover:bg-gray-100 ${className}`}
     >

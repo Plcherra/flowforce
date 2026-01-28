@@ -1,16 +1,24 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, AlertTriangle } from 'lucide-react';
-import { useAccountDeletion } from '@/hooks/useAccountDeletion';
-import AccountDeletionDialog from './AccountDeletionDialog';
-import PasswordChangeForm from './PasswordChangeForm';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Shield, AlertTriangle } from "lucide-react";
+import { useAccountDeletion } from "@/hooks/useAccountDeletion";
+import AccountDeletionDialog from "./AccountDeletionDialog";
+import PasswordChangeForm from "./PasswordChangeForm";
 
 interface AccountSecurityProps {
   userId: string;
   onSignOut: () => Promise<void>;
 }
 
-export default function AccountSecurity({ userId, onSignOut }: AccountSecurityProps) {
+export default function AccountSecurity({
+  userId,
+  onSignOut,
+}: AccountSecurityProps) {
   const {
     isDeleting,
     deletionProgress,
@@ -38,12 +46,15 @@ export default function AccountSecurity({ userId, onSignOut }: AccountSecurityPr
           <div className="flex items-start space-x-3">
             <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
             <div className="flex-1">
-              <h4 className="font-medium text-red-800">Permanent Account Deletion</h4>
+              <h4 className="font-medium text-red-800">
+                Permanent Account Deletion
+              </h4>
               <p className="text-sm text-red-600 mt-1">
-                Completely remove your account and all associated data from our servers. 
-                This action cannot be undone and will prevent future login.
+                Completely remove your account and all associated data from our
+                servers. This action cannot be undone and will prevent future
+                login.
               </p>
-              
+
               <AccountDeletionDialog
                 isDeleting={isDeleting}
                 deletionProgress={deletionProgress}

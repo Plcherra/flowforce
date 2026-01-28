@@ -1,39 +1,44 @@
-
-import { useTranslation } from 'react-i18next';
-import Breadcrumbs from '@/components/resources/Breadcrumbs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Code, Clock } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "@/components/resources/Breadcrumbs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Code, Clock } from "lucide-react";
+import { BackButton } from "@/components/ui/back-button";
 
 export default function ApiDocumentation() {
   const { t } = useTranslation();
 
   const breadcrumbItems = [
-    { label: t('landing.resources'), href: '/resources' },
-    { label: t('resources.documentation.title'), href: '/resources' },
-    { label: 'API Documentation' },
+    { label: t("landing.resources"), href: "/resources" },
+    { label: t("resources.documentation.title"), href: "/resources" },
+    { label: "API Documentation" },
   ];
 
   const endpoints = [
     {
-      method: 'GET',
-      path: '/api/v1/employees',
-      description: 'Retrieve all employees',
-      auth: 'Required'
+      method: "GET",
+      path: "/api/v1/employees",
+      description: "Retrieve all employees",
+      auth: "Required",
     },
     {
-      method: 'POST',
-      path: '/api/v1/schedules',
-      description: 'Create a new schedule',
-      auth: 'Required'
+      method: "POST",
+      path: "/api/v1/schedules",
+      description: "Create a new schedule",
+      auth: "Required",
     },
     {
-      method: 'PUT',
-      path: '/api/v1/tasks/{id}',
-      description: 'Update a specific task',
-      auth: 'Required'
-    }
+      method: "PUT",
+      path: "/api/v1/tasks/{id}",
+      description: "Update a specific task",
+      auth: "Required",
+    },
   ];
 
   return (
@@ -43,7 +48,7 @@ export default function ApiDocumentation() {
           <Breadcrumbs items={breadcrumbItems} />
           <BackButton />
         </div>
-        
+
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
@@ -69,7 +74,8 @@ export default function ApiDocumentation() {
             <div className="prose max-w-none">
               <h3>Authentication</h3>
               <p>
-                FlowForce API uses Bearer token authentication. Include your API token in the Authorization header:
+                FlowForce API uses Bearer token authentication. Include your API
+                token in the Authorization header:
               </p>
               <pre className="bg-gray-100 p-4 rounded-lg">
                 <code>Authorization: Bearer YOUR_API_TOKEN</code>
@@ -87,10 +93,20 @@ export default function ApiDocumentation() {
                   <div key={index} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <Badge variant={endpoint.method === 'GET' ? 'default' : endpoint.method === 'POST' ? 'destructive' : 'secondary'}>
+                        <Badge
+                          variant={
+                            endpoint.method === "GET"
+                              ? "default"
+                              : endpoint.method === "POST"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
                           {endpoint.method}
                         </Badge>
-                        <code className="font-mono text-sm">{endpoint.path}</code>
+                        <code className="font-mono text-sm">
+                          {endpoint.path}
+                        </code>
                       </div>
                       <Badge variant="outline">{endpoint.auth}</Badge>
                     </div>
@@ -101,14 +117,15 @@ export default function ApiDocumentation() {
 
               <h3>Rate Limits</h3>
               <p>
-                API requests are limited to 1000 requests per hour per API token. 
-                Rate limit information is included in response headers.
+                API requests are limited to 1000 requests per hour per API
+                token. Rate limit information is included in response headers.
               </p>
 
               <h3>Error Handling</h3>
               <p>
-                The API returns standard HTTP status codes. Error responses include 
-                a JSON object with error details and suggestions for resolution.
+                The API returns standard HTTP status codes. Error responses
+                include a JSON object with error details and suggestions for
+                resolution.
               </p>
             </div>
           </CardContent>

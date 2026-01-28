@@ -11,7 +11,15 @@ export interface CreateIssueInput {
 }
 
 export async function createIssue(input: CreateIssueInput) {
-  const { orgId, kpiKey, issueType, title, description, severity = 'warning', metadata } = input;
+  const {
+    orgId,
+    kpiKey,
+    issueType,
+    title,
+    description,
+    severity = "warning",
+    metadata,
+  } = input;
   const payload = {
     org_id: orgId,
     kpi_key: kpiKey ?? null,
@@ -22,7 +30,11 @@ export async function createIssue(input: CreateIssueInput) {
     source: metadata ?? {},
   };
 
-  const { data, error } = await supabaseAdmin.from('ops_issues').insert(payload).select('*').single();
+  const { data, error } = await supabaseAdmin
+    .from("ops_issues")
+    .insert(payload)
+    .select("*")
+    .single();
   if (error) {
     throw error;
   }

@@ -1,38 +1,47 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Check, 
-  Plus, 
-  Trash2, 
+} from "@/components/ui/select";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Plus,
+  Trash2,
   Eye,
   Settings,
   Users,
-  Lock
-} from 'lucide-react';
-import * as Icons from 'lucide-react';
-import { QUICK_TEMPLATES } from '@/data/sectionTemplates';
-import { listSectionComponents, getSectionComponent } from '@/components/sections/componentRegistry';
+  Lock,
+} from "lucide-react";
+import * as Icons from "lucide-react";
+import { QUICK_TEMPLATES } from "@/data/sectionTemplates";
+import {
+  listSectionComponents,
+  getSectionComponent,
+} from "@/components/sections/componentRegistry";
 
 interface SectionConfigurationWizardProps {
   section: any;
@@ -42,83 +51,126 @@ interface SectionConfigurationWizardProps {
 }
 
 const WIZARD_STEPS = [
-  { id: 'overview', title: 'Overview', icon: Eye },
-  { id: 'pages', title: 'Pages & Content', icon: Settings },
-  { id: 'permissions', title: 'Permissions', icon: Lock },
-  { id: 'review', title: 'Review & Launch', icon: Check }
+  { id: "overview", title: "Overview", icon: Eye },
+  { id: "pages", title: "Pages & Content", icon: Settings },
+  { id: "permissions", title: "Permissions", icon: Lock },
+  { id: "review", title: "Review & Launch", icon: Check },
 ];
 
 const PERMISSION_OPTIONS = [
-  { id: 'viewOwnProfile', label: 'View Own Profile', description: 'Users can view their own profile' },
-  { id: 'viewAllProfiles', label: 'View All Profiles', description: 'Users can view all user profiles' },
-  { id: 'manageTeam', label: 'Manage Team', description: 'Users can manage team members' },
-  { id: 'manageCompany', label: 'Manage Company', description: 'Full company management access' },
-  { id: 'viewReports', label: 'View Reports', description: 'Users can view reports and analytics' },
-  { id: 'manageSettings', label: 'Manage Settings', description: 'Users can modify system settings' }
+  {
+    id: "viewOwnProfile",
+    label: "View Own Profile",
+    description: "Users can view their own profile",
+  },
+  {
+    id: "viewAllProfiles",
+    label: "View All Profiles",
+    description: "Users can view all user profiles",
+  },
+  {
+    id: "manageTeam",
+    label: "Manage Team",
+    description: "Users can manage team members",
+  },
+  {
+    id: "manageCompany",
+    label: "Manage Company",
+    description: "Full company management access",
+  },
+  {
+    id: "viewReports",
+    label: "View Reports",
+    description: "Users can view reports and analytics",
+  },
+  {
+    id: "manageSettings",
+    label: "Manage Settings",
+    description: "Users can modify system settings",
+  },
 ];
 
-export function SectionConfigurationWizard({ 
-  section, 
-  open, 
-  onOpenChange, 
-  onSave 
+export function SectionConfigurationWizard({
+  section,
+  open,
+  onOpenChange,
+  onSave,
 }: SectionConfigurationWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const componentOptions = useMemo(() => listSectionComponents(), []);
-  const withComponentMetadata = useCallback((pages: any[] = []) => {
-    return pages.map((page: any) => {
-      const contentArray = Array.isArray(page?.content) ? page.content : [];
-      const primary = contentArray[0] || {};
-      const resolvedComponent = page.componentId || primary.component || primary.type || componentOptions[0]?.id || '';
-      const normalizedContent = resolvedComponent
-        ? [{
-            ...primary,
-            type: resolvedComponent,
-            component: resolvedComponent,
-            title: primary.title || page.title || primary.title,
-          }]
-        : contentArray;
+  const withComponentMetadata = useCallback(
+    (pages: any[] = []) => {
+      return pages.map((page: any) => {
+        const contentArray = Array.isArray(page?.content) ? page.content : [];
+        const primary = contentArray[0] || {};
+        const resolvedComponent =
+          page.componentId ||
+          primary.component ||
+          primary.type ||
+          componentOptions[0]?.id ||
+          "";
+        const normalizedContent = resolvedComponent
+          ? [
+              {
+                ...primary,
+                type: resolvedComponent,
+                component: resolvedComponent,
+                title: primary.title || page.title || primary.title,
+              },
+            ]
+          : contentArray;
 
-      return {
-        ...page,
-        componentId: resolvedComponent,
-        content: normalizedContent,
-      };
-    });
-  }, [componentOptions]);
+        return {
+          ...page,
+          componentId: resolvedComponent,
+          content: normalizedContent,
+        };
+      });
+    },
+    [componentOptions],
+  );
 
   const [formData, setFormData] = useState({
-    name: section?.name || '',
-    description: section?.description || '',
-    icon: section?.icon || 'FileText',
-    pages: withComponentMetadata(section?.pages && section.pages.length > 0 ? section.pages : []),
-    permissions: section?.permissions || ['viewOwnProfile'],
-    isActive: true
+    name: section?.name || "",
+    description: section?.description || "",
+    icon: section?.icon || "FileText",
+    pages: withComponentMetadata(
+      section?.pages && section.pages.length > 0 ? section.pages : [],
+    ),
+    permissions: section?.permissions || ["viewOwnProfile"],
+    isActive: true,
   });
 
   // Suggested pages from template (DB id or local quick template id)
   const suggestedPages = useMemo(() => {
     const tplId = section?.template_id;
     if (!tplId) return [] as any[];
-    const tpl = QUICK_TEMPLATES.find(t => t.id === tplId);
+    const tpl = QUICK_TEMPLATES.find((t) => t.id === tplId);
     return (tpl?.config?.pages || []) as any[];
   }, [section?.template_id]);
 
   // If there are no existing pages and we have suggestions, pre-fill with suggestions once
-  const hasPrefilled = useMemo(() => formData.pages && formData.pages.length > 0, [formData.pages]);
+  const hasPrefilled = useMemo(
+    () => formData.pages && formData.pages.length > 0,
+    [formData.pages],
+  );
   React.useEffect(() => {
     if (!hasPrefilled && suggestedPages.length > 0) {
-      const nextPages = withComponentMetadata(suggestedPages.map((p: any) => ({
-        name: p.name,
-        title: p.title,
-        description: p.description || '',
-        icon: p.icon || 'FileText',
-        route: p.route,
-        content: Array.isArray(p.content) ? p.content : [],
-        permissions: Array.isArray(p.permissions) ? p.permissions : ['viewOwnProfile'],
-      })));
+      const nextPages = withComponentMetadata(
+        suggestedPages.map((p: any) => ({
+          name: p.name,
+          title: p.title,
+          description: p.description || "",
+          icon: p.icon || "FileText",
+          route: p.route,
+          content: Array.isArray(p.content) ? p.content : [],
+          permissions: Array.isArray(p.permissions)
+            ? p.permissions
+            : ["viewOwnProfile"],
+        })),
+      );
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         pages: nextPages,
       }));
@@ -143,17 +195,17 @@ export function SectionConfigurationWizard({
   };
 
   const addPage = () => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const nextPages = withComponentMetadata([
         ...prev.pages,
         {
           name: `new-page-${prev.pages.length + 1}`,
-          title: 'New Page',
-          description: '',
-          icon: 'FileText',
+          title: "New Page",
+          description: "",
+          icon: "FileText",
           route: `/new-page-${prev.pages.length + 1}`,
           content: [],
-          permissions: ['viewOwnProfile'],
+          permissions: ["viewOwnProfile"],
         },
       ]);
 
@@ -165,72 +217,84 @@ export function SectionConfigurationWizard({
   };
 
   const removePage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      pages: prev.pages.filter((_, i) => i !== index)
+      pages: prev.pages.filter((_, i) => i !== index),
     }));
   };
 
   const updatePage = (index: number, updates: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       pages: prev.pages.map((page, i) => {
         if (i !== index) return page;
 
         const nextPage: any = { ...page, ...updates };
-        if (updates.title && Array.isArray(page.content) && page.content.length > 0) {
-          nextPage.content = page.content.map((entry: any, entryIndex: number) =>
-            entryIndex === 0 ? { ...entry, title: updates.title } : entry
+        if (
+          updates.title &&
+          Array.isArray(page.content) &&
+          page.content.length > 0
+        ) {
+          nextPage.content = page.content.map(
+            (entry: any, entryIndex: number) =>
+              entryIndex === 0 ? { ...entry, title: updates.title } : entry,
           );
         }
         return nextPage;
-      })
+      }),
     }));
   };
 
   const setPageComponent = (index: number, componentId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       pages: prev.pages.map((page, i) => {
         if (i !== index) return page;
 
-        const baseContent = Array.isArray(page.content) && page.content.length > 0
-          ? page.content[0]
-          : {};
+        const baseContent =
+          Array.isArray(page.content) && page.content.length > 0
+            ? page.content[0]
+            : {};
 
         return {
           ...page,
           componentId,
-          content: [{
-            ...baseContent,
-            type: componentId,
-            component: componentId,
-            title: baseContent?.title || page.title,
-          }],
+          content: [
+            {
+              ...baseContent,
+              type: componentId,
+              component: componentId,
+              title: baseContent?.title || page.title,
+            },
+          ],
         };
-      })
+      }),
     }));
   };
 
   const togglePermission = (permission: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: prev.permissions.includes(permission)
-        ? prev.permissions.filter(p => p !== permission)
-        : [...prev.permissions, permission]
+        ? prev.permissions.filter((p) => p !== permission)
+        : [...prev.permissions, permission],
     }));
   };
 
   const getIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName];
-    return IconComponent ? <IconComponent className="h-4 w-4" /> : <Icons.FileText className="h-4 w-4" />;
+    return IconComponent ? (
+      <IconComponent className="h-4 w-4" />
+    ) : (
+      <Icons.FileText className="h-4 w-4" />
+    );
   };
 
   const renderStepContent = () => {
     const step = WIZARD_STEPS[currentStep];
 
     switch (step.id) {
-      case 'overview':
+      case "overview":
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -239,24 +303,31 @@ export function SectionConfigurationWizard({
                 Configure the basic settings for your section
               </p>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name">Section Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   placeholder="Enter section name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   placeholder="Describe what this section is for"
                   rows={3}
                 />
@@ -265,33 +336,53 @@ export function SectionConfigurationWizard({
           </div>
         );
 
-      case 'pages':
+      case "pages":
         return (
           <div className="space-y-6">
             <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Pages & Content</h3>
-              <p className="text-muted-foreground">Add pages to organize content within this section</p>
+              <p className="text-muted-foreground">
+                Add pages to organize content within this section
+              </p>
             </div>
-            
+
             {/* Suggested pages from template */}
             {suggestedPages.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-medium">Suggested Pages</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {suggestedPages.map((p: any, index: number) => {
-                    const suggestionSlug = (p.route || '').split('/').filter(Boolean).pop();
+                    const suggestionSlug = (p.route || "")
+                      .split("/")
+                      .filter(Boolean)
+                      .pop();
                     const included = formData.pages.some((pg: any) => {
-                      const pageSlug = (pg.route || '').split('/').filter(Boolean).pop();
-                      return pageSlug === suggestionSlug || (pg.name && pg.name === p.name);
+                      const pageSlug = (pg.route || "")
+                        .split("/")
+                        .filter(Boolean)
+                        .pop();
+                      return (
+                        pageSlug === suggestionSlug ||
+                        (pg.name && pg.name === p.name)
+                      );
                     });
                     return (
-                      <Card key={index} className={included ? 'border-primary/50' : ''}>
+                      <Card
+                        key={index}
+                        className={included ? "border-primary/50" : ""}
+                      >
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-base">{p.title}</CardTitle>
-                            <Badge variant="outline" className="text-xs">{p.icon || 'Page'}</Badge>
+                            <CardTitle className="text-base">
+                              {p.title}
+                            </CardTitle>
+                            <Badge variant="outline" className="text-xs">
+                              {p.icon || "Page"}
+                            </Badge>
                           </div>
-                          {p.description && <CardDescription>{p.description}</CardDescription>}
+                          {p.description && (
+                            <CardDescription>{p.description}</CardDescription>
+                          )}
                         </CardHeader>
                         <CardContent className="pt-0">
                           <div className="flex justify-end">
@@ -299,34 +390,50 @@ export function SectionConfigurationWizard({
                               <Button
                                 size="sm"
                                 variant="secondary"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  pages: prev.pages.filter((pg: any) => {
-                                    const pageSlug = (pg.route || '').split('/').filter(Boolean).pop();
-                                    return pageSlug !== suggestionSlug && pg.name !== p.name;
-                                  })
-                                }))}
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    pages: prev.pages.filter((pg: any) => {
+                                      const pageSlug = (pg.route || "")
+                                        .split("/")
+                                        .filter(Boolean)
+                                        .pop();
+                                      return (
+                                        pageSlug !== suggestionSlug &&
+                                        pg.name !== p.name
+                                      );
+                                    }),
+                                  }))
+                                }
                               >
                                 Remove
                               </Button>
                             ) : (
                               <Button
                                 size="sm"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  pages: withComponentMetadata([
-                                    ...prev.pages,
-                                    {
-                                      name: p.name,
-                                      title: p.title,
-                                      description: p.description || '',
-                                      icon: p.icon || 'FileText',
-                                      route: p.route,
-                                      content: Array.isArray(p.content) ? p.content : [],
-                                      permissions: Array.isArray(p.permissions) ? p.permissions : ['viewOwnProfile'],
-                                    },
-                                  ])
-                                }))}
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    pages: withComponentMetadata([
+                                      ...prev.pages,
+                                      {
+                                        name: p.name,
+                                        title: p.title,
+                                        description: p.description || "",
+                                        icon: p.icon || "FileText",
+                                        route: p.route,
+                                        content: Array.isArray(p.content)
+                                          ? p.content
+                                          : [],
+                                        permissions: Array.isArray(
+                                          p.permissions,
+                                        )
+                                          ? p.permissions
+                                          : ["viewOwnProfile"],
+                                      },
+                                    ]),
+                                  }))
+                                }
                               >
                                 Add
                               </Button>
@@ -349,12 +456,14 @@ export function SectionConfigurationWizard({
                       <div className="flex items-center justify-between">
                         <Input
                           value={page.title}
-                          onChange={(e) => updatePage(index, { title: e.target.value })}
+                          onChange={(e) =>
+                            updatePage(index, { title: e.target.value })
+                          }
                           className="font-medium border-0 p-0 h-auto focus-visible:ring-0"
                           placeholder="Page title"
                         />
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => removePage(index)}
                         >
@@ -365,7 +474,9 @@ export function SectionConfigurationWizard({
                     <CardContent className="space-y-4">
                       <Textarea
                         value={page.description}
-                        onChange={(e) => updatePage(index, { description: e.target.value })}
+                        onChange={(e) =>
+                          updatePage(index, { description: e.target.value })
+                        }
                         placeholder="Page description"
                         rows={2}
                       />
@@ -373,7 +484,9 @@ export function SectionConfigurationWizard({
                         <Label>Primary Component</Label>
                         <Select
                           value={page.componentId}
-                          onValueChange={(value) => setPageComponent(index, value)}
+                          onValueChange={(value) =>
+                            setPageComponent(index, value)
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Choose component" />
@@ -396,9 +509,9 @@ export function SectionConfigurationWizard({
                   </Card>
                 );
               })}
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 onClick={addPage}
                 className="w-full border-dashed border-2"
               >
@@ -409,7 +522,7 @@ export function SectionConfigurationWizard({
           </div>
         );
 
-      case 'permissions':
+      case "permissions":
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -418,10 +531,13 @@ export function SectionConfigurationWizard({
                 Choose who can access and manage this section
               </p>
             </div>
-            
+
             <div className="space-y-3">
               {PERMISSION_OPTIONS.map((permission) => (
-                <div key={permission.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                <div
+                  key={permission.id}
+                  className="flex items-center space-x-3 p-3 border rounded-lg"
+                >
                   <Checkbox
                     id={permission.id}
                     checked={formData.permissions.includes(permission.id)}
@@ -441,7 +557,7 @@ export function SectionConfigurationWizard({
           </div>
         );
 
-      case 'review':
+      case "review":
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -450,7 +566,7 @@ export function SectionConfigurationWizard({
                 Review your section configuration before launching
               </p>
             </div>
-            
+
             <Card>
               <CardHeader>
                 <div className="flex items-center space-x-3">
@@ -465,12 +581,19 @@ export function SectionConfigurationWizard({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Pages ({formData.pages.length})</h4>
+                  <h4 className="font-medium mb-2">
+                    Pages ({formData.pages.length})
+                  </h4>
                   <div className="space-y-1">
                     {formData.pages.map((page, index) => {
-                      const componentMeta = getSectionComponent(page.componentId);
+                      const componentMeta = getSectionComponent(
+                        page.componentId,
+                      );
                       return (
-                        <div key={index} className="text-sm text-muted-foreground">
+                        <div
+                          key={index}
+                          className="text-sm text-muted-foreground"
+                        >
                           • {page.title}
                           {componentMeta && (
                             <span className="text-xs text-muted-foreground ml-2">
@@ -482,14 +605,22 @@ export function SectionConfigurationWizard({
                     })}
                   </div>
                 </div>
-                
+
                 <div>
-                  <h4 className="font-medium mb-2">Permissions ({formData.permissions.length})</h4>
+                  <h4 className="font-medium mb-2">
+                    Permissions ({formData.permissions.length})
+                  </h4>
                   <div className="flex flex-wrap gap-1">
                     {formData.permissions.map((permission) => {
-                      const perm = PERMISSION_OPTIONS.find(p => p.id === permission);
+                      const perm = PERMISSION_OPTIONS.find(
+                        (p) => p.id === permission,
+                      );
                       return (
-                        <Badge key={permission} variant="secondary" className="text-xs">
+                        <Badge
+                          key={permission}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {perm?.label}
                         </Badge>
                       );
@@ -519,21 +650,29 @@ export function SectionConfigurationWizard({
             const StepIcon = step.icon;
             const isActive = index === currentStep;
             const isCompleted = index < currentStep;
-            
+
             return (
               <div key={step.id} className="flex items-center">
-                <div className={`
+                <div
+                  className={`
                   flex items-center justify-center w-8 h-8 rounded-full
-                  ${isActive ? 'bg-primary text-primary-foreground' : 
-                    isCompleted ? 'bg-green-500 text-white' : 
-                    'bg-muted text-muted-foreground'}
-                `}>
+                  ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : isCompleted
+                        ? "bg-green-500 text-white"
+                        : "bg-muted text-muted-foreground"
+                  }
+                `}
+                >
                   <StepIcon className="h-4 w-4" />
                 </div>
                 {index < WIZARD_STEPS.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-2 ${
-                    isCompleted ? 'bg-green-500' : 'bg-muted'
-                  }`} />
+                  <div
+                    className={`w-12 h-0.5 mx-2 ${
+                      isCompleted ? "bg-green-500" : "bg-muted"
+                    }`}
+                  />
                 )}
               </div>
             );
@@ -541,21 +680,19 @@ export function SectionConfigurationWizard({
         </div>
 
         {/* Step Content */}
-        <div className="min-h-[400px]">
-          {renderStepContent()}
-        </div>
+        <div className="min-h-[400px]">{renderStepContent()}</div>
 
         {/* Navigation */}
         <div className="flex justify-between pt-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 0}
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Previous
           </Button>
-          
+
           {currentStep === WIZARD_STEPS.length - 1 ? (
             <Button onClick={handleSave}>
               <Check className="h-4 w-4 mr-2" />

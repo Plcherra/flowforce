@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 /**
  * Splits a list of IDs into chunks and delegates fetching to the provided async function.
@@ -21,7 +21,9 @@ export function useChunkedSupabaseQuery<T>(
     return {
       chunks,
       fetchAll: async () => {
-        const results = await Promise.all(chunks.map((chunk) => fetcher(chunk)));
+        const results = await Promise.all(
+          chunks.map((chunk) => fetcher(chunk)),
+        );
         return results.flat();
       },
     };

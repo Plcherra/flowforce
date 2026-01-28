@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import type { Goal } from '@/hooks/useGoals';
+import { useCallback, useState } from "react";
+import type { Goal } from "@/hooks/useGoals";
 
 export interface GoalSuggestion {
   title: string;
@@ -15,11 +15,14 @@ export function useGoalDialogs() {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [suggestion, setSuggestion] = useState<GoalSuggestion | null>(null);
 
-  const open = useCallback((goal?: Goal | null, options?: GoalDialogOptions) => {
-    setSelectedGoal(goal ?? null);
-    setSuggestion(options?.suggestion ?? null);
-    setOpen(true);
-  }, []);
+  const open = useCallback(
+    (goal?: Goal | null, options?: GoalDialogOptions) => {
+      setSelectedGoal(goal ?? null);
+      setSuggestion(options?.suggestion ?? null);
+      setOpen(true);
+    },
+    [],
+  );
 
   const close = useCallback(() => {
     setOpen(false);

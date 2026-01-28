@@ -1,21 +1,20 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { CustomTemplate, CustomSection } from '@/types/customTemplate';
-import AnimatedPanel from './AnimatedPanel';
-import StepSidebar from './StepSidebar';
-import WizardHeader from './WizardHeader';
-import WizardNavigation from './WizardNavigation';
-import { ValidationManager } from './ValidationManager';
-import { UserInfo, CompanyInfo } from '@/types/onboarding';
-import StepRenderer from './StepRenderer';
-import { logger } from '@/utils/logger';
+import React, { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { CustomTemplate, CustomSection } from "@/types/customTemplate";
+import AnimatedPanel from "./AnimatedPanel";
+import StepSidebar from "./StepSidebar";
+import WizardHeader from "./WizardHeader";
+import WizardNavigation from "./WizardNavigation";
+import { ValidationManager } from "./ValidationManager";
+import { UserInfo, CompanyInfo } from "@/types/onboarding";
+import StepRenderer from "./StepRenderer";
+import { logger } from "@/utils/logger";
 
 interface Branding {
   logo: File | null;
@@ -50,99 +49,155 @@ interface EnhancedOnboardingWizardProps {
 // Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
-    transition: { 
+    transition: {
       duration: 0.6,
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
-const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ onComplete, onCancel }: EnhancedOnboardingWizardProps) {
+const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
+  onComplete,
+  onCancel,
+}: EnhancedOnboardingWizardProps) {
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-  const [selectedTemplate, setSelectedTemplate] = useState<BusinessTemplate | null>(null);
+  const [direction, setDirection] = useState<"left" | "right">("right");
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<BusinessTemplate | null>(null);
   const [enabledSections, setEnabledSections] = useState<string[]>([]);
   const [customSections, setCustomSections] = useState<CustomSection[]>([]);
   const [customRoles, setCustomRoles] = useState<OnboardingRole[]>([]);
   const [positions, setPositions] = useState<OnboardingPosition[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-  const [customTemplate, setCustomTemplate] = useState<Partial<CustomTemplate>>({
-    name: '',
-    description: '',
-    industry: '',
-    companySize: [],
-    branding: {
-      primaryColor: '#3b82f6',
-      secondaryColor: '#1e40af',
-      accentColor: '#10b981',
-      fontFamily: 'Inter, sans-serif',
-      headerStyle: 'modern',
-      sidebarStyle: 'expanded',
-      cardStyle: 'rounded',
-      backgroundPattern: 'none'
+  const [customTemplate, setCustomTemplate] = useState<Partial<CustomTemplate>>(
+    {
+      name: "",
+      description: "",
+      industry: "",
+      companySize: [],
+      branding: {
+        primaryColor: "#3b82f6",
+        secondaryColor: "#1e40af",
+        accentColor: "#10b981",
+        fontFamily: "Inter, sans-serif",
+        headerStyle: "modern",
+        sidebarStyle: "expanded",
+        cardStyle: "rounded",
+        backgroundPattern: "none",
+      },
+      sections: [],
+      isPublic: false,
     },
-    sections: [],
-    isPublic: false
-  });
-  
+  );
+
   // User and company info state
   const [userInfo, setUserInfo] = useState<UserInfo>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
   });
 
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
-    name: '',
-    industry: '',
-    size: '',
-    description: '',
-    website: '',
-    phone: ''
+    name: "",
+    industry: "",
+    size: "",
+    description: "",
+    website: "",
+    phone: "",
   });
 
   const [branding, setBranding] = useState<Branding>({
     logo: null,
-    primaryColor: customTemplate.branding?.primaryColor || '#3b82f6',
-    secondaryColor: customTemplate.branding?.secondaryColor || '#1e40af'
+    primaryColor: customTemplate.branding?.primaryColor || "#3b82f6",
+    secondaryColor: customTemplate.branding?.secondaryColor || "#1e40af",
   });
 
-  const isCustomTemplate = selectedTemplate?.id === 'custom';
+  const isCustomTemplate = selectedTemplate?.id === "custom";
   const totalSteps = isCustomTemplate ? 6 : 5;
 
-  const steps = useMemo(() => isCustomTemplate ? [
-    { id: 1, title: t('onboarding.steps.info.title'), description: t('onboarding.steps.info.description') },
-    { id: 2, title: t('onboarding.steps.template.title'), description: t('onboarding.steps.template.description') },
-    { id: 3, title: t('onboarding.steps.custom.title'), description: t('onboarding.steps.custom.description') },
-    { id: 4, title: t('onboarding.steps.sections.title'), description: t('onboarding.steps.sections.description') },
-    { id: 5, title: t('onboarding.steps.roles.title'), description: t('onboarding.steps.roles.description') },
-    { id: 6, title: t('onboarding.steps.review.title'), description: t('onboarding.steps.review.description') }
-  ] : [
-    { id: 1, title: t('onboarding.steps.info.title'), description: t('onboarding.steps.info.description') },
-    { id: 2, title: t('onboarding.steps.template.title'), description: t('onboarding.steps.template.description') },
-    { id: 3, title: t('onboarding.steps.sections.title'), description: t('onboarding.steps.sections.description') },
-    { id: 4, title: t('onboarding.steps.roles.title'), description: t('onboarding.steps.roles.description') },
-    { id: 5, title: t('onboarding.steps.review.title'), description: t('onboarding.steps.review.description') }
-  ], [isCustomTemplate]);
+  const steps = useMemo(
+    () =>
+      isCustomTemplate
+        ? [
+            {
+              id: 1,
+              title: t("onboarding.steps.info.title"),
+              description: t("onboarding.steps.info.description"),
+            },
+            {
+              id: 2,
+              title: t("onboarding.steps.template.title"),
+              description: t("onboarding.steps.template.description"),
+            },
+            {
+              id: 3,
+              title: t("onboarding.steps.custom.title"),
+              description: t("onboarding.steps.custom.description"),
+            },
+            {
+              id: 4,
+              title: t("onboarding.steps.sections.title"),
+              description: t("onboarding.steps.sections.description"),
+            },
+            {
+              id: 5,
+              title: t("onboarding.steps.roles.title"),
+              description: t("onboarding.steps.roles.description"),
+            },
+            {
+              id: 6,
+              title: t("onboarding.steps.review.title"),
+              description: t("onboarding.steps.review.description"),
+            },
+          ]
+        : [
+            {
+              id: 1,
+              title: t("onboarding.steps.info.title"),
+              description: t("onboarding.steps.info.description"),
+            },
+            {
+              id: 2,
+              title: t("onboarding.steps.template.title"),
+              description: t("onboarding.steps.template.description"),
+            },
+            {
+              id: 3,
+              title: t("onboarding.steps.sections.title"),
+              description: t("onboarding.steps.sections.description"),
+            },
+            {
+              id: 4,
+              title: t("onboarding.steps.roles.title"),
+              description: t("onboarding.steps.roles.description"),
+            },
+            {
+              id: 5,
+              title: t("onboarding.steps.review.title"),
+              description: t("onboarding.steps.review.description"),
+            },
+          ],
+    [isCustomTemplate],
+  );
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps) {
-      setDirection('right');
-      setCurrentStep(prev => prev + 1);
+      setDirection("right");
+      setCurrentStep((prev) => prev + 1);
     }
   }, [currentStep, totalSteps]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
-      setDirection('left');
-      setCurrentStep(prev => prev - 1);
+      setDirection("left");
+      setCurrentStep((prev) => prev - 1);
     }
   }, [currentStep]);
 
@@ -154,37 +209,48 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
     }
   }, []);
 
-  const handleSectionToggle = useCallback((sectionId: string, enabled: boolean) => {
-    setEnabledSections(prev => 
-      enabled 
-        ? [...prev, sectionId]
-        : prev.filter(id => id !== sectionId)
-    );
-  }, []);
+  const handleSectionToggle = useCallback(
+    (sectionId: string, enabled: boolean) => {
+      setEnabledSections((prev) =>
+        enabled ? [...prev, sectionId] : prev.filter((id) => id !== sectionId),
+      );
+    },
+    [],
+  );
 
   const handleRolesChange = useCallback((roles: OnboardingRole[]) => {
     setCustomRoles(roles);
   }, []);
 
-  const handleCustomSectionsChange = useCallback((sections: CustomSection[]) => {
-    setCustomSections(sections);
-  }, []);
+  const handleCustomSectionsChange = useCallback(
+    (sections: CustomSection[]) => {
+      setCustomSections(sections);
+    },
+    [],
+  );
 
-  const handleCustomTemplateChange = useCallback((template: Partial<CustomTemplate>) => {
-    setCustomTemplate(template);
-    // Update branding when custom template changes
-    if (template.branding) {
-      setBranding(prev => ({
-        ...prev,
-        primaryColor: template.branding?.primaryColor || prev.primaryColor,
-        secondaryColor: template.branding?.secondaryColor || prev.secondaryColor
-      }));
-    }
-  }, []);
+  const handleCustomTemplateChange = useCallback(
+    (template: Partial<CustomTemplate>) => {
+      setCustomTemplate(template);
+      // Update branding when custom template changes
+      if (template.branding) {
+        setBranding((prev) => ({
+          ...prev,
+          primaryColor: template.branding?.primaryColor || prev.primaryColor,
+          secondaryColor:
+            template.branding?.secondaryColor || prev.secondaryColor,
+        }));
+      }
+    },
+    [],
+  );
 
-  const handlePositionsChange = useCallback((newPositions: OnboardingPosition[]) => {
-    setPositions(newPositions);
-  }, []);
+  const handlePositionsChange = useCallback(
+    (newPositions: OnboardingPosition[]) => {
+      setPositions(newPositions);
+    },
+    [],
+  );
 
   const handleComplete = async () => {
     if (!selectedTemplate) return;
@@ -193,15 +259,15 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
     try {
       // Create user account
       const { error } = await signUp(
-        userInfo.email, 
-        userInfo.password, 
-        userInfo.firstName, 
-        userInfo.lastName
+        userInfo.email,
+        userInfo.password,
+        userInfo.firstName,
+        userInfo.lastName,
       );
 
       if (error) {
         toast({
-          title: t('onboarding.messages.accountCreationFailed'),
+          title: t("onboarding.messages.accountCreationFailed"),
           description: error.message,
           variant: "destructive",
         });
@@ -217,15 +283,15 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
         template: selectedTemplate,
         enabledSections,
         customRoles,
-        positions
+        positions,
       });
-      
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      logger.error('Error creating account:', { error, tags: ['error'] });
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      logger.error("Error creating account:", { error, tags: ["error"] });
       toast({
-        title: t('onboarding.messages.setupError'),
-        description: t('onboarding.messages.setupErrorDescription'),
+        title: t("onboarding.messages.setupError"),
+        description: t("onboarding.messages.setupErrorDescription"),
         variant: "destructive",
       });
       setIsCreatingAccount(false);
@@ -240,20 +306,22 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
       companyInfo,
       selectedTemplate,
       enabledSections,
-      customRoles
+      customRoles,
     );
   };
 
   const handleStepNext = () => {
-    if (currentStep === 1 && !ValidationManager.validateUserInfo(userInfo, companyInfo)) {
+    if (
+      currentStep === 1 &&
+      !ValidationManager.validateUserInfo(userInfo, companyInfo)
+    ) {
       return;
     }
     handleNext();
   };
 
-
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950 relative overflow-hidden"
       variants={containerVariants}
       initial="hidden"
@@ -264,7 +332,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
         currentStep={currentStep}
         totalSteps={totalSteps}
         steps={steps}
-        onNavigateHome={() => navigate('/')}
+        onNavigateHome={() => navigate("/")}
       />
 
       {/* Main Content */}
@@ -299,7 +367,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
                   </AnimatedPanel>
 
                   {/* Navigation */}
-                  <motion.div 
+                  <motion.div
                     className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -323,7 +391,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
 
             {/* Desktop Sidebar */}
             <div className="hidden lg:block">
-              <StepSidebar 
+              <StepSidebar
                 currentStep={currentStep}
                 steps={steps}
                 selectedTemplate={selectedTemplate}
@@ -335,7 +403,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({ 
 
       {/* Mobile Bottom Drawer */}
       <div className="lg:hidden">
-        <StepSidebar 
+        <StepSidebar
           currentStep={currentStep}
           steps={steps}
           selectedTemplate={selectedTemplate}

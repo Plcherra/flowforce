@@ -1,12 +1,15 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
-import { retrySupabaseQuery } from '@/utils/retry';
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Tables,
+  TablesInsert,
+} from "@/integrations/supabase/public-types";
+import { retrySupabaseQuery } from "@/utils/retry";
 
-export type TaskRow = Tables<'tasks'>;
-export type TaskInsert = TablesInsert<'tasks'>;
-type TaskCommentRow = Tables<'task_comments'>;
+export type TaskRow = Tables<"tasks">;
+export type TaskInsert = TablesInsert<"tasks">;
+type TaskCommentRow = Tables<"task_comments">;
 
 const profileSchema = z.object({
   first_name: z.string().nullable(),
@@ -74,27 +77,35 @@ const taskCommentSchema: z.ZodType<TaskCommentRow> = z
   .passthrough();
 
 const taskCommentWithUserSchema = taskCommentSchema.extend({
-  user: profileSchema.pick({ first_name: true, last_name: true }).nullable().optional(),
+  user: profileSchema
+    .pick({ first_name: true, last_name: true })
+    .nullable()
+    .optional(),
 });
 
 export type TaskWithRelations = z.infer<typeof taskWithRelationsSchema>;
 export type TaskCommentWithUser = z.infer<typeof taskCommentWithUserSchema>;
 
-export async function fetchTasksByCompany(companyId: string): Promise<TaskWithRelations[]> {
+export async function fetchTasksByCompany(
+  companyId: string,
+): Promise<TaskWithRelations[]> {
   // Phase 6: Apply retry logic to critical data fetch
   const { data, error } = await retrySupabaseQuery(
-    () => supabase
-      .from('tasks')
-      .select(`
+    () =>
+      supabase
+        .from("tasks")
+        .select(
+          `
         *,
         assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
         created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
         department:departments(name),
         goal:goals(id, title, status, progress, target_completion_date)
-      `)
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false }),
-    { maxRetries: 2, baseDelay: 500 } // Fewer retries for read operations
+      `,
+        )
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false }),
+    { maxRetries: 2, baseDelay: 500 }, // Fewer retries for read operations
   );
 
   if (error) {
@@ -107,10 +118,14 @@ export async function fetchTasksByCompany(companyId: string): Promise<TaskWithRe
 export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
   // Ensure company_id is set for security
   if (!taskData.company_id) {
-    throw new Error('company_id is required when creating a task');
+    throw new Error("company_id is required when creating a task");
   }
 
-  const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert(taskData)
+    .select()
+    .single();
 
   if (error) {
     throw error;
@@ -121,37 +136,40 @@ export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
 
 export async function updateTaskRow(
   id: string,
-  updates: Partial<Omit<TaskRow, 'id'>>,
-  companyId?: string | null
+  updates: Partial<Omit<TaskRow, "id">>,
+  companyId?: string | null,
 ): Promise<TaskRow> {
-  let query = supabase.from('tasks').update(updates).eq('id', id);
-  
+  let query = supabase.from("tasks").update(updates).eq("id", id);
+
   // Add company_id filter if provided for security
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
-  
+
   const { data, error } = await query.select().single();
 
   if (error) {
     throw error;
   }
-  
+
   if (!data) {
-    throw new Error('Task not found or access denied');
+    throw new Error("Task not found or access denied");
   }
 
   return taskRowSchema.parse(data);
 }
 
-export async function deleteTaskRow(id: string, companyId?: string | null): Promise<void> {
-  let query = supabase.from('tasks').delete().eq('id', id);
-  
+export async function deleteTaskRow(
+  id: string,
+  companyId?: string | null,
+): Promise<void> {
+  let query = supabase.from("tasks").delete().eq("id", id);
+
   // Add company_id filter if provided for security
   if (companyId) {
-    query = query.eq('company_id', companyId);
+    query = query.eq("company_id", companyId);
   }
-  
+
   const { error } = await query;
 
   if (error) {
@@ -159,28 +177,32 @@ export async function deleteTaskRow(id: string, companyId?: string | null): Prom
   }
 }
 
-export async function ensureGoalTaskLink(goalId: string, taskId: string): Promise<void> {
-  const { error } = await supabase
-    .from('goal_tasks')
-    .upsert(
-      {
-        goal_id: goalId,
-        task_id: taskId,
-      },
-      { onConflict: 'goal_id,task_id' }
-    );
+export async function ensureGoalTaskLink(
+  goalId: string,
+  taskId: string,
+): Promise<void> {
+  const { error } = await supabase.from("goal_tasks").upsert(
+    {
+      goal_id: goalId,
+      task_id: taskId,
+    },
+    { onConflict: "goal_id,task_id" },
+  );
 
   if (error) {
     throw error;
   }
 }
 
-export async function removeGoalTaskLink(goalId: string, taskId: string): Promise<void> {
+export async function removeGoalTaskLink(
+  goalId: string,
+  taskId: string,
+): Promise<void> {
   const { error } = await supabase
-    .from('goal_tasks')
+    .from("goal_tasks")
     .delete()
-    .eq('goal_id', goalId)
-    .eq('task_id', taskId);
+    .eq("goal_id", goalId)
+    .eq("task_id", taskId);
 
   if (error) {
     throw error;
@@ -190,10 +212,10 @@ export async function removeGoalTaskLink(goalId: string, taskId: string): Promis
 export async function insertTaskComment(
   taskId: string,
   userId: string,
-  comment: string
+  comment: string,
 ): Promise<TaskCommentRow> {
   const { data, error } = await supabase
-    .from('task_comments')
+    .from("task_comments")
     .insert({
       task_id: taskId,
       user_id: userId,
@@ -209,17 +231,19 @@ export async function insertTaskComment(
   return taskCommentSchema.parse(data);
 }
 
-export async function fetchTaskComments(taskId: string): Promise<TaskCommentWithUser[]> {
+export async function fetchTaskComments(
+  taskId: string,
+): Promise<TaskCommentWithUser[]> {
   const { data, error } = await supabase
-    .from('task_comments')
+    .from("task_comments")
     .select(
       `
         *,
         user:profiles(first_name, last_name)
-      `
+      `,
     )
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: true });
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: true });
 
   if (error) {
     throw error;

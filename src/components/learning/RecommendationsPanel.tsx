@@ -1,8 +1,17 @@
-import { Lightbulb, Sparkles } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { CourseRecommendation, LearningCatalogRecord } from '@/types/learning';
+import { Lightbulb, Sparkles } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type {
+  CourseRecommendation,
+  LearningCatalogRecord,
+} from "@/types/learning";
 
 interface RecommendationsPanelProps {
   recommendations: CourseRecommendation[];
@@ -10,7 +19,11 @@ interface RecommendationsPanelProps {
   onEnroll: (courseId: string) => void;
 }
 
-export function RecommendationsPanel({ recommendations, courseById, onEnroll }: RecommendationsPanelProps) {
+export function RecommendationsPanel({
+  recommendations,
+  courseById,
+  onEnroll,
+}: RecommendationsPanelProps) {
   if (recommendations.length === 0) {
     return null;
   }
@@ -22,7 +35,9 @@ export function RecommendationsPanel({ recommendations, courseById, onEnroll }: 
           <Sparkles className="h-5 w-5 text-primary" />
           Co-Pilot suggestions
         </CardTitle>
-        <CardDescription>Courses that strengthen your current growth plan.</CardDescription>
+        <CardDescription>
+          Courses that strengthen your current growth plan.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.map((recommendation) => {
@@ -32,16 +47,22 @@ export function RecommendationsPanel({ recommendations, courseById, onEnroll }: 
           }
 
           return (
-            <div key={recommendation.courseId} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
+            <div
+              key={recommendation.courseId}
+              className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
+            >
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   {course.title}
                   <Badge variant="outline">{course.category}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">{recommendation.reason}</p>
+                <p className="text-xs text-muted-foreground">
+                  {recommendation.reason}
+                </p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Lightbulb className="h-3 w-3" /> Confidence {(recommendation.confidence * 100).toFixed(0)}%
+                    <Lightbulb className="h-3 w-3" /> Confidence{" "}
+                    {(recommendation.confidence * 100).toFixed(0)}%
                   </span>
                   <span>{course.modules.length} modules</span>
                   <span>{course.xpReward} XP</span>

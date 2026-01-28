@@ -1,16 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { type EventAttendee } from '@/hooks/useEvents';
-import { useScheduling } from '@/contexts/SchedulingContext';
-import { Schedule } from '@/types/common';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { useCreateVendorVisit } from '@/features/calendar/hooks/useCreateVendorVisit';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { type EventAttendee } from "@/hooks/useEvents";
+import { useScheduling } from "@/contexts/SchedulingContext";
+import { Schedule } from "@/types/common";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { useCreateVendorVisit } from "@/features/calendar/hooks/useCreateVendorVisit";
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
@@ -18,20 +23,26 @@ interface CreateVendorVisitDialogProps {
   onCreated?: (eventId: string) => void;
 }
 
-export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: CreateVendorVisitDialogProps) {
+export function CreateVendorVisitDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: CreateVendorVisitDialogProps) {
   const { shifts } = useScheduling();
   const { toast } = useToast();
   const { profile } = useProfile();
   const { createVendorVisit } = useCreateVendorVisit();
 
-  const [title, setTitle] = useState('Vendor Visit');
-  const [vendorName, setVendorName] = useState('');
-  const [serviceType, setServiceType] = useState('');
-  const [location, setLocation] = useState('');
-  const [description, setDescription] = useState('');
-  const [start, setStart] = useState<string>('');
-  const [end, setEnd] = useState<string>('');
-  const [selectedShiftIds, setSelectedShiftIds] = useState<Record<string, boolean>>({});
+  const [title, setTitle] = useState("Vendor Visit");
+  const [vendorName, setVendorName] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [start, setStart] = useState<string>("");
+  const [end, setEnd] = useState<string>("");
+  const [selectedShiftIds, setSelectedShiftIds] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     if (open) {
@@ -50,13 +61,17 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
     const overlaps = (aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) => {
       return aStart <= bEnd && bStart <= aEnd;
     };
-    return (shifts || []).filter((sh) => {
-      const shS = new Date(sh.start_time);
-      const shE = new Date(sh.end_time);
-      const timeOk = overlaps(s, e, shS, shE);
-      const locOk = !location || (sh.location || '').toLowerCase().includes(location.toLowerCase());
-      return timeOk && locOk;
-    }).slice(0, 20);
+    return (shifts || [])
+      .filter((sh) => {
+        const shS = new Date(sh.start_time);
+        const shE = new Date(sh.end_time);
+        const timeOk = overlaps(s, e, shS, shE);
+        const locOk =
+          !location ||
+          (sh.location || "").toLowerCase().includes(location.toLowerCase());
+        return timeOk && locOk;
+      })
+      .slice(0, 20);
   }, [shifts, start, end, location]);
 
   const toggleShift = (id: string, next: boolean | string) => {
@@ -72,12 +87,15 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
       .forEach((shift) => {
         shift.assignments?.forEach((assignment) => {
           if (assignment.user?.id) {
-            const name = `${assignment.user.first_name ?? ''} ${assignment.user.last_name ?? ''}`.trim() || 'Team member';
+            const name =
+              `${assignment.user.first_name ?? ""} ${assignment.user.last_name ?? ""}`.trim() ||
+              "Team member";
             map.set(assignment.user.id, {
               id: assignment.user.id,
               name,
               avatar_url: assignment.user.avatar_url ?? null,
-              role: shift.job_position?.name ?? assignment.user.role ?? undefined,
+              role:
+                shift.job_position?.name ?? assignment.user.role ?? undefined,
             });
           }
         });
@@ -88,9 +106,10 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
   const handleCreate = async () => {
     if (!start || !end || !title.trim() || !vendorName.trim()) {
       toast({
-        title: 'Missing information',
-        description: 'All required fields must be filled before creating a visit.',
-        variant: 'destructive',
+        title: "Missing information",
+        description:
+          "All required fields must be filled before creating a visit.",
+        variant: "destructive",
       });
       return;
     }
@@ -98,9 +117,9 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
       toast({
-        title: 'Missing company context',
-        description: 'You need an active company to create vendor visits.',
-        variant: 'destructive',
+        title: "Missing company context",
+        description: "You need an active company to create vendor visits.",
+        variant: "destructive",
       });
       return;
     }
@@ -111,13 +130,13 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
       startIso = new Date(start);
       endIso = new Date(end);
       if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
-        throw new Error('Invalid date');
+        throw new Error("Invalid date");
       }
     } catch {
       toast({
-        title: 'Invalid date',
-        description: 'Please provide valid start and end times.',
-        variant: 'destructive',
+        title: "Invalid date",
+        description: "Please provide valid start and end times.",
+        variant: "destructive",
       });
       return;
     }
@@ -136,8 +155,18 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
         related_shift_ids: linkedShiftIds,
         attendees: buildAttendees(linkedShiftIds),
         checklist: [
-          { id: 'sv-greet', text: 'Supervisor greet vendor', done: false, who: 'supervisor' },
-          { id: 'vd-complete', text: 'Vendor completes service scope', done: false, who: 'vendor' },
+          {
+            id: "sv-greet",
+            text: "Supervisor greet vendor",
+            done: false,
+            who: "supervisor",
+          },
+          {
+            id: "vd-complete",
+            text: "Vendor completes service scope",
+            done: false,
+            who: "vendor",
+          },
         ],
         vendor: { name: vendorName, service_type: serviceType || undefined },
       });
@@ -147,16 +176,16 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
       }
 
       toast({
-        title: 'Vendor visit created',
+        title: "Vendor visit created",
         description: `${vendorName} scheduled for ${new Date(start).toLocaleString()}.`,
       });
       onOpenChange(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       toast({
-        title: 'Vendor visit not saved',
+        title: "Vendor visit not saved",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   };
@@ -175,41 +204,75 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
           </div>
           <div>
             <Label>Vendor Name</Label>
-            <Input value={vendorName} onChange={(e) => setVendorName(e.target.value)} placeholder="e.g., ACME Electric" />
+            <Input
+              value={vendorName}
+              onChange={(e) => setVendorName(e.target.value)}
+              placeholder="e.g., ACME Electric"
+            />
           </div>
           <div>
             <Label>Service Type</Label>
-            <Input value={serviceType} onChange={(e) => setServiceType(e.target.value)} placeholder="Electrical, HVAC, etc." />
+            <Input
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
+              placeholder="Electrical, HVAC, etc."
+            />
           </div>
           <div>
             <Label>Location</Label>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Site/Area" />
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Site/Area"
+            />
           </div>
           <div>
             <Label>Start</Label>
-            <Input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
+            <Input
+              type="datetime-local"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+            />
           </div>
           <div>
             <Label>End</Label>
-            <Input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} />
+            <Input
+              type="datetime-local"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+            />
           </div>
           <div className="md:col-span-2">
             <Label>Description</Label>
-            <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="text-sm font-medium mb-2">Suggested Shifts (time/location overlap)</div>
+          <div className="text-sm font-medium mb-2">
+            Suggested Shifts (time/location overlap)
+          </div>
           <div className="max-h-48 overflow-auto border rounded-md p-2 space-y-2">
             {suggestions.length === 0 && (
-              <div className="text-xs text-muted-foreground px-2 py-4">No matching shifts. Adjust time or location to find candidates.</div>
+              <div className="text-xs text-muted-foreground px-2 py-4">
+                No matching shifts. Adjust time or location to find candidates.
+              </div>
             )}
             {suggestions.map((sh) => (
               <label key={sh.id} className="flex items-center gap-2 text-sm">
-                <Checkbox checked={!!selectedShiftIds[sh.id]} onCheckedChange={(v) => toggleShift(sh.id, v)} />
+                <Checkbox
+                  checked={!!selectedShiftIds[sh.id]}
+                  onCheckedChange={(v) => toggleShift(sh.id, v)}
+                />
                 <span className="truncate">
-                  {sh.title || sh.job_position?.name || 'Shift'} – {new Date(sh.start_time).toLocaleTimeString()} to {new Date(sh.end_time).toLocaleTimeString()} {sh.location ? `• ${sh.location}` : ''}
+                  {sh.title || sh.job_position?.name || "Shift"} –{" "}
+                  {new Date(sh.start_time).toLocaleTimeString()} to{" "}
+                  {new Date(sh.end_time).toLocaleTimeString()}{" "}
+                  {sh.location ? `• ${sh.location}` : ""}
                 </span>
               </label>
             ))}
@@ -217,8 +280,15 @@ export function CreateVendorVisitDialog({ open, onOpenChange, onCreated }: Creat
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleCreate} disabled={!vendorName || !title || !start || !end}>Create Visit</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreate}
+            disabled={!vendorName || !title || !start || !end}
+          >
+            Create Visit
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

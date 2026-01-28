@@ -1,30 +1,47 @@
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, Package, Plus } from 'lucide-react';
-import { useInventoryItems } from '@/features/inventory/hooks/useInventoryItems';
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Package, Plus } from "lucide-react";
+import { useInventoryItems } from "@/features/inventory/hooks/useInventoryItems";
 
 interface ItemSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onItemsSelected: (items: Array<{ id: string; name: string; expectedQuantity: number }>) => void;
+  onItemsSelected: (
+    items: Array<{ id: string; name: string; expectedQuantity: number }>,
+  ) => void;
   excludeIds?: string[];
 }
 
-export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds = [] }: ItemSelectorProps) {
-  const [search, setSearch] = useState('');
+export function ItemSelector({
+  open,
+  onOpenChange,
+  onItemsSelected,
+  excludeIds = [],
+}: ItemSelectorProps) {
+  const [search, setSearch] = useState("");
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [expectedQuantities, setExpectedQuantities] = useState<Record<string, number>>({});
+  const [expectedQuantities, setExpectedQuantities] = useState<
+    Record<string, number>
+  >({});
   const { data: items, isLoading } = useInventoryItems();
 
-  const filteredItems = items?.filter(item => 
-    !excludeIds.includes(item.id) &&
-    item.name.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  const filteredItems =
+    items?.filter(
+      (item) =>
+        !excludeIds.includes(item.id) &&
+        item.name.toLowerCase().includes(search.toLowerCase()),
+    ) || [];
 
   const handleItemToggle = (itemId: string) => {
     const newSelected = new Set(selectedItems);
@@ -34,39 +51,39 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
       newSelected.add(itemId);
       // Set default expected quantity
       if (!expectedQuantities[itemId]) {
-        setExpectedQuantities(prev => ({ ...prev, [itemId]: 0 }));
+        setExpectedQuantities((prev) => ({ ...prev, [itemId]: 0 }));
       }
     }
     setSelectedItems(newSelected);
   };
 
   const handleQuantityChange = (itemId: string, quantity: number) => {
-    setExpectedQuantities(prev => ({ ...prev, [itemId]: quantity }));
+    setExpectedQuantities((prev) => ({ ...prev, [itemId]: quantity }));
   };
 
   const handleConfirm = () => {
-    const selectedItemsData = Array.from(selectedItems).map(itemId => {
-      const item = filteredItems.find(i => i.id === itemId);
+    const selectedItemsData = Array.from(selectedItems).map((itemId) => {
+      const item = filteredItems.find((i) => i.id === itemId);
       return {
         id: itemId,
-        name: item?.name || '',
-        expectedQuantity: expectedQuantities[itemId] || 0
+        name: item?.name || "",
+        expectedQuantity: expectedQuantities[itemId] || 0,
       };
     });
-    
+
     onItemsSelected(selectedItemsData);
     onOpenChange(false);
-    
+
     // Reset state
     setSelectedItems(new Set());
     setExpectedQuantities({});
-    setSearch('');
+    setSearch("");
   };
 
   const handleCancel = () => {
     setSelectedItems(new Set());
     setExpectedQuantities({});
-    setSearch('');
+    setSearch("");
     onOpenChange(false);
   };
 
@@ -79,7 +96,8 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
             Select Items for Count
           </DialogTitle>
           <DialogDescription>
-            Choose items to include in the inventory count and set expected quantities
+            Choose items to include in the inventory count and set expected
+            quantities
           </DialogDescription>
         </DialogHeader>
 
@@ -105,7 +123,12 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
               </div>
             ) : (
               filteredItems.map((item) => (
-                <Card key={item.id} className={selectedItems.has(item.id) ? "ring-2 ring-primary" : ""}>
+                <Card
+                  key={item.id}
+                  className={
+                    selectedItems.has(item.id) ? "ring-2 ring-primary" : ""
+                  }
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
                       <Checkbox
@@ -115,17 +138,21 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
                       <div className="flex-1">
                         <h4 className="font-medium">{item.name}</h4>
                         {item.sku && (
-                          <p className="text-xs text-muted-foreground">SKU: {item.sku}</p>
+                          <p className="text-xs text-muted-foreground">
+                            SKU: {item.sku}
+                          </p>
                         )}
                         {item.description && (
-                          <p className="text-xs text-muted-foreground">{item.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {item.description}
+                          </p>
                         )}
                         <div className="flex flex-wrap gap-2 mt-1">
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                            {item.category || 'Uncategorized'}
+                            {item.category || "Uncategorized"}
                           </span>
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                            {item.unit?.name || 'No unit'}
+                            {item.unit?.name || "No unit"}
                           </span>
                           {item.location && (
                             <span className="text-xs bg-muted px-2 py-0.5 rounded">
@@ -145,7 +172,12 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
                             min="0"
                             step="0.01"
                             value={expectedQuantities[item.id] || 0}
-                            onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                item.id,
+                                Number(e.target.value),
+                              )
+                            }
                             className="w-24"
                           />
                         </div>
@@ -161,7 +193,8 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
           {selectedItems.size > 0 && (
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm font-medium">
-                {selectedItems.size} item{selectedItems.size !== 1 ? 's' : ''} selected
+                {selectedItems.size} item{selectedItems.size !== 1 ? "s" : ""}{" "}
+                selected
               </p>
             </div>
           )}
@@ -171,13 +204,13 @@ export function ItemSelector({ open, onOpenChange, onItemsSelected, excludeIds =
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleConfirm}
             disabled={selectedItems.size === 0}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Add {selectedItems.size} Item{selectedItems.size !== 1 ? 's' : ''}
+            Add {selectedItems.size} Item{selectedItems.size !== 1 ? "s" : ""}
           </Button>
         </div>
       </DialogContent>

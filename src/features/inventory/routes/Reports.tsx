@@ -1,23 +1,35 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, TrendingDown, AlertTriangle, BarChart3, Download } from 'lucide-react';
-import { useInventoryDashboard } from '@/features/inventory/hooks/useInventoryDashboard';
-import { InventoryLayout } from '../components/InventoryLayout';
-import { IfCan } from '@/components/permissions/IfCan';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  FileText,
+  TrendingDown,
+  AlertTriangle,
+  BarChart3,
+  Download,
+} from "lucide-react";
+import { useInventoryDashboard } from "@/features/inventory/hooks/useInventoryDashboard";
+import { InventoryLayout } from "../components/InventoryLayout";
+import { IfCan } from "@/components/permissions/IfCan";
 
 // Placeholder data for development - will be replaced with real data
 const placeholderReports = {
   lowStock: [],
   waste: [],
   variance: [],
-  prep: []
+  prep: [],
 };
 
 export default function InventoryReportsPage() {
   const { lowStock } = useInventoryDashboard();
-  
+
   // Use real data when available, otherwise show empty state
   const lowStockReport = lowStock || [];
   const { waste, variance, prep } = placeholderReports;
@@ -37,7 +49,7 @@ export default function InventoryReportsPage() {
                 Analytics and insights for inventory management
               </p>
             </div>
-            
+
             <div className="flex gap-2">
               <Button variant="outline">
                 <Download className="h-4 w-4 mr-2" />
@@ -58,45 +70,41 @@ export default function InventoryReportsPage() {
                 <div className="text-2xl font-bold text-destructive">
                   {lowStockReport.length}
                 </div>
-                <p className="text-xs text-muted-foreground">Items below minimum</p>
+                <p className="text-xs text-muted-foreground">
+                  Items below minimum
+                </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingDown className="h-4 w-4 text-destructive" />
                   <span className="text-sm font-medium">Waste Value</span>
                 </div>
-                <div className="text-2xl font-bold">
-                  $0.00
-                </div>
+                <div className="text-2xl font-bold">$0.00</div>
                 <p className="text-xs text-muted-foreground">This week</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">Avg Variance</span>
                 </div>
-                <div className="text-2xl font-bold">
-                  0.0%
-                </div>
+                <div className="text-2xl font-bold">0.0%</div>
                 <p className="text-xs text-muted-foreground">Count accuracy</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="h-4 w-4 bg-primary rounded-full" />
                   <span className="text-sm font-medium">Prep Rate</span>
                 </div>
-                <div className="text-2xl font-bold">
-                  0%
-                </div>
+                <div className="text-2xl font-bold">0%</div>
                 <p className="text-xs text-muted-foreground">Completion rate</p>
               </CardContent>
             </Card>
@@ -125,24 +133,31 @@ export default function InventoryReportsPage() {
                   {lowStockReport.length === 0 ? (
                     <div className="text-center py-8">
                       <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No low stock items currently</p>
+                      <p className="text-muted-foreground">
+                        No low stock items currently
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {lowStockReport.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
                           <div>
                             <h3 className="font-semibold">{item.name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              Current: {item.current} {item.unit || 'units'} | Min: {item.min}
+                              Current: {item.current} {item.unit || "units"} |
+                              Min: {item.min}
                             </p>
                           </div>
                           <div className="text-right">
                             <Badge variant="destructive">
-                              {(item.current - item.min)} below
+                              {item.current - item.min} below
                             </Badge>
                             <p className="text-xs text-muted-foreground mt-1">
-                              Order: {Math.abs(item.current - item.min)} {item.unit || 'units'}
+                              Order: {Math.abs(item.current - item.min)}{" "}
+                              {item.unit || "units"}
                             </p>
                           </div>
                         </div>
@@ -167,8 +182,12 @@ export default function InventoryReportsPage() {
                 <CardContent>
                   <div className="text-center py-8">
                     <TrendingDown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No waste data available yet</p>
-                    <p className="text-sm text-muted-foreground mt-2">Waste tracking will appear here once configured</p>
+                    <p className="text-muted-foreground">
+                      No waste data available yet
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Waste tracking will appear here once configured
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -188,8 +207,12 @@ export default function InventoryReportsPage() {
                 <CardContent>
                   <div className="text-center py-8">
                     <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No count variance data available</p>
-                    <p className="text-sm text-muted-foreground mt-2">Variance reports will appear after inventory counts</p>
+                    <p className="text-muted-foreground">
+                      No count variance data available
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Variance reports will appear after inventory counts
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -211,8 +234,12 @@ export default function InventoryReportsPage() {
                     <div className="h-12 w-12 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
                       <div className="h-5 w-5 bg-background rounded-full" />
                     </div>
-                    <p className="text-muted-foreground">No prep performance data available</p>
-                    <p className="text-sm text-muted-foreground mt-2">Prep tracking will appear here once configured</p>
+                    <p className="text-muted-foreground">
+                      No prep performance data available
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Prep tracking will appear here once configured
+                    </p>
                   </div>
                 </CardContent>
               </Card>

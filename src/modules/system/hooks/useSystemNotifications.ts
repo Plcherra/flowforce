@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ModuleNotificationOverride, NotificationsSettings } from '@/types/system-settings';
-import { DEFAULT_NOTIFICATIONS } from './systemSettingsDefaults';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type {
+  ModuleNotificationOverride,
+  NotificationsSettings,
+} from "@/types/system-settings";
+import { DEFAULT_NOTIFICATIONS } from "./systemSettingsDefaults";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
-type ChannelKey = NotificationsSettings['deliveryChannels'][number];
+type ChannelKey = NotificationsSettings["deliveryChannels"][number];
 
 export function useSystemNotifications(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
@@ -15,9 +18,9 @@ export function useSystemNotifications(source: SystemSettingsHook) {
   const [reminderWindow, setReminderWindow] = useState(
     base.escalations.reminderWindowMinutes.toString(),
   );
-  const [moduleOverrides, setModuleOverrides] = useState<Record<string, ModuleNotificationOverride>>(
-    base.moduleOverrides,
-  );
+  const [moduleOverrides, setModuleOverrides] = useState<
+    Record<string, ModuleNotificationOverride>
+  >(base.moduleOverrides);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<Error | null>(null);
 
@@ -38,9 +41,18 @@ export function useSystemNotifications(source: SystemSettingsHook) {
   }, []);
 
   const toggleModuleChannel = useCallback(
-    (moduleKey: string, channelKey: keyof ModuleNotificationOverride, value: boolean) => {
+    (
+      moduleKey: string,
+      channelKey: keyof ModuleNotificationOverride,
+      value: boolean,
+    ) => {
       setModuleOverrides((prev) => {
-        const existing = prev[moduleKey] ?? { email: true, in_app: true, sms: false, push: false };
+        const existing = prev[moduleKey] ?? {
+          email: true,
+          in_app: true,
+          sms: false,
+          push: false,
+        };
         return {
           ...prev,
           [moduleKey]: {
@@ -63,7 +75,14 @@ export function useSystemNotifications(source: SystemSettingsHook) {
       reminderWindow !== base.escalations.reminderWindowMinutes.toString() ||
       JSON.stringify(moduleOverrides) !== JSON.stringify(base.moduleOverrides)
     );
-  }, [channels, base, digestEnabled, digestHour, moduleOverrides, reminderWindow]);
+  }, [
+    channels,
+    base,
+    digestEnabled,
+    digestHour,
+    moduleOverrides,
+    reminderWindow,
+  ]);
 
   const save = useCallback(async () => {
     if (!dirty) return;
@@ -77,7 +96,8 @@ export function useSystemNotifications(source: SystemSettingsHook) {
         moduleOverrides,
         escalations: {
           criticalModules: base.escalations.criticalModules,
-          reminderWindowMinutes: Number(reminderWindow) || base.escalations.reminderWindowMinutes,
+          reminderWindowMinutes:
+            Number(reminderWindow) || base.escalations.reminderWindowMinutes,
         },
       };
 
@@ -88,7 +108,16 @@ export function useSystemNotifications(source: SystemSettingsHook) {
     } finally {
       setSaving(false);
     }
-  }, [dirty, channels, digestEnabled, digestHour, moduleOverrides, reminderWindow, base, updateSettings]);
+  }, [
+    dirty,
+    channels,
+    digestEnabled,
+    digestHour,
+    moduleOverrides,
+    reminderWindow,
+    base,
+    updateSettings,
+  ]);
 
   const reset = useCallback(() => {
     setChannels(base.deliveryChannels);

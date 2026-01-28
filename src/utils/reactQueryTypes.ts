@@ -21,7 +21,7 @@ export function asArray<T>(data: T | T[] | undefined | null): T[] {
  */
 export function asDefined<T>(data: T | null | undefined): T {
   if (data === null || data === undefined) {
-    throw new Error('Expected data to be defined but got null/undefined');
+    throw new Error("Expected data to be defined but got null/undefined");
   }
   return data;
 }
@@ -46,14 +46,14 @@ export function isArray<T>(value: unknown): value is T[] {
  */
 export function safeArrayMap<T, R>(
   data: T[] | undefined | null,
-  mapper: (item: T, index: number) => R
+  mapper: (item: T, index: number) => R,
 ): R[] {
   return Array.isArray(data) ? data.map(mapper) : [];
 }
 
 export function safeArrayFilter<T>(
   data: T[] | undefined | null,
-  predicate: (item: T, index: number) => boolean
+  predicate: (item: T, index: number) => boolean,
 ): T[] {
   return Array.isArray(data) ? data.filter(predicate) : [];
 }
@@ -61,9 +61,11 @@ export function safeArrayFilter<T>(
 export function safeArrayReduce<T, R>(
   data: T[] | undefined | null,
   reducer: (acc: R, item: T, index: number) => R,
-  initialValue: R
+  initialValue: R,
 ): R {
-  return Array.isArray(data) ? data.reduce(reducer, initialValue) : initialValue;
+  return Array.isArray(data)
+    ? data.reduce(reducer, initialValue)
+    : initialValue;
 }
 
 /**

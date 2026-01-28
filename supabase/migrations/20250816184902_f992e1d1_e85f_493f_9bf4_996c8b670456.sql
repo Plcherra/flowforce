@@ -3,6 +3,8 @@
 -- 1. Update RLS policies on user_roles to allow initial role assignment
 DROP POLICY IF EXISTS "Users can manage their own roles" ON public.user_roles;
 DROP POLICY IF EXISTS "Admins can manage all user roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Users can insert their own roles during registration" ON public.user_roles;
+DROP POLICY IF EXISTS "Users can view their own roles" ON public.user_roles;
 
 CREATE POLICY "Users can insert their own roles during registration" 
 ON public.user_roles 
@@ -20,6 +22,23 @@ FOR ALL
 USING (is_admin_or_manager(auth.uid()));
 
 -- 2. Create or replace the handle_new_user trigger function
+-- Drop all variants of handle_new_user first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'handle_new_user'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -57,6 +76,23 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- 4. Completely rewrite create_company_with_owner to work with existing users
+-- Drop all variants of create_company_with_owner first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'create_company_with_owner'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.create_company_with_owner(
   user_email text, 
   user_password text, 

@@ -1,13 +1,24 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { createTicket, updateTicket, deleteTicket } from '@/repositories/ticketsRepository';
-import type { CreateTicketInput, UpdateTicketInput } from '@/repositories/ticketsRepository';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  createTicket,
+  updateTicket,
+  deleteTicket,
+} from "@/repositories/ticketsRepository";
+import type {
+  CreateTicketInput,
+  UpdateTicketInput,
+} from "@/repositories/ticketsRepository";
+import { logger } from "@/utils/logger";
 
-export type HelpDeskTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
-export type HelpDeskTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type HelpDeskTicketStatus =
+  | "open"
+  | "in_progress"
+  | "resolved"
+  | "closed";
+export type HelpDeskTicketPriority = "low" | "medium" | "high" | "urgent";
 
 interface TicketRow {
   id: string;
@@ -49,19 +60,22 @@ export interface UseTicketsResult {
   refresh: () => Promise<void>;
   usingFallback: boolean;
   createTicket: (input: CreateTicketInput) => Promise<HelpDeskTicket>;
-  updateTicket: (ticketId: string, updates: UpdateTicketInput) => Promise<HelpDeskTicket>;
+  updateTicket: (
+    ticketId: string,
+    updates: UpdateTicketInput,
+  ) => Promise<HelpDeskTicket>;
   deleteTicket: (ticketId: string) => Promise<void>;
   creating: boolean;
   updating: boolean;
   deleting: boolean;
 }
 
-const DEFAULT_TICKET_STATUS: HelpDeskTicketStatus = 'open';
-const DEFAULT_TICKET_PRIORITY: HelpDeskTicketPriority = 'medium';
+const DEFAULT_TICKET_STATUS: HelpDeskTicketStatus = "open";
+const DEFAULT_TICKET_PRIORITY: HelpDeskTicketPriority = "medium";
 
 const mapRowToTicket = (row: TicketRow): HelpDeskTicket => ({
   id: row.id,
-  subject: row.subject ?? 'Untitled request',
+  subject: row.subject ?? "Untitled request",
   description: row.description ?? null,
   status: (row.status as HelpDeskTicketStatus) ?? DEFAULT_TICKET_STATUS,
   priority: (row.priority as HelpDeskTicketPriority) ?? DEFAULT_TICKET_PRIORITY,
@@ -73,7 +87,11 @@ const mapRowToTicket = (row: TicketRow): HelpDeskTicket => ({
 });
 
 export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
-  const { companyId: companyIdOverride = null, statusFilter, enabled = true } = options;
+  const {
+    companyId: companyIdOverride = null,
+    statusFilter,
+    enabled = true,
+  } = options;
   const { user } = useAuth();
   const [tickets, setTickets] = useState<HelpDeskTicket[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,7 +99,9 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
   const [usingFallback, setUsingFallback] = useState(false);
 
   const metadataCompanyId =
-    typeof user?.user_metadata?.company_id === 'string' ? (user.user_metadata.company_id as string) : null;
+    typeof user?.user_metadata?.company_id === "string"
+      ? (user.user_metadata.company_id as string)
+      : null;
   const effectiveCompanyId = companyIdOverride ?? metadataCompanyId;
 
   const fetchTickets = useCallback(async () => {
@@ -94,14 +114,14 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
 
     if (!user?.id) {
       setTickets([]);
-      setError('You need to be signed in to load help desk tickets.');
+      setError("You need to be signed in to load help desk tickets.");
       setUsingFallback(true);
       return;
     }
 
     if (!effectiveCompanyId) {
       setTickets([]);
-      setError('No company context found for help desk tickets.');
+      setError("No company context found for help desk tickets.");
       setUsingFallback(true);
       return;
     }
@@ -111,27 +131,39 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
     setError(null);
 
     try {
-      let query = supabase.from('helpdesk_tickets').select('*').eq('company_id', effectiveCompanyId);
+      let query = supabase
+        .from("helpdesk_tickets")
+        .select("*")
+        .eq("company_id", effectiveCompanyId);
       if (statusFilter) {
         if (Array.isArray(statusFilter)) {
-          query = query.in('status', statusFilter);
+          query = query.in("status", statusFilter);
         } else {
-          query = query.eq('status', statusFilter);
+          query = query.eq("status", statusFilter);
         }
       }
 
-      const { data, error: queryError } = await query.order('created_at', { ascending: false });
+      const { data, error: queryError } = await query.order("created_at", {
+        ascending: false,
+      });
 
       if (queryError) {
         throw queryError;
       }
 
-      const mapped = Array.isArray(data) ? data.map((row) => mapRowToTicket(row as TicketRow)) : [];
+      const mapped = Array.isArray(data)
+        ? data.map((row) => mapRowToTicket(row as TicketRow))
+        : [];
       setTickets(mapped);
     } catch (unknownError) {
       const message =
-        unknownError instanceof Error ? unknownError.message : 'Unable to load help desk tickets.';
-      logger.error('[useTickets] Failed to load tickets', { error: unknownError, tags: ['error'] });
+        unknownError instanceof Error
+          ? unknownError.message
+          : "Unable to load help desk tickets.";
+      logger.error("[useTickets] Failed to load tickets", {
+        error: unknownError,
+        tags: ["error"],
+      });
       setTickets([]);
       setError(message);
       setUsingFallback(true);
@@ -158,9 +190,15 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
   });
 
   const updateTicketMutation = useMutation({
-    mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: UpdateTicketInput }) => {
+    mutationFn: async ({
+      ticketId,
+      updates,
+    }: {
+      ticketId: string;
+      updates: UpdateTicketInput;
+    }) => {
       if (!effectiveCompanyId) {
-        throw new Error('Company context required to update tickets');
+        throw new Error("Company context required to update tickets");
       }
       return updateTicket(ticketId, effectiveCompanyId, updates);
     },
@@ -172,7 +210,7 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
   const deleteTicketMutation = useMutation({
     mutationFn: async (ticketId: string) => {
       if (!effectiveCompanyId) {
-        throw new Error('Company context required to delete tickets');
+        throw new Error("Company context required to delete tickets");
       }
       return deleteTicket(ticketId, effectiveCompanyId);
     },

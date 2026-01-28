@@ -1,30 +1,53 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Plus, Search, Filter, Edit, Trash2, History } from 'lucide-react';
-import { useInventoryItems, useDeleteInventoryItem } from '@/hooks/useInventory';
-import { asArray, safeArrayFilter } from '@/utils/reactQueryTypes';
-import { useInventoryCategories } from '@/features/inventory/hooks/useInventoryCategories';
-import InventoryItemForm from '@/components/inventory/InventoryItemForm';
-import { InventoryRecipeDialog } from '@/components/inventory/InventoryRecipeDialog';
-import { getUnitHierarchyDisplay } from '@/features/inventory/hooks/useItemUnits';
-import type { InventoryItem } from '@/features/inventory/hooks/types';
-import { useToast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Package,
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  History,
+} from "lucide-react";
+import {
+  useInventoryItems,
+  useDeleteInventoryItem,
+} from "@/hooks/useInventory";
+import { asArray, safeArrayFilter } from "@/utils/reactQueryTypes";
+import { useInventoryCategories } from "@/features/inventory/hooks/useInventoryCategories";
+import InventoryItemForm from "@/components/inventory/InventoryItemForm";
+import { InventoryRecipeDialog } from "@/components/inventory/InventoryRecipeDialog";
+import { getUnitHierarchyDisplay } from "@/features/inventory/hooks/useItemUnits";
+import type { InventoryItem } from "@/features/inventory/hooks/types";
+import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 export default function ItemsSetup() {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | undefined>();
   const [recipeItem, setRecipeItem] = useState<InventoryItem | undefined>();
   const [isRecipeDialogOpen, setRecipeDialogOpen] = useState(false);
-  
+
   const { data: itemsData, isLoading } = useInventoryItems();
   const { data: categoriesData } = useInventoryCategories();
   const items = asArray(itemsData);
@@ -33,15 +56,17 @@ export default function ItemsSetup() {
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
-  const filteredItems = safeArrayFilter(items, item => {
-    const matchesSearch = !normalizedSearch ||
+  const filteredItems = safeArrayFilter(items, (item) => {
+    const matchesSearch =
+      !normalizedSearch ||
       item.name.toLowerCase().includes(normalizedSearch) ||
       item.description?.toLowerCase().includes(normalizedSearch) ||
       item.sku?.toLowerCase().includes(normalizedSearch) ||
       item.barcode?.toLowerCase().includes(normalizedSearch) ||
       item.preferred_supplier?.name?.toLowerCase().includes(normalizedSearch);
 
-    const matchesCategory = selectedCategory === 'all' ||
+    const matchesCategory =
+      selectedCategory === "all" ||
       item.category_id === selectedCategory ||
       item.category === selectedCategory;
 
@@ -63,7 +88,7 @@ export default function ItemsSetup() {
       try {
         await deleteItem.mutateAsync(item.id);
       } catch (error) {
-        logger.error('Failed to delete item:', { error, tags: ['error'] });
+        logger.error("Failed to delete item:", { error, tags: ["error"] });
       }
     }
   };
@@ -82,26 +107,31 @@ export default function ItemsSetup() {
   };
 
   const getStockStatus = (item: InventoryItem) => {
-    if (!item.min_stock_level) return 'unknown';
+    if (!item.min_stock_level) return "unknown";
     const currentStock = item.min_stock_level || 0; // Use min level as proxy for current stock
-    if (currentStock < item.min_stock_level) return 'low';
-    if (item.max_stock_level && currentStock > item.max_stock_level) return 'high';
-    return 'normal';
+    if (currentStock < item.min_stock_level) return "low";
+    if (item.max_stock_level && currentStock > item.max_stock_level)
+      return "high";
+    return "normal";
   };
 
   const getStockBadge = (status: string) => {
     switch (status) {
-      case 'low': return <Badge variant="destructive">Low Stock</Badge>;
-      case 'high': return <Badge variant="secondary">Overstocked</Badge>;
-      case 'normal': return <Badge variant="default">Normal</Badge>;
-      default: return <Badge variant="outline">Unknown</Badge>;
+      case "low":
+        return <Badge variant="destructive">Low Stock</Badge>;
+      case "high":
+        return <Badge variant="secondary">Overstocked</Badge>;
+      case "normal":
+        return <Badge variant="default">Normal</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
   const formatCurrency = (value?: number | null) =>
-    typeof value === 'number' && Number.isFinite(value)
+    typeof value === "number" && Number.isFinite(value)
       ? `$${value.toFixed(2)}`
-      : 'N/A';
+      : "N/A";
 
   return (
     <div>
@@ -117,7 +147,7 @@ export default function ItemsSetup() {
               Manage inventory items, stock levels, and configurations
             </p>
           </div>
-          
+
           <div className="flex gap-2">
             <Button variant="outline">Import Items</Button>
             <Button onClick={handleNewItem}>
@@ -148,8 +178,11 @@ export default function ItemsSetup() {
                   className="pl-10"
                 />
               </div>
-              
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -162,7 +195,7 @@ export default function ItemsSetup() {
                   ))}
                 </SelectContent>
               </Select>
-              
+
               <Button variant="outline" size="icon">
                 <Filter className="h-4 w-4" />
               </Button>
@@ -183,15 +216,16 @@ export default function ItemsSetup() {
                 <CardContent className="p-8 text-center">
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">
-                    {searchTerm || selectedCategory !== 'all' ? 'No Items Found' : 'No Items Yet'}
+                    {searchTerm || selectedCategory !== "all"
+                      ? "No Items Found"
+                      : "No Items Yet"}
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm || selectedCategory !== 'all' 
-                      ? 'Try adjusting your search or filters'
-                      : 'Create your first inventory item to get started'
-                    }
+                    {searchTerm || selectedCategory !== "all"
+                      ? "Try adjusting your search or filters"
+                      : "Create your first inventory item to get started"}
                   </p>
-                  {!searchTerm && selectedCategory === 'all' && (
+                  {!searchTerm && selectedCategory === "all" && (
                     <Button onClick={handleNewItem}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add First Item
@@ -204,17 +238,25 @@ export default function ItemsSetup() {
                 {filteredItems.map((item) => {
                   const stockStatus = getStockStatus(item);
                   const baseCost = item.cost_per_unit ?? null;
-                  const recipeCost = item.recipe_cost_per_unit ?? item.calculated_cost_per_unit ?? null;
-                  const supplierName = item.preferred_supplier?.name || 'No supplier linked';
-                  const unitHierarchy = item.units && item.units.length > 0
-                    ? getUnitHierarchyDisplay(item.units)
-                    : null;
+                  const recipeCost =
+                    item.recipe_cost_per_unit ??
+                    item.calculated_cost_per_unit ??
+                    null;
+                  const supplierName =
+                    item.preferred_supplier?.name || "No supplier linked";
+                  const unitHierarchy =
+                    item.units && item.units.length > 0
+                      ? getUnitHierarchyDisplay(item.units)
+                      : null;
                   const primaryUnit = item.unit?.name
-                    ? `${item.unit?.name}${item.unit?.abbreviation ? ` (${item.unit?.abbreviation})` : ''}`
-                    : 'N/A';
-                  const categoryName = item.category_details?.name || item.category || 'Uncategorized';
+                    ? `${item.unit?.name}${item.unit?.abbreviation ? ` (${item.unit?.abbreviation})` : ""}`
+                    : "N/A";
+                  const categoryName =
+                    item.category_details?.name ||
+                    item.category ||
+                    "Uncategorized";
                   const recipeLineCount = item.recipes?.[0]?.lines?.length || 0;
-                  
+
                   return (
                     <Card key={item.id}>
                       <CardContent className="p-6">
@@ -227,47 +269,73 @@ export default function ItemsSetup() {
                                   {getStockBadge(stockStatus)}
                                 </h3>
                                 {item.description && (
-                                  <p className="text-muted-foreground">{item.description}</p>
+                                  <p className="text-muted-foreground">
+                                    {item.description}
+                                  </p>
                                 )}
                               </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
                               <div>
-                                <span className="font-medium">SKU / Barcode:</span>
+                                <span className="font-medium">
+                                  SKU / Barcode:
+                                </span>
                                 <p className="text-muted-foreground">
-                                  {item.sku || 'N/A'}
-                                  {item.barcode ? ` • ${item.barcode}` : ''}
+                                  {item.sku || "N/A"}
+                                  {item.barcode ? ` • ${item.barcode}` : ""}
                                 </p>
                               </div>
                               <div>
                                 <span className="font-medium">Category:</span>
-                                <p className="text-muted-foreground">{categoryName}</p>
+                                <p className="text-muted-foreground">
+                                  {categoryName}
+                                </p>
                               </div>
                               <div>
                                 <span className="font-medium">Supplier:</span>
-                                <p className="text-muted-foreground">{supplierName}</p>
+                                <p className="text-muted-foreground">
+                                  {supplierName}
+                                </p>
                               </div>
                               <div>
-                                <span className="font-medium">Stock Targets:</span>
-                                <p className={`font-medium ${
-                                  stockStatus === 'low' ? 'text-destructive' : 
-                                  stockStatus === 'high' ? 'text-amber-600' : ''
-                                }`}>
-                                  Min {item.min_stock_level || 0} / Max {item.max_stock_level || '∞'}
+                                <span className="font-medium">
+                                  Stock Targets:
+                                </span>
+                                <p
+                                  className={`font-medium ${
+                                    stockStatus === "low"
+                                      ? "text-destructive"
+                                      : stockStatus === "high"
+                                        ? "text-amber-600"
+                                        : ""
+                                  }`}
+                                >
+                                  Min {item.min_stock_level || 0} / Max{" "}
+                                  {item.max_stock_level || "∞"}
                                 </p>
                               </div>
                               <div>
                                 <span className="font-medium">Cost:</span>
-                                <p className="text-muted-foreground">Base {formatCurrency(baseCost)}</p>
+                                <p className="text-muted-foreground">
+                                  Base {formatCurrency(baseCost)}
+                                </p>
                                 {recipeCost && baseCost !== recipeCost && (
-                                  <p className="text-muted-foreground">Recipe {formatCurrency(recipeCost)}</p>
+                                  <p className="text-muted-foreground">
+                                    Recipe {formatCurrency(recipeCost)}
+                                  </p>
                                 )}
                               </div>
                               <div>
-                                <span className="font-medium">Location / Unit:</span>
-                                <p className="text-muted-foreground">{item.location?.name || 'No location set'}</p>
-                                <p className="text-muted-foreground">Unit: {primaryUnit}</p>
+                                <span className="font-medium">
+                                  Location / Unit:
+                                </span>
+                                <p className="text-muted-foreground">
+                                  {item.location?.name || "No location set"}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Unit: {primaryUnit}
+                                </p>
                               </div>
                             </div>
 
@@ -282,7 +350,7 @@ export default function ItemsSetup() {
                               </p>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center gap-2 ml-4">
                             <Button
                               variant="outline"
@@ -298,15 +366,15 @@ export default function ItemsSetup() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleViewHistory(item)}
                             >
                               <History className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDeleteItem(item)}
                             >
@@ -326,7 +394,9 @@ export default function ItemsSetup() {
             <Card>
               <CardHeader>
                 <CardTitle>Categories</CardTitle>
-                <CardDescription>Organize items into categories</CardDescription>
+                <CardDescription>
+                  Organize items into categories
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {categories.length === 0 ? (
@@ -340,7 +410,9 @@ export default function ItemsSetup() {
                         <CardContent className="p-4">
                           <h3 className="font-medium">{category.name}</h3>
                           {category.description && (
-                            <p className="text-sm text-muted-foreground">{category.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {category.description}
+                            </p>
                           )}
                         </CardContent>
                       </Card>
@@ -369,7 +441,9 @@ export default function ItemsSetup() {
             <Card>
               <CardHeader>
                 <CardTitle>Storage Locations</CardTitle>
-                <CardDescription>Configure storage areas and locations</CardDescription>
+                <CardDescription>
+                  Configure storage areas and locations
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-4">
@@ -383,7 +457,9 @@ export default function ItemsSetup() {
             <Card>
               <CardHeader>
                 <CardTitle>Inventory Settings</CardTitle>
-                <CardDescription>Configure system preferences and defaults</CardDescription>
+                <CardDescription>
+                  Configure system preferences and defaults
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground text-center py-4">
@@ -395,7 +471,7 @@ export default function ItemsSetup() {
         </Tabs>
 
         {/* Item Form Dialog */}
-        <InventoryItemForm 
+        <InventoryItemForm
           editItem={editingItem}
           open={showItemForm}
           onOpenChange={setShowItemForm}

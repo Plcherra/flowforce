@@ -1,4 +1,4 @@
-import type { CoverageForecast } from '@/services/analytics/ForecastAPI';
+import type { CoverageForecast } from "@/services/analytics/ForecastAPI";
 
 export type AvailabilityWindow = { start: string; end: string };
 export type AvailabilityMap = Record<string, AvailabilityWindow[]>;
@@ -43,7 +43,7 @@ export interface DraftShift {
   employeeId: string | null;
   employeeName?: string | null;
   hours: number;
-  status: 'draft';
+  status: "draft";
 }
 
 export interface CoverageGap {

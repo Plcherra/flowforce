@@ -1,22 +1,38 @@
-
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { useTasks } from '@/hooks/useTasks';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CreateReminderDialog } from '@/components/reminders/CreateReminderDialog';
-import { useTaskFormOptions } from '@/hooks/useTaskFormOptions';
-import { logger } from '@/utils/logger';
+import React, { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { useTasks } from "@/hooks/useTasks";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CreateReminderDialog } from "@/components/reminders/CreateReminderDialog";
+import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
+import { logger } from "@/utils/logger";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -31,7 +47,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
     assignees,
     goals,
     loading: optionsLoading,
-    error: optionsError
+    error: optionsError,
   } = useTaskFormOptions(open);
   const [loading, setLoading] = useState(false);
   const [dueDate, setDueDate] = useState<Date | undefined>();
@@ -39,21 +55,22 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    estimated_hours: '',
-    assigned_to: '',
-    goal_id: ''
+    title: "",
+    description: "",
+    priority: "medium",
+    estimated_hours: "",
+    assigned_to: "",
+    goal_id: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!optionsError) return;
     toast({
-      title: 'Unable to load options',
-      description: 'Some fields may be unavailable right now. Please try again later.',
-      variant: 'destructive',
+      title: "Unable to load options",
+      description:
+        "Some fields may be unavailable right now. Please try again later.",
+      variant: "destructive",
     });
   }, [optionsError, toast]);
 
@@ -73,12 +90,12 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
-      priority: 'medium',
-      estimated_hours: '',
-      assigned_to: '',
-      goal_id: ''
+      title: "",
+      description: "",
+      priority: "medium",
+      estimated_hours: "",
+      assigned_to: "",
+      goal_id: "",
     });
     setDueDate(undefined);
     setCreateReminder(false);
@@ -88,12 +105,13 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
-      nextErrors.title = 'A title is required.';
+      nextErrors.title = "A title is required.";
     }
     if (formData.estimated_hours) {
       const value = parseFloat(formData.estimated_hours);
       if (Number.isNaN(value) || value < 0) {
-        nextErrors.estimated_hours = 'Estimated hours must be a positive number.';
+        nextErrors.estimated_hours =
+          "Estimated hours must be a positive number.";
       }
     }
     return nextErrors;
@@ -121,11 +139,13 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
       const taskData = {
         title: formData.title,
         description: formData.description || null,
-        status: 'todo' as const,
+        status: "todo" as const,
         priority: formData.priority as any,
         created_by: user.id,
         due_date: dueDate?.toISOString() || null,
-        estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : null,
+        estimated_hours: formData.estimated_hours
+          ? parseFloat(formData.estimated_hours)
+          : null,
         assigned_to: formData.assigned_to ? formData.assigned_to : null,
         department_id: null,
         tags: null,
@@ -133,37 +153,37 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
         parent_task_id: null,
         workflow_id: null,
         actual_hours: null,
-        goal_id: formData.goal_id ? formData.goal_id : null
+        goal_id: formData.goal_id ? formData.goal_id : null,
       };
 
       const { data: newTask, error } = await createTask(taskData);
-      
+
       if (error) {
         toast({
-          title: 'Error',
-          description: 'Failed to create task. Please try again.',
-          variant: 'destructive',
+          title: "Error",
+          description: "Failed to create task. Please try again.",
+          variant: "destructive",
         });
       } else {
         toast({
-          title: 'Success',
-          description: 'Task created successfully.',
+          title: "Success",
+          description: "Task created successfully.",
         });
-        
+
         // If user wants to create reminder, show reminder dialog
         if (createReminder && newTask) {
           setCreatedTaskId(newTask.id);
           setShowReminderDialog(true);
         }
-        
+
         handleDialogChange(false);
       }
     } catch (error) {
-      logger.error('Error creating task:', { error, tags: ['error'] });
+      logger.error("Error creating task:", { error, tags: ["error"] });
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -179,7 +199,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
             Create a new task to track your work and collaborate with your team.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
@@ -187,13 +207,18 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
               id="title"
               placeholder="Enter task title"
               value={formData.title}
-              onChange={(e) => handleFieldChange('title', e.target.value)}
+              onChange={(e) => handleFieldChange("title", e.target.value)}
               aria-invalid={Boolean(errors.title)}
-              aria-describedby={errors.title ? 'create-task-title-error' : undefined}
+              aria-describedby={
+                errors.title ? "create-task-title-error" : undefined
+              }
               required
             />
             {errors.title && (
-              <p className="text-sm text-destructive" id="create-task-title-error">
+              <p
+                className="text-sm text-destructive"
+                id="create-task-title-error"
+              >
                 {errors.title}
               </p>
             )}
@@ -205,7 +230,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
               id="description"
               placeholder="Enter task description"
               value={formData.description}
-              onChange={(e) => handleFieldChange('description', e.target.value)}
+              onChange={(e) => handleFieldChange("description", e.target.value)}
               rows={3}
             />
           </div>
@@ -215,7 +240,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => handleFieldChange('priority', value)}
+                onValueChange={(value) => handleFieldChange("priority", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
@@ -237,13 +262,22 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
                 step="0.5"
                 placeholder="0"
                 value={formData.estimated_hours}
-                onChange={(e) => handleFieldChange('estimated_hours', e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("estimated_hours", e.target.value)
+                }
                 aria-invalid={Boolean(errors.estimated_hours)}
-                aria-describedby={errors.estimated_hours ? 'create-task-estimated-hours-error' : undefined}
+                aria-describedby={
+                  errors.estimated_hours
+                    ? "create-task-estimated-hours-error"
+                    : undefined
+                }
                 min={0}
               />
               {errors.estimated_hours && (
-                <p className="text-sm text-destructive" id="create-task-estimated-hours-error">
+                <p
+                  className="text-sm text-destructive"
+                  id="create-task-estimated-hours-error"
+                >
                   {errors.estimated_hours}
                 </p>
               )}
@@ -254,14 +288,23 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="assigned_to">Assign To</Label>
               <Select
-                value={formData.assigned_to || 'none'}
+                value={formData.assigned_to || "none"}
                 onValueChange={(value) =>
-                  handleFieldChange('assigned_to', value === 'none' ? '' : value)
+                  handleFieldChange(
+                    "assigned_to",
+                    value === "none" ? "" : value,
+                  )
                 }
                 disabled={optionsLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={optionsLoading ? 'Loading team members…' : 'Select team member'} />
+                  <SelectValue
+                    placeholder={
+                      optionsLoading
+                        ? "Loading team members…"
+                        : "Select team member"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Unassigned</SelectItem>
@@ -277,9 +320,9 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="goal_id">Linked Goal</Label>
               <Select
-                value={formData.goal_id || 'none'}
+                value={formData.goal_id || "none"}
                 onValueChange={(value) =>
-                  handleFieldChange('goal_id', value === 'none' ? '' : value)
+                  handleFieldChange("goal_id", value === "none" ? "" : value)
                 }
                 disabled={optionsLoading}
               >
@@ -287,10 +330,10 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
                   <SelectValue
                     placeholder={
                       optionsLoading
-                        ? 'Loading goals…'
+                        ? "Loading goals…"
                         : goals.length === 0
-                          ? 'No goals available'
-                          : 'Select goal (optional)'
+                          ? "No goals available"
+                          : "Select goal (optional)"
                     }
                   />
                 </SelectTrigger>
@@ -333,7 +376,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
 
           {/* Reminder Option */}
           <div className="flex items-center space-x-2">
-            <Checkbox 
+            <Checkbox
               id="create-reminder"
               checked={createReminder}
               onCheckedChange={(checked) => setCreateReminder(checked === true)}
@@ -344,19 +387,24 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleDialogChange(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleDialogChange(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !formData.title.trim()}>
-              {loading ? 'Creating...' : 'Create Task'}
+              {loading ? "Creating..." : "Create Task"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
-      
+
       {/* Reminder Dialog */}
       {showReminderDialog && createdTaskId && (
-        <CreateReminderDialog 
+        <CreateReminderDialog
           open={showReminderDialog}
           onOpenChange={setShowReminderDialog}
           taskId={createdTaskId}

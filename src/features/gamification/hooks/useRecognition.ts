@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 
 type BadgeCatalogRow = {
   code: string;
@@ -73,7 +73,7 @@ export interface UseRecognitionResult {
   refetch: () => Promise<unknown>;
 }
 
-const RECOGNITION_SCOPE = ['gamification', 'recognition'] as const;
+const RECOGNITION_SCOPE = ["gamification", "recognition"] as const;
 const XP_BASE = 200;
 const XP_GROWTH = 150;
 
@@ -85,7 +85,8 @@ const defaultSnapshot: RecognitionSnapshot = {
   progress: 0,
 };
 
-const xpForLevel = (level: number) => XP_BASE + XP_GROWTH * Math.max(level - 1, 0);
+const xpForLevel = (level: number) =>
+  XP_BASE + XP_GROWTH * Math.max(level - 1, 0);
 
 const cumulativeXpForLevel = (level: number) => {
   if (level <= 1) return 0;
@@ -96,7 +97,9 @@ const cumulativeXpForLevel = (level: number) => {
   return total;
 };
 
-const buildSnapshot = (skill: SkillRow | null | undefined): RecognitionSnapshot => {
+const buildSnapshot = (
+  skill: SkillRow | null | undefined,
+): RecognitionSnapshot => {
   if (!skill) {
     return defaultSnapshot;
   }
@@ -106,7 +109,10 @@ const buildSnapshot = (skill: SkillRow | null | undefined): RecognitionSnapshot 
   const xpThreshold = cumulativeXpForLevel(level);
   const xpIntoLevel = Math.max(totalXp - xpThreshold, 0);
   const xpNeededForNextLevel = xpForLevel(level);
-  const progress = xpNeededForNextLevel > 0 ? Math.min(xpIntoLevel / xpNeededForNextLevel, 1) : 0;
+  const progress =
+    xpNeededForNextLevel > 0
+      ? Math.min(xpIntoLevel / xpNeededForNextLevel, 1)
+      : 0;
 
   return {
     level,
@@ -130,8 +136,9 @@ const mapEarnedBadge = (row: Record<string, unknown>): EarnedBadge => {
   const badge = row.badge as Record<string, unknown> | null | undefined;
   return {
     id: row.id as string,
-    code: (row.badge_code as string) ?? '',
-    title: (badge?.title as string | undefined) ?? (row.badge_code as string) ?? '',
+    code: (row.badge_code as string) ?? "",
+    title:
+      (badge?.title as string | undefined) ?? (row.badge_code as string) ?? "",
     description: (badge?.description as string | null | undefined) ?? null,
     icon: (badge?.icon as string | null | undefined) ?? null,
     awardedAt: row.awarded_at as string,
@@ -139,11 +146,16 @@ const mapEarnedBadge = (row: Record<string, unknown>): EarnedBadge => {
   };
 };
 
-const filterBadges = (badges: BadgeCatalogRow[], role: string | null, search: string | undefined) => {
-  const searchValue = search?.toLowerCase() ?? '';
+const filterBadges = (
+  badges: BadgeCatalogRow[],
+  role: string | null,
+  search: string | undefined,
+) => {
+  const searchValue = search?.toLowerCase() ?? "";
   return badges
     .filter((badge) => {
-      const matchesRole = !badge.role || !role || badge.role.toLowerCase() === role.toLowerCase();
+      const matchesRole =
+        !badge.role || !role || badge.role.toLowerCase() === role.toLowerCase();
       const matchesSearch =
         !searchValue ||
         badge.title?.toLowerCase().includes(searchValue) ||
@@ -168,7 +180,9 @@ const buildMilestones = (
       (!badge.role || !role || badge.role.toLowerCase() === role.toLowerCase()),
   );
 
-  const sorted = filteredBadges.sort((a, b) => (a.min_level ?? 0) - (b.min_level ?? 0)).slice(0, 3);
+  const sorted = filteredBadges
+    .sort((a, b) => (a.min_level ?? 0) - (b.min_level ?? 0))
+    .slice(0, 3);
 
   return sorted.map((badge) => {
     const requiredLevel = badge.min_level ?? 1;
@@ -185,23 +199,29 @@ const buildMilestones = (
   });
 };
 
-export function useRecognition(options: UseRecognitionOptions = {}): UseRecognitionResult {
+export function useRecognition(
+  options: UseRecognitionOptions = {},
+): UseRecognitionResult {
   const { filters, enabled = true } = options;
   const { profile } = useProfile();
 
   const profileId = profile?.userId ?? profile?.id ?? null;
   const defaultRole = profile?.role ?? null;
 
-  const normalizedRole = filters?.role ?? defaultRole ?? 'employee';
+  const normalizedRole = filters?.role ?? defaultRole ?? "employee";
   const normalizedSearch = filters?.search?.trim() ?? undefined;
 
   const filterKey = useMemo(
-    () => JSON.stringify({ role: normalizedRole, search: normalizedSearch ?? null }),
+    () =>
+      JSON.stringify({
+        role: normalizedRole,
+        search: normalizedSearch ?? null,
+      }),
     [normalizedRole, normalizedSearch],
   );
 
   const recognitionQuery = useQuery({
-    queryKey: [...RECOGNITION_SCOPE, profileId ?? 'anonymous', filterKey],
+    queryKey: [...RECOGNITION_SCOPE, profileId ?? "anonymous", filterKey],
     enabled: Boolean(enabled && profileId),
     queryFn: async () => {
       if (!profileId) {
@@ -215,30 +235,38 @@ export function useRecognition(options: UseRecognitionOptions = {}): UseRecognit
 
       const [badgeResponse, earnedResponse, skillResponse] = await Promise.all([
         supabase
-          .from('badge_catalog')
-          .select('code, title, description, icon, min_level, role')
-          .order('title', { ascending: true }),
+          .from("badge_catalog")
+          .select("code, title, description, icon, min_level, role")
+          .order("title", { ascending: true }),
         supabase
-          .from('employee_badge')
-          .select('id, badge_code, awarded_at, reason, badge:badge_catalog(code, title, description, icon, min_level, role)')
-          .eq('employee_id', profileId)
-          .order('awarded_at', { ascending: false }),
+          .from("employee_badge")
+          .select(
+            "id, badge_code, awarded_at, reason, badge:badge_catalog(code, title, description, icon, min_level, role)",
+          )
+          .eq("employee_id", profileId)
+          .order("awarded_at", { ascending: false }),
         supabase
-          .from('skill_matrix')
-          .select('level, xp')
-          .eq('employee_id', profileId)
-          .eq('role', normalizedRole)
+          .from("skill_matrix")
+          .select("level, xp")
+          .eq("employee_id", profileId)
+          .eq("role", normalizedRole)
           .maybeSingle(),
       ]);
 
       if (badgeResponse.error) {
-        throw new Error(badgeResponse.error.message ?? 'Failed to load badge catalog');
+        throw new Error(
+          badgeResponse.error.message ?? "Failed to load badge catalog",
+        );
       }
       if (earnedResponse.error) {
-        throw new Error(earnedResponse.error.message ?? 'Failed to load earned badges');
+        throw new Error(
+          earnedResponse.error.message ?? "Failed to load earned badges",
+        );
       }
-      if (skillResponse.error && skillResponse.error.code !== 'PGRST116') {
-        throw new Error(skillResponse.error.message ?? 'Failed to load XP snapshot');
+      if (skillResponse.error && skillResponse.error.code !== "PGRST116") {
+        throw new Error(
+          skillResponse.error.message ?? "Failed to load XP snapshot",
+        );
       }
 
       const badgeRows = (badgeResponse.data as BadgeCatalogRow[]) ?? [];
@@ -248,7 +276,12 @@ export function useRecognition(options: UseRecognitionOptions = {}): UseRecognit
       const badges = filterBadges(badgeRows, normalizedRole, normalizedSearch);
       const earnedBadges = earnedRows.map(mapEarnedBadge);
       const snapshot = buildSnapshot(skillRow);
-      const milestones = buildMilestones(badgeRows, earnedBadges, snapshot.xp, normalizedRole);
+      const milestones = buildMilestones(
+        badgeRows,
+        earnedBadges,
+        snapshot.xp,
+        normalizedRole,
+      );
 
       return {
         badges,
@@ -265,7 +298,7 @@ export function useRecognition(options: UseRecognitionOptions = {}): UseRecognit
     queryError instanceof Error
       ? queryError
       : queryError
-        ? new Error('Unable to load recognition data')
+        ? new Error("Unable to load recognition data")
         : null;
 
   return {

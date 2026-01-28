@@ -12,6 +12,6 @@ export function issueToTask(issue: DetectorIssue) {
     status: "open",
     generated_by: "auto_plan",
     metadata: issue.metadata ?? {},
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 }

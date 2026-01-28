@@ -1,5 +1,20 @@
 -- Fix the create_company_with_owner function to properly handle profile creation
-DROP FUNCTION IF EXISTS public.create_company_with_owner(text, text, text, text, jsonb, jsonb, jsonb);
+-- Drop all variants of create_company_with_owner first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'create_company_with_owner'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.create_company_with_owner(
   user_email text, 

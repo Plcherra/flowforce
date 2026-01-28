@@ -1,8 +1,15 @@
-
-import { Loader2, Trash2, CheckCircle, AlertTriangle, Database, Shield, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { 
+import {
+  Loader2,
+  Trash2,
+  CheckCircle,
+  AlertTriangle,
+  Database,
+  Shield,
+  Clock,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -12,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 
 interface AccountDeletionDialogProps {
   isDeleting: boolean;
@@ -38,9 +45,12 @@ export default function AccountDeletionDialog({
           <div className="text-center space-y-3">
             <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
             <div>
-              <h3 className="text-lg font-semibold text-green-800">Account Deleted Successfully</h3>
+              <h3 className="text-lg font-semibold text-green-800">
+                Account Deleted Successfully
+              </h3>
               <p className="text-sm text-green-700 mt-2">
-                Your account and all associated data have been permanently removed from our servers.
+                Your account and all associated data have been permanently
+                removed from our servers.
               </p>
               {deletionStats && (
                 <div className="mt-3 p-3 bg-green-100 border border-green-200 rounded text-xs text-green-800 space-y-1">
@@ -55,16 +65,19 @@ export default function AccountDeletionDialog({
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      Completed in: {Math.round(deletionStats.executionTimeMs / 1000)}s
+                      Completed in:{" "}
+                      {Math.round(deletionStats.executionTimeMs / 1000)}s
                     </div>
                     <div className="col-span-2">
-                      Tables processed: {deletionStats.deletedTables?.length || 0}
+                      Tables processed:{" "}
+                      {deletionStats.deletedTables?.length || 0}
                     </div>
-                    {deletionStats.errors && deletionStats.errors.length > 0 && (
-                      <div className="col-span-2 text-amber-700">
-                        Warnings: {deletionStats.errors.length} issues noted
-                      </div>
-                    )}
+                    {deletionStats.errors &&
+                      deletionStats.errors.length > 0 && (
+                        <div className="col-span-2 text-amber-700">
+                          Warnings: {deletionStats.errors.length} issues noted
+                        </div>
+                      )}
                   </div>
                   <div className="text-center mt-2 pt-2 border-t border-green-300">
                     ✅ Authentication permanently revoked
@@ -80,7 +93,9 @@ export default function AccountDeletionDialog({
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-              <span className="text-sm font-medium text-red-800">{deletionStep}</span>
+              <span className="text-sm font-medium text-red-800">
+                {deletionStep}
+              </span>
             </div>
             <Progress value={deletionProgress} className="w-full" />
             <div className="text-xs text-gray-600 space-y-1">
@@ -131,21 +146,27 @@ export default function AccountDeletionDialog({
                     <li>• Complete comprehensive data verification</li>
                   </ul>
                 </div>
-                
+
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-xs text-blue-800">
-                    <strong>✨ Enhanced Security Features:</strong><br/>
-                    • Atomic transaction processing<br/>
-                    • Foreign key CASCADE optimization<br/>
-                    • Real-time deletion progress tracking<br/>
-                    • Comprehensive verification system<br/>
-                    • Optimized for {`<1`} second completion
+                    <strong>✨ Enhanced Security Features:</strong>
+                    <br />
+                    • Atomic transaction processing
+                    <br />
+                    • Foreign key CASCADE optimization
+                    <br />
+                    • Real-time deletion progress tracking
+                    <br />
+                    • Comprehensive verification system
+                    <br />• Optimized for {`<1`} second completion
                   </p>
                 </div>
 
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded">
                   <p className="text-xs text-amber-800 font-medium">
-                    ⚡ This bulletproof process cannot be stopped once started and will permanently erase your digital footprint from our entire system.
+                    ⚡ This bulletproof process cannot be stopped once started
+                    and will permanently erase your digital footprint from our
+                    entire system.
                   </p>
                 </div>
               </div>
@@ -155,7 +176,7 @@ export default function AccountDeletionDialog({
             <AlertDialogCancel disabled={isDeleting}>
               Cancel - Keep My Account
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={onDeleteAccount}
               disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-500"

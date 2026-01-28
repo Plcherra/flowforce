@@ -1,34 +1,34 @@
-
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useTranslation } from 'react-i18next';
-import AuthHeader from '@/components/auth/AuthHeader';
-import CompanyRegistrationCard from '@/components/auth/CompanyRegistrationCard';
-import SignInForm from '@/components/auth/SignInForm';
-import InviteSignUpForm from '@/components/auth/InviteSignUpForm';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
-import PasswordResetForm from '@/components/auth/PasswordResetForm';
-import type { UserMetadata } from '@/types/common';
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
+import AuthHeader from "@/components/auth/AuthHeader";
+import CompanyRegistrationCard from "@/components/auth/CompanyRegistrationCard";
+import SignInForm from "@/components/auth/SignInForm";
+import InviteSignUpForm from "@/components/auth/InviteSignUpForm";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import PasswordResetForm from "@/components/auth/PasswordResetForm";
+import type { UserMetadata } from "@/types/common";
 
 export default function Auth() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, resetPassword, updatePassword, user, loading } = useAuth();
+  const { signIn, signUp, resetPassword, updatePassword, user, loading } =
+    useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
-  const inviteCode = searchParams.get('invite');
-  const isPasswordReset = searchParams.get('reset') === 'true';
+  const inviteCode = searchParams.get("invite");
+  const isPasswordReset = searchParams.get("reset") === "true";
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
-    
+
     // Check if this is a password reset redirect
     if (isPasswordReset) {
       setShowPasswordReset(true);
@@ -39,15 +39,20 @@ export default function Auth() {
     setIsLoading(true);
 
     const { error } = await signIn(email, password);
-    
+
     if (!error) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
-    
+
     setIsLoading(false);
   };
 
-  const handleSignUp = async (email: string, password: string, firstName: string, lastName: string) => {
+  const handleSignUp = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) => {
     setIsLoading(true);
 
     const metadata: UserMetadata = {
@@ -56,7 +61,7 @@ export default function Auth() {
     };
 
     await signUp(email, password, firstName, lastName, metadata);
-    
+
     setIsLoading(false);
   };
 
@@ -71,15 +76,15 @@ export default function Auth() {
     setIsLoading(true);
     const { error } = await updatePassword(password);
     setIsLoading(false);
-    
+
     if (!error) {
       setShowPasswordReset(false);
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
 
   const handleCompanyRegistration = () => {
-    navigate('/company-registration');
+    navigate("/company-registration");
   };
 
   if (loading) {
@@ -96,20 +101,22 @@ export default function Auth() {
         <AuthHeader inviteCode={inviteCode} />
 
         {!inviteCode && (
-          <CompanyRegistrationCard onRegisterCompany={handleCompanyRegistration} />
+          <CompanyRegistrationCard
+            onRegisterCompany={handleCompanyRegistration}
+          />
         )}
 
         {showPasswordReset ? (
-          <PasswordResetForm 
+          <PasswordResetForm
             onSubmit={handlePasswordUpdate}
             onBack={() => {
               setShowPasswordReset(false);
-              navigate('/auth', { replace: true });
+              navigate("/auth", { replace: true });
             }}
             isLoading={isLoading}
           />
         ) : showForgotPassword ? (
-          <ForgotPasswordForm 
+          <ForgotPasswordForm
             onSubmit={handleForgotPassword}
             onBack={() => setShowForgotPassword(false)}
             isLoading={isLoading}
@@ -117,15 +124,15 @@ export default function Auth() {
         ) : inviteCode ? (
           <InviteSignUpForm onSubmit={handleSignUp} isLoading={isLoading} />
         ) : (
-          <SignInForm 
-            onSubmit={handleSignIn} 
+          <SignInForm
+            onSubmit={handleSignIn}
             onForgotPassword={() => setShowForgotPassword(true)}
-            isLoading={isLoading} 
+            isLoading={isLoading}
           />
         )}
 
         <div className="text-center text-sm text-gray-600">
-          <p>{t('auth.termsMessage')}</p>
+          <p>{t("auth.termsMessage")}</p>
         </div>
       </div>
     </div>

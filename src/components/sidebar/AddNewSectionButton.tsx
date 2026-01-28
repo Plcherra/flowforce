@@ -1,13 +1,16 @@
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface AddNewSectionButtonProps {
   category: string;
   categoryKey: string;
 }
 
-export function AddNewSectionButton({ category, categoryKey }: AddNewSectionButtonProps) {
+export function AddNewSectionButton({
+  category,
+  categoryKey,
+}: AddNewSectionButtonProps) {
   const navigate = useNavigate();
 
   const handleAddNew = () => {

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import NextLink from 'next/link';
+import React, { useCallback, useEffect, useMemo } from "react";
+import NextLink from "next/link";
 import {
   usePathname,
   useRouter,
   useSearchParams as useNextSearchParams,
   useParams as useNextParams,
-} from 'next/navigation';
+} from "next/navigation";
 
 type LinkProps = React.PropsWithChildren<
   {
@@ -20,13 +20,18 @@ type LinkProps = React.PropsWithChildren<
 
 type NavLinkProps = LinkProps & { end?: boolean };
 
-export function Link({ to, replace, prefetch = true, className, children, ...rest }: LinkProps) {
+export function Link({
+  to,
+  replace,
+  prefetch = true,
+  className,
+  children,
+  ...rest
+}: LinkProps) {
   const pathname = usePathname();
   const isActive = !!pathname && pathname === to;
   const computedClass =
-    typeof className === 'function'
-      ? className({ isActive })
-      : className;
+    typeof className === "function" ? className({ isActive }) : className;
 
   return (
     <NextLink
@@ -42,20 +47,12 @@ export function Link({ to, replace, prefetch = true, className, children, ...res
 }
 
 export function NavLink({ to, className, end, ...rest }: NavLinkProps) {
-  const pathname = usePathname() ?? '';
+  const pathname = usePathname() ?? "";
   const isActive = end ? pathname === to : pathname.startsWith(to);
   const computedClass =
-    typeof className === 'function'
-      ? className({ isActive })
-      : className;
+    typeof className === "function" ? className({ isActive }) : className;
 
-  return (
-    <NextLink
-      href={to}
-      className={computedClass}
-      {...rest}
-    />
-  );
+  return <NextLink href={to} className={computedClass} {...rest} />;
 }
 
 export function useNavigate() {
@@ -86,35 +83,40 @@ export function Navigate({ to, replace }: { to: string; replace?: boolean }) {
   return null;
 }
 
-export function useParams<T extends Record<string, any> = Record<string, string>>() {
+export function useParams<
+  T extends Record<string, any> = Record<string, string>,
+>() {
   const params = useNextParams() || {};
   const normalized: Record<string, any> = { ...params };
 
   // Support optional catch-all segments named "wildcard" to mimic react-router's "*"
   if (Array.isArray((params as any).wildcard)) {
-    normalized['*'] = (params as any).wildcard.join('/');
+    normalized["*"] = (params as any).wildcard.join("/");
   }
 
   if (Array.isArray((params as any).slug)) {
     const slug = (params as any).slug as string[];
     normalized.path = normalized.path ?? slug[0];
-    normalized['*'] = slug.slice(1).join('/');
+    normalized["*"] = slug.slice(1).join("/");
   }
 
   return normalized as T;
 }
 
-export function useSearchParams(): [URLSearchParams, (nextInit: URLSearchParams | string | Record<string, string>) => void] {
+export function useSearchParams(): [
+  URLSearchParams,
+  (nextInit: URLSearchParams | string | Record<string, string>) => void,
+] {
   const router = useRouter();
-  const pathname = usePathname() ?? '';
+  const pathname = usePathname() ?? "";
   const searchParams = useNextSearchParams();
 
   const setSearchParams = useCallback(
     (nextInit: URLSearchParams | string | Record<string, string>) => {
       let next: string;
 
-      if (typeof nextInit === 'string') {
-        next = nextInit.startsWith('?') ? nextInit : `?${nextInit}`;
+      if (typeof nextInit === "string") {
+        next = nextInit.startsWith("?") ? nextInit : `?${nextInit}`;
       } else if (nextInit instanceof URLSearchParams) {
         next = `?${nextInit.toString()}`;
       } else {
@@ -126,20 +128,25 @@ export function useSearchParams(): [URLSearchParams, (nextInit: URLSearchParams 
     [pathname, router],
   );
 
-  return [searchParams ? new URLSearchParams(searchParams.toString()) : new URLSearchParams(), setSearchParams];
+  return [
+    searchParams
+      ? new URLSearchParams(searchParams.toString())
+      : new URLSearchParams(),
+    setSearchParams,
+  ];
 }
 
 export function useLocation() {
-  const pathname = usePathname() ?? '';
+  const pathname = usePathname() ?? "";
   const searchParams = useNextSearchParams();
 
   return useMemo(
     () => ({
       pathname,
-      search: searchParams ? `?${searchParams.toString()}` : '',
-      hash: '',
+      search: searchParams ? `?${searchParams.toString()}` : "",
+      hash: "",
       state: null,
-      key: 'next',
+      key: "next",
     }),
     [pathname, searchParams],
   );
@@ -152,7 +159,7 @@ export function Outlet() {
 export function ScrollRestoration() {
   const pathname = usePathname();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.scrollTo({ top: 0 });
     }
   }, [pathname]);
@@ -168,7 +175,7 @@ export function Route({ element }: { element?: React.ReactNode }) {
 }
 
 export function useNavigation() {
-  return { state: 'idle' as const };
+  return { state: "idle" as const };
 }
 
 export function RouterProvider({ children }: { children?: React.ReactNode }) {

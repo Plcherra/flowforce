@@ -1,10 +1,20 @@
-import { Fragment } from 'react';
-import { Award, Lock } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { cn } from '@/lib/utils';
+import { Fragment } from "react";
+import { Award, Lock } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { cn } from "@/lib/utils";
 
 export interface GamificationBadge {
   id: string;
@@ -24,23 +34,23 @@ interface BadgesGalleryProps {
   description?: string;
 }
 
-const lockedClasses = 'grayscale opacity-40';
+const lockedClasses = "grayscale opacity-40";
 
 export function BadgesGallery({
   badges,
   loading,
   columns = 3,
   className,
-  title = 'Badges & Milestones',
-  description = 'Unlock new achievements as XP accumulates across modules.',
+  title = "Badges & Milestones",
+  description = "Unlock new achievements as XP accumulates across modules.",
 }: BadgesGalleryProps) {
   const columnClass = cn(
-    'grid grid-cols-2 gap-4 sm:grid-cols-3',
+    "grid grid-cols-2 gap-4 sm:grid-cols-3",
     {
-      2: 'lg:grid-cols-2',
-      3: 'lg:grid-cols-3',
-      4: 'lg:grid-cols-4',
-      5: 'lg:grid-cols-5',
+      2: "lg:grid-cols-2",
+      3: "lg:grid-cols-3",
+      4: "lg:grid-cols-4",
+      5: "lg:grid-cols-5",
     }[Math.min(Math.max(columns, 2), 5)],
   );
 
@@ -53,7 +63,10 @@ export function BadgesGallery({
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {Array.from({ length: columns * 2 }).map((_, index) => (
-            <Skeleton key={`badge-skeleton-${index}`} className="h-24 rounded-xl" />
+            <Skeleton
+              key={`badge-skeleton-${index}`}
+              className="h-24 rounded-xl"
+            />
           ))}
         </CardContent>
       </Card>
@@ -72,7 +85,8 @@ export function BadgesGallery({
       <CardContent>
         {badges.length === 0 ? (
           <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No badges available yet. Automations will surface achievements here once XP accrues.
+            No badges available yet. Automations will surface achievements here
+            once XP accrues.
           </div>
         ) : (
           <div className={columnClass}>
@@ -82,8 +96,10 @@ export function BadgesGallery({
               const badgeContent = (
                 <div
                   className={cn(
-                    'relative flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-background to-muted/60 p-4 text-left shadow-sm transition hover:border-primary/40',
-                    earned ? 'shadow-primary/20 hover:shadow-lg hover:shadow-primary/20' : lockedClasses,
+                    "relative flex h-full flex-col rounded-2xl border border-border bg-gradient-to-br from-background to-muted/60 p-4 text-left shadow-sm transition hover:border-primary/40",
+                    earned
+                      ? "shadow-primary/20 hover:shadow-lg hover:shadow-primary/20"
+                      : lockedClasses,
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -92,7 +108,7 @@ export function BadgesGallery({
                     </div>
                     {earned ? (
                       <Badge variant="outline" className="text-[10px]">
-                        {badge.xpValue ? `+${badge.xpValue} XP` : 'Unlocked'}
+                        {badge.xpValue ? `+${badge.xpValue} XP` : "Unlocked"}
                       </Badge>
                     ) : (
                       <Lock className="h-4 w-4 text-muted-foreground" />
@@ -100,11 +116,16 @@ export function BadgesGallery({
                   </div>
                   <div className="mt-3 space-y-1">
                     <p className="font-semibold leading-tight">{badge.name}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{badge.description}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {badge.description}
+                    </p>
                   </div>
                   {earned && badge.earnedAt ? (
                     <p className="mt-auto text-[11px] uppercase tracking-wide text-emerald-600">
-                      Earned {typeof badge.earnedAt === 'string' ? badge.earnedAt : badge.earnedAt.toLocaleDateString()}
+                      Earned{" "}
+                      {typeof badge.earnedAt === "string"
+                        ? badge.earnedAt
+                        : badge.earnedAt.toLocaleDateString()}
                     </p>
                   ) : null}
                 </div>
@@ -116,14 +137,25 @@ export function BadgesGallery({
                     <HoverCardTrigger asChild>{badgeContent}</HoverCardTrigger>
                     <HoverCardContent className="w-72 text-sm">
                       <p className="font-semibold">{badge.name}</p>
-                      <p className="text-xs text-muted-foreground">{badge.description}</p>
-                      {badge.xpValue ? <p className="mt-2 text-xs text-primary">Worth {badge.xpValue} XP</p> : null}
+                      <p className="text-xs text-muted-foreground">
+                        {badge.description}
+                      </p>
+                      {badge.xpValue ? (
+                        <p className="mt-2 text-xs text-primary">
+                          Worth {badge.xpValue} XP
+                        </p>
+                      ) : null}
                       {badge.earnedAt ? (
                         <p className="text-xs text-muted-foreground">
-                          Earned {typeof badge.earnedAt === 'string' ? badge.earnedAt : badge.earnedAt.toLocaleString()}
+                          Earned{" "}
+                          {typeof badge.earnedAt === "string"
+                            ? badge.earnedAt
+                            : badge.earnedAt.toLocaleString()}
                         </p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">Unlock by completing the recommended activity.</p>
+                        <p className="text-xs text-muted-foreground">
+                          Unlock by completing the recommended activity.
+                        </p>
                       )}
                     </HoverCardContent>
                   </HoverCard>

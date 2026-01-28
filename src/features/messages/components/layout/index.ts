@@ -1,5 +1,9 @@
-export { MessagesShell } from './MessagesShell';
-export { MessagesHeader } from './MessagesHeader';
-export { MessagesMainArea } from './MessagesMainArea';
-export { MessagesSidebar } from './MessagesSidebar';
-export { MessagesLayout } from './MessagesLayout';
+export { MessagesShell } from "./MessagesShell";
+export { MessagesHeader } from "./MessagesHeader";
+export { MessagesMainArea } from "./MessagesMainArea";
+export { MessagesSidebar } from "./MessagesSidebar";
+export { MessagesLayout } from "./MessagesLayout";
+export { MessagesMobileLayout } from "./MessagesMobileLayout";
+export { MessagesDesktopLayout } from "./MessagesDesktopLayout";
+export { MessagesPortalContent } from "./MessagesPortalContent";
+export { MessagesWorkspaceHeader } from "./MessagesWorkspaceHeader";

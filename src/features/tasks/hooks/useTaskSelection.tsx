@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface TaskLike {
   id: string;
@@ -11,7 +11,9 @@ export interface SelectionHandlers {
 
 export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(
+    null,
+  );
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
         clearTimeout(timeoutRef.current);
       }
     },
-    []
+    [],
   );
 
   const selectedTask = useMemo(() => {
@@ -47,10 +49,12 @@ export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
       setHighlightedTaskId(taskId);
       clearHighlightTimeout();
       timeoutRef.current = setTimeout(() => {
-        setHighlightedTaskId((current) => (current === taskId ? null : current));
+        setHighlightedTaskId((current) =>
+          current === taskId ? null : current,
+        );
       }, 2500);
     },
-    [clearHighlightTimeout]
+    [clearHighlightTimeout],
   );
 
   const closeTask = useCallback(() => {
@@ -61,13 +65,13 @@ export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
     (taskId: string): SelectionHandlers => ({
       onClick: () => openTask(taskId),
       onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
+        if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           openTask(taskId);
         }
       },
     }),
-    [openTask]
+    [openTask],
   );
 
   const handleNotificationNavigate = useCallback(
@@ -78,11 +82,11 @@ export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
       requestAnimationFrame(() => {
         const element = document.getElementById(`task-card-${taskId}`);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       });
     },
-    [openTask, tasks]
+    [openTask, tasks],
   );
 
   return {

@@ -1,12 +1,12 @@
-import type { TrainingAssignment } from './training';
+import type { TrainingAssignment } from "./training";
 
 export type RecognitionSourceType =
-  | 'goal_milestone'
-  | 'goal_completion'
-  | 'task_completion'
-  | 'training_completion'
-  | 'onboarding_completion'
-  | 'manual';
+  | "goal_milestone"
+  | "goal_completion"
+  | "task_completion"
+  | "training_completion"
+  | "onboarding_completion"
+  | "manual";
 
 export interface RecognitionDetails {
   message: string;

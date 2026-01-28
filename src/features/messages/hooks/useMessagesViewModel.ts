@@ -1,19 +1,32 @@
-import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { useLocation, useNavigate, useParams } from "@/lib/router-adapter";
 
-import { useMessages } from '@/hooks/useMessages';
-import { useProfile } from '@/hooks/useProfile';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useToast } from '@/hooks/use-toast';
-import type { Message, MessageAttachment, MessageChannel, ThreadMessage } from '@/types/messages';
-import { logger } from '@/utils/logger';
-import { useAvailabilityStatus } from './useAvailabilityStatus';
-import { useChannelActions } from './useChannelActions';
-import { useMessageActions } from './useMessageActions';
+import { useMessages } from "@/hooks/useMessages";
+import { useProfile } from "@/hooks/useProfile";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import type {
+  Message,
+  MessageAttachment,
+  MessageChannel,
+  ThreadMessage,
+} from "@/types/messages";
+import { logger } from "@/utils/logger";
+import { useAvailabilityStatus } from "./useAvailabilityStatus";
+import { useChannelActions } from "./useChannelActions";
+import { useMessageActions } from "./useMessageActions";
 
-type FilterType = 'all' | 'unread' | 'teams' | 'helpdesk';
-type CallType = 'video' | 'audio';
-type ProfileDetails = ReturnType<typeof useProfile>['profile'];
+type FilterType = "all" | "unread" | "teams" | "helpdesk";
+type CallType = "video" | "audio";
+type ProfileDetails = ReturnType<typeof useProfile>["profile"];
 
 interface MessagesViewModelState {
   isMobile: boolean;
@@ -43,15 +56,18 @@ interface MessagesViewModelState {
   handleStartVideoCall: (type: CallType) => void;
   handleCloseVideoCall: () => void;
   handleScheduleMessage: (content: string, scheduledFor: Date) => void;
-  handleSendMessage: (content: string, attachments: MessageAttachment[]) => Promise<void>;
+  handleSendMessage: (
+    content: string,
+    attachments: MessageAttachment[],
+  ) => Promise<void>;
   threadMessage: ThreadMessage | null;
   isThreadOpen: boolean;
   closeThread: () => void;
   handleThreadMessage: (message: ThreadMessage) => void;
   handleDeleteChannel: (channelId: string) => Promise<void>;
   handleChannelUpdated: () => Promise<void>;
-    handleUpdateMessage: (messageId: string, content: string) => Promise<void>;
-    handleDeleteMessage: (messageId: string) => Promise<void>;
+  handleUpdateMessage: (messageId: string, content: string) => Promise<void>;
+  handleDeleteMessage: (messageId: string) => Promise<void>;
   sidebarWidth: number;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   activeFilter: FilterType;
@@ -82,8 +98,15 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ filter?: string }>();
-  const { deleteChannel: deleteChannelAction, updateLastRead: updateLastReadAction } = useChannelActions();
-  const { sendMessage: sendMessageAction, deleteMessage: deleteMessageAction, updateMessage: updateMessageAction } = useMessageActions();
+  const {
+    deleteChannel: deleteChannelAction,
+    updateLastRead: updateLastReadAction,
+  } = useChannelActions();
+  const {
+    sendMessage: sendMessageAction,
+    deleteMessage: deleteMessageAction,
+    updateMessage: updateMessageAction,
+  } = useMessageActions();
 
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -93,29 +116,34 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const [showMessageSearch, setShowMessageSearch] = useState(false);
   const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
   const [callType, setCallType] = useState<CallType | null>(null);
-  const [threadMessage, setThreadMessage] = useState<ThreadMessage | null>(null);
+  const [threadMessage, setThreadMessage] = useState<ThreadMessage | null>(
+    null,
+  );
   const [sidebarWidth, setSidebarWidth] = useState(300);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const { available, updateAvailability } = useAvailabilityStatus();
 
-  const currentChannel = useMemo(
-    () => channels.find((channel) => channel.id === currentChannelId) ?? null,
-    [channels, currentChannelId],
-  );
+  const currentChannel = useMemo(() => {
+    if (!Array.isArray(channels) || channels.length === 0) return null;
+    return channels.find((channel) => channel.id === currentChannelId) ?? null;
+  }, [channels, currentChannelId]);
 
-  const normalizeFilter = useCallback((value?: string | null): FilterType | null => {
-    if (!value) return null;
-    const normalized = value.toLowerCase();
-    switch (normalized) {
-      case 'all':
-      case 'unread':
-      case 'teams':
-      case 'helpdesk':
-        return normalized as FilterType;
-      default:
-        return null;
-    }
-  }, []);
+  const normalizeFilter = useCallback(
+    (value?: string | null): FilterType | null => {
+      if (!value) return null;
+      const normalized = value.toLowerCase();
+      switch (normalized) {
+        case "all":
+        case "unread":
+        case "teams":
+        case "helpdesk":
+          return normalized as FilterType;
+        default:
+          return null;
+      }
+    },
+    [],
+  );
 
   const routeFilter = useMemo(
     () => normalizeFilter(params.filter),
@@ -123,15 +151,15 @@ export function useMessagesViewModel(): MessagesViewModelState {
   );
 
   const queryFilter = useMemo(
-    () => normalizeFilter(new URLSearchParams(location.search).get('filter')),
+    () => normalizeFilter(new URLSearchParams(location.search).get("filter")),
     [location.search, normalizeFilter],
   );
 
-  const activeFilter = routeFilter ?? queryFilter ?? 'all';
+  const activeFilter = routeFilter ?? queryFilter ?? "all";
 
   useEffect(() => {
-    const basePath = '/app/messages';
-    const currentPath = location.pathname.replace(/\/+$/, '') || '/';
+    const basePath = "/app/messages";
+    const currentPath = location.pathname.replace(/\/+$/, "") || "/";
 
     if (params.filter && !routeFilter) {
       if (currentPath !== basePath) {
@@ -140,7 +168,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
       return;
     }
 
-    if (!params.filter && queryFilter && queryFilter !== 'all') {
+    if (!params.filter && queryFilter && queryFilter !== "all") {
       const target = `${basePath}/${queryFilter}`;
       if (currentPath !== target) {
         navigate(target, { replace: true });
@@ -149,7 +177,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
   }, [location.pathname, navigate, params.filter, routeFilter, queryFilter]);
 
   useEffect(() => {
-    if (channels.length > 0 && !currentChannelId) {
+    if (Array.isArray(channels) && channels.length > 0 && !currentChannelId) {
       setCurrentChannelId(channels[0].id);
     }
   }, [channels, currentChannelId, setCurrentChannelId]);
@@ -166,51 +194,68 @@ export function useMessagesViewModel(): MessagesViewModelState {
     }
   }, [currentChannelId, updateLastReadAction]);
 
+  const lastMessagesErrorRef = useRef<Error | null>(null);
   useEffect(() => {
-    if (!messagesError) return;
+    if (!messagesError) {
+      lastMessagesErrorRef.current = null;
+      return;
+    }
+    // Avoid duplicate toasts for the same error (e.g. React Strict Mode double-invoke)
+    if (lastMessagesErrorRef.current === messagesError) return;
+    lastMessagesErrorRef.current = messagesError;
 
-    logger.error('Messages module error', { error: messagesError });
+    logger.error("Messages module error", { error: messagesError });
     toast({
-      title: 'Something went wrong',
-      description: messagesError.message ?? 'Please try again shortly.',
-      variant: 'destructive',
+      title: "Something went wrong",
+      description: messagesError.message ?? "Please try again shortly.",
+      variant: "destructive",
     });
     clearMessagesError();
   }, [clearMessagesError, messagesError, toast]);
 
   const canToggleAvailability = useMemo(() => {
-    const role = (profile?.role ?? '').toLowerCase();
-    return ['supervisor', 'manager', 'admin', 'owner', 'company_admin'].includes(role);
+    const role = (profile?.role ?? "").toLowerCase();
+    return [
+      "supervisor",
+      "manager",
+      "admin",
+      "owner",
+      "company_admin",
+    ].includes(role);
   }, [profile?.role]);
 
   const filteredChannels = useMemo<MessageChannel[]>(() => {
     const uid = profile?.id;
     let list = channels.slice();
 
-    if (activeFilter === 'unread') {
+    if (activeFilter === "unread") {
       list = list.filter((channel) => {
-        const me = channel.channel_members?.find((member) => member.user_id === uid);
+        const me = channel.channel_members?.find(
+          (member) => member.user_id === uid,
+        );
         if (!me?.last_read_at) return true;
         return new Date(channel.updated_at) > new Date(me.last_read_at);
       });
     }
 
-    if (activeFilter === 'teams') {
-      list = list.filter((channel) => channel.type !== 'direct');
+    if (activeFilter === "teams") {
+      list = list.filter((channel) => channel.type !== "direct");
     }
 
-    if (activeFilter === 'helpdesk') {
+    if (activeFilter === "helpdesk") {
       list = list.filter(
         (channel) =>
-          (channel.type ?? '').toLowerCase() === 'helpdesk' ||
-          channel.name.toLowerCase().includes('help'),
+          (channel.type ?? "").toLowerCase() === "helpdesk" ||
+          (channel.name ?? "").toLowerCase().includes("help"),
       );
     }
 
     if (query.trim()) {
       const keyword = query.toLowerCase();
       list = list.filter((channel) =>
-        `${channel.name} ${channel.description ?? ''}`.toLowerCase().includes(keyword),
+        `${channel.name ?? ""} ${channel.description ?? ""}`
+          .toLowerCase()
+          .includes(keyword),
       );
     }
 
@@ -225,7 +270,10 @@ export function useMessagesViewModel(): MessagesViewModelState {
   );
 
   const handleSendMessage = useCallback(
-    async (content: string, attachments: MessageAttachment[]): Promise<void> => {
+    async (
+      content: string,
+      attachments: MessageAttachment[],
+    ): Promise<void> => {
       if (!currentChannelId) return;
       await sendMessageAction(currentChannelId, content, {
         attachments,
@@ -242,11 +290,14 @@ export function useMessagesViewModel(): MessagesViewModelState {
     setCallType(null);
   }, []);
 
-  const handleScheduleMessage = useCallback((content: string, scheduledFor: Date): void => {
-    logger.debug('Scheduled message', {
-      context: { content, scheduledFor },
-    });
-  }, []);
+  const handleScheduleMessage = useCallback(
+    (content: string, scheduledFor: Date): void => {
+      logger.debug("Scheduled message", {
+        context: { content, scheduledFor },
+      });
+    },
+    [],
+  );
 
   const handleThreadMessage = useCallback((message: ThreadMessage): void => {
     setThreadMessage(message);
@@ -268,7 +319,12 @@ export function useMessagesViewModel(): MessagesViewModelState {
         // toast handled inside action
       }
     },
-    [currentChannelId, deleteChannelAction, refetchChannels, setCurrentChannelId],
+    [
+      currentChannelId,
+      deleteChannelAction,
+      refetchChannels,
+      setCurrentChannelId,
+    ],
   );
 
   const handleChannelUpdated = useCallback(async () => {
@@ -301,8 +357,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
   const navigateToFilter = useCallback(
     (value: FilterType): void => {
-      const basePath = '/app/messages';
-      const target = value === 'all' ? basePath : `${basePath}/${value}`;
+      const basePath = "/app/messages";
+      const target = value === "all" ? basePath : `${basePath}/${value}`;
       if (location.pathname !== target) {
         navigate(target, { replace: true });
       }

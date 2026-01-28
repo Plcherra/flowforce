@@ -1,28 +1,40 @@
-import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import type { Message } from '@/components/MessageCard';
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import type { Message } from "@/components/MessageCard";
 
 interface MessageModalProps {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   message: Message | null;
-  onUpdateStatus?: (id: string, status: Message['status']) => void;
+  onUpdateStatus?: (id: string, status: Message["status"]) => void;
   onAddReply?: (id: string, content: string) => void;
 }
 
-export function MessageModal({ open, onOpenChange, message, onUpdateStatus, onAddReply }: MessageModalProps) {
-  const [reply, setReply] = useState('');
+export function MessageModal({
+  open,
+  onOpenChange,
+  message,
+  onUpdateStatus,
+  onAddReply,
+}: MessageModalProps) {
+  const [reply, setReply] = useState("");
 
   useEffect(() => {
-    setReply('');
+    setReply("");
   }, [message?.id]);
 
   const handleStatusToggle = () => {
     if (!message || !onUpdateStatus) return;
-    const nextStatus = message.status === 'open' ? 'closed' : 'open';
+    const nextStatus = message.status === "open" ? "closed" : "open";
     onUpdateStatus(message.id, nextStatus);
   };
 
@@ -31,7 +43,7 @@ export function MessageModal({ open, onOpenChange, message, onUpdateStatus, onAd
     const trimmed = reply.trim();
     if (!trimmed) return;
     onAddReply(message.id, trimmed);
-    setReply('');
+    setReply("");
   };
 
   return (
@@ -39,13 +51,18 @@ export function MessageModal({ open, onOpenChange, message, onUpdateStatus, onAd
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{message?.subject || 'Message'}</span>
+            <span>{message?.subject || "Message"}</span>
             {message && (
               <div className="flex items-center gap-2">
-                <Badge variant={message.status === 'open' ? 'default' : 'secondary'} className="text-xs">
+                <Badge
+                  variant={message.status === "open" ? "default" : "secondary"}
+                  className="text-xs"
+                >
                   {message.status}
                 </Badge>
-                <Badge variant="outline" className="text-xs capitalize">{message.category}</Badge>
+                <Badge variant="outline" className="text-xs capitalize">
+                  {message.category}
+                </Badge>
               </div>
             )}
           </DialogTitle>
@@ -63,7 +80,10 @@ export function MessageModal({ open, onOpenChange, message, onUpdateStatus, onAd
             <h4 className="text-sm font-medium">Conversation</h4>
             <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
               {message.replies.map((reply) => (
-                <div key={reply.id} className="bg-muted/60 rounded-md p-3 text-sm">
+                <div
+                  key={reply.id}
+                  className="bg-muted/60 rounded-md p-3 text-sm"
+                >
                   <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                     <span>{reply.author}</span>
                     <span>{new Date(reply.timestamp).toLocaleString()}</span>
@@ -97,8 +117,12 @@ export function MessageModal({ open, onOpenChange, message, onUpdateStatus, onAd
             )}
 
             {onUpdateStatus && (
-              <Button variant="ghost" className="w-full" onClick={handleStatusToggle}>
-                Mark as {message?.status === 'open' ? 'resolved' : 'open'}
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={handleStatusToggle}
+              >
+                Mark as {message?.status === "open" ? "resolved" : "open"}
               </Button>
             )}
 

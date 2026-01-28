@@ -1,7 +1,7 @@
-import { Clock, Edit, Play, Pause } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Clock, Edit, Play, Pause } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface CountingTimersProps {
   countingTime: number;
@@ -26,7 +26,7 @@ export function CountingTimers({
   onStartTimer,
   onStopTimer,
   onStartEditTimer,
-  onStopEditTimer
+  onStopEditTimer,
 }: CountingTimersProps) {
   return (
     <div className="flex gap-4 items-center">
@@ -75,7 +75,9 @@ export function CountingTimers({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={isEditTimerRunning ? onStopEditTimer : onStartEditTimer}
+                  onClick={
+                    isEditTimerRunning ? onStopEditTimer : onStartEditTimer
+                  }
                   className="h-8 w-8 p-0"
                 >
                   {isEditTimerRunning ? (

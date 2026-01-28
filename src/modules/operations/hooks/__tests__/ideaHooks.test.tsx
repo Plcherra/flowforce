@@ -1,11 +1,11 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
-import { useIdeaInsights } from '../useIdeaInsights';
-import { useIdeaDiagnostics } from '../useIdeaDiagnostics';
-import { useIdeaActions } from '../useIdeaActions';
-import { useIdeaAssessments } from '../useIdeaAssessments';
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+import { useIdeaInsights } from "../useIdeaInsights";
+import { useIdeaDiagnostics } from "../useIdeaDiagnostics";
+import { useIdeaActions } from "../useIdeaActions";
+import { useIdeaAssessments } from "../useIdeaAssessments";
 
 type SupabaseMock = {
   rpc: ReturnType<typeof vi.fn>;
@@ -17,26 +17,29 @@ const { rpcMock, fromMock } = vi.hoisted(() => ({
   fromMock: vi.fn(),
 }));
 
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     rpc: rpcMock,
     from: fromMock,
   },
 }));
 
-vi.mock('@/hooks/useProfile', () => ({
+vi.mock("@/hooks/useProfile", () => ({
   useProfile: () => ({
     profile: {
-      id: 'user-1',
-      userId: 'user-1',
-      company_id: 'company-1',
+      id: "user-1",
+      userId: "user-1",
+      company_id: "company-1",
     },
     loading: false,
   }),
 }));
 
-describe('IDEA hooks', () => {
-  const range = { start: new Date('2024-01-01T00:00:00Z'), end: new Date('2024-01-08T00:00:00Z') };
+describe("IDEA hooks", () => {
+  const range = {
+    start: new Date("2024-01-01T00:00:00Z"),
+    end: new Date("2024-01-08T00:00:00Z"),
+  };
 
   beforeEach(() => {
     rpcMock.mockReset();
@@ -47,25 +50,32 @@ describe('IDEA hooks', () => {
     vi.restoreAllMocks();
   });
 
-  it('loads KPI insights from Supabase', async () => {
+  it("loads KPI insights from Supabase", async () => {
     rpcMock.mockResolvedValue({
       data: [
-        { id: 'sales', label: 'Sales', value: 125000, delta: 5200, trend: 'up', unit: 'USD' },
+        {
+          id: "sales",
+          label: "Sales",
+          value: 125000,
+          delta: 5200,
+          trend: "up",
+          unit: "USD",
+        },
       ],
       error: null,
     });
     fromMock.mockImplementation(() => ({}));
 
-    const { result } = renderHook(() => useIdeaInsights('company-1', range), {
+    const { result } = renderHook(() => useIdeaInsights("company-1", range), {
       wrapper: createQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data[0].label).toBe('Sales');
+    expect(result.current.data[0].label).toBe("Sales");
   });
 
-  it('summarises diagnostics from AI endpoint', async () => {
+  it("summarises diagnostics from AI endpoint", async () => {
     rpcMock.mockResolvedValue({ data: [], error: null });
     fromMock.mockImplementation(() => ({}));
 
@@ -74,14 +84,19 @@ describe('IDEA hooks', () => {
       json: async () => ({
         evaluation: {
           insights: [
-            { id: 'sig-1', message: 'Rising labor cost', severity: 'warning', metadata: { confidence: 0.82 } },
+            {
+              id: "sig-1",
+              message: "Rising labor cost",
+              severity: "warning",
+              metadata: { confidence: 0.82 },
+            },
           ],
           recommendedActions: [
             {
-              dedupeKey: 'rec-1',
-              actionType: 'idea.action.correct',
+              dedupeKey: "rec-1",
+              actionType: "idea.action.correct",
               confidence: 0.71,
-              impacts: [{ metric: 'Labor %', delta: -3 }],
+              impacts: [{ metric: "Labor %", delta: -3 }],
             },
           ],
         },
@@ -92,45 +107,66 @@ describe('IDEA hooks', () => {
     // @ts-expect-error override fetch for test
     global.fetch = fetchMock;
 
-    const insights = [{ id: 'labor', label: 'Labor %', value: 28, delta: 3, trend: 'up' as const }];
-    const { result } = renderHook(() => useIdeaDiagnostics('company-1', insights, range), {
-      wrapper: createQueryWrapper(),
-    });
+    const insights = [
+      {
+        id: "labor",
+        label: "Labor %",
+        value: 28,
+        delta: 3,
+        trend: "up" as const,
+      },
+    ];
+    const { result } = renderHook(
+      () => useIdeaDiagnostics("company-1", insights, range),
+      {
+        wrapper: createQueryWrapper(),
+      },
+    );
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.data.causes[0].summary).toContain('labor');
-    expect(result.current.data.recommendations[0].action).toContain('idea.action.correct');
+    expect(result.current.data.causes[0].summary).toContain("labor");
+    expect(result.current.data.recommendations[0].action).toContain(
+      "idea.action.correct",
+    );
     expect(fetchMock).toHaveBeenCalledWith(
-      '/functions/v1/copilot-service',
-      expect.objectContaining({ method: 'POST' }),
+      "/functions/v1/copilot-service",
+      expect.objectContaining({ method: "POST" }),
     );
 
     global.fetch = originalFetch as typeof global.fetch;
   });
 
-  it('creates and executes IDEA actions', async () => {
+  it("creates and executes IDEA actions", async () => {
     const actionsStore: any[] = [];
-    const cyclesStore: any[] = [{ id: 'cycle-1', stage: 'execute', company_id: 'company-1', range: {} }];
+    const cyclesStore: any[] = [
+      { id: "cycle-1", stage: "execute", company_id: "company-1", range: {} },
+    ];
 
     fromMock.mockImplementation((table: string) => {
-      if (table === 'idea_actions') {
+      if (table === "idea_actions") {
         return createIdeaActionsMock(actionsStore);
       }
-      if (table === 'idea_cycles') {
+      if (table === "idea_cycles") {
         return createIdeaCyclesMock(cyclesStore);
       }
       return {};
     });
 
-    const { result } = renderHook(() => useIdeaActions('company-1', 'cycle-1'), {
-      wrapper: createQueryWrapper(),
-    });
+    const { result } = renderHook(
+      () => useIdeaActions("company-1", "cycle-1"),
+      {
+        wrapper: createQueryWrapper(),
+      },
+    );
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toEqual([]);
 
     await act(async () => {
-      await result.current.createAction({ action: 'Coach shift leads', recommendationId: 'rec-1' });
+      await result.current.createAction({
+        action: "Coach shift leads",
+        recommendationId: "rec-1",
+      });
     });
 
     await waitFor(() => expect(result.current.data).toHaveLength(1));
@@ -139,15 +175,15 @@ describe('IDEA hooks', () => {
       await result.current.execute({ actionId: result.current.data[0].id });
     });
 
-    await waitFor(() => expect(result.current.data[0].status).toBe('executed'));
+    await waitFor(() => expect(result.current.data[0].status).toBe("executed"));
   });
 
-  it('evaluates assessments and persists cycle updates', async () => {
+  it("evaluates assessments and persists cycle updates", async () => {
     const beforeSnapshot = [
-      { id: 'sales', value: 100000, label: 'Sales', unit: 'USD' },
+      { id: "sales", value: 100000, label: "Sales", unit: "USD" },
     ];
     const afterSnapshot = [
-      { id: 'sales', value: 120000, label: 'Sales', unit: 'USD' },
+      { id: "sales", value: 120000, label: "Sales", unit: "USD" },
     ];
 
     rpcMock.mockImplementation((_fn: string, params: any) => {
@@ -159,11 +195,15 @@ describe('IDEA hooks', () => {
     });
 
     fromMock.mockImplementation((table: string) => {
-      if (table === 'idea_cycles') {
+      if (table === "idea_cycles") {
         return {
           update: vi.fn(() => ({
             eq: vi.fn(() => ({
-              select: vi.fn(() => ({ single: vi.fn(() => Promise.resolve({ data: { id: 'cycle-1' }, error: null })) })),
+              select: vi.fn(() => ({
+                single: vi.fn(() =>
+                  Promise.resolve({ data: { id: "cycle-1" }, error: null }),
+                ),
+              })),
             })),
           })),
         };
@@ -176,11 +216,11 @@ describe('IDEA hooks', () => {
       label: entry.label,
       value: entry.value,
       delta: entry.value - beforeSnapshot[0].value,
-      trend: 'up' as const,
+      trend: "up" as const,
     }));
 
     const { result } = renderHook(
-      () => useIdeaAssessments('company-1', range, 'cycle-1', insights, true),
+      () => useIdeaAssessments("company-1", range, "cycle-1", insights, true),
       { wrapper: createQueryWrapper() },
     );
 
@@ -188,22 +228,29 @@ describe('IDEA hooks', () => {
     expect(result.current.data[0].roi).toBe(20);
 
     await act(async () => {
-      await result.current.saveAssessment('Integration test');
+      await result.current.saveAssessment("Integration test");
     });
 
-    expect(fromMock).toHaveBeenCalledWith('idea_cycles');
+    expect(fromMock).toHaveBeenCalledWith("idea_cycles");
   });
 
-  it('progresses through identify, diagnose, execute, and assess stages', async () => {
+  it("progresses through identify, diagnose, execute, and assess stages", async () => {
     let callCount = 0;
     const identifySnapshot = [
-      { id: 'sales', label: 'Sales', value: 150000, delta: 5000, trend: 'up', unit: 'USD' },
+      {
+        id: "sales",
+        label: "Sales",
+        value: 150000,
+        delta: 5000,
+        trend: "up",
+        unit: "USD",
+      },
     ];
     const beforeSnapshot = [
-      { id: 'sales', value: 120000, label: 'Sales', unit: 'USD' },
+      { id: "sales", value: 120000, label: "Sales", unit: "USD" },
     ];
     const afterSnapshot = [
-      { id: 'sales', value: 150000, label: 'Sales', unit: 'USD' },
+      { id: "sales", value: 150000, label: "Sales", unit: "USD" },
     ];
 
     rpcMock.mockImplementation(() => {
@@ -221,19 +268,24 @@ describe('IDEA hooks', () => {
     const cyclesStore: any[] = [];
 
     fromMock.mockImplementation((table: string) => {
-      if (table === 'idea_actions') {
+      if (table === "idea_actions") {
         return createIdeaActionsMock(actionsStore);
       }
-      if (table === 'idea_cycles') {
+      if (table === "idea_cycles") {
         return createIdeaCyclesMock(cyclesStore);
       }
       return {};
     });
 
-    const insightsHook = renderHook(() => useIdeaInsights('company-99', range), {
-      wrapper: createQueryWrapper(),
-    });
-    await waitFor(() => expect(insightsHook.result.current.loading).toBe(false));
+    const insightsHook = renderHook(
+      () => useIdeaInsights("company-99", range),
+      {
+        wrapper: createQueryWrapper(),
+      },
+    );
+    await waitFor(() =>
+      expect(insightsHook.result.current.loading).toBe(false),
+    );
     expect(insightsHook.result.current.data).toHaveLength(1);
 
     const fetchMock = vi.fn().mockResolvedValue({
@@ -241,14 +293,19 @@ describe('IDEA hooks', () => {
       json: async () => ({
         evaluation: {
           insights: [
-            { id: 'c-flow', message: 'Product mix shift', severity: 'warning', metadata: { confidence: 0.78 } },
+            {
+              id: "c-flow",
+              message: "Product mix shift",
+              severity: "warning",
+              metadata: { confidence: 0.78 },
+            },
           ],
           recommendedActions: [
             {
-              dedupeKey: 'r-flow',
-              actionType: 'Launch upsell campaign',
+              dedupeKey: "r-flow",
+              actionType: "Launch upsell campaign",
               confidence: 0.74,
-              impacts: [{ metric: 'Sales', delta: 5, unit: 'USD' }],
+              impacts: [{ metric: "Sales", delta: 5, unit: "USD" }],
             },
           ],
         },
@@ -259,56 +316,79 @@ describe('IDEA hooks', () => {
     global.fetch = fetchMock;
 
     const diagnosticsHook = renderHook(
-      ({ data }) => useIdeaDiagnostics('company-99', data, range),
+      ({ data }) => useIdeaDiagnostics("company-99", data, range),
       {
-        initialProps: { data: [] as ReturnType<typeof useIdeaInsights>['data'] },
+        initialProps: {
+          data: [] as ReturnType<typeof useIdeaInsights>["data"],
+        },
         wrapper: createQueryWrapper(),
       },
     );
 
     diagnosticsHook.rerender({ data: insightsHook.result.current.data });
-    await waitFor(() => expect(diagnosticsHook.result.current.loading).toBe(false));
+    await waitFor(() =>
+      expect(diagnosticsHook.result.current.loading).toBe(false),
+    );
     expect(diagnosticsHook.result.current.data.recommendations).toHaveLength(1);
 
     cyclesStore.push({
-      id: 'cycle-1',
-      company_id: 'company-99',
-      stage: 'execute',
+      id: "cycle-1",
+      company_id: "company-99",
+      stage: "execute",
       range: `[${range.start.toISOString()},${range.end.toISOString()})`,
       insights: insightsHook.result.current.data,
       actions: diagnosticsHook.result.current.data.recommendations,
       assessments: null,
     });
 
-    const actionsHook = renderHook(() => useIdeaActions('company-99', 'cycle-1'), {
-      wrapper: createQueryWrapper(),
-    });
+    const actionsHook = renderHook(
+      () => useIdeaActions("company-99", "cycle-1"),
+      {
+        wrapper: createQueryWrapper(),
+      },
+    );
     await waitFor(() => expect(actionsHook.result.current.loading).toBe(false));
 
     await act(async () => {
       await actionsHook.result.current.createAction({
         action: diagnosticsHook.result.current.data.recommendations[0].action,
-        recommendationId: diagnosticsHook.result.current.data.recommendations[0].id,
+        recommendationId:
+          diagnosticsHook.result.current.data.recommendations[0].id,
       });
     });
 
-    await waitFor(() => expect(actionsHook.result.current.data).toHaveLength(1));
+    await waitFor(() =>
+      expect(actionsHook.result.current.data).toHaveLength(1),
+    );
 
     await act(async () => {
-      await actionsHook.result.current.execute({ actionId: actionsHook.result.current.data[0].id });
+      await actionsHook.result.current.execute({
+        actionId: actionsHook.result.current.data[0].id,
+      });
     });
 
-    await waitFor(() => expect(actionsHook.result.current.data[0].status).toBe('executed'));
+    await waitFor(() =>
+      expect(actionsHook.result.current.data[0].status).toBe("executed"),
+    );
 
     const assessmentsHook = renderHook(
-      () => useIdeaAssessments('company-99', range, 'cycle-1', insightsHook.result.current.data, true),
+      () =>
+        useIdeaAssessments(
+          "company-99",
+          range,
+          "cycle-1",
+          insightsHook.result.current.data,
+          true,
+        ),
       { wrapper: createQueryWrapper() },
     );
 
-    await waitFor(() => expect(assessmentsHook.result.current.loading).toBe(false));
+    await waitFor(() =>
+      expect(assessmentsHook.result.current.loading).toBe(false),
+    );
 
     await act(async () => {
-      await assessmentsHook.result.current.saveAssessment('Cycle complete');
+      await assessmentsHook.result.current.saveAssessment("Cycle complete");
     });
 
     expect(cyclesStore[0].assessments).not.toBeNull();
@@ -335,7 +415,9 @@ function createQueryWrapper() {
   });
 
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   };
 }
 

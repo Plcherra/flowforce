@@ -1,12 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { useTeamManagement } from '@/hooks/useTeamManagement';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { useTeamManagement } from "@/hooks/useTeamManagement";
 
-type Profile = Tables<'profiles'>;
+type Profile = Tables<"profiles">;
 
 type RoleManagerDialogProps = {
   open: boolean;
@@ -22,22 +33,24 @@ export function RoleManagerDialog({
   onRoleUpdated,
 }: RoleManagerDialogProps) {
   const { roles, isLoading, assignRole, isAssigning } = useTeamManagement();
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
-  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
 
   const employeeOptions = useMemo(
     () =>
       employees.map((employee) => ({
         id: employee.id,
-        name: `${employee.first_name} ${employee.last_name}`.trim() || employee.email,
+        name:
+          `${employee.first_name} ${employee.last_name}`.trim() ||
+          employee.email,
       })),
     [employees],
   );
 
   useEffect(() => {
     if (!open) {
-      setSelectedEmployeeId('');
-      setSelectedRoleId('');
+      setSelectedEmployeeId("");
+      setSelectedRoleId("");
     }
   }, [open]);
 
@@ -59,7 +72,10 @@ export function RoleManagerDialog({
         <form className="space-y-4" onSubmit={handleAssign}>
           <div className="space-y-1.5">
             <Label>Employee</Label>
-            <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
+            <Select
+              value={selectedEmployeeId}
+              onValueChange={setSelectedEmployeeId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a teammate" />
               </SelectTrigger>
@@ -94,11 +110,18 @@ export function RoleManagerDialog({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={!selectedEmployeeId || !selectedRoleId || isAssigning}>
-              {isAssigning ? 'Saving…' : 'Save changes'}
+            <Button
+              type="submit"
+              disabled={!selectedEmployeeId || !selectedRoleId || isAssigning}
+            >
+              {isAssigning ? "Saving…" : "Save changes"}
             </Button>
           </div>
         </form>

@@ -1,11 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Bold,
+  Italic,
+  Underline,
   Strikethrough,
   AlignLeft,
   AlignCenter,
@@ -18,10 +30,10 @@ import {
   Type,
   Palette,
   Undo2,
-  Redo2
-} from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+  Redo2,
+} from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 interface DescriptionEditorDialogProps {
   open: boolean;
@@ -34,10 +46,10 @@ export function DescriptionEditorDialog({
   open,
   onOpenChange,
   content,
-  onSave
+  onSave,
 }: DescriptionEditorDialogProps) {
   const [editorContent, setEditorContent] = useState(content);
-  const [fontSize, setFontSize] = useState('14px');
+  const [fontSize, setFontSize] = useState("14px");
 
   useEffect(() => {
     setEditorContent(content);
@@ -51,27 +63,37 @@ export function DescriptionEditorDialog({
   const quillModules = {
     toolbar: {
       container: [
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'align': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        ['link', 'image'],
-        ['clean'],
-        ['undo', 'redo']
+        [{ size: ["small", false, "large", "huge"] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link", "image"],
+        ["clean"],
+        ["undo", "redo"],
       ],
     },
     history: {
       delay: 1000,
       maxStack: 50,
-      userOnly: false
-    }
+      userOnly: false,
+    },
   };
 
   const quillFormats = [
-    'size', 'bold', 'italic', 'underline', 'strike',
-    'color', 'background', 'align', 'list', 'bullet',
-    'link', 'image', 'clean'
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "align",
+    "list",
+    "bullet",
+    "link",
+    "image",
+    "clean",
   ];
 
   return (
@@ -83,7 +105,7 @@ export function DescriptionEditorDialog({
             Use the rich text editor to format and style your content.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="flex-1 flex flex-col gap-4">
           {/* Custom Toolbar */}
           <div className="flex flex-wrap items-center gap-2 p-3 border rounded-lg bg-muted/20">
@@ -184,9 +206,9 @@ export function DescriptionEditorDialog({
               formats={quillFormats}
               theme="snow"
               className="h-full"
-              style={{ 
-                height: 'calc(100% - 42px)', // Account for toolbar height
-                fontSize: fontSize 
+              style={{
+                height: "calc(100% - 42px)", // Account for toolbar height
+                fontSize: fontSize,
               }}
             />
           </div>
@@ -197,9 +219,7 @@ export function DescriptionEditorDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
-            Confirm
-          </Button>
+          <Button onClick={handleSave}>Confirm</Button>
         </div>
       </DialogContent>
     </Dialog>

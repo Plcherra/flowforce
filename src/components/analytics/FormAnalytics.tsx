@@ -1,17 +1,46 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Users, FileText, Calendar, Download, Activity } from 'lucide-react';
-import { useForms } from '@/hooks/useForms';
-import { asArray, safeArrayMap, safeArrayLength } from '@/utils/reactQueryTypes';
-import { FormSubmission } from '@/types/common';
-import type { AssistantContext } from '@/types/ai';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  TrendingUp,
+  Users,
+  FileText,
+  Calendar,
+  Download,
+  Activity,
+} from "lucide-react";
+import { useForms } from "@/hooks/useForms";
+import {
+  asArray,
+  safeArrayMap,
+  safeArrayLength,
+} from "@/utils/reactQueryTypes";
+import { FormSubmission } from "@/types/common";
+import type { AssistantContext } from "@/types/ai";
+import { logger } from "@/utils/logger";
 
 interface FormAnalyticsProps {
   formId?: string;
@@ -21,7 +50,7 @@ interface FormAnalyticsProps {
     formId: string;
     submissionCount: number;
     completionRate: number;
-    fieldData: AnalyticsData['fieldAnalysis'];
+    fieldData: AnalyticsData["fieldAnalysis"];
   }) => void;
 }
 
@@ -35,13 +64,20 @@ interface AnalyticsData {
   deviceBreakdown: { device: string; count: number; percentage: number }[];
 }
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe'];
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088fe"];
 
-export default function FormAnalytics({ formId, onContextChange, onFormSelect, onSummaryChange }: FormAnalyticsProps) {
+export default function FormAnalytics({
+  formId,
+  onContextChange,
+  onFormSelect,
+  onSummaryChange,
+}: FormAnalyticsProps) {
   const { forms, getFormSubmissions, getFormFields } = useForms();
-  const [selectedForm, setSelectedForm] = useState(formId || '');
-  const [timeRange, setTimeRange] = useState('7d');
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [selectedForm, setSelectedForm] = useState(formId || "");
+  const [timeRange, setTimeRange] = useState("7d");
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -71,12 +107,12 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
   const loadAnalytics = async () => {
     if (!selectedForm) return;
-    
+
     setLoading(true);
     try {
       const [submissionsResult, fieldsResult] = await Promise.all([
         getFormSubmissions(selectedForm),
-        getFormFields(selectedForm)
+        getFormFields(selectedForm),
       ]);
 
       if (!submissionsResult.error && !fieldsResult.error) {
@@ -92,7 +128,9 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
           const data = (s.submission_data || {}) as Record<string, any>;
           for (const f of fields) {
             const val = data[f.id];
-            const hasValue = Array.isArray(val) ? val.length > 0 : (val ?? '') !== '';
+            const hasValue = Array.isArray(val)
+              ? val.length > 0
+              : (val ?? "") !== "";
             if (hasValue) fieldCounts[f.id] = (fieldCounts[f.id] || 0) + 1;
           }
         });
@@ -101,41 +139,72 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
         const completedSubmissions = submissions.filter((submission: any) => {
           if (!requiredFields.length) return true;
-          const data = (submission.submission_data || {}) as Record<string, unknown>;
+          const data = (submission.submission_data || {}) as Record<
+            string,
+            unknown
+          >;
           return requiredFields.every((field) => {
             const value = data[field.id];
             if (Array.isArray(value)) return value.length > 0;
-            return (value ?? '') !== '';
+            return (value ?? "") !== "";
           });
         });
 
-        const completionRate = submissions.length > 0
-          ? Math.round((completedSubmissions.length / submissions.length) * 100)
-          : 0;
+        const completionRate =
+          submissions.length > 0
+            ? Math.round(
+                (completedSubmissions.length / submissions.length) * 100,
+              )
+            : 0;
 
-        const topFields = fields.slice(0, 5).map(f => ({
+        const topFields = fields.slice(0, 5).map((f) => ({
           field: f.label,
           interactions: fieldCounts[f.id] || 0,
         }));
 
-        const fieldAnalysis = fields.map(f => {
+        const fieldAnalysis = fields.map((f) => {
           const count = fieldCounts[f.id] || 0;
-          const completion = submissions.length > 0 ? Math.round((count / submissions.length) * 100) : 0;
-          return { field: f.label, completion, dropoff: Math.max(0, 100 - completion) };
+          const completion =
+            submissions.length > 0
+              ? Math.round((count / submissions.length) * 100)
+              : 0;
+          return {
+            field: f.label,
+            completion,
+            dropoff: Math.max(0, 100 - completion),
+          };
         });
 
         const breakdownCounts = { desktop: 0, mobile: 0, tablet: 0 };
         submissions.forEach((s: any) => {
-          const ua = String(s.user_agent || '').toLowerCase();
+          const ua = String(s.user_agent || "").toLowerCase();
           if (/ipad|tablet/.test(ua)) breakdownCounts.tablet += 1;
           else if (/mobi|iphone|android/.test(ua)) breakdownCounts.mobile += 1;
           else breakdownCounts.desktop += 1;
         });
         const totalDevices = Math.max(1, submissions.length);
         const deviceBreakdown = [
-          { device: 'Desktop', count: breakdownCounts.desktop, percentage: Math.round((breakdownCounts.desktop / totalDevices) * 100) },
-          { device: 'Mobile', count: breakdownCounts.mobile, percentage: Math.round((breakdownCounts.mobile / totalDevices) * 100) },
-          { device: 'Tablet', count: breakdownCounts.tablet, percentage: Math.round((breakdownCounts.tablet / totalDevices) * 100) },
+          {
+            device: "Desktop",
+            count: breakdownCounts.desktop,
+            percentage: Math.round(
+              (breakdownCounts.desktop / totalDevices) * 100,
+            ),
+          },
+          {
+            device: "Mobile",
+            count: breakdownCounts.mobile,
+            percentage: Math.round(
+              (breakdownCounts.mobile / totalDevices) * 100,
+            ),
+          },
+          {
+            device: "Tablet",
+            count: breakdownCounts.tablet,
+            percentage: Math.round(
+              (breakdownCounts.tablet / totalDevices) * 100,
+            ),
+          },
         ];
 
         const data: AnalyticsData = {
@@ -151,14 +220,14 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
         setAnalyticsData(data);
       }
     } catch (error) {
-      logger.error('Error loading analytics:', { error, tags: ['error'] });
+      logger.error("Error loading analytics:", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
   };
 
   const generateDailyData = (submissions: FormSubmission[], range: string) => {
-    const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
+    const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
     const counts = new Map<string, number>();
     const today = new Date();
     for (let i = days - 1; i >= 0; i--) {
@@ -168,32 +237,38 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
       counts.set(key, 0);
     }
     submissions.forEach((s: any) => {
-      const key = String(s.submitted_at || '').slice(0, 10);
+      const key = String(s.submitted_at || "").slice(0, 10);
       if (counts.has(key)) counts.set(key, (counts.get(key) || 0) + 1);
     });
     return Array.from(counts.entries()).map(([iso, count]) => ({
-      date: new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: new Date(iso).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
       submissions: count,
     }));
   };
 
   const exportData = () => {
     if (!analyticsData) return;
-    
+
     const csvData = [
-      ['Metric', 'Value'],
-      ['Total Submissions', analyticsData.totalSubmissions],
-      ['Completion Rate', `${analyticsData.completionRate}%`],
-      ['Average Time (seconds)', analyticsData.averageTime],
-      ...analyticsData.topFields.map(field => [`Field: ${field.field}`, field.interactions])
+      ["Metric", "Value"],
+      ["Total Submissions", analyticsData.totalSubmissions],
+      ["Completion Rate", `${analyticsData.completionRate}%`],
+      ["Average Time (seconds)", analyticsData.averageTime],
+      ...analyticsData.topFields.map((field) => [
+        `Field: ${field.field}`,
+        field.interactions,
+      ]),
     ];
 
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const csvContent = csvData.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `form-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `form-analytics-${new Date().toISOString().split("T")[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -229,59 +304,70 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
       return;
     }
 
-    const lowCompletionFields = analyticsData.fieldAnalysis.filter((field) => field.completion < 70);
+    const lowCompletionFields = analyticsData.fieldAnalysis.filter(
+      (field) => field.completion < 70,
+    );
     const averageFieldCompletion = analyticsData.fieldAnalysis.length
       ? Math.round(
-          analyticsData.fieldAnalysis.reduce((sum, field) => sum + field.completion, 0) /
-            analyticsData.fieldAnalysis.length
+          analyticsData.fieldAnalysis.reduce(
+            (sum, field) => sum + field.completion,
+            0,
+          ) / analyticsData.fieldAnalysis.length,
         )
       : analyticsData.completionRate;
 
-    const accuracyScore = Math.min(100, Math.round((analyticsData.completionRate + averageFieldCompletion) / 2));
+    const accuracyScore = Math.min(
+      100,
+      Math.round((analyticsData.completionRate + averageFieldCompletion) / 2),
+    );
 
-    const engagementDivisor = timeRange === '7d' ? 12 : timeRange === '30d' ? 45 : 90;
+    const engagementDivisor =
+      timeRange === "7d" ? 12 : timeRange === "30d" ? 45 : 90;
     const engagementScore = Math.min(
       100,
-      Math.round((analyticsData.totalSubmissions / Math.max(1, engagementDivisor)) * 100)
+      Math.round(
+        (analyticsData.totalSubmissions / Math.max(1, engagementDivisor)) * 100,
+      ),
     );
 
     const contextPayload: AssistantContext = {
-      type: 'form',
-      title: formMeta.title ?? 'Form analytics',
+      type: "form",
+      title: formMeta.title ?? "Form analytics",
       subtitle: `Window: ${timeRange}`,
       metrics: [
-        { label: 'Completion rate', value: `${analyticsData.completionRate}%` },
+        { label: "Completion rate", value: `${analyticsData.completionRate}%` },
         {
-          label: 'Engagement',
+          label: "Engagement",
           value: `${engagementScore}%`,
           helperText: `${analyticsData.totalSubmissions} submissions`,
         },
         {
-          label: 'Accuracy',
+          label: "Accuracy",
           value: `${accuracyScore}%`,
-          helperText: 'Based on field completion',
+          helperText: "Based on field completion",
         },
         {
-          label: 'Follow-ups',
+          label: "Follow-ups",
           value: `${lowCompletionFields.length}`,
-          helperText: 'Fields below 70% completion',
+          helperText: "Fields below 70% completion",
         },
       ],
       insights: [
         analyticsData.completionRate < 60
           ? {
-              title: 'Completion warning',
+              title: "Completion warning",
               detail:
-                'Completion rate dipped below 60%. Consider trimming required fields or delivering targeted reminders.',
+                "Completion rate dipped below 60%. Consider trimming required fields or delivering targeted reminders.",
             }
           : {
-              title: 'Healthy flow',
-              detail: 'Form completion is outperforming benchmarks. Maintain the current configuration.',
+              title: "Healthy flow",
+              detail:
+                "Form completion is outperforming benchmarks. Maintain the current configuration.",
             },
         ...(lowCompletionFields.length
           ? [
               {
-                title: 'Field friction',
+                title: "Field friction",
                 detail: `${lowCompletionFields.length} fields show material drop-off and may need adjustments.`,
               },
             ]
@@ -291,21 +377,22 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
         ...(lowCompletionFields.length
           ? [
               {
-                label: 'Launch field optimization playbook',
-                action: 'Trigger the form optimization playbook for low performing fields',
-                intent: 'copilot' as const,
+                label: "Launch field optimization playbook",
+                action:
+                  "Trigger the form optimization playbook for low performing fields",
+                intent: "copilot" as const,
               },
             ]
           : []),
         {
-          label: 'Send reminder sequence',
-          action: 'Draft a reminder email sequence to boost submissions',
-          intent: 'analysis' as const,
+          label: "Send reminder sequence",
+          action: "Draft a reminder email sequence to boost submissions",
+          intent: "analysis" as const,
         },
         {
-          label: 'Ask for AI improvement tips',
-          action: 'Share improvement tips I should prioritize',
-          intent: 'optimization' as const,
+          label: "Ask for AI improvement tips",
+          action: "Share improvement tips I should prioritize",
+          intent: "optimization" as const,
         },
       ],
     };
@@ -318,7 +405,14 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
     });
 
     onContextChange(contextPayload);
-  }, [analyticsData, selectedForm, forms, timeRange, onContextChange, onSummaryChange]);
+  }, [
+    analyticsData,
+    selectedForm,
+    forms,
+    timeRange,
+    onContextChange,
+    onSummaryChange,
+  ]);
 
   const formsArray = asArray(forms);
   if (!formsArray.length) {
@@ -327,7 +421,9 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
         <CardContent className="py-8 text-center">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Forms Available</h3>
-          <p className="text-muted-foreground">Create a form first to view analytics</p>
+          <p className="text-muted-foreground">
+            Create a form first to view analytics
+          </p>
         </CardContent>
       </Card>
     );
@@ -342,11 +438,11 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
               <SelectValue placeholder="Select a form" />
             </SelectTrigger>
             <SelectContent>
-              {safeArrayMap(forms, (form) => (
+              {Array.isArray(forms) ? forms.map((form) => (
                 <SelectItem key={form.id} value={form.id}>
                   {form.title}
                 </SelectItem>
-              ))}
+              )) : []}
             </SelectContent>
           </Select>
 
@@ -390,11 +486,15 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Submissions</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total Submissions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold">{analyticsData.totalSubmissions}</div>
+                    <div className="text-2xl font-bold">
+                      {analyticsData.totalSubmissions}
+                    </div>
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </CardContent>
@@ -402,11 +502,15 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Completion Rate</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Completion Rate
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold">{analyticsData.completionRate}%</div>
+                    <div className="text-2xl font-bold">
+                      {analyticsData.completionRate}%
+                    </div>
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   </div>
                 </CardContent>
@@ -414,11 +518,16 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Time</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Avg. Time
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold">{Math.floor(analyticsData.averageTime / 60)}m {analyticsData.averageTime % 60}s</div>
+                    <div className="text-2xl font-bold">
+                      {Math.floor(analyticsData.averageTime / 60)}m{" "}
+                      {analyticsData.averageTime % 60}s
+                    </div>
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </CardContent>
@@ -426,10 +535,18 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Status</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Status
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Badge variant={analyticsData.completionRate > 80 ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      analyticsData.completionRate > 80
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
                     {analyticsData.completionRate > 80 ? "Excellent" : "Good"}
                   </Badge>
                 </CardContent>
@@ -447,7 +564,12 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Line type="monotone" dataKey="submissions" stroke="#8884d8" strokeWidth={2} />
+                    <Line
+                      type="monotone"
+                      dataKey="submissions"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -481,14 +603,23 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
               <CardContent>
                 <div className="space-y-4">
                   {analyticsData.fieldAnalysis.map((field, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded"
+                    >
                       <div className="font-medium">{field.field}</div>
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-muted-foreground">
-                          Completion: <span className="font-medium text-green-600">{field.completion}%</span>
+                          Completion:{" "}
+                          <span className="font-medium text-green-600">
+                            {field.completion}%
+                          </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Drop-off: <span className="font-medium text-red-600">{field.dropoff}%</span>
+                          Drop-off:{" "}
+                          <span className="font-medium text-red-600">
+                            {field.dropoff}%
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -513,10 +644,15 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
                         cy="50%"
                         outerRadius={80}
                         dataKey="count"
-                        label={({ device, percentage }) => `${device} (${percentage}%)`}
+                        label={({ device, percentage }) =>
+                          `${device} (${percentage}%)`
+                        }
                       >
                         {analyticsData.deviceBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip />
@@ -525,11 +661,16 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
 
                   <div className="space-y-4">
                     {analyticsData.deviceBreakdown.map((device, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 border rounded"
+                      >
                         <div className="flex items-center gap-3">
-                          <div 
-                            className="w-4 h-4 rounded" 
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{
+                              backgroundColor: COLORS[index % COLORS.length],
+                            }}
                           />
                           <span className="font-medium">{device.device}</span>
                         </div>
@@ -547,7 +688,9 @@ export default function FormAnalytics({ formId, onContextChange, onFormSelect, o
       ) : (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">Select a form to view analytics</p>
+            <p className="text-muted-foreground">
+              Select a form to view analytics
+            </p>
           </CardContent>
         </Card>
       )}

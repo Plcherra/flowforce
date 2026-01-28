@@ -1,20 +1,36 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { INDUSTRIES, COMPANY_SIZES, CompanyInfo, Branding } from '@/types/onboarding';
-import { 
-  Building2, 
-  Upload, 
-  Palette, 
-  CheckSquare, 
-  Users, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  INDUSTRIES,
+  COMPANY_SIZES,
+  CompanyInfo,
+  Branding,
+} from "@/types/onboarding";
+import {
+  Building2,
+  Upload,
+  Palette,
+  CheckSquare,
+  Users,
   Calendar,
   MessageSquare,
   FileText,
@@ -22,8 +38,8 @@ import {
   ShoppingCart,
   Utensils,
   Briefcase,
-  Heart
-} from 'lucide-react';
+  Heart,
+} from "lucide-react";
 
 interface SelectedSections {
   [key: string]: boolean;
@@ -31,88 +47,179 @@ interface SelectedSections {
 
 const BUSINESS_TEMPLATES = [
   {
-    id: 'office',
-    name: 'Office & Professional',
-    description: 'Perfect for professional services, consulting, and office-based businesses',
+    id: "office",
+    name: "Office & Professional",
+    description:
+      "Perfect for professional services, consulting, and office-based businesses",
     icon: Briefcase,
-    sections: ['employees', 'tasks', 'messages', 'forms', 'analytics', 'reports']
+    sections: [
+      "employees",
+      "tasks",
+      "messages",
+      "forms",
+      "analytics",
+      "reports",
+    ],
   },
   {
-    id: 'retail',
-    name: 'Retail & Commerce',
-    description: 'Designed for retail stores, e-commerce, and product-based businesses',
+    id: "retail",
+    name: "Retail & Commerce",
+    description:
+      "Designed for retail stores, e-commerce, and product-based businesses",
     icon: ShoppingCart,
-    sections: ['employees', 'scheduling', 'inventory', 'tasks', 'analytics', 'expenses']
+    sections: [
+      "employees",
+      "scheduling",
+      "inventory",
+      "tasks",
+      "analytics",
+      "expenses",
+    ],
   },
   {
-    id: 'restaurant',
-    name: 'Restaurant & Food Service',
-    description: 'Built for restaurants, cafes, and food service operations',
+    id: "restaurant",
+    name: "Restaurant & Food Service",
+    description: "Built for restaurants, cafes, and food service operations",
     icon: Utensils,
-    sections: ['employees', 'scheduling', 'tasks', 'inventory', 'messages', 'expenses']
+    sections: [
+      "employees",
+      "scheduling",
+      "tasks",
+      "inventory",
+      "messages",
+      "expenses",
+    ],
   },
   {
-    id: 'healthcare',
-    name: 'Healthcare & Medical',
-    description: 'Tailored for healthcare facilities, clinics, and medical practices',
+    id: "healthcare",
+    name: "Healthcare & Medical",
+    description:
+      "Tailored for healthcare facilities, clinics, and medical practices",
     icon: Heart,
-    sections: ['employees', 'scheduling', 'forms', 'messages', 'learning', 'certifications']
-  }
+    sections: [
+      "employees",
+      "scheduling",
+      "forms",
+      "messages",
+      "learning",
+      "certifications",
+    ],
+  },
 ];
 
 const AVAILABLE_SECTIONS = [
-  { id: 'employees', name: 'Employee Management', icon: Users, description: 'Manage staff profiles and roles' },
-  { id: 'scheduling', name: 'Scheduling & Time Tracking', icon: Calendar, description: 'Shift scheduling and time management' },
-  { id: 'tasks', name: 'Task Management', icon: CheckSquare, description: 'Project and task tracking' },
-  { id: 'messages', name: 'Internal Communication', icon: MessageSquare, description: 'Team messaging and announcements' },
-  { id: 'forms', name: 'Digital Forms', icon: FileText, description: 'Custom forms and document management' },
-  { id: 'analytics', name: 'Analytics & Reports', icon: BarChart3, description: 'Business insights and reporting' },
-  { id: 'inventory', name: 'Inventory Management', icon: Building2, description: 'Stock and inventory tracking' },
-  { id: 'expenses', name: 'Expense Management', icon: Building2, description: 'Track and approve expenses' },
-  { id: 'learning', name: 'Learning Center', icon: Building2, description: 'Training and development' },
-  { id: 'certifications', name: 'Certifications', icon: Building2, description: 'Professional certifications' }
+  {
+    id: "employees",
+    name: "Employee Management",
+    icon: Users,
+    description: "Manage staff profiles and roles",
+  },
+  {
+    id: "scheduling",
+    name: "Scheduling & Time Tracking",
+    icon: Calendar,
+    description: "Shift scheduling and time management",
+  },
+  {
+    id: "tasks",
+    name: "Task Management",
+    icon: CheckSquare,
+    description: "Project and task tracking",
+  },
+  {
+    id: "messages",
+    name: "Internal Communication",
+    icon: MessageSquare,
+    description: "Team messaging and announcements",
+  },
+  {
+    id: "forms",
+    name: "Digital Forms",
+    icon: FileText,
+    description: "Custom forms and document management",
+  },
+  {
+    id: "analytics",
+    name: "Analytics & Reports",
+    icon: BarChart3,
+    description: "Business insights and reporting",
+  },
+  {
+    id: "inventory",
+    name: "Inventory Management",
+    icon: Building2,
+    description: "Stock and inventory tracking",
+  },
+  {
+    id: "expenses",
+    name: "Expense Management",
+    icon: Building2,
+    description: "Track and approve expenses",
+  },
+  {
+    id: "learning",
+    name: "Learning Center",
+    icon: Building2,
+    description: "Training and development",
+  },
+  {
+    id: "certifications",
+    name: "Certifications",
+    icon: Building2,
+    description: "Professional certifications",
+  },
 ];
 
 interface CompanyOnboardingWizardProps {
-  onComplete: (data: { companyInfo: CompanyInfo; branding: Branding; sections: SelectedSections; template: string }) => void;
+  onComplete: (data: {
+    companyInfo: CompanyInfo;
+    branding: Branding;
+    sections: SelectedSections;
+    template: string;
+  }) => void;
   onCancel: () => void;
 }
 
-export default function CompanyOnboardingWizard({ onComplete, onCancel }: CompanyOnboardingWizardProps) {
+export default function CompanyOnboardingWizard({
+  onComplete,
+  onCancel,
+}: CompanyOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
-    name: '',
-    industry: '',
-    size: '',
-    description: '',
-    website: '',
-    phone: ''
+    name: "",
+    industry: "",
+    size: "",
+    description: "",
+    website: "",
+    phone: "",
   });
   const [branding, setBranding] = useState<Branding>({
     logo: null,
-    primaryColor: '#3b82f6',
-    secondaryColor: '#1e40af'
+    primaryColor: "#3b82f6",
+    secondaryColor: "#1e40af",
   });
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [selectedSections, setSelectedSections] = useState<SelectedSections>({});
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [selectedSections, setSelectedSections] = useState<SelectedSections>(
+    {},
+  );
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
 
   const handleNext = () => {
-    setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
   const handleBack = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
-    const template = BUSINESS_TEMPLATES.find(t => t.id === templateId);
+    const template = BUSINESS_TEMPLATES.find((t) => t.id === templateId);
     if (template) {
       const newSections: SelectedSections = {};
-      template.sections.forEach(section => {
+      template.sections.forEach((section) => {
         newSections[section] = true;
       });
       setSelectedSections(newSections);
@@ -120,9 +227,9 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
   };
 
   const handleSectionToggle = (sectionId: string) => {
-    setSelectedSections(prev => ({
+    setSelectedSections((prev) => ({
       ...prev,
-      [sectionId]: !prev[sectionId]
+      [sectionId]: !prev[sectionId],
     }));
   };
 
@@ -131,7 +238,7 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
       companyInfo,
       branding,
       sections: selectedSections,
-      template: selectedTemplate
+      template: selectedTemplate,
     });
   };
 
@@ -158,11 +265,17 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
             <Building2 className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-gray-900">FlowForce</h1>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800">Company Onboarding</h2>
-          <p className="text-gray-600 mt-2">Let's set up your business operations platform</p>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Company Onboarding
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Let's set up your business operations platform
+          </p>
           <div className="mt-4 max-w-md mx-auto">
             <Progress value={progress} className="h-2" />
-            <p className="text-sm text-gray-500 mt-2">Step {currentStep} of {totalSteps}</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Step {currentStep} of {totalSteps}
+            </p>
           </div>
         </div>
 
@@ -186,19 +299,34 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                       <Input
                         id="company-name"
                         value={companyInfo.name}
-                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setCompanyInfo((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                         placeholder="Enter your company name"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="industry">Industry *</Label>
-                      <Select value={companyInfo.industry} onValueChange={(value) => setCompanyInfo(prev => ({ ...prev, industry: value }))}>
+                      <Select
+                        value={companyInfo.industry}
+                        onValueChange={(value) =>
+                          setCompanyInfo((prev) => ({
+                            ...prev,
+                            industry: value,
+                          }))
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select your industry" />
                         </SelectTrigger>
                         <SelectContent>
-                          {INDUSTRIES.map(industry => (
-                            <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                          {INDUSTRIES.map((industry) => (
+                            <SelectItem key={industry} value={industry}>
+                              {industry}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -207,13 +335,20 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="company-size">Company Size *</Label>
-                      <Select value={companyInfo.size} onValueChange={(value) => setCompanyInfo(prev => ({ ...prev, size: value }))}>
+                      <Select
+                        value={companyInfo.size}
+                        onValueChange={(value) =>
+                          setCompanyInfo((prev) => ({ ...prev, size: value }))
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select company size" />
                         </SelectTrigger>
                         <SelectContent>
-                          {COMPANY_SIZES.map(size => (
-                            <SelectItem key={size} value={size}>{size}</SelectItem>
+                          {COMPANY_SIZES.map((size) => (
+                            <SelectItem key={size} value={size}>
+                              {size}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -223,7 +358,12 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                       <Input
                         id="website"
                         value={companyInfo.website}
-                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, website: e.target.value }))}
+                        onChange={(e) =>
+                          setCompanyInfo((prev) => ({
+                            ...prev,
+                            website: e.target.value,
+                          }))
+                        }
                         placeholder="https://yourcompany.com"
                       />
                     </div>
@@ -233,7 +373,12 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                     <Textarea
                       id="description"
                       value={companyInfo.description}
-                      onChange={(e) => setCompanyInfo(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={(e) =>
+                        setCompanyInfo((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
                       placeholder="Brief description of your company and what you do"
                       rows={3}
                     />
@@ -264,7 +409,9 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                             <Button variant="outline" size="sm">
                               Choose File
                             </Button>
-                            <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 2MB</p>
+                            <p className="text-sm text-gray-500 mt-2">
+                              PNG, JPG up to 2MB
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -278,12 +425,22 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                           type="color"
                           id="primary-color"
                           value={branding.primaryColor}
-                          onChange={(e) => setBranding(prev => ({ ...prev, primaryColor: e.target.value }))}
+                          onChange={(e) =>
+                            setBranding((prev) => ({
+                              ...prev,
+                              primaryColor: e.target.value,
+                            }))
+                          }
                           className="w-12 h-10 rounded border border-gray-300"
                         />
                         <Input
                           value={branding.primaryColor}
-                          onChange={(e) => setBranding(prev => ({ ...prev, primaryColor: e.target.value }))}
+                          onChange={(e) =>
+                            setBranding((prev) => ({
+                              ...prev,
+                              primaryColor: e.target.value,
+                            }))
+                          }
                           placeholder="#3b82f6"
                         />
                       </div>
@@ -295,12 +452,22 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                           type="color"
                           id="secondary-color"
                           value={branding.secondaryColor}
-                          onChange={(e) => setBranding(prev => ({ ...prev, secondaryColor: e.target.value }))}
+                          onChange={(e) =>
+                            setBranding((prev) => ({
+                              ...prev,
+                              secondaryColor: e.target.value,
+                            }))
+                          }
                           className="w-12 h-10 rounded border border-gray-300"
                         />
                         <Input
                           value={branding.secondaryColor}
-                          onChange={(e) => setBranding(prev => ({ ...prev, secondaryColor: e.target.value }))}
+                          onChange={(e) =>
+                            setBranding((prev) => ({
+                              ...prev,
+                              secondaryColor: e.target.value,
+                            }))
+                          }
                           placeholder="#1e40af"
                         />
                       </div>
@@ -315,29 +482,42 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                 <CardHeader className="px-0 pt-0">
                   <CardTitle>Choose Your Business Template</CardTitle>
                   <CardDescription>
-                    Select a pre-configured template that matches your business type
+                    Select a pre-configured template that matches your business
+                    type
                   </CardDescription>
                 </CardHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {BUSINESS_TEMPLATES.map(template => (
+                  {BUSINESS_TEMPLATES.map((template) => (
                     <div
                       key={template.id}
                       className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedTemplate === template.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                       onClick={() => handleTemplateSelect(template.id)}
                     >
                       <div className="flex items-start space-x-3">
                         <template.icon className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{template.name}</h3>
-                          <p className="text-gray-600 text-sm mt-1">{template.description}</p>
+                          <h3 className="font-semibold text-lg">
+                            {template.name}
+                          </h3>
+                          <p className="text-gray-600 text-sm mt-1">
+                            {template.description}
+                          </p>
                           <div className="flex flex-wrap gap-1 mt-3">
-                            {template.sections.map(section => (
-                              <Badge key={section} variant="secondary" className="text-xs">
-                                {AVAILABLE_SECTIONS.find(s => s.id === section)?.name}
+                            {template.sections.map((section) => (
+                              <Badge
+                                key={section}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {
+                                  AVAILABLE_SECTIONS.find(
+                                    (s) => s.id === section,
+                                  )?.name
+                                }
                               </Badge>
                             ))}
                           </div>
@@ -358,13 +538,13 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                   </CardDescription>
                 </CardHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {AVAILABLE_SECTIONS.map(section => (
+                  {AVAILABLE_SECTIONS.map((section) => (
                     <div
                       key={section.id}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedSections[section.id]
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                       onClick={() => handleSectionToggle(section.id)}
                     >
@@ -372,7 +552,9 @@ export default function CompanyOnboardingWizard({ onComplete, onCancel }: Compan
                         <section.icon className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                         <div className="flex-1">
                           <h4 className="font-medium">{section.name}</h4>
-                          <p className="text-gray-600 text-sm mt-1">{section.description}</p>
+                          <p className="text-gray-600 text-sm mt-1">
+                            {section.description}
+                          </p>
                         </div>
                         {selectedSections[section.id] && (
                           <CheckSquare className="h-5 w-5 text-primary" />

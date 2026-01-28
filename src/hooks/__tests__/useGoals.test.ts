@@ -1,19 +1,17 @@
-import { renderHook } from '@testing-library/react';
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { renderHook } from "@testing-library/react";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 
-import { useGoals } from '@/hooks/useGoals';
+import { useGoals } from "@/hooks/useGoals";
 
-const {
-  useQueryMock,
-  useMutationMock,
-  invalidateQueriesMock,
-} = vi.hoisted(() => ({
-  useQueryMock: vi.fn(),
-  useMutationMock: vi.fn(),
-  invalidateQueriesMock: vi.fn(),
-}));
+const { useQueryMock, useMutationMock, invalidateQueriesMock } = vi.hoisted(
+  () => ({
+    useQueryMock: vi.fn(),
+    useMutationMock: vi.fn(),
+    invalidateQueriesMock: vi.fn(),
+  }),
+);
 
-vi.mock('@tanstack/react-query', () => ({
+vi.mock("@tanstack/react-query", () => ({
   useQuery: useQueryMock,
   useMutation: useMutationMock,
   useQueryClient: () => ({
@@ -21,7 +19,7 @@ vi.mock('@tanstack/react-query', () => ({
   }),
 }));
 
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
@@ -35,18 +33,18 @@ vi.mock('@/integrations/supabase/client', () => ({
   },
 }));
 
-vi.mock('@/hooks/useProfile', () => ({
+vi.mock("@/hooks/useProfile", () => ({
   useProfile: () => ({
     profile: {
-      companyId: 'company-1',
-      userId: 'user-1',
-      firstName: 'Taylor',
-      lastName: 'Rivera',
+      companyId: "company-1",
+      userId: "user-1",
+      firstName: "Taylor",
+      lastName: "Rivera",
     },
   }),
 }));
 
-describe('useGoals', () => {
+describe("useGoals", () => {
   beforeEach(() => {
     const defaultMutation = {
       mutateAsync: vi.fn(),
@@ -64,7 +62,7 @@ describe('useGoals', () => {
     useMutationMock.mockReturnValue(defaultMutation);
   });
 
-  it('returns default stats when no goals are present', () => {
+  it("returns default stats when no goals are present", () => {
     const { result } = renderHook(() => useGoals());
 
     expect(result.current.stats).toEqual({
@@ -76,19 +74,19 @@ describe('useGoals', () => {
     });
   });
 
-  it('derives progress using calculateGoalProgress helper', () => {
+  it("derives progress using calculateGoalProgress helper", () => {
     const { result } = renderHook(() => useGoals());
     const mockGoal = {
-      id: 'g-1',
-      company_id: 'company-1',
-      created_by: 'user-1',
+      id: "g-1",
+      company_id: "company-1",
+      created_by: "user-1",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      title: 'Launch onboarding wizard',
+      title: "Launch onboarding wizard",
       description: null,
-      status: 'active',
+      status: "active",
       progress: 42,
-      priority: 'high',
+      priority: "high",
       reward_type: null,
       reward_details: null,
       target_completion_date: null,

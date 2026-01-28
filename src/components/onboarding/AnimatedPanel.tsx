@@ -1,36 +1,35 @@
-
-import { ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AnimatedPanelProps {
   children: ReactNode;
   step: number;
-  direction?: 'left' | 'right';
+  direction?: "left" | "right";
   className?: string;
 }
 
-export default function AnimatedPanel({ 
-  children, 
-  step, 
-  direction = 'right',
-  className = "" 
+export default function AnimatedPanel({
+  children,
+  step,
+  direction = "right",
+  className = "",
 }: AnimatedPanelProps) {
   const slideVariants = {
     enter: (direction: string) => ({
-      x: direction === 'right' ? 50 : -50,
+      x: direction === "right" ? 50 : -50,
       opacity: 0,
-      scale: 0.98
+      scale: 0.98,
     }),
     center: {
       x: 0,
       opacity: 1,
-      scale: 1
+      scale: 1,
     },
     exit: (direction: string) => ({
-      x: direction === 'right' ? -50 : 50,
+      x: direction === "right" ? -50 : 50,
       opacity: 0,
-      scale: 0.98
-    })
+      scale: 0.98,
+    }),
   };
 
   return (
@@ -47,7 +46,7 @@ export default function AnimatedPanel({
           ease: [0.4, 0, 0.2, 1],
           type: "spring",
           stiffness: 300,
-          damping: 30
+          damping: 30,
         }}
         className={`w-full ${className}`}
       >

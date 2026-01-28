@@ -1,7 +1,6 @@
-
-import { lazy, Suspense, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, Settings, Users, CheckCircle, Loader2 } from 'lucide-react';
+import { lazy, Suspense, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Building2, Settings, Users, CheckCircle, Loader2 } from "lucide-react";
 
 interface StepIllustrationProps {
   step: number;
@@ -24,13 +23,13 @@ const TemplateAnimation = () => (
     transition={{ duration: 0.6 }}
   >
     <motion.div
-      animate={{ 
+      animate={{
         rotate: 360,
-        scale: [1, 1.1, 1]
+        scale: [1, 1.1, 1],
       }}
-      transition={{ 
-        rotate: { duration: 4, repeat: Infinity, ease: 'linear' },
-        scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+      transition={{
+        rotate: { duration: 4, repeat: Infinity, ease: "linear" },
+        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
       }}
       className="relative"
     >
@@ -57,16 +56,16 @@ const TemplateAnimation = () => (
         animate={{
           x: [0, 30, -30, 0],
           y: [0, -20, 20, 0],
-          opacity: [0.3, 1, 0.3]
+          opacity: [0.3, 1, 0.3],
         }}
         transition={{
           duration: 3,
           repeat: Infinity,
-          delay: i * 0.5
+          delay: i * 0.5,
         }}
         style={{
           left: `${20 + i * 20}%`,
-          top: `${30 + i * 10}%`
+          top: `${30 + i * 10}%`,
         }}
       />
     ))}
@@ -83,7 +82,7 @@ const SectionAnimation = () => (
   >
     <motion.div
       animate={{ y: [-5, 5, -5] }}
-      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
     >
       <Settings className="h-16 w-16 text-green-500" />
     </motion.div>
@@ -127,7 +126,7 @@ const RoleAnimation = () => (
   >
     <motion.div
       animate={{ rotate: [0, 10, -10, 0] }}
-      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
     >
       <Users className="h-16 w-16 text-orange-500" />
     </motion.div>
@@ -145,14 +144,14 @@ const RoleAnimation = () => (
         <motion.div
           key={i}
           className="w-6 h-6 bg-orange-300 rounded-full"
-          animate={{ 
+          animate={{
             y: [0, -8, 0],
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
-          transition={{ 
-            duration: 1.5, 
-            repeat: Infinity, 
-            delay: i * 0.2 
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            delay: i * 0.2,
           }}
         />
       ))}
@@ -169,13 +168,13 @@ const ReviewAnimation = () => (
     transition={{ duration: 0.6 }}
   >
     <motion.div
-      animate={{ 
+      animate={{
         scale: [1, 1.2, 1],
-        rotate: [0, 360]
+        rotate: [0, 360],
       }}
-      transition={{ 
-        scale: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
-        rotate: { duration: 4, repeat: Infinity, ease: 'linear' }
+      transition={{
+        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+        rotate: { duration: 4, repeat: Infinity, ease: "linear" },
       }}
     >
       <CheckCircle className="h-16 w-16 text-purple-500" />
@@ -194,23 +193,26 @@ const ReviewAnimation = () => (
         key={i}
         className="absolute w-1 h-1 bg-purple-400 rounded-full"
         animate={{
-          x: [0, Math.cos(i * 45 * Math.PI / 180) * 40],
-          y: [0, Math.sin(i * 45 * Math.PI / 180) * 40],
+          x: [0, Math.cos((i * 45 * Math.PI) / 180) * 40],
+          y: [0, Math.sin((i * 45 * Math.PI) / 180) * 40],
           opacity: [0, 1, 0],
-          scale: [0, 1, 0]
+          scale: [0, 1, 0],
         }}
         transition={{
           duration: 2,
           repeat: Infinity,
-          delay: i * 0.1
+          delay: i * 0.1,
         }}
-        style={{ left: '50%', top: '50%' }}
+        style={{ left: "50%", top: "50%" }}
       />
     ))}
   </motion.div>
 );
 
-export default function StepIllustration({ step, className = "" }: StepIllustrationProps) {
+export default function StepIllustration({
+  step,
+  className = "",
+}: StepIllustrationProps) {
   const renderAnimation = () => {
     switch (step) {
       case 1:

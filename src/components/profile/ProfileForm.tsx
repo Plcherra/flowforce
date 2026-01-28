@@ -1,16 +1,21 @@
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { User, Mail, Phone, Calendar, Save } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/public-types";
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { User, Mail, Phone, Calendar, Save } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/public-types';
-
-type Profile = Tables<'profiles'> & {
+type Profile = Tables<"profiles"> & {
   position?: {
     id: string;
     name: string;
@@ -32,30 +37,35 @@ interface ProfileFormProps {
   onProfileUpdate: () => void;
 }
 
-export default function ProfileForm({ profile, userEmail, userId, onProfileUpdate }: ProfileFormProps) {
+export default function ProfileForm({
+  profile,
+  userEmail,
+  userId,
+  onProfileUpdate,
+}: ProfileFormProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    first_name: profile?.first_name || '',
-    last_name: profile?.last_name || '',
-    phone: profile?.phone || '',
-    birth_date: profile?.birth_date || '',
+    first_name: profile?.first_name || "",
+    last_name: profile?.last_name || "",
+    phone: profile?.phone || "",
+    birth_date: profile?.birth_date || "",
   });
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone,
           birth_date: formData.birth_date || null,
         })
-        .eq('id', userId);
+        .eq("id", userId);
 
       if (error) throw error;
 
@@ -63,11 +73,12 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       });
-      
+
       setIsEditing(false);
       onProfileUpdate();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       toast({
         title: "Update Failed",
         description: errorMessage,
@@ -80,10 +91,10 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
 
   const startEditing = () => {
     setFormData({
-      first_name: profile?.first_name || '',
-      last_name: profile?.last_name || '',
-      phone: profile?.phone || '',
-      birth_date: profile?.birth_date || '',
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
+      phone: profile?.phone || "",
+      birth_date: profile?.birth_date || "",
     });
     setIsEditing(true);
   };
@@ -91,10 +102,10 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
   const cancelEditing = () => {
     setIsEditing(false);
     setFormData({
-      first_name: profile?.first_name || '',
-      last_name: profile?.last_name || '',
-      phone: profile?.phone || '',
-      birth_date: profile?.birth_date || '',
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
+      phone: profile?.phone || "",
+      birth_date: profile?.birth_date || "",
     });
   };
 
@@ -116,19 +127,11 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
           </Button>
         ) : (
           <div className="flex space-x-2">
-            <Button 
-              onClick={handleSaveProfile} 
-              disabled={isSaving}
-              size="sm"
-            >
+            <Button onClick={handleSaveProfile} disabled={isSaving} size="sm">
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Saving...' : 'Save'}
+              {isSaving ? "Saving..." : "Save"}
             </Button>
-            <Button 
-              onClick={cancelEditing} 
-              variant="outline" 
-              size="sm"
-            >
+            <Button onClick={cancelEditing} variant="outline" size="sm">
               Cancel
             </Button>
           </div>
@@ -142,13 +145,15 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
               <Input
                 id="first_name"
                 value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, first_name: e.target.value })
+                }
                 placeholder="Enter first name"
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <User className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.first_name || 'Not set'}</span>
+                <span>{profile?.first_name || "Not set"}</span>
               </div>
             )}
           </div>
@@ -159,13 +164,15 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
               <Input
                 id="last_name"
                 value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, last_name: e.target.value })
+                }
                 placeholder="Enter last name"
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <User className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.last_name || 'Not set'}</span>
+                <span>{profile?.last_name || "Not set"}</span>
               </div>
             )}
           </div>
@@ -175,7 +182,9 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
             <div className="flex items-center space-x-2 p-2 border rounded bg-muted">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span>{userEmail}</span>
-              <Badge variant="secondary" className="ml-auto text-xs">Read-only</Badge>
+              <Badge variant="secondary" className="ml-auto text-xs">
+                Read-only
+              </Badge>
             </div>
           </div>
 
@@ -185,13 +194,15 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
               <Input
                 id="phone"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 placeholder="Enter phone number"
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.phone || 'Not set'}</span>
+                <span>{profile?.phone || "Not set"}</span>
               </div>
             )}
           </div>
@@ -203,16 +214,17 @@ export default function ProfileForm({ profile, userEmail, userId, onProfileUpdat
                 id="birth_date"
                 type="date"
                 value={formData.birth_date}
-                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, birth_date: e.target.value })
+                }
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>
-                  {profile?.birth_date 
-                    ? new Date(profile.birth_date).toLocaleDateString() 
-                    : 'Not set'
-                  }
+                  {profile?.birth_date
+                    ? new Date(profile.birth_date).toLocaleDateString()
+                    : "Not set"}
                 </span>
               </div>
             )}

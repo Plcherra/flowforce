@@ -1,22 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/useProfile';
-import { InventoryService } from '@/features/inventory/services/inventoryService';
-import type { InventoryLocation } from '@/features/inventory/hooks/types';
-import { logger } from '@/utils/logger';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { InventoryService } from "@/features/inventory/services/inventoryService";
+import type { InventoryLocation } from "@/features/inventory/hooks/types";
+import { logger } from "@/utils/logger";
 
 export function useInventoryLocations() {
   const { profile, loading } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
-  const {
-    data,
-    isLoading,
-    error,
-  } = useQuery<InventoryLocation[], Error>({
-    queryKey: ['inventory-locations', companyId ?? 'unknown'],
+  const { data, isLoading, error } = useQuery<InventoryLocation[], Error>({
+    queryKey: ["inventory-locations", companyId ?? "unknown"],
     enabled: Boolean(companyId) && !loading,
-    queryFn: () => InventoryService.listLocations({ companyId: companyId ?? undefined }),
+    queryFn: () =>
+      InventoryService.listLocations({ companyId: companyId ?? undefined }),
   });
 
   return { data, isLoading, error };
@@ -28,10 +25,16 @@ export function useCreateInventoryLocation() {
   const { profile } = useProfile();
 
   return useMutation({
-    mutationFn: async (locationData: { name: string; location_type: string; temperature_controlled?: boolean }) => {
+    mutationFn: async (locationData: {
+      name: string;
+      location_type: string;
+      temperature_controlled?: boolean;
+    }) => {
       const companyId = profile?.companyId ?? profile?.company_id;
       if (!companyId) {
-        throw new Error('Company information not found. Please ensure you are logged in.');
+        throw new Error(
+          "Company information not found. Please ensure you are logged in.",
+        );
       }
 
       return InventoryService.createLocation({
@@ -40,20 +43,20 @@ export function useCreateInventoryLocation() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-locations'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
       toast({
-        title: 'Success',
-        description: 'Location created successfully',
+        title: "Success",
+        description: "Location created successfully",
       });
     },
     onError: (error: any) => {
-      const message = error?.message || 'Failed to create location';
+      const message = error?.message || "Failed to create location";
       toast({
-        title: 'Error',
+        title: "Error",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
-      logger.error('Create location error', { error, tags: ['error'] });
+      logger.error("Create location error", { error, tags: ["error"] });
     },
   });
 }
@@ -67,20 +70,20 @@ export function useDeleteInventoryLocation() {
       await InventoryService.deleteLocation(locationId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory-locations'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
       toast({
-        title: 'Success',
-        description: 'Location deleted successfully',
+        title: "Success",
+        description: "Location deleted successfully",
       });
     },
     onError: (error: any) => {
-      const message = error?.message || 'Failed to delete location';
+      const message = error?.message || "Failed to delete location";
       toast({
-        title: 'Error',
+        title: "Error",
         description: message,
-        variant: 'destructive',
+        variant: "destructive",
       });
-      logger.error('Delete location error', { error, tags: ['error'] });
+      logger.error("Delete location error", { error, tags: ["error"] });
     },
   });
 }

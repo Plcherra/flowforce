@@ -1,1 +1,1 @@
-export * from '@/features/recognitions/hooks/useRecognitions';
+export * from "@/features/recognitions/hooks/useRecognitions";

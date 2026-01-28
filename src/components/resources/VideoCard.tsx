@@ -1,7 +1,6 @@
-
-import { Card, CardContent } from '@/components/ui/card';
-import { Video } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent } from "@/components/ui/card";
+import { Video } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface VideoCardProps {
   title: string;
@@ -12,13 +11,22 @@ interface VideoCardProps {
   embedUrl: string;
 }
 
-export default function VideoCard({ title, description, duration, url, thumbnail, embedUrl }: VideoCardProps) {
-  const isPlaceholder = embedUrl === 'placeholder';
+export default function VideoCard({
+  title,
+  description,
+  duration,
+  url,
+  thumbnail,
+  embedUrl,
+}: VideoCardProps) {
+  const isPlaceholder = embedUrl === "placeholder";
 
   return (
     <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-300">
       <Link to={url}>
-        <div className={`h-48 ${thumbnail} rounded-t-lg relative overflow-hidden`}>
+        <div
+          className={`h-48 ${thumbnail} rounded-t-lg relative overflow-hidden`}
+        >
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
           <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-sm">
             {duration}

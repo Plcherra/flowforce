@@ -80,6 +80,7 @@ ALTER TABLE public.form_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.form_submission_files ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for forms
+DROP POLICY IF EXISTS "Users can view forms they created or published forms" ON public.forms;
 CREATE POLICY "Users can view forms they created or published forms" ON public.forms
   FOR SELECT USING (
     created_by = auth.uid() OR 
@@ -87,15 +88,18 @@ CREATE POLICY "Users can view forms they created or published forms" ON public.f
     public.is_admin_or_manager(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Admins and managers can create forms" ON public.forms;
 CREATE POLICY "Admins and managers can create forms" ON public.forms
   FOR INSERT WITH CHECK (public.is_admin_or_manager(auth.uid()));
 
+DROP POLICY IF EXISTS "Form creators and admins can update forms" ON public.forms;
 CREATE POLICY "Form creators and admins can update forms" ON public.forms
   FOR UPDATE USING (
     created_by = auth.uid() OR 
     public.is_admin_or_manager(auth.uid())
   );
 
+DROP POLICY IF EXISTS "Form creators and admins can delete forms" ON public.forms;
 CREATE POLICY "Form creators and admins can delete forms" ON public.forms
   FOR DELETE USING (
     created_by = auth.uid() OR 
@@ -103,6 +107,7 @@ CREATE POLICY "Form creators and admins can delete forms" ON public.forms
   );
 
 -- RLS Policies for form fields
+DROP POLICY IF EXISTS "Users can view form fields for accessible forms" ON public.form_fields;
 CREATE POLICY "Users can view form fields for accessible forms" ON public.form_fields
   FOR SELECT USING (
     EXISTS (
@@ -116,6 +121,7 @@ CREATE POLICY "Users can view form fields for accessible forms" ON public.form_f
     )
   );
 
+DROP POLICY IF EXISTS "Form creators and admins can manage form fields" ON public.form_fields;
 CREATE POLICY "Form creators and admins can manage form fields" ON public.form_fields
   FOR ALL USING (
     EXISTS (
@@ -129,6 +135,7 @@ CREATE POLICY "Form creators and admins can manage form fields" ON public.form_f
   );
 
 -- RLS Policies for form submissions
+DROP POLICY IF EXISTS "Users can view submissions for forms they created" ON public.form_submissions;
 CREATE POLICY "Users can view submissions for forms they created" ON public.form_submissions
   FOR SELECT USING (
     submitted_by = auth.uid() OR
@@ -142,6 +149,7 @@ CREATE POLICY "Users can view submissions for forms they created" ON public.form
     )
   );
 
+DROP POLICY IF EXISTS "Users can create submissions for published forms" ON public.form_submissions;
 CREATE POLICY "Users can create submissions for published forms" ON public.form_submissions
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -154,6 +162,7 @@ CREATE POLICY "Users can create submissions for published forms" ON public.form_
   );
 
 -- RLS Policies for form submission files
+DROP POLICY IF EXISTS "Users can view files for submissions they can access" ON public.form_submission_files;
 CREATE POLICY "Users can view files for submissions they can access" ON public.form_submission_files
   FOR SELECT USING (
     EXISTS (
@@ -168,6 +177,7 @@ CREATE POLICY "Users can view files for submissions they can access" ON public.f
     )
   );
 
+DROP POLICY IF EXISTS "Users can upload files for their submissions" ON public.form_submission_files;
 CREATE POLICY "Users can upload files for their submissions" ON public.form_submission_files
   FOR INSERT WITH CHECK (
     EXISTS (

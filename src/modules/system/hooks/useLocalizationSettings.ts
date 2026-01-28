@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { LocalizationSettings } from '@/types/system-settings';
-import { DEFAULT_LOCALIZATION } from './systemSettingsDefaults';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { LocalizationSettings } from "@/types/system-settings";
+import { DEFAULT_LOCALIZATION } from "./systemSettingsDefaults";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useLocalizationSettings(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
@@ -15,7 +15,10 @@ export function useLocalizationSettings(source: SystemSettingsHook) {
     setState(base);
   }, [base]);
 
-  const dirty = useMemo(() => JSON.stringify(state) !== JSON.stringify(base), [state, base]);
+  const dirty = useMemo(
+    () => JSON.stringify(state) !== JSON.stringify(base),
+    [state, base],
+  );
 
   const save = useCallback(async () => {
     if (!dirty) return;
@@ -37,7 +40,7 @@ export function useLocalizationSettings(source: SystemSettingsHook) {
   }, [base]);
 
   const updateRegionalFormat = useCallback(
-    (key: keyof LocalizationSettings['regionalFormats'], value: string) => {
+    (key: keyof LocalizationSettings["regionalFormats"], value: string) => {
       setState((prev) => ({
         ...prev,
         regionalFormats: {

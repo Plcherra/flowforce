@@ -1,12 +1,12 @@
-import type React from 'react';
-import type { PageMeta } from './PageFactory';
-import eventsConfig from './events/section.config';
+import type React from "react";
+import type { PageMeta } from "./PageFactory";
+import eventsConfig from "./events/section.config";
 
 export type SectionMeta = {
   title: string;
   slug: string; // e.g., 'events'
-  category: 'communication' | 'operations' | 'hr' | 'custom';
-  accessLevel?: 'public' | 'team' | 'admin';
+  category: "communication" | "operations" | "hr" | "custom";
+  accessLevel?: "public" | "team" | "admin";
   pages: PageMeta[];
 };
 
@@ -17,7 +17,10 @@ export function getSectionBySlug(slug: string) {
 }
 
 export function getNavByCategory() {
-  const byCat: Record<string, { name: string; href: string; icon: React.ReactNode | undefined }[]> = {};
+  const byCat: Record<
+    string,
+    { name: string; href: string; icon: React.ReactNode | undefined }[]
+  > = {};
   sections.forEach((s) => {
     const list = byCat[s.category] || (byCat[s.category] = []);
     list.push({ name: s.title, href: `/sections/${s.slug}`, icon: undefined });

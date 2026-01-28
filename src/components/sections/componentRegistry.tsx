@@ -1,16 +1,25 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
-import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
-import { useAnnouncements } from '@/hooks/useAnnouncements';
-import { useEmployees } from '@/hooks/useEmployees';
-import { useEvents } from '@/hooks/useEvents';
-import { formatDistanceToNow } from 'date-fns';
-import type { CustomSection, CustomSectionPage } from '@/hooks/useCustomSections';
+import { useMemo } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
+import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
+import { useAnnouncements } from "@/hooks/useAnnouncements";
+import { useEmployees } from "@/hooks/useEmployees";
+import { useEvents } from "@/hooks/useEvents";
+import { formatDistanceToNow } from "date-fns";
+import type {
+  CustomSection,
+  CustomSectionPage,
+} from "@/hooks/useCustomSections";
 
 export interface SectionComponentProps {
   section: CustomSection;
@@ -23,7 +32,7 @@ export interface SectionComponentDefinition {
   label: string;
   description: string;
   icon: string;
-  category: 'communication' | 'operations' | 'hr' | 'custom';
+  category: "communication" | "operations" | "hr" | "custom";
   render: (props: SectionComponentProps) => JSX.Element;
 }
 
@@ -33,7 +42,9 @@ function UpdatesFeedComponent() {
   const displayed = useMemo(() => updates.slice(0, 5), [updates]);
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading updates...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">Loading updates...</div>
+    );
   }
 
   if (displayed.length === 0) {
@@ -41,7 +52,9 @@ function UpdatesFeedComponent() {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="text-base">No updates yet</CardTitle>
-          <CardDescription>Publish your first update to keep everyone in the loop.</CardDescription>
+          <CardDescription>
+            Publish your first update to keep everyone in the loop.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -53,23 +66,36 @@ function UpdatesFeedComponent() {
         <Card key={update.id} className="shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">{update.title}</CardTitle>
-              <Badge variant={update.isPinned ? 'default' : 'secondary'}>
-                {update.isPinned ? 'Pinned' : 'Update'}
+              <CardTitle className="text-lg font-semibold">
+                {update.title}
+              </CardTitle>
+              <Badge variant={update.isPinned ? "default" : "secondary"}>
+                {update.isPinned ? "Pinned" : "Update"}
               </Badge>
             </div>
             {update.createdAt && (
               <CardDescription>
-                {formatDistanceToNow(new Date(update.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(update.createdAt), {
+                  addSuffix: true,
+                })}
               </CardDescription>
             )}
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             <p className="text-sm text-muted-foreground leading-snug">
-              {update.body?.slice(0, 180) || 'No content provided yet.'}
+              {update.body?.slice(0, 180) || "No content provided yet."}
             </p>
             <div className="flex items-center gap-3">
-              <Button size="sm" variant="outline" onClick={() => void toggleLike({ updateId: update.id, currentlyLiked: update.viewerHasLiked })}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  void toggleLike({
+                    updateId: update.id,
+                    currentlyLiked: update.viewerHasLiked,
+                  })
+                }
+              >
                 👍 {update.likes ?? 0}
               </Button>
               <span className="text-xs text-muted-foreground">
@@ -87,7 +113,11 @@ function AnnouncementsBoardComponent() {
   const { announcements, loading } = useAnnouncements();
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading announcements...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">
+        Loading announcements...
+      </div>
+    );
   }
 
   if (announcements.length === 0) {
@@ -95,7 +125,9 @@ function AnnouncementsBoardComponent() {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="text-base">No announcements</CardTitle>
-          <CardDescription>Publish announcements to highlight critical updates.</CardDescription>
+          <CardDescription>
+            Publish announcements to highlight critical updates.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -110,20 +142,29 @@ function AnnouncementsBoardComponent() {
               <CardTitle className="text-base font-medium">
                 {announcement.title}
               </CardTitle>
-              <Badge variant={announcement.is_read ? 'outline' : 'default'}>
+              <Badge variant={announcement.is_read ? "outline" : "default"}>
                 {announcement.priority}
               </Badge>
             </div>
             <CardDescription className="flex flex-wrap items-center gap-2 text-xs">
-              <span>{announcement.creator_profile?.first_name} {announcement.creator_profile?.last_name}</span>
+              <span>
+                {announcement.creator_profile?.first_name}{" "}
+                {announcement.creator_profile?.last_name}
+              </span>
               {announcement.created_at && (
-                <span>• {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}</span>
+                <span>
+                  •{" "}
+                  {formatDistanceToNow(new Date(announcement.created_at), {
+                    addSuffix: true,
+                  })}
+                </span>
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground leading-snug">
-              {announcement.content?.slice(0, 220) || 'No description provided.'}
+              {announcement.content?.slice(0, 220) ||
+                "No description provided."}
             </p>
           </CardContent>
         </Card>
@@ -138,7 +179,9 @@ function EmployeeDirectoryComponent() {
   const topEmployees = useMemo(() => employees.slice(0, 8), [employees]);
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading employees...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">Loading employees...</div>
+    );
   }
 
   if (topEmployees.length === 0) {
@@ -146,7 +189,9 @@ function EmployeeDirectoryComponent() {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="text-base">No employees found</CardTitle>
-          <CardDescription>Add team members to start building your directory.</CardDescription>
+          <CardDescription>
+            Add team members to start building your directory.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -156,16 +201,26 @@ function EmployeeDirectoryComponent() {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Team Directory</CardTitle>
-        <CardDescription>Quick access to recently added teammates.</CardDescription>
+        <CardDescription>
+          Quick access to recently added teammates.
+        </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {topEmployees.map((employee) => (
-            <div key={employee.id} className="border rounded-lg p-3 flex flex-col gap-2">
+            <div
+              key={employee.id}
+              className="border rounded-lg p-3 flex flex-col gap-2"
+            >
               <div className="flex items-center justify-between">
-                <span className="font-medium">{employee.fullName || `${employee.firstName} ${employee.lastName}`}</span>
+                <span className="font-medium">
+                  {employee.fullName ||
+                    `${employee.firstName} ${employee.lastName}`}
+                </span>
                 {employee.position && (
-                  <Badge variant="secondary" className="text-xs">{employee.position}</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    {employee.position}
+                  </Badge>
                 )}
               </div>
               <div className="flex flex-col text-xs text-muted-foreground gap-1">
@@ -183,16 +238,19 @@ function EmployeeDirectoryComponent() {
 
 function EventsSnapshotComponent() {
   const { events, loading } = useEvents();
-  const upcoming = useMemo(() =>
-    events
-      .filter((event) => Date.parse(event.start) >= Date.now())
-      .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
-      .slice(0, 6),
-    [events]
+  const upcoming = useMemo(
+    () =>
+      events
+        .filter((event) => Date.parse(event.start) >= Date.now())
+        .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
+        .slice(0, 6),
+    [events],
   );
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading events...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">Loading events...</div>
+    );
   }
 
   if (upcoming.length === 0) {
@@ -200,7 +258,9 @@ function EventsSnapshotComponent() {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="text-base">No upcoming events</CardTitle>
-          <CardDescription>Schedule an event to see it appear here.</CardDescription>
+          <CardDescription>
+            Schedule an event to see it appear here.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -219,7 +279,9 @@ function EventsSnapshotComponent() {
               <div key={event.id} className="border rounded-lg p-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-sm">{event.title}</span>
-                  <Badge variant="outline" className="text-xs capitalize">{event.type || 'event'}</Badge>
+                  <Badge variant="outline" className="text-xs capitalize">
+                    {event.type || "event"}
+                  </Badge>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">
                   <span>{new Date(event.start).toLocaleString()}</span>
@@ -241,35 +303,36 @@ function EventsSnapshotComponent() {
 
 const SECTION_COMPONENTS: SectionComponentDefinition[] = [
   {
-    id: 'feed',
-    label: 'Company Updates Feed',
-    description: 'Interactive feed of company updates with reactions and engagement.',
-    icon: 'Megaphone',
-    category: 'communication',
+    id: "feed",
+    label: "Company Updates Feed",
+    description:
+      "Interactive feed of company updates with reactions and engagement.",
+    icon: "Megaphone",
+    category: "communication",
     render: () => <UpdatesFeedComponent />,
   },
   {
-    id: 'announcements',
-    label: 'Announcements Board',
-    description: 'Prioritized announcements with read status tracking.',
-    icon: 'Bell',
-    category: 'communication',
+    id: "announcements",
+    label: "Announcements Board",
+    description: "Prioritized announcements with read status tracking.",
+    icon: "Bell",
+    category: "communication",
     render: () => <AnnouncementsBoardComponent />,
   },
   {
-    id: 'directory',
-    label: 'Employee Directory',
-    description: 'Quick contacts and roles for your teammates.',
-    icon: 'Users',
-    category: 'hr',
+    id: "directory",
+    label: "Employee Directory",
+    description: "Quick contacts and roles for your teammates.",
+    icon: "Users",
+    category: "hr",
     render: () => <EmployeeDirectoryComponent />,
   },
   {
-    id: 'events',
-    label: 'Events Snapshot',
-    description: 'Upcoming meetings and schedule highlights.',
-    icon: 'Calendar',
-    category: 'operations',
+    id: "events",
+    label: "Events Snapshot",
+    description: "Upcoming meetings and schedule highlights.",
+    icon: "Calendar",
+    category: "operations",
     render: () => <EventsSnapshotComponent />,
   },
 ];

@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchPerformanceDataset } from '@/services/performance/performanceService';
-import type { PerformanceDataset } from '@/services/performance/performanceTypes';
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPerformanceDataset } from "@/services/performance/performanceService";
+import type { PerformanceDataset } from "@/services/performance/performanceTypes";
 
 export interface PerformanceEmployeeSummary {
   id: string;
@@ -43,7 +43,7 @@ export interface PerformanceReviewEntry {
 
 export function usePerformanceOverview() {
   const query = useQuery<PerformanceDataset, Error>({
-    queryKey: ['performance-dataset'],
+    queryKey: ["performance-dataset"],
     queryFn: fetchPerformanceDataset,
     staleTime: 1000 * 60 * 5,
   });
@@ -52,26 +52,37 @@ export function usePerformanceOverview() {
     if (!query.data) return [];
     return query.data.employees
       .map((employee) => {
-        const fullName = `${employee.firstName ?? ''} ${employee.lastName ?? ''}`.trim();
-        const activeGoals = employee.goals.filter((goal) => goal.status !== 'completed').length;
-        const completedGoals = employee.goals.filter((goal) => goal.status === 'completed').length;
+        const fullName =
+          `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+        const activeGoals = employee.goals.filter(
+          (goal) => goal.status !== "completed",
+        ).length;
+        const completedGoals = employee.goals.filter(
+          (goal) => goal.status === "completed",
+        ).length;
         const averageGoalProgress =
           employee.goals.length > 0
             ? Math.round(
-                employee.goals.reduce((sum, goal) => sum + goal.progress, 0) / employee.goals.length,
+                employee.goals.reduce((sum, goal) => sum + goal.progress, 0) /
+                  employee.goals.length,
               )
             : null;
         const reviewCount = employee.reviews.length;
         const averageReviewScore =
           reviewCount > 0
             ? Math.round(
-                (employee.reviews.reduce((sum, review) => sum + (review.score ?? 0), 0) / reviewCount) * 10,
+                (employee.reviews.reduce(
+                  (sum, review) => sum + (review.score ?? 0),
+                  0,
+                ) /
+                  reviewCount) *
+                  10,
               ) / 10
             : null;
 
         return {
           id: employee.id,
-          fullName: fullName || 'Unnamed Employee',
+          fullName: fullName || "Unnamed Employee",
           role: employee.role ?? null,
           avatarUrl: employee.avatarUrl ?? null,
           activeGoals,
@@ -103,7 +114,7 @@ export function usePerformanceOverview() {
         } else {
           goalMap.set(goal.id, {
             id: goal.id,
-            title: goal.title ?? 'Untitled Goal',
+            title: goal.title ?? "Untitled Goal",
             status: goal.status,
             progress: goal.progress,
             targetCompletionDate: goal.targetCompletionDate ?? null,
@@ -131,7 +142,9 @@ export function usePerformanceOverview() {
     const reviewEntries: PerformanceReviewEntry[] = [];
 
     query.data.employees.forEach((employee) => {
-      const fullName = `${employee.firstName ?? ''} ${employee.lastName ?? ''}`.trim() || 'Unknown Employee';
+      const fullName =
+        `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim() ||
+        "Unknown Employee";
       employee.reviews.forEach((review) => {
         reviewEntries.push({
           id: review.id,

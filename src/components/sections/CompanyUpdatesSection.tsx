@@ -1,33 +1,37 @@
-
-import React, { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { LayoutGrid, List, Plus } from 'lucide-react';
-import { useCan } from '@/hooks/useCan';
-import { logger } from '@/utils/logger';
-import { useCompanyUpdates } from '@/hooks/useCompanyUpdates';
-import { useCompanyUpdateComments } from '@/features/company-updates/hooks/useCompanyUpdateComments';
-import { useCompanyUpdateMutations } from '@/features/company-updates/hooks/useCompanyUpdateMutations';
-import { UpdatesTableView } from './updates/UpdatesTableView';
-import { UpdatesFeedView } from './updates/UpdatesFeedView';
-import { EditUpdateDialog } from '@/features/company-updates/components/EditUpdateDialog';
-import type { CompanyUpdate } from '@/types/companyUpdates';
+import React, { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { LayoutGrid, List, Plus } from "lucide-react";
+import { useCan } from "@/hooks/useCan";
+import { logger } from "@/utils/logger";
+import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
+import { useCompanyUpdateComments } from "@/features/company-updates/hooks/useCompanyUpdateComments";
+import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
+import { UpdatesTableView } from "./updates/UpdatesTableView";
+import { UpdatesFeedView } from "./updates/UpdatesFeedView";
+import { EditUpdateDialog } from "@/features/company-updates/components/EditUpdateDialog";
+import type { CompanyUpdate } from "@/types/companyUpdates";
 
 export default function CompanyUpdatesSection() {
   const { can } = useCan();
-  const [viewMode, setViewMode] = useState<'table' | 'feed'>('table');
-  const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "feed">("table");
+  const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(
+    null,
+  );
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { updates, loading } = useCompanyUpdates();
-  const { commentsByUpdate } = useCompanyUpdateComments(updates.map((update) => update.id));
+  const { commentsByUpdate } = useCompanyUpdateComments(
+    updates.map((update) => update.id),
+  );
   const comments = useMemo(
     () => Object.values(commentsByUpdate).flat(),
     [commentsByUpdate],
   );
-  const { toggleLike, addComment, markAsViewed, togglePin, deleteUpdate } = useCompanyUpdateMutations();
+  const { toggleLike, addComment, markAsViewed, togglePin, deleteUpdate } =
+    useCompanyUpdateMutations();
 
   const handleAddNew = () => {
     // TODO: Open create update dialog
-    logger.debug('Add new update');
+    logger.debug("Add new update");
   };
 
   const handleEdit = (update: CompanyUpdate) => {
@@ -82,35 +86,37 @@ export default function CompanyUpdatesSection() {
                   <span className="text-2xl">📢</span>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Company Updates</h1>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    Company Updates
+                  </h1>
                   <p className="text-muted-foreground mt-1">
                     Stay informed with the latest company news and announcements
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 {/* View Toggle */}
                 <div className="flex items-center border border-border rounded-lg p-1">
                   <Button
-                    variant={viewMode === 'table' ? 'default' : 'ghost'}
+                    variant={viewMode === "table" ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setViewMode('table')}
+                    onClick={() => setViewMode("table")}
                     className="h-8 px-3"
                   >
                     <List className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant={viewMode === 'feed' ? 'default' : 'ghost'}
+                    variant={viewMode === "feed" ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setViewMode('feed')}
+                    onClick={() => setViewMode("feed")}
                     className="h-8 px-3"
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </Button>
                 </div>
 
-                {can('systemSettings') && (
+                {can("systemSettings") && (
                   <Button onClick={handleAddNew}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Update
@@ -122,10 +128,12 @@ export default function CompanyUpdatesSection() {
         </div>
 
         {/* Content */}
-        <div className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
-          viewMode === 'feed' ? 'max-w-4xl' : 'max-w-7xl'
-        }`}>
-          {viewMode === 'table' ? (
+        <div
+          className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
+            viewMode === "feed" ? "max-w-4xl" : "max-w-7xl"
+          }`}
+        >
+          {viewMode === "table" ? (
             <UpdatesTableView
               updates={updates}
               onEdit={handleEdit}

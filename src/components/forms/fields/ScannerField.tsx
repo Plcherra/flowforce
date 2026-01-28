@@ -1,19 +1,19 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ScanLine, Camera, Type, Check, X } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { logger } from '@/utils/logger';
+import React, { useState, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScanLine, Camera, Type, Check, X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { logger } from "@/utils/logger";
 
 interface ScanConfig {
-  scan_types?: ('barcode' | 'qr_code')[];
+  scan_types?: ("barcode" | "qr_code")[];
   auto_submit?: boolean;
 }
 
 interface ScanData {
   scan_data: string;
-  scan_type: 'barcode' | 'qr_code';
+  scan_type: "barcode" | "qr_code";
   scan_format?: string;
 }
 
@@ -34,32 +34,32 @@ export function ScannerField({
   onChange,
   required = false,
   config = {
-    scan_types: ['barcode', 'qr_code'],
-    auto_submit: false
+    scan_types: ["barcode", "qr_code"],
+    auto_submit: false,
   },
-  className = ""
+  className = "",
 }: ScannerFieldProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [manualEntry, setManualEntry] = useState(false);
-  const [manualValue, setManualValue] = useState('');
+  const [manualValue, setManualValue] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const supportedTypes = config.scan_types || ['barcode', 'qr_code'];
+  const supportedTypes = config.scan_types || ["barcode", "qr_code"];
 
   const startCamera = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Prefer back camera
+        video: { facingMode: "environment" }, // Prefer back camera
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setIsScanning(true);
       }
     } catch (error) {
-      logger.error('Error accessing camera:', { error, tags: ['error'] });
+      logger.error("Error accessing camera:", { error, tags: ["error"] });
       toast({
         title: "Error",
         description: "Unable to access camera. Please check permissions.",
@@ -70,7 +70,7 @@ export function ScannerField({
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setIsScanning(false);
@@ -80,17 +80,20 @@ export function ScannerField({
     if (!manualValue.trim()) return;
 
     // Simple heuristic to determine scan type
-    const scanType = manualValue.length > 20 || manualValue.includes('http') ? 'qr_code' : 'barcode';
+    const scanType =
+      manualValue.length > 20 || manualValue.includes("http")
+        ? "qr_code"
+        : "barcode";
 
     const scanData: ScanData = {
       scan_data: manualValue.trim(),
       scan_type: scanType,
-      scan_format: 'manual_entry'
+      scan_format: "manual_entry",
     };
 
     onChange(scanData);
     setManualEntry(false);
-    setManualValue('');
+    setManualValue("");
 
     toast({
       title: "Success",
@@ -103,7 +106,7 @@ export function ScannerField({
     const mockData: ScanData = {
       scan_data: Math.random().toString(36).substring(2, 15),
       scan_type: supportedTypes[0],
-      scan_format: 'simulated'
+      scan_format: "simulated",
     };
 
     onChange(mockData);
@@ -122,10 +125,10 @@ export function ScannerField({
 
   const formatScanType = (type: string) => {
     switch (type) {
-      case 'qr_code':
-        return 'QR Code';
-      case 'barcode':
-        return 'Barcode';
+      case "qr_code":
+        return "QR Code";
+      case "barcode":
+        return "Barcode";
       default:
         return type;
     }
@@ -193,7 +196,8 @@ export function ScannerField({
               <div className="text-center">
                 <ScanLine className="h-8 w-8 text-primary mx-auto mb-2 animate-pulse" />
                 <p className="text-sm font-medium text-foreground">
-                  Scanning for {supportedTypes.map(formatScanType).join(' and ')}
+                  Scanning for{" "}
+                  {supportedTypes.map(formatScanType).join(" and ")}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Position the code within the camera view
@@ -251,7 +255,7 @@ export function ScannerField({
                   value={manualValue}
                   onChange={(e) => setManualValue(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       handleManualSubmit();
                     }
                   }}
@@ -263,7 +267,7 @@ export function ScannerField({
                     size="sm"
                     onClick={() => {
                       setManualEntry(false);
-                      setManualValue('');
+                      setManualValue("");
                     }}
                     className="flex-1"
                   >
@@ -287,14 +291,10 @@ export function ScannerField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <ScanLine className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            Scan {supportedTypes.map(formatScanType).join(' or ')}
+            Scan {supportedTypes.map(formatScanType).join(" or ")}
           </p>
           <div className="flex gap-2 justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={startCamera}
-            >
+            <Button type="button" variant="outline" onClick={startCamera}>
               <Camera className="h-4 w-4 mr-2" />
               Start Scanning
             </Button>
@@ -317,7 +317,7 @@ export function ScannerField({
 export function ScannerFieldPreview({
   label = "Scanner",
   description = "Scan a barcode or QR code",
-  className = ""
+  className = "",
 }: Partial<ScannerFieldProps>) {
   return (
     <ScannerField
@@ -326,8 +326,8 @@ export function ScannerFieldPreview({
       value={undefined}
       onChange={() => {}}
       config={{
-        scan_types: ['barcode', 'qr_code'],
-        auto_submit: false
+        scan_types: ["barcode", "qr_code"],
+        auto_submit: false,
       }}
       className={className}
     />

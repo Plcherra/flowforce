@@ -1,29 +1,33 @@
 import { createClient } from "@supabase/supabase-js";
-import { createServerLogger } from './utils/logger';
+import { createServerLogger } from "./utils/logger";
 
-const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl =
+  process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // Lazy initialization - only create client when first accessed
 // This prevents errors during Next.js startup when scanning API routes
 let supabaseAdminInstance: ReturnType<typeof createClient> | null = null;
 
-const logger = createServerLogger('supabaseAdmin');
+const logger = createServerLogger("supabaseAdmin");
 
 function getSupabaseAdmin() {
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     const error = new Error(
       "Missing Supabase service role configuration. " +
-      "Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables."
+        "Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
     );
-    logger.error('Missing Supabase service role configuration', { error, tags: ['error'] });
+    logger.error("Missing Supabase service role configuration", {
+      error,
+      tags: ["error"],
+    });
     throw error;
   }
-  
+
   if (!supabaseAdminInstance) {
     supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceRoleKey);
   }
-  
+
   return supabaseAdminInstance;
 }
 
@@ -34,7 +38,7 @@ export const supabaseAdmin = new Proxy({} as any, {
     const client = getSupabaseAdmin();
     const value = (client as any)[prop];
     // Bind functions to maintain 'this' context
-    if (typeof value === 'function') {
+    if (typeof value === "function") {
       return value.bind(client);
     }
     return value;

@@ -84,18 +84,24 @@ BEGIN
     ALTER TABLE public.company_roles DROP COLUMN company_id CASCADE;
     ALTER TABLE public.company_roles ADD COLUMN company_id uuid REFERENCES public.companies;
     
-    -- Create a default company for existing roles if needed
-    INSERT INTO public.companies (name, created_by) 
-    SELECT 'Default Company', (SELECT id FROM auth.users LIMIT 1)
-    WHERE NOT EXISTS (SELECT 1 FROM public.companies);
+    -- Create a default company for existing roles if needed (only if users exist)
+    -- Skip if no users exist (fresh DB - companies will be created by app logic)
+    IF EXISTS (SELECT 1 FROM auth.users LIMIT 1) AND NOT EXISTS (SELECT 1 FROM public.companies) THEN
+      INSERT INTO public.companies (name, created_by) 
+      VALUES ('Default Company', (SELECT id FROM auth.users LIMIT 1));
+    END IF;
     
-    -- Update existing company_roles to reference the first company
+    -- Update existing company_roles to reference the first company (only if company exists)
     UPDATE public.company_roles 
     SET company_id = (SELECT id FROM public.companies LIMIT 1)
-    WHERE company_id IS NULL;
+    WHERE company_id IS NULL
+      AND EXISTS (SELECT 1 FROM public.companies);
     
-    -- Make company_id NOT NULL
-    ALTER TABLE public.company_roles ALTER COLUMN company_id SET NOT NULL;
+    -- Make company_id NOT NULL only if all rows have been updated
+    -- Skip if no companies exist (will be handled by later migrations or app logic)
+    IF EXISTS (SELECT 1 FROM public.companies) AND NOT EXISTS (SELECT 1 FROM public.company_roles WHERE company_id IS NULL) THEN
+      ALTER TABLE public.company_roles ALTER COLUMN company_id SET NOT NULL;
+    END IF;
   END IF;
 END $$;
 
@@ -104,65 +110,220 @@ ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.company_invites ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for companies
-CREATE POLICY "Company members can view their company" 
-  ON public.companies 
-  FOR SELECT 
-  USING (id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+-- Use permissive policy if profiles table doesn't have company_id yet
+DROP POLICY IF EXISTS "Company members can view their company" ON public.companies;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) THEN
+    CREATE POLICY "Company members can view their company" 
+      ON public.companies 
+      FOR SELECT 
+      USING (id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+  ELSE
+    -- Temporary permissive policy until profiles.company_id exists
+    CREATE POLICY "Company members can view their company" 
+      ON public.companies 
+      FOR SELECT 
+      USING (true); -- TODO: tighten after profiles.company_id exists
+  END IF;
+END $$;
 
-CREATE POLICY "Company admins can update their company" 
-  ON public.companies 
-  FOR UPDATE 
-  USING (id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+DROP POLICY IF EXISTS "Company admins can update their company" ON public.companies;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'is_company_admin'
+  ) THEN
+    CREATE POLICY "Company admins can update their company" 
+      ON public.companies 
+      FOR UPDATE 
+      USING (id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+  ELSE
+    -- Temporary permissive policy until profiles columns exist
+    CREATE POLICY "Company admins can update their company" 
+      ON public.companies 
+      FOR UPDATE 
+      USING (true); -- TODO: tighten after profiles.is_company_admin exists
+  END IF;
+END $$;
 
+DROP POLICY IF EXISTS "Anyone can create a company" ON public.companies;
 CREATE POLICY "Anyone can create a company" 
   ON public.companies 
   FOR INSERT 
   WITH CHECK (true);
 
 -- RLS policies for company invites
-CREATE POLICY "Company admins can manage invites" 
-  ON public.company_invites 
-  FOR ALL 
-  USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+DROP POLICY IF EXISTS "Company admins can manage invites" ON public.company_invites;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'is_company_admin'
+  ) THEN
+    CREATE POLICY "Company admins can manage invites" 
+      ON public.company_invites 
+      FOR ALL 
+      USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+  ELSE
+    -- Temporary permissive policy until profiles columns exist
+    CREATE POLICY "Company admins can manage invites" 
+      ON public.company_invites 
+      FOR ALL 
+      USING (true); -- TODO: tighten after profiles.is_company_admin exists
+  END IF;
+END $$;
 
+DROP POLICY IF EXISTS "Invited users can view their invite" ON public.company_invites;
 CREATE POLICY "Invited users can view their invite" 
   ON public.company_invites 
   FOR SELECT 
   USING (email = (SELECT email FROM auth.users WHERE id = auth.uid()) OR invite_token IS NOT NULL);
 
 -- Recreate the RLS policies for company_roles
-CREATE POLICY "Users can view their company roles" 
-  ON public.company_roles 
-  FOR SELECT 
-  USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+DROP POLICY IF EXISTS "Users can view their company roles" ON public.company_roles;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) THEN
+    CREATE POLICY "Users can view their company roles" 
+      ON public.company_roles 
+      FOR SELECT 
+      USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+  ELSE
+    CREATE POLICY "Users can view their company roles" 
+      ON public.company_roles 
+      FOR SELECT 
+      USING (true); -- TODO: tighten after profiles.company_id exists
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can manage company roles" 
-  ON public.company_roles 
-  FOR ALL 
-  USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+DROP POLICY IF EXISTS "Admins can manage company roles" ON public.company_roles;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'is_company_admin'
+  ) THEN
+    CREATE POLICY "Admins can manage company roles" 
+      ON public.company_roles 
+      FOR ALL 
+      USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true));
+  ELSE
+    CREATE POLICY "Admins can manage company roles" 
+      ON public.company_roles 
+      FOR ALL 
+      USING (true); -- TODO: tighten after profiles.is_company_admin exists
+  END IF;
+END $$;
 
 -- Recreate RLS policies for role_permissions
-CREATE POLICY "Users can view role permissions" 
-  ON public.role_permissions 
-  FOR SELECT 
-  USING (
-    role_id IN (
-      SELECT id FROM public.company_roles 
-      WHERE company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid())
-    )
-  );
+DROP POLICY IF EXISTS "Users can view role permissions" ON public.role_permissions;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) THEN
+    CREATE POLICY "Users can view role permissions" 
+      ON public.role_permissions 
+      FOR SELECT 
+      USING (
+        role_id IN (
+          SELECT id FROM public.company_roles 
+          WHERE company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid())
+        )
+      );
+  ELSE
+    CREATE POLICY "Users can view role permissions" 
+      ON public.role_permissions 
+      FOR SELECT 
+      USING (true); -- TODO: tighten after profiles.company_id exists
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can manage role permissions" 
-  ON public.role_permissions 
-  FOR ALL 
-  USING (
-    role_id IN (
-      SELECT id FROM public.company_roles 
-      WHERE company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true)
-    )
-  );
+DROP POLICY IF EXISTS "Admins can manage role permissions" ON public.role_permissions;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'company_id'
+  ) AND EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'is_company_admin'
+  ) THEN
+    CREATE POLICY "Admins can manage role permissions" 
+      ON public.role_permissions 
+      FOR ALL 
+      USING (
+        role_id IN (
+          SELECT id FROM public.company_roles 
+          WHERE company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid() AND is_company_admin = true)
+        )
+      );
+  ELSE
+    CREATE POLICY "Admins can manage role permissions" 
+      ON public.role_permissions 
+      FOR ALL 
+      USING (true); -- TODO: tighten after profiles.is_company_admin exists
+  END IF;
+END $$;
 
 -- Update the handle_new_user function to support company registration
+-- Drop all variants of handle_new_user first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'handle_new_user'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -233,6 +394,23 @@ END;
 $function$;
 
 -- Function to create company invitation
+-- Drop all variants of create_company_invite first
+DO $$
+DECLARE
+  func_record RECORD;
+BEGIN
+  FOR func_record IN
+    SELECT p.oid, p.proname, pg_get_function_identity_arguments(p.oid) as args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'create_company_invite'
+  LOOP
+    EXECUTE format('DROP FUNCTION IF EXISTS public.%I(%s) CASCADE',
+                    func_record.proname,
+                    func_record.args);
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION public.create_company_invite(
   company_uuid uuid,
   invite_email text,

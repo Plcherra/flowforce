@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface NumberSliderFieldProps {
   label: string;
@@ -31,7 +31,7 @@ export function NumberSliderField({
   showLabels = true,
   unit = "",
   onChange,
-  className = ""
+  className = "",
 }: NumberSliderFieldProps) {
   const [currentValue, setCurrentValue] = useState(value);
 
@@ -114,7 +114,7 @@ export function NumberSliderField({
               <div
                 className="bg-primary h-1 rounded-full transition-all duration-200"
                 style={{
-                  width: `${((currentValue - min) / (max - min)) * 100}%`
+                  width: `${((currentValue - min) / (max - min)) * 100}%`,
                 }}
               />
             </div>
@@ -129,7 +129,7 @@ export function NumberSliderField({
 export function NumberSliderFieldPreview({
   label = "Rating Scale",
   description = "Select a value using the slider",
-  className = ""
+  className = "",
 }: Partial<NumberSliderFieldProps>) {
   return (
     <NumberSliderField

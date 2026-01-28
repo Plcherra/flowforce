@@ -1,14 +1,14 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { BusinessTemplate, OnboardingPosition } from '@/types/templates';
-import { CustomTemplate, CustomSection } from '@/types/customTemplate';
-import CustomTemplateBuilder from './CustomTemplateBuilder';
-import UserInfoStep from './UserInfoStep';
-import TemplateSelectionStep from './TemplateSelectionStep';
-import SectionCustomizationStep from './SectionCustomizationStep';
-import RoleSetupStep from './RoleSetupStep';
-import ReviewStep from './ReviewStep';
-import { UserInfo, CompanyInfo, OnboardingRole } from '@/types/onboarding';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import { CustomTemplate, CustomSection } from "@/types/customTemplate";
+import CustomTemplateBuilder from "./CustomTemplateBuilder";
+import UserInfoStep from "./UserInfoStep";
+import TemplateSelectionStep from "./TemplateSelectionStep";
+import SectionCustomizationStep from "./SectionCustomizationStep";
+import RoleSetupStep from "./RoleSetupStep";
+import ReviewStep from "./ReviewStep";
+import { UserInfo, CompanyInfo, OnboardingRole } from "@/types/onboarding";
 
 interface StepRendererProps {
   currentStep: number;
@@ -49,7 +49,7 @@ export default function StepRenderer({
   onSectionToggle,
   onCustomSectionsChange,
   onRolesChange,
-  onPositionsChange
+  onPositionsChange,
 }: StepRendererProps) {
   const { t } = useTranslation();
   if (isCustomTemplate) {
@@ -87,7 +87,9 @@ export default function StepRenderer({
         if (!selectedTemplate) {
           return (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">{t('onboarding.fallbacks.selectTemplateFirst')}</p>
+              <p className="text-muted-foreground">
+                {t("onboarding.fallbacks.selectTemplateFirst")}
+              </p>
             </div>
           );
         }

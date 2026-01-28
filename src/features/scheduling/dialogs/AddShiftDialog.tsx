@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 interface AddShiftDialogProps {
   /** Provide the trigger element (button, link, etc.) that opens the dialog */

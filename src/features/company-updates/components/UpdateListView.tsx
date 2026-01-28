@@ -1,9 +1,16 @@
-import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import type { CompanyUpdate } from '@/types/companyUpdates';
-import { getTypeColor } from '@/features/company-updates/utils';
+import React from "react";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import type { CompanyUpdate } from "@/types/companyUpdates";
+import { getTypeColor } from "@/features/company-updates/utils";
 
 interface UpdateListViewProps {
   updates: CompanyUpdate[];
@@ -28,10 +35,14 @@ export function UpdateListView({ updates }: UpdateListViewProps) {
               <TableRow key={update.id}>
                 <TableCell className="font-medium">{update.title}</TableCell>
                 <TableCell>
-                  <Badge className={`text-xs ${getTypeColor(update.type)}`}>{update.type}</Badge>
+                  <Badge className={`text-xs ${getTypeColor(update.type)}`}>
+                    {update.type}
+                  </Badge>
                 </TableCell>
                 <TableCell className="capitalize">{update.priority}</TableCell>
-                <TableCell>{new Date(update.publishDate).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(update.publishDate).toLocaleDateString()}
+                </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   👁 {update.views} • 👍 {update.likes} • 💬 {update.comments}
                 </TableCell>

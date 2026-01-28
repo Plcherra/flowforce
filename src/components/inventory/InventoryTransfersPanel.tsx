@@ -1,1 +1,1 @@
-export * from '@/features/inventory/components/InventoryTransfersPanel';
+export * from "@/features/inventory/components/InventoryTransfersPanel";

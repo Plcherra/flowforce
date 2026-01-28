@@ -1,18 +1,21 @@
-import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
-import type { Tables, TablesInsert } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import type {
+  Tables,
+  TablesInsert,
+} from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-type EventShiftLinkRow = Tables<'event_shift_links'>;
+type EventShiftLinkRow = Tables<"event_shift_links">;
 type EventShiftLinkWithShift = EventShiftLinkRow & {
-  shift?: Tables<'schedules'> | null;
+  shift?: Tables<"schedules"> | null;
 };
 
 export interface LinkShiftInput {
   shiftId: string;
   storeId?: string | null;
-  metadata?: TablesInsert<'event_shift_links'>['metadata'];
+  metadata?: TablesInsert<"event_shift_links">["metadata"];
 }
 
 export interface UseEventLinksResult {
@@ -25,7 +28,9 @@ export interface UseEventLinksResult {
 }
 
 const normaliseEntries = (entries: LinkShiftInput[]) =>
-  entries.filter((entry) => typeof entry.shiftId === 'string' && entry.shiftId.length > 0);
+  entries.filter(
+    (entry) => typeof entry.shiftId === "string" && entry.shiftId.length > 0,
+  );
 
 export function useEventLinks(eventId?: string | null): UseEventLinksResult {
   const { profile } = useProfile();
@@ -47,10 +52,10 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
     try {
       const response = await supabase
-        .from('event_shift_links')
-        .select('*, shift:schedules(*)')
-        .eq('event_id', eventId)
-        .eq('company_id', companyId);
+        .from("event_shift_links")
+        .select("*, shift:schedules(*)")
+        .eq("event_id", eventId)
+        .eq("company_id", companyId);
 
       if (response.error) {
         throw response.error;
@@ -58,9 +63,14 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
       setLinks((response.data as EventShiftLinkWithShift[]) ?? []);
     } catch (err) {
-      logger.error('Failed to load event shift links', { error: err, tags: ['error'] });
+      logger.error("Failed to load event shift links", {
+        error: err,
+        tags: ["error"],
+      });
       setLinks([]);
-      setError(err instanceof Error ? err.message : 'Unable to load linked shifts');
+      setError(
+        err instanceof Error ? err.message : "Unable to load linked shifts",
+      );
     } finally {
       setLoading(false);
     }
@@ -73,7 +83,7 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
       if (serialised.length === 0) return;
 
       const existingIds = new Set(links.map((link) => link.shift_id));
-      const payload: TablesInsert<'event_shift_links'>[] = serialised
+      const payload: TablesInsert<"event_shift_links">[] = serialised
         .filter((entry) => !existingIds.has(entry.shiftId))
         .map((entry) => ({
           event_id: eventId,
@@ -89,13 +99,22 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
       setError(null);
 
       try {
-        const response = await supabase.from('event_shift_links').insert(payload).select('*, shift:schedules(*)');
+        const response = await supabase
+          .from("event_shift_links")
+          .insert(payload)
+          .select("*, shift:schedules(*)");
         if (response.error) throw response.error;
 
-        setLinks((prev) => [...prev, ...((response.data ?? []) as EventShiftLinkWithShift[])]);
+        setLinks((prev) => [
+          ...prev,
+          ...((response.data ?? []) as EventShiftLinkWithShift[]),
+        ]);
       } catch (err) {
-        logger.error('Failed to link shifts to event', { error: err, tags: ['error'] });
-        setError(err instanceof Error ? err.message : 'Unable to link shifts');
+        logger.error("Failed to link shifts to event", {
+          error: err,
+          tags: ["error"],
+        });
+        setError(err instanceof Error ? err.message : "Unable to link shifts");
         throw err;
       } finally {
         setLoading(false);
@@ -113,11 +132,11 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
       try {
         const response = await supabase
-          .from('event_shift_links')
+          .from("event_shift_links")
           .delete()
-          .eq('event_id', eventId)
-          .eq('company_id', companyId)
-          .eq('shift_id', shiftId);
+          .eq("event_id", eventId)
+          .eq("company_id", companyId)
+          .eq("shift_id", shiftId);
 
         if (response.error) {
           throw response.error;
@@ -125,8 +144,11 @@ export function useEventLinks(eventId?: string | null): UseEventLinksResult {
 
         setLinks((prev) => prev.filter((link) => link.shift_id !== shiftId));
       } catch (err) {
-        logger.error('Failed to unlink shift from event', { error: err, tags: ['error'] });
-        setError(err instanceof Error ? err.message : 'Unable to unlink shift');
+        logger.error("Failed to unlink shift from event", {
+          error: err,
+          tags: ["error"],
+        });
+        setError(err instanceof Error ? err.message : "Unable to unlink shift");
         throw err;
       } finally {
         setLoading(false);

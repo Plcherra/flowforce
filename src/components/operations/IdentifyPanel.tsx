@@ -1,9 +1,9 @@
-import { Lightbulb, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { IdeaKpiInsight } from '@/modules/operations/hooks/useIdeaInsights';
-import IdeaMetricCard from '@/modules/operations/components/idea/IdeaMetricCard';
-import { KPICharts } from '@/components/operations/KPICharts';
+import { Lightbulb, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { IdeaKpiInsight } from "@/modules/operations/hooks/useIdeaInsights";
+import IdeaMetricCard from "@/modules/operations/components/idea/IdeaMetricCard";
+import { KPICharts } from "@/components/operations/KPICharts";
 
 interface IdentifyPanelProps {
   insights: IdeaKpiInsight[];
@@ -16,7 +16,10 @@ function InsightsSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="rounded-xl border border-border/60 bg-muted/30 p-4">
+        <div
+          key={index}
+          className="rounded-xl border border-border/60 bg-muted/30 p-4"
+        >
           <Skeleton className="h-4 w-24" />
           <Skeleton className="mt-4 h-7 w-32" />
           <Skeleton className="mt-2 h-3 w-20" />
@@ -26,7 +29,12 @@ function InsightsSkeleton() {
   );
 }
 
-export function IdentifyPanel({ insights, loading, stageDescription, onDiagnose }: IdentifyPanelProps) {
+export function IdentifyPanel({
+  insights,
+  loading,
+  stageDescription,
+  onDiagnose,
+}: IdentifyPanelProps) {
   const hasInsights = insights.length > 0;
 
   return (
@@ -36,7 +44,9 @@ export function IdentifyPanel({ insights, loading, stageDescription, onDiagnose 
           <Lightbulb className="h-4 w-4 text-amber-500" aria-hidden="true" />
           Identify
         </div>
-        <h2 className="text-xl font-semibold text-foreground">Spot operational signals</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          Spot operational signals
+        </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div>
           <Button onClick={onDiagnose} disabled={!hasInsights}>
@@ -60,7 +70,9 @@ export function IdentifyPanel({ insights, loading, stageDescription, onDiagnose 
                   value={insight.value}
                   delta={insight.delta ?? undefined}
                   unit={insight.unit ?? undefined}
-                  description={insight.trend ? `Trend: ${insight.trend}` : undefined}
+                  description={
+                    insight.trend ? `Trend: ${insight.trend}` : undefined
+                  }
                 />
               ))}
             </div>

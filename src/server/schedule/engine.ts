@@ -2,9 +2,9 @@
 // Greedy-first scheduling engine that respects Co-Pilot policy decisions.
 // Generates assignments for a set of shift slots using available employees.
 
-import { PolicyEngine } from '@/server/copilot/policy-engine';
-import type { Area } from '@/server/copilot/rules-loader';
-import type { Decision } from '@/server/copilot/decision';
+import { PolicyEngine } from "@/server/copilot/policy-engine";
+import type { Area } from "@/server/copilot/rules-loader";
+import type { Decision } from "@/server/copilot/decision";
 
 // ---- Types ----
 export type ISODate = string; // e.g., '2025-09-08'
@@ -84,23 +84,40 @@ function timeLTE(a: TimeHHMM, b: TimeHHMM): boolean {
   return a <= b; // string compare is fine for HH:MM format
 }
 
-function overlaps(aStart: TimeHHMM, aEnd: TimeHHMM, bStart: TimeHHMM, bEnd: TimeHHMM): boolean {
+function overlaps(
+  aStart: TimeHHMM,
+  aEnd: TimeHHMM,
+  bStart: TimeHHMM,
+  bEnd: TimeHHMM,
+): boolean {
   return aStart < bEnd && bStart < aEnd;
 }
 
-function isAvailableOn(employee: EmployeeProfile, date: ISODate, start: TimeHHMM, end: TimeHHMM): boolean {
+function isAvailableOn(
+  employee: EmployeeProfile,
+  date: ISODate,
+  start: TimeHHMM,
+  end: TimeHHMM,
+): boolean {
   const wd = toWeekday(date);
   const day = employee.availability.find((d) => d.weekday === wd);
   if (!day) return false;
   return day.ranges.some((r) => timeLTE(r.start, start) && timeLTE(end, r.end));
 }
 
-function hasQualifications(employee: EmployeeProfile, required?: string[]): boolean {
+function hasQualifications(
+  employee: EmployeeProfile,
+  required?: string[],
+): boolean {
   if (!required || required.length === 0) return true;
   return required.every((q) => employee.qualificationIds.includes(q));
 }
 
-function withinWeeklyCap(employee: EmployeeProfile, currentAssigned: AssignedShift[], addHours: number): boolean {
+function withinWeeklyCap(
+  employee: EmployeeProfile,
+  currentAssigned: AssignedShift[],
+  addHours: number,
+): boolean {
   if (!employee.maxHoursWeek) return true;
   const hours = currentAssigned
     .filter((a) => a.employeeId === employee.id)
@@ -109,36 +126,54 @@ function withinWeeklyCap(employee: EmployeeProfile, currentAssigned: AssignedShi
 }
 
 function diffHours(start: TimeHHMM, end: TimeHHMM): number {
-  const [sh, sm] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
-  return (eh + em / 60) - (sh + sm / 60);
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  return eh + em / 60 - (sh + sm / 60);
 }
 
-function buildDayAreaCounts(assignments: AssignedShift[], date: ISODate): Record<Area, number> {
-  const counts: Record<Area, number> = { FOH: 0, BOH: 0 } as Record<Area, number>;
+function buildDayAreaCounts(
+  assignments: AssignedShift[],
+  date: ISODate,
+): Record<Area, number> {
+  const counts: Record<Area, number> = { FOH: 0, BOH: 0 } as Record<
+    Area,
+    number
+  >;
   assignments.forEach((a) => {
     if (a.date === date) counts[a.area] = (counts[a.area] ?? 0) + 1;
   });
   return counts;
 }
 
-function collidesWithExisting(employee: EmployeeProfile, date: ISODate, start: TimeHHMM, end: TimeHHMM, assigned: AssignedShift[]): boolean {
-  return assigned.some((a) => a.employeeId === employee.id && a.date === date && overlaps(a.start, a.end, start, end));
+function collidesWithExisting(
+  employee: EmployeeProfile,
+  date: ISODate,
+  start: TimeHHMM,
+  end: TimeHHMM,
+  assigned: AssignedShift[],
+): boolean {
+  return assigned.some(
+    (a) =>
+      a.employeeId === employee.id &&
+      a.date === date &&
+      overlaps(a.start, a.end, start, end),
+  );
 }
 
 // ---- Core Greedy Engine ----
 export async function generateSchedule(
   engine: PolicyEngine,
-  input: GenerateScheduleInput
+  input: GenerateScheduleInput,
 ): Promise<GenerateScheduleResult> {
   const assigned: AssignedShift[] = [...(input.preassigned ?? [])];
   const warnings: EngineWarning[] = [];
 
-  // Heuristic ordering: 
+  // Heuristic ordering:
   // 1) closer-required slots first, 2) BOH before FOH (often more constrained), 3) earlier dates first, 4) longer shifts first.
   const slots = [...input.slots].sort((a, b) => {
-    if ((b.isCloser ? 1 : 0) - (a.isCloser ? 1 : 0) !== 0) return (b.isCloser ? 1 : 0) - (a.isCloser ? 1 : 0);
-    if (a.area !== b.area) return a.area === 'BOH' ? -1 : 1;
+    if ((b.isCloser ? 1 : 0) - (a.isCloser ? 1 : 0) !== 0)
+      return (b.isCloser ? 1 : 0) - (a.isCloser ? 1 : 0);
+    if (a.area !== b.area) return a.area === "BOH" ? -1 : 1;
     if (a.date !== b.date) return a.date.localeCompare(b.date);
     const lenA = diffHours(a.start, a.end);
     const lenB = diffHours(b.start, b.end);
@@ -146,23 +181,33 @@ export async function generateSchedule(
   });
 
   for (const slot of slots) {
-    const candidates = input.employees.filter((e) =>
-      e.locationIds.includes(slot.locationId) &&
-      isAvailableOn(e, slot.date, slot.start, slot.end) &&
-      hasQualifications(e, slot.requiresQualificationIds) &&
-      (slot.isCloser ? (e.availability.find((d) => d.weekday === toWeekday(slot.date))?.canClose === true) : true) &&
-      (slot.traineeOk ? true : !e.isTrainee) &&
-      !collidesWithExisting(e, slot.date, slot.start, slot.end, assigned)
+    const candidates = input.employees.filter(
+      (e) =>
+        e.locationIds.includes(slot.locationId) &&
+        isAvailableOn(e, slot.date, slot.start, slot.end) &&
+        hasQualifications(e, slot.requiresQualificationIds) &&
+        (slot.isCloser
+          ? e.availability.find((d) => d.weekday === toWeekday(slot.date))
+              ?.canClose === true
+          : true) &&
+        (slot.traineeOk ? true : !e.isTrainee) &&
+        !collidesWithExisting(e, slot.date, slot.start, slot.end, assigned),
     );
 
     // Score candidates: prefer non-trainees, more qualifications, fewer hours assigned so far
     const scored = candidates
       .map((e) => {
-        const hoursSoFar = assigned.filter((a) => a.employeeId === e.id).reduce((acc, a) => acc + diffHours(a.start, a.end), 0);
-        const qualScore = (slot.requiresQualificationIds?.filter((q) => e.qualificationIds.includes(q)).length ?? 0) * 10;
+        const hoursSoFar = assigned
+          .filter((a) => a.employeeId === e.id)
+          .reduce((acc, a) => acc + diffHours(a.start, a.end), 0);
+        const qualScore =
+          (slot.requiresQualificationIds?.filter((q) =>
+            e.qualificationIds.includes(q),
+          ).length ?? 0) * 10;
         const traineePenalty = e.isTrainee ? -20 : 0;
         const availabilityBonus = 0; // could add open/close bonuses if needed
-        const score = qualScore + availabilityBonus + (100 - hoursSoFar) + traineePenalty;
+        const score =
+          qualScore + availabilityBonus + (100 - hoursSoFar) + traineePenalty;
         return { e, score, hoursSoFar };
       })
       .sort((a, b) => b.score - a.score);
@@ -206,9 +251,12 @@ export async function generateSchedule(
     }
 
     if (!placed) {
-      warnings.push({ slotId: slot.id, reasons: [
-        `No eligible candidate for ${slot.area} ${slot.roleId ?? ''} on ${slot.date} ${slot.start}-${slot.end}`.trim(),
-      ] });
+      warnings.push({
+        slotId: slot.id,
+        reasons: [
+          `No eligible candidate for ${slot.area} ${slot.roleId ?? ""} on ${slot.date} ${slot.start}-${slot.end}`.trim(),
+        ],
+      });
     }
   }
 

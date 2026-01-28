@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SecuritySettings } from '@/types/system-settings';
-import { DEFAULT_SECURITY } from './systemSettingsDefaults';
-import type { SystemSettingsHook } from './useSystemSettings';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SecuritySettings } from "@/types/system-settings";
+import { DEFAULT_SECURITY } from "./systemSettingsDefaults";
+import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useSecuritySettings(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
@@ -15,7 +15,10 @@ export function useSecuritySettings(source: SystemSettingsHook) {
     setState(base);
   }, [base]);
 
-  const dirty = useMemo(() => JSON.stringify(state) !== JSON.stringify(base), [state, base]);
+  const dirty = useMemo(
+    () => JSON.stringify(state) !== JSON.stringify(base),
+    [state, base],
+  );
 
   const save = useCallback(async () => {
     if (!dirty) return;
@@ -37,7 +40,10 @@ export function useSecuritySettings(source: SystemSettingsHook) {
   }, [base]);
 
   const updatePasswordPolicy = useCallback(
-    (key: keyof SecuritySettings['passwordPolicy'], value: boolean | number) => {
+    (
+      key: keyof SecuritySettings["passwordPolicy"],
+      value: boolean | number,
+    ) => {
       setState((prev) => ({
         ...prev,
         passwordPolicy: {
@@ -50,7 +56,10 @@ export function useSecuritySettings(source: SystemSettingsHook) {
   );
 
   const updateTokenAccess = useCallback(
-    (key: keyof SecuritySettings['apiTokenAccess'], value: boolean | number | string | null) => {
+    (
+      key: keyof SecuritySettings["apiTokenAccess"],
+      value: boolean | number | string | null,
+    ) => {
       setState((prev) => ({
         ...prev,
         apiTokenAccess: {
@@ -63,10 +72,7 @@ export function useSecuritySettings(source: SystemSettingsHook) {
   );
 
   const updateRowLevelSecurity = useCallback(
-    (
-      key: keyof SecuritySettings['rowLevelSecurity'],
-      value: boolean,
-    ) => {
+    (key: keyof SecuritySettings["rowLevelSecurity"], value: boolean) => {
       setState((prev) => ({
         ...prev,
         rowLevelSecurity: {

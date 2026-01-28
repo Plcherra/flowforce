@@ -1,17 +1,23 @@
-import { useMemo, useState } from 'react';
-import { AlertTriangle, Search } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
-import { GoalCard } from '@/features/goals/components/GoalCard';
-import type { Goal, GoalStatus } from '@/hooks/useGoals';
-import type { GoalDialogs } from '@/hooks/useGoalDialogs';
+import { useMemo, useState } from "react";
+import { AlertTriangle, Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
+import { GoalCard } from "@/features/goals/components/GoalCard";
+import type { Goal, GoalStatus } from "@/hooks/useGoals";
+import type { GoalDialogs } from "@/hooks/useGoalDialogs";
 
-const FILTERS = ['all', 'active', 'completed', 'draft', 'cancelled'] as const;
+const FILTERS = ["all", "active", "completed", "draft", "cancelled"] as const;
 type GoalFilter = (typeof FILTERS)[number];
 
 interface GoalListProps {
@@ -35,14 +41,14 @@ export function GoalList({
   onDelete,
   onRetry,
 }: GoalListProps) {
-  const [activeFilter, setActiveFilter] = useState<GoalFilter>('all');
-  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState<GoalFilter>("all");
+  const [search, setSearch] = useState("");
 
   const normalizedQuery = search.trim().toLowerCase();
 
   const filteredGoals = useMemo(() => {
     const byFilter = data.filter((goal) => {
-      if (activeFilter === 'all') {
+      if (activeFilter === "all") {
         return true;
       }
       return goal.status === activeFilter;
@@ -53,7 +59,8 @@ export function GoalList({
     }
 
     return byFilter.filter((goal) => {
-      const haystack = `${goal.title ?? ''} ${goal.description ?? ''}`.toLowerCase();
+      const haystack =
+        `${goal.title ?? ""} ${goal.description ?? ""}`.toLowerCase();
       return haystack.includes(normalizedQuery);
     });
   }, [data, activeFilter, normalizedQuery]);
@@ -64,7 +71,10 @@ export function GoalList({
     <section className="space-y-6">
       <div className="sticky top-20 z-10 space-y-4 rounded-xl border border-border/60 bg-background/90 p-4 shadow-sm backdrop-blur-md">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as GoalFilter)}>
+          <Tabs
+            value={activeFilter}
+            onValueChange={(value) => setActiveFilter(value as GoalFilter)}
+          >
             <TabsList>
               {FILTERS.map((filter) => (
                 <TabsTrigger key={filter} value={filter} className="capitalize">
@@ -95,7 +105,7 @@ export function GoalList({
                 Unable to load goals
               </CardTitle>
               <CardDescription className="text-destructive/80">
-                {error.message ?? 'An unexpected error occurred.'}
+                {error.message ?? "An unexpected error occurred."}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -108,7 +118,9 @@ export function GoalList({
           <Alert variant="warning">
             <AlertTitle>Latest updates may be stale</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
-              <span>{error.message ?? 'We could not refresh goals from the server.'}</span>
+              <span>
+                {error.message ?? "We could not refresh goals from the server."}
+              </span>
               <Button variant="outline" size="sm" onClick={onRetry}>
                 Retry
               </Button>
@@ -122,7 +134,10 @@ export function GoalList({
             {loadingInitial ? (
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, index) => (
-                  <Card key={index} className="border border-border/60 bg-background/70">
+                  <Card
+                    key={`goal-skeleton-${index}`}
+                    className="border border-border/60 bg-background/70"
+                  >
                     <CardHeader>
                       <Skeleton className="h-6 w-2/3" />
                     </CardHeader>
@@ -140,8 +155,8 @@ export function GoalList({
                   <CardTitle>No goals found</CardTitle>
                   <CardDescription>
                     {data.length === 0
-                      ? 'Create your first goal to begin tracking progress.'
-                      : 'No goals match your filters yet.'}
+                      ? "Create your first goal to begin tracking progress."
+                      : "No goals match your filters yet."}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
@@ -157,10 +172,10 @@ export function GoalList({
             ) : (
               <div
                 className={cn(
-                  'grid gap-4',
-                  'md:grid-cols-2',
-                  'xl:grid-cols-3',
-                  isFetching ? 'opacity-75 transition-opacity' : '',
+                  "grid gap-4",
+                  "md:grid-cols-2",
+                  "xl:grid-cols-3",
+                  isFetching ? "opacity-75 transition-opacity" : "",
                 )}
               >
                 {filteredGoals.map((goal) => (

@@ -1,12 +1,11 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
+import type { Tables } from "@/integrations/supabase/public-types";
+import { logger } from "@/utils/logger";
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-import type { Tables } from '@/integrations/supabase/public-types';
-import { logger } from '@/utils/logger';
-
-type Workflow = Tables<'workflows'>;
-type WorkflowStep = Tables<'workflow_steps'>;
+type Workflow = Tables<"workflows">;
+type WorkflowStep = Tables<"workflow_steps">;
 
 export function useWorkflows() {
   const { user } = useAuth();
@@ -27,27 +26,31 @@ export function useWorkflows() {
 
     try {
       const { data, error } = await supabase
-        .from('workflows')
-        .select(`
+        .from("workflows")
+        .select(
+          `
           *,
           created_profile:profiles!workflows_created_by_fkey(first_name, last_name),
           department:departments(name)
-        `)
-        .order('created_at', { ascending: false });
+        `,
+        )
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setWorkflows(data || []);
     } catch (error) {
-      logger.error('Error fetching workflows', { error, tags: ['error'] });
+      logger.error("Error fetching workflows", { error, tags: ["error"] });
     } finally {
       setLoading(false);
     }
   };
 
-  const createWorkflow = async (workflowData: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>) => {
+  const createWorkflow = async (
+    workflowData: Omit<Workflow, "id" | "created_at" | "updated_at">,
+  ) => {
     try {
       const { data, error } = await supabase
-        .from('workflows')
+        .from("workflows")
         .insert(workflowData)
         .select()
         .single();
@@ -56,7 +59,7 @@ export function useWorkflows() {
       await fetchWorkflows(); // Refresh the list
       return { data, error: null };
     } catch (error) {
-      logger.error('Error creating workflow', { error, tags: ['error'] });
+      logger.error("Error creating workflow", { error, tags: ["error"] });
       return { data: null, error };
     }
   };
@@ -64,9 +67,9 @@ export function useWorkflows() {
   const updateWorkflow = async (id: string, updates: Partial<Workflow>) => {
     try {
       const { data, error } = await supabase
-        .from('workflows')
+        .from("workflows")
         .update(updates)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -74,23 +77,20 @@ export function useWorkflows() {
       await fetchWorkflows(); // Refresh the list
       return { data, error: null };
     } catch (error) {
-      logger.error('Error updating workflow', { error, tags: ['error'] });
+      logger.error("Error updating workflow", { error, tags: ["error"] });
       return { data: null, error };
     }
   };
 
   const deleteWorkflow = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('workflows')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("workflows").delete().eq("id", id);
 
       if (error) throw error;
       await fetchWorkflows(); // Refresh the list
       return { error: null };
     } catch (error) {
-      logger.error('Error deleting workflow', { error, tags: ['error'] });
+      logger.error("Error deleting workflow", { error, tags: ["error"] });
       return { error };
     }
   };
@@ -98,26 +98,30 @@ export function useWorkflows() {
   const getWorkflowSteps = async (workflowId: string) => {
     try {
       const { data, error } = await supabase
-        .from('workflow_steps')
-        .select(`
+        .from("workflow_steps")
+        .select(
+          `
           *,
           assigned_user:profiles(first_name, last_name)
-        `)
-        .eq('workflow_id', workflowId)
-        .order('step_number', { ascending: true });
+        `,
+        )
+        .eq("workflow_id", workflowId)
+        .order("step_number", { ascending: true });
 
       if (error) throw error;
       return { data: data || [], error: null };
     } catch (error) {
-      logger.error('Error fetching workflow steps', { error, tags: ['error'] });
+      logger.error("Error fetching workflow steps", { error, tags: ["error"] });
       return { data: [], error };
     }
   };
 
-  const createWorkflowStep = async (stepData: Omit<WorkflowStep, 'id' | 'created_at' | 'updated_at'>) => {
+  const createWorkflowStep = async (
+    stepData: Omit<WorkflowStep, "id" | "created_at" | "updated_at">,
+  ) => {
     try {
       const { data, error } = await supabase
-        .from('workflow_steps')
+        .from("workflow_steps")
         .insert(stepData)
         .select()
         .single();
@@ -125,7 +129,7 @@ export function useWorkflows() {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      logger.error('Error creating workflow step', { error, tags: ['error'] });
+      logger.error("Error creating workflow step", { error, tags: ["error"] });
       return { data: null, error };
     }
   };
@@ -138,6 +142,6 @@ export function useWorkflows() {
     deleteWorkflow,
     getWorkflowSteps,
     createWorkflowStep,
-    refetchWorkflows: fetchWorkflows
+    refetchWorkflows: fetchWorkflows,
   };
 }

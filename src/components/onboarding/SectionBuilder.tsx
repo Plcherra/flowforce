@@ -1,29 +1,41 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Plus, 
-  X, 
-  GripVertical, 
-  MessageSquare, 
-  Cog, 
-  Users, 
-  BarChart3, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  X,
+  GripVertical,
+  MessageSquare,
+  Cog,
+  Users,
+  BarChart3,
   Shield,
   Calendar,
   FileText,
   ShoppingCart,
   DollarSign,
   Award,
-  BookOpen
-} from 'lucide-react';
-import { CustomSection, CustomPage } from '@/types/customTemplate';
+  BookOpen,
+} from "lucide-react";
+import { CustomSection, CustomPage } from "@/types/customTemplate";
 
 interface SectionBuilderProps {
   sections: CustomSection[];
@@ -41,31 +53,34 @@ const sectionIcons = {
   Award: Award,
   BookOpen: BookOpen,
   Cog: Cog,
-  Shield: Shield
+  Shield: Shield,
 };
 
 const sectionCategories = [
-  { value: 'communication', label: 'Communication' },
-  { value: 'operations', label: 'Operations' },
-  { value: 'hr', label: 'HR & Development' },
-  { value: 'analytics', label: 'Analytics & Reports' },
-  { value: 'admin', label: 'Admin & Setup' },
-  { value: 'custom', label: 'Custom' },
-  { value: 'other', label: 'Other' }
+  { value: "communication", label: "Communication" },
+  { value: "operations", label: "Operations" },
+  { value: "hr", label: "HR & Development" },
+  { value: "analytics", label: "Analytics & Reports" },
+  { value: "admin", label: "Admin & Setup" },
+  { value: "custom", label: "Custom" },
+  { value: "other", label: "Other" },
 ];
 
-export default function SectionBuilder({ sections, onSectionsChange }: SectionBuilderProps) {
+export default function SectionBuilder({
+  sections,
+  onSectionsChange,
+}: SectionBuilderProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
-  const [customCategory, setCustomCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState("");
   const [newSection, setNewSection] = useState<Partial<CustomSection>>({
-    name: '',
-    description: '',
-    icon: 'FileText',
-    category: 'custom',
+    name: "",
+    description: "",
+    icon: "FileText",
+    category: "custom",
     pages: [],
     permissions: [],
     isDefault: false,
-    isActive: true
+    isActive: true,
   });
 
   const addSection = () => {
@@ -74,67 +89,74 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
     const section: CustomSection = {
       id: Date.now().toString(),
       name: newSection.name,
-      description: newSection.description || '',
-      icon: newSection.icon || 'FileText',
-      category: newSection.category as any || 'custom',
+      description: newSection.description || "",
+      icon: newSection.icon || "FileText",
+      category: (newSection.category as any) || "custom",
       pages: [],
       permissions: newSection.permissions || [],
       isDefault: false,
-      isActive: true
+      isActive: true,
     };
 
     onSectionsChange([...sections, section]);
     setNewSection({
-      name: '',
-      description: '',
-      icon: 'FileText',
-      category: 'custom',
+      name: "",
+      description: "",
+      icon: "FileText",
+      category: "custom",
       pages: [],
       permissions: [],
       isDefault: false,
-      isActive: true
+      isActive: true,
     });
   };
 
   const removeSection = (sectionId: string) => {
-    onSectionsChange(sections.filter(s => s.id !== sectionId));
+    onSectionsChange(sections.filter((s) => s.id !== sectionId));
   };
 
-  const updateSection = (sectionId: string, updates: Partial<CustomSection>) => {
-    onSectionsChange(sections.map(s => 
-      s.id === sectionId ? { ...s, ...updates } : s
-    ));
+  const updateSection = (
+    sectionId: string,
+    updates: Partial<CustomSection>,
+  ) => {
+    onSectionsChange(
+      sections.map((s) => (s.id === sectionId ? { ...s, ...updates } : s)),
+    );
   };
 
   const addPageToSection = (sectionId: string) => {
     const newPage: CustomPage = {
       id: Date.now().toString(),
-      name: 'New Page',
-      title: 'New Page',
-      description: 'A custom page',
-      icon: 'FileText',
+      name: "New Page",
+      title: "New Page",
+      description: "A custom page",
+      icon: "FileText",
       route: `/custom-page-${Date.now()}`,
       content: [],
       permissions: [],
-      isActive: true
+      isActive: true,
     };
 
     updateSection(sectionId, {
-      pages: [...(sections.find(s => s.id === sectionId)?.pages || []), newPage]
+      pages: [
+        ...(sections.find((s) => s.id === sectionId)?.pages || []),
+        newPage,
+      ],
     });
   };
 
   const removePageFromSection = (sectionId: string, pageId: string) => {
-    const section = sections.find(s => s.id === sectionId);
+    const section = sections.find((s) => s.id === sectionId);
     if (section) {
       updateSection(sectionId, {
-        pages: section.pages.filter(p => p.id !== pageId)
+        pages: section.pages.filter((p) => p.id !== pageId),
       });
     }
   };
 
   const IconComponent = ({ iconName }: { iconName: string }) => {
-    const Icon = sectionIcons[iconName as keyof typeof sectionIcons] || FileText;
+    const Icon =
+      sectionIcons[iconName as keyof typeof sectionIcons] || FileText;
     return <Icon className="h-4 w-4" />;
   };
 
@@ -164,21 +186,27 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
               <Label>Section Name</Label>
               <Input
                 value={newSection.name}
-                onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+                onChange={(e) =>
+                  setNewSection({ ...newSection, name: e.target.value })
+                }
                 placeholder="e.g., Customer Management"
               />
             </div>
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select 
-                value={newSection.category === 'other' ? 'other' : newSection.category} 
+              <Select
+                value={
+                  newSection.category === "other"
+                    ? "other"
+                    : newSection.category
+                }
                 onValueChange={(value) => {
-                  if (value === 'other') {
-                    setNewSection({ ...newSection, category: 'other' });
-                    setCustomCategory('');
+                  if (value === "other") {
+                    setNewSection({ ...newSection, category: "other" });
+                    setCustomCategory("");
                   } else {
                     setNewSection({ ...newSection, category: value as any });
-                    setCustomCategory('');
+                    setCustomCategory("");
                   }
                 }}
               >
@@ -193,13 +221,16 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                   ))}
                 </SelectContent>
               </Select>
-              {newSection.category === 'other' && (
+              {newSection.category === "other" && (
                 <Input
                   placeholder="Enter custom category name"
                   value={customCategory}
                   onChange={(e) => {
                     setCustomCategory(e.target.value);
-                    setNewSection({ ...newSection, category: e.target.value as any });
+                    setNewSection({
+                      ...newSection,
+                      category: e.target.value as any,
+                    });
                   }}
                   className="mt-2"
                 />
@@ -211,7 +242,9 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
             <Label>Description</Label>
             <Textarea
               value={newSection.description}
-              onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
+              onChange={(e) =>
+                setNewSection({ ...newSection, description: e.target.value })
+              }
               placeholder="Describe what this section is for..."
               rows={2}
             />
@@ -225,7 +258,9 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                   key={iconName}
                   variant={newSection.icon === iconName ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setNewSection({ ...newSection, icon: iconName })}
+                  onClick={() =>
+                    setNewSection({ ...newSection, icon: iconName })
+                  }
                   className="h-10"
                 >
                   <IconComponent iconName={iconName} />
@@ -243,7 +278,7 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
       {/* Existing Sections */}
       <div className="space-y-4">
         <h4 className="font-medium">Your Sections ({sections.length})</h4>
-        
+
         {sections.map((section) => (
           <Card key={section.id}>
             <CardHeader>
@@ -258,12 +293,20 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">
-                    {sectionCategories.find(c => c.value === section.category)?.label}
+                    {
+                      sectionCategories.find(
+                        (c) => c.value === section.category,
+                      )?.label
+                    }
                   </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEditingSection(editingSection === section.id ? null : section.id)}
+                    onClick={() =>
+                      setEditingSection(
+                        editingSection === section.id ? null : section.id,
+                      )
+                    }
                   >
                     Edit
                   </Button>
@@ -286,18 +329,26 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                       <Label>Name</Label>
                       <Input
                         value={section.name}
-                        onChange={(e) => updateSection(section.id, { name: e.target.value })}
+                        onChange={(e) =>
+                          updateSection(section.id, { name: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Category</Label>
-                      <Select 
-                        value={section.category === 'other' ? 'other' : section.category} 
+                      <Select
+                        value={
+                          section.category === "other"
+                            ? "other"
+                            : section.category
+                        }
                         onValueChange={(value) => {
-                          if (value === 'other') {
-                            updateSection(section.id, { category: 'other' });
+                          if (value === "other") {
+                            updateSection(section.id, { category: "other" });
                           } else {
-                            updateSection(section.id, { category: value as any });
+                            updateSection(section.id, {
+                              category: value as any,
+                            });
                           }
                         }}
                       >
@@ -312,11 +363,20 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                           ))}
                         </SelectContent>
                       </Select>
-                      {section.category === 'other' && (
+                      {section.category === "other" && (
                         <Input
                           placeholder="Enter custom category name"
-                          value={typeof section.category === 'string' && section.category !== 'other' ? section.category : ''}
-                          onChange={(e) => updateSection(section.id, { category: e.target.value })}
+                          value={
+                            typeof section.category === "string" &&
+                            section.category !== "other"
+                              ? section.category
+                              : ""
+                          }
+                          onChange={(e) =>
+                            updateSection(section.id, {
+                              category: e.target.value,
+                            })
+                          }
                           className="mt-2"
                         />
                       )}
@@ -327,7 +387,11 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                     <Label>Description</Label>
                     <Textarea
                       value={section.description}
-                      onChange={(e) => updateSection(section.id, { description: e.target.value })}
+                      onChange={(e) =>
+                        updateSection(section.id, {
+                          description: e.target.value,
+                        })
+                      }
                       rows={2}
                     />
                   </div>
@@ -355,10 +419,15 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                     ) : (
                       <div className="space-y-2">
                         {section.pages.map((page) => (
-                          <div key={page.id} className="flex items-center justify-between p-2 border rounded">
+                          <div
+                            key={page.id}
+                            className="flex items-center justify-between p-2 border rounded"
+                          >
                             <div className="flex items-center gap-2">
                               <IconComponent iconName={page.icon} />
-                              <span className="text-sm font-medium">{page.name}</span>
+                              <span className="text-sm font-medium">
+                                {page.name}
+                              </span>
                               <Badge variant="outline" className="text-xs">
                                 {page.route}
                               </Badge>
@@ -366,7 +435,9 @@ export default function SectionBuilder({ sections, onSectionsChange }: SectionBu
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => removePageFromSection(section.id, page.id)}
+                              onClick={() =>
+                                removePageFromSection(section.id, page.id)
+                              }
                             >
                               <X className="h-3 w-3" />
                             </Button>
