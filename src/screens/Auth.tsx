@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -26,7 +26,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     }
 
     // Check if this is a password reset redirect
@@ -41,7 +41,7 @@ export default function Auth() {
     const { error } = await signIn(email, password);
 
     if (!error) {
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     }
 
     setIsLoading(false);
@@ -79,7 +79,7 @@ export default function Auth() {
 
     if (!error) {
       setShowPasswordReset(false);
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     }
   };
 

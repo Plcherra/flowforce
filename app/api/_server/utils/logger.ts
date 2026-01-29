@@ -144,10 +144,20 @@ async function persistLog(
     });
 
     if (error) {
-      console.error("[logger] failed to persist log", error);
+      console.error("[logger] failed to persist log", {
+        error: error.message || String(error),
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
     }
   } catch (error) {
-    console.error("[logger] unexpected error persisting log", error);
+    const errorMessage =
+      error instanceof Error ? error.message : String(error);
+    console.error("[logger] unexpected error persisting log", {
+      error: errorMessage,
+      type: error instanceof Error ? error.constructor.name : typeof error,
+    });
   }
 }
 

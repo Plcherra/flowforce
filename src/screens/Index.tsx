@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
@@ -16,7 +16,7 @@ export default function Index() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     }
   }, [user, loading, navigate]);
 

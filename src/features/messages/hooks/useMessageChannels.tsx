@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useRealtime } from "@/hooks/useRealtime";
@@ -13,45 +13,98 @@ import {
   deleteChannel as deleteChannelService,
 } from "@/features/messages/api/channelService";
 
+// UUID validation pattern
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const isValidUUID = (value: string | null | undefined): boolean => {
+  if (!value) return false;
+  return UUID_PATTERN.test(value);
+};
+
 export function useMessageChannels() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { profile } = useProfile();
   const [channels, setChannels] = useState<MessageChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isFetchingRef = useRef(false);
+  const retryCountRef = useRef(0);
+  const MAX_RETRIES = 3;
+
+  // Query key includes user ID and company ID for automatic cache invalidation on login/logout
+  const userId = session?.user?.id ?? null;
+  const rawCompanyId = profile?.companyId ?? profile?.company_id ?? null;
+  
+  // Validate companyId - only use if it's a valid UUID, otherwise use null
+  // This prevents errors when "demo-company" or other non-UUID values are used
+  const companyId = isValidUUID(rawCompanyId) ? rawCompanyId : null;
+  
+  const queryKey = ["message_channels", userId, companyId];
+
+  // Only fetch when user is authenticated
+  const enabled = !!session?.user;
 
   const fetchChannels = useCallback(async () => {
-    if (!user) return;
+    if (!userId) return;
 
+    // Prevent concurrent fetches and infinite retries
+    if (isFetchingRef.current) {
+      logger.debug("Channel fetch already in progress, skipping", {
+        tags: ["channels"],
+      });
+      return;
+    }
+
+    if (retryCountRef.current >= MAX_RETRIES) {
+      logger.warn("Max retries reached for channel fetch", {
+        retryCount: retryCountRef.current,
+        tags: ["channels", "error"],
+      });
+      return;
+    }
+
+    isFetchingRef.current = true;
     setLoading(true);
     try {
-      const companyId = profile?.companyId ?? profile?.company_id ?? null;
-      const data = await messagesRepository.listChannels(user.id, companyId);
+      // companyId is already validated (null if not a valid UUID)
+      // This allows fetching channels even without a company context
+      const data = await messagesRepository.listChannels(userId, companyId);
       setChannels(asArray(data));
       setError(null);
+      retryCountRef.current = 0; // Reset retry count on success
     } catch (error) {
       const issue =
         error instanceof Error ? error : new Error("Error fetching channels");
       logger.error("Error fetching channels:", {
         error: issue,
+        retryCount: retryCountRef.current,
         tags: ["error"],
       });
       setError(issue);
+      retryCountRef.current += 1;
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [user, profile?.companyId, profile?.company_id]);
+  }, [userId, companyId]);
 
   useEffect(() => {
-    if (!user) {
+    // Prevent running when not logged in
+    if (!enabled) {
       setChannels([]);
       setLoading(false);
       setError(null);
+      retryCountRef.current = 0; // Reset retry count on logout
       return;
     }
 
+    // Reset retry count when user/company changes (new session)
+    retryCountRef.current = 0;
     fetchChannels();
-  }, [fetchChannels, user]);
+    // Only depend on userId and companyId, not fetchChannels to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, userId, companyId]);
 
   useRealtime({
     channel: "message_channels_changes",
@@ -59,22 +112,26 @@ export function useMessageChannels() {
       { event: "*", schema: "public", table: "message_channels" },
       { event: "*", schema: "public", table: "channel_members" },
     ],
-    enabled: Boolean(user?.id),
+    enabled: enabled && Boolean(userId),
     onPayload: () => {
+      // Reset retry count on realtime updates to allow fresh fetches
+      retryCountRef.current = 0;
       void fetchChannels();
     },
   });
 
   const createChannel = useCallback(
     async (channelData: CreateChannelData) => {
-      if (!user) {
+      if (!enabled || !userId) {
         const issue = new Error("User not authenticated");
         setError(issue);
         return { data: null, error: issue };
       }
 
       try {
-        const channel = await createChannelService(channelData, user.id);
+        const channel = await createChannelService(channelData, userId);
+        // Reset retry count before refetching after successful creation
+        retryCountRef.current = 0;
         await fetchChannels();
         setError(null);
         return { data: channel, error: null };
@@ -87,19 +144,21 @@ export function useMessageChannels() {
         return { data: null, error: issue };
       }
     },
-    [fetchChannels, user],
+    [fetchChannels, enabled, userId],
   );
 
   const joinChannel = useCallback(
     async (channelId: string) => {
-      if (!user) {
+      if (!enabled || !userId) {
         const issue = new Error("User not authenticated");
         setError(issue);
         return { error: issue };
       }
 
       try {
-        await joinChannelService(channelId, user.id);
+        await joinChannelService(channelId, userId);
+        // Reset retry count before refetching after successful join
+        retryCountRef.current = 0;
         await fetchChannels();
         setError(null);
         return { error: null };
@@ -110,15 +169,15 @@ export function useMessageChannels() {
         return { error: issue };
       }
     },
-    [fetchChannels, user],
+    [fetchChannels, enabled, userId],
   );
 
   const updateLastRead = useCallback(
     async (channelId: string) => {
-      if (!user) return;
+      if (!enabled || !userId) return;
 
       try {
-        await updateLastReadService(channelId, user.id);
+        await updateLastReadService(channelId, userId);
       } catch (error) {
         const issue =
           error instanceof Error
@@ -131,21 +190,23 @@ export function useMessageChannels() {
         setError(issue);
       }
     },
-    [user],
+    [enabled, userId],
   );
 
   const clearError = useCallback(() => setError(null), []);
 
   const deleteChannel = useCallback(
     async (channelId: string) => {
-      if (!user) {
+      if (!enabled || !userId) {
         const issue = new Error("User not authenticated");
         setError(issue);
         return { error: issue };
       }
 
       try {
-        await deleteChannelService(channelId, user.id);
+        await deleteChannelService(channelId, userId);
+        // Reset retry count before refetching after successful deletion
+        retryCountRef.current = 0;
         await fetchChannels();
         setError(null);
         return { error: null };
@@ -158,7 +219,7 @@ export function useMessageChannels() {
         return { error: issue };
       }
     },
-    [fetchChannels, user],
+    [fetchChannels, enabled, userId],
   );
 
   return {

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Building2, Play, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import { DemoModal } from "@/components/DemoModal";
 import { useTranslation } from "react-i18next";
 

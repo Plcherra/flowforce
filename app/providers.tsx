@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
+import { supabase } from "@/integrations/supabase/client";
 // Initialize i18next before using it
 import "@/i18n/config";
 
@@ -79,6 +80,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary showDetails={appEnv.DEV}>
       <QueryClientProvider client={queryClient}>
+        <AuthStateCacheInvalidator />
         <AuthProvider>
           <ProfileProvider>
             <LanguageProvider>
@@ -92,4 +94,40 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </QueryClientProvider>
     </ErrorBoundary>
   );
+}
+
+/**
+ * Component that listens to Supabase auth state changes and invalidates
+ * React Query cache on sign in/out to prevent stale data.
+ */
+function AuthStateCacheInvalidator() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        logger.debug("Auth state changed, invalidating React Query cache", {
+          event,
+          hasSession: !!session,
+          tags: ["auth", "react-query"],
+        });
+
+        // Invalidate all queries to ensure fresh data after auth change
+        queryClient.invalidateQueries();
+        
+        // Optionally clear all queries completely for sign out
+        if (event === "SIGNED_OUT") {
+          queryClient.removeQueries();
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryClient]);
+
+  return null;
 }

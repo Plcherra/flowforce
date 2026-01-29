@@ -40,6 +40,15 @@ export type UseEmployeesOptions = {
 
 const EMPLOYEE_CHUNK_SIZE = 100;
 
+// UUID validation pattern
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const isValidUUID = (value: string | null | undefined): boolean => {
+  if (!value) return false;
+  return UUID_PATTERN.test(value);
+};
+
 const chunkArray = <T>(items: T[], chunkSize: number): T[][] => {
   if (chunkSize <= 0) return [items];
   const result: T[][] = [];
@@ -333,13 +342,22 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
 
   const effectiveCompanyId =
     companyIdOverride ?? resolvedCompanyId ?? metadataCompanyId;
+  
+  // Validate that companyId is a valid UUID before querying
+  // Skip query if it's "demo-company" or any other non-UUID value
+  const isValidCompanyId = isValidUUID(effectiveCompanyId);
+  
   const queryKey = employeesQueryKey(effectiveCompanyId, includeInactive);
 
   const queryResult = useQuery<Employee[]>({
     queryKey,
-    enabled: Boolean(enabled && user?.id && effectiveCompanyId),
+    enabled: Boolean(enabled && user?.id && effectiveCompanyId && isValidCompanyId),
     queryFn: async () => {
-      if (!effectiveCompanyId) {
+      if (!effectiveCompanyId || !isValidCompanyId) {
+        logger.debug("Skipping employee fetch - invalid or demo company ID", {
+          companyId: effectiveCompanyId,
+          tags: ["employees"],
+        });
         return [];
       }
       try {

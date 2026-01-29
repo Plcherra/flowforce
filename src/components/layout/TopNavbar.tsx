@@ -6,7 +6,7 @@ import { Building2, User, LogOut, Bell, Search, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useCan } from "@/hooks/useCan";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import {
   DropdownMenu,
   DropdownMenuContent,

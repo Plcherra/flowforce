@@ -215,7 +215,7 @@ async function fetchCompanyEmployees(params: {
     .select(
       `
         *,
-        department:departments!profiles_department_id_fkey(id, name, color, company_id, created_at, updated_at, description, manager_id, type),
+        department:departments!profiles_department_id_fkey(id, name, company_id, created_at, updated_at, description, manager_id, type),
         position:positions(id, name, role)
       `,
     )

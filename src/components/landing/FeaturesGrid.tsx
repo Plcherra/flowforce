@@ -15,7 +15,7 @@ import {
   BarChart3,
   ArrowRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import { EmployeeManagement } from "@/components/illustrations/EmployeeManagement";
 import { ShiftScheduling } from "@/components/illustrations/ShiftScheduling";
 import { TaskManagement } from "@/components/illustrations/TaskManagement";

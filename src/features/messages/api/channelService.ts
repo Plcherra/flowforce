@@ -87,6 +87,41 @@ export async function createChannel(
       hint?: string;
     };
 
+    // Check for RLS recursion error specifically
+    const isRLSRecursionError =
+      supabaseError.code === "42P17" ||
+      (supabaseError.message?.toLowerCase().includes("infinite recursion") ?? false);
+
+    if (isRLSRecursionError) {
+      logger.error(
+        "RLS policy recursion error when adding channel members - this indicates a database policy issue",
+        {
+          error: errorObj,
+          context: {
+            channelId: channel.id,
+            memberCount: uniqueMembers.length,
+            members: uniqueMembers.map((m) => ({
+              user_id: m.user_id,
+              role: m.role,
+            })),
+            errorCode: supabaseError.code,
+            errorDetails: supabaseError.details,
+            errorHint: supabaseError.hint,
+            note: "Channel was created but members could not be added due to RLS policy recursion. Please contact support.",
+          },
+          tags: ["error", "channels", "rls"],
+        },
+      );
+
+      // Wrap the error with a more user-friendly message
+      const userFriendlyError = new Error(
+        "Channel created but failed to add members due to a policy configuration issue. Please try adding members manually or contact support.",
+      );
+      (userFriendlyError as Error & { originalError?: Error }).originalError =
+        errorObj;
+      throw userFriendlyError;
+    }
+
     logger.error("Failed to add members to channel, channel may be orphaned", {
       error: errorObj,
       context: {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -247,7 +247,7 @@ export function useCompanyRegistration() {
       });
 
       // Navigate to dashboard
-      navigate("/dashboard");
+      navigate("/app/dashboard");
     } catch (error: any) {
       const registrationError = handleRegistrationError(error);
       setError(registrationError);

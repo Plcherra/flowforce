@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Building2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-adapter";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export function LandingHeader() {

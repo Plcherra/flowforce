@@ -17,21 +17,14 @@ export default function Messages() {
   const organizationId = bootstrap.organization?.id ?? null;
   const organizationName = bootstrap.organization?.name ?? null;
 
-  if (!bootstrap.userReady || bootstrap.loading) {
+  // Only require user to be ready, not full bootstrap
+  // Messages can work without employees/organization data
+  if (!bootstrap.userReady) {
     return <PageLoader text="Loading your workspace..." />;
   }
 
-  if (!bootstrap.ready) {
-    return (
-      <EmptyStateCard
-        title="Waiting on workspace data"
-        description="We need your organization and employee roster before enabling messaging."
-        icon={<MessageCircle className="h-5 w-5" />}
-      />
-    );
-  }
-
-  if (bootstrap.error) {
+  // Show error only if it's critical (not just missing employees)
+  if (bootstrap.error && !bootstrap.organizationFallback && !bootstrap.employeesFallback) {
     return (
       <div className="p-6">
         <Alert variant="destructive">

@@ -11,7 +11,7 @@ import {
   Sun,
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-adapter";
 import { useTranslation } from "react-i18next";
 
 export function LandingFooter() {

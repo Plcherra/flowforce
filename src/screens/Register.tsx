@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Building2, Users, Mail, Lock, MapPin, Phone } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-adapter";
 
 const industries = [
   "Retail",
@@ -58,12 +58,9 @@ export default function Register() {
     e.preventDefault();
     // In a real app, this would submit to the registration API
     // Navigate to company registration with template building flow
-    navigate("/company-registration", {
-      state: {
-        formData,
-        enableCustomTemplates: true,
-      },
-    });
+    // Note: Next.js navigation does not support react-router location state.
+    // If prefill is needed, persist it (e.g. localStorage) or encode into query params.
+    navigate("/company-registration");
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
