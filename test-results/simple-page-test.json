@@ -1,265 +1,342 @@
 {
-  "timestamp": "2026-01-25T15:12:17.151Z",
+  "timestamp": "2026-05-08T21:36:02.979Z",
   "baseUrl": "http://localhost:3000",
   "results": [
     {
       "route": "/",
-      "status": "ERROR",
-      "loadTime": 26,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 400,
+      "isHtml": true,
+      "contentLength": 17370,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/dashboard",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 108,
+      "isHtml": true,
+      "contentLength": 27117,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/messages",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 69,
+      "isHtml": true,
+      "contentLength": 24704,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/tasks",
-      "status": "ERROR",
-      "loadTime": 2,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 5829,
+      "isHtml": true,
+      "contentLength": 23369,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/goals",
-      "status": "ERROR",
-      "loadTime": 2,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 2806,
+      "isHtml": true,
+      "contentLength": 23025,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/forms",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 4887,
+      "isHtml": true,
+      "contentLength": 23387,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/employees",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 41,
+      "isHtml": true,
+      "contentLength": 23254,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/calendar",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 2744,
+      "isHtml": true,
+      "contentLength": 23046,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/operations",
-      "status": "ERROR",
-      "loadTime": 3,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 2294,
+      "isHtml": true,
+      "contentLength": 23060,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/analytics",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 6326,
+      "isHtml": true,
+      "contentLength": 25789,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/reports",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 6535,
+      "isHtml": true,
+      "contentLength": 23039,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/admin",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 3467,
+      "isHtml": true,
+      "contentLength": 23025,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/settings",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 3153,
+      "isHtml": true,
+      "contentLength": 23635,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/expenses",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 4301,
+      "isHtml": true,
+      "contentLength": 23390,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/time-off",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 3243,
+      "isHtml": true,
+      "contentLength": 22870,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/enhanced-scheduling",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 133,
+      "isHtml": true,
+      "contentLength": 23586,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/inventory-actions",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 4824,
+      "isHtml": true,
+      "contentLength": 23109,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/items-setup",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 4163,
+      "isHtml": true,
+      "contentLength": 23067,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/performance",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 3994,
+      "isHtml": true,
+      "contentLength": 23067,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/learning-center",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": 200,
+      "loadTime": 4105,
+      "isHtml": true,
+      "contentLength": 23095,
+      "success": true,
+      "redirected": false,
+      "isProtected": false
     },
     {
       "route": "/app/company-updates",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10046,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/help-desk",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10027,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/availability/manage",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10010,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/scheduling/timeoff",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10007,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/schedule-lobby",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10006,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/cookbook",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10040,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/purchasing",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10035,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/certifications",
-      "status": "ERROR",
-      "loadTime": 2,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10035,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/leaderboard",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10047,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/recognition",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10006,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/meetings",
-      "status": "ERROR",
-      "loadTime": 2,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10057,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/ai-insights",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10060,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/profile",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10113,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/position-management",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10031,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/sections-permissions",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10236,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/invite-employee",
-      "status": "ERROR",
-      "loadTime": 1,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10039,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     },
     {
       "route": "/app/add-section",
-      "status": "ERROR",
-      "loadTime": 0,
-      "error": "fetch failed",
-      "success": false
+      "status": "NETWORK_ERROR",
+      "loadTime": 10006,
+      "error": "This operation was aborted",
+      "success": false,
+      "isNetworkError": true
     }
   ]
 }
