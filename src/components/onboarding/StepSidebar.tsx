@@ -7,6 +7,7 @@ import {
   Users,
   CheckCircle,
   FileCheck,
+  type LucideIcon,
 } from "lucide-react";
 import { BusinessTemplate } from "@/types/templates";
 import { useTranslation } from "react-i18next";
@@ -23,12 +24,13 @@ interface StepSidebarProps {
   isMobile?: boolean;
 }
 
-const stepIcons = {
+const stepIcons: Record<number, LucideIcon> = {
   1: Building2,
   2: Settings,
   3: Users,
   4: CheckCircle,
   5: FileCheck,
+  6: FileCheck,
 };
 
 export default function StepSidebar({
@@ -39,7 +41,10 @@ export default function StepSidebar({
 }: StepSidebarProps) {
   const { t } = useTranslation();
   const currentStepData = steps.find((step) => step.id === currentStep);
-  const IconComponent = stepIcons[currentStep as keyof typeof stepIcons];
+  const IconComponent = stepIcons[currentStep] ?? FileCheck;
+  const localizedTemplate = selectedTemplate
+    ? I18nHelpers.getLocalizedTemplate(selectedTemplate.id, selectedTemplate)
+    : null;
 
   if (isMobile) {
     return (
@@ -64,7 +69,7 @@ export default function StepSidebar({
             </div>
             {selectedTemplate && (
               <Badge variant="secondary" className="shrink-0">
-                {selectedTemplate.name}
+                {localizedTemplate?.name ?? selectedTemplate.name}
               </Badge>
             )}
           </div>
@@ -120,13 +125,11 @@ export default function StepSidebar({
                   <Badge variant="secondary">{selectedTemplate.industry}</Badge>
                 </div>
                 <p className="font-medium text-sm">
-                  {I18nHelpers.getLocalizedTemplate(selectedTemplate.id).name}
+                  {localizedTemplate?.name ?? selectedTemplate.name}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {
-                    I18nHelpers.getLocalizedTemplate(selectedTemplate.id)
-                      .description
-                  }
+                  {localizedTemplate?.description ??
+                    selectedTemplate.description}
                 </p>
               </div>
             </div>

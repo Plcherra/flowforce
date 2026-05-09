@@ -5,9 +5,8 @@ import type { Tables } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
 
 type TaskNotificationRow = Tables<"task_notifications">;
-type TaskRow = Tables<"tasks">;
 
-const notificationSchema: z.ZodType<TaskNotificationRow> = z
+const notificationSchema = z
   .object({
     id: z.string(),
     user_id: z.string(),
@@ -21,12 +20,7 @@ const notificationSchema: z.ZodType<TaskNotificationRow> = z
   })
   .passthrough();
 
-const taskSummarySchema: z.ZodType<
-  Pick<
-    TaskRow,
-    "id" | "title" | "due_date" | "priority" | "assigned_to" | "status"
-  >
-> = z
+const taskSummarySchema = z
   .object({
     id: z.string(),
     title: z.string(),
@@ -36,6 +30,14 @@ const taskSummarySchema: z.ZodType<
     status: z.string(),
   })
   .passthrough();
+
+const isMissingTableError = (error: unknown) => {
+  const candidate = error as { code?: string; message?: string } | null;
+  return (
+    candidate?.code === "PGRST205" ||
+    candidate?.message?.includes("Could not find the table")
+  );
+};
 
 export type TaskNotification = z.infer<typeof notificationSchema>;
 export type TaskSummary = z.infer<typeof taskSummarySchema>;
@@ -51,6 +53,10 @@ export async function fetchNotificationsForUser(
     .limit(50);
 
   if (error) {
+    if (isMissingTableError(error)) {
+      return [];
+    }
+
     throw error;
   }
 
@@ -138,6 +144,10 @@ export async function findRecentNotification(
     .single();
 
   if (error) {
+    if (isMissingTableError(error)) {
+      return null;
+    }
+
     if (error.code === "PGRST116") {
       return null;
     }
@@ -162,6 +172,10 @@ export async function fetchTasksDueSoon(
     .in("status", ["todo", "in_progress", "review"]);
 
   if (error) {
+    if (isMissingTableError(error)) {
+      return [];
+    }
+
     // Handle enum validation errors gracefully
     if (error.message?.includes("invalid input value for enum task_status")) {
       logger.warn(
@@ -202,6 +216,10 @@ export async function fetchOverdueTasks(
     .in("status", ["todo", "in_progress", "review"]);
 
   if (error) {
+    if (isMissingTableError(error)) {
+      return [];
+    }
+
     // Handle enum validation errors gracefully
     if (error.message?.includes("invalid input value for enum task_status")) {
       logger.warn(

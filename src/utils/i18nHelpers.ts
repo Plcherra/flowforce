@@ -9,15 +9,26 @@ export class I18nHelpers {
    * Get localized template name and description
    * Handles dynamic template content from businessTemplates.ts
    */
-  static getLocalizedTemplate(templateId: string) {
+  static getLocalizedTemplate(
+    templateId: string,
+    fallback?: { name?: string; description?: string },
+  ) {
     const baseKey = `templates.${templateId}`;
+    const fallbackName =
+      fallback?.name ??
+      templateId
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    const fallbackDescription =
+      fallback?.description ?? `${fallbackName} workspace template.`;
+
     return {
       name: i18n.exists(`${baseKey}.name`)
         ? i18n.t(`${baseKey}.name`)
-        : i18n.t(`templates.fallback.name`, { id: templateId }),
+        : fallbackName,
       description: i18n.exists(`${baseKey}.description`)
         ? i18n.t(`${baseKey}.description`)
-        : i18n.t(`templates.fallback.description`, { id: templateId }),
+        : fallbackDescription,
     };
   }
 
@@ -43,7 +54,11 @@ export class I18nHelpers {
    * Pluralization Helper
    * Addresses Challenge 2: Handling singular/plural forms
    */
-  static pluralize(key: string, count: number, options?: any): string {
+  static pluralize(
+    key: string,
+    count: number,
+    options?: Record<string, unknown>,
+  ): string {
     // Use i18next's built-in pluralization
     return i18n.t(key, { count, ...options }) as string;
   }
@@ -70,7 +85,7 @@ export class I18nHelpers {
   static getValidationError(
     field: string,
     type: string,
-    options?: any,
+    options?: Record<string, unknown>,
   ): string {
     const key = `validation.${type}`;
     return i18n.t(key, {

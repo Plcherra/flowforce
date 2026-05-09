@@ -10,7 +10,6 @@ import {
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 type LegacyProfileFields = {
@@ -125,13 +124,16 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
 };
 
 async function fetchProfileFromSupabase(
-  userId: string,
+  user: User,
   companyId: string | null,
 ): Promise<ProfileDetails | null> {
+  const userId = user.id;
   try {
     let query = supabase
       .from("profiles")
-      .select("id, company_id, role, first_name, last_name, avatar_url, employee_id, phone")
+      .select(
+        "id, company_id, role, first_name, last_name, avatar_url, employee_id, phone",
+      )
       .eq("id", userId);
 
     if (companyId) {
@@ -146,7 +148,9 @@ async function fetchProfileFromSupabase(
     }
 
     if (!data) {
-      logger.error(" Missing profile row", { userId, companyId });
+      logger.warn(" Missing profile row", {
+        context: { userId, companyId },
+      });
       return null;
     }
 
@@ -176,11 +180,11 @@ async function fetchProfileFromSupabase(
 }
 
 async function getProfile(
-  userId: string,
+  user: User,
   companyId: string | null,
   _forceRefresh = false,
 ): Promise<ProfileDetails | null> {
-  return fetchProfileFromSupabase(userId, companyId);
+  return fetchProfileFromSupabase(user, companyId);
 }
 
 interface LoadProfileStateOptions {
@@ -236,7 +240,7 @@ async function loadProfileState({
 
   try {
     const fetchedProfile = await getProfile(
-      user.id,
+      user,
       activeCompanyId,
       forceRefresh,
     );

@@ -2,7 +2,9 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import { AlertTriangle } from "lucide-react";
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
 import { CustomTemplate, CustomSection } from "@/types/customTemplate";
 import AnimatedPanel from "./AnimatedPanel";
@@ -70,6 +72,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
   const [customRoles, setCustomRoles] = useState<OnboardingRole[]>([]);
   const [positions, setPositions] = useState<OnboardingPosition[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
   const [customTemplate, setCustomTemplate] = useState<Partial<CustomTemplate>>(
     {
       name: "",
@@ -180,11 +183,12 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
               description: t("onboarding.steps.review.description"),
             },
           ],
-    [isCustomTemplate],
+    [isCustomTemplate, t],
   );
 
   const handleNext = useCallback(() => {
     if (currentStep < totalSteps) {
+      setCompletionError(null);
       setDirection("right");
       setCurrentStep((prev) => prev + 1);
     }
@@ -192,6 +196,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
+      setCompletionError(null);
       setDirection("left");
       setCurrentStep((prev) => prev - 1);
     }
@@ -252,6 +257,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
     if (!selectedTemplate) return;
 
     setIsCreatingAccount(true);
+    setCompletionError(null);
     try {
       await onComplete({
         userInfo,
@@ -262,7 +268,12 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
         customRoles,
         positions,
       });
-    } catch {
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to complete setup. Please review the form and try again.";
+      setCompletionError(message);
       setIsCreatingAccount(false);
     }
   };
@@ -334,6 +345,13 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
                       onPositionsChange={handlePositionsChange}
                     />
                   </AnimatedPanel>
+
+                  {completionError && (
+                    <Alert variant="destructive" className="mt-6">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>{completionError}</AlertDescription>
+                    </Alert>
+                  )}
 
                   {/* Navigation */}
                   <motion.div

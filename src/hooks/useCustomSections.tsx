@@ -69,6 +69,14 @@ const parseJsonArray = (value: any) => {
   return [];
 };
 
+const isMissingTableError = (error: unknown) => {
+  const candidate = error as { code?: string; message?: string } | null;
+  return (
+    candidate?.code === "PGRST205" ||
+    candidate?.message?.includes("Could not find the table")
+  );
+};
+
 const slugify = (value: string) => {
   return (
     value
@@ -141,6 +149,11 @@ export function useCustomSections() {
           .filter((section) => !shouldExcludeSection(section)),
       );
     } catch (error) {
+      if (isMissingTableError(error)) {
+        setSections([]);
+        return;
+      }
+
       logger.error("Error fetching custom sections", {
         error,
         tags: ["error"],
@@ -175,6 +188,11 @@ export function useCustomSections() {
           .filter((template) => !shouldExcludeTemplate(template)),
       );
     } catch (error) {
+      if (isMissingTableError(error)) {
+        setTemplates([]);
+        return;
+      }
+
       logger.error("Error fetching section templates", {
         error,
         tags: ["error"],

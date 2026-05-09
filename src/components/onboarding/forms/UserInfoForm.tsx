@@ -95,6 +95,8 @@ export default function UserInfoForm({
             </Label>
             <Input
               id="firstName"
+              name="given-name"
+              autoComplete="given-name"
               value={userInfo.firstName}
               onChange={(e) => handleFieldChange("firstName", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.firstName")}
@@ -111,6 +113,8 @@ export default function UserInfoForm({
             </Label>
             <Input
               id="lastName"
+              name="family-name"
+              autoComplete="family-name"
               value={userInfo.lastName}
               onChange={(e) => handleFieldChange("lastName", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.lastName")}
@@ -131,7 +135,9 @@ export default function UserInfoForm({
             <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
               id="email"
+              name="email"
               type="email"
+              autoComplete="email"
               value={userInfo.email}
               onChange={(e) => handleFieldChange("email", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.email")}
@@ -144,12 +150,17 @@ export default function UserInfoForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t("onboarding.userInfo.fields.phone")}</Label>
+          <Label htmlFor="personalPhone">
+            {t("onboarding.userInfo.fields.phone")}
+          </Label>
           <div className="relative">
             <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              id="phone"
+              id="personalPhone"
+              name="tel"
               type="tel"
+              autoComplete="tel"
+              inputMode="tel"
               value={userInfo.phone ?? ""}
               onChange={(e) => handleFieldChange("phone", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.phone")}
@@ -167,7 +178,9 @@ export default function UserInfoForm({
             <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
               id="password"
+              name="new-password"
               type="password"
+              autoComplete="new-password"
               value={userInfo.password}
               onChange={(e) => handleFieldChange("password", e.target.value)}
               placeholder="Create a strong, unique password"
@@ -248,9 +261,7 @@ export default function UserInfoForm({
               </li>
               <li
                 className={
-                  /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
-                    userInfo.password,
-                  )
+                  /[^A-Za-z0-9]/.test(userInfo.password)
                     ? "text-green-600"
                     : "text-gray-400"
                 }

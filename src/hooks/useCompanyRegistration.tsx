@@ -27,10 +27,7 @@ interface RegistrationError {
   details?: string;
 }
 
-type JsonRecord = Record<string, unknown>;
-
 const OWNER_ROLE = "owner";
-const NO_ROW_ERROR_CODES = new Set(["PGRST116"]);
 
 const normalizeText = (value: string | null | undefined) => {
   const trimmed = value?.trim();
@@ -53,109 +50,11 @@ const createCompanySlug = (companyName: string) => {
   return slug || `company-${Date.now().toString(36)}`;
 };
 
-const isColumnShapeError = (error: unknown) => {
-  const candidate = error as { code?: string; message?: string } | null;
-  const message = candidate?.message?.toLowerCase() ?? "";
-  return (
-    candidate?.code === "42703" ||
-    candidate?.code === "PGRST204" ||
-    message.includes("column") ||
-    message.includes("schema cache")
-  );
-};
-
-const getCompanySelectId = (row: unknown) => {
-  if (row && typeof row === "object" && "id" in row) {
-    const id = (row as { id?: unknown }).id;
-    return typeof id === "string" ? id : null;
-  }
-  return null;
-};
-
-const getRejectedColumn = (error: unknown) => {
-  const message =
-    (error as { message?: string } | null)?.message?.toLowerCase() ?? "";
-  const patterns = [
-    /'([^']+)' column/,
-    /column "([^"]+)"/,
-    /column ([a-z0-9_]+) /,
-  ];
-
-  for (const pattern of patterns) {
-    const match = message.match(pattern);
-    if (match?.[1]) {
-      return match[1];
-    }
-  }
-
-  return null;
-};
-
-const withoutKey = <T extends JsonRecord>(payload: T, key: string) => {
-  const next = { ...payload };
-  delete next[key];
-  return next;
-};
-
-const writeWithColumnFallback = async <T extends JsonRecord>(
-  payload: T,
-  write: (nextPayload: T) => Promise<{ data: unknown; error: unknown }>,
-) => {
-  let nextPayload = { ...payload } as T;
-  let lastError: unknown = null;
-
-  while (Object.keys(nextPayload).length > 0) {
-    const result = await write(nextPayload);
-
-    if (!result.error) {
-      return result.data;
-    }
-
-    lastError = result.error;
-    const rejectedColumn = getRejectedColumn(result.error);
-
-    if (!isColumnShapeError(result.error) || !rejectedColumn) {
-      throw result.error;
-    }
-
-    if (!(rejectedColumn in nextPayload)) {
-      throw result.error;
-    }
-
-    nextPayload = withoutKey(nextPayload, rejectedColumn) as T;
-  }
-
-  throw lastError;
-};
-
 export function useCompanyRegistration() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<RegistrationError | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const transformRolesForDatabase = (roles: OnboardingRole[]) => {
-    return roles.map((role) => ({
-      id: role.id,
-      name: role.name,
-      description: role.description || "",
-      color: role.color,
-      icon: role.icon,
-      hierarchy_level: role.hierarchy_level,
-      permissions: role.permissions || {},
-      is_system_role: role.is_system_role || false,
-    }));
-  };
-
-  const transformPositionsForDatabase = (positions: OnboardingPosition[]) => {
-    return positions.map((position) => ({
-      id: position.id,
-      name: position.name,
-      description: position.description || "",
-      roleId: position.roleId,
-      permissions: position.permissions || {},
-    }));
-  };
 
   const validateRegistrationData = (
     data: RegistrationData,
@@ -201,136 +100,38 @@ export function useCompanyRegistration() {
     return null;
   };
 
-  const createCompanyPayload = (
-    data: RegistrationData,
-    userId?: string | null,
-    companyId?: string | null,
-  ) => {
-    const transformedRoles = transformRolesForDatabase(data.customRoles);
-    const transformedPositions = transformPositionsForDatabase(data.positions);
-    const now = new Date().toISOString();
-
-    return {
-      ...(companyId ? { id: companyId } : {}),
-      name: data.companyInfo.name.trim(),
-      slug: createCompanySlug(data.companyInfo.name),
-      website: normalizeWebsite(data.companyInfo.website),
-      phone: normalizeText(data.companyInfo.phone),
-      industry: normalizeText(data.companyInfo.industry),
-      size: normalizeText(data.companyInfo.size),
-      description: normalizeText(data.companyInfo.description),
-      logo_url: null,
-      primary_color: data.branding.primaryColor,
-      secondary_color: data.branding.secondaryColor,
-      template_id: data.template.id,
-      template_name: data.template.name,
-      enabled_sections: data.enabledSections,
-      template_config: {
-        industry: data.template.industry,
-        defaultRoles: data.template.defaultRoles,
-        customFields: data.template.customFields,
-        suggestedPositions: data.template.suggestedPositions,
-      },
-      custom_roles: transformedRoles,
-      positions: transformedPositions,
-      registration_complete: true,
-      created_by: userId || null,
-      owner_id: userId || null,
-      updated_at: now,
-    };
-  };
-
-  const saveCompany = async (data: RegistrationData, userId: string) => {
-    const payload = createCompanyPayload(data, userId);
-
-    const companyRow = await writeWithColumnFallback(
-      payload,
-      async (nextPayload) => {
-        const query = (supabase.from("companies") as any)
-          .insert(nextPayload)
-          .select("id")
-          .single();
-
-        return query;
-      },
-    );
-
-    return getCompanySelectId(companyRow);
-  };
-
-  const getProfileById = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, company_id")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (error) {
-      const code = (error as { code?: string }).code;
-      if (!code || !NO_ROW_ERROR_CODES.has(code)) {
-        throw error;
-      }
-    }
-
-    return data ?? null;
-  };
-
-  const saveProfile = async (
+  const completeOnboardingOnServer = async (
     data: RegistrationData,
     userId: string,
-    companyId: string | null,
   ) => {
-    const now = new Date().toISOString();
-    const ownerPhone =
-      normalizeText(data.userInfo.phone) ??
-      normalizeText(data.companyInfo.phone);
-    const corePayload = {
-      id: userId,
-      company_id: companyId,
-      first_name: data.userInfo.firstName.trim(),
-      last_name: data.userInfo.lastName.trim(),
-      role: OWNER_ROLE,
-      phone: ownerPhone,
-      updated_at: now,
-    };
-    const extraPayload = {
-      email: data.userInfo.email.trim().toLowerCase(),
-      is_company_admin: true,
-      employment_status: "active",
-      updated_at: now,
+    const response = await fetch("/api/onboarding/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, userId }),
+    });
+
+    const result = (await response.json().catch(() => ({}))) as {
+      companyId?: string;
+      message?: string;
+      details?: { message?: string } | string;
     };
 
-    const existingProfile = await getProfileById(userId);
-
-    if (existingProfile) {
-      await writeWithColumnFallback(corePayload, async (payload) =>
-        (supabase.from("profiles") as any)
-          .update(payload)
-          .eq("id", userId)
-          .select("id")
-          .single(),
-      );
-    } else {
-      await writeWithColumnFallback(corePayload, async (payload) =>
-        (supabase.from("profiles") as any)
-          .insert(payload)
-          .select("id")
-          .single(),
+    if (!response.ok) {
+      const detailMessage =
+        typeof result.details === "string"
+          ? result.details
+          : result.details?.message;
+      throw new Error(
+        [result.message, detailMessage].filter(Boolean).join(": ") ||
+          "Unable to complete onboarding.",
       );
     }
 
-    await writeWithColumnFallback(extraPayload, async (payload) =>
-      (supabase.from("profiles") as any)
-        .update(payload)
-        .eq("id", userId)
-        .select("id")
-        .single(),
-    ).catch((error) => {
-      logger.warn("Unable to save optional profile onboarding fields", {
-        error,
-        tags: ["warning"],
-      });
-    });
+    if (!result.companyId) {
+      throw new Error("Company setup did not return a company id.");
+    }
+
+    return result.companyId;
   };
 
   const updateUserMetadata = async (
@@ -417,20 +218,18 @@ export function useCompanyRegistration() {
       });
 
       if (signInError) {
-        throw new Error(
-          "Account was created, but FlowForce could not save onboarding data until email confirmation is complete.",
+        logger.warn(
+          "Signup completed without an active session; continuing onboarding data save",
+          {
+            error: signInError,
+            context: { userId },
+            tags: ["warning"],
+          },
         );
       }
     }
 
-    const companyId = await saveCompany(data, userId);
-    if (!companyId) {
-      throw new Error(
-        "Company was created, but Supabase did not return an id.",
-      );
-    }
-
-    await saveProfile(data, userId, companyId);
+    const companyId = await completeOnboardingOnServer(data, userId);
     await updateUserMetadata(data, companyId);
 
     return { userId, companyId };
@@ -476,6 +275,19 @@ export function useCompanyRegistration() {
         type: "auth",
         message:
           "Too many registration attempts. Please wait about a minute before trying again.",
+        details,
+      };
+    }
+
+    if (
+      message.includes("row-level security") ||
+      message.includes("42501") ||
+      message.includes("permission denied")
+    ) {
+      return {
+        type: "database",
+        message:
+          "FlowForce could not finish workspace setup because Supabase permissions are blocking the write. Check the onboarding API service role key and RLS policies.",
         details,
       };
     }
@@ -537,7 +349,7 @@ export function useCompanyRegistration() {
 
       // Navigate to dashboard
       navigate("/app/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       const registrationError = handleRegistrationError(error);
       setError(registrationError);
 

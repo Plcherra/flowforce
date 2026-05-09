@@ -135,6 +135,37 @@ create index if not exists profiles_company_id_idx on public.profiles(company_id
 create index if not exists profiles_role_idx on public.profiles(role);
 create index if not exists profiles_email_idx on public.profiles(email);
 
+alter table public.companies enable row level security;
+alter table public.profiles enable row level security;
+
+drop policy if exists "Users can read their company" on public.companies;
+create policy "Users can read their company"
+on public.companies
+for select
+to authenticated
+using (
+  id in (
+    select profiles.company_id
+    from public.profiles
+    where profiles.id = auth.uid()
+  )
+);
+
+drop policy if exists "Users can read own profile" on public.profiles;
+create policy "Users can read own profile"
+on public.profiles
+for select
+to authenticated
+using (id = auth.uid());
+
+drop policy if exists "Users can update own profile" on public.profiles;
+create policy "Users can update own profile"
+on public.profiles
+for update
+to authenticated
+using (id = auth.uid())
+with check (id = auth.uid());
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -154,4 +185,3 @@ drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
 before update on public.profiles
 for each row execute function public.set_updated_at();
-

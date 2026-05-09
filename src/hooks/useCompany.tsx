@@ -38,7 +38,7 @@ export const DEMO_COMPANY: Company = {
     start: "09:00",
     end: "17:00",
     days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
-  } as CompanySettings["working_hours"],
+  } as unknown as CompanySettings["working_hours"],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   created_by: "",
@@ -94,6 +94,17 @@ const parseJSONValue = <T,>(value: unknown, fallback: T): T => {
   }
 
   return fallback;
+};
+
+const readMetadataCompanyId = (
+  user: { user_metadata?: Record<string, unknown> } | null,
+) => {
+  const metadata = user?.user_metadata;
+  return typeof metadata?.active_company_id === "string"
+    ? metadata.active_company_id
+    : typeof metadata?.company_id === "string"
+      ? metadata.company_id
+      : null;
 };
 
 export interface Company {
@@ -180,18 +191,20 @@ export function useCompany() {
         .from("profiles")
         .select("company_id, is_company_admin")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         throw handleError(profileError, "fetching user profile");
       }
 
-      if (profile?.company_id) {
+      const companyId = profile?.company_id ?? readMetadataCompanyId(user);
+
+      if (companyId) {
         const { data: companyData, error: companyError } = await supabase
           .from("companies")
           .select("*")
-          .eq("id", profile.company_id)
-          .single();
+          .eq("id", companyId)
+          .maybeSingle();
 
         if (companyError) {
           // Check for recursion error before throwing
@@ -202,7 +215,12 @@ export function useCompany() {
           throw handleError(companyError, "fetching company data");
         }
 
-        setCompany(parseCompanyData(companyData));
+        if (companyData) {
+          setCompany(parseCompanyData(companyData));
+        } else {
+          handleDemoFallback("company row not found");
+          return;
+        }
       } else {
         handleDemoFallback("profile missing company_id");
         return;
@@ -213,7 +231,9 @@ export function useCompany() {
         return;
       }
       handleError(error, "fetchCompany");
-      handleDemoFallback("encountered an unexpected error while loading company");
+      handleDemoFallback(
+        "encountered an unexpected error while loading company",
+      );
       return;
     }
 

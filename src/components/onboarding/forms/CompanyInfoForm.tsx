@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, Users, Briefcase } from "lucide-react";
+import { Building2, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CompanyInfo, COMPANY_SIZES, INDUSTRIES } from "@/types/onboarding";
 
@@ -50,6 +50,8 @@ export default function CompanyInfoForm({
           </Label>
           <Input
             id="companyName"
+            name="organization"
+            autoComplete="organization"
             value={companyInfo.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             placeholder={t("onboarding.userInfo.placeholders.companyName")}
@@ -99,6 +101,8 @@ export default function CompanyInfoForm({
             </Select>
             {companyInfo.industry === "Other" && (
               <Input
+                name="organization-industry"
+                autoComplete="off"
                 placeholder={t(
                   "onboarding.userInfo.placeholders.customIndustry",
                 )}
@@ -152,6 +156,8 @@ export default function CompanyInfoForm({
           </Label>
           <Textarea
             id="description"
+            name="organization-description"
+            autoComplete="off"
             value={companyInfo.description}
             onChange={(e) => handleFieldChange("description", e.target.value)}
             placeholder={t("onboarding.userInfo.placeholders.description")}
@@ -166,17 +172,24 @@ export default function CompanyInfoForm({
             </Label>
             <Input
               id="website"
+              name="url"
+              type="url"
+              autoComplete="url"
               value={companyInfo.website}
               onChange={(e) => handleFieldChange("website", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.website")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">
+            <Label htmlFor="companyPhone">
               {t("onboarding.userInfo.fields.phone")}
             </Label>
             <Input
-              id="phone"
+              id="companyPhone"
+              name="organization-phone"
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
               value={companyInfo.phone}
               onChange={(e) => handleFieldChange("phone", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.phone")}

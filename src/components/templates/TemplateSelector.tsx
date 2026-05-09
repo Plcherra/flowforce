@@ -25,7 +25,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { BUSINESS_TEMPLATES } from "@/data/businessTemplates";
-import { AVAILABLE_SECTIONS } from "@/data/availableSections";
 import { BusinessTemplate } from "@/types/templates";
 import { useTranslation } from "react-i18next";
 import { I18nHelpers } from "@/utils/i18nHelpers";
@@ -68,7 +67,7 @@ export default function TemplateSelector({
 
   const getLocalizedTemplate = (template: BusinessTemplate) => {
     // Use I18nHelpers for localized template content
-    return I18nHelpers.getLocalizedTemplate(template.id);
+    return I18nHelpers.getLocalizedTemplate(template.id, template);
   };
 
   const loadMoreTemplates = useCallback(() => {
@@ -198,8 +197,10 @@ export default function TemplateSelector({
         {BUSINESS_TEMPLATES.slice(0, visibleTemplates).map(
           (template, index) => {
             const IconComponent =
-              TEMPLATE_ICONS[template.icon as keyof typeof TEMPLATE_ICONS];
+              TEMPLATE_ICONS[template.icon as keyof typeof TEMPLATE_ICONS] ??
+              Cog;
             const isSelected = selectedTemplateId === template.id;
+            const localizedTemplate = getLocalizedTemplate(template);
 
             return (
               <motion.div
@@ -237,7 +238,7 @@ export default function TemplateSelector({
                         </motion.div>
                         <div>
                           <CardTitle className="text-lg">
-                            {getLocalizedTemplate(template).name}
+                            {localizedTemplate.name}
                           </CardTitle>
                           <Badge variant="secondary" className="mt-1">
                             {I18nHelpers.getContextualTranslation(
@@ -261,7 +262,7 @@ export default function TemplateSelector({
                   </CardHeader>
                   <CardContent>
                     <CardDescription className="mb-4">
-                      {getLocalizedTemplate(template).description}
+                      {localizedTemplate.description}
                     </CardDescription>
 
                     <Accordion type="single" collapsible className="w-full">
@@ -357,10 +358,14 @@ export default function TemplateSelector({
             <CheckCircle className="h-5 w-5 text-green-600 dark: dark:text-green-400" />
             <span className="text-green-800 dark:text-green-200 font-medium">
               Template Selected:{" "}
-              {
-                BUSINESS_TEMPLATES.find((t) => t.id === selectedTemplateId)
-                  ?.name
-              }
+              {(() => {
+                const template = BUSINESS_TEMPLATES.find(
+                  (t) => t.id === selectedTemplateId,
+                );
+                return template
+                  ? getLocalizedTemplate(template).name
+                  : t("onboarding.customTemplate.title");
+              })()}
             </span>
           </div>
         </motion.div>

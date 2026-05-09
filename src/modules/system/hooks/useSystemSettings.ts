@@ -22,26 +22,9 @@ import {
 
 type ProfileRow = Tables<"profiles">;
 
-type PartialUpdate = Partial<
-  Pick<
-    SystemSettingsRow,
-    | "general"
-    | "security"
-    | "localization"
-    | "notifications"
-    | "integrations"
-    | "appearance"
-    | "admin_config"
-    | "updated_at"
-  >
->;
+type PartialUpdate = Record<string, unknown>;
 
-const allowedManagerRoles: ProfileRow["role"][] = [
-  "admin",
-  "owner",
-  "company_admin",
-  "manager",
-];
+const allowedManagerRoles = ["admin", "owner", "company_admin", "manager"];
 
 const ensureDefaults = (
   company: Company,
@@ -122,13 +105,13 @@ export function useSystemSettings(
           .from("profiles")
           .select("role, is_company_admin")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) throw profileError;
         if (!active) return;
 
-        setRole(data.role);
-        setIsCompanyAdmin(Boolean(data.is_company_admin));
+        setRole(data?.role ?? null);
+        setIsCompanyAdmin(Boolean(data?.is_company_admin));
       } catch (err) {
         if (!active) return;
         const handled = handleError(err, "loadSystemSettingsPermissions");
@@ -160,7 +143,7 @@ export function useSystemSettings(
     setFetching(true);
     try {
       const { data: row, error: fetchError } = await supabase
-        .from("system_settings")
+        .from("system_settings" as any)
         .select("*")
         .eq("company_id", companyId)
         .maybeSingle();
@@ -169,7 +152,7 @@ export function useSystemSettings(
 
       if (!workingRow && canEdit) {
         const { data: inserted, error: insertError } = await supabase
-          .from("system_settings")
+          .from("system_settings" as any)
           .insert({ company_id: companyId })
           .select()
           .single();
@@ -183,7 +166,9 @@ export function useSystemSettings(
       }
 
       if (workingRow) {
-        setSettings(normalizeSystemSettingsRow(workingRow, company ?? null));
+        setSettings(
+          normalizeSystemSettingsRow(workingRow as never, company ?? null),
+        );
         setError(null);
       } else {
         setSettings(null);
@@ -217,7 +202,7 @@ export function useSystemSettings(
       };
 
       const { data, error: updateError } = await supabase
-        .from("system_settings")
+        .from("system_settings" as any)
         .update(payload)
         .eq("company_id", companyId)
         .select()
@@ -295,7 +280,9 @@ export function useSystemSettings(
         }
 
         targetCompanyId =
-          typeof created === "string" ? created : (created?.id ?? null);
+          typeof created === "string"
+            ? created
+            : ((created as { id?: string } | null)?.id ?? null);
       }
 
       if (!targetCompanyId) {

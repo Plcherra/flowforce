@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 import { logger } from "@/utils/logger";
 
@@ -85,13 +85,22 @@ const isMissingCompanyError = (error: CompanyRolesError) => {
   return lowerMessage.includes("company");
 };
 
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error
+    ? error.message
+    : typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof error.message === "string"
+      ? error.message
+      : fallback;
+
 export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
   const { onboarding = false } = options;
   const { user } = useAuth();
   const [roles, setRoles] = useState<CompanyRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<CompanyRolesError | null>(null);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const fetchRoles = useCallback(async () => {
@@ -102,16 +111,18 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
     try {
       const metadataCompanyId =
-        typeof user.user_metadata?.company_id === "string"
-          ? (user.user_metadata.company_id as string)
-          : null;
+        typeof user.user_metadata?.active_company_id === "string"
+          ? (user.user_metadata.active_company_id as string)
+          : typeof user.user_metadata?.company_id === "string"
+            ? (user.user_metadata.company_id as string)
+            : null;
 
       const { data: currentProfile, error: currentProfileError } =
         await supabase
           .from("profiles")
           .select("company_id")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
       if (currentProfileError) {
         logger.error("Error resolving current profile for company roles", {
@@ -234,7 +245,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       logger.error("Create role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
-        description: error.message || "Failed to create role",
+        description: getErrorMessage(error, "Failed to create role"),
         variant: "destructive",
       });
     },
@@ -276,7 +287,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       logger.error("Update role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
-        description: error.message || "Failed to update role",
+        description: getErrorMessage(error, "Failed to update role"),
         variant: "destructive",
       });
     },
@@ -309,7 +320,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       logger.error("Delete role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
-        description: error.message || "Failed to deactivate role",
+        description: getErrorMessage(error, "Failed to deactivate role"),
         variant: "destructive",
       });
     },
