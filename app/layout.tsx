@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "ConnectFlow Operations Suite",
-  description: "Operations suite powered by ConnectFlow.",
+  title: "FlowForce",
+  description: "Business operations platform powered by FlowForce.",
 };
 
 export default function RootLayout({

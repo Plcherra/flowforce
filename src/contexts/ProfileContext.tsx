@@ -97,7 +97,7 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
   const resolvedRole =
     readMetadataValue(userMetadata, "role") ??
     readMetadataValue(userMetadata, "position_role") ??
-    "staff";
+    "owner";
 
   return {
     userId: fallbackId,
@@ -131,9 +131,7 @@ async function fetchProfileFromSupabase(
   try {
     let query = supabase
       .from("profiles")
-      .select(
-        "id, company_id, role, role_id, first_name, last_name, email, avatar_url, employee_id, employment_status, department_id, hire_date",
-      )
+      .select("id, company_id, role, first_name, last_name, avatar_url, employee_id, phone")
       .eq("id", userId);
 
     if (companyId) {
@@ -143,57 +141,36 @@ async function fetchProfileFromSupabase(
     const { data, error } = await query.maybeSingle();
 
     if (error) {
-      if (appEnv.DEV) {
-        logger.error("[ProfileProvider] Failed to load profile", {
-          context: { userId, companyId },
-          error,
-          tags: ["error"],
-        });
-      }
+      logger.error(" Failed to load profile", { error });
       return null;
     }
 
     if (!data) {
-      if (appEnv.DEV) {
-        logger.error("[ProfileProvider] Missing profile row", {
-          context: { userId, companyId },
-          tags: ["error"],
-        });
-      }
+      logger.error(" Missing profile row", { userId, companyId });
       return null;
     }
 
     return {
       userId: data.id,
       companyId: data.company_id ?? null,
-      role: data.role ?? null,
+      role: data.role ?? "employee",
       id: data.id,
       company_id: data.company_id ?? null,
       firstName: data.first_name ?? null,
       lastName: data.last_name ?? null,
       first_name: data.first_name ?? null,
       last_name: data.last_name ?? null,
-      email: data.email ?? null,
       avatar_url: data.avatar_url ?? null,
       employeeId: data.employee_id ?? null,
       employee_id: data.employee_id ?? null,
-      employment_status: data.employment_status ?? null,
-      department_id: data.department_id ?? null,
-      hire_date: data.hire_date ?? null,
-      role_id: data.role_id ?? null,
-      roleId: data.role_id ?? null,
+      role_id: null,
+      roleId: null,
       locationIds: [],
       position: null,
       isPlaceholder: false,
     };
   } catch (error) {
-    if (appEnv.DEV) {
-      logger.error("[ProfileProvider] Unexpected profile fetch error", {
-        context: { userId, companyId },
-        error,
-        tags: ["error"],
-      });
-    }
+    logger.error(" Unexpected profile fetch error", { error });
     return null;
   }
 }

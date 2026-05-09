@@ -176,8 +176,8 @@ async function main() {
   // Save results
   const fs = await import('fs');
   const path = await import('path');
-  const reportPath = path.join(process.cwd(), 'test-results', 'simple-page-test.json');
-  const reportDir = path.join(process.cwd(), 'test-results');
+  const reportPath = path.join(process.cwd(), 'docs', 'test-results', 'simple-page-test.json');
+  const reportDir = path.join(process.cwd(), 'docs', 'test-results');
   
   if (!fs.existsSync(reportDir)) {
     fs.mkdirSync(reportDir, { recursive: true });

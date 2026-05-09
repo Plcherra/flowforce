@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { CustomTemplate, CustomSection } from "@/types/customTemplate";
 import AnimatedPanel from "./AnimatedPanel";
 import StepSidebar from "./StepSidebar";
@@ -14,7 +12,6 @@ import WizardNavigation from "./WizardNavigation";
 import { ValidationManager } from "./ValidationManager";
 import { UserInfo, CompanyInfo } from "@/types/onboarding";
 import StepRenderer from "./StepRenderer";
-import { logger } from "@/utils/logger";
 
 interface Branding {
   logo: File | null;
@@ -42,7 +39,7 @@ interface EnhancedOnboardingWizardProps {
     enabledSections: string[];
     customRoles: OnboardingRole[];
     positions: OnboardingPosition[];
-  }) => void;
+  }) => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -63,8 +60,6 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
   onCancel,
 }: EnhancedOnboardingWizardProps) {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-  const { toast } = useToast();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [direction, setDirection] = useState<"left" | "right">("right");
@@ -102,6 +97,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
     lastName: "",
     email: "",
     password: "",
+    phone: "",
   });
 
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
@@ -257,26 +253,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
 
     setIsCreatingAccount(true);
     try {
-      // Create user account
-      const { error } = await signUp(
-        userInfo.email,
-        userInfo.password,
-        userInfo.firstName,
-        userInfo.lastName,
-      );
-
-      if (error) {
-        toast({
-          title: t("onboarding.messages.accountCreationFailed"),
-          description: error.message,
-          variant: "destructive",
-        });
-        setIsCreatingAccount(false);
-        return;
-      }
-
-      // Complete onboarding with all collected data
-      onComplete({
+      await onComplete({
         userInfo,
         companyInfo,
         branding,
@@ -285,15 +262,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
         customRoles,
         positions,
       });
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      logger.error("Error creating account:", { error, tags: ["error"] });
-      toast({
-        title: t("onboarding.messages.setupError"),
-        description: t("onboarding.messages.setupErrorDescription"),
-        variant: "destructive",
-      });
+    } catch {
       setIsCreatingAccount(false);
     }
   };

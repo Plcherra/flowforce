@@ -23,6 +23,7 @@ export function useOnboardingState() {
     lastName: "",
     email: "",
     password: "",
+    phone: "",
   });
 
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({

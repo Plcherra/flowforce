@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Lock, AlertTriangle, CheckCircle } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Phone,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePasswordValidation } from "@/hooks/usePasswordValidation";
 import { getPasswordStrengthColor } from "@/utils/passwordValidation";
@@ -134,6 +141,21 @@ export default function UserInfoForm({
           {errors.email && (
             <p className="text-sm text-red-500">{errors.email}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">{t("onboarding.userInfo.fields.phone")}</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              id="phone"
+              type="tel"
+              value={userInfo.phone ?? ""}
+              onChange={(e) => handleFieldChange("phone", e.target.value)}
+              placeholder={t("onboarding.userInfo.placeholders.phone")}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">

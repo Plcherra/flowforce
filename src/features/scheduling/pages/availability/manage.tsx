@@ -81,7 +81,7 @@ function ManageAvailabilityContent() {
           <ShieldAlert className="h-5 w-5 text-primary" />
           <AlertTitle>Organization context missing</AlertTitle>
           <AlertDescription>
-            ConnectFlow needs an active company to manage availability. Add your
+            FlowForce needs an active company to manage availability. Add your
             company profile or reach out to support for help.
           </AlertDescription>
         </Alert>

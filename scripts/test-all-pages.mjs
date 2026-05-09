@@ -434,8 +434,8 @@ async function main() {
 
     // Save report to file
     const fs = await import('fs');
-    const reportPath = join(process.cwd(), 'test-results', 'page-test-report.json');
-    const reportDir = join(process.cwd(), 'test-results');
+    const reportPath = join(process.cwd(), 'docs', 'test-results', 'page-test-report.json');
+    const reportDir = join(process.cwd(), 'docs', 'test-results');
     
     if (!existsSync(reportDir)) {
       await import('fs/promises').then(({ mkdir }) => mkdir(reportDir, { recursive: true }));

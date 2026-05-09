@@ -234,11 +234,14 @@ export const navigationSections: NavigationSection[] = [
   // All admin functions now handled in Team Directory
 ];
 
+const normalizeRole = (role: string) => role.trim().toLowerCase();
+
 export const getRoleBadgeColor = (role: string) => {
-  switch (role) {
+  switch (normalizeRole(role)) {
     case "owner":
       return "bg-purple-100 text-purple-800";
     case "company_admin":
+    case "administrator":
       return "bg-red-100 text-red-800";
     case "admin":
       return "bg-red-100 text-red-800";
@@ -247,6 +250,7 @@ export const getRoleBadgeColor = (role: string) => {
     case "supervisor":
       return "bg-green-100 text-green-800";
     case "staff":
+    case "employee":
       return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
@@ -254,10 +258,11 @@ export const getRoleBadgeColor = (role: string) => {
 };
 
 export const getRoleIcon = (role: string) => {
-  switch (role) {
+  switch (normalizeRole(role)) {
     case "owner":
       return <Crown className="h-3 w-3" />;
     case "company_admin":
+    case "administrator":
       return <Crown className="h-3 w-3" />;
     case "admin":
       return <Crown className="h-3 w-3" />;
@@ -266,6 +271,7 @@ export const getRoleIcon = (role: string) => {
     case "supervisor":
       return <UserCheck className="h-3 w-3" />;
     case "staff":
+    case "employee":
       return <User className="h-3 w-3" />;
     default:
       return <User className="h-3 w-3" />;
@@ -273,11 +279,13 @@ export const getRoleIcon = (role: string) => {
 };
 
 export const getRoleLabel = (role: string) => {
-  switch (role) {
+  switch (normalizeRole(role)) {
     case "owner":
       return "Owner";
     case "company_admin":
       return "Company Admin";
+    case "administrator":
+      return "Administrator";
     case "admin":
       return "Admin";
     case "manager":
@@ -286,6 +294,8 @@ export const getRoleLabel = (role: string) => {
       return "Supervisor";
     case "staff":
       return "Staff";
+    case "employee":
+      return "Employee";
     default:
       return "Staff";
   }

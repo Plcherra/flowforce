@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useProfile } from "@/hooks/useProfile";
+import { getRoleLabel } from "@/data/navigationData";
 
 interface StaffSchedule {
   id: string;
@@ -89,7 +90,7 @@ export function MobileStaffInterface() {
                   : "My Profile"}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {profile?.role || "Staff"}
+                {getRoleLabel(profile?.role || "employee")}
               </p>
             </div>
           </div>

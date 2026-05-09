@@ -33,7 +33,7 @@ npm run test:pages
 
 **Output:**
 - Console output with real-time progress
-- Detailed report in `test-results/page-test-report.json`
+- Detailed report in `docs/test-results/page-test-report.json`
 
 ### 2. `test-pages-simple.mjs` (Quick Testing)
 
@@ -60,11 +60,11 @@ npm run test:pages:simple
 
 **Output:**
 - Console summary
-- JSON report in `test-results/simple-page-test.json`
+- JSON report in `docs/test-results/simple-page-test.json`
 
 ## Test Results
 
-All test results are saved to `test-results/` directory:
+All test results are saved to `docs/test-results/` directory:
 
 - `page-test-report.json` - Full Playwright test results
 - `simple-page-test.json` - Simple HTTP test results
@@ -102,7 +102,7 @@ npm run dev
 npm run test:pages
 
 # 3. Review results
-cat test-results/page-test-report.json | jq '.results[] | select(.status != "success")'
+cat docs/test-results/page-test-report.json | jq '.results[] | select(.status != "success")'
 
 # 4. Fix issues and re-test
 npm run test:pages

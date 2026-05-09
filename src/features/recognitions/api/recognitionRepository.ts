@@ -483,7 +483,7 @@ async function seedDefaultTrainingModules(companyId: string, actorId: string) {
     {
       title: "Core Systems Training",
       description:
-        "Hands-on walkthrough of ConnectFlow operations suite for new team members.",
+        "Hands-on walkthrough of FlowForce operations for new team members.",
       category: "Operations",
       level: "Intermediate",
       duration_minutes: 120,

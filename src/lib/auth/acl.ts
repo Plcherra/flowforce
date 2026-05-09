@@ -1,5 +1,5 @@
 // src/lib/auth/acl.ts
-// Centralized Role-Based Access Control for ConnectFlow (Co-Pilot)
+// Centralized Role-Based Access Control for FlowForce.
 
 export type Role =
   | "owner"
