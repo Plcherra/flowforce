@@ -5,6 +5,7 @@
 import { PERMISSION_KEYS } from "@/hooks/useUserPermissions";
 import type { RoleKey, ModuleId } from "../types/permissions";
 import { ROLE_MODULES } from "../constants/modules";
+import { ROLE_ORDER } from "../constants/roles";
 
 export const ALL_TRUE_PERMISSIONS = PERMISSION_KEYS.reduce<
   Record<string, boolean>
@@ -33,7 +34,6 @@ export function createDefaultMatrix(): Record<
   RoleKey,
   Record<ModuleId, boolean>
 > {
-  const { ROLE_ORDER } = require("../constants/roles");
   const order: RoleKey[] = ROLE_ORDER;
   return order.reduce(
     (acc, role) => {

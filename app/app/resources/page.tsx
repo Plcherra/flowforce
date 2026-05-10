@@ -1,6 +1,6 @@
 "use client";
 
-import ResourcesPage from "@/screens/Resources";
+import ResourcesPage from "@/features/resources/pages/Resources";
 
 export default function Resources() {
   return <ResourcesPage />;

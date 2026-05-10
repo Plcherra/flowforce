@@ -6,12 +6,12 @@ import React from "react";
 import type { FormFieldDataLocal, FieldBuckets } from "../types/formFill";
 import type { FormSubmissionData } from "@/types/api";
 import type { FormFieldType } from "@/types/forms";
-import type { FormReviewLayoutSection } from "@/components/forms/presentation";
+import type { FormReviewLayoutSection } from "@/features/forms/components/presentation";
 import {
   FormLabelValueRow,
   FormNarrativeBlock,
   FormImageBlock,
-} from "@/components/forms/presentation";
+} from "@/features/forms/components/presentation";
 import { NARRATIVE_TYPES, ATTACHMENT_TYPES } from "../types/formFill";
 import { formatAttachmentValue, formatListValue } from "./formValueFormatters";
 

@@ -51,7 +51,7 @@ import type {
 import { can, type Role, type UserIdentity } from "@/lib/auth/acl";
 import { supabase } from "@/integrations/supabase/client";
 import { getReportsBucket } from "@/services/ingestion";
-import { CreateDocumentTaskDialog } from "@/components/reports/CreateDocumentTaskDialog";
+import { CreateDocumentTaskDialog } from "@/features/analytics/components/reports/builder/CreateDocumentTaskDialog";
 
 const STATUS_META: Record<
   DocumentProcessingState,

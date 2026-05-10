@@ -2,7 +2,17 @@
  * Copilot insights panel component
  */
 
-import { Sparkles, MessageCircle, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  MessageCircle,
+  RefreshCw,
+  Sparkles,
+  TrendingUp,
+  UserX,
+} from "lucide-react";
+import { useNavigate } from "@/lib/router-adapter";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -17,6 +27,9 @@ import type { CopilotInsight } from "../types/userManagement";
 interface CopilotInsightsPanelProps {
   insights: CopilotInsight[];
   isLoading: boolean;
+  isFetching?: boolean;
+  onRefresh?: () => void;
+  onReactivate?: (employeeId: string) => void;
 }
 
 export function CopilotInsightsPanel({

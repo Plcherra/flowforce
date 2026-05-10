@@ -1,6 +1,6 @@
 "use client";
 
-import CookbookPage from "@/screens/Cookbook";
+import CookbookPage from "@/features/inventory/pages/Cookbook";
 
 export default function Cookbook() {
   return <CookbookPage />;

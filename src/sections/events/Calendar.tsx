@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Plus, Search } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SchedulingCalendar } from "@/components/scheduling/SchedulingCalendar";
+import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingCalendar";
 import { SchedulingProvider } from "@/contexts/SchedulingContext";
 import { useEvents } from "@/hooks/useEvents";
 

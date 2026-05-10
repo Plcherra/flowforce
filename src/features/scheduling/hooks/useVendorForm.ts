@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import type {
   PendingVendorEvent,
   VendorFormState,
-} from "@/components/scheduling/drag-drop/types";
+} from "@/features/scheduling/components/drag-drop/types";
 
 interface UseVendorFormProps {
   pendingVendorEvent: PendingVendorEvent | null;

@@ -19,15 +19,15 @@ import { useProfile } from "@/hooks/useProfile";
 import {
   AvailabilityRequestForm,
   type AvailabilityGrid,
-} from "@/components/availability/AvailabilityRequestForm";
-import { TimeOffRequestPanel } from "@/components/availability/TimeOffRequestPanel";
-import { DEFAULT_ORG_ID, startOfIsoWeek } from "@/availability/lockEngine";
+} from "@/features/availability/components/AvailabilityRequestForm";
+import { TimeOffRequestPanel } from "@/features/availability/components/TimeOffRequestPanel";
+import { DEFAULT_ORG_ID, startOfIsoWeek } from "@/features/availability/utils/lockEngine";
 import {
   cloneGrid,
   gridFromAvailabilityRows,
   rangesFromGrid,
   type StaffAvailabilityRow,
-} from "@/availability/availabilityUtils";
+} from "@/features/availability/utils/availabilityUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 

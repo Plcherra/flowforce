@@ -23,11 +23,11 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { TemplateSelectionStep } from "@/components/updates/steps/TemplateSelectionStep";
-import { DesignContentStep } from "@/components/updates/steps/DesignContentStep";
-import { RecipientsStep } from "@/components/updates/steps/RecipientsStep";
-import { PublishSettingsStep } from "@/components/updates/steps/PublishSettingsStep";
-import { SummaryStep } from "@/components/updates/steps/SummaryStep";
+import { TemplateSelectionStep } from "./steps/TemplateSelectionStep";
+import { DesignContentStep } from "./steps/DesignContentStep";
+import { RecipientsStep } from "./steps/RecipientsStep";
+import { PublishSettingsStep } from "./steps/PublishSettingsStep";
+import { SummaryStep } from "./steps/SummaryStep";
 
 import { useCompanyUpdateDraft } from "./useCompanyUpdateDraft";
 import { WIZARD_STEPS } from "./steps";

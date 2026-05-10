@@ -2,7 +2,7 @@
  * Employee card component
  */
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import {
   MoreVertical,
   KeyRound,
@@ -12,6 +12,8 @@ import {
   Building2,
   Shield,
   BadgeCheck,
+  Sparkles,
+  Clock,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

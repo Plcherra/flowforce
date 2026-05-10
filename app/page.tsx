@@ -1,6 +1,6 @@
 "use client";
 
-import IndexPage from "@/screens/Index";
+import IndexPage from "@/features/marketing/pages/Index";
 
 export default function HomePage() {
   return <IndexPage />;

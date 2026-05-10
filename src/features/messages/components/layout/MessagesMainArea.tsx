@@ -2,10 +2,8 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { MessagesHeader } from "./MessagesHeader";
-import {
-  MessagesList,
-  MessageInput,
-} from "@/features/messages/components/conversations";
+import { MessageInput } from "@/features/messages/components/conversations/MessageInput";
+import { MessagesList } from "@/features/messages/components/conversations/MessagesList";
 import type {
   MessageChannel,
   Message,

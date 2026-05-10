@@ -1,6 +1,6 @@
 "use client";
 
-import VideoDetailPage from "@/screens/resources/VideoDetail";
+import VideoDetailPage from "@/features/resources/pages/resources/VideoDetail";
 
 export default function VideoDetail() {
   return <VideoDetailPage />;

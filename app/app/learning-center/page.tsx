@@ -1,6 +1,6 @@
 "use client";
 
-import LearningCenterPage from "@/screens/LearningCenter";
+import LearningCenterPage from "@/features/learning/pages/LearningCenter";
 
 export default function LearningCenter() {
   return <LearningCenterPage />;

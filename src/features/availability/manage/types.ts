@@ -1,5 +1,5 @@
 import type { AvailabilityRequest } from "@/types/availability";
-import type { AvailabilityGrid } from "@/components/availability/AvailabilityRequestForm";
+import type { AvailabilityGrid } from "@/features/availability/components/AvailabilityRequestForm";
 
 export interface ManagerAvailabilityRequest extends AvailabilityRequest {
   employeeName: string;

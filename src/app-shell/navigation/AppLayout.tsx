@@ -1,0 +1,20 @@
+import { Outlet, ScrollRestoration } from "@/lib/router-adapter";
+import { useRoutePreloader } from "@/hooks/useRoutePreloader";
+import { useNavigationAnalytics } from "@/hooks/useNavigationAnalytics";
+import { NavigationGuard } from "@/app-shell/navigation/NavigationGuard";
+import { RouteLoadingBoundary } from "@/app-shell/navigation/RouteLoadingBoundary";
+
+export function AppLayout() {
+  // These hooks now run INSIDE the router context
+  useRoutePreloader();
+  useNavigationAnalytics();
+
+  return (
+    <NavigationGuard>
+      <RouteLoadingBoundary>
+        <Outlet />
+        <ScrollRestoration />
+      </RouteLoadingBoundary>
+    </NavigationGuard>
+  );
+}

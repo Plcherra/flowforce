@@ -1,6 +1,6 @@
 "use client";
 
-import DocumentationDetailPage from "@/screens/resources/DocumentationDetail";
+import DocumentationDetailPage from "@/features/resources/pages/resources/DocumentationDetail";
 
 export default function DocumentationDetail() {
   return <DocumentationDetailPage />;

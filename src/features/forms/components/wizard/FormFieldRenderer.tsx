@@ -23,20 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LocationField } from "@/components/forms/fields/LocationField";
-import { ImageUploadField } from "@/components/forms/fields/ImageUploadField";
-import { VideoUploadField } from "@/components/forms/fields/VideoUploadField";
-import { AudioRecordingField } from "@/components/forms/fields/AudioRecordingField";
-import { FileUploadField } from "@/components/forms/fields/FileUploadField";
-import { FormulaField } from "@/components/forms/fields/FormulaField";
-import { NumberSliderField } from "@/components/forms/fields/NumberSliderField";
-import { YesNoField } from "@/components/forms/fields/YesNoField";
-import { DescriptionField } from "@/components/forms/fields/DescriptionField";
-import { SignatureField } from "@/components/forms/fields/SignatureField";
-import { RatingField } from "@/components/forms/fields/RatingField";
-import { ScannerField } from "@/components/forms/fields/ScannerField";
-import { TaskField } from "@/components/forms/fields/TaskField";
-import { ImageSelectionField } from "@/components/forms/fields/ImageSelectionField";
+import { LocationField } from "@/features/forms/components/fields/LocationField";
+import { ImageUploadField } from "@/features/forms/components/fields/ImageUploadField";
+import { VideoUploadField } from "@/features/forms/components/fields/VideoUploadField";
+import { AudioRecordingField } from "@/features/forms/components/fields/AudioRecordingField";
+import { FileUploadField } from "@/features/forms/components/fields/FileUploadField";
+import { FormulaField } from "@/features/forms/components/fields/FormulaField";
+import { NumberSliderField } from "@/features/forms/components/fields/NumberSliderField";
+import { YesNoField } from "@/features/forms/components/fields/YesNoField";
+import { DescriptionField } from "@/features/forms/components/fields/DescriptionField";
+import { SignatureField } from "@/features/forms/components/fields/SignatureField";
+import { RatingField } from "@/features/forms/components/fields/RatingField";
+import { ScannerField } from "@/features/forms/components/fields/ScannerField";
+import { TaskField } from "@/features/forms/components/fields/TaskField";
+import { ImageSelectionField } from "@/features/forms/components/fields/ImageSelectionField";
 import type { FormFieldDataLocal } from "../../types/formFill";
 import type { FormFieldType } from "@/types/forms";
 import type {

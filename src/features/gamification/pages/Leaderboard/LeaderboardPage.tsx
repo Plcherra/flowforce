@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { LeaderboardPeriod } from "@/features/leaderboard/types";
-import { useLeaderboardData } from "@/features/leaderboard/useLeaderboardData";
+import type { LeaderboardPeriod } from "@/features/gamification/leaderboard/types";
+import { useLeaderboardData } from "@/features/gamification/leaderboard/useLeaderboardData";
 import { formatDistanceToNow } from "date-fns";
 import { LeaderboardHeader } from "./LeaderboardHeader";
 import { XPProgressCard } from "./XPProgressCard";

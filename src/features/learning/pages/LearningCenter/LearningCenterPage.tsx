@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useLocation } from "react-router-dom";
-import CourseCreationWizard from "@/components/learning/course-wizard";
+import { useLocation } from "@/lib/router-adapter";
+import CourseCreationWizard from "@/features/learning/components/course-wizard";
 import { useLearningCenter } from "@/hooks/learning/useLearningCenter";
 import { LearningOverview } from "./LearningOverview";
 import { LearningCatalog } from "./LearningCatalog";

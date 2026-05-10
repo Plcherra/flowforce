@@ -6,9 +6,9 @@ import { useProfile } from "@/hooks/useProfile";
 import type {
   LeaderboardEntry,
   LeaderboardPeriod,
-} from "@/features/leaderboard/types";
-import { mapToLeaderboardEntry } from "@/features/leaderboard/useLeaderboardData";
-import type { LeaderboardRowRecord } from "@/features/leaderboard/leaderboardRepository";
+} from "@/features/gamification/leaderboard/types";
+import { mapToLeaderboardEntry } from "@/features/gamification/leaderboard/useLeaderboardData";
+import type { LeaderboardRowRecord } from "@/features/gamification/leaderboard/leaderboardRepository";
 
 export interface UseLeaderboardFilters {
   companyId?: string | null;

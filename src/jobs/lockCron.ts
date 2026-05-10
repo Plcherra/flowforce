@@ -3,7 +3,7 @@ import {
   addWeeks,
   computeAutoLockThreshold,
   startOfIsoWeek,
-} from "@/availability/lockEngine";
+} from "@/features/availability/utils/lockEngine";
 import type { Database } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
 

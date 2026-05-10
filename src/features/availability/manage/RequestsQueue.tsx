@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ArrowUpRight, CheckCircle2, Inbox, XCircle } from "lucide-react";
 
-import { hoursDelta } from "@/availability/availabilityUtils";
+import { hoursDelta } from "@/features/availability/utils/availabilityUtils";
 import { Button } from "@/components/ui/button";
 import {
   Card,

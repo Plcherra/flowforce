@@ -1,6 +1,6 @@
 "use client";
 
-import DynamicSectionPage from "@/components/sections/DynamicSection";
+import DynamicSectionPage from "@/features/sections/components/DynamicSection";
 
 export default function DynamicSection() {
   return <DynamicSectionPage />;

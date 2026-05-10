@@ -1,6 +1,6 @@
 "use client";
 
-import EmployeesPage from "@/screens/Employees";
+import EmployeesPage from "@/features/employees/pages/Employees";
 
 export default function Employees() {
   return <EmployeesPage />;

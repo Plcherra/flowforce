@@ -28,11 +28,11 @@ import {
   useCreateWaste,
 } from "@/hooks/useInventory";
 import { asArray, safeArrayMap } from "@/utils/reactQueryTypes";
-import { InventoryTransfersPanel } from "@/components/inventory/InventoryTransfersPanel";
+import { InventoryTransfersPanel } from "@/features/inventory/components/InventoryTransfersPanel";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
-import { ProductionEventForm } from "@/components/inventory/ProductionEventForm";
-import { ProductionEventList } from "@/components/inventory/ProductionEventList";
+import { ProductionEventForm } from "@/features/inventory/components/ProductionEventForm";
+import { ProductionEventList } from "@/features/inventory/components/ProductionEventList";
 import { useInventoryFormState } from "@/features/inventory/hooks/useInventoryForm";
 import {
   wasteTypes,

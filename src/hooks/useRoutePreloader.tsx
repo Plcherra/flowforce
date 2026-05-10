@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-adapter";
 
 // Preload common routes the user is likely to visit
 const routePreloadMap: Record<string, string[]> = {

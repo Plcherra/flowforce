@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { LeaderboardEntry } from "@/features/leaderboard/types";
+import type { LeaderboardEntry } from "@/features/gamification/leaderboard/types";
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];

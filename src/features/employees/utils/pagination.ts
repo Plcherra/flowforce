@@ -55,8 +55,8 @@ export function generatePaginationSequence(
 
   const sequence: Array<number | "start-ellipsis" | "end-ellipsis"> = [1];
 
-  let start = Math.max(2, page - 1);
-  let end = Math.min(totalPages - 1, page + 1);
+  const start = Math.max(2, page - 1);
+  const end = Math.min(totalPages - 1, page + 1);
 
   if (start > 2) {
     sequence.push("start-ellipsis");

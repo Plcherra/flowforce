@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "@/lib/router-adapter";
 import {
   Card,
   CardContent,
@@ -26,8 +26,8 @@ import {
   useInventoryCounts,
   useInventoryCountLines,
 } from "@/features/inventory/hooks/useInventoryCounts";
-import { MarketManCountingInterface } from "@/components/inventory/MarketManCountingInterface";
-import { ItemSelector } from "@/components/inventory/ItemSelector";
+import { MarketManCountingInterface } from "@/features/inventory/components/MarketManCountingInterface";
+import { ItemSelector } from "@/features/inventory/components/ItemSelector";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
 import { listInventoryCountEvents } from "@/features/inventory/repositories/countsRepository";

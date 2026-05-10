@@ -182,6 +182,10 @@ export function RouterProvider({ children }: { children?: React.ReactNode }) {
   return <>{children ?? null}</>;
 }
 
+export function MemoryRouter({ children }: { children?: React.ReactNode }) {
+  return <>{children ?? null}</>;
+}
+
 export function createBrowserRouter() {
   return {};
 }

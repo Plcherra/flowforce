@@ -1,6 +1,6 @@
 "use client";
 
-import ItemsSetupPage from "@/screens/ItemsSetup";
+import ItemsSetupPage from "@/features/inventory/pages/ItemsSetup";
 
 export default function ItemsSetup() {
   return <ItemsSetupPage />;

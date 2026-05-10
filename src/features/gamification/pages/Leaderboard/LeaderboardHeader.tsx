@@ -2,7 +2,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw } from "lucide-react";
-import type { LeaderboardPeriod } from "@/features/leaderboard/types";
+import type { LeaderboardPeriod } from "@/features/gamification/leaderboard/types";
 
 interface LeaderboardHeaderProps {
   period: LeaderboardPeriod;

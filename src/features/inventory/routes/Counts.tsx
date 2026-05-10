@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import { Button } from "@/components/ui/button";
 import { Calculator, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { NewCountWizard } from "@/components/inventory/NewCountWizard";
-import { CountManagement } from "@/components/inventory/CountManagement";
+import { NewCountWizard } from "@/features/inventory/components/NewCountWizard";
+import { CountManagement } from "@/features/inventory/components/CountManagement";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
 

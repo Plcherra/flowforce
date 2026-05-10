@@ -1,6 +1,6 @@
 "use client";
 
-import MessagesPage from "@/screens/Messages";
+import MessagesPage from "@/features/messages/pages/Messages";
 
 export default function MessagesFilter() {
   return <MessagesPage />;

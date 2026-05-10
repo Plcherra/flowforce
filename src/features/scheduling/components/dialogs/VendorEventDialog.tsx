@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import type {
   PendingVendorEvent,
   VendorFormState,
-} from "@/components/scheduling/drag-drop/types";
+} from "@/features/scheduling/components/drag-drop/types";
 import { getVendorLabel } from "../../constants/templates";
 import { toSqlTime } from "../../utils/timeHelpers";
 

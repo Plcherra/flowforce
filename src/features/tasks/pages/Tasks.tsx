@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { TaskNotifications } from "@/components/tasks/TaskNotifications";
+import { TaskNotifications } from "@/features/tasks/components/TaskNotifications";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   TaskPageSkeleton,
@@ -31,25 +31,25 @@ import {
 } from "@/features/tasks/components";
 
 const CreateTaskDialog = lazy(() =>
-  import("@/components/tasks/CreateTaskDialog").then((module) => ({
+  import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
     default: module.CreateTaskDialog,
   })),
 );
 
 const TaskDetailsDialog = lazy(() =>
-  import("@/components/tasks/TaskDetailsDialog").then((module) => ({
+  import("@/features/tasks/components/TaskDetailsDialog").then((module) => ({
     default: module.TaskDetailsDialog,
   })),
 );
 
 const TaskActivityFeed = lazy(() =>
-  import("@/components/tasks/TaskActivityFeed").then((module) => ({
+  import("@/features/tasks/components/TaskActivityFeed").then((module) => ({
     default: module.TaskActivityFeed,
   })),
 );
 
 const RemindersPanel = lazy(() =>
-  import("@/components/reminders/RemindersPanel").then((module) => ({
+  import("@/features/tasks/components/reminders/RemindersPanel").then((module) => ({
     default: module.RemindersPanel,
   })),
 );

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-adapter";
 import {
   Users,
   UserCheck,
@@ -15,7 +15,7 @@ import {
   Link2,
 } from "lucide-react";
 
-import RoleGuard from "@/components/RoleGuard";
+import RoleGuard from "@/app-shell/guards/RoleGuard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -44,10 +44,10 @@ import {
 import { usePositions, type Position } from "@/hooks/usePositions";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 import { useShiftTemplates } from "@/hooks/scheduling/useShiftTemplates";
-import CreatePositionDialog from "@/components/positions/CreatePositionDialog";
-import EditPositionDialog from "@/components/positions/EditPositionDialog";
-import { PositionManagementDialog } from "@/components/positions/PositionManagementDialog";
-import { UserPositionAssignment } from "@/components/positions/UserPositionAssignment";
+import CreatePositionDialog from "@/features/positions/components/CreatePositionDialog";
+import EditPositionDialog from "@/features/positions/components/EditPositionDialog";
+import { PositionManagementDialog } from "@/features/positions/components/PositionManagementDialog";
+import { UserPositionAssignment } from "@/features/positions/components/UserPositionAssignment";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
 
 const ROLE_ORDER = ["staff", "supervisor", "manager", "admin"] as const;

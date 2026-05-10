@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import RoleGuard from "@/components/RoleGuard";
-import UserManagement from "@/components/admin/UserManagement";
-import AuditLog from "@/components/admin/AuditLog";
-import AdminTabs from "@/components/admin/AdminTabs";
-import RoleConfigurationTab from "@/components/roles/RoleConfigurationTab";
+import { useSearchParams } from "@/lib/router-adapter";
+import RoleGuard from "@/app-shell/guards/RoleGuard";
+import UserManagement from "@/features/admin/components/UserManagement";
+import AuditLog from "@/features/admin/components/AuditLog";
+import AdminTabs from "@/features/admin/components/AdminTabs";
+import RoleConfigurationTab from "@/features/roles/components/RoleConfigurationTab";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
 import { useFeatureFlag } from "@/hooks/useFeatureFlags";

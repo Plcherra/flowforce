@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FormAnalytics from "@/components/analytics/FormAnalytics";
-import FormInsights from "@/components/analytics/FormInsights";
-import InteractiveKpiTiles from "@/components/analytics/InteractiveKpiTiles";
-import { ReportsAnalyzer } from "@/components/analytics/ReportsAnalyzer";
-import { FloatingAssistant } from "@/components/ai/FloatingAssistant";
+import FormAnalytics from "@/features/analytics/components/FormAnalytics";
+import FormInsights from "@/features/analytics/components/FormInsights";
+import InteractiveKpiTiles from "@/features/analytics/components/InteractiveKpiTiles";
+import { ReportsAnalyzer } from "@/features/analytics/components/ReportsAnalyzer";
+import { FloatingAssistant } from "@/features/ai/components/FloatingAssistant";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { BarChart, FileBarChart2, Lightbulb, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { AssistantAction, AssistantContext } from "@/types/ai";
-import BusinessAnalyticsBoard from "@/components/analytics/BusinessAnalyticsBoard";
+import BusinessAnalyticsBoard from "@/features/analytics/components/BusinessAnalyticsBoard";
 import { useCompany } from "@/hooks/useCompany";
 
 type TabValue = "business" | "analytics" | "insights" | "reports";

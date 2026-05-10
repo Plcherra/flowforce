@@ -1,6 +1,6 @@
 "use client";
 
-import PermissionDemoPage from "@/screens/PermissionDemo";
+import PermissionDemoPage from "@/features/permissions/pages/PermissionDemo";
 
 export default function PermissionDemo() {
   return <PermissionDemoPage />;

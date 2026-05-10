@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
-import FormsSection from "@/components/forms/FormsSection";
+import FormsSection from "@/features/forms/components/FormsSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +14,12 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { PageAsyncWrapper } from "@/components/ui/async-wrapper";
 
 const CreateFormDialog = lazy(
-  () => import("@/components/forms/CreateFormDialog"),
+  () => import("@/features/forms/components/CreateFormDialog"),
 );
 const FormBuilderDialog = lazy(
-  () => import("@/components/forms/FormBuilderDialog"),
+  () => import("@/features/forms/components/FormBuilderDialog"),
 );
-const FormFillDialog = lazy(() => import("@/components/forms/FormFillDialog"));
+const FormFillDialog = lazy(() => import("@/features/forms/components/FormFillDialog"));
 
 type StatusFilter = "all" | "published" | "draft" | "archived";
 

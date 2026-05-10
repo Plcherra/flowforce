@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-adapter";
 import { logger } from "@/utils/logger";
 
 interface NavigationEvent {

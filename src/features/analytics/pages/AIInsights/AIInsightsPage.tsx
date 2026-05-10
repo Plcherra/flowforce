@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import LoadingSpinner from "@/components/resources/LoadingSpinner";
+import LoadingSpinner from "@/features/resources/components/LoadingSpinner";
 import { XPBar } from "@/features/gamification/components";
 import { usePerformanceOverview } from "@/hooks/usePerformanceOverview";
 import type {
@@ -32,17 +32,17 @@ import {
   type Recommendation,
 } from "./RecommendationsPanel";
 
-const AIInsightsPanel = lazy(() => import("@/components/ai/AIInsightsPanel"));
-const AIChatAssistant = lazy(() => import("@/components/ai/AIChatAssistant"));
+const AIInsightsPanel = lazy(() => import("@/features/ai/components/AIInsightsPanel"));
+const AIChatAssistant = lazy(() => import("@/features/ai/components/AIChatAssistant"));
 const PerformanceRadarChart = lazy(
-  () => import("@/components/ai/PerformanceRadarChart"),
+  () => import("@/features/ai/components/PerformanceRadarChart"),
 );
 const ScenarioSimulator = lazy(
-  () => import("@/components/ai/ScenarioSimulator"),
+  () => import("@/features/ai/components/ScenarioSimulator"),
 );
-const AIQuickActions = lazy(() => import("@/components/ai/AIQuickActions"));
+const AIQuickActions = lazy(() => import("@/features/ai/components/AIQuickActions"));
 const EngagementOverview = lazy(
-  () => import("@/components/company-updates/EngagementOverview"),
+  () => import("@/features/company-updates/components/EngagementOverview"),
 );
 
 const PanelFallback = () => (

@@ -1,6 +1,6 @@
 "use client";
 
-import HelpDeskPage from "@/screens/HelpDesk";
+import HelpDeskPage from "@/features/helpdesk/pages/HelpDesk";
 
 export default function HelpDesk() {
   return <HelpDeskPage />;

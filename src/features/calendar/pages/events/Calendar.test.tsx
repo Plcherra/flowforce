@@ -21,7 +21,7 @@ vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => false,
 }));
 
-vi.mock("@/components/scheduling/SchedulingCalendar", () => ({
+vi.mock("@/features/scheduling/components/SchedulingCalendar", () => ({
   SchedulingCalendar: () => (
     <div data-testid="scheduling-calendar">calendar</div>
   ),

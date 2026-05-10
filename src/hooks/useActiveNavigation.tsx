@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-adapter";
 import { NavigationSection, NavigationItem } from "./useNavigationStructure";
 
 export interface ProcessedNavigationItem extends NavigationItem {

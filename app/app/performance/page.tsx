@@ -1,6 +1,6 @@
 "use client";
 
-import PerformancePage from "@/screens/Performance";
+import PerformancePage from "@/features/performance/pages/Performance";
 
 export default function Performance() {
   return <PerformancePage />;

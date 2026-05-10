@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { MessageChannel } from "@/types/messages";
 import { Input } from "@/components/ui/input";
-import { MessageFilterBar } from "@/components/MessageFilterBar";
+import { MessageFilterBar } from "@/features/messages/components/legacy/MessageFilterBar";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,5 @@
-import type { IdeaKpiInsight } from "@/modules/operations/hooks/useIdeaInsights";
-import type { DateRange } from "@/modules/operations/hooks/useIdeaInsights";
+import type { IdeaKpiInsight } from "@/features/operations/hooks/useIdeaInsights";
+import type { DateRange } from "@/features/operations/hooks/useIdeaInsights";
 
 export type MetricsPayload = Array<{
   metric: string | undefined;

@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-adapter";
 import type { RoleSummary, PositionCoverage } from "../types/userManagement";
 
 interface RoleSummarySidebarProps {

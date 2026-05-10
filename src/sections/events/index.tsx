@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-adapter";
 import config from "./section.config";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";

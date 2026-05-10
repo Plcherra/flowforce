@@ -4,9 +4,9 @@ import { ChannelMembers } from "../modals/ChannelMembers";
 import { ChannelSettings } from "../modals/ChannelSettings";
 import { DirectMessageDialog } from "../modals/DirectMessageDialog";
 import { MessageSearch } from "../modals/MessageSearch";
-import { ThreadedMessageView } from "@/components/messages/ThreadedMessageView";
-import { VideoCallDialog } from "@/components/messages/VideoCallDialog";
-import { CreateAnnouncement } from "@/components/announcements/CreateAnnouncement";
+import { ThreadedMessageView } from "@/features/messages/components/ThreadedMessageView";
+import { VideoCallDialog } from "@/features/messages/components/VideoCallDialog";
+import { CreateAnnouncement } from "@/features/messages/components/announcements/CreateAnnouncement";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesPortalContentProps {

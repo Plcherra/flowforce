@@ -5,9 +5,9 @@
 import { useCallback } from "react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { ShiftTemplate } from "@/components/scheduling/drag-drop/types";
-import type { VendorPaletteItem } from "@/components/scheduling/drag-drop/types";
-import type { PendingVendorEvent } from "@/components/scheduling/drag-drop/types";
+import type { ShiftTemplate } from "@/features/scheduling/components/drag-drop/types";
+import type { VendorPaletteItem } from "@/features/scheduling/components/drag-drop/types";
+import type { PendingVendorEvent } from "@/features/scheduling/components/drag-drop/types";
 
 interface UseDragDropHandlersProps {
   draggedTemplate: ShiftTemplate | null;

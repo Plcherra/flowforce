@@ -15,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CreateEventDialog } from "@/components/events/CreateEventDialog";
-import { CreateVendorVisitDialog } from "@/components/events/CreateVendorVisitDialog";
-import { CalendarView } from "@/components/events/CalendarView";
-import { EventDetailsDrawer } from "@/components/events/EventDetailsDrawer";
+import { CreateEventDialog } from "@/features/calendar/components/CreateEventDialog";
+import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
+import { CalendarView } from "@/features/calendar/components/CalendarView";
+import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
 import {
   useCalendarEvents,
   mapAppEventToCalendarEvent,

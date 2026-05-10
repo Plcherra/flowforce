@@ -6,7 +6,7 @@ import { LockControls } from "@/features/availability/manage/LockControls";
 import { RequestsQueue } from "@/features/availability/manage/RequestsQueue";
 import { ExceptionsTable } from "@/features/availability/manage/ExceptionsTable";
 import { useAvailabilityManagement } from "@/features/availability/manage/useAvailabilityManagement";
-import { DEFAULT_ORG_ID } from "@/availability/lockEngine";
+import { DEFAULT_ORG_ID } from "@/features/availability/utils/lockEngine";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { useAuth } from "@/hooks/useAuth";

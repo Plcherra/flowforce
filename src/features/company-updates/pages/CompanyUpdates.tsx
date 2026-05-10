@@ -12,7 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
 import { useRecognitions } from "@/hooks/useRecognitions";
-import type { WizardFormData } from "@/components/updates/CreateUpdateWizard";
+import type { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
 import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
 import { RecognitionHighlights } from "@/features/company-updates/components/RecognitionHighlights";
 import { UpdateFeedCard } from "@/features/company-updates/components/UpdateFeedCard";
@@ -21,6 +21,7 @@ import { UpdateListView } from "@/features/company-updates/components/UpdateList
 import { UpdatesEmptyState } from "@/features/company-updates/components/UpdatesEmptyState";
 import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
@@ -38,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Megaphone } from "lucide-react";
 import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
 import { getErrorMessage } from "@/shared/utils";
 import { useCompanyUpdateFilters } from "@/features/company-updates/hooks/useCompanyUpdateFilters";
@@ -52,15 +53,85 @@ import {
 import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
 import { PageLoader } from "@/components/common/PageLoader";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
-import { Megaphone } from "lucide-react";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const CreateUpdateWizard = lazy(
-  () => import("@/components/updates/CreateUpdateWizard"),
+  () => import("@/features/company-updates/wizard/CreateUpdateWizard"),
+);
+
+const SCHEMA_CACHE_ERROR_CODES = new Set(["PGRST200", "PGRST202", "PGRST205"]);
+
+const getUnknownErrorMessage = (error: unknown) => {
+  if (!error) return "";
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    return typeof message === "string" ? message : "";
+  }
+  return "";
+};
+
+const isMissingBackendResourceError = (
+  error: unknown,
+  resourceNames: string[],
+) => {
+  const message = getUnknownErrorMessage(error).toLowerCase();
+  const code =
+    typeof error === "object" && error && "code" in error
+      ? (error as { code?: unknown }).code
+      : null;
+  const hasSchemaCode =
+    typeof code === "string" && SCHEMA_CACHE_ERROR_CODES.has(code);
+
+  return (
+    (hasSchemaCode ||
+      message.includes("schema cache") ||
+      message.includes("could not find the table")) &&
+    resourceNames.some((resource) => message.includes(resource.toLowerCase()))
+  );
+};
+
+const ModuleSetupState = ({
+  canCreate,
+  onCreate,
+  wizardOpen,
+}: {
+  canCreate: boolean;
+  onCreate: () => void;
+  wizardOpen: boolean;
+}) => (
+  <div className="px-4 py-6">
+    <EmptyStateCard
+      title="Company Updates module is not fully set up yet"
+      description="The app is running, but the database tables for company updates and recognitions have not been created in this Supabase project yet."
+      icon={<Megaphone className="h-5 w-5" />}
+      action={
+        canCreate ? (
+          <Button
+            onClick={onCreate}
+            aria-expanded={wizardOpen}
+            aria-controls="company-updates-wizard"
+          >
+            Open create wizard
+          </Button>
+        ) : undefined
+      }
+    />
+    <Alert className="mt-4 border-amber-200 bg-amber-50 text-amber-950">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Database setup needed</AlertTitle>
+      <AlertDescription>
+        Missing tables: <code>company_updates</code> and/or{" "}
+        <code>recognitions</code>. Once those migrations are restored, this page
+        will automatically show the update feed.
+      </AlertDescription>
+    </Alert>
+  </div>
 );
 
 export default function CompanyUpdates() {
-  // All hooks must be called before any conditional returns
+  // Hooks
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
@@ -125,57 +196,32 @@ export default function CompanyUpdates() {
     addComment,
   } = useCompanyUpdateMutations();
 
+  // Derived values and memos
   const recognitionHighlights = useMemo(
     () => (Array.isArray(recognitionFeed) ? recognitionFeed.slice(0, 3) : []),
     [recognitionFeed],
   );
 
-  // Early returns after all hooks
-  if (!bootstrap.userReady || bootstrap.loading) {
-    return <PageLoader text="Loading company updates..." />;
-  }
-
-  if (bootstrap.error) {
-    return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Unable to load workspace</AlertTitle>
-          <AlertDescription>{bootstrap.error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!bootstrap.ready) {
-    return (
-      <div className="p-6">
-        <EmptyStateCard
-          title="Workspace data is still loading"
-          description="Company updates unlock once we have your organization and employee information."
-          icon={<Megaphone className="h-5 w-5" />}
-        />
-      </div>
-    );
-  }
-
+  const updatesSchemaMissing = isMissingBackendResourceError(error, [
+    "company_updates",
+    "company_update",
+  ]);
+  const recognitionsSchemaMissing = isMissingBackendResourceError(
+    recognitionError,
+    ["recognitions"],
+  );
+  const moduleSchemaMissing = updatesSchemaMissing || recognitionsSchemaMissing;
   const isInitialLoading = loading && safeArrayLength(safeUpdates) === 0;
-  const errorMessage = error
-    ? getErrorMessage(error, "Unable to load company updates.")
-    : null;
+  const errorMessage =
+    error && !updatesSchemaMissing
+      ? getErrorMessage(error, "Unable to load company updates.")
+      : null;
+  const recognitionErrorMessage = recognitionsSchemaMissing
+    ? null
+    : recognitionError;
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
-  const showPagination = totalPages > 1;
-
-  useEffect(() => {
-    setPage(1);
-  }, [pageSize, searchTerm, viewMode, setPage]);
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages || 1);
-    }
-  }, [page, totalPages, setPage]);
+  const showPagination = !moduleSchemaMissing && totalPages > 1;
 
   const canCreateUpdate = useMemo(() => {
     if (can("systemSettings") || can("manageCompany")) {
@@ -186,6 +232,18 @@ export default function CompanyUpdates() {
     return ["owner", "company_admin", "admin", "manager"].includes(role);
   }, [can, profile?.role]);
 
+  // Effects
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize, searchTerm, viewMode, setPage]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages || 1);
+    }
+  }, [page, totalPages, setPage]);
+
+  // Event handlers
   const handlePageChange = useCallback(
     (nextPage: number) => {
       setPage(nextPage);
@@ -304,6 +362,35 @@ export default function CompanyUpdates() {
     [commentsByUpdate],
   );
 
+  // Conditional UI states after every hook has been called
+  if (!bootstrap.userReady || bootstrap.loading) {
+    return <PageLoader text="Loading company updates..." />;
+  }
+
+  if (bootstrap.error) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Unable to load workspace</AlertTitle>
+          <AlertDescription>{bootstrap.error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!bootstrap.ready) {
+    return (
+      <div className="p-6">
+        <EmptyStateCard
+          title="Workspace data is still loading"
+          description="Company updates unlock once we have your organization and employee information."
+          icon={<Megaphone className="h-5 w-5" />}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <CompanyUpdatesHeader
@@ -317,6 +404,14 @@ export default function CompanyUpdates() {
         wizardOpen={createWizardOpen}
       />
 
+      {moduleSchemaMissing ? (
+        <ModuleSetupState
+          canCreate={canCreateUpdate}
+          onCreate={() => setCreateWizardOpen(true)}
+          wizardOpen={createWizardOpen}
+        />
+      ) : null}
+
       {errorMessage && (
         <div className="px-4 pt-4">
           <Alert variant="destructive">
@@ -327,12 +422,12 @@ export default function CompanyUpdates() {
         </div>
       )}
 
-      {viewMode === "feed" && (
+      {!moduleSchemaMissing && viewMode === "feed" && (
         <div className="px-4 py-6 space-y-4">
           <RecognitionHighlights
             loading={recognitionLoading}
             highlights={recognitionHighlights}
-            error={recognitionError}
+            error={recognitionErrorMessage}
           />
 
           {isInitialLoading ? (
@@ -373,7 +468,7 @@ export default function CompanyUpdates() {
         </div>
       )}
 
-      {viewMode === "grid" && (
+      {!moduleSchemaMissing && viewMode === "grid" && (
         <>
           {isInitialLoading ? (
             <GridSkeleton />
@@ -393,7 +488,7 @@ export default function CompanyUpdates() {
         </>
       )}
 
-      {viewMode === "list" && (
+      {!moduleSchemaMissing && viewMode === "list" && (
         <>
           {isInitialLoading ? (
             <ListSkeleton />

@@ -14,8 +14,8 @@ import {
   type PerformanceReviewEntry,
 } from "@/hooks/usePerformanceOverview";
 import { useRecognitions } from "@/hooks/useRecognitions";
-import { useLeaderboardData } from "@/features/leaderboard/useLeaderboardData";
-import type { LeaderboardPeriod } from "@/features/leaderboard/types";
+import { useLeaderboardData } from "@/features/gamification/leaderboard/useLeaderboardData";
+import type { LeaderboardPeriod } from "@/features/gamification/leaderboard/types";
 import { useLeaderboardInsightsStore } from "@/stores/useLeaderboardInsights";
 import { formatDistanceToNow } from "date-fns";
 import { PerformanceHeader } from "./PerformanceHeader";

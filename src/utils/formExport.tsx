@@ -1,7 +1,7 @@
 import React from "react";
 import { renderToString } from "react-dom/server";
-import type { FormReviewLayoutProps } from "@/components/forms/presentation";
-import { FormReviewLayout } from "@/components/forms/presentation";
+import type { FormReviewLayoutProps } from "@/features/forms/components/presentation";
+import { FormReviewLayout } from "@/features/forms/components/presentation";
 
 export async function exportFormResponseToPdf(layout: FormReviewLayoutProps) {
   if (typeof window === "undefined" || typeof document === "undefined") {

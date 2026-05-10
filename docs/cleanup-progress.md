@@ -1,0 +1,123 @@
+# Cleanup Progress
+
+## Phase 1: Immediate Cleanup
+
+- [x] Removed Vite/Vitest config files and old React stylesheet entry files.
+- [x] Removed the `npm run test` Vitest script.
+- [x] Removed Vite/Vitest-only dependencies from `package.json`.
+- [x] Removed `lovable-tagger` because it pulled Vite into the dependency tree.
+- [x] Consolidated `src/components/company-updates/` into `src/features/company-updates/`.
+- [x] Consolidated `src/components/updates/` into `src/features/company-updates/wizard/`.
+- [x] Updated imports for moved Company Updates files.
+
+**Blockers / notes:**
+
+- Legacy Vitest test files still exist under `src/**/__tests__` and `*.test.*`. They are excluded from TypeScript compilation for now and should be migrated to the Next.js test approach later.
+- `npm run typecheck` still fails because of broad existing schema/type issues outside Phase 1 cleanup.
+- `npm run lint` now runs through ESLint directly, but it still fails on existing lint errors across the repo.
+
+**Next action:**
+
+- Refactor `src/features/company-updates/pages/CompanyUpdates.tsx` into smaller page sections.
+
+## Phase 2: Restructure Folders
+
+- [x] Make `src/components/` shared-only.
+- [x] Move app shell code into `src/app-shell/`.
+- [x] Removed the legacy `src/screens/` route layer.
+- [x] Replaced remaining `react-router-dom` imports with the Next router adapter.
+- [x] Removed the `react-router-dom` dependency.
+- [x] Merge duplicate feature areas.
+
+**Completed Phase 2 details:**
+
+- Moved `src/components/AppShell.tsx` to `src/app-shell/AppShell.tsx`.
+- Moved `src/components/AppSidebar.tsx` to `src/app-shell/navigation/AppSidebar.tsx`.
+- Moved `src/components/layout/TopNavbar.tsx` to `src/app-shell/layout/TopNavbar.tsx`.
+- Moved `src/components/navigation/*` to `src/app-shell/navigation/*`.
+- Moved `src/components/sidebar/AddNewSectionButton.tsx` to `src/app-shell/navigation/sidebar/AddNewSectionButton.tsx`.
+- Updated app shell imports in `app/app/AppLayoutClient.tsx` and moved shell files.
+- Moved `src/components/dashboard/*` to `src/features/dashboard/components/*`.
+- Updated dashboard imports in `src/screens/Dashboard.tsx`.
+- Moved `src/components/employees/*` to `src/features/employees/components/*`.
+- Updated employee imports in `src/features/employees/components/TeamDirectory.tsx`.
+- Moved `src/components/tasks/*` to `src/features/tasks/components/*`.
+- Updated task imports in `src/features/tasks/pages/Tasks.tsx` and analytics task dialog usage.
+- Moved `src/components/messages/*` to `src/features/messages/components/*`.
+- Updated message imports in the messages layout, header, modal, and moved message components.
+- Moved `src/components/analytics/*` to `src/features/analytics/components/*`.
+- Moved `src/components/operations/*` to `src/features/operations/components/idea/*`.
+- Moved `src/components/positions/*` to `src/features/positions/components/*`.
+- Moved role management files from `src/components/roles/*` to `src/features/roles/components/*` and removed the old `SectionPermissionsTab` re-export wrapper.
+- Moved admin tab/audit files from `src/components/admin/*` to `src/features/admin/components/*` and removed the old `UserManagement` re-export wrapper.
+- Moved `src/components/availability/*` to `src/features/availability/components/*`.
+- Moved report builder/viewer files from `src/components/reports/*` to `src/features/analytics/components/reports/builder/*`.
+- Moved payments/financial overview files from `src/components/payments/*` and `src/components/financial/*` to `src/features/inventory/components/expenses/*`.
+- Moved reminders files from `src/components/reminders/*` to `src/features/tasks/components/reminders/*`.
+- Moved `src/components/forms/*` to `src/features/forms/components/*`.
+- Moved `src/components/inventory/*` to `src/features/inventory/components/*`.
+- Moved `src/components/learning/*` to `src/features/learning/components/*`.
+- Moved `src/components/sections/*` to `src/features/sections/components/*`.
+- Removed a stale `react-refresh/only-export-components` eslint directive from the moved sections registry.
+- Moved `src/components/scheduling/*` to `src/features/scheduling/components/*`.
+- Removed the old `src/components/scheduling/DragDropScheduleCalendar.tsx` re-export wrapper.
+- Fixed missing imports in moved scheduling files that surfaced during focused ESLint.
+- Moved `src/components/ai/*` to `src/features/ai/components/*`.
+- Moved event components from `src/components/events/*` to `src/features/calendar/components/*` and removed old event re-export wrappers.
+- Moved `src/components/expenses/ExpenseForm.tsx` to `src/features/inventory/components/expenses/ExpenseForm.tsx`.
+- Moved `src/components/cookbook/*` to `src/features/inventory/components/cookbook/*`.
+- Moved `src/components/announcements/*` to `src/features/messages/components/announcements/*`.
+- Moved `src/components/users/*` and `src/components/people/EngagementPanel.tsx` to `src/features/employees/components/users/*`.
+- Moved `src/components/auth/*` to `src/features/auth/components/*`.
+- Moved `src/components/landing/*` to `src/features/marketing/components/*`.
+- Moved `src/components/illustrations/*` to `src/features/marketing/components/illustrations/*`.
+- Moved `src/components/onboarding/*` to `src/features/onboarding/components/*`.
+- Moved `src/components/profile/*` to `src/features/profile/components/*`.
+- Moved `src/components/resources/*` to `src/features/resources/components/*`.
+- Moved `src/components/templates/*` to `src/features/templates/components/*`.
+- Moved remaining top-level app/domain components from `src/components/*.tsx` into `src/app-shell/*` or owning feature folders.
+- Moved active route screens into feature-owned page folders for dashboard, employees, tasks, messages, company updates, forms, goals, auth, profile, onboarding, marketing, templates, resources, inventory, calendar/events, help desk, operations, sections, permissions, and HR development.
+- Removed duplicate legacy `src/screens/*` copies after verifying active routes import canonical feature pages.
+- Moved the old `src/screens/api/ops/issues/[issueId]/suggest-automation.ts` handler to `app/api/ops/issues/[issueId]/suggest-automation/route.ts`.
+- Replaced the old router-adapter-based Not Found screen with a static App Router `app/not-found.tsx` page.
+- Moved old `src/screens/__tests__` files next to their feature owners.
+- Replaced remaining `react-router-dom` imports with `src/lib/router-adapter.tsx` and added a lightweight `MemoryRouter` compatibility export for existing tests.
+- Removed `react-router-dom` from `package.json` and `package-lock.json`.
+- Fixed lint errors surfaced during the structural move: missing UI/icon imports, `require()` imports, one logger switch case declaration, and one test display-name issue.
+- Merged `src/features/recognitions/*` into `src/features/recognition/*` and removed the plural feature folder.
+- Moved root-level `src/availability/*` utilities and tests into `src/features/availability/utils/*`.
+- Moved `src/modules/operations/*` into `src/features/operations/*` and removed the operations module folder.
+- Moved `src/modules/system/*` into `src/features/system/*` and removed `src/modules/`.
+- Merged standalone `src/features/leaderboard/*` into `src/features/gamification/leaderboard/*`.
+- Moved the sidebar primitive implementation from `src/features/ui/components/sidebar.tsx` back into `src/components/ui/sidebar.tsx` and removed `src/features/ui/`.
+- Fixed a messages build collision where `src/features/messages/components/conversations.ts` shadowed the `conversations/` component folder.
+- Added a Suspense boundary around the protected app shell so router-adapter search param usage is valid during Next.js prerendering.
+
+**Current Phase 2 verification:**
+
+- `npm run lint` passes. The repo still has many warnings, but zero lint errors.
+- `npx eslint . --ext .js,.jsx,.ts,.tsx --quiet` passes.
+- `npm run build` passes.
+- Duplicate feature/module folders removed: `src/features/recognitions`, `src/features/leaderboard`, `src/features/ui`, `src/availability`, and `src/modules`.
+- No legacy structural imports remain for `@/modules`, `@/screens`, `@/availability`, `react-router-dom`, `@/features/recognitions`, or `@/features/leaderboard`.
+- `npm run typecheck` was attempted, but it ran for several minutes without output and had to be stopped. Typecheck remains a known slow/broad verification blocker.
+- `src/screens/` is removed.
+- There are no remaining `@/screens` imports.
+- There are no remaining `react-router-dom` imports.
+- Active code imports for the moved component groups have been updated away from `@/components/*`.
+- Remaining `src/components/` usage is limited to shared folders: `ui/`, `common/`, `loading/`, and `permissions/`.
+
+## Phase 3: Component & Code Quality
+
+- [ ] Refactor `CompanyUpdates.tsx`.
+- [ ] Add shared missing-backend handling.
+- [ ] Create standard feature state components.
+- [x] Replace React Router imports in touched files.
+
+## Phase 4: Final Polish
+
+- [x] Continue migrating `src/screens/` route by route.
+- [ ] Clean root-level shared folders as features are touched.
+- [x] Remove unused dependencies after imports are gone.
+- [ ] Add smoke tests for visible modules.
+- [ ] Add a Supabase contract check.

@@ -1,6 +1,6 @@
 "use client";
 
-import GoalsPage from "@/screens/Goals";
+import GoalsPage from "@/features/goals/pages/Goals";
 
 export default function Goals() {
   return <GoalsPage />;

@@ -183,7 +183,7 @@ function log(
       case "warn":
         console.warn(consoleMessage, payload ?? "");
         break;
-      case "error":
+      case "error": {
         // Properly serialize error objects to avoid [object Object]
         let errorToLog: string;
         if (meta.error) {
@@ -247,6 +247,7 @@ function log(
         }
         console.error(consoleMessage, errorToLog || "Error occurred");
         break;
+      }
     }
   }
 

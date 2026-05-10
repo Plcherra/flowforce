@@ -19,9 +19,9 @@ import {
   useEmployees,
   type Employee as DirectoryEmployee,
 } from "@/hooks/useEmployees";
-import type { EmployeeDrawerTab } from "@/components/employees/EmployeeDrawer";
-import { TeamActionsBar } from "@/components/employees/TeamActionsBar";
-import { InviteEmployeeDialog } from "@/components/employees/InviteEmployeeDialog";
+import type { EmployeeDrawerTab } from "@/features/employees/components/EmployeeDrawer";
+import { TeamActionsBar } from "@/features/employees/components/TeamActionsBar";
+import { InviteEmployeeDialog } from "@/features/employees/components/InviteEmployeeDialog";
 import { useEmployeesCacheInvalidation } from "@/features/employees/hooks/useEmployeesCacheInvalidation";
 import {
   useVendorForm,
@@ -507,17 +507,17 @@ export function TeamDirectory() {
 }
 
 const EmployeeDrawer = lazy(async () =>
-  import("@/components/employees/EmployeeDrawer").then((module) => ({
+  import("@/features/employees/components/EmployeeDrawer").then((module) => ({
     default: module.EmployeeDrawer,
   })),
 );
 
 const RoleManagerDialog = lazy(async () => {
-  const module = await import("@/components/employees/RoleManagerDialog");
+  const module = await import("@/features/employees/components/RoleManagerDialog");
   return { default: module.RoleManagerDialog };
 });
 
 const PermissionManagerDialog = lazy(async () => {
-  const module = await import("@/components/employees/PermissionManagerDialog");
+  const module = await import("@/features/employees/components/PermissionManagerDialog");
   return { default: module.PermissionManagerDialog };
 });

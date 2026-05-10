@@ -12,7 +12,7 @@ import { useInventoryWaste } from "@/hooks/useInventory";
 import { formatDistanceToNow } from "date-fns";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-adapter";
 
 const wasteTypeColors = {
   spoilage: "bg-red-100 text-red-800",

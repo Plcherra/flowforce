@@ -5,7 +5,7 @@
 import type {
   ShiftTemplate,
   VendorPaletteItem,
-} from "@/components/scheduling/drag-drop/types";
+} from "@/features/scheduling/components/drag-drop/types";
 
 export const ROLE_TEMPLATES: ShiftTemplate[] = [
   {

@@ -37,30 +37,30 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 import { useCan } from "@/hooks/useCan";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ExpenseForm from "@/components/expenses/ExpenseForm";
-import PaymentsOverview from "@/components/payments/PaymentsOverview";
-import RoleGuard from "@/components/RoleGuard";
+import ExpenseForm from "@/features/inventory/components/expenses/ExpenseForm";
+import PaymentsOverview from "@/features/inventory/components/expenses/PaymentsOverview";
+import RoleGuard from "@/app-shell/guards/RoleGuard";
 import { logger } from "@/utils/logger";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Phase 4: Lazy load heavy financial components for better initial bundle size
 const AIChatAssistant = lazy(() =>
-  import("@/components/ai/AIChatAssistant").then((m) => ({
+  import("@/features/ai/components/AIChatAssistant").then((m) => ({
     default: m.default,
   })),
 );
 const AIInsightsPanel = lazy(() =>
-  import("@/components/ai/AIInsightsPanel").then((m) => ({
+  import("@/features/ai/components/AIInsightsPanel").then((m) => ({
     default: m.default,
   })),
 );
 const EmployeeFinancialOverview = lazy(() =>
-  import("@/components/financial/EmployeeFinancialOverview").then((m) => ({
+  import("@/features/inventory/components/expenses/EmployeeFinancialOverview").then((m) => ({
     default: m.EmployeeFinancialOverview,
   })),
 );
 const ManagerFinancialOverview = lazy(() =>
-  import("@/components/financial/ManagerFinancialOverview").then((m) => ({
+  import("@/features/inventory/components/expenses/ManagerFinancialOverview").then((m) => ({
     default: m.ManagerFinancialOverview,
   })),
 );

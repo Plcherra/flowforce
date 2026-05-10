@@ -1,6 +1,6 @@
 "use client";
 
-import UserManualPage from "@/screens/resources/docs/UserManual";
+import UserManualPage from "@/features/resources/pages/resources/docs/UserManual";
 
 export default function UserManual() {
   return <UserManualPage />;

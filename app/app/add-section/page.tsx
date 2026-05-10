@@ -1,6 +1,6 @@
 "use client";
 
-import AddSectionPage from "@/screens/AddSection";
+import AddSectionPage from "@/features/sections/pages/AddSection";
 
 export default function AddSection() {
   return <AddSectionPage />;

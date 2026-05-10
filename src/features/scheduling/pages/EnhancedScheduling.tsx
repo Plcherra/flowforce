@@ -1,4 +1,4 @@
-import { NextGenSchedulingSystem } from "@/components/scheduling/NextGenSchedulingSystem";
+import { NextGenSchedulingSystem } from "@/features/scheduling/components/NextGenSchedulingSystem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSearchParams } from "@/lib/router-adapter";
 import { SchedulingProvider } from "@/contexts/SchedulingContext";

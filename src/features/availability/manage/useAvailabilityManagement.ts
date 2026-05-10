@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 
-import { computeAutoLockThreshold } from "@/availability/lockEngine";
+import { computeAutoLockThreshold } from "@/features/availability/utils/lockEngine";
 import {
   cloneGrid,
   computeImpactScore,
   gridFromAvailabilityRows,
   rangesFromGrid,
   type StaffAvailabilityRow,
-} from "@/availability/availabilityUtils";
+} from "@/features/availability/utils/availabilityUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyEmployeeDecision } from "@/notifications/availability";
 import { queryKeys } from "@/lib/queryKeys";
@@ -18,7 +18,7 @@ import type {
   AvailabilityLockMode,
   OrgPrefs,
 } from "@/types/availability";
-import type { AvailabilityGrid } from "@/components/availability/AvailabilityRequestForm";
+import type { AvailabilityGrid } from "@/features/availability/components/AvailabilityRequestForm";
 import { logger } from "@/utils/logger";
 
 import type {

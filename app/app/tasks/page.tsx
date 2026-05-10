@@ -1,6 +1,6 @@
 "use client";
 
-import TasksPage from "@/screens/Tasks";
+import TasksPage from "@/features/tasks/pages/Tasks";
 
 export default function Tasks() {
   return <TasksPage />;

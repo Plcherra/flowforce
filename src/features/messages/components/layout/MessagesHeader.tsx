@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MessageScheduler } from "@/components/messages/MessageScheduler";
+import { MessageScheduler } from "@/features/messages/components/MessageScheduler";
 import type { MessageChannel } from "@/types/messages";
 
 interface MessagesHeaderProps {

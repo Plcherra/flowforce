@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router-adapter";
 
 const SCROLL_STORAGE_KEY = "sidebar-scroll-position";
 const DEBOUNCE_DELAY = 150;

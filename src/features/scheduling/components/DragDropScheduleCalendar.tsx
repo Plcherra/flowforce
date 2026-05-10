@@ -1,16 +1,26 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "lucide-react";
-import { AssignmentPanel } from "@/components/scheduling/drag-drop/AssignmentPanel";
-import { ScheduleToolbar } from "@/components/scheduling/drag-drop/ScheduleToolbar";
-import { WeekGrid } from "@/components/scheduling/drag-drop/WeekGrid";
-import { ShiftDetailsPanel } from "@/components/scheduling/ShiftDetailsPanel";
-import { ShiftWizardDialog } from "@/components/scheduling/ShiftWizardDialog";
-import { WeekTemplateDialog } from "@/components/scheduling/WeekTemplateDialog";
-import { ImportShiftsDialog } from "@/components/scheduling/ImportShiftsDialog";
+import { format } from "date-fns";
+import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
+import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
+import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
+import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetailsPanel";
+import { ShiftWizardDialog } from "@/features/scheduling/components/ShiftWizardDialog";
+import { WeekTemplateDialog } from "@/features/scheduling/components/WeekTemplateDialog";
+import { ImportShiftsDialog } from "@/features/scheduling/components/ImportShiftsDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useScheduleBoard } from "@/hooks/scheduling/useScheduleBoard";
 import type { PendingVendorEvent, AIRecommendation } from "./drag-drop/types";
 import {

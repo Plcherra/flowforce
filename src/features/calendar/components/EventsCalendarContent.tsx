@@ -23,7 +23,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useEvents } from "@/hooks/useEvents";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SchedulingCalendar } from "@/components/scheduling/SchedulingCalendar";
+import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingCalendar";
 import { CreateEventDialog } from "@/features/calendar/components/CreateEventDialog";
 import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
 import { NetworkStatusBanner } from "@/features/calendar/components/NetworkStatusBanner";

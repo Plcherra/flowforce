@@ -1,6 +1,6 @@
 "use client";
 
-import TemplatesPage from "@/screens/Templates";
+import TemplatesPage from "@/features/templates/pages/Templates";
 
 export default function Templates() {
   return <TemplatesPage />;
