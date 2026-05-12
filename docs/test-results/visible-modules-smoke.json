@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-05-10T20:52:09.290Z",
+  "baseUrl": "http://localhost:3001",
+  "timeoutMs": 15000,
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0
+  },
+  "results": [
+    {
+      "name": "Marketing home",
+      "path": "/",
+      "status": 200,
+      "durationMs": 100,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Company registration",
+      "path": "/company-registration",
+      "status": 200,
+      "durationMs": 16,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Dashboard",
+      "path": "/app/dashboard",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 13,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Employees",
+      "path": "/app/employees",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 10,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Tasks",
+      "path": "/app/tasks",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 12,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Messages",
+      "path": "/app/messages",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 11,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Company updates",
+      "path": "/app/company-updates",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 13,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Calendar",
+      "path": "/app/calendar",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 9,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Scheduling",
+      "path": "/app/enhanced-scheduling",
+      "authRequired": true,
+      "note": "Canonical scheduling route. /app/scheduling is not a page.",
+      "status": 200,
+      "durationMs": 17,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Inventory actions",
+      "path": "/app/inventory-actions",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 11,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    },
+    {
+      "name": "Analytics",
+      "path": "/app/analytics",
+      "authRequired": true,
+      "status": 200,
+      "durationMs": 10,
+      "ok": true,
+      "redirectedToAuth": false,
+      "hasContent": true,
+      "hasError": false,
+      "error": null
+    }
+  ]
+}

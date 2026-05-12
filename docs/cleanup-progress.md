@@ -109,15 +109,72 @@
 
 ## Phase 3: Component & Code Quality
 
-- [ ] Refactor `CompanyUpdates.tsx`.
-- [ ] Add shared missing-backend handling.
-- [ ] Create standard feature state components.
+- [x] Refactor `CompanyUpdates.tsx`.
+- [x] Add shared missing-backend handling.
+- [x] Create standard feature state components.
 - [x] Replace React Router imports in touched files.
+
+**Completed Phase 3 details:**
+
+- Split `src/features/company-updates/pages/CompanyUpdates.tsx` into feature-owned section components:
+  - `src/features/company-updates/components/CompanyUpdatesFeedSection.tsx`
+  - `src/features/company-updates/components/CompanyUpdatesGridSection.tsx`
+  - `src/features/company-updates/components/CompanyUpdatesListSection.tsx`
+  - `src/features/company-updates/components/CompanyUpdatesPagination.tsx`
+  - `src/features/company-updates/components/CompanyUpdatesSetupState.tsx`
+  - `src/features/company-updates/components/CompanyUpdatesSkeletons.tsx`
+- Moved Supabase missing-resource detection into `src/shared/utils/supabaseErrors.ts`.
+- Added shared feature state components:
+  - `src/shared/components/FeatureLoadingState.tsx`
+  - `src/shared/components/FeatureErrorState.tsx`
+  - `src/shared/components/FeatureSetupRequiredState.tsx`
+  - `src/shared/components/FeatureEmptyState.tsx`
+- Wired `FeatureSetupRequiredState` into the Company Updates missing-backend state.
+- Applied the shared missing-backend pattern to Calendar:
+  - `src/features/calendar/components/NetworkStatusBanner.tsx`
+  - `src/features/calendar/pages/events/EventsHub.tsx`
+- Applied the shared missing-backend pattern to Scheduling:
+  - `src/hooks/scheduling/useSchedulingConsolidated.ts`
+  - `src/features/scheduling/components/NextGenSchedulingSystem.tsx`
+  - `src/features/scheduling/components/SchedulingCalendar.tsx`
+  - `src/features/scheduling/pages/ScheduleLobby.tsx`
+- Kept `CompanyUpdates.tsx` focused on hooks, derived state, event handlers, and high-level layout.
+
+**Current Phase 3 verification:**
+
+- Focused ESLint for the touched Phase 3 files passes.
+- `npm run build` passes after Company Updates changes.
+- `npm run build` passes after Calendar changes.
+- `npm run build` passes after Scheduling changes.
 
 ## Phase 4: Final Polish
 
 - [x] Continue migrating `src/screens/` route by route.
 - [ ] Clean root-level shared folders as features are touched.
 - [x] Remove unused dependencies after imports are gone.
-- [ ] Add smoke tests for visible modules.
-- [ ] Add a Supabase contract check.
+- [x] Add smoke tests for visible modules.
+- [x] Add a Supabase contract check.
+
+**Completed Phase 4 details:**
+
+- Added `scripts/check-supabase-contract.mjs`.
+- Added `npm run check:supabase`.
+- The contract check verifies required Supabase relations for visible modules and read-style RPCs.
+- Mutating RPCs are listed as manual checks and are not executed by the script.
+- Removed unused Capacitor packages from `package.json` and `package-lock.json`.
+- Removed remaining project `.DS_Store` files outside `.git/` and `node_modules/`.
+- Confirmed legacy structural folders are absent: `src/screens/`, `src/components/company-updates/`, `src/components/updates/`, `src/features/recognitions/`, `src/availability/`, and `src/modules/`.
+- Added `scripts/smoke-visible-modules.mjs`.
+- Added `npm run test:smoke`.
+- Smoke test output is saved to `docs/test-results/visible-modules-smoke.json`.
+
+**Current Phase 4 verification:**
+
+- `npm run check:supabase` passes with 0 missing relations and 0 missing read RPCs.
+- `npm run test:smoke` passes against a local production server on port 3001.
+- Focused ESLint for the Phase 4 scripts passes.
+- `npm run build` passes after the Phase 4 script/dependency changes.
+
+**Next Phase 4 action:**
+
+- Continue cleaning root-level shared folders as features are touched.

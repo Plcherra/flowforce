@@ -21,7 +21,13 @@ import { useScheduling } from "@/contexts/SchedulingContext";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
 import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
+import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
+import {
+  getSupabaseSetupMessage,
+  isMissingBackendResourceError,
+} from "@/shared/utils/supabaseErrors";
+import { CalendarDays } from "lucide-react";
 
 const INITIAL_FILTERS: SchedulingFilterState = {
   positions: [],
@@ -29,6 +35,12 @@ const INITIAL_FILTERS: SchedulingFilterState = {
   status: "all",
   published: "all",
 };
+const SCHEDULING_CALENDAR_RESOURCE_NAMES = [
+  "schedules",
+  "schedule_assignments",
+  "calendar_events_full",
+  "calendar_events",
+];
 
 type CalendarMode = "scheduling" | "events";
 
@@ -141,6 +153,10 @@ export function SchedulingCalendar({
   );
   const combinedLoading = loading || eventsLoading;
   const combinedError = schedulingError || eventsError;
+  const setupMissing = isMissingBackendResourceError(
+    combinedError,
+    SCHEDULING_CALENDAR_RESOURCE_NAMES,
+  );
 
   useEffect(() => {
     if (
@@ -191,78 +207,107 @@ export function SchedulingCalendar({
 
   return (
     <div className="space-y-6">
-      {combinedError && (
-        <Alert variant="destructive">
-          <AlertTitle>Calendar data may be stale</AlertTitle>
-          <AlertDescription>{combinedError}</AlertDescription>
-        </Alert>
+      {setupMissing ? (
+        <FeatureSetupRequiredState
+          title="Scheduling calendar is not fully set up yet"
+          description={getSupabaseSetupMessage(
+            combinedError,
+            "Scheduling calendar",
+          )}
+          icon={<CalendarDays className="h-5 w-5" />}
+          setupDescription={
+            <>
+              Missing scheduling or calendar tables. Restore the migrations for{" "}
+              <code>schedules</code> and <code>calendar_events_full</code>, then
+              refresh this page.
+            </>
+          }
+        />
+      ) : combinedError ? (
+        <FeatureErrorState
+          title="Calendar data may be stale"
+          description={combinedError}
+        />
+      ) : null}
+
+      {setupMissing ? null : (
+        <>
+          <ScheduleHeader
+            mode={mode}
+            onPrevDate={() => handleDateChange("prev")}
+            onNextDate={() => handleDateChange("next")}
+            onToggleFilters={
+              isSchedulingMode
+                ? () => setShowFilters((previous) => !previous)
+                : undefined
+            }
+            selectedDate={selectedDate}
+            currentView={currentView}
+            isMobile={isMobile}
+            dateRangeText={selectedDate.toDateString()}
+            showFilters={isSchedulingMode ? showFilters : false}
+            hideToolbar={effectiveHideShiftActions || !isSchedulingMode}
+          />
+
+          <ViewSelector
+            currentView={currentView}
+            onViewChange={(view: ViewType) => setCurrentView(view)}
+            isMobile={isMobile}
+            mode={mode}
+          />
+        </>
       )}
 
-      <ScheduleHeader
-        mode={mode}
-        onPrevDate={() => handleDateChange("prev")}
-        onNextDate={() => handleDateChange("next")}
-        onToggleFilters={
-          isSchedulingMode
-            ? () => setShowFilters((previous) => !previous)
-            : undefined
-        }
-        selectedDate={selectedDate}
-        currentView={currentView}
-        isMobile={isMobile}
-        dateRangeText={selectedDate.toDateString()}
-        showFilters={isSchedulingMode ? showFilters : false}
-        hideToolbar={effectiveHideShiftActions || !isSchedulingMode}
-      />
-
-      <ViewSelector
-        currentView={currentView}
-        onViewChange={(view: ViewType) => setCurrentView(view)}
-        isMobile={isMobile}
-        mode={mode}
-      />
-
-      {isSchedulingMode && showFilters && (
+      {!setupMissing && isSchedulingMode && showFilters && (
         <SchedulingFilters filters={filters} onFiltersChange={setFilters} />
       )}
 
-      <div className={isMobile ? "" : "flex gap-6"}>
-        <div className="flex-1">
-          <CalendarGrid
-            currentView={currentView}
-            schedules={filteredShifts}
-            selectedDate={selectedDate}
-            onSelectShift={handleSelectShift}
-            onSelectEvent={handleSelectEvent}
-            filters={filters}
-            loading={combinedLoading}
-            isMobile={isMobile}
-            overlayEvents={overlayEvents}
-            hideShiftActions={effectiveHideShiftActions}
-            selectedEventId={selectedEventId}
-          />
-        </div>
+      {!setupMissing && (
+        <div className={isMobile ? "" : "flex gap-6"}>
+          <div className="flex-1">
+            <CalendarGrid
+              currentView={currentView}
+              schedules={filteredShifts}
+              selectedDate={selectedDate}
+              onSelectShift={handleSelectShift}
+              onSelectEvent={handleSelectEvent}
+              filters={filters}
+              loading={combinedLoading}
+              isMobile={isMobile}
+              overlayEvents={overlayEvents}
+              hideShiftActions={effectiveHideShiftActions}
+              selectedEventId={selectedEventId}
+            />
+          </div>
 
-        {selectedShift && selectedSchedule && !isMobile && !externalDetails && (
-          <div className="w-96">
+          {selectedShift &&
+            selectedSchedule &&
+            !isMobile &&
+            !externalDetails && (
+              <div className="w-96">
+                <ShiftDetailsPanel
+                  shiftId={selectedShift}
+                  onClose={() => handleSelectShift(null)}
+                />
+              </div>
+            )}
+        </div>
+      )}
+
+      {!setupMissing &&
+        selectedShift &&
+        selectedSchedule &&
+        isMobile &&
+        !externalDetails && (
+          <div className="fixed inset-0 bg-background z-50 overflow-auto">
             <ShiftDetailsPanel
               shiftId={selectedShift}
               onClose={() => handleSelectShift(null)}
             />
           </div>
         )}
-      </div>
 
-      {selectedShift && selectedSchedule && isMobile && !externalDetails && (
-        <div className="fixed inset-0 bg-background z-50 overflow-auto">
-          <ShiftDetailsPanel
-            shiftId={selectedShift}
-            onClose={() => handleSelectShift(null)}
-          />
-        </div>
-      )}
-
-      {!externalDetails && (
+      {!setupMissing && !externalDetails && (
         <EventDetailsDrawer
           event={selectedEvent}
           open={Boolean(selectedEventId)}

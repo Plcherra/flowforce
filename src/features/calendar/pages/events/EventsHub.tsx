@@ -19,6 +19,8 @@ import { CreateEventDialog } from "@/features/calendar/components/CreateEventDia
 import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
 import { CalendarView } from "@/features/calendar/components/CalendarView";
 import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
+import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
+import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
 import {
   useCalendarEvents,
   mapAppEventToCalendarEvent,
@@ -26,6 +28,10 @@ import {
 import { useEvents } from "@/hooks/useEvents";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
+import {
+  getSupabaseSetupMessage,
+  isMissingTableError,
+} from "@/shared/utils/supabaseErrors";
 
 type ViewMode = "month" | "week" | "day";
 
@@ -74,8 +80,18 @@ export default function EventsHubPage() {
 
   const [offline, setOffline] = useState(false);
   const offlineToastShown = useRef(false);
+  const calendarSetupMissing = isMissingTableError(error, [
+    "calendar_events_full",
+    "calendar_events",
+  ]);
 
   useEffect(() => {
+    if (calendarSetupMissing) {
+      setOffline(false);
+      offlineToastShown.current = false;
+      return;
+    }
+
     if (error) {
       logger.error("[Calendar] load error", { error, tags: ["error"] });
       setOffline(true);
@@ -93,11 +109,19 @@ export default function EventsHubPage() {
       }
       offlineToastShown.current = false;
     }
-  }, [error, offline, toast]);
+  }, [calendarSetupMissing, error, offline, toast]);
 
-  const mergedEvents = offline ? fallbackEvents : events;
-  const mergedLoading = offline ? cachedLoading : loading;
-  const displayError = offline ? null : error;
+  const mergedEvents = calendarSetupMissing
+    ? []
+    : offline
+      ? fallbackEvents
+      : events;
+  const mergedLoading = calendarSetupMissing
+    ? false
+    : offline
+      ? cachedLoading
+      : loading;
+  const displayError = offline || calendarSetupMissing ? null : error;
 
   const selectedEvent = useMemo(
     () => mergedEvents.find((event) => event.id === selectedEventId) ?? null,
@@ -241,17 +265,37 @@ export default function EventsHubPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <CalendarView
-                    events={mergedEvents}
-                    date={currentDate}
-                    view={view}
-                    loading={Boolean(mergedLoading)}
-                    error={displayError}
-                    selectedEventId={selectedEventId}
-                    onDateChange={setCurrentDate}
-                    onViewChange={(next) => setView(next)}
-                    onSelectEvent={(event) => handleSelectEvent(event.id)}
-                  />
+                  {calendarSetupMissing ? (
+                    <FeatureSetupRequiredState
+                      title="Calendar module is not fully set up yet"
+                      description={getSupabaseSetupMessage(error, "Calendar")}
+                      icon={<CalendarDays className="h-5 w-5" />}
+                      setupDescription={
+                        <>
+                          Missing table: <code>calendar_events_full</code>.
+                          Restore the calendar migrations, then refresh this
+                          page.
+                        </>
+                      }
+                    />
+                  ) : displayError ? (
+                    <FeatureErrorState
+                      title="Unable to load calendar"
+                      description={displayError}
+                    />
+                  ) : (
+                    <CalendarView
+                      events={mergedEvents}
+                      date={currentDate}
+                      view={view}
+                      loading={Boolean(mergedLoading)}
+                      error={null}
+                      selectedEventId={selectedEventId}
+                      onDateChange={setCurrentDate}
+                      onViewChange={(next) => setView(next)}
+                      onSelectEvent={(event) => handleSelectEvent(event.id)}
+                    />
+                  )}
                   {offline && (
                     <div className="mt-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
                       Showing cached events while we reconnect.

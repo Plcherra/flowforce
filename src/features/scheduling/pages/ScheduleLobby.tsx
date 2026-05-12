@@ -15,10 +15,29 @@ import {
   SchedulingProvider,
   useScheduling,
 } from "@/contexts/SchedulingContext";
+import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
+import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
+import {
+  getSupabaseSetupMessage,
+  isMissingBackendResourceError,
+} from "@/shared/utils/supabaseErrors";
+
+const SCHEDULING_RESOURCE_NAMES = [
+  "schedules",
+  "schedule_assignments",
+  "time_off_requests",
+  "user_unavailability",
+  "vendor_event",
+  "vendor_visits",
+];
 
 function ScheduleLobbyContent() {
-  const { shifts, loading } = useScheduling();
+  const { shifts, loading, error } = useScheduling();
   const [query, setQuery] = useState("");
+  const setupMissing = isMissingBackendResourceError(
+    error,
+    SCHEDULING_RESOURCE_NAMES,
+  );
 
   const groups = useMemo(() => {
     const map = new Map<
@@ -59,6 +78,23 @@ function ScheduleLobbyContent() {
 
       {loading ? (
         <div className="text-sm text-muted-foreground">Loading...</div>
+      ) : setupMissing ? (
+        <FeatureSetupRequiredState
+          title="Scheduling lobby is not fully set up yet"
+          description={getSupabaseSetupMessage(error, "Scheduling lobby")}
+          icon={<CalendarDays className="h-5 w-5" />}
+          setupDescription={
+            <>
+              Missing scheduling database resources. Restore the scheduling
+              migrations, then refresh this page.
+            </>
+          }
+        />
+      ) : error ? (
+        <FeatureErrorState
+          title="Unable to load scheduling lobby"
+          description={error}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (

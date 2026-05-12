@@ -18,8 +18,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile } from "@/hooks/useProfile";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { useSearchParams } from "@/lib/router-adapter";
 import { appEnv } from "@/lib/env";
+import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
+import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
+import {
+  getSupabaseSetupMessage,
+  isMissingBackendResourceError,
+} from "@/shared/utils/supabaseErrors";
 import { SCHEDULING_TABS } from "@/features/scheduling/types/tabs";
 import { useSchedulingTabs } from "@/features/scheduling/hooks/useSchedulingTabs";
 import { useHoursSummary } from "@/features/scheduling/hooks/useHoursSummary";
@@ -76,6 +81,15 @@ const CopilotSchedulerSidebar = lazy(() =>
     default: m.CopilotSchedulerSidebar,
   })),
 );
+
+const SCHEDULING_RESOURCE_NAMES = [
+  "schedules",
+  "schedule_assignments",
+  "time_off_requests",
+  "user_unavailability",
+  "vendor_event",
+  "vendor_visits",
+];
 
 import {
   Dialog,
@@ -154,6 +168,10 @@ export function NextGenSchedulingSystem({
 
   const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
   const showDebugTools = appEnv.DEV || isManager;
+  const schedulingSetupMissing = isMissingBackendResourceError(
+    schedulingError,
+    SCHEDULING_RESOURCE_NAMES,
+  );
 
   const showStatusAlert = Boolean(schedulingError) || isFallbackData;
   const statusTitle = isFallbackData
@@ -242,7 +260,50 @@ export function NextGenSchedulingSystem({
       </div>
 
       <div className="container mx-auto p-4">
-        {showStatusAlert && (
+        {schedulingSetupMissing ? (
+          <FeatureSetupRequiredState
+            title="Scheduling module is not fully set up yet"
+            description={getSupabaseSetupMessage(
+              schedulingError,
+              "Scheduling",
+            )}
+            icon={<Calendar className="h-5 w-5" />}
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRetry}
+                disabled={retryDisabled}
+              >
+                Retry
+              </Button>
+            }
+            setupDescription={
+              <>
+                Missing scheduling database resources. Restore the scheduling
+                migrations for <code>schedules</code>,{" "}
+                <code>schedule_assignments</code>, time off, availability, and
+                vendor visits, then refresh this page.
+              </>
+            }
+          />
+        ) : schedulingError ? (
+          <FeatureErrorState
+            title="Scheduling data unavailable"
+            description={statusDescription}
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRetry}
+                disabled={retryDisabled}
+              >
+                Retry
+              </Button>
+            }
+            className="mb-6"
+          />
+        ) : showStatusAlert ? (
           <Alert
             variant={isFallbackData ? "default" : "destructive"}
             className="mb-6"
@@ -261,7 +322,7 @@ export function NextGenSchedulingSystem({
               </Button>
             </div>
           </Alert>
-        )}
+        ) : null}
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}

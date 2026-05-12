@@ -1,137 +1,47 @@
 import React, {
-  useMemo,
-  useState,
-  useCallback,
-  useEffect,
   lazy,
   Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useCan } from "@/hooks/useCan";
-import { useProfile } from "@/hooks/useProfile";
-import { useToast } from "@/hooks/use-toast";
-import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
-import { useRecognitions } from "@/hooks/useRecognitions";
-import type { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
-import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
-import { RecognitionHighlights } from "@/features/company-updates/components/RecognitionHighlights";
-import { UpdateFeedCard } from "@/features/company-updates/components/UpdateFeedCard";
-import { UpdateGridView } from "@/features/company-updates/components/UpdateGridView";
-import { UpdateListView } from "@/features/company-updates/components/UpdateListView";
-import { UpdatesEmptyState } from "@/features/company-updates/components/UpdatesEmptyState";
-import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { AlertTriangle, Megaphone } from "lucide-react";
-import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
-import { getErrorMessage } from "@/shared/utils";
-import { useCompanyUpdateFilters } from "@/features/company-updates/hooks/useCompanyUpdateFilters";
-import { useCompanyUpdateComments } from "@/features/company-updates/hooks/useCompanyUpdateComments";
-import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
-import {
-  asArray,
-  safeArrayLength,
-  safeArrayMap,
-} from "@/utils/reactQueryTypes";
-import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
-import { PageLoader } from "@/components/common/PageLoader";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
+import { PageLoader } from "@/components/common/PageLoader";
+import { CompanyUpdatesFeedSection } from "@/features/company-updates/components/CompanyUpdatesFeedSection";
+import { CompanyUpdatesGridSection } from "@/features/company-updates/components/CompanyUpdatesGridSection";
+import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
+import { CompanyUpdatesListSection } from "@/features/company-updates/components/CompanyUpdatesListSection";
+import {
+  CompanyUpdatesPagination,
+  PAGE_SIZE_OPTIONS,
+} from "@/features/company-updates/components/CompanyUpdatesPagination";
+import { CompanyUpdatesSetupState } from "@/features/company-updates/components/CompanyUpdatesSetupState";
+import { WizardFallback } from "@/features/company-updates/components/CompanyUpdatesSkeletons";
+import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
+import { useCompanyUpdateComments } from "@/features/company-updates/hooks/useCompanyUpdateComments";
+import { useCompanyUpdateFilters } from "@/features/company-updates/hooks/useCompanyUpdateFilters";
+import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
+import { useCan } from "@/hooks/useCan";
+import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
+import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useProfile } from "@/hooks/useProfile";
+import { useRecognitions } from "@/hooks/useRecognitions";
+import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/shared/utils";
+import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
+import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
+import type { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
+import { asArray, safeArrayLength, safeArrayMap } from "@/utils/reactQueryTypes";
+import { AlertTriangle, Megaphone } from "lucide-react";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50] as const;
 const CreateUpdateWizard = lazy(
   () => import("@/features/company-updates/wizard/CreateUpdateWizard"),
 );
 
-const SCHEMA_CACHE_ERROR_CODES = new Set(["PGRST200", "PGRST202", "PGRST205"]);
-
-const getUnknownErrorMessage = (error: unknown) => {
-  if (!error) return "";
-  if (typeof error === "string") return error;
-  if (error instanceof Error) return error.message;
-  if (typeof error === "object" && "message" in error) {
-    const message = (error as { message?: unknown }).message;
-    return typeof message === "string" ? message : "";
-  }
-  return "";
-};
-
-const isMissingBackendResourceError = (
-  error: unknown,
-  resourceNames: string[],
-) => {
-  const message = getUnknownErrorMessage(error).toLowerCase();
-  const code =
-    typeof error === "object" && error && "code" in error
-      ? (error as { code?: unknown }).code
-      : null;
-  const hasSchemaCode =
-    typeof code === "string" && SCHEMA_CACHE_ERROR_CODES.has(code);
-
-  return (
-    (hasSchemaCode ||
-      message.includes("schema cache") ||
-      message.includes("could not find the table")) &&
-    resourceNames.some((resource) => message.includes(resource.toLowerCase()))
-  );
-};
-
-const ModuleSetupState = ({
-  canCreate,
-  onCreate,
-  wizardOpen,
-}: {
-  canCreate: boolean;
-  onCreate: () => void;
-  wizardOpen: boolean;
-}) => (
-  <div className="px-4 py-6">
-    <EmptyStateCard
-      title="Company Updates module is not fully set up yet"
-      description="The app is running, but the database tables for company updates and recognitions have not been created in this Supabase project yet."
-      icon={<Megaphone className="h-5 w-5" />}
-      action={
-        canCreate ? (
-          <Button
-            onClick={onCreate}
-            aria-expanded={wizardOpen}
-            aria-controls="company-updates-wizard"
-          >
-            Open create wizard
-          </Button>
-        ) : undefined
-      }
-    />
-    <Alert className="mt-4 border-amber-200 bg-amber-50 text-amber-950">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Database setup needed</AlertTitle>
-      <AlertDescription>
-        Missing tables: <code>company_updates</code> and/or{" "}
-        <code>recognitions</code>. Once those migrations are restored, this page
-        will automatically show the update feed.
-      </AlertDescription>
-    </Alert>
-  </div>
-);
-
 export default function CompanyUpdates() {
-  // Hooks
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
@@ -167,25 +77,17 @@ export default function CompanyUpdates() {
     status: "published",
     searchTerm,
   });
-
   const {
     recognitions: recognitionFeed,
     loading: recognitionLoading,
     error: recognitionError,
   } = useRecognitions();
 
-  // Ensure updates is an array
   const safeUpdates = asArray(updates);
-
-  // Compute updateIds with safe fallback
-  const updateIds = useMemo(() => {
-    if (safeArrayLength(safeUpdates) === 0) {
-      return [];
-    }
-    return safeArrayMap(safeUpdates, (update) => update.id).filter(Boolean);
-  }, [safeUpdates]);
-
-  // All hooks must be called unconditionally before any early returns
+  const updateIds = useMemo(
+    () => safeArrayMap(safeUpdates, (update) => update.id).filter(Boolean),
+    [safeUpdates],
+  );
   const { commentsByUpdate } = useCompanyUpdateComments(updateIds);
   const {
     createUpdate,
@@ -196,12 +98,10 @@ export default function CompanyUpdates() {
     addComment,
   } = useCompanyUpdateMutations();
 
-  // Derived values and memos
   const recognitionHighlights = useMemo(
     () => (Array.isArray(recognitionFeed) ? recognitionFeed.slice(0, 3) : []),
     [recognitionFeed],
   );
-
   const updatesSchemaMissing = isMissingBackendResourceError(error, [
     "company_updates",
     "company_update",
@@ -222,7 +122,6 @@ export default function CompanyUpdates() {
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = !moduleSchemaMissing && totalPages > 1;
-
   const canCreateUpdate = useMemo(() => {
     if (can("systemSettings") || can("manageCompany")) {
       return true;
@@ -232,7 +131,6 @@ export default function CompanyUpdates() {
     return ["owner", "company_admin", "admin", "manager"].includes(role);
   }, [can, profile?.role]);
 
-  // Effects
   useEffect(() => {
     setPage(1);
   }, [pageSize, searchTerm, viewMode, setPage]);
@@ -243,7 +141,10 @@ export default function CompanyUpdates() {
     }
   }, [page, totalPages, setPage]);
 
-  // Event handlers
+  const openCreateWizard = useCallback(() => {
+    setCreateWizardOpen(true);
+  }, []);
+
   const handlePageChange = useCallback(
     (nextPage: number) => {
       setPage(nextPage);
@@ -252,13 +153,6 @@ export default function CompanyUpdates() {
       }
     },
     [setPage],
-  );
-
-  const handlePageSizeChange = useCallback(
-    (nextSize: number) => {
-      setPageSize(nextSize);
-    },
-    [setPageSize],
   );
 
   const handleUpdateComplete = useCallback(
@@ -283,20 +177,6 @@ export default function CompanyUpdates() {
       toggleLike({ updateId, currentlyLiked });
     },
     [toggleLike],
-  );
-
-  const handleMarkAsViewed = useCallback(
-    (updateId: string) => {
-      markAsViewed({ updateId });
-    },
-    [markAsViewed],
-  );
-
-  const handleCommentChange = useCallback(
-    (id: string, value: string) => {
-      handleCommentInputChange(id, value);
-    },
-    [handleCommentInputChange],
   );
 
   const handleCommentSubmit = useCallback(
@@ -362,7 +242,6 @@ export default function CompanyUpdates() {
     [commentsByUpdate],
   );
 
-  // Conditional UI states after every hook has been called
   if (!bootstrap.userReady || bootstrap.loading) {
     return <PageLoader text="Loading company updates..." />;
   }
@@ -396,7 +275,7 @@ export default function CompanyUpdates() {
       <CompanyUpdatesHeader
         isMobile={isMobile}
         canCreateUpdate={canCreateUpdate}
-        onCreate={() => setCreateWizardOpen(true)}
+        onCreate={openCreateWizard}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         viewMode={viewMode}
@@ -404,13 +283,13 @@ export default function CompanyUpdates() {
         wizardOpen={createWizardOpen}
       />
 
-      {moduleSchemaMissing ? (
-        <ModuleSetupState
+      {moduleSchemaMissing && (
+        <CompanyUpdatesSetupState
           canCreate={canCreateUpdate}
-          onCreate={() => setCreateWizardOpen(true)}
+          onCreate={openCreateWizard}
           wizardOpen={createWizardOpen}
         />
-      ) : null}
+      )}
 
       {errorMessage && (
         <div className="px-4 pt-4">
@@ -423,101 +302,65 @@ export default function CompanyUpdates() {
       )}
 
       {!moduleSchemaMissing && viewMode === "feed" && (
-        <div className="px-4 py-6 space-y-4">
-          <RecognitionHighlights
-            loading={recognitionLoading}
-            highlights={recognitionHighlights}
-            error={recognitionErrorMessage}
-          />
-
-          {isInitialLoading ? (
-            <FeedSkeleton />
-          ) : (
-            <>
-              {safeArrayMap(safeUpdates, (update) => (
-                <UpdateFeedCard
-                  key={update.id}
-                  update={update}
-                  comments={getUpdateComments(update.id)}
-                  showComments={Boolean(visibleComments[update.id])}
-                  commentValue={commentInputs[update.id] ?? ""}
-                  onCommentChange={handleCommentChange}
-                  onSubmitComment={handleCommentSubmit}
-                  onToggleComments={handleToggleComments}
-                  onLike={(id) => handleLike(id, update.viewerHasLiked)}
-                  onArchive={handleArchive}
-                  onDelete={handleDelete}
-                  canManage={canCreateUpdate}
-                  onView={handleMarkAsViewed}
-                  viewerHasViewed={update.viewerHasViewed}
-                  commentError={commentErrors[update.id]}
-                />
-              ))}
-
-              {safeArrayLength(safeUpdates) === 0 && (
-                <UpdatesEmptyState
-                  hasSearch={hasSearch}
-                  searchTerm={searchTerm}
-                  canCreate={canCreateUpdate}
-                  onCreate={() => setCreateWizardOpen(true)}
-                  wizardOpen={createWizardOpen}
-                />
-              )}
-            </>
-          )}
-        </div>
+        <CompanyUpdatesFeedSection
+          updates={safeUpdates}
+          loading={isInitialLoading}
+          recognitionLoading={recognitionLoading}
+          recognitionHighlights={recognitionHighlights}
+          recognitionError={recognitionErrorMessage}
+          visibleComments={visibleComments}
+          commentInputs={commentInputs}
+          commentErrors={commentErrors}
+          canCreateUpdate={canCreateUpdate}
+          hasSearch={hasSearch}
+          searchTerm={searchTerm}
+          wizardOpen={createWizardOpen}
+          getUpdateComments={getUpdateComments}
+          onCreate={openCreateWizard}
+          onCommentChange={handleCommentInputChange}
+          onSubmitComment={handleCommentSubmit}
+          onToggleComments={handleToggleComments}
+          onLike={handleLike}
+          onArchive={handleArchive}
+          onDelete={handleDelete}
+          onView={markAsViewed}
+        />
       )}
 
       {!moduleSchemaMissing && viewMode === "grid" && (
-        <>
-          {isInitialLoading ? (
-            <GridSkeleton />
-          ) : safeArrayLength(safeUpdates) > 0 ? (
-            <UpdateGridView updates={safeUpdates} />
-          ) : (
-            <div className="px-4 py-6">
-              <UpdatesEmptyState
-                hasSearch={hasSearch}
-                searchTerm={searchTerm}
-                canCreate={canCreateUpdate}
-                onCreate={() => setCreateWizardOpen(true)}
-                wizardOpen={createWizardOpen}
-              />
-            </div>
-          )}
-        </>
+        <CompanyUpdatesGridSection
+          updates={safeUpdates}
+          loading={isInitialLoading}
+          hasSearch={hasSearch}
+          searchTerm={searchTerm}
+          canCreateUpdate={canCreateUpdate}
+          wizardOpen={createWizardOpen}
+          onCreate={openCreateWizard}
+        />
       )}
 
       {!moduleSchemaMissing && viewMode === "list" && (
-        <>
-          {isInitialLoading ? (
-            <ListSkeleton />
-          ) : safeArrayLength(safeUpdates) > 0 ? (
-            <UpdateListView updates={safeUpdates} />
-          ) : (
-            <div className="px-4 py-6">
-              <UpdatesEmptyState
-                hasSearch={hasSearch}
-                searchTerm={searchTerm}
-                canCreate={canCreateUpdate}
-                onCreate={() => setCreateWizardOpen(true)}
-                wizardOpen={createWizardOpen}
-              />
-            </div>
-          )}
-        </>
+        <CompanyUpdatesListSection
+          updates={safeUpdates}
+          loading={isInitialLoading}
+          hasSearch={hasSearch}
+          searchTerm={searchTerm}
+          canCreateUpdate={canCreateUpdate}
+          wizardOpen={createWizardOpen}
+          onCreate={openCreateWizard}
+        />
       )}
 
       {showPagination && !isInitialLoading && (
         <div className="px-4 pb-6">
-          <UpdatesPagination
+          <CompanyUpdatesPagination
             page={page}
             totalPages={totalPages}
             total={pagination.total ?? 0}
             pageSize={pageSize}
             pageSizeOptions={PAGE_SIZE_OPTIONS}
             onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
+            onPageSizeChange={setPageSize}
           />
         </div>
       )}
@@ -533,186 +376,4 @@ export default function CompanyUpdates() {
       </div>
     </div>
   );
-}
-
-function FeedSkeleton() {
-  return (
-    <div className="space-y-4 animate-pulse">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="rounded-lg border bg-card p-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-3 w-1/4" />
-            </div>
-          </div>
-          <Skeleton className="h-5 w-2/3" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function GridSkeleton() {
-  return (
-    <div className="px-4 py-6 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 animate-pulse">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="rounded-lg border bg-card p-4 space-y-3">
-          <Skeleton className="h-4 w-1/4" />
-          <Skeleton className="h-5 w-4/5" />
-          <Skeleton className="h-4 w-full" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ListSkeleton() {
-  return (
-    <div className="px-4 py-6 animate-pulse">
-      <div className="overflow-hidden rounded-lg border divide-y divide-border">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-5 items-center gap-4 px-6 py-4"
-          >
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WizardFallback() {
-  return (
-    <div className="flex items-center justify-center py-6">
-      <div className="space-y-3 rounded-lg border bg-card p-6 shadow-sm">
-        <Skeleton className="h-5 w-40" />
-        <Skeleton className="h-4 w-64" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-24" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type UpdatesPaginationProps = {
-  page: number;
-  totalPages: number;
-  total: number;
-  pageSize: number;
-  pageSizeOptions: readonly number[];
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
-};
-
-function UpdatesPagination({
-  page,
-  totalPages,
-  total,
-  pageSize,
-  pageSizeOptions,
-  onPageChange,
-  onPageSizeChange,
-}: UpdatesPaginationProps) {
-  const pageNumbers = getPaginationSequence(page, totalPages);
-  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = total === 0 ? 0 : Math.min(page * pageSize, total);
-
-  return (
-    <div className="rounded-lg border bg-card px-4 py-4 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {from === 0 ? 0 : from}-{to} of {total} updates
-        </p>
-
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
-          <div className="flex items-center gap-2 text-sm">
-            <span>Per page</span>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => onPageSizeChange(Number(value))}
-            >
-              <SelectTrigger className="h-8 w-[90px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {pageSizeOptions.map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Pagination className="ml-auto w-auto">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => onPageChange(Math.max(1, page - 1))}
-                  aria-disabled={page === 1}
-                  className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                />
-              </PaginationItem>
-              {pageNumbers.map((value, index) =>
-                value === "ellipsis" ? (
-                  <PaginationItem key={`ellipsis-${index}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={value}>
-                    <PaginationLink
-                      isActive={value === page}
-                      onClick={() => onPageChange(value)}
-                    >
-                      {value}
-                    </PaginationLink>
-                  </PaginationItem>
-                ),
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                  aria-disabled={page === totalPages}
-                  className={
-                    page === totalPages ? "pointer-events-none opacity-50" : ""
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function getPaginationSequence(
-  current: number,
-  total: number,
-): Array<number | "ellipsis"> {
-  if (total <= 5) {
-    return Array.from({ length: total }, (_, index) => index + 1);
-  }
-
-  if (current <= 3) {
-    return [1, 2, 3, "ellipsis", total];
-  }
-
-  if (current >= total - 2) {
-    return [1, "ellipsis", total - 2, total - 1, total];
-  }
-
-  return [1, "ellipsis", current - 1, current, current + 1, "ellipsis", total];
 }

@@ -1,18 +1,25 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-
-const MIGRATION_HINT =
-  "Calendar tables are missing. Run supabase/migrations/20251101090000_calendar_events.sql and redeploy.";
+import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
+import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
+import {
+  getSupabaseSetupMessage,
+  isMissingBackendResourceError,
+} from "@/shared/utils/supabaseErrors";
+import { CalendarDays } from "lucide-react";
 
 interface NetworkStatusBannerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   errorMessage?: string | null;
   errorCode?: string | null;
+  moduleName?: string;
+  missingResources?: string[];
 }
 
 export function NetworkStatusBanner({
   errorMessage,
   errorCode,
+  moduleName = "Calendar",
+  missingResources = ["calendar_events_full", "calendar_events", "schedules"],
   className,
   ...rest
 }: NetworkStatusBannerProps) {
@@ -20,20 +27,34 @@ export function NetworkStatusBanner({
     return null;
   }
 
-  const isMissingSchema = errorCode === "42P01";
-  const description = isMissingSchema ? MIGRATION_HINT : errorMessage;
-  const title = isMissingSchema
-    ? "Calendar schema missing"
-    : "Calendar offline";
+  const isMissingSchema =
+    errorCode === "42P01" ||
+    isMissingBackendResourceError(errorMessage, missingResources);
+
+  if (isMissingSchema) {
+    return (
+      <div className={cn("max-w-4xl", className)} {...rest}>
+        <FeatureSetupRequiredState
+          title={`${moduleName} module is not fully set up yet`}
+          description={getSupabaseSetupMessage(errorMessage, moduleName)}
+          icon={<CalendarDays className="h-5 w-5" />}
+          setupDescription={
+            <>
+              Missing calendar database resources. Restore the calendar and
+              scheduling migrations, then refresh this page.
+            </>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
-    <Alert
-      variant="destructive"
+    <FeatureErrorState
+      title={`${moduleName} offline`}
+      description={errorMessage}
       className={cn("max-w-4xl", className)}
       {...rest}
-    >
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
-    </Alert>
+    />
   );
 }

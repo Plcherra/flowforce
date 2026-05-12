@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
 import { buildSchedulingFallbackData } from "./fallbackData";
 import { logger } from "@/utils/logger";
+import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -52,6 +53,14 @@ interface SchedulingConsolidatedResult {
 }
 
 const DEFAULT_ERROR = "Unable to load the latest scheduling data.";
+const SCHEDULING_RESOURCE_NAMES = [
+  "schedules",
+  "schedule_assignments",
+  "time_off_requests",
+  "user_unavailability",
+  "vendor_event",
+  "vendor_visits",
+];
 
 export function useSchedulingConsolidated(
   params: SchedulingQueryParams,
@@ -153,11 +162,25 @@ export function useSchedulingConsolidated(
             "message" in schedulesQuery.error
           ? String(schedulesQuery.error.message)
           : DEFAULT_ERROR;
-    logger.error("Failed to load scheduling data, using fallback data", {
+    const missingSchema = isMissingBackendResourceError(
+      schedulesQuery.error,
+      SCHEDULING_RESOURCE_NAMES,
+    );
+    const logContext = {
       error: schedulesQuery.error,
       context: { errorMessage },
-      tags: ["error"],
-    });
+      tags: [missingSchema ? "warning" : "error"],
+    };
+
+    if (missingSchema) {
+      logger.warn("Scheduling database resources are missing", logContext);
+    } else {
+      logger.error("Failed to load scheduling data, using fallback data", {
+        ...logContext,
+        tags: ["error"],
+      });
+    }
+
     setError(errorMessage);
     const fallback = buildSchedulingFallbackData({ start: range.start });
     setShifts(fallback.shifts);
@@ -168,7 +191,7 @@ export function useSchedulingConsolidated(
     setTeamMembers(fallback.profiles);
     setIsUsingFallback(true);
 
-    if (!fallbackNoticeShownRef.current) {
+    if (!missingSchema && !fallbackNoticeShownRef.current) {
       toast({
         title: "Scheduling in preview mode",
         description:

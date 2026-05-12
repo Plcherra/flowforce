@@ -177,45 +177,47 @@ src/
 
 Goal: reduce complexity in the riskiest active files first, starting with Company Updates.
 
-- [ ] **Refactor `CompanyUpdates.tsx` after consolidation**
+- [x] **Refactor `CompanyUpdates.tsx` after consolidation**
   - **Current main page:** `src/features/company-updates/pages/CompanyUpdates.tsx`
-  - **Split into:**
-    - `src/features/company-updates/pages/CompanyUpdatesPage.tsx`
+  - **Completed split into:**
     - `src/features/company-updates/components/CompanyUpdatesFeedSection.tsx`
     - `src/features/company-updates/components/CompanyUpdatesGridSection.tsx`
     - `src/features/company-updates/components/CompanyUpdatesListSection.tsx`
     - `src/features/company-updates/components/CompanyUpdatesPagination.tsx`
     - `src/features/company-updates/components/CompanyUpdatesSkeletons.tsx`
     - `src/features/company-updates/components/CompanyUpdatesSetupState.tsx`
-  - **Keep in the page file:**
+  - **Kept in the page file:**
     - top-level hooks
     - derived page state
     - event handlers
     - high-level layout only
   - **Why it matters:** This page already had hook-order issues. Smaller sections reduce future breakage.
 
-- [ ] **Add shared missing-backend handling**
-  - **Create:** `src/shared/utils/supabaseErrors.ts`
-  - **Add helpers:**
+- [x] **Add shared missing-backend handling**
+  - **Created:** `src/shared/utils/supabaseErrors.ts`
+  - **Added helpers:**
     - `isMissingTableError(error)`
     - `isMissingRpcError(error)`
     - `isMissingRelationshipError(error)`
     - `getSupabaseSetupMessage(error, moduleName)`
-  - **Use first in:**
+  - **Used first in:**
     - `src/features/company-updates`
+  - **Now also applied to:**
     - `src/features/calendar`
     - `src/features/scheduling`
+  - **Still apply later to:**
     - `src/features/tasks`
     - `src/features/employees`
   - **Why it matters:** Missing Supabase tables/RPCs are known current failures. Handle them consistently instead of crashing or logging noisy errors.
 
-- [ ] **Create standard feature state components**
-  - **Create if missing:**
+- [x] **Create standard feature state components**
+  - **Created:**
     - `src/shared/components/FeatureLoadingState.tsx`
     - `src/shared/components/FeatureErrorState.tsx`
     - `src/shared/components/FeatureSetupRequiredState.tsx`
     - `src/shared/components/FeatureEmptyState.tsx`
-  - **Use them in incomplete modules first.**
+  - **Used first in:** `src/features/company-updates/components/CompanyUpdatesSetupState.tsx`
+  - **Still apply later to:** calendar, scheduling, tasks, employees, and other incomplete backend modules.
   - **Why it matters:** Every module should look stable even when the backend table for that module is not ready.
 
 - [x] **Replace React Router imports**
@@ -254,16 +256,20 @@ Goal: finish the architecture cleanup once the highest-risk feature consolidatio
     - scheduling hooks/repositories -> `src/features/scheduling/`
   - **Why it matters:** Avoid a giant risky move. Clean ownership as part of active feature work.
 
-- [ ] **Remove unused dependencies only after imports are gone**
-  - **Review/remove from `package.json`:**
-    - `react-router-dom`
+- [x] **Remove unused dependencies only after imports are gone**
+  - **Completed:** removed `react-router-dom`.
+  - **Completed:** removed unused Capacitor packages:
     - `@capacitor/android`
+    - `@capacitor/cli`
     - `@capacitor/core`
     - `@capacitor/ios`
+  - **Completed:** verified there are no active imports for React Router or Capacitor.
   - **Why it matters:** Dependency cleanup should happen after code cleanup, not before.
 
-- [ ] **Add smoke tests for visible modules**
-  - **Minimum routes:**
+- [x] **Add smoke tests for visible modules**
+  - **Created:** `scripts/smoke-visible-modules.mjs`
+  - **Added script:** `npm run test:smoke`
+  - **Tested routes:**
     - `/`
     - `/company-registration`
     - `/app/dashboard`
@@ -272,18 +278,21 @@ Goal: finish the architecture cleanup once the highest-risk feature consolidatio
     - `/app/messages`
     - `/app/company-updates`
     - `/app/calendar`
-    - `/app/scheduling`
+    - `/app/enhanced-scheduling`
     - `/app/inventory-actions`
     - `/app/analytics`
+  - **Note:** `/app/enhanced-scheduling` is the current scheduling page; `/app/scheduling` is not an active route.
   - **Why it matters:** Since all features stay in scope, every visible module should at least load without crashing.
 
-- [ ] **Add a Supabase contract check**
-  - **Create:** `scripts/check-supabase-contract.mjs`
-  - **Check:** required tables, views, and RPCs used by visible modules.
+- [x] **Add a Supabase contract check**
+  - **Created:** `scripts/check-supabase-contract.mjs`
+  - **Added script:** `npm run check:supabase`
+  - **Checks:** required tables/views used by visible modules and read-style RPCs.
+  - **Safety:** mutating RPCs are listed for manual review instead of being executed.
   - **Why it matters:** This catches missing-table problems before demos.
 
-- [ ] **Delete legacy folders only when empty**
-  - **Delete only after migration is complete:**
+- [x] **Delete legacy folders only when empty**
+  - **Confirmed absent:**
     - `src/screens/`
     - `src/components/company-updates/`
     - `src/components/updates/`
