@@ -89,7 +89,7 @@ import {
   fetchCourseMetrics,
   fetchEnrollments,
   fetchLearningCatalog,
-} from "@/features/learning/services/learningService";
+} from "../learningService";
 
 type SupabaseMock = typeof supabase & {
   __setTableRows: (table: string, rows: any[]) => void;

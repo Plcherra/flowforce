@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { InventoryService } from "@/features/inventory/services/inventoryService";
-import { CookbookService, type CookbookRecipe } from "@/services/cookbook";
-import type { InventoryItem, InventoryUnit } from "./inventory/types";
+import {
+  CookbookService,
+  type CookbookRecipe,
+} from "@/features/inventory/services/cookbook";
+import type { InventoryItem, InventoryUnit } from "@/features/inventory/hooks/types";
 import type { InventoryWaste } from "@/features/inventory/hooks/useInventoryWaste";
-import { useToast } from "./use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 
 export type UOM =

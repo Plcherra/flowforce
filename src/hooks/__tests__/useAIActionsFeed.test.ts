@@ -31,7 +31,7 @@ vi.mock("@/hooks/useProfile", () => ({
   useProfile: () => useProfileMock(),
 }));
 
-vi.mock("@/hooks/scheduling/useSchedulingConsolidated", () => ({
+vi.mock("@/features/scheduling/hooks/useSchedulingConsolidated", () => ({
   useSchedulingConsolidated: (params: unknown) =>
     useSchedulingConsolidatedMock(params),
 }));

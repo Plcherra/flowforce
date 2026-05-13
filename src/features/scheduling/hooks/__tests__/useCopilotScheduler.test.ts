@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { addDays } from "date-fns";
 import { describe, expect, it } from "vitest";
-import { generateDraftSchedulePlan } from "@/hooks/scheduling/copilotSchedulerPlan";
+import { generateDraftSchedulePlan } from "@/features/scheduling/hooks/copilotSchedulerPlan";
 import {
   rotateSupervisors,
   type EmployeeState,
-} from "@/hooks/scheduling/copilotSchedulerMath";
+} from "@/features/scheduling/hooks/copilotSchedulerMath";
 import type {
   CoverageTemplatePlan,
   SchedulerEmployee,
-} from "@/hooks/scheduling/copilotSchedulerTypes";
+} from "@/features/scheduling/hooks/copilotSchedulerTypes";
 
 const weekStart = new Date("2024-03-04T00:00:00.000Z");
 const weekEnd = addDays(weekStart, 6);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UserSelector } from "@/features/messages/components/UserSelector";
-import { useMessageChannels } from "@/hooks/messages/useMessageChannels";
+import { useMessageChannels } from "@/features/messages/hooks/useMessageChannels";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 

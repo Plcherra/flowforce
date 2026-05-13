@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type {
   ShiftWithAssignments,
   VendorEventWithMetadata,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 interface EmployeeSummary {
   id: string;

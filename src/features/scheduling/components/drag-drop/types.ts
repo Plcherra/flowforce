@@ -5,7 +5,7 @@ import type {
   TimeOffWithUser,
   UnavailabilityWithUser,
   VendorEventWithMetadata,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export interface AIRecommendation {
   name: string;

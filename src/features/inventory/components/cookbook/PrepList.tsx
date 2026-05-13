@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { PrepItem } from "@/hooks/useCookbook";
+import type { PrepItem } from "@/features/inventory/hooks/useCookbook";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
 interface PrepListProps {

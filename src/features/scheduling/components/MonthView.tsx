@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";

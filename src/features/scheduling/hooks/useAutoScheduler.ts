@@ -4,10 +4,10 @@ import {
   type AutoScheduleParams,
   type AutoScheduleResult,
 } from "@/features/scheduling/services/autoScheduler";
-import { useAuth } from "../useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { useToast } from "../use-toast";
-import { useProfile } from "../useProfile";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 
 interface AutoScheduleState {
   loading: boolean;

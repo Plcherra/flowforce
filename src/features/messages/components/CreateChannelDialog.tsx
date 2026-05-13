@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useMessageChannels } from "@/hooks/messages/useMessageChannels";
+import { useMessageChannels } from "@/features/messages/hooks/useMessageChannels";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 

@@ -70,7 +70,7 @@ const profileState: { profile: typeof defaultProfile | null } = {
   profile: { ...defaultProfile },
 };
 
-vi.mock("@/hooks/scheduling/useSchedulingConsolidated", () => ({
+vi.mock("@/features/scheduling/hooks/useSchedulingConsolidated", () => ({
   useSchedulingConsolidated: () => ({
     shifts: [
       {

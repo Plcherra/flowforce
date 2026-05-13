@@ -4,7 +4,7 @@ import type {
   CoverageTemplatePlan,
   SchedulerEmployee,
   SwapSuggestion,
-} from "@/hooks/scheduling/copilotSchedulerTypes";
+} from "@/features/scheduling/hooks/copilotSchedulerTypes";
 
 const clampConfidence = (value: number) =>
   Math.min(0.95, Math.max(0.15, value));

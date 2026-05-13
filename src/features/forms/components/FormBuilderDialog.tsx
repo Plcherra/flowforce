@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useForms, type FormFieldRow } from "@/hooks/useForms";
+import { useForms, type FormFieldRow } from "@/features/forms/hooks/useForms";
 import { useToast } from "@/hooks/use-toast";
 import { useFormSchemaStore, useFormSchema, type FormSchema } from "@/stores/useFormSchemaStore";
 import FormFieldLibrary, {

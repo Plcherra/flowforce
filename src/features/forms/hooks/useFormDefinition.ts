@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useForms, type FormWithMeta } from "@/hooks/useForms";
+import { useForms, type FormWithMeta } from "@/features/forms/hooks/useForms";
 import type {
   FormFieldRow,
   FormQueryRow,
-} from "@/repositories/formsRepository";
-import { fetchFormWithRelations } from "@/repositories/formsRepository";
+} from "@/features/forms/repositories/formsRepository";
+import { fetchFormWithRelations } from "@/features/forms/repositories/formsRepository";
 import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
 

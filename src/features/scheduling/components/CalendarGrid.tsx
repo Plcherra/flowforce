@@ -3,7 +3,7 @@ import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
 import { DayView } from "./DayView";
 import type { SchedulingFilterState } from "./SchedulingFilters";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 
 type ViewType = "month" | "week" | "day" | "year";

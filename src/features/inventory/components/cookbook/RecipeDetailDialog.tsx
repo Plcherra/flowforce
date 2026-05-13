@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { CookbookRecipe } from "@/services/cookbook";
+import type { CookbookRecipe } from "@/features/inventory/services/cookbook";
 import { FileDown, Link as LinkIcon, UtensilsCrossed } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

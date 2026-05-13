@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import type {
   VendorEventUpsertInput,
   VendorEventWithMetadata,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 interface UseVendorMutationsProps {
   companyId: string | null;

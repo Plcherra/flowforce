@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { supabase } from "@/integrations/supabase/client";
 
 vi.mock("@/integrations/supabase/client", () => {

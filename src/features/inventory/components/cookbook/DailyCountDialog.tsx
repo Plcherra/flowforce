@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCookbook, type UOM } from "@/hooks/useCookbook";
+import { useCookbook, type UOM } from "@/features/inventory/hooks/useCookbook";
 
 interface DailyCountDialogProps {
   items: Array<{ id: string; name: string; uom: UOM }>;

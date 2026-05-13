@@ -24,7 +24,7 @@ import {
   unassignUserFromShift,
   upsertShiftRecord,
   upsertVendorEvent as upsertVendorEventRecord,
-} from "@/repositories/schedulingRepository";
+} from "@/features/scheduling/repositories/schedulingRepository";
 import type { Tables } from "@/integrations/supabase/public-types";
 
 interface SchedulingConsolidatedResult {

@@ -13,7 +13,7 @@ import type {
   UnavailabilityWithUser,
   VendorEventUpsertInput,
   VendorEventRow,
-} from "@/hooks/scheduling/types";
+} from "@/features/scheduling/hooks/types";
 
 const jsonSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([

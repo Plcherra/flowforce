@@ -1,4 +1,4 @@
-import type { FormWithMeta } from "@/hooks/useForms";
+import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 
 export const safeLower = (value?: string | null) => value?.toLowerCase() ?? "";
 

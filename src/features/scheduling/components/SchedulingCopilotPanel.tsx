@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   useScheduleCopilot,
   type StepProgressState,
-} from "@/hooks/scheduling/useScheduleCopilot";
+} from "@/features/scheduling/hooks/useScheduleCopilot";
 import {
   CheckCircle,
   Circle,

@@ -20,7 +20,7 @@ import { ViewType } from "@/types/scheduling-unified";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
 import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
 import {

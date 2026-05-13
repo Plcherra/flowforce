@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import type { CreateChannelData, MessageChannel } from "@/types/messages";
 import { logger } from "@/utils/logger";
 

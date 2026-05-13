@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Form } from "@/components/ui/form";
-import { useForms, type FormWithMeta } from "@/hooks/useForms";
+import { useForms, type FormWithMeta } from "@/features/forms/hooks/useForms";
 import { useFormDefinition } from "@/features/forms/hooks/useFormDefinition";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";

@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { WeekView } from "../WeekView";
 import type { SchedulingFilterState } from "../SchedulingFilters";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 
 const filters: SchedulingFilterState = {

@@ -1,5 +1,5 @@
 import { differenceInMinutes } from "date-fns";
-import type { SchedulerEmployee } from "@/hooks/scheduling/copilotSchedulerTypes";
+import type { SchedulerEmployee } from "@/features/scheduling/hooks/copilotSchedulerTypes";
 
 export const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 export const MAX_STORE_WEEKLY_HOURS = 38;

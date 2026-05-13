@@ -1,5 +1,24 @@
-// Re-export from feature folder
-export * from "@/features/learning/services/learningService";
+import { z } from "zod";
+
+import { supabase } from "@/integrations/supabase/client";
+import type { TablesInsert } from "@/integrations/supabase/public-types";
+import type {
+  CourseCreationPayload,
+  CourseModuleInput,
+  CourseRecommendation,
+  LearningCatalogRecord,
+  LearningCourse,
+  LearningCourseMetrics,
+  LearningEnrollment,
+  LearningModule,
+  LearningProgressEvent,
+  LearningProgressSnapshot,
+  ModuleAsset,
+  PersonalLearningSnapshot,
+} from "@/types/learning";
+import { logger } from "@/utils/logger";
+
+const learningClient = supabase;
 
 const TABLE_COURSES = "learning_courses";
 const TABLE_MODULES = "learning_modules";

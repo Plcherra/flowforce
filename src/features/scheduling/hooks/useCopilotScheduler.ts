@@ -7,7 +7,7 @@ import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
 import {
   computeExistingHours,
   generateDraftSchedulePlan,
-} from "@/hooks/scheduling/copilotSchedulerPlan";
+} from "@/features/scheduling/hooks/copilotSchedulerPlan";
 import type {
   CoverageGap,
   CoverageTemplatePlan,
@@ -16,26 +16,26 @@ import type {
   SchedulerEmployee,
   ScheduleSummary,
   SwapSuggestion,
-} from "@/hooks/scheduling/copilotSchedulerTypes";
+} from "@/features/scheduling/hooks/copilotSchedulerTypes";
 import {
   buildCoverageGapActions,
   buildSwapActions,
   mapCoverageTemplateRow,
   mapEmployeeRow,
-} from "@/hooks/scheduling/copilotSchedulerUtils";
+} from "@/features/scheduling/hooks/copilotSchedulerUtils";
 import {
   INITIAL_STATE,
   type CopilotSchedulerState,
   type UseCopilotSchedulerOptions,
-} from "@/hooks/scheduling/copilotSchedulerState";
+} from "@/features/scheduling/hooks/copilotSchedulerState";
 import {
   listCompanyEmployees,
   listCoverageTemplates,
-} from "@/repositories/copilotRepository";
+} from "@/features/scheduling/repositories/copilotRepository";
 import {
   insertSchedules,
   insertScheduleAssignments,
-} from "@/repositories/schedulingRepository";
+} from "@/features/scheduling/repositories/schedulingRepository";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useCopilotScheduler({
@@ -288,4 +288,4 @@ export function useCopilotScheduler({
 }
 
 export type UseCopilotSchedulerReturn = ReturnType<typeof useCopilotScheduler>;
-export type { UseCopilotSchedulerOptions } from "@/hooks/scheduling/copilotSchedulerState";
+export type { UseCopilotSchedulerOptions } from "@/features/scheduling/hooks/copilotSchedulerState";

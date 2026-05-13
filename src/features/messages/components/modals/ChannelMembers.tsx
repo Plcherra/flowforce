@@ -39,7 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   messagesRepository,
   type ChannelMemberDetail,
-} from "@/repositories/messagesRepository";
+} from "@/features/messages/api/messagesRepository";
 import { logger } from "@/utils/logger";
 
 const AvatarPlaceholder = ({ name }: { name: string }) => (

@@ -6,7 +6,7 @@ import { Clock, Users, Plus, CalendarDays } from "lucide-react";
 import type {
   ShiftWithAssignments,
   AssignmentWithUser,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { SchedulingFilterState } from "./SchedulingFilters";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";

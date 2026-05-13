@@ -6,7 +6,7 @@ import type {
   ScheduleSummary,
   SwapSuggestion,
   SchedulerEmployee,
-} from "@/hooks/scheduling/copilotSchedulerTypes";
+} from "@/features/scheduling/hooks/copilotSchedulerTypes";
 
 export interface UseCopilotSchedulerOptions {
   weekStart: Date;

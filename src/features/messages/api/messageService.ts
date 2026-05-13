@@ -1,4 +1,4 @@
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import type { MessageAttachment } from "@/types/messages";
 
 export async function sendMessage(

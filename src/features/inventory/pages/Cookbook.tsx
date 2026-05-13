@@ -18,13 +18,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCookbook } from "@/hooks/useCookbook";
+import { useCookbook } from "@/features/inventory/hooks/useCookbook";
 import { CookbookGrid } from "@/features/inventory/components/cookbook/CookbookGrid";
 import { PrepList } from "@/features/inventory/components/cookbook/PrepList";
 import { DailyCountDialog } from "@/features/inventory/components/cookbook/DailyCountDialog";
 import { RecipeDetailDialog } from "@/features/inventory/components/cookbook/RecipeDetailDialog";
 import { CreateRecipeDialog } from "@/features/inventory/components/cookbook/CreateRecipeDialog";
-import type { CookbookRecipe } from "@/services/cookbook";
+import type { CookbookRecipe } from "@/features/inventory/services/cookbook";
 
 export default function Cookbook() {
   const {

@@ -11,7 +11,7 @@ import { useGoals } from "./useGoals";
 import { useReminders } from "./useReminders";
 import { useTaskNotifications } from "@/features/tasks";
 import { useProfile } from "./useProfile";
-import { useSchedulingConsolidated } from "./scheduling/useSchedulingConsolidated";
+import { useSchedulingConsolidated } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { useExpenses, type Expense } from "./useExpenses";
 
 export type FeedSource =

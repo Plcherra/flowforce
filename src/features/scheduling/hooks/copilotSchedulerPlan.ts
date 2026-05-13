@@ -12,7 +12,7 @@ import {
   rotateSupervisors,
   type EmployeeState,
   type SupervisorLedger,
-} from "@/hooks/scheduling/copilotSchedulerMath";
+} from "@/features/scheduling/hooks/copilotSchedulerMath";
 import type {
   CoverageGap,
   CoverageTemplatePlan,
@@ -22,7 +22,7 @@ import type {
   ScheduleSummary,
   SchedulerEmployee,
   SwapSuggestion,
-} from "@/hooks/scheduling/copilotSchedulerTypes";
+} from "@/features/scheduling/hooks/copilotSchedulerTypes";
 
 const initialiseEmployees = (
   employees: SchedulerEmployee[],

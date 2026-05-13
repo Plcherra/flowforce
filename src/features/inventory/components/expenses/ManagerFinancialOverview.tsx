@@ -21,7 +21,7 @@ import { useManagerFinancialMetrics } from "@/hooks/useFinancialManagement";
 import { useSystemSettings } from "@/features/system/hooks/useSystemSettings";
 import { useIntegrationSettings } from "@/features/system/hooks/useIntegrationSettings";
 import { useToast } from "@/hooks/use-toast";
-import { generateFinancialDemoData } from "@/services/financialDemoData";
+import { generateFinancialDemoData } from "@/features/inventory/services/financialDemoData";
 import {
   Area,
   Bar,

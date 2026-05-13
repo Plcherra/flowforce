@@ -13,8 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { useCopilotScheduler } from "@/hooks/scheduling/useCopilotScheduler";
-import type { ScheduleSummary } from "@/hooks/scheduling/copilotSchedulerTypes";
+import { useCopilotScheduler } from "@/features/scheduling/hooks/useCopilotScheduler";
+import type { ScheduleSummary } from "@/features/scheduling/hooks/copilotSchedulerTypes";
 import { format } from "date-fns";
 import {
   AlertTriangle,

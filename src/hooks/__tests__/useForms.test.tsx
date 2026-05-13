@@ -35,7 +35,7 @@ const repositoryMocks = vi.hoisted(() => ({
   insertFormSubmission: vi.fn(),
 }));
 
-vi.mock("@/repositories/formsRepository", () => ({
+vi.mock("@/features/forms/repositories/formsRepository", () => ({
   fetchFormsWithRelations: repositoryMocks.fetchFormsWithRelations,
   insertFormRow: repositoryMocks.insertFormRow,
   updateFormRow: repositoryMocks.updateFormRow,

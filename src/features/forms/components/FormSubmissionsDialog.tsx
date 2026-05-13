@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, FileText, User, Calendar } from "lucide-react";
-import { useForms } from "@/hooks/useForms";
+import { useForms } from "@/features/forms/hooks/useForms";
 import FormFillDialog from "./FormFillDialog";
 import { FormSubmission, FormField } from "@/types/common";
 

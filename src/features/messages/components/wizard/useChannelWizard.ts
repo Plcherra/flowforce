@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useMessageChannels } from "@/hooks/messages/useMessageChannels";
+import { useMessageChannels } from "@/features/messages/hooks/useMessageChannels";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";

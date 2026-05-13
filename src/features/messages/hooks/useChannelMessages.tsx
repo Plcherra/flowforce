@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { Message } from "@/types/messages";
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { useRealtime } from "@/hooks/useRealtime";
 import { logger } from "@/utils/logger";
 import {

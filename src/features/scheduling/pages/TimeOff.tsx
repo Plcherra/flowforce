@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
-import { useSchedulingConsolidated } from "@/hooks/scheduling/useSchedulingConsolidated";
+import { useSchedulingConsolidated } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import {
   asArray,
   safeArrayFilter,
@@ -19,7 +19,7 @@ import {
   safeArrayLength,
   safeArrayMap,
 } from "@/utils/reactQueryTypes";
-import type { TimeOffWithUser } from "@/hooks/scheduling/types";
+import type { TimeOffWithUser } from "@/features/scheduling/hooks/types";
 import {
   Calendar,
   Plus,

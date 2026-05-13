@@ -5,7 +5,7 @@ import {
   companyUpdatesRepository,
   type CompanyUpdateRow,
   type CommentRow,
-} from "@/repositories/companyUpdatesRepository";
+} from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { CreateCompanyUpdateInput } from "@/types/companyUpdates";
 
 const UPDATES_QUERY_KEY = "company-updates";

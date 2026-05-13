@@ -1,7 +1,7 @@
 import type {
   ShiftWithAssignments,
   AssignmentWithUser,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 // Shared utilities for scheduling components
 

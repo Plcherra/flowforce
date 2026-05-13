@@ -7,7 +7,7 @@ import CreateFormDialog from "../CreateFormDialog";
 
 const mockCreateForm = vi.fn();
 
-vi.mock("@/hooks/useForms", () => ({
+vi.mock("@/features/forms/hooks/useForms", () => ({
   useForms: () => ({
     createForm: mockCreateForm,
   }),
@@ -21,7 +21,7 @@ vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
-vi.mock("@/services/forms/formImportService", () => ({
+vi.mock("@/features/forms/services/formImportService", () => ({
   importFormFromFile: vi.fn(),
 }));
 

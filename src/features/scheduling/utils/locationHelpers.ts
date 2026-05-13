@@ -2,7 +2,7 @@
  * Utility functions for location operations
  */
 
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 /**
  * Extract unique locations from shifts

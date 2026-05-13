@@ -15,7 +15,7 @@ import {
   type UnavailabilityWithUser,
   type VendorEventWithMetadata,
   type ProfileSummary,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";

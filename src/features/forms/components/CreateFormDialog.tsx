@@ -23,7 +23,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useForms } from "@/hooks/useForms";
+import { useForms } from "@/features/forms/hooks/useForms";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { importFormFromFile } from "@/features/forms/services/formImportService";

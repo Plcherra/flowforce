@@ -7,7 +7,7 @@ import {
   companyUpdatesRepository,
   type CompanyUpdateRow,
   type ReactionRow,
-} from "@/repositories/companyUpdatesRepository";
+} from "@/features/company-updates/repositories/companyUpdatesRepository";
 import { safeArrayMap } from "@/utils/reactQueryTypes";
 
 const DEFAULT_PAGE_SIZE = 25;

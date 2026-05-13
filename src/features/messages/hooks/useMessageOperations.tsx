@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import type { MessageAttachment, SearchResult } from "@/types/messages";
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 
 export function useMessageOperations() {
   const { user } = useAuth();

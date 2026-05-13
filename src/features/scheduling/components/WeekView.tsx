@@ -6,7 +6,7 @@ import { Clock } from "lucide-react";
 import type {
   ShiftWithAssignments,
   AssignmentWithUser,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";

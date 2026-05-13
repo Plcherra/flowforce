@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
-import { companyUpdatesRepository } from "@/repositories/companyUpdatesRepository";
-import type { CommentRow } from "@/repositories/companyUpdatesRepository";
+import { companyUpdatesRepository } from "@/features/company-updates/repositories/companyUpdatesRepository";
+import type { CommentRow } from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { UpdateComment } from "@/types/companyUpdates";
 
 const COMMENTS_QUERY_KEY = "company-update-comments";

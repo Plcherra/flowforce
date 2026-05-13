@@ -10,7 +10,7 @@ import type {
 import type {
   VendorEventUpsertInput,
   VendorEventWithMetadata,
-} from "@/hooks/scheduling/useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export type ShiftInsertPayload = Omit<
   TablesInsert<"schedules">,

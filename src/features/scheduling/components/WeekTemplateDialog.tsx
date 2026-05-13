@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useWeekTemplates } from "@/hooks/scheduling/useWeekTemplates";
+import { useWeekTemplates } from "@/features/scheduling/hooks/useWeekTemplates";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/public-types";
 import { Save, Calendar, Eye } from "lucide-react";

@@ -12,7 +12,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Download, FileBarChart2, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
-import { useForms } from "@/hooks/useForms";
+import { useForms } from "@/features/forms/hooks/useForms";
 import { useDocumentInbox } from "@/hooks/useDocumentIngestion";
 import { asArray } from "@/utils/reactQueryTypes";
 import type { AssistantContext } from "@/types/ai";

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "./useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
 import { useProfile } from "@/hooks/useProfile";
@@ -14,19 +14,19 @@ import {
   replaceFormFields as repositoryReplaceFormFields,
   fetchFormSubmissions as repositoryFetchFormSubmissions,
   insertFormSubmission,
-} from "@/repositories/formsRepository";
+} from "@/features/forms/repositories/formsRepository";
 import type {
   FormRow,
   FormFieldRow,
   FormSubmissionRow,
   FormQueryRow,
-} from "@/repositories/formsRepository";
+} from "@/features/forms/repositories/formsRepository";
 
 export type {
   FormRow,
   FormFieldRow,
   FormSubmissionRow,
-} from "@/repositories/formsRepository";
+} from "@/features/forms/repositories/formsRepository";
 
 export type FormWithMeta = Omit<
   FormQueryRow,

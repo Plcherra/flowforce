@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useScheduleBoard } from "@/hooks/scheduling/useScheduleBoard";
+import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
 import type { PendingVendorEvent, AIRecommendation } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,

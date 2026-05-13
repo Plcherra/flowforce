@@ -12,12 +12,12 @@ import {
   insertSchedules,
   insertScheduleAssignments,
   deleteCopilotDrafts,
-} from "@/repositories/schedulingRepository";
+} from "@/features/scheduling/repositories/schedulingRepository";
 import {
   listCompanyEmployees,
   listCoverageTemplates,
   listCoverageLocations,
-} from "@/repositories/copilotRepository";
+} from "@/features/scheduling/repositories/copilotRepository";
 import {
   generateSchedule,
   type ShiftSlot,

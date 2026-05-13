@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useRealtime } from "@/hooks/useRealtime";
 import type { MessageChannel, CreateChannelData } from "@/types/messages";
-import { messagesRepository } from "@/repositories/messagesRepository";
+import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { logger } from "@/utils/logger";
 import { asArray } from "@/utils/reactQueryTypes";
 import {

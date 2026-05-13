@@ -18,7 +18,7 @@ vi.mock("@/features/forms/components/fields/DescriptionField", () => ({
   DescriptionField: () => null,
 }));
 
-vi.mock("@/hooks/useForms", () => ({
+vi.mock("@/features/forms/hooks/useForms", () => ({
   useForms: () => mockUseForms(),
 }));
 

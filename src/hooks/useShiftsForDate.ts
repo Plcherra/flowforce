@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { isSameDay, parseISO } from "date-fns";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export interface OnDutyStaff {
   id: string;

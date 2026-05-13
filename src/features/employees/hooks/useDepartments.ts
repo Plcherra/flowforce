@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { employeesRepository } from "@/repositories/employeesRepository";
+import { employeesRepository } from "@/features/employees/repositories/employeesRepository";
 import { logger } from "@/utils/logger";
 import type { Department } from "../types/directory";
 

@@ -146,11 +146,12 @@
 - `npm run build` passes after Company Updates changes.
 - `npm run build` passes after Calendar changes.
 - `npm run build` passes after Scheduling changes.
+- Verification policy is finalized: focused ESLint plus `npm run build` are the per-batch gates. `npm run typecheck` remains a milestone/overnight check because it is too slow and broad for each cleanup batch.
 
 ## Phase 4: Final Polish
 
 - [x] Continue migrating `src/screens/` route by route.
-- [ ] Clean root-level shared folders as features are touched.
+- [x] Clean root-level shared folders as features are touched.
 - [x] Remove unused dependencies after imports are gone.
 - [x] Add smoke tests for visible modules.
 - [x] Add a Supabase contract check.
@@ -167,6 +168,30 @@
 - Added `scripts/smoke-visible-modules.mjs`.
 - Added `npm run test:smoke`.
 - Smoke test output is saved to `docs/test-results/visible-modules-smoke.json`.
+- Completed Phase 4 root cleanup Batch 1:
+  - moved `src/repositories/companyUpdatesRepository.ts` to `src/features/company-updates/repositories/companyUpdatesRepository.ts`
+  - updated Company Updates hooks to import from the feature-owned repository path
+- Completed Phase 4 root cleanup Batch 2:
+  - moved `src/repositories/messagesRepository.ts` to `src/features/messages/api/messagesRepository.ts`
+  - removed root `src/hooks/messages/*` wrappers because the feature-owned hooks already existed
+  - updated Messages API, hook, component, and test imports to use feature-owned paths
+- Completed Phase 4 root cleanup Batch 3:
+  - moved `src/hooks/useCookbook.tsx` to `src/features/inventory/hooks/useCookbook.tsx`
+  - moved `src/services/cookbook.ts` to `src/features/inventory/services/cookbook.ts`
+  - moved `src/services/financialDemoData.ts` to `src/features/inventory/services/financialDemoData.ts`
+  - updated cookbook and financial demo imports to use feature-owned inventory paths
+- Completed Phase 4 root cleanup Batch 4:
+  - moved `src/hooks/useForms.tsx` to `src/features/forms/hooks/useForms.tsx`
+  - moved `src/repositories/formsRepository.ts` to `src/features/forms/repositories/formsRepository.ts`
+  - removed root `src/services/forms/formImportService.ts` wrapper because the feature-owned service already existed
+  - updated Forms, Analytics, and related test imports to use feature-owned forms paths
+- Completed Phase 4 root cleanup Batch 5:
+  - moved `src/hooks/scheduling/*` to `src/features/scheduling/hooks/*`
+  - moved `src/repositories/schedulingRepository.ts` to `src/features/scheduling/repositories/schedulingRepository.ts`
+  - moved `src/repositories/shiftSwapsRepository.ts` to `src/features/scheduling/repositories/shiftSwapsRepository.ts`
+  - moved `src/repositories/copilotRepository.ts` to `src/features/scheduling/repositories/copilotRepository.ts`
+  - removed deprecated wrapper `src/hooks/useSchedulingConsolidated.ts`
+  - updated scheduling, calendar, AI feed, positions, utility, context, component, and test imports to use feature-owned scheduling paths
 
 **Current Phase 4 verification:**
 
@@ -174,7 +199,27 @@
 - `npm run test:smoke` passes against a local production server on port 3001.
 - Focused ESLint for the Phase 4 scripts passes.
 - `npm run build` passes after the Phase 4 script/dependency changes.
+- Focused ESLint for Phase 4 Batch 1 Company Updates files passes.
+- `npm run build` passes after Phase 4 Batch 1.
+- Focused ESLint for Phase 4 Batch 2 Messages files passes.
+- `npm run build` passes after Phase 4 Batch 2.
+- Focused ESLint for Phase 4 Batch 3 Inventory files passes.
+- `npm run build` passes after Phase 4 Batch 3.
+- Focused ESLint for Phase 4 Batch 4 Forms files passes.
+- `npm run build` passes after Phase 4 Batch 4.
+- Focused ESLint for Phase 4 Batch 5 Scheduling files passes.
+- `npm run build` passes after Phase 4 Batch 5.
+- Deferred manual review completed:
+  - Tasks root hooks stay as compatibility exports for now; task repositories should be handled in a dedicated Tasks batch.
+  - Learning service implementation now lives in `src/features/learning/services/learningService.ts`; root service is a compatibility export.
+  - Performance service/hook/repository ownership stays shared because Analytics and Performance both consume it.
+  - Employee repository moved to `src/features/employees/repositories/employeesRepository.ts`; root `useEmployees` stays as the cross-feature compatibility export.
+  - Unused root scheduling/guardrail service wrappers were removed after confirming active imports use feature-owned scheduling service paths.
+- Focused ESLint for the deferred review code changes passes with existing warnings only in Learning service/test files.
+- `npm run build` passes after the deferred review cleanup.
+- `npm run check:supabase` passes with 0 missing relations and 0 missing read RPCs.
+- `npm run test:smoke` passes after starting a local production server on port 3000.
 
 **Next Phase 4 action:**
 
-- Continue cleaning root-level shared folders as features are touched.
+- Plan a dedicated Tasks cleanup batch before moving task repositories because Tasks has wider AI, Analytics, Goals, and test coverage.

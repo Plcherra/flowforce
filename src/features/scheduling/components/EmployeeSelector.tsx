@@ -19,7 +19,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import type { AssignmentWithUser } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { AssignmentWithUser } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { logger } from "@/utils/logger";
 
 interface EmployeeSelectorProps {

@@ -43,7 +43,7 @@ import {
 
 import { usePositions, type Position } from "@/hooks/usePositions";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
-import { useShiftTemplates } from "@/hooks/scheduling/useShiftTemplates";
+import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import CreatePositionDialog from "@/features/positions/components/CreatePositionDialog";
 import EditPositionDialog from "@/features/positions/components/EditPositionDialog";
 import { PositionManagementDialog } from "@/features/positions/components/PositionManagementDialog";

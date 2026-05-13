@@ -29,7 +29,7 @@ import {
   fetchTimeOffRequests,
   updateShiftSwapStatus,
   updateTimeOffStatus,
-} from "@/repositories/shiftSwapsRepository";
+} from "@/features/scheduling/repositories/shiftSwapsRepository";
 
 export function StaffShiftManagement() {
   const { toast } = useToast();

@@ -6,7 +6,7 @@ import type { Tables } from "@/integrations/supabase/public-types";
 import {
   employeesRepository,
   type EmployeeProfileRow,
-} from "@/repositories/employeesRepository";
+} from "@/features/employees/repositories/employeesRepository";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
 

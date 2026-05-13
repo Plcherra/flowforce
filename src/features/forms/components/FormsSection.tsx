@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { FormWithMeta } from "@/hooks/useForms";
+import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 import {
   formatDate,
   getOwnerName,

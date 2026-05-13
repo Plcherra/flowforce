@@ -3,8 +3,8 @@
  */
 
 import { parseISO } from "date-fns";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
-import type { AssignmentWithUser } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import type { AssignmentWithUser } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export interface HoursSummary {
   totalHours: number;

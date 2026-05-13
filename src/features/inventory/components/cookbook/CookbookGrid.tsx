@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, HeartOff, Leaf, Scissors, FileDown } from "lucide-react";
-import type { CookbookRecipe } from "@/services/cookbook";
+import type { CookbookRecipe } from "@/features/inventory/services/cookbook";
 
 interface CookbookGridProps {
   recipes: CookbookRecipe[];

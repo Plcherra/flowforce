@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CalendarIcon, Loader2, ShieldAlert } from "lucide-react";
-import { useAutoScheduler } from "@/hooks/scheduling/useAutoScheduler";
+import { useAutoScheduler } from "@/features/scheduling/hooks/useAutoScheduler";
 import { describeAvailableRuleSets } from "@/features/scheduling/services/autoScheduler";
 import { addDays, format, startOfWeek } from "date-fns";
 

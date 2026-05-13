@@ -24,7 +24,7 @@ import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { ShiftInsertPayload } from "../types/mutations";
-import type { ShiftUpsertInput } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftUpsertInput } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
   Tables,
   TablesUpdate,

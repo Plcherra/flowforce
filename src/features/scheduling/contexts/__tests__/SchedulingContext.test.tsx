@@ -11,7 +11,7 @@ const insertMocks = vi.hoisted(() => ({
 
 const refetchMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@/hooks/scheduling/useSchedulingConsolidated", () => ({
+vi.mock("@/features/scheduling/hooks/useSchedulingConsolidated", () => ({
   useSchedulingConsolidated: () => ({
     shifts: [],
     assignments: [],

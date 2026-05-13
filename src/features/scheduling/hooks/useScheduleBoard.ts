@@ -3,7 +3,7 @@ import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useProfile } from "@/hooks/useProfile";
-import type { ShiftWithAssignments } from "@/hooks/scheduling/useSchedulingConsolidated";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
   VendorEventWithMetadata,
   ProfileSummary,
