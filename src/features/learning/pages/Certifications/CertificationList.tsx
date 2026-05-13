@@ -93,7 +93,7 @@ export function CertificationList({
               <div className="space-y-1 text-sm text-muted-foreground">
                 {cert.requirementDetails.map((detail) => (
                   <p key={detail.key}>
-                    {detail.label}:{" "}
+                    {detail.labelKey}:{" "}
                     {Math.min(
                       Math.round(detail.current),
                       Math.round(detail.target),

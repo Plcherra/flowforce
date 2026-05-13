@@ -237,14 +237,14 @@ export async function fetchSchedulingWeek(params: {
   const assignmentRows = z
     .array(assignmentRowSchema)
     .parse(assignmentsResponse.data ?? []);
-  const assignmentsWithUsers: AssignmentWithUser[] = assignmentRows.map(
+  const assignmentsWithUsers = assignmentRows.map(
     (assignment) => ({
       ...assignment,
       user: assignment.user_id
         ? (profileMap.get(assignment.user_id) ?? null)
         : null,
     }),
-  );
+  ) as unknown as AssignmentWithUser[];
 
   const shiftWithAssignments: ShiftWithAssignments[] = schedules.map(
     (shift) => ({
@@ -258,22 +258,22 @@ export async function fetchSchedulingWeek(params: {
   const timeOffRows = z
     .array(timeOffRowSchema)
     .parse(timeOffResponse.data ?? []);
-  const timeOffWithUsers: TimeOffWithUser[] = timeOffRows.map((request) => ({
+  const timeOffWithUsers = timeOffRows.map((request) => ({
     ...request,
     user: request.user_id ? (profileMap.get(request.user_id) ?? null) : null,
-  }));
+  })) as unknown as TimeOffWithUser[];
 
   const unavailabilityRows = z
     .array(unavailabilityRowSchema)
     .parse(unavailabilityResponse.data ?? []);
-  const unavailabilityWithUsers: UnavailabilityWithUser[] =
+  const unavailabilityWithUsers =
     unavailabilityRows.map((entry) => ({
       ...entry,
       user: entry.user_id ? (profileMap.get(entry.user_id) ?? null) : null,
       createdBy: entry.created_by
         ? (profileMap.get(entry.created_by) ?? null)
         : null,
-    }));
+    })) as unknown as UnavailabilityWithUser[];
 
   const vendorEvents = z
     .array(vendorEventRowSchema)
@@ -293,7 +293,7 @@ export async function fetchSchedulingWeek(params: {
         email,
         avatar_url,
       }),
-    ),
+    ) as ProfileSummary[],
   };
 }
 

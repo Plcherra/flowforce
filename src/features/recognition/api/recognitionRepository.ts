@@ -181,7 +181,7 @@ async function fetchRecognitionRows(
   limit?: number,
 ) {
   const query = supabase
-    .from<RecognitionRow>("recognitions")
+    .from("recognitions")
     .select("*")
     .eq("company_id", companyId)
     .order("awarded_at", { ascending: false });
@@ -594,7 +594,7 @@ async function generateTrainingRecognitions(
   existing: RecognitionRow[],
 ) {
   const { data: completions, error } = await supabase
-    .from<TrainingCompletionEventRow>("v_training_completion_events")
+    .from("v_training_completion_events")
     .select(
       "assignment_id, completed_at, employee_id, module_id, module_title, xp_reward, company_id",
     )
@@ -604,7 +604,8 @@ async function generateTrainingRecognitions(
     throw new Error(
       error.message ?? "Failed to fetch training completion events",
     );
-  const completionRows: TrainingCompletionEventRow[] = completions ?? [];
+  const completionRows: TrainingCompletionEventRow[] =
+    (completions ?? []) as TrainingCompletionEventRow[];
   if (completionRows.length === 0) return;
 
   const existingTrainingRecognitions = new Set<string>();
@@ -637,8 +638,11 @@ async function generateTrainingRecognitions(
 
   if (!assignments) return;
 
+  const assignmentRows = (assignments ?? []) as any[];
   const employeeMap = new Map<string, ProfileRow>();
-  (employees ?? []).forEach((profile) => employeeMap.set(profile.id, profile));
+  ((employees ?? []) as ProfileRow[]).forEach((profile) =>
+    employeeMap.set(profile.id, profile),
+  );
 
   const newRecognitionsPayload: TablesInsert<"goal_rewards">[] = [];
 
@@ -647,9 +651,8 @@ async function generateTrainingRecognitions(
       continue;
     }
 
-    const assigned = assignments.find(
-      (assignment: TrainingAssignment) =>
-        assignment.id === completion.assignment_id,
+    const assigned = assignmentRows.find(
+      (assignment) => assignment.id === completion.assignment_id,
     );
     const employee = employeeMap.get(completion.employee_id);
 
@@ -658,7 +661,11 @@ async function generateTrainingRecognitions(
     }
 
     const moduleTitle =
-      assigned.module?.title ?? completion.module_title ?? "training module";
+      (Array.isArray(assigned.module)
+        ? assigned.module[0]?.title
+        : assigned.module?.title) ??
+      completion.module_title ??
+      "training module";
     const employeeName =
       `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() ||
       "Team Member";
@@ -667,7 +674,12 @@ async function generateTrainingRecognitions(
       source: "training_completion",
       training_assignment_id: completion.assignment_id,
       message: `${employeeName} completed ${moduleTitle}`,
-      xp_awarded: assigned.module?.xp_reward ?? completion.xp_reward ?? null,
+      xp_awarded:
+        (Array.isArray(assigned.module)
+          ? assigned.module[0]?.xp_reward
+          : assigned.module?.xp_reward) ??
+        completion.xp_reward ??
+        null,
       metadata: {
         module_id: assigned.module_id,
         company_id: companyId,

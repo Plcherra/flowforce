@@ -107,7 +107,12 @@ export function SchedulingFilters({
             <label className="text-sm font-medium">Status</label>
             <Select
               value={filters.status}
-              onValueChange={(value) => handleFilterChange("status", value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "status",
+                  value as SchedulingFilterState["status"],
+                )
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="All statuses" />
@@ -127,7 +132,12 @@ export function SchedulingFilters({
             <label className="text-sm font-medium">Published</label>
             <Select
               value={filters.published}
-              onValueChange={(value) => handleFilterChange("published", value)}
+              onValueChange={(value) =>
+                handleFilterChange(
+                  "published",
+                  value as SchedulingFilterState["published"],
+                )
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="All" />

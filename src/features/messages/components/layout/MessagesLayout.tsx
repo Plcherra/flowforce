@@ -114,10 +114,11 @@ export function MessagesLayout({
 
       const handleMove: EventListener = (event) => {
         let clientX: number | undefined;
-        if ("touches" in event && event.touches.length > 0) {
-          clientX = event.touches[0]?.clientX;
-          if (typeof (event as TouchEvent).preventDefault === "function") {
-            (event as TouchEvent).preventDefault();
+        const touchEvent = event as TouchEvent;
+        if ("touches" in touchEvent && touchEvent.touches.length > 0) {
+          clientX = touchEvent.touches[0]?.clientX;
+          if (typeof touchEvent.preventDefault === "function") {
+            touchEvent.preventDefault();
           }
         } else if ("clientX" in event) {
           clientX = (event as MouseEvent).clientX;

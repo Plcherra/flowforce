@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import {
@@ -216,8 +216,6 @@ export function AvailabilityRequestForm({
           ? computeAutoLockThreshold(weekStartDate, {
               auto_lock_day_of_week: prefs.autoLockDayOfWeek,
               auto_lock_hour: prefs.autoLockHour,
-              availability_lock_mode: "auto" as Database["public"]["Enums"]["availability_lock_mode"],
-              id: prefs.id,
             })
           : null;
 
@@ -253,7 +251,9 @@ export function AvailabilityRequestForm({
     },
   });
 
-  const { data: lastRequest } = useQuery<AvailabilityRequest | null>({
+  const { data: lastRequest, error: lastRequestError } = useQuery<
+    AvailabilityRequest | null
+  >({
     queryKey: ["availability-last-request", employeeId],
     queryFn: async () => {
       // TODO: Regenerate Supabase types to include availability_request table
@@ -295,11 +295,16 @@ export function AvailabilityRequestForm({
         updatedAt: requestData.created_at,
       };
     },
-    onError: (error) => {
-      logger.error("Error loading last request", { error, tags: ["error"] });
-      // Don't show toast for this - it's not critical if it fails
-    },
   });
+
+  useEffect(() => {
+    if (lastRequestError) {
+      logger.error("Error loading last request", {
+        error: lastRequestError,
+        tags: ["error"],
+      });
+    }
+  }, [lastRequestError]);
 
   const directEditAllowed = useMemo(() => {
     if (!lockInfo) return false;

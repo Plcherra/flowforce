@@ -20,7 +20,7 @@ import { logger } from "@/utils/logger";
 // TODO: Define proper Zod schema for InventoryItem when types are finalized
 const inventoryItemSchema: z.ZodType<InventoryItem> = z
   .object({})
-  .passthrough() as z.ZodType<InventoryItem>;
+  .passthrough() as unknown as z.ZodType<InventoryItem>;
 
 type ListItemsOptions = {
   companyId?: string;

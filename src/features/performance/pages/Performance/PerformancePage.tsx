@@ -247,7 +247,7 @@ export function PerformancePage() {
       <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr]">
         <GoalProgressSection goals={goalCards} loading={performanceLoading} />
         <XPTrendsSection
-          xpBySource={xpBySource}
+          xpBySource={xpBySource as unknown as Record<string, number>}
           leaderboard={xpSnapshot}
           loading={leaderboardLoading}
         />

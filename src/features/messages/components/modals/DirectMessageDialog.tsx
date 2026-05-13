@@ -6,10 +6,10 @@ import { logger } from "@/utils/logger";
 
 interface User {
   id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar_url?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
 }
 
 interface DirectMessageDialogProps {
@@ -30,11 +30,14 @@ export function DirectMessageDialog({
   const handleUserSelect = async (user: User) => {
     setLoading(true);
     try {
-      const channelName = `${user.first_name} ${user.last_name}`;
+      const channelName =
+        `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
+        user.email ||
+        "Direct message";
 
       const { data, error } = await createChannel({
         name: channelName,
-        description: `Direct message with ${user.first_name} ${user.last_name}`,
+        description: `Direct message with ${channelName}`,
         type: "direct",
         is_private: true,
         member_ids: [user.id],

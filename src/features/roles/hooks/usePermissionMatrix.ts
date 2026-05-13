@@ -32,7 +32,7 @@ export function usePermissionMatrix({
   >(() => createDefaultMatrix());
   const [roleMetadata, setRoleMetadata] = useState<
     Record<RoleKey, RoleMetadata>
-  >({});
+  >({} as Record<RoleKey, RoleMetadata>);
   const [dirtyRoles, setDirtyRoles] = useState<Set<RoleKey>>(new Set());
 
   const rolesArray = useMemo(
@@ -48,7 +48,7 @@ export function usePermissionMatrix({
   );
 
   const initializeFromRoles = (rolesToUse: CompanyRole[]) => {
-    const nextMetadata: Record<RoleKey, RoleMetadata> = {};
+    const nextMetadata = {} as Record<RoleKey, RoleMetadata>;
     const nextMatrix: Record<
       RoleKey,
       Record<ModuleId, boolean>

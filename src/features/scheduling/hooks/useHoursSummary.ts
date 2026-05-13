@@ -27,11 +27,11 @@ export function useHoursSummary({
 }: UseHoursSummaryProps) {
   const filteredShifts = useMemo(() => {
     if (!locationFilter) return shifts;
-    return filterShiftsByLocation(shifts, locationFilter);
+    return filterShiftsByLocation(shifts as any, locationFilter) as ShiftWithAssignments[];
   }, [shifts, locationFilter]);
 
   const hoursSummary = useMemo(
-    () => calculateHoursSummary(filteredShifts, assignments),
+    () => calculateHoursSummary(filteredShifts as ShiftWithAssignments[], assignments),
     [filteredShifts, assignments],
   );
 

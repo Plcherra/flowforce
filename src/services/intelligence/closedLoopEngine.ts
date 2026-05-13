@@ -161,7 +161,7 @@ async function resolveCompanyId(userId: string): Promise<string | null> {
 }
 
 async function fetchOrDefault<T>(
-  promise: Promise<{ data: T | null; error: PostgrestError | null }>,
+  promise: PromiseLike<{ data: T | null; error: PostgrestError | null }>,
   fallback: T,
   debugLabel: string,
 ): Promise<T> {
@@ -740,7 +740,8 @@ export async function buildClosedLoopState(
     if (task.status !== "completed") return false;
     const completedAt = task.updated_at ?? task.created_at;
     if (!completedAt) return false;
-    return dayjs(completedAt).isBetween(rangeStart, rangeEnd, null, "[]");
+    const completedTime = dayjs(completedAt).valueOf();
+    return completedTime >= rangeStart.getTime() && completedTime <= rangeEnd.getTime();
   }).length;
 
   const metrics: ClosedLoopMetrics = {

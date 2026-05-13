@@ -79,7 +79,12 @@ export function GoalModal({
           : "",
       });
 
-      const nextSelections = goal.tasks.reduce<TaskWeightMap>(
+      const nextSelections = (
+        goal.tasks as Array<{
+          task?: { id?: string | null } | null;
+          weight?: number | null;
+        }>
+      ).reduce<TaskWeightMap>(
         (acc, taskLink) => {
           if (taskLink.task?.id) {
             acc[taskLink.task.id] = taskLink.weight ?? 1;

@@ -6,6 +6,7 @@ import type {
   InventoryItemUpdate,
   InventoryRecipeLine,
   InventoryUnit,
+  InventoryCount,
   InventorySupplier,
   SupplierIntegrationDetails,
   ProductionEvent,
@@ -14,6 +15,7 @@ import type {
   ProductionApproval,
 } from "@/features/inventory/hooks/types";
 import { calculateProductionMaterials } from "@/lib/inventory/production";
+import { collectUnits } from "@/utils/inventoryUnits";
 import { logger } from "@/utils/logger";
 import {
   listInventoryItems,
@@ -27,6 +29,7 @@ import {
   deleteInventoryLocation,
   type CreateInventoryLocationInput,
 } from "../repositories/locationsRepository";
+import { listInventoryCounts } from "../repositories/countsRepository";
 
 type CreateLocationPayload = Omit<CreateInventoryLocationInput, "companyId"> & {
   companyId?: string;
@@ -230,16 +233,23 @@ export class InventoryService {
 
     return (
       data
-        ?.map((item) => ({
-          name: item.name,
-          current: Math.max(
-            0,
-            (item.min_stock_level || 10) - Math.floor(Math.random() * 15),
-          ),
-          min: item.min_stock_level || 0,
-          unit: item.inv_units?.name || "units",
-          item_id: item.id,
-        }))
+        ?.map((item) => {
+          const unitRelation = item.inv_units as any;
+
+          return {
+            name: item.name,
+            current: Math.max(
+              0,
+              (item.min_stock_level || 10) - Math.floor(Math.random() * 15),
+            ),
+            min: item.min_stock_level || 0,
+            unit:
+              (Array.isArray(unitRelation)
+                ? unitRelation[0]?.name
+                : unitRelation?.name) || "units",
+            item_id: item.id,
+          };
+        })
         .filter((item) => item.current < item.min)
         .slice(0, 5) || []
     );
@@ -261,10 +271,14 @@ export class InventoryService {
 
     return (
       adjustments?.map((adj) => {
+        const itemRelation = adj.inv_items as any;
         const timeStr = new Date(adj.created_at).toLocaleString();
         return {
           action: `${adj.adjustment_type} adjustment`,
-          item: adj.inv_items?.name || "Unknown item",
+          item:
+            (Array.isArray(itemRelation)
+              ? itemRelation[0]?.name
+              : itemRelation?.name) || "Unknown item",
           time: timeStr,
           type: adj.adjustment_type,
         };
@@ -829,7 +843,7 @@ export class InventoryService {
         filename = "waste_records.csv";
         break;
       case "counts":
-        data = await this.listCounts();
+        data = await listInventoryCounts();
         filename = "inventory_counts.csv";
         break;
       case "adjustments":

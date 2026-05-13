@@ -414,7 +414,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
                                       value={overrideValue}
                                       onValueChange={(value: PermissionValue) =>
                                         handlePermissionChange(
-                                          definition.key,
+                                          definition.key as PermissionKey,
                                           value,
                                         )
                                       }

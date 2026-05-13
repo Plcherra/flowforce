@@ -13,7 +13,7 @@ export interface DraftLineItem {
 }
 
 export interface IntegrationFormState {
-  provider: "toast" | "marketman" | "quickbooks" | "connecteam" | null;
+  provider: "marketman" | "us_foods" | "baldor" | "sysco" | "other" | null;
   account_id: string;
   api_key: string;
   notes: string;
@@ -30,39 +30,48 @@ export interface InvoiceFormState {
 
 export interface VendorInvoiceRecord {
   id: string;
-  po_id: string;
-  invoice_number: string;
-  amount: number;
-  due_date: string;
-  notes: string | null;
-  payment_status: string;
-  created_at: string;
+  po_id?: string | null;
+  invoice_number?: string | null;
+  reference_number?: string | null;
+  amount?: number | null;
+  due_date?: string | null;
+  notes?: string | null;
+  description?: string | null;
+  payment_status?: string | null;
+  payment_method?: string | null;
+  status?: string | null;
+  created_at?: string | null;
 }
 
 export const PROVIDER_OPTIONS: Array<{
-  value: "toast" | "marketman" | "quickbooks" | "connecteam";
+  value: "marketman" | "us_foods" | "baldor" | "sysco" | "other";
   label: string;
   description: string;
 }> = [
-  {
-    value: "toast",
-    label: "Toast",
-    description: "Restaurant POS and inventory management",
-  },
   {
     value: "marketman",
     label: "MarketMan",
     description: "Foodservice inventory and ordering platform",
   },
   {
-    value: "quickbooks",
-    label: "QuickBooks",
-    description: "Accounting and financial management",
+    value: "us_foods",
+    label: "US Foods",
+    description: "Foodservice distributor catalog and ordering",
   },
   {
-    value: "connecteam",
-    label: "Connecteam",
-    description: "Employee management and scheduling",
+    value: "baldor",
+    label: "Baldor",
+    description: "Fresh produce and specialty food supplier",
+  },
+  {
+    value: "sysco",
+    label: "Sysco",
+    description: "Broadline foodservice distributor",
+  },
+  {
+    value: "other",
+    label: "Other",
+    description: "Custom supplier integration",
   },
 ];
 

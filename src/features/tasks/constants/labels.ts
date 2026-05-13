@@ -10,6 +10,7 @@ export const STATUS_LABELS: Record<KnownTaskStatus, string> = {
   in_progress: labelFor("in_progress"),
   review: labelFor("review"),
   blocked: labelFor("blocked"),
+  completed: labelFor("completed"),
   done: labelFor("done"),
   cancelled: labelFor("cancelled"),
 };

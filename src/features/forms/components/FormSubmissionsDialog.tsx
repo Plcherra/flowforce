@@ -46,7 +46,7 @@ export default function FormSubmissionsDialog({
     ]);
 
     if (!submissionsResult.error) {
-      setSubmissions(submissionsResult.data);
+      setSubmissions((submissionsResult.data ?? []) as FormSubmission[]);
     }
     if (!fieldsResult.error) {
       setFields(fieldsResult.data as any);

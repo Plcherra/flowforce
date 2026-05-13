@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { AlertTriangle, FileText, Loader2, Plus, Upload } from "lucide-react";
@@ -18,11 +18,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { notifyManagersNewRequest } from "@/notifications/availability";
-import type {
-  EmployeeReport,
-  EmployeeReportSummary,
-  EmployeeReportCategory,
-} from "@/types/people";
+import type { EmployeeReportCategory } from "@/types/people";
 
 const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -188,16 +184,6 @@ export function ReportInbox() {
     },
   });
 
-  const reportsByEmployee = useMemo(() => {
-    const map = new Map<string, EmployeeReport[]>();
-    (reportsQuery.data ?? []).forEach((record) => {
-      const bucket = map.get(record.employee_id) ?? [];
-      bucket.push(record as EmployeeReport);
-      map.set(record.employee_id, bucket);
-    });
-    return map;
-  }, [reportsQuery.data]);
-
   return (
     <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
       <Card className="border bg-background shadow-sm">
@@ -340,10 +326,10 @@ export function ReportInbox() {
             disabled={
               !formValues.employeeId ||
               !formValues.notes ||
-              createReportMutation.isLoading
+              createReportMutation.isPending
             }
           >
-            {createReportMutation.isLoading && (
+            {createReportMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Submit report
@@ -372,10 +358,10 @@ export function ReportInbox() {
                 )
               }
               disabled={
-                generateSummaryMutation.isLoading || !formValues.employeeId
+                generateSummaryMutation.isPending || !formValues.employeeId
               }
             >
-              {generateSummaryMutation.isLoading && (
+              {generateSummaryMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Generate summary

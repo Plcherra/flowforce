@@ -159,7 +159,7 @@ export function useGoalTasks(options: UseGoalTasksOptions = {}) {
       }
       const payload: TablesInsert<"goal_tasks"> = {
         goal_id: targetGoalId,
-        task_id,
+        task_id: taskId,
         weight: typeof weight === "number" ? weight : 1,
       };
       const { error } = await supabase.from("goal_tasks").insert(payload);

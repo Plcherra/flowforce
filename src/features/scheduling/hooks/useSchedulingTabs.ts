@@ -73,7 +73,7 @@ export function useSchedulingTabs({ locationFilter }: UseSchedulingTabsProps) {
         nextParams.delete("location");
       }
 
-      setSearchParams(nextParams, { replace: true });
+      setSearchParams(nextParams);
     },
     [
       activeTab,
@@ -103,7 +103,7 @@ export function useSchedulingTabs({ locationFilter }: UseSchedulingTabsProps) {
         nextParams.delete("location");
       }
 
-      setSearchParams(nextParams, { replace: true });
+      setSearchParams(nextParams);
     },
     [locationFilter, searchParams, setSearchParams],
   );

@@ -30,7 +30,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
       return `${relevantTargets.length} ${relevantTargets.length === 1 ? "person" : "people"}`;
     }
 
-    const labelMap: Record<typeof type, { singular: string; plural: string }> =
+    const labelMap: Record<string, { singular: string; plural: string }> =
       {
         departments: { singular: "department", plural: "departments" },
         roles: { singular: "role", plural: "roles" },

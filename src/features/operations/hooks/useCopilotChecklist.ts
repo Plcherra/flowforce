@@ -140,7 +140,7 @@ const parseDefaultTasks = (value: unknown): DefaultTask[] => {
   if (!value) return [];
   if (Array.isArray(value)) {
     return value
-      .map((entry) => {
+      .map((entry): DefaultTask | null => {
         if (!entry || typeof entry !== "object") return null;
         const title = (entry as { title?: string }).title;
         if (typeof title !== "string" || title.trim().length === 0) return null;

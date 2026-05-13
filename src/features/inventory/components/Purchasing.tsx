@@ -56,7 +56,7 @@ import {
   useReceivePurchaseOrder,
   useUpdatePurchaseOrder,
   useRecordVendorInvoice,
-  useVendorInvoices,
+  useVendorInvoices as useVendorInvoicesQuery,
   useSupplierIntegrationLink,
 } from "@/hooks/useInventory";
 import { useToast } from "@/hooks/use-toast";
@@ -69,12 +69,13 @@ import {
   IntegrationDialog,
   VendorInvoiceDialog,
   PurchaseOrderDetailsDialog,
-} from "./purchasing";
+} from "./purchasing/index";
 import { usePurchaseOrderForm } from "../hooks/usePurchaseOrderForm";
 import { useReceiveOrders } from "../hooks/useReceiveOrders";
 import { useOrderHistory } from "../hooks/useOrderHistory";
 import { useVendorInvoices } from "../hooks/useVendorInvoices";
 import { formatCurrency, formatDate } from "@/shared/utils";
+import { cn } from "@/lib/utils";
 import {
   STATUS_LABELS,
   getPaymentStatusVariant,
@@ -87,13 +88,6 @@ import type {
   PurchaseOrder,
   SupplierIntegrationDetails,
 } from "../hooks/types";
-import type {
-  DraftLineItem,
-  IntegrationFormState,
-  InvoiceFormState,
-  VendorInvoiceRecord,
-} from "../types/purchasing";
-
 type DraftLineItem = {
   id: string;
   itemId?: string;
@@ -147,7 +141,7 @@ export default function InventoryPurchasingPage() {
   const { data: suppliers = [], isLoading: suppliersLoading } =
     useInventorySuppliers(companyId);
   const { data: vendorInvoiceData = [], isLoading: invoicesLoading } =
-    useVendorInvoices();
+    useVendorInvoicesQuery();
 
   const createOrder = useCreatePurchaseOrder();
   const receiveOrder = useReceivePurchaseOrder();
@@ -272,17 +266,6 @@ export default function InventoryPurchasingPage() {
       amount: (defaultPo.total_amount ?? 0).toFixed(2),
     });
   }, [purchaseOrders, vendorInvoicesHook]);
-
-  const openOrderCount = useMemo(
-    () =>
-      purchaseOrders.filter(
-        (po) => po.status !== "received" && po.status !== "cancelled",
-      ).length,
-    [purchaseOrders],
-  );
-
-  const pendingApprovalCount = pendingOrders.length;
-  const supplierCount = suppliers?.length ?? 0;
 
   // Use values from hooks
   const receivingCandidates = receiveOrders.receivingCandidates;
@@ -726,9 +709,11 @@ export default function InventoryPurchasingPage() {
                               <Input
                                 id="expected-date"
                                 type="date"
-                                value={expectedDate}
+                                value={purchaseOrderForm.expectedDate}
                                 onChange={(event) =>
-                                  setExpectedDate(event.target.value)
+                                  purchaseOrderForm.setExpectedDate(
+                                    event.target.value,
+                                  )
                                 }
                               />
                             </div>
@@ -1010,7 +995,7 @@ export default function InventoryPurchasingPage() {
                               <div className="flex items-center justify-between">
                                 <span>Line Items</span>
                                 <span className="font-medium">
-                                  {lineItems.length}
+                                  {purchaseOrderForm.lineItems.length}
                                 </span>
                               </div>
                               <div className="flex items-center justify-between">
@@ -1227,12 +1212,15 @@ export default function InventoryPurchasingPage() {
                                 const StatusIcon = getStatusIcon(po.status);
                                 const outstanding =
                                   outstandingByPo.get(po.id) ?? 0;
-                                const isSelected = receivingSelection === po.id;
+                                const isSelected =
+                                  receiveOrders.receivingSelection === po.id;
                                 return (
                                   <button
                                     key={po.id}
                                     type="button"
-                                    onClick={() => setReceivingSelection(po.id)}
+                                    onClick={() =>
+                                      receiveOrders.setReceivingSelection(po.id)
+                                    }
                                     className={cn(
                                       "w-full rounded-lg border p-4 text-left transition hover:border-primary",
                                       isSelected && "border-primary shadow-sm",
@@ -1501,12 +1489,9 @@ export default function InventoryPurchasingPage() {
                           Status
                         </Label>
                         <Select
-                          value={historyFilter.status}
+                          value={orderHistory.filter.status}
                           onValueChange={(value) =>
-                            setHistoryFilter((prev) => ({
-                              ...prev,
-                              status: value,
-                            }))
+                            orderHistory.updateFilter({ status: value })
                           }
                         >
                           <SelectTrigger>
@@ -1529,12 +1514,9 @@ export default function InventoryPurchasingPage() {
                           Supplier
                         </Label>
                         <Select
-                          value={historyFilter.supplier}
+                          value={orderHistory.filter.supplier}
                           onValueChange={(value) =>
-                            setHistoryFilter((prev) => ({
-                              ...prev,
-                              supplier: value,
-                            }))
+                            orderHistory.updateFilter({ supplier: value })
                           }
                         >
                           <SelectTrigger>
@@ -1542,11 +1524,7 @@ export default function InventoryPurchasingPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All suppliers</SelectItem>
-                            {Array.from(
-                              new Set(
-                                purchaseOrders.map((po) => po.supplier_name),
-                              ),
-                            ).map((supplier) => (
+                            {orderHistory.suppliers.map((supplier) => (
                               <SelectItem key={supplier} value={supplier}>
                                 {supplier}
                               </SelectItem>
@@ -1560,12 +1538,11 @@ export default function InventoryPurchasingPage() {
                         </Label>
                         <Input
                           type="date"
-                          value={historyFilter.from}
+                          value={orderHistory.filter.from}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({
-                              ...prev,
+                            orderHistory.updateFilter({
                               from: event.target.value,
-                            }))
+                            })
                           }
                         />
                       </div>
@@ -1575,12 +1552,11 @@ export default function InventoryPurchasingPage() {
                         </Label>
                         <Input
                           type="date"
-                          value={historyFilter.to}
+                          value={orderHistory.filter.to}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({
-                              ...prev,
+                            orderHistory.updateFilter({
                               to: event.target.value,
-                            }))
+                            })
                           }
                         />
                       </div>
@@ -1590,12 +1566,11 @@ export default function InventoryPurchasingPage() {
                         </Label>
                         <Input
                           placeholder="Search by PO number or supplier"
-                          value={historyFilter.search}
+                          value={orderHistory.filter.search}
                           onChange={(event) =>
-                            setHistoryFilter((prev) => ({
-                              ...prev,
+                            orderHistory.updateFilter({
                               search: event.target.value,
-                            }))
+                            })
                           }
                         />
                       </div>

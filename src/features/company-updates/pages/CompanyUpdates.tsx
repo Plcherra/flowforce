@@ -123,7 +123,7 @@ export default function CompanyUpdates() {
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = !moduleSchemaMissing && totalPages > 1;
   const canCreateUpdate = useMemo(() => {
-    if (can("systemSettings") || can("manageCompany")) {
+    if (can("systemSettings") || can("admin.settings")) {
       return true;
     }
 
@@ -323,7 +323,7 @@ export default function CompanyUpdates() {
           onLike={handleLike}
           onArchive={handleArchive}
           onDelete={handleDelete}
-          onView={markAsViewed}
+          onView={(updateId) => markAsViewed({ updateId })}
         />
       )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import {
   Dialog,
   DialogContent,
@@ -152,7 +152,7 @@ export function CreateEventDialog({
   }, [end, location, safeShifts, start]);
 
   const toggleSelection =
-    (setState: (value: SelectionRecord) => void) =>
+    (setState: Dispatch<SetStateAction<SelectionRecord>>) =>
     (id: string, next: boolean | string) => {
       const value = Boolean(next);
       setState((prev) => ({ ...prev, [id]: value }));

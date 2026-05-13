@@ -49,11 +49,16 @@ function buildEmployees(): EmployeePerformance[] {
       reviews: [
         {
           id: "review-ava-1",
+          goalId: "goal-1",
           date: dayjs().subtract(25, "day").format("YYYY-MM-DD"),
-          severity: 5,
-          notes: "Exceeded targets and coached peers on new POS workflow.",
+          score: 5,
+          summary: "Exceeded targets and coached peers on new POS workflow.",
           reviewerId: "mgr-ops-1",
           status: performanceReviewStatusSchema.parse("on_track"),
+          aiSummary: null,
+          aiInsightId: null,
+          actionItems: [],
+          reviewCycle: null,
         },
       ],
       latestReviewStatus: performanceReviewStatusSchema.parse("on_track"),
@@ -86,12 +91,17 @@ function buildEmployees(): EmployeePerformance[] {
       reviews: [
         {
           id: "review-noah-1",
+          goalId: "goal-3",
           date: dayjs().subtract(95, "day").format("YYYY-MM-DD"),
-          severity: 3,
-          notes:
+          score: 3,
+          summary:
             "Solid progress, needs to tighten shift hand-off documentation.",
           reviewerId: "mgr-ops-1",
           status: performanceReviewStatusSchema.parse("due_soon"),
+          aiSummary: null,
+          aiInsightId: null,
+          actionItems: [],
+          reviewCycle: null,
         },
       ],
       latestReviewStatus: performanceReviewStatusSchema.parse("due_soon"),
@@ -136,12 +146,17 @@ function buildEmployees(): EmployeePerformance[] {
       reviews: [
         {
           id: "review-lena-1",
+          goalId: "goal-4",
           date: dayjs().subtract(32, "day").format("YYYY-MM-DD"),
-          severity: 2,
-          notes:
+          score: 2,
+          summary:
             "Needs coaching on rush-hour throughput. Attendance improving.",
           reviewerId: "mgr-ops-2",
           status: performanceReviewStatusSchema.parse("needs_coaching"),
+          aiSummary: null,
+          aiInsightId: null,
+          actionItems: [],
+          reviewCycle: null,
         },
       ],
       latestReviewStatus: performanceReviewStatusSchema.parse("needs_coaching"),
@@ -208,5 +223,6 @@ export function generateMockPerformanceDataset(): PerformanceDataset {
     employees,
     goalSummary,
     radar,
+    goalReviews: [],
   };
 }

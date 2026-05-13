@@ -15,7 +15,7 @@ interface LeaderboardHeaderProps {
 const PERIOD_OPTIONS: Array<{ value: LeaderboardPeriod; label: string }> = [
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
-  { value: "quarterly", label: "Quarterly" },
+  { value: "all_time", label: "All time" },
 ];
 
 export function LeaderboardHeader({

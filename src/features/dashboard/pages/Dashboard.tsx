@@ -8,7 +8,7 @@ import ProfileCard from "@/features/dashboard/components/ProfileCard";
 import ActivityCard from "@/features/dashboard/components/ActivityCard";
 import CompanyUpdatesCard from "@/features/dashboard/components/CompanyUpdatesCard";
 import OperationsHealthCard from "@/features/dashboard/components/OperationsHealthCard";
-import { useDashboardData } from "@/hooks/useDashboardData.tsx";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PageAsyncWrapper } from "@/components/ui/async-wrapper";
@@ -39,9 +39,7 @@ export default function Dashboard() {
         <div className="rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
           <p className="font-semibold">Supabase profile error</p>
           <pre className="mt-2 whitespace-pre-wrap break-words">
-            {typeof profileError === "string"
-              ? profileError
-              : (profileError?.message ?? "Unknown error")}
+            {String(profileError ?? "Unknown error")}
           </pre>
         </div>
       </div>

@@ -47,6 +47,7 @@ export function useTaskTimeline(taskId: string | null, open: boolean) {
     const channel = supabase
       .channel(`task-timeline-${taskId}`)
       .on(
+        "postgres_changes",
         {
           event: "INSERT",
           schema: "public",

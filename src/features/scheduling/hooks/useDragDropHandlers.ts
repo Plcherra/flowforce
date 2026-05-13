@@ -43,8 +43,6 @@ interface UseDragDropHandlersProps {
   refetchAll: () => Promise<void>;
   setPendingVendorEvent: (event: PendingVendorEvent | null) => void;
   setVendorModalOpen: (open: boolean) => void;
-  setDraggedTemplate: (template: ShiftTemplate | null) => void;
-  setDraggedVendor: (vendor: VendorPaletteItem | null) => void;
   locationFilter?: string;
 }
 

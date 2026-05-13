@@ -37,7 +37,16 @@ interface CourseModulesFormProps {
   onAdd: (module: CourseModuleInput) => void;
 }
 
-const DEFAULT_STATE = {
+type ModuleDraft = {
+  title: string;
+  type: (typeof MODULE_TYPES)[number];
+  description: string;
+  duration: number;
+  xp: number;
+  assets: ModuleAsset[];
+};
+
+const DEFAULT_STATE: ModuleDraft = {
   title: "",
   type: MODULE_TYPES[0],
   description: "",
@@ -52,7 +61,7 @@ const generateId = () =>
     : Math.random().toString(36).slice(2);
 
 export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
-  const [newModule, setNewModule] = useState(DEFAULT_STATE);
+  const [newModule, setNewModule] = useState<ModuleDraft>(DEFAULT_STATE);
 
   const acceptsUpload = useMemo(
     () => newModule.type.toLowerCase().includes("upload"),
@@ -123,7 +132,10 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
           <Select
             value={newModule.type}
             onValueChange={(value) =>
-              setNewModule((prev) => ({ ...prev, type: value }))
+              setNewModule((prev) => ({
+                ...prev,
+                type: value as ModuleDraft["type"],
+              }))
             }
           >
             <SelectTrigger id="module-type">

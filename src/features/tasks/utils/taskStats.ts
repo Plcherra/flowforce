@@ -3,7 +3,7 @@
  */
 
 import type { KnownTaskStatus } from "../types/filters";
-import { normalizeStatus } from "./normalization";
+import { normalizePriority, normalizeStatus } from "./normalization";
 
 interface Task {
   status?: string | null;

@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
   useScheduleCopilot,
+  type CopilotEvaluation,
   type StepProgressState,
 } from "@/features/scheduling/hooks/useScheduleCopilot";
 import {
@@ -263,7 +264,11 @@ export function SchedulingCopilotPanel() {
                                 id={`${criterion.id}-value`}
                                 type="number"
                                 className="h-8 w-24"
-                                value={state?.value ?? ""}
+                                value={
+                                  typeof state?.value === "boolean"
+                                    ? ""
+                                    : (state?.value ?? "")
+                                }
                                 onChange={(event) =>
                                   setCriterionValue(
                                     currentStep.id,

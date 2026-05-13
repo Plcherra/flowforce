@@ -34,9 +34,9 @@ const toCompanyUpdate = (
   title: row.title,
   body: row.body,
   richContent: row.rich_content,
-  type: row.update_type,
-  priority: row.priority,
-  status: row.status,
+  type: row.update_type as CompanyUpdate["type"],
+  priority: row.priority as CompanyUpdate["priority"],
+  status: row.status as CompanyUpdate["status"],
   backgroundStyle:
     (row.background_style as CompanyUpdate["backgroundStyle"]) ?? null,
   recipients: (row.recipients as CompanyUpdate["recipients"]) ?? null,

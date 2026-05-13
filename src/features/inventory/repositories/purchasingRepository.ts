@@ -13,7 +13,7 @@ const purchaseOrderSchema: z.ZodType<PurchaseOrder> = z
     po_number: z.string(),
     status: z.string(),
   })
-  .passthrough();
+  .passthrough() as unknown as z.ZodType<PurchaseOrder>;
 
 const purchaseOrderArraySchema = z.array(purchaseOrderSchema);
 

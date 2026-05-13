@@ -9,6 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/public-types";
 import type { ScenarioBaseline } from "@/lib/ai/scenarioEngine";
+import { logger } from "@/utils/logger";
 
 type ScheduleRow = Pick<
   Tables<"schedules">,

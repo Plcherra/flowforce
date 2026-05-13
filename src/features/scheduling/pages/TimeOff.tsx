@@ -188,7 +188,7 @@ export default function TimeOff() {
       });
       const conflictCount = safeArrayLength(conflicts);
 
-      map.set(request.id, conflicts);
+      map.set(request.id, conflictCount);
     });
 
     return map;

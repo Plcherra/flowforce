@@ -47,7 +47,7 @@ export function useRealtime<T = Record<string, unknown>>({
 
     try {
       events.forEach((eventConfig) => {
-        realtimeChannel.on(
+        (realtimeChannel as any).on(
           "postgres_changes",
           {
             event: eventConfig.event,

@@ -10,6 +10,7 @@ export type IngestedFile = {
   storage_path: string;
   metadata?: Record<string, unknown> | Json | null;
   created_at?: string;
+  uploaded_at?: string;
   updated_at?: string;
 };
 
@@ -24,6 +25,7 @@ export type ExtractedDocument = {
   meta?: Record<string, unknown> | Json | null;
   processing_state?: "pending" | "processing" | "ready" | "error";
   processing_error?: string | null;
+  text_extracted?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -63,6 +65,7 @@ export interface DocumentWithRelations extends ExtractedDocument {
   created_at?: string;
   updated_at?: string;
   processing_state?: "pending" | "processing" | "ready" | "error";
+  text_extracted?: string | null;
   title?: string | null;
   source?: string | null;
   meta?: Record<string, unknown> | null;

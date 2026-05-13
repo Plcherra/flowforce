@@ -65,7 +65,7 @@ export function mapToLeaderboardEntry(
       .map((item: Record<string, unknown>) => [item.code as string, item]),
   );
   const insights = Array.isArray(row.insights) ? row.insights : [];
-  const challenges = (
+  const challenges = ((
     Array.isArray(row.challenges) ? row.challenges : []
   ).filter(
     (challenge: unknown): challenge is LeaderboardChallenge =>
@@ -75,7 +75,7 @@ export function mapToLeaderboardEntry(
       typeof challenge.employeeId === "string" &&
       "focus" in challenge &&
       typeof challenge.focus === "string",
-  );
+  ) as unknown) as LeaderboardChallenge[];
   const fallbackDepartment =
     fallbackProfile?.department ?? row.department ?? null;
   const departmentId =
@@ -119,10 +119,24 @@ export function mapToLeaderboardEntry(
     achievements,
     insights,
     challenges,
-    taskCount: achievementsMap.get("task_streak")?.value ?? 0,
-    goalCount: achievementsMap.get("goal_closer")?.value ?? 0,
-    recognitionCount: achievementsMap.get("recognition_star")?.value ?? 0,
-    trainingCount: achievementsMap.get("skills_in_motion")?.value ?? 0,
+    taskCount:
+      (achievementsMap.get("task_streak") as { value?: number } | undefined)
+        ?.value ?? 0,
+    goalCount:
+      (achievementsMap.get("goal_closer") as { value?: number } | undefined)
+        ?.value ?? 0,
+    recognitionCount:
+      (
+        achievementsMap.get("recognition_star") as
+          | { value?: number }
+          | undefined
+      )?.value ?? 0,
+    trainingCount:
+      (
+        achievementsMap.get("skills_in_motion") as
+          | { value?: number }
+          | undefined
+      )?.value ?? 0,
     reliability: employee?.reliability ?? fallbackProfile?.reliability,
     updatedAt: row.updated_at ?? row.last_synced_at ?? dayjs().toISOString(),
     rank: rank + 1,

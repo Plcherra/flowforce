@@ -23,12 +23,13 @@ These are the technical issues that need to be fixed before the project can be c
 - [x] Split typecheck into smaller scopes if needed: app, src, tests, Supabase types.
   - Added scoped configs and `scripts/typecheck-scopes.mjs`.
 - [x] Record the actual TypeScript error count once typecheck finishes.
-  - Current count: 206 errors total; app = 206, tests = 0, Supabase client types = 0.
-- [ ] Fix TypeScript errors in priority order: build blockers first, shared types second, feature-specific issues last.
-  - Started: fixed shared router/logger/UI prop issues, stale root hook wrappers, Supabase public type stabilization, and Playwright test type errors.
-- [ ] Remove `typescript.ignoreBuildErrors: true` from `next.config.mjs`.
-  - Keep this until app-scope typecheck reaches 0 errors.
-- [ ] Confirm `npm run build` still passes after TypeScript validation is re-enabled.
+  - Final count: 0 errors across app, tests, and Supabase scopes.
+- [x] Fix TypeScript errors in priority order: build blockers first, shared types second, feature-specific issues last.
+  - Completed shared router/logger/UI prop issues, stale root hook wrappers, Supabase public type stabilization, Playwright test type errors, and build-only Next.js type blockers.
+- [x] Remove `typescript.ignoreBuildErrors: true` from `next.config.mjs`.
+  - Removed after app/test/Supabase typecheck reached 0 errors.
+- [x] Confirm `npm run build` still passes after TypeScript validation is re-enabled.
+  - Confirmed with `npm run build`; production build completes with TypeScript enforced.
 
 ## 3. Next.js Configuration And Workspace Root
 
@@ -129,8 +130,8 @@ These are the technical issues that need to be fixed before the project can be c
 
 - [ ] Add a single current stabilization report after the above fixes are complete.
 - [ ] Confirm `npm run dev` starts cleanly.
-- [ ] Confirm `npm run build` passes cleanly.
-- [ ] Confirm `npm run typecheck` passes cleanly.
+- [x] Confirm `npm run build` passes cleanly.
+- [x] Confirm `npm run typecheck` passes cleanly.
 - [ ] Confirm the demo account can access the core app.
 - [ ] Confirm no secrets are committed.
 - [ ] Confirm `.env.example` is complete.

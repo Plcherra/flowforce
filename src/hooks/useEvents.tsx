@@ -57,6 +57,8 @@ export type AppEvent = {
     name: string;
     service_type?: string;
     contact?: string;
+    contact_email?: string | null;
+    contact_phone?: string | null;
   };
   related_shift_ids?: string[];
   attendees?: EventAttendee[];

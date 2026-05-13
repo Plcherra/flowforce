@@ -108,7 +108,7 @@ export default function FormFillDialog({
     if (!hasInitialized && orderedFields.length > 0) {
       const defaultValues: FormSubmissionData = {};
       orderedFields.forEach((field) => {
-        defaultValues[field.id] = getDefaultValue(field);
+        defaultValues[field.id] = getDefaultValueForField(field);
       });
       form.reset(defaultValues);
       setHasInitialized(true);
@@ -339,7 +339,7 @@ export default function FormFillDialog({
       );
     }
 
-    switch (currentStep.id) {
+    switch (wizard.currentStep.id) {
       case "overview":
         return (
           <div className="space-y-6">

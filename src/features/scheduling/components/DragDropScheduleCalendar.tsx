@@ -134,7 +134,7 @@ export function DragDropScheduleCalendar({
   const { vendorForm, setVendorForm } = useVendorForm({
     pendingVendorEvent,
     locations,
-    candidateVendorShifts,
+    candidateVendorShifts: candidateVendorShifts as any,
     vendorModalOpen,
   });
 
@@ -507,7 +507,7 @@ export function DragDropScheduleCalendar({
         pendingVendorEvent={pendingVendorEvent}
         vendorForm={vendorForm}
         locations={locations}
-        candidateVendorShifts={candidateVendorShifts}
+        candidateVendorShifts={candidateVendorShifts as any}
         onFormChange={setVendorForm}
         onCreateVendorEvent={createVendorEvent}
       />

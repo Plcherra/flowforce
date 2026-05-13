@@ -95,7 +95,7 @@ export function usePermissions() {
 
   const can = (permission: Permission): boolean => {
     try {
-      return resolver.resolve(permission as unknown);
+      return resolver.resolve(permission as any);
     } catch (error) {
       logger.error("Failed to resolve permission", { error, tags: ["error"] });
       return false;

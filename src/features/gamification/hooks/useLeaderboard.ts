@@ -155,7 +155,7 @@ export function useLeaderboard(
         throw new Error(error.message ?? "Failed to load leaderboard");
       }
 
-      const rows = (data ?? []) as LeaderboardRowRecord[];
+      const rows = (data ?? []) as unknown as LeaderboardRowRecord[];
       const mappedEntries = rows
         .map((row, index) => mapToLeaderboardEntry(row, index, undefined))
         .filter((entry): entry is LeaderboardEntry => Boolean(entry));

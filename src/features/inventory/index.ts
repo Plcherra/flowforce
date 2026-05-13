@@ -3,7 +3,7 @@
  */
 
 // Components
-export * from "./components/purchasing";
+export * from "./components/purchasing/index";
 
 // Hooks
 export * from "./hooks";

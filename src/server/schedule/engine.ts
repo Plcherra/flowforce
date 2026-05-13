@@ -220,7 +220,7 @@ export async function generateSchedule(
       // Day/area counts to pass into policy check
       const dayCounts = buildDayAreaCounts(assigned, slot.date);
 
-      const decision: Decision = await engine.canScheduleShift({
+      const decision: Decision = await (engine as any).canScheduleShift({
         date: slot.date,
         locationId: slot.locationId,
         area: slot.area,

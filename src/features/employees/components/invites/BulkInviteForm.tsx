@@ -37,6 +37,7 @@ export function BulkInviteForm({
   onProcess,
   isPending,
   onCopyLink,
+  onError,
 }: BulkInviteFormProps) {
   const [fileInputKey, setFileInputKey] = useState(0);
 

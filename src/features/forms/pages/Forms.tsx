@@ -103,7 +103,7 @@ export default function Forms() {
       (form) => form.created_by !== user?.id,
     );
 
-    const activeSections = [
+    const activeSections: FormSectionConfig[] = [
       {
         key: "my",
         title: "My Forms",

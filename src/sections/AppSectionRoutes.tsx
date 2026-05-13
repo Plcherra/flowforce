@@ -1,5 +1,4 @@
 import React from "react";
-import { Route } from "@/lib/router-adapter";
 import { sections } from "./registry";
 
 // Statically map section pages without relying on build-time globbing
@@ -23,20 +22,16 @@ export function buildSectionRoutes(): React.ReactElement[] {
 
     // Add exact route for section index
     routes.push(
-      <Route
-        key={sec.slug}
-        path={`/sections/${sec.slug}`}
-        element={<Index />}
-      />,
+      <React.Fragment key={sec.slug}>
+        <Index />
+      </React.Fragment>,
     );
 
     // Add catch-all route for section to handle dynamic routing
     routes.push(
-      <Route
-        key={`${sec.slug}-catchall`}
-        path={`/sections/${sec.slug}/*`}
-        element={<Index />}
-      />,
+      <React.Fragment key={`${sec.slug}-catchall`}>
+        <Index />
+      </React.Fragment>,
     );
 
     // Add static page routes
@@ -53,11 +48,9 @@ export function buildSectionRoutes(): React.ReactElement[] {
         return Promise.resolve({ default: () => <div>Page not found</div> });
       });
       routes.push(
-        <Route
-          key={`${sec.slug}-${p.slug}`}
-          path={`/sections/${sec.slug}/${p.slug}`}
-          element={<Lazy />}
-        />,
+        <React.Fragment key={`${sec.slug}-${p.slug}`}>
+          <Lazy />
+        </React.Fragment>,
       );
     }
   }

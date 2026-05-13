@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type ChangeEvent,
 } from "react";
 import { useSearchParams } from "@/lib/router-adapter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,7 +123,7 @@ export function TeamDirectory() {
     if (!inviteParam) return;
     const next = new URLSearchParams(searchParams);
     next.delete("invite");
-    setSearchParams(next, { replace: true });
+    setSearchParams(next);
   };
 
   const handleInviteChange = (open: boolean) => {
@@ -176,13 +177,16 @@ export function TeamDirectory() {
     setPage((prev) => (prev === 1 ? prev : 1));
   }, [activeTab, searchTerm, departmentFilter]);
 
+  const { totalPages, displayRangeStart, displayRangeEnd, hasResults } =
+    pagination;
   const combinedError = employeesError ?? departmentError;
   const combinedErrorMessage = useMemo(() => {
     if (!combinedError) return null;
     if (typeof combinedError === "string") return combinedError;
-    if (combinedError instanceof Error) return combinedError.message;
+    const errorValue = combinedError as unknown;
+    if (errorValue instanceof Error) return errorValue.message;
     try {
-      return JSON.stringify(combinedError);
+      return JSON.stringify(errorValue);
     } catch {
       return "We couldn’t load your team directory data. Please try again.";
     }
@@ -265,8 +269,6 @@ export function TeamDirectory() {
   const isAdmin = ["owner", "admin", "manager"].includes(currentRole);
   const canManageEmployees = ["admin", "manager"].includes(currentRole);
 
-  const { totalPages, displayRangeStart, displayRangeEnd, hasResults } =
-    pagination;
   const {
     active: activeEmployeesCount,
     inactive: inactiveEmployeesCount,

@@ -35,7 +35,7 @@ export function groupGoalTasks(
     const sanitized: GoalTaskWithDetails = {
       id: record.id ?? `${goalId}-${index}`,
       weight: record.weight ?? null,
-      task: record.task ?? null,
+      task: (record.task as GoalTaskWithDetails["task"]) ?? null,
     };
     existing.push(sanitized);
     map.set(goalId, existing);
@@ -81,8 +81,8 @@ export function buildRecognitionMap({
       typeof details?.xp_awarded === "number"
         ? details.xp_awarded
         : details &&
-            typeof (details as Record<string, unknown>)?.xp === "number"
-          ? ((details as Record<string, unknown>).xp as number)
+            typeof (details as unknown as Record<string, unknown>)?.xp === "number"
+          ? ((details as unknown as Record<string, unknown>).xp as number)
           : null;
     const xp =
       explicitXp != null

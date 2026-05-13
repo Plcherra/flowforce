@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
-import type { PurchaseOrder, VendorInvoiceRecord } from "../hooks/types";
-import type { InvoiceFormState } from "../types/purchasing";
+import type { PurchaseOrder } from "../hooks/types";
+import type { InvoiceFormState, VendorInvoiceRecord } from "../types/purchasing";
 
 interface UseVendorInvoicesProps {
   purchaseOrders: PurchaseOrder[];

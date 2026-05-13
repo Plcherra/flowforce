@@ -10,7 +10,7 @@ const actorSchema = z.object({
   last_name: z.string().nullable(),
 });
 
-const taskActivitySchema: z.ZodType<TaskActivityRow> = z
+const taskActivitySchema = z
   .object({
     id: z.string(),
     task_id: z.string(),

@@ -8,9 +8,9 @@ type DatabaseWithoutInternals = Omit<GeneratedDatabase, "__InternalSupabase">;
 type DefaultSchema = DatabaseWithoutInternals["public"];
 type DefaultTables = DefaultSchema["Tables"];
 type DefaultViews = DefaultSchema["Views"];
-type AnyRow = Record<string, any>;
-type AnyInsert = Record<string, any>;
-type AnyUpdate = Record<string, any>;
+type AnyRow = any;
+type AnyInsert = any;
+type AnyUpdate = any;
 
 // The app is currently ahead of the regenerated Supabase schema types. Until
 // the database contract is stabilized, app-facing table helpers stay permissive

@@ -23,7 +23,7 @@ export type FormRow = Tables<"forms">;
 export type FormFieldRow = Tables<"form_fields">;
 export type FormSubmissionRow = Tables<"form_submissions">;
 
-const formRowSchema: z.ZodType<FormRow> = z.object({
+const formRowSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().nullable(),
@@ -39,7 +39,7 @@ const formRowSchema: z.ZodType<FormRow> = z.object({
   end_date: z.string().nullable(),
 });
 
-const formFieldRowSchema: z.ZodType<FormFieldRow> = z.object({
+const formFieldRowSchema = z.object({
   id: z.string(),
   form_id: z.string(),
   field_order: z.number(),
@@ -62,7 +62,7 @@ const formFieldRowSchema: z.ZodType<FormFieldRow> = z.object({
   updated_at: z.string(),
 });
 
-const formSubmissionRowSchema: z.ZodType<FormSubmissionRow> = z.object({
+const formSubmissionRowSchema = z.object({
   id: z.string(),
   form_id: z.string(),
   submission_data: jsonSchema,

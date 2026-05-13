@@ -163,7 +163,7 @@ export function useForms() {
     [],
   );
 
-  const formsQuery = useQuery<FormWithMeta[]>({
+  const formsQuery = useQuery<FormWithMeta[], Error, FormWithMeta[]>({
     queryKey: formsQueryKey,
     queryFn: async () => {
       if (!companyId) {
@@ -174,20 +174,8 @@ export function useForms() {
     enabled: Boolean(user && companyId),
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    suspense: false,
     throwOnError: false,
     retry: 1,
-    onError: (error) => {
-      logger.error("Error fetching forms", {
-        error,
-        tags: ["forms", "data-fetch"],
-      });
-      toast({
-        title: "Error",
-        description: "Failed to load forms",
-        variant: "destructive",
-      });
-    },
   });
 
   const forms = formsQuery.data ?? [];

@@ -16,7 +16,7 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
 
 type DepartmentRow = Tables<"departments"> & { color?: string | null };
 
-const departmentRowSchema: z.ZodType<DepartmentRow> = z
+const departmentRowSchema = z
   .object({
     company_id: z.string().nullable(),
     created_at: z.string(),
@@ -38,7 +38,7 @@ const positionRowSchema = z
   })
   .passthrough();
 
-const employeeProfileRowSchema: z.ZodType<Tables<"profiles">> = z
+const employeeProfileRowSchema = z
   .object({
     id: z.string(),
     first_name: z.string().nullable(),
@@ -80,7 +80,7 @@ const profileCompanyContextSchema = z
   })
   .passthrough();
 
-const skillMatrixRowSchema: z.ZodType<Tables<"skill_matrix">> = z
+const skillMatrixRowSchema = z
   .object({
     created_at: z.string(),
     employee_id: z.string(),

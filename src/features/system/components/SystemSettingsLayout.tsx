@@ -41,7 +41,7 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
 
   const handleProfilerRender = (
     id: string,
-    phase: "mount" | "update",
+    phase: "mount" | "update" | "nested-update",
     actualDuration: number,
   ) => {
     if (appEnv.DEV) {

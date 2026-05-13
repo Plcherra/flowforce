@@ -88,7 +88,7 @@ export async function listInventoryCounts(
 
   return inventoryCountArraySchema.parse(data ?? []).map((count) => ({
     ...count,
-    locations: (count.locations ?? [])
+    locations: ((count.locations ?? []) as Array<Record<string, unknown>>)
       .map((entry: Record<string, unknown>) => entry?.location)
       .filter(Boolean),
   })) as InventoryCount[];
@@ -118,7 +118,7 @@ export async function getInventoryCount(
   const parsed = inventoryCountSchema.parse(data);
   return {
     ...parsed,
-    locations: (parsed.locations ?? [])
+    locations: ((parsed.locations ?? []) as Array<Record<string, unknown>>)
       .map((entry: Record<string, unknown>) => entry?.location)
       .filter(Boolean),
   } as InventoryCount;
@@ -565,8 +565,12 @@ async function resolveCountScopeItems(
   const { data, error } = await itemQuery;
   if (error) throw error;
 
-  const items = (data ?? []) as InventoryItem[];
-  const scoped = items.map((item) => ({ item, expectedQuantity: 0 }));
+  const items = (data ?? []) as unknown as InventoryItem[];
+  const scoped = items.map((item) => ({
+    item,
+    expectedQuantity: 0,
+    units: [],
+  }));
   return attachUnitsToItems(client, scoped);
 }
 
@@ -593,7 +597,7 @@ async function buildScopedItemsForIds(
   const expectedMap = new Map(
     items.map((entry) => [entry.id, entry.expectedQuantity ?? 0]),
   );
-  const scoped = ((data ?? []) as InventoryItem[]).map<ScopedCountItem>(
+  const scoped = ((data ?? []) as unknown as InventoryItem[]).map<ScopedCountItem>(
     (item) => ({
       item,
       expectedQuantity: expectedMap.get(item.id) ?? 0,

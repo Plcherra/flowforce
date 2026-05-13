@@ -72,16 +72,16 @@ export function TeamAvailabilityPanel({
   const employeesError = management.employeesQuery.error;
 
   const missingOrgPrefs =
-    queriesEnabled && isMissingRelationError(orgPrefsError, "org_prefs");
+    queriesEnabled && isMissingRelationError(orgPrefsError as any, "org_prefs");
   const missingAvailabilityRequest =
     queriesEnabled &&
-    isMissingRelationError(requestsError, "availability_request");
+    isMissingRelationError(requestsError as any, "availability_request");
   const missingAvailabilityTable =
     queriesEnabled &&
-    isMissingRelationError(exceptionsError, "availability_exception");
+    isMissingRelationError(exceptionsError as any, "availability_exception");
   const missingStaffAvailability =
     queriesEnabled &&
-    isMissingRelationError(exceptionsError, "staff_availability");
+    isMissingRelationError(exceptionsError as any, "staff_availability");
 
   const firstError = useMemo(() => {
     return (

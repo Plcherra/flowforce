@@ -7,7 +7,6 @@ import type {
 } from "@/features/forms/repositories/formsRepository";
 import { fetchFormWithRelations } from "@/features/forms/repositories/formsRepository";
 import { useProfile } from "@/hooks/useProfile";
-import { logger } from "@/utils/logger";
 
 type UseFormDefinitionOptions = {
   formId?: string | null;
@@ -70,7 +69,7 @@ export function useFormDefinition({
     return initialForm ?? forms.find((form) => form.id === formId) ?? null;
   }, [formId, forms, initialForm]);
 
-  const formQuery = useQuery({
+  const formQuery = useQuery<FormQueryRow | null>({
     queryKey: ["form-detail", companyId ?? "no-company", formId ?? "no-form"],
     enabled: Boolean(formId && companyId && !cachedForm),
     queryFn: async () => {
@@ -80,9 +79,6 @@ export function useFormDefinition({
       return fetchFormWithRelations(companyId, formId);
     },
     retry: 1,
-    onError: (error) => {
-      logger.error("Error loading form definition", { error, tags: ["error"] });
-    },
   });
 
   const fieldsQuery = useQuery<FormFieldRow[]>({
@@ -99,9 +95,6 @@ export function useFormDefinition({
       return data;
     },
     retry: 1,
-    onError: (error) => {
-      logger.error("Error loading form fields", { error, tags: ["error"] });
-    },
   });
 
   const form = cachedForm ?? buildMetaFromQueryRow(formQuery.data ?? null);

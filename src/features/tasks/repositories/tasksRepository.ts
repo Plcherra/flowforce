@@ -29,7 +29,7 @@ const goalSchema = z.object({
   target_completion_date: z.string().nullable(),
 });
 
-const taskRowSchema: z.ZodType<TaskRow> = z
+const taskRowSchema = z
   .object({
     id: z.string(),
     title: z.string(),
@@ -65,7 +65,7 @@ const taskWithRelationsSchema = taskRowSchema.extend({
   goal: goalSchema.nullable().optional(),
 });
 
-const taskCommentSchema: z.ZodType<TaskCommentRow> = z
+const taskCommentSchema = z
   .object({
     id: z.string(),
     task_id: z.string(),
@@ -91,8 +91,8 @@ export async function fetchTasksByCompany(
 ): Promise<TaskWithRelations[]> {
   // Phase 6: Apply retry logic to critical data fetch
   const { data, error } = await retrySupabaseQuery(
-    () =>
-      supabase
+    async () =>
+      await supabase
         .from("tasks")
         .select(
           `

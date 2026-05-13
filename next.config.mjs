@@ -2,9 +2,6 @@ const aliasPath = './src/lib/router-adapter';
 
 const nextConfig = {
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // Optimize webpack for faster dev builds
   webpack: (config, { dev, isServer }) => {
     config.resolve.alias['react-router-dom'] = aliasPath;

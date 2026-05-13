@@ -13,7 +13,7 @@ const inventoryLocationSchema: z.ZodType<InventoryLocation> = z.object({
   company_id: z.string().uuid(),
   created_at: z.string(),
   updated_at: z.string(),
-});
+}) as unknown as z.ZodType<InventoryLocation>;
 
 type ListInventoryLocationsOptions = {
   companyId?: string;

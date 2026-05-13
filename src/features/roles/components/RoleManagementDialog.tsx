@@ -272,7 +272,7 @@ export default function RoleManagementDialog({
                             )}
                             onCheckedChange={(checked) =>
                               handlePermissionChange(
-                                permission.key,
+                                permission.key as any,
                                 Boolean(checked),
                               )
                             }

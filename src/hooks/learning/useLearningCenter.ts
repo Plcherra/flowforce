@@ -687,5 +687,5 @@ async function fetchAdminEnrollments(
     });
     throw new Error("Malformed admin enrollment response.");
   }
-  return parsed.data.enrollments;
+  return parsed.data.enrollments as unknown as LearningEnrollment[];
 }

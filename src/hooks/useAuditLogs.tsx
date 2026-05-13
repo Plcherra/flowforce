@@ -45,7 +45,7 @@ export function useAuditLogs() {
 
       if (error) {
         // Gracefully handle missing table when feature flag is disabled or migration not run
-        if ((error as Record<string, unknown>).code === "42P01") {
+        if ((error as unknown as Record<string, unknown>).code === "42P01") {
           logger.warn(
             "[useAuditLogs] audit_logs table not found. Returning empty list",
             { tags: ["warning"] },

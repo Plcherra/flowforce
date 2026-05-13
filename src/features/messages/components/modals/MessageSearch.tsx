@@ -162,8 +162,10 @@ export function MessageSearch({
           id: msg.id,
           content: msg.content,
           created_at: msg.created_at,
-          sender_profile: msg.sender_profile,
-          channel: msg.channel,
+          sender_profile: Array.isArray(msg.sender_profile)
+            ? msg.sender_profile[0]
+            : msg.sender_profile,
+          channel: Array.isArray(msg.channel) ? msg.channel[0] : msg.channel,
         })),
         ...filteredChannels.map((channel) => ({
           type: "channel" as const,

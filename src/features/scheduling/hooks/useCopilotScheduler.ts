@@ -80,7 +80,7 @@ export function useCopilotScheduler({
 
       const forecastMap = new Map(
         forecastApi
-          .getCoverageForecast(templates, { window: timeframe, location })
+          .getCoverageForecast(templates as any, { window: timeframe, location })
           .map((forecast) => [forecast.templateId, forecast]),
       );
 

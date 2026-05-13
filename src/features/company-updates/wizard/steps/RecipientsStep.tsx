@@ -162,10 +162,7 @@ export function RecipientsStep({
     }
 
     const appliedCategory = formData.recipients.type;
-    const labels: Record<
-      typeof appliedCategory,
-      { singular: string; plural: string }
-    > = {
+    const labels: Record<string, { singular: string; plural: string }> = {
       departments: { singular: "department", plural: "departments" },
       roles: { singular: "role", plural: "roles" },
       individuals: { singular: "person", plural: "people" },

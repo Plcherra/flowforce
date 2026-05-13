@@ -73,9 +73,7 @@ export function StepXPRewards({
         </CardHeader>
         <CardContent>
           <CourseModulesForm
-            modules={modules}
-            onAddModule={onAddModule}
-            onRemoveModule={onRemoveModule}
+            onAdd={onAddModule}
           />
         </CardContent>
       </Card>

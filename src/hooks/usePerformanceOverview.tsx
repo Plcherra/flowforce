@@ -42,9 +42,9 @@ export interface PerformanceReviewEntry {
 }
 
 export function usePerformanceOverview() {
-  const query = useQuery<PerformanceDataset, Error>({
+  const query = useQuery<PerformanceDataset, Error, PerformanceDataset>({
     queryKey: ["performance-dataset"],
-    queryFn: fetchPerformanceDataset,
+    queryFn: () => fetchPerformanceDataset(),
     staleTime: 1000 * 60 * 5,
   });
 

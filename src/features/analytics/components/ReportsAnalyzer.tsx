@@ -85,7 +85,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
     accuracyScore: metrics?.accuracyScore ?? 0,
     reportsEngagementScore: metrics?.reportsEngagementScore ?? 0,
     filteredDocumentsLength: metrics?.filteredDocuments?.length ?? 0,
-    followUpActions: metrics?.followUpActions ?? [],
+    followUpActions: metrics?.followUpActions ?? 0,
     timeRange,
     selectedReport,
   });

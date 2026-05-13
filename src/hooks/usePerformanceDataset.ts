@@ -5,7 +5,7 @@ import type { PerformanceDataset } from "@/services/performance/performanceTypes
 export function usePerformanceDataset() {
   return useQuery<PerformanceDataset, Error>({
     queryKey: ["performance-dataset"],
-    queryFn: fetchPerformanceDataset,
+    queryFn: () => fetchPerformanceDataset(),
     staleTime: 1000 * 60 * 5,
   });
 }

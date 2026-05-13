@@ -17,13 +17,12 @@ import {
 } from "@tanstack/react-query";
 import { useProfile } from "./useProfile";
 import { supabase } from "@/integrations/supabase/client";
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type QueryBuilder<T> = (
   client: SupabaseClient,
   companyId: string | null,
-) => PostgrestFilterBuilder<any, any, T[], unknown>;
+) => any;
 
 interface UseSupabaseQueryOptions<TData, TError = Error> {
   queryKey: readonly unknown[];

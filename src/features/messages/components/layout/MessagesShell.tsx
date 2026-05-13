@@ -5,7 +5,7 @@ import { MessagesMobileLayout } from "./MessagesMobileLayout";
 import { MessagesDesktopLayout } from "./MessagesDesktopLayout";
 import { MessagesPortalContent } from "./MessagesPortalContent";
 import { MessagesWorkspaceHeader } from "./MessagesWorkspaceHeader";
-import type { MessagesViewModel } from "../hooks/useMessagesViewModel";
+import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesShellProps {
   viewModel: MessagesViewModel;

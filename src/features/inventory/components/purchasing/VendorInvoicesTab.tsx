@@ -34,7 +34,8 @@ import {
   STATUS_LABELS,
 } from "../../utils/statusHelpers";
 import { extractInvoiceNumber } from "../../types/purchasing";
-import type { PurchaseOrder, VendorInvoiceRecord } from "../../hooks/types";
+import type { VendorInvoiceRecord } from "../../types/purchasing";
+import type { PurchaseOrder } from "../../hooks/types";
 
 interface VendorInvoicesTabProps {
   purchaseOrders: PurchaseOrder[];

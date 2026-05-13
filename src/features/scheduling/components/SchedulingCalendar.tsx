@@ -251,7 +251,7 @@ export function SchedulingCalendar({
 
           <ViewSelector
             currentView={currentView}
-            onViewChange={(view: ViewType) => setCurrentView(view)}
+            onViewChange={(view) => setCurrentView(view as ViewType)}
             isMobile={isMobile}
             mode={mode}
           />

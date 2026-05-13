@@ -19,7 +19,7 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   ]),
 );
 
-const calendarEventRowSchema: z.ZodType<Tables<"calendar_events">> = z.object({
+const calendarEventRowSchema = z.object({
   attendees: jsonSchema,
   checklist: jsonSchema,
   color: z.string().nullable(),
@@ -40,7 +40,7 @@ const calendarEventRowSchema: z.ZodType<Tables<"calendar_events">> = z.object({
   vendor: jsonSchema,
 });
 
-const eventParticipantRowSchema: z.ZodType<Tables<"event_participants">> =
+const eventParticipantRowSchema =
   z.object({
     avatar_url: z.string().nullable(),
     company_id: z.string(),
@@ -56,7 +56,7 @@ const eventParticipantRowSchema: z.ZodType<Tables<"event_participants">> =
     updated_at: z.string(),
   });
 
-const eventShiftLinkRowSchema: z.ZodType<Tables<"event_shift_links">> =
+const eventShiftLinkRowSchema =
   z.object({
     company_id: z.string(),
     created_at: z.string(),
@@ -79,7 +79,7 @@ type CalendarEventViewRow = CalendarEventRow & {
   participants?: Tables<"event_participants">[] | null;
 };
 
-const calendarEventViewRowSchema: z.ZodType<CalendarEventViewRow> =
+const calendarEventViewRowSchema =
   calendarEventRowSchema.extend({
     participants: z.array(eventParticipantRowSchema).nullable().optional(),
   });

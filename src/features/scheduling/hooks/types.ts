@@ -6,11 +6,15 @@ export type TimeOffRequestRow = Tables<"time_off_requests">;
 export type UnavailabilityRow = Tables<"user_unavailability">;
 export type VendorEventRow = Tables<"vendor_event">;
 export type ProfileRow = Tables<"profiles">;
+export type VendorEventWithMetadata = VendorEventRow;
 
 export type ProfileSummary = Pick<
   ProfileRow,
   "id" | "first_name" | "last_name" | "email" | "avatar_url"
->;
+> & {
+  role?: string | null;
+  position?: { id?: string; name?: string | null } | null;
+};
 
 export interface SchedulingQueryParams {
   companyId?: string | null;

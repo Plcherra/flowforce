@@ -9,7 +9,7 @@ import type { PositionCoverage } from "../types/userManagement";
  */
 export function calculatePositionCoverage(
   positions: Array<{ id: string; name: string; role: string | null }>,
-  assignments: Array<{ position_id: string; employee_id: string }>,
+  assignments: Array<{ position_id: string; employee_id?: string }>,
 ): PositionCoverage[] {
   return positions.map((position) => {
     const employees = assignments.filter(

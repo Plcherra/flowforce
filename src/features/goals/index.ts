@@ -5,4 +5,7 @@ export * from "./hooks/useGoalDialogs";
 export * from "./hooks/useGoals";
 export * from "./types";
 export * from "./utils/rewardUtils";
-export * from "./utils/suggestionUtils";
+export {
+  buildGoalSuggestionPrompt,
+  parseGoalSuggestionPayload,
+} from "./utils/suggestionUtils";

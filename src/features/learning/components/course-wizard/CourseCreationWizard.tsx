@@ -110,10 +110,12 @@ export function CourseCreationWizard({
       return;
     }
     setLoadingCertifications(true);
-    supabase
-      .from("certification_catalog")
-      .select("id, title, unlocks_role")
-      .order("title", { ascending: true })
+    void Promise.resolve(
+      supabase
+        .from("certification_catalog")
+        .select("id, title, unlocks_role")
+        .order("title", { ascending: true }),
+    )
       .then(({ data, error }) => {
         if (error) {
           logger.warn("Unable to load certification catalog", {
@@ -323,8 +325,14 @@ export function CourseCreationWizard({
           totalSteps={steps.length}
           canContinue={canContinue()}
           submitting={loading}
-          onBack={() => setStep((prev) => Math.max(prev - 1, 0))}
-          onNext={() => setStep((prev) => Math.min(prev + 1, steps.length - 1))}
+          onBack={() =>
+            setStep((prev) => Math.max(prev - 1, 0) as WizardStep)
+          }
+          onNext={() =>
+            setStep((prev) =>
+              Math.min(prev + 1, steps.length - 1) as WizardStep
+            )
+          }
           onSubmit={handleSubmit}
         />
       </DialogContent>

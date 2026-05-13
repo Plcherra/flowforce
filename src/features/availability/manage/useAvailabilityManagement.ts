@@ -244,7 +244,7 @@ export function useAvailabilityManagement({
         )
         .order("start_date", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as AvailabilityException[];
+      return (data ?? []) as unknown as AvailabilityException[];
     },
     enabled: queriesEnabled,
   });
@@ -266,14 +266,12 @@ export function useAvailabilityManagement({
     const nextLock =
       pendingMode === "auto"
         ? computeAutoLockThreshold(weekStart, {
-            id: prefs.id,
-            availability_lock_mode: "auto",
             auto_lock_day_of_week: Number(pendingDay),
             auto_lock_hour: Number(pendingHour),
           })
         : null;
     return {
-      nextLock,
+      nextLock: nextLock ? nextLock.toISOString() : null,
     };
   }, [orgPrefsQuery.data, pendingMode, pendingDay, pendingHour]);
 
@@ -509,14 +507,14 @@ export function useAvailabilityManagement({
     exceptionsQuery,
     lockStatePreview,
     updateLockSettings: () => updatePrefsMutation.mutate(),
-    updateLockSettingsPending: updatePrefsMutation.isLoading,
+    updateLockSettingsPending: updatePrefsMutation.isPending,
     approveRequest: (request: ManagerAvailabilityRequest) =>
       approveRequestMutation.mutate(request),
     denyRequest: (request: ManagerAvailabilityRequest, note: string) =>
       denyRequestMutation.mutate({ request, note }),
     requestsMutationPending:
-      approveRequestMutation.isLoading || denyRequestMutation.isLoading,
+      approveRequestMutation.isPending || denyRequestMutation.isPending,
     saveException: () => createExceptionMutation.mutate(),
-    saveExceptionPending: createExceptionMutation.isLoading,
+    saveExceptionPending: createExceptionMutation.isPending,
   };
 }

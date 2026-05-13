@@ -75,7 +75,10 @@ export async function fetchWorkflowSnapshot(
   const snapshot: WorkflowSnapshot = {};
 
   (data || []).forEach((workflowStep) => {
-    const stepSlug = workflowStep.schedule_rulebook_step?.slug;
+    const stepRelation = workflowStep.schedule_rulebook_step as any;
+    const stepSlug = (
+      Array.isArray(stepRelation) ? stepRelation[0] : stepRelation
+    )?.slug;
     if (!stepSlug) {
       return;
     }
@@ -94,8 +97,13 @@ export async function fetchWorkflowSnapshot(
     const criteriaRecords = workflowStep.schedule_workflow_criteria || [];
 
     criteriaRecords.forEach((criterionRecord: any) => {
+      const criterionRelation =
+        criterionRecord.schedule_rulebook_step_criteria as any;
       const criterionSlug =
-        criterionRecord.schedule_rulebook_step_criteria?.slug;
+        (Array.isArray(criterionRelation)
+          ? criterionRelation[0]
+          : criterionRelation
+        )?.slug;
       if (!criterionSlug) {
         return;
       }

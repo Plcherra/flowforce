@@ -160,7 +160,7 @@ export function useSchedulingConsolidated(
         : typeof schedulesQuery.error === "object" &&
             schedulesQuery.error !== null &&
             "message" in schedulesQuery.error
-          ? String(schedulesQuery.error.message)
+          ? String((schedulesQuery.error as { message?: unknown }).message)
           : DEFAULT_ERROR;
     const missingSchema = isMissingBackendResourceError(
       schedulesQuery.error,
@@ -337,6 +337,7 @@ export type {
   TimeOffWithUser,
   UnavailabilityWithUser,
   VendorEventRow as VendorEventWithMetadata,
+  ProfileSummary,
   ShiftUpsertInput,
   VendorEventUpsertInput,
   SchedulingQueryParams,

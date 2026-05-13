@@ -13,7 +13,7 @@
 **Blockers / notes:**
 
 - Legacy unit-test files have been removed. Current validation uses `npm run lint`, `npm run build`, `npm run check:supabase`, and `npm run test:smoke`.
-- `npm run typecheck` still fails because of broad existing schema/type issues outside Phase 1 cleanup.
+- `npm run typecheck` now passes with scoped app, test, and Supabase checks.
 - `npm run lint` now runs through ESLint directly, but it still fails on existing lint errors across the repo.
 
 **Next action:**
@@ -100,7 +100,7 @@
 - `npm run build` passes.
 - Duplicate feature/module folders removed: `src/features/recognitions`, `src/features/leaderboard`, `src/features/ui`, `src/availability`, and `src/modules`.
 - No legacy structural imports remain for `@/modules`, `@/screens`, `@/availability`, `react-router-dom`, `@/features/recognitions`, or `@/features/leaderboard`.
-- `npm run typecheck` was attempted, but it ran for several minutes without output and had to be stopped. Typecheck remains a known slow/broad verification blocker.
+- `npm run typecheck` has been recovered using scoped checks and now passes in a reasonable time.
 - `src/screens/` is removed.
 - There are no remaining `@/screens` imports.
 - There are no remaining `react-router-dom` imports.
@@ -146,7 +146,7 @@
 - `npm run build` passes after Company Updates changes.
 - `npm run build` passes after Calendar changes.
 - `npm run build` passes after Scheduling changes.
-- Verification policy is finalized: focused ESLint plus `npm run build` are the per-batch gates. `npm run typecheck` remains a milestone/overnight check because it is too slow and broad for each cleanup batch.
+- Verification policy is updated: focused ESLint plus `npm run typecheck` and `npm run build` are the primary cleanup gates when practical.
 
 ## Phase 4: Final Polish
 
@@ -231,6 +231,9 @@
 - Focused ESLint for the Tasks batch passes with existing warnings only.
 - `npm run build` passes after Phase 4 Batch 6.
 - `npm run test:smoke` passes after Phase 4 Batch 6.
+- `npm run typecheck` passes across app, tests, and Supabase scopes.
+- `typescript.ignoreBuildErrors` has been removed from `next.config.mjs`.
+- `npm run build` passes with TypeScript validation re-enabled.
 
 **Next Phase 4 action:**
 

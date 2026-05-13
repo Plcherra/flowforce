@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
+import { useTasks } from "@/hooks/useTasks";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TaskNotifications } from "@/features/tasks/components/TaskNotifications";
@@ -57,7 +57,7 @@ const RemindersPanel = lazy(() =>
 export default function Tasks() {
   const isMobile = useIsMobile();
   const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
-  const tasks = asArray(tasksData);
+  const tasks = asArray(tasksData) as any[];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const {
     statusFilter,
@@ -76,7 +76,7 @@ export default function Tasks() {
     closeTask,
     handleNotificationNavigate,
     getSelectionHandlers,
-  } = useTaskSelection<TaskWithRelations>(tasks);
+  } = useTaskSelection<any>(tasks);
 
   const totalTasks = tasks.length;
 
@@ -93,7 +93,7 @@ export default function Tasks() {
   );
 
   const filteredTasks = useMemo(
-    () => filterTasks(tasks, statusFilter, priorityFilter, searchTerm),
+    () => filterTasks(tasks, statusFilter, priorityFilter, searchTerm) as any[],
     [tasks, statusFilter, priorityFilter, searchTerm],
   );
 
@@ -204,7 +204,7 @@ export default function Tasks() {
             />
           ) : (
             <div data-testid="tasks-list" className="space-y-4">
-              {filteredTasks.map((task) => {
+              {filteredTasks.map((task: any) => {
                 const dueBadge = calculateDueBadge(task);
                 const selectionHandlers = getSelectionHandlers(task.id);
 

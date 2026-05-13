@@ -20,14 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { calculateProductionMaterials } from "@/lib/inventory/production";
+import {
+  calculateProductionMaterials,
+  type ProductionMaterialUsage,
+} from "@/lib/inventory/production";
 import { useCreateProductionEvent } from "@/features/inventory/hooks/useInventoryProductionEvents";
 import { useInventoryItems } from "@/features/inventory/hooks/useInventoryItems";
 import { useInventoryUnits } from "@/features/inventory/hooks/useInventoryUnits";
 import type {
   InventoryItem,
   InventoryUnit,
-  ProductionMaterialUsage,
   ProductionType,
 } from "@/features/inventory/hooks/types";
 import { collectUnits } from "@/utils/inventoryUnits";

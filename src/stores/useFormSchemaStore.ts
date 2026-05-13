@@ -242,4 +242,4 @@ export const useFormSchemaStore = create<FormSchemaState>()(
 );
 
 export const useFormSchema = () =>
-  useFormSchemaStore((state) => state.schema, shallow);
+  useFormSchemaStore((state) => state.schema);

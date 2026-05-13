@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-import type { WizardFormData, UpdateMediaItem } from "../CreateUpdateWizard";
+import type { WizardFormData } from "../CreateUpdateWizard";
+import type { UpdateMediaItem } from "../types";
 import { GRADIENT_PRESETS, BACKGROUND_PATTERNS } from "@/data/updateTemplates";
 import { CompanyUpdatePreview } from "@/features/company-updates/wizard/CompanyUpdatePreview";
 import { RichTextEditor } from "@/features/company-updates/wizard/RichTextEditor";

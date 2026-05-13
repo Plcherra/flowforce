@@ -175,14 +175,20 @@ export function useEmployeeEngagement(
       });
 
       const badgeRows = badgeResponse.data ?? [];
-      const mappedBadges: EngagementBadge[] = badgeRows.map((row) => ({
-        code: row.badge_code,
-        title: (row.badge as BadgeCatalogRow | null)?.title ?? row.badge_code,
-        description: (row.badge as BadgeCatalogRow | null)?.description ?? null,
-        icon: (row.badge as BadgeCatalogRow | null)?.icon ?? null,
-        minLevel: (row.badge as BadgeCatalogRow | null)?.min_level ?? null,
-        awardedAt: row.awarded_at,
-      }));
+      const mappedBadges: EngagementBadge[] = badgeRows.map((row) => {
+        const badge = Array.isArray(row.badge)
+          ? (row.badge[0] as BadgeCatalogRow | undefined)
+          : (row.badge as unknown as BadgeCatalogRow | null);
+
+        return {
+          code: row.badge_code,
+          title: badge?.title ?? row.badge_code,
+          description: badge?.description ?? null,
+          icon: badge?.icon ?? null,
+          minLevel: badge?.min_level ?? null,
+          awardedAt: row.awarded_at,
+        };
+      });
       setBadges(mappedBadges);
     } catch (err) {
       logger.error("Failed to fetch engagement data", {

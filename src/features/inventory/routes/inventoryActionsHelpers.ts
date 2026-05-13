@@ -1,5 +1,5 @@
 import type { InventoryItem } from "@/features/inventory/hooks/types";
-import type { CreateWasteData } from "@/hooks/inventory/useInventoryWaste";
+import type { CreateWasteData } from "@/features/inventory/hooks/useInventoryWaste";
 
 export const wasteTypes = [
   { value: "spoilage", label: "Spoilage" },

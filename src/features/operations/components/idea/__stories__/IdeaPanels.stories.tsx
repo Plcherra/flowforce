@@ -53,6 +53,8 @@ const baseContext: IdeaContextValue = {
   companyId: undefined,
   activeCycleId: null,
   setActiveCycleId: () => void 0,
+  loading: false,
+  ready: true,
 };
 
 const diagnosticsMock = {

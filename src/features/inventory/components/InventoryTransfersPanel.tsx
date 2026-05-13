@@ -388,13 +388,13 @@ export function InventoryTransfersPanel() {
       .filter(
         (
           entry,
-        ): entry is {
+        ): entry is NonNullable<typeof entry> => Boolean(entry),
+      ) as {
           item_id: string;
           unit_id: string;
           quantity: number;
           cost_per_unit?: number;
-        } => Boolean(entry),
-      );
+        }[];
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

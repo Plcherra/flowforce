@@ -33,6 +33,7 @@ export interface CalendarEvent {
   color: string | null;
   storeId: string | null;
   participants: CalendarEventParticipant[];
+  attendees?: CalendarEventParticipant[];
   shiftIds: string[];
   metadata: Tables<"calendar_events">["metadata"];
   raw: CalendarEventRow;

@@ -192,7 +192,6 @@ export default function Expenses() {
         status: "pending",
         employee_id: profile?.id,
         created_by: profile?.id,
-        company_id: profile?.companyId ?? profile?.company_id ?? undefined,
       });
       setShowCreateDialog(false);
     } catch (error) {
@@ -297,7 +296,7 @@ export default function Expenses() {
                   </DialogDescription>
                 </DialogHeader>
                 <ExpenseForm
-                  onSubmit={handleCreateExpense}
+                  onSubmit={handleCreateExpense as any}
                   onCancel={() => setShowCreateDialog(false)}
                 />
               </DialogContent>

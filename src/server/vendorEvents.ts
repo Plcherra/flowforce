@@ -8,6 +8,7 @@ export interface VendorEventInput {
   id?: string;
   company_id: string;
   location_id?: string | null;
+  location?: string | null;
   vendor_type: string;
   event_date: string;
   start_time?: string | null;

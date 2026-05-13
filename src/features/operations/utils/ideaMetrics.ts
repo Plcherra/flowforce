@@ -11,13 +11,24 @@ export type MetricsPayload = Array<{
   metadata?: Record<string, unknown>;
 }>;
 
+export type SignalPayload = Array<{
+  type: string;
+  severity: "info" | "warning" | "critical";
+  message: string;
+  metric?: string;
+  observedAt?: string;
+  metadata?: Record<string, unknown>;
+}>;
+
 export const severityConfidence: Record<string, number> = {
   critical: 0.9,
   warning: 0.65,
   info: 0.45,
 };
 
-export function resolveSeverity(delta: number) {
+export function resolveSeverity(
+  delta: number,
+): "info" | "warning" | "critical" {
   const absolute = Math.abs(delta);
   if (absolute >= 10) return "critical";
   if (absolute >= 5) return "warning";
@@ -41,7 +52,9 @@ export function buildMetricsPayload(
   }));
 }
 
-export function buildSignalsFromMetrics(metrics: MetricsPayload) {
+export function buildSignalsFromMetrics(
+  metrics: MetricsPayload,
+): SignalPayload {
   return metrics
     .filter((metric) => Math.abs(metric.change ?? 0) > 0)
     .map((metric) => {

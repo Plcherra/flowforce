@@ -66,4 +66,6 @@ export const queryKeys = {
   calendarEventsDisabled: ["calendar-events", "disabled"] as const,
 };
 
-export type QueryKey = ReturnType<(typeof queryKeys)[keyof typeof queryKeys]>;
+export type QueryKey = ReturnType<
+  Extract<(typeof queryKeys)[keyof typeof queryKeys], (...args: any[]) => any>
+>;

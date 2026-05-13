@@ -39,7 +39,7 @@ export function useNavigationAnalytics() {
 
     // Log navigation for debugging (in production, this would send to analytics service)
     logger.info("Navigation Event", {
-      context: navigationEvent,
+      context: { ...navigationEvent },
       tags: ["analytics", "navigation"],
     });
 

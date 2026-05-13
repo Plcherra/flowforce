@@ -13,13 +13,7 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { useProfile } from "../useProfile";
 import { useAuth } from "../useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-type CompanyQueryBuilder<T> = (
-  client: SupabaseClient,
-  companyId: string,
-) => PostgrestFilterBuilder<any, any, T[], unknown>;
+type SupabaseQueryBuilder = any;
 
 interface UseCompanyScopedQueryOptions<TData> {
   queryKey: readonly unknown[];
@@ -30,8 +24,8 @@ interface UseCompanyScopedQueryOptions<TData> {
   gcTime?: number;
   companyId?: string | null;
   additionalFilters?: (
-    query: PostgrestFilterBuilder<any, any, T[], unknown>,
-  ) => PostgrestFilterBuilder<any, any, T[], unknown>;
+    query: SupabaseQueryBuilder,
+  ) => SupabaseQueryBuilder;
   orderBy?: { column: string; ascending?: boolean };
 }
 
@@ -140,8 +134,8 @@ export function useUserScopedQuery<TData>({
   gcTime?: number;
   userId?: string | null;
   additionalFilters?: (
-    query: PostgrestFilterBuilder<any, any, T[], unknown>,
-  ) => PostgrestFilterBuilder<any, any, T[], unknown>;
+    query: SupabaseQueryBuilder,
+  ) => SupabaseQueryBuilder;
   orderBy?: { column: string; ascending?: boolean };
 }) {
   // Phase 7: Use useAuth hook properly

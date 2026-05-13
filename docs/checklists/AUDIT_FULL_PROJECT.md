@@ -163,8 +163,8 @@ src/
 - [x] **Verify the restructured app builds**
   - **Completed:** fixed a messages import collision caused by a helper file named `conversations.ts` shadowing the `conversations/` component folder.
   - **Completed:** wrapped the protected app shell in Suspense so router-adapter search param usage satisfies Next.js prerendering.
-  - **Verification:** `npm run lint` passes and `npm run build` passes.
-  - **Known issue:** standalone `npm run typecheck` remains too slow/broad to use as a quick Phase 2 gate.
+  - **Verification:** `npm run lint`, `npm run typecheck`, and `npm run build` pass.
+  - **Completed:** scoped TypeScript checks recovered `npm run typecheck` as a practical validation gate.
   - **Why it matters:** Phase 2 is not just file movement; the app now compiles after the structural changes.
 
 ---
@@ -222,10 +222,10 @@ Goal: reduce complexity in the riskiest active files first, starting with Compan
   - **Why it matters:** removes one of the biggest sources of hybrid App Router confusion.
 
 - [x] **Run checks after each cleanup batch**
-  - **Batch policy:** run focused ESLint on touched files and `npm run build` after every cleanup batch.
+  - **Batch policy:** run focused ESLint on touched files, then `npm run typecheck` and `npm run build` when practical.
   - **Backend/schema policy:** run `npm run check:supabase` when schema-facing code changes.
   - **Visible route policy:** run `npm run test:smoke` when route/page behavior changes.
-  - **Typecheck policy:** do not use `npm run typecheck` as a per-batch gate right now because it is too slow/broad for this cleanup phase. Keep it as a milestone or overnight check and record blockers in `docs/cleanup-progress.md`.
+  - **Typecheck policy:** use the scoped `npm run typecheck` script as the project TypeScript gate.
   - **Why it matters:** Large structural moves create import errors. Catch them immediately.
 
 ---
