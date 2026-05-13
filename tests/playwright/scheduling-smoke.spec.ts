@@ -115,10 +115,10 @@ test.describe('Scheduling smoke (Playwright)', () => {
   });
 
   test('dragging staff onto shift shows assignment chip', async ({ page }) => {
-    test.fixme('Requires draggable staff list hook-up for deterministic assignment interaction.');
+    test.fixme(true, 'Requires draggable staff list hook-up for deterministic assignment interaction.');
   });
 
   test('linking vendor event to supervisor shift surfaces chip', async ({ page }) => {
-    test.fixme('Requires deterministic vendor dialog selectors; pending UI data-test hooks.');
+    test.fixme(true, 'Requires deterministic vendor dialog selectors; pending UI data-test hooks.');
   });
 });

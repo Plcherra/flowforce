@@ -43,7 +43,9 @@ export type PositionRow = Database["public"]["Tables"]["positions"]["Row"];
 export type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];
 
 export type ProfileWithRelations = ProfileRow & {
-  department: Pick<DepartmentRow, "id" | "name" | "color"> | null;
+  department: (Pick<DepartmentRow, "id" | "name"> & {
+    color?: string | null;
+  }) | null;
   position:
     | (Pick<PositionRow, "id" | "name" | "role"> & { role: string | null })
     | null;

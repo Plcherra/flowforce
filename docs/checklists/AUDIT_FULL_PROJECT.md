@@ -6,23 +6,19 @@ Goal: keep the full FlowForce product scope while cleaning the existing structur
 
 Goal: remove obvious legacy leftovers and consolidate the active Company Updates module first.
 
-- [x] **Remove Vite/Vitest and old React leftovers**
+- [x] **Remove old React app-shell and retired test-runner leftovers**
   - **Delete these files if they exist:**
     - `src/App.css`
     - `src/index.css`
     - `src/main.tsx`
     - `src/App.tsx`
-    - `src/vite-env.d.ts`
     - `index.html`
-    - `vite.config.ts`
-    - `vitest.config.ts`
-    - `vitest.setup.ts`
   - **Update after deletion:**
-    - remove any `vitest` scripts from `package.json`
-    - remove Vite/Vitest-only dependencies from `package.json`
-    - migrate any remaining tests to the Next.js test approach chosen for the project
-  - **Verification:** run `rg "App.css|index.css|main.tsx|vite-env|vite.config|vitest" .` after cleanup and confirm no active app code depends on them.
-  - **Why it matters:** FlowForce is moving fully to Next.js. Vite and Vitest should not remain as parallel tooling.
+    - remove retired unit-test scripts from `package.json`
+    - remove retired test-only dependencies from `package.json`
+    - use the supported Next.js validation gates
+  - **Verification:** confirm no retired app-shell or test-runner references remain in tracked files.
+  - **Why it matters:** FlowForce now uses Next.js as the only app runtime and build path.
 
 - [x] **Consolidate `components/company-updates` into `features/company-updates`**
   - **Move:**
@@ -267,11 +263,16 @@ Goal: finish the architecture cleanup once the highest-risk feature consolidatio
     - `src/repositories/employeesRepository.ts` -> `src/features/employees/repositories/employeesRepository.ts`
     - kept `src/hooks/useEmployees.ts` as the cross-feature compatibility export
     - kept `src/services/performance/*`, `src/hooks/usePerformanceOverview.tsx`, `src/hooks/usePerformanceDataset.ts`, and `src/repositories/performanceRepository.ts` shared because Analytics and Performance both consume them
-    - kept `src/hooks/useTasks.tsx` and `src/hooks/useReminders.tsx` as compatibility entrypoints until a dedicated Tasks cleanup batch
+    - moved `src/repositories/tasksRepository.ts` -> `src/features/tasks/repositories/tasksRepository.ts`
+    - moved `src/repositories/taskActivitiesRepository.ts` -> `src/features/tasks/repositories/taskActivitiesRepository.ts`
+    - moved `src/repositories/taskNotificationsRepository.ts` -> `src/features/tasks/repositories/taskNotificationsRepository.ts`
+    - moved `src/repositories/remindersRepository.ts` -> `src/features/tasks/repositories/remindersRepository.ts`
+    - moved `src/hooks/useReminders.tsx` -> `src/features/tasks/hooks/useReminders.tsx`
+    - kept `src/hooks/useTasks.tsx` and `src/hooks/useReminders.tsx` as compatibility entrypoints for cross-feature callers
     - converted `src/services/learning/learningService.ts` to a thin compatibility export and kept the implementation in `src/features/learning/services/learningService.ts`
     - moved the Learning service test to `src/features/learning/services/__tests__/learningService.test.ts`
     - removed unused root scheduling/guardrail service wrappers after confirming active imports use `src/features/scheduling/services/*`
-  - **Remaining deferred item:** task repositories still need a dedicated Tasks cleanup batch because AI, Analytics, Goals, and tests depend on the current root hook/repository paths.
+  - **Completed:** removed retired unit-test files and kept the Next.js validation gates as the supported quality path.
   - **Why it matters:** Avoid a giant risky move. Clean ownership as part of active feature work.
 
 - [x] **Remove unused dependencies only after imports are gone**
@@ -321,7 +322,7 @@ Goal: finish the architecture cleanup once the highest-risk feature consolidatio
 
 ## Highest-Impact Execution Order
 
-1. Remove Vite/Vitest and old React leftovers.
+1. Remove old React app-shell and retired test-runner leftovers.
 2. Consolidate `components/company-updates` and `components/updates` into `features/company-updates`.
 3. Refactor `features/company-updates/pages/CompanyUpdates.tsx`.
 4. Add shared missing-schema handling and setup states.

@@ -94,6 +94,22 @@ Do not do a risky mass move. Complete one batch at a time, update imports, then 
 - [x] Run focused ESLint for touched Scheduling files.
 - [x] Run `npm run build`.
 
+## Batch 6: Tasks Hooks And Repositories
+
+- [x] Move `src/repositories/tasksRepository.ts` to `src/features/tasks/repositories/tasksRepository.ts`.
+- [x] Move `src/repositories/taskActivitiesRepository.ts` to `src/features/tasks/repositories/taskActivitiesRepository.ts`.
+- [x] Move `src/repositories/taskNotificationsRepository.ts` to `src/features/tasks/repositories/taskNotificationsRepository.ts`.
+- [x] Move `src/repositories/remindersRepository.ts` to `src/features/tasks/repositories/remindersRepository.ts`.
+- [x] Move `src/hooks/useReminders.tsx` to `src/features/tasks/hooks/useReminders.tsx`.
+- [x] Keep `src/hooks/useTasks.tsx` as a root compatibility export for AI, Analytics, Goals, and tests.
+- [x] Add `src/hooks/useReminders.tsx` as a root compatibility export for AI and existing mocks.
+- [x] Update Tasks feature imports to use `src/features/tasks/repositories/*`.
+- [x] Update Tasks reminder components to use `src/features/tasks/hooks/useReminders`.
+- [x] Update focused task tests/mocks to use feature-owned repository paths.
+- [x] Run focused ESLint for touched Tasks files.
+- [x] Run `npm run build`.
+- [x] Run `npm run test:smoke`.
+
 ## Files To Keep In Root-Level Shared Areas For Now
 
 - [x] Keep `src/hooks/useAuth.tsx` in root hooks.
@@ -111,7 +127,7 @@ Do not do a risky mass move. Complete one batch at a time, update imports, then 
 ## Deferred Manual Review
 
 - [x] Review Tasks hooks/repositories separately because duplicate root and feature hook structures exist.
-  - Decision: keep root compatibility hooks for now (`src/hooks/useTasks.tsx`, `src/hooks/useReminders.tsx`) because AI, Analytics, Goals, and task tests still import them. Move task repositories only in a dedicated Tasks cleanup batch.
+  - Completed: moved task repositories and the reminder hook into `src/features/tasks`, while keeping root compatibility exports for `useTasks` and `useReminders`.
 - [x] Review Learning service duplication before moving or deleting wrappers.
   - Completed: kept the implementation in `src/features/learning/services/learningService.ts`, converted `src/services/learning/learningService.ts` to a thin compatibility export, and moved the Learning service test into `src/features/learning/services/__tests__/`.
 - [x] Review Performance service ownership because it is shared by analytics and performance.

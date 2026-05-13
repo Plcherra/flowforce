@@ -26,6 +26,8 @@ interface DynamicSectionProps {
   sectionPath?: string;
 }
 
+type SectionRecord = Record<string, any>;
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -75,10 +77,11 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const sectionSlug = getSectionSlug(section);
-  const templateKey = (section.template_id || "").toString().toLowerCase();
-  const sectionRoute = (section.path || "").toString().toLowerCase();
-  const sectionName = (section.name || "").toString().toLowerCase();
+  const sectionRecord = section as unknown as SectionRecord;
+  const sectionSlug = getSectionSlug(sectionRecord);
+  const templateKey = (sectionRecord.template_id || "").toString().toLowerCase();
+  const sectionRoute = (sectionRecord.path || "").toString().toLowerCase();
+  const sectionName = (sectionRecord.name || "").toString().toLowerCase();
   const isHelpDeskSection =
     templateKey === "help-desk" ||
     sectionRoute.includes("help-desk") ||
@@ -89,17 +92,17 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
       await supabase
         .from("custom_sections")
         .update({
-          name: updates.name ?? section.name,
-          description: updates.description ?? section.description,
-          icon: updates.icon ?? section.icon,
-          permissions: updates.permissions ?? section.permissions,
+          name: updates.name ?? sectionRecord.name,
+          description: updates.description ?? sectionRecord.description,
+          icon: updates.icon ?? sectionRecord.icon,
+          permissions: updates.permissions ?? sectionRecord.permissions,
         })
-        .eq("id", section.id);
+        .eq("id", sectionRecord.id);
 
       const { data: existingPages } = await supabase
         .from("custom_section_pages")
         .select("id, route, name")
-        .eq("section_id", section.id);
+        .eq("section_id", sectionRecord.id);
 
       const existingBySlug = new Map(
         (existingPages || []).map((page: Record<string, unknown>) => {
@@ -110,9 +113,10 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
 
       const finalPages = (
         Array.isArray(updates.pages) ? updates.pages : []
-      ).map((p: Record<string, unknown>, index: number) => {
+      ).map((p: SectionRecord, index: number) => {
         const baseSlug = slugify(
-          extractSlug(p.route) || p.name || p.title || `page-${index + 1}`,
+          extractSlug(String(p.route || "")) ||
+            String(p.name || p.title || `page-${index + 1}`),
         );
         const route = `/${sectionSlug}/${baseSlug}`;
         const primaryContent =
@@ -126,7 +130,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
         return {
           slug: baseSlug,
           payload: {
-            section_id: section.id,
+            section_id: sectionRecord.id,
             name: p.name || baseSlug,
             title: p.title || p.name || "Page",
             description: p.description || null,
@@ -158,7 +162,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
         seenSlugs.add(slug);
         const existing = existingBySlug.get(slug);
         if (existing) {
-          pagesToUpdate.push({ id: existing.id, values: payload });
+          pagesToUpdate.push({ id: String(existing.id), values: payload });
         } else {
           pagesToInsert.push(payload);
         }
@@ -219,7 +223,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
         return (
           <>
             <GenericSectionRenderer
-              section={section}
+              section={sectionRecord}
               onOpenWizard={() => setShowWizard(true)}
               onNavigateToPage={(page) => {
                 const slug =
@@ -229,7 +233,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
               }}
             />
             <SectionConfigurationWizard
-              section={section}
+              section={section as any}
               open={showWizard}
               onOpenChange={setShowWizard}
               onSave={async (updates) => {
@@ -241,7 +245,7 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
     }
   }
 
-  const page = section.custom_section_pages?.find(
+  const page = sectionRecord.custom_section_pages?.find(
     (p: Record<string, unknown>) =>
       extractSlug(String(p.route || p.name || p.title || "")) === pageSlug,
   );
@@ -253,13 +257,13 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
   return (
     <>
       <SectionPageView
-        section={section}
-        page={page}
+        section={sectionRecord}
+        page={page as SectionRecord}
         onBack={() => navigate(`/app/section/${sectionSlug}`)}
         onOpenWizard={() => setShowWizard(true)}
       />
       <SectionConfigurationWizard
-        section={section}
+        section={section as any}
         open={showWizard}
         onOpenChange={setShowWizard}
         onSave={async (updates) => {
@@ -275,9 +279,9 @@ function GenericSectionRenderer({
   onOpenWizard,
   onNavigateToPage,
 }: {
-  section: Record<string, unknown>;
+  section: SectionRecord;
   onOpenWizard: () => void;
-  onNavigateToPage: (page: Record<string, unknown>) => void;
+  onNavigateToPage: (page: SectionRecord) => void;
 }) {
   const { can } = useCan();
   const navigate = useNavigate();
@@ -291,9 +295,9 @@ function GenericSectionRenderer({
       return <span className="text-base">{section.icon}</span>;
     }
 
-    const IconComponent = (Icons as Record<string, React.ComponentType>)[
+    const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[
       String(section.icon || "")
-    ] as React.ComponentType | undefined;
+    ] as React.ComponentType<{ className?: string }> | undefined;
     if (IconComponent) {
       return <IconComponent className="h-4 w-4" />;
     }
@@ -377,10 +381,10 @@ function GenericSectionRenderer({
             {(Array.isArray(section.custom_section_pages)
               ? section.custom_section_pages
               : []
-            ).map((page: Record<string, unknown>, index: number) => {
+            ).map((page: SectionRecord, index: number) => {
               const IconComponent =
                 (page.icon &&
-                  (Icons as Record<string, React.ComponentType>)[
+                  (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[
                     String(page.icon)
                   ]) ||
                 Icons.FileText;
@@ -492,15 +496,15 @@ function SectionPageView({
   onBack,
   onOpenWizard,
 }: {
-  section: Record<string, unknown>;
-  page: Record<string, unknown>;
+  section: SectionRecord;
+  page: SectionRecord;
   onBack: () => void;
   onOpenWizard: () => void;
 }) {
   const { can } = useCan();
   const IconComponent =
     (page.icon &&
-      (Icons as Record<string, React.ComponentType>)[String(page.icon)]) ||
+      (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[String(page.icon)]) ||
     Icons.FileText;
   const componentEntry =
     Array.isArray(page.content) && page.content.length > 0
@@ -558,7 +562,11 @@ function SectionPageView({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {componentMeta ? (
           <div className="space-y-4">
-            {componentMeta.render({ section, page, config: componentEntry })}
+            {componentMeta.render({
+              section: section as any,
+              page: page as any,
+              config: componentEntry,
+            })}
           </div>
         ) : (
           <Card className="max-w-2xl">

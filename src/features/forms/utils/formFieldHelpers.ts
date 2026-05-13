@@ -66,7 +66,7 @@ export function getFieldOptions(field: FormFieldDataLocal): string[] {
 /**
  * Parse field configuration safely
  */
-export function parseConfig<T extends Record<string, unknown>>(
+export function parseConfig<T extends object>(
   config: unknown,
   defaultValue: T,
 ): T {

@@ -3,9 +3,34 @@ import type {
   PublishingSettings,
   UpdateRecipient,
 } from "@/types/updateTemplates";
-import type { Tables } from "@/integrations/supabase/public-types";
 
-export type CompanyUpdateRow = Tables<"company_updates">;
+export type CompanyUpdateRow = {
+  id: string;
+  company_id: string;
+  title: string;
+  body: string;
+  rich_content?: string | null;
+  update_type: string;
+  priority: string;
+  status: string;
+  background_style?: unknown;
+  recipients?: unknown;
+  publishing_settings?: unknown;
+  assigned_employees?: string[] | null;
+  author_id?: string | null;
+  author_name?: string | null;
+  author_role?: string | null;
+  author_avatar?: string | null;
+  publish_date?: string | null;
+  scheduled_date?: string | null;
+  is_pinned: boolean;
+  likes_count?: number | null;
+  comments_count?: number | null;
+  views_count?: number | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 export type CompanyUpdateType = "announcement" | "news" | "event" | "policy";
 export type CompanyUpdatePriority = "high" | "medium" | "low";

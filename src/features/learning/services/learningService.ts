@@ -18,7 +18,15 @@ import type {
 } from "@/types/learning";
 import { logger } from "@/utils/logger";
 
-const learningClient = supabase;
+let learningClient = supabase;
+
+export function __setLearningServiceClient(client: typeof supabase) {
+  learningClient = client;
+}
+
+export function __resetLearningServiceClient() {
+  learningClient = supabase;
+}
 
 const TABLE_COURSES = "learning_courses";
 const TABLE_MODULES = "learning_modules";
@@ -135,7 +143,7 @@ const metricsRowSchema = z.object({
 type MetricsRow = z.infer<typeof metricsRowSchema>;
 
 const fromTable = <Row>(table: string) =>
-  learningClient.from<Row>(table as any);
+  (learningClient as any).from(table) as any;
 
 const parseWithSchema = <Schema extends z.ZodTypeAny>(
   schema: Schema,
@@ -232,8 +240,8 @@ const mapModule = (row: ModuleRow): LearningModule => {
     assets,
     metadata,
     orderIndex: row.order_index,
-    estimatedMinutes: row.estimated_minutes ?? 0,
-    xpAward: row.xp_award ?? 0,
+    estimatedMinutes: toNumber(row.estimated_minutes),
+    xpAward: toNumber(row.xp_award),
     createdAt: row.created_at,
   };
 };
@@ -276,7 +284,10 @@ const mapProgressSnapshot = (row: ProgressSnapshotRow) => ({
   aiRecommendation: row.ai_recommendation ?? null,
   recordedAt: row.recorded_at,
   recordedBy: row.recorded_by ?? null,
-  metadata: row.metadata ?? null,
+  metadata:
+    row.metadata && typeof row.metadata === "object"
+      ? (row.metadata as Record<string, unknown>)
+      : {},
 });
 
 const mapMetrics = (row: MetricsRow): LearningCourseMetrics => ({
@@ -311,7 +322,11 @@ export type ProgressHistoryPage = {
 };
 
 function buildSlug(title: string) {
-  const baseSlug = slugify(title);
+  const baseSlug = title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
   return baseSlug || `course-${Date.now()}`;
 }
 
@@ -948,9 +963,12 @@ export async function completeEnrollment(
 
   await ensureCourseCompletionRewards(updated, course, options);
 
-  toast({
-    title: "Course completed",
-    description: `${course.title} marked as complete.`,
+  logger.info("Course completed", {
+    context: {
+      courseId: course.id,
+      courseTitle: course.title,
+      enrollmentId: enrollment.id,
+    },
   });
 
   return updated;

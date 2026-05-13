@@ -22,7 +22,7 @@ import {
   isTomorrow,
   isPast,
 } from "date-fns";
-import { useReminders } from "@/hooks/useReminders";
+import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { CreateReminderDialog } from "./CreateReminderDialog";
 import { useToast } from "@/hooks/use-toast";
 import { ReminderListSkeleton } from "@/components/loading/TaskSkeletons";

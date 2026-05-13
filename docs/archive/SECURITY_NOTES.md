@@ -8,32 +8,17 @@
 
 ## Remaining Vulnerabilities
 
-### Quill XSS Vulnerability (Moderate)
+None recorded at the time of the Next.js-only dependency cleanup.
 
-**Status:** Mitigated with DOMPurify sanitization  
-**Severity:** Moderate  
-**CVE:** GHSA-4943-9vgg-gr5r  
-**Package:** `quill` (via `react-quill`)
+## Rich Text Editor Cleanup
 
-**Details:**
-
-- `react-quill@2.0.0` is the latest version available
-- The underlying `quill@1.3.7` has a known XSS vulnerability
-- No patch is available from the quill maintainers (vulnerability is disputed)
-- The vulnerability affects the `onloadstart` attribute on IMG elements
-
-**Mitigation Applied:**
-
-- ✅ Added DOMPurify sanitization to all react-quill output rendering
-- ✅ All `dangerouslySetInnerHTML` usage now sanitizes content with `DOMPurify.sanitize()`
+- ✅ Replaced the retired rich text editor dependency with the existing TipTap stack.
+- ✅ Removed the vulnerable transitive rich text package from `package.json` and `package-lock.json`.
+- ✅ Kept DOMPurify sanitization for rendered rich text content.
 - ✅ Files updated:
-  - `src/components/forms/fields/DescriptionField.tsx`
-
-**Recommendation:**
-
-- Consider migrating from `react-quill` to `@tiptap/react` (already in dependencies) for future features
-- Continue using DOMPurify for any rich text content rendering
-- Monitor for quill updates or react-quill alternatives
+  - `src/features/forms/components/fields/DescriptionField.tsx`
+  - `src/features/forms/components/builder/DescriptionEditorDialog.tsx`
+  - `src/features/forms/components/builder/RichTextContentEditor.tsx`
 
 ## Package Updates
 

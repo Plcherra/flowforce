@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Edit3, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import DOMPurify from "dompurify";
+import { RichTextContentEditor } from "@/features/forms/components/builder/RichTextContentEditor";
 
 interface DescriptionFieldProps {
   label: string;
@@ -26,6 +25,10 @@ export function DescriptionField({
   const [editMode, setEditMode] = useState(isEditing);
   const [currentContent, setCurrentContent] = useState(content);
 
+  useEffect(() => {
+    setCurrentContent(content);
+  }, [content]);
+
   const handleContentChange = (value: string) => {
     setCurrentContent(value);
     onContentChange?.(value);
@@ -34,33 +37,6 @@ export function DescriptionField({
   const toggleEditMode = () => {
     setEditMode(!editMode);
   };
-
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "image"],
-      ["clean"],
-    ],
-  };
-
-  const quillFormats = [
-    "header",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "color",
-    "background",
-    "align",
-    "list",
-    "bullet",
-    "link",
-    "image",
-  ];
 
   return (
     <Card className={`border-l-4 border-l-primary/20 ${className}`}>
@@ -94,20 +70,18 @@ export function DescriptionField({
             )}
             {editMode ? (
               <div className="mt-3">
-                <ReactQuill
+                <RichTextContentEditor
                   value={currentContent}
                   onChange={handleContentChange}
-                  modules={quillModules}
-                  formats={quillFormats}
-                  theme="snow"
-                  className="bg-background"
                 />
               </div>
             ) : (
               currentContent && (
                 <div
                   className="prose prose-sm max-w-none text-foreground mt-3"
-                  dangerouslySetInnerHTML={{ __html: currentContent }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(currentContent),
+                  }}
                 />
               )
             )}

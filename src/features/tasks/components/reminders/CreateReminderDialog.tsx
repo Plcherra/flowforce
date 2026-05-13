@@ -34,7 +34,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useReminders } from "@/hooks/useReminders";
+import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";

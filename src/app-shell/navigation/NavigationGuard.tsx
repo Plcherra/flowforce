@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -21,10 +21,13 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
   );
   const isAuthRoute = authRoutes.some((route) => currentPath.startsWith(route));
 
-  const redirectTo = (destination: string, state?: Record<string, unknown>) => {
-    if (currentPath === destination) return;
-    navigate(destination, { replace: true, state });
-  };
+  const redirectTo = useCallback(
+    (destination: string, state?: Record<string, unknown>) => {
+      if (currentPath === destination) return;
+      navigate(destination, { replace: true, state });
+    },
+    [currentPath, navigate],
+  );
 
   useEffect(() => {
     if (loading) return; // Wait for auth to resolve
@@ -46,7 +49,7 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
       redirectTo("/app/dashboard");
       return;
     }
-  }, [user, loading, currentPath, isProtectedRoute, isAuthRoute, navigate]);
+  }, [user, loading, currentPath, isProtectedRoute, isAuthRoute, redirectTo]);
 
   if (loading && isProtectedRoute) {
     return (

@@ -107,25 +107,6 @@ export const validateCompanyInfo = (
   };
 };
 
-const isValidUrl = (url: string): boolean => {
-  try {
-    new URL(url.startsWith("http") ? url : `https://${url}`);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const isValidPhone = (phone: string): boolean => {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
-  return phoneRegex.test(cleanPhone);
-};
-
-export const sanitizeUserInput = (input: string): string => {
-  return input.trim().replace(/[<>\"']/g, "");
-};
-
 export const generateEmployeeId = (): string => {
   const year = new Date().getFullYear();
   const random = Math.floor(Math.random() * 10000)

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { syncGoalProgress } from "@/features/goals/services/goalProgressService";
-export type { TaskWithRelations } from "@/repositories/tasksRepository";
+export type { TaskWithRelations } from "@/features/tasks/repositories/tasksRepository";
 import { logger } from "@/utils/logger";
 
 import {
@@ -19,9 +19,9 @@ import {
   TaskWithRelations,
   updateTaskRow,
   deleteTaskRow,
-} from "@/repositories/tasksRepository";
+} from "@/features/tasks/repositories/tasksRepository";
 import { fetchCompanyIdForUser } from "@/repositories/companyRepository";
-import { fetchTaskTimeline } from "@/repositories/taskActivitiesRepository";
+import { fetchTaskTimeline } from "@/features/tasks/repositories/taskActivitiesRepository";
 
 const STATUS_ALIASES: Record<string, TaskStatus> = {
   completed: "done",

@@ -16,7 +16,7 @@ import {
   markNotificationAsRead,
   type NewNotificationInput,
   type TaskNotification,
-} from "@/repositories/taskNotificationsRepository";
+} from "@/features/tasks/repositories/taskNotificationsRepository";
 
 const NOTIFICATION_QUERY_KEY = "task-notifications";
 

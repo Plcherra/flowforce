@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "incremental": false,
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/integrations/supabase/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "scripts",
+    "tests",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "reports",
+    "dev",
+    "dist"
+  ]
+}

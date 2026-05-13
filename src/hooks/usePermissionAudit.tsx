@@ -14,6 +14,16 @@ interface AuditLogEntry {
   timestamp: string;
 }
 
+const toLogContext = (entry: AuditLogEntry): Record<string, unknown> => ({
+  user_id: entry.user_id,
+  permission_key: entry.permission_key,
+  action: entry.action,
+  result: entry.result,
+  source: entry.source,
+  context: entry.context,
+  timestamp: entry.timestamp,
+});
+
 /**
  * Hook for auditing permission checks and changes
  * Provides security monitoring and compliance logging
@@ -46,7 +56,7 @@ export function usePermissionAudit() {
         // Development: Log to logger
         if (process.env.NODE_ENV === "development") {
           logger.info("[Permission Audit]", {
-            context: auditEntry,
+            context: toLogContext(auditEntry),
             tags: ["audit", "permission"],
           });
         }
@@ -89,7 +99,7 @@ export function usePermissionAudit() {
 
         if (process.env.NODE_ENV === "development") {
           logger.info("[Permission Audit] Override", {
-            context: auditEntry,
+            context: toLogContext(auditEntry),
             tags: ["audit", "permission"],
           });
         }

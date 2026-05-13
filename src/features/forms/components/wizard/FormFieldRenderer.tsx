@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { useForm } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -53,7 +53,7 @@ import { getFieldOptions, parseConfig } from "../../utils/formFieldHelpers";
 
 interface FormFieldRendererProps {
   field: FormFieldDataLocal;
-  form: ReturnType<typeof useForm>;
+  form: UseFormReturn<Record<string, any>>;
 }
 
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
@@ -625,7 +625,6 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
               <FormulaField
                 label={field.label}
                 description={field.description}
-                value={formField.value as number}
                 onChange={formField.onChange}
               />
             </FormItem>

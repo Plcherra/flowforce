@@ -50,7 +50,7 @@ class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error("ErrorBoundary caught:", {
       error,
-      errorInfo,
+      context: { errorInfo },
       tags: ["error"],
     });
 

@@ -2,17 +2,17 @@
 
 ## Phase 1: Immediate Cleanup
 
-- [x] Removed Vite/Vitest config files and old React stylesheet entry files.
-- [x] Removed the `npm run test` Vitest script.
-- [x] Removed Vite/Vitest-only dependencies from `package.json`.
-- [x] Removed `lovable-tagger` because it pulled Vite into the dependency tree.
+- [x] Removed retired app-shell config files and old React stylesheet entry files.
+- [x] Removed the retired unit-test script.
+- [x] Removed retired test-runner-only dependencies from `package.json`.
+- [x] Removed the legacy tagging dependency because it pulled retired app tooling into the dependency tree.
 - [x] Consolidated `src/components/company-updates/` into `src/features/company-updates/`.
 - [x] Consolidated `src/components/updates/` into `src/features/company-updates/wizard/`.
 - [x] Updated imports for moved Company Updates files.
 
 **Blockers / notes:**
 
-- Legacy Vitest test files still exist under `src/**/__tests__` and `*.test.*`. They are excluded from TypeScript compilation for now and should be migrated to the Next.js test approach later.
+- Legacy unit-test files have been removed. Current validation uses `npm run lint`, `npm run build`, `npm run check:supabase`, and `npm run test:smoke`.
 - `npm run typecheck` still fails because of broad existing schema/type issues outside Phase 1 cleanup.
 - `npm run lint` now runs through ESLint directly, but it still fails on existing lint errors across the repo.
 
@@ -210,7 +210,7 @@
 - Focused ESLint for Phase 4 Batch 5 Scheduling files passes.
 - `npm run build` passes after Phase 4 Batch 5.
 - Deferred manual review completed:
-  - Tasks root hooks stay as compatibility exports for now; task repositories should be handled in a dedicated Tasks batch.
+  - Tasks repositories and the reminder hook moved into `src/features/tasks`; root `useTasks` and `useReminders` stay as compatibility exports.
   - Learning service implementation now lives in `src/features/learning/services/learningService.ts`; root service is a compatibility export.
   - Performance service/hook/repository ownership stays shared because Analytics and Performance both consume it.
   - Employee repository moved to `src/features/employees/repositories/employeesRepository.ts`; root `useEmployees` stays as the cross-feature compatibility export.
@@ -219,7 +219,19 @@
 - `npm run build` passes after the deferred review cleanup.
 - `npm run check:supabase` passes with 0 missing relations and 0 missing read RPCs.
 - `npm run test:smoke` passes after starting a local production server on port 3000.
+- Completed Phase 4 root cleanup Batch 6:
+  - moved `src/repositories/tasksRepository.ts` to `src/features/tasks/repositories/tasksRepository.ts`
+  - moved `src/repositories/taskActivitiesRepository.ts` to `src/features/tasks/repositories/taskActivitiesRepository.ts`
+  - moved `src/repositories/taskNotificationsRepository.ts` to `src/features/tasks/repositories/taskNotificationsRepository.ts`
+  - moved `src/repositories/remindersRepository.ts` to `src/features/tasks/repositories/remindersRepository.ts`
+  - moved `src/hooks/useReminders.tsx` to `src/features/tasks/hooks/useReminders.tsx`
+  - kept root `src/hooks/useTasks.tsx` and `src/hooks/useReminders.tsx` as compatibility exports for cross-feature callers
+  - updated Tasks imports and focused test mocks to use feature-owned repository paths
+- Focused legacy unit tests are no longer a valid gate. Use the supported Next.js validation commands instead.
+- Focused ESLint for the Tasks batch passes with existing warnings only.
+- `npm run build` passes after Phase 4 Batch 6.
+- `npm run test:smoke` passes after Phase 4 Batch 6.
 
 **Next Phase 4 action:**
 
-- Plan a dedicated Tasks cleanup batch before moving task repositories because Tasks has wider AI, Analytics, Goals, and test coverage.
+- Rebuild automated unit coverage intentionally around the current Next.js stack if needed.

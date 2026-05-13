@@ -34,6 +34,7 @@ export interface LogContext {
 }
 
 export interface LogMeta extends LogContext {
+  [key: string]: unknown;
   context?: Record<string, unknown>;
   error?: unknown;
   timestamp?: string;

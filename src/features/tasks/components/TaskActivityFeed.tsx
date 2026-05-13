@@ -25,10 +25,10 @@ import { useAuth } from "@/hooks/useAuth";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ActivityFeedSkeleton } from "@/components/loading/TaskSkeletons";
-import { fetchTaskActivitiesForCompany } from "@/repositories/taskActivitiesRepository";
+import { fetchTaskActivitiesForCompany } from "@/features/tasks/repositories/taskActivitiesRepository";
 import { fetchCompanyIdForUser } from "@/repositories/companyRepository";
 import { supabase } from "@/integrations/supabase/client";
-import type { TaskActivityWithActor } from "@/repositories/taskActivitiesRepository";
+import type { TaskActivityWithActor } from "@/features/tasks/repositories/taskActivitiesRepository";
 import { logger } from "@/utils/logger";
 
 export function TaskActivityFeed() {

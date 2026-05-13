@@ -15,7 +15,10 @@ type LinkProps = React.PropsWithChildren<
     replace?: boolean;
     prefetch?: boolean;
     className?: string | ((state: { isActive: boolean }) => string);
-  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+  } & Omit<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>,
+    "className" | "href"
+  >
 >;
 
 type NavLinkProps = LinkProps & { end?: boolean };
@@ -58,7 +61,20 @@ export function NavLink({ to, className, end, ...rest }: NavLinkProps) {
 export function useNavigate() {
   const router = useRouter();
   return useCallback(
-    (to: string, options?: { replace?: boolean; state?: any }) => {
+    (to: string | number, options?: { replace?: boolean; state?: unknown }) => {
+      if (typeof to === "number") {
+        if (to === -1) {
+          router.back();
+          return;
+        }
+        if (to === 0) {
+          router.refresh();
+          return;
+        }
+        window.history.go(to);
+        return;
+      }
+
       if (options?.replace) {
         router.replace(to);
       } else {
@@ -105,18 +121,32 @@ export function useParams<
 
 export function useSearchParams(): [
   URLSearchParams,
-  (nextInit: URLSearchParams | string | Record<string, string>) => void,
+  (
+    nextInit:
+      | URLSearchParams
+      | string
+      | Record<string, string>
+      | ((prev: URLSearchParams) => URLSearchParams),
+  ) => void,
 ] {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const searchParams = useNextSearchParams();
 
   const setSearchParams = useCallback(
-    (nextInit: URLSearchParams | string | Record<string, string>) => {
+    (
+      nextInit:
+        | URLSearchParams
+        | string
+        | Record<string, string>
+        | ((prev: URLSearchParams) => URLSearchParams),
+    ) => {
       let next: string;
 
       if (typeof nextInit === "string") {
         next = nextInit.startsWith("?") ? nextInit : `?${nextInit}`;
+      } else if (typeof nextInit === "function") {
+        next = `?${nextInit(new URLSearchParams(searchParams?.toString() ?? "")).toString()}`;
       } else if (nextInit instanceof URLSearchParams) {
         next = `?${nextInit.toString()}`;
       } else {
@@ -125,7 +155,7 @@ export function useSearchParams(): [
 
       router.push(`${pathname}${next}`);
     },
-    [pathname, router],
+    [pathname, router, searchParams],
   );
 
   return [
@@ -175,7 +205,7 @@ export function Route({ element }: { element?: React.ReactNode }) {
 }
 
 export function useNavigation() {
-  return { state: "idle" as const };
+  return { state: "idle" as "idle" | "loading" | "submitting" };
 }
 
 export function RouterProvider({ children }: { children?: React.ReactNode }) {

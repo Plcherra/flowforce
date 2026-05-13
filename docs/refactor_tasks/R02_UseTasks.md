@@ -30,5 +30,5 @@ Execution Notes
 Implementation Summary
 
 - `useTasks` now scopes the Supabase select via a combined `or` filter and locally removes any stragglers, logging whenever off-tenant rows are discarded.
-- Vitest coverage (`src/hooks/__tests__/useTasks.test.tsx`) asserts both the tenant filter and the empty-state behaviour.
+- Historical unit coverage for this hook was retired during the Next.js-only cleanup. Rebuild coverage with the current test strategy before changing tenant filtering again.
 - See `/refactor_tasks_progress.md` for completion tracking.
