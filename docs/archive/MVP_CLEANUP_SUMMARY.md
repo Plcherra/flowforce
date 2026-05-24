@@ -40,7 +40,7 @@ Many are Supabase type mismatches that can be handled with type assertions for M
 
 ### Recommended Next Steps
 
-1. **Regenerate Supabase Types** - Run `supabase gen types typescript --project-id wvkfhprjpegjyzktyueh` to regenerate from remote database (or start Docker and run `supabase gen types typescript` for local)
+1. **Regenerate Supabase Types** - Run `supabase gen types typescript --project-id <project-ref>` to regenerate from remote database (or start Docker and run `supabase gen types typescript` for local)
 2. **Add Type Assertions** - For MVP, add `as any` with TODO comments for missing types
 3. **Fix Remaining Runtime Issues** - Add error boundaries, loading states, empty states
 4. **Test Core Flows** - Verify login, messages, reports, tasks, goals, scheduling, forms

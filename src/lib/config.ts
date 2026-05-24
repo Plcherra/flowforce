@@ -25,11 +25,11 @@ const getEnvOrWarn = (value: string | undefined, key: string): string => {
 
 export const SUPABASE_URL = getEnvOrWarn(
   appEnv.VITE_SUPABASE_URL,
-  "VITE_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_URL",
 );
 export const SUPABASE_ANON_KEY = getEnvOrWarn(
   appEnv.VITE_SUPABASE_PUBLISHABLE_KEY,
-  "VITE_SUPABASE_PUBLISHABLE_KEY",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
 );
 export const FUNCTIONS_BASE = SUPABASE_URL
   ? `${SUPABASE_URL}/functions/v1`

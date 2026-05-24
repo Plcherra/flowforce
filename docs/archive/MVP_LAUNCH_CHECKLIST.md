@@ -74,7 +74,7 @@
 
 ### Regenerate Types
 ```bash
-supabase gen types typescript --project-id wvkfhprjpegjyzktyueh > src/integrations/supabase/types.ts
+supabase gen types typescript --project-id <project-ref> > src/integrations/supabase/types.ts
 ```
 
 ### Run Checks

@@ -2,14 +2,14 @@
 
 ## Summary
 
-- **Direct DB host** (`db.wvkfhprjpegjyzktyueh.supabase.co`) is **IPv6-only**. From networks with no IPv6 (or no route to it), you get "no route to host" or "resolves to []". So we do **not** use direct for CLI on this machine.
+- **Direct DB host** (`db.<project-ref>.supabase.co`) may be IPv6-only depending on the Supabase region. From networks with no IPv6 route, you can get "no route to host" or "resolves to []".
 - **Pooler** (`aws-0-us-west-1.pooler.supabase.com`) works with **password-based auth**. The password-less `cli_login_postgres` flow often fails with "invalid SCRAM server-final-message"; always use `SUPABASE_DB_PASSWORD` for `db pull` / `db push` / `gen types`.
 
-## Permanent env (already in `~/.zshrc`)
+## Optional local env
 
 ```bash
-export SUPABASE_DB_URL="postgresql://postgres:Vanilla.thunder97@db.wvkfhprjpegjyzktyueh.supabase.co:5432/postgres"
-export SUPABASE_DB_PASSWORD="Vanilla.thunder97"
+export SUPABASE_DB_URL="postgresql://postgres:<database-password>@db.<project-ref>.supabase.co:5432/postgres"
+export SUPABASE_DB_PASSWORD="<database-password>"
 export SUPABASE_DNS_RESOLVER=https
 ```
 
@@ -29,13 +29,13 @@ source ~/.zshrc
 
 ```bash
 supabase projects list
-# FlowForce (wvkfhprjpegjyzktyueh) should show as linked (●)
+# FlowForce should show as linked (●)
 ```
 
 ### 2. Pull schema (pooler + password)
 
 ```bash
-SUPABASE_DB_PASSWORD='Vanilla.thunder97' supabase db pull
+SUPABASE_DB_PASSWORD='<database-password>' supabase db pull
 # Or after: source ~/.zshrc
 supabase db pull
 ```
@@ -45,7 +45,7 @@ supabase db pull
 ### 3. Push migrations (pooler + password)
 
 ```bash
-SUPABASE_DB_PASSWORD='Vanilla.thunder97' supabase db push
+SUPABASE_DB_PASSWORD='<database-password>' supabase db push
 # Or with env already set:
 supabase db push
 ```
@@ -55,9 +55,9 @@ supabase db push
 Uses pooler via project-id; **no** `--db-url` and **no** Docker:
 
 ```bash
-SUPABASE_DB_PASSWORD='Vanilla.thunder97' npx supabase gen types typescript --project-id wvkfhprjpegjyzktyueh > supabase/database.types.ts
+SUPABASE_DB_PASSWORD='<database-password>' npx supabase gen types typescript --project-id <project-ref> > supabase/database.types.ts
 # Or with env already set:
-npx supabase gen types typescript --project-id wvkfhprjpegjyzktyueh > supabase/database.types.ts
+npx supabase gen types typescript --project-id <project-ref> > supabase/database.types.ts
 ```
 
 Output path: **`supabase/database.types.ts`** (used by `supabase/database-overrides.ts`).
@@ -69,7 +69,7 @@ Run with debug and paste the output:
 ```bash
 supabase db pull --debug
 # or
-SUPABASE_DB_PASSWORD='Vanilla.thunder97' supabase db pull --debug
+SUPABASE_DB_PASSWORD='<database-password>' supabase db pull --debug
 ```
 
 ## Direct connection (optional, IPv6-only)
@@ -88,5 +88,5 @@ From this machine, that host currently resolves only to IPv6 and fails with "no 
 
 ```bash
 SUPABASE_DB_PASSWORD='yourpassword' supabase db pull
-SUPABASE_DB_PASSWORD='yourpassword' npx supabase gen types typescript --project-id wvkfhprjpegjyzktyueh > supabase/database.types.ts
+SUPABASE_DB_PASSWORD='<database-password>' npx supabase gen types typescript --project-id <project-ref> > supabase/database.types.ts
 ```

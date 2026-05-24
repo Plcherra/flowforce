@@ -274,8 +274,8 @@ function summarizeError(error) {
 async function checkRelation(supabase, relation) {
   const { error } = await supabase
     .from(relation)
-    .select("*", { head: true, count: "exact" })
-    .limit(1);
+    .select("*")
+    .limit(0);
 
   if (!error) {
     return { name: relation, status: "ok" };

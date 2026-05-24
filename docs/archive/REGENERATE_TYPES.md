@@ -6,7 +6,7 @@ Since Docker isn't running, you can regenerate types directly from your remote S
 
 ```bash
 # Using Supabase CLI with project ID
-supabase gen types typescript --project-id wvkfhprjpegjyzktyueh > src/integrations/supabase/types.ts
+supabase gen types typescript --project-id <project-ref> > src/integrations/supabase/types.ts
 
 # Or if you have Supabase CLI linked
 supabase gen types typescript --linked > src/integrations/supabase/types.ts

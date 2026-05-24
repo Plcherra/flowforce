@@ -42,15 +42,24 @@ These are the technical issues that need to be fixed before the project can be c
 
 ## 4. Supabase Connection And Environment
 
-- [ ] Audit `.env.example` against actual environment usage.
-- [ ] Confirm required variables are documented: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and any OpenAI/API keys.
-- [ ] Confirm local Supabase connection works or document that the project uses a remote Supabase instance.
-- [ ] Validate `src/integrations/supabase/client.ts` points to the expected project.
-- [ ] Validate server-side Supabase admin clients do not run without required service-role keys.
-- [ ] Add clear error handling for missing Supabase environment variables.
-- [ ] Run or document the required Supabase migrations for a fresh setup.
-- [ ] Verify `supabase/database.types.ts` matches the active database schema.
-- [ ] Confirm seed data creates at least one usable demo tenant and demo user.
+- [x] Audit `.env.example` against actual environment usage.
+  - Expanded `.env.example` to include Supabase, OpenAI, cron, Connecteam, logging, operations defaults, and validation-script variables.
+- [x] Confirm required variables are documented: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and any OpenAI/API keys.
+  - Required and optional variables are documented in `.env.example` and `docs/supabase-environment-audit.md`.
+- [x] Confirm local Supabase connection works or document that the project uses a remote Supabase instance.
+  - Local Supabase does not run because Docker is unavailable. Current documented target is remote project `vncapxfubgqaibhjwtoy`.
+- [x] Validate `src/integrations/supabase/client.ts` points to the expected project.
+  - `.env`, `supabase/.temp/project-ref`, and `supabase/config.toml` now point to `vncapxfubgqaibhjwtoy`.
+- [x] Validate server-side Supabase admin clients do not run without required service-role keys.
+  - `app/api/_server/supabaseAdmin.ts` uses lazy initialization and clear errors; `src/services/supabase/admin.ts` now re-exports that safe client.
+- [x] Add clear error handling for missing Supabase environment variables.
+  - Client config now warns with Next.js env names; server admin access throws a clear service-role configuration error when used.
+- [x] Run or document the required Supabase migrations for a fresh setup.
+  - Remote migration list now matches local migrations `20260509000100` and `20260513000100`; the second migration restores the feature-schema surface required by the app.
+- [x] Verify `supabase/database.types.ts` matches the active database schema.
+  - Regenerated from the linked remote after restoring feature migrations. `npm run check:supabase` reports 0 missing relations and `npm run typecheck` passes with 0 errors.
+- [x] Confirm seed data creates at least one usable demo tenant and demo user.
+  - Added `supabase/seed.sql` with `FlowForce Demo Company` and `demo.owner@flowforce.local` / `FlowForceDemo123!`.
 
 ## 5. Authentication Flow
 
