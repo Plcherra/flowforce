@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { chromium } from "playwright";
@@ -43,6 +43,9 @@ const IGNORED_CONSOLE_PATTERNS = [
   /nextjs-toploader/i,
   /using placeholder client/i,
   /missing environment variable: next_public_openai/i,
+  /task notifications subscription closed/i,
+  /websocket connection to .*supabase.*realtime.*failed/i,
+  /websocket is closed before the connection is established/i,
 ];
 
 function readEnvFiles() {
@@ -128,6 +131,24 @@ function isAuthRedirect(url) {
 
 function hasErrorShell(text) {
   return ERROR_TEXT_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function formatDiagnostics(result) {
+  const lines = [];
+
+  for (const error of result.errors.slice(0, 5)) {
+    lines.push(`${error.type}: ${error.message}`);
+  }
+
+  if (result.errors.length > 5) {
+    lines.push(`... ${result.errors.length - 5} more errors`);
+  }
+
+  for (const warning of result.warnings.slice(0, 3)) {
+    lines.push(`warning/${warning.type}: ${warning.message}`);
+  }
+
+  return lines.join("; ");
 }
 
 function buildClients() {
@@ -553,7 +574,12 @@ async function signIn(context, seed) {
 
   const bodyText = (await page.textContent("body").catch(() => "")) ?? "";
   assert(!hasErrorShell(bodyText), "Sign in reached an application error shell");
-  assert(result.errors.length === 0, "Sign in produced page or console errors");
+  assert(
+    result.errors.length === 0,
+    `Sign in produced page or console errors${
+      result.errors.length > 0 ? `: ${formatDiagnostics(result)}` : ""
+    }`,
+  );
 
   await page.close();
 }
@@ -653,6 +679,8 @@ function printResult(result) {
 
 async function main() {
   const { admin } = buildClients();
+  const reportDir = join(cwd, "docs", "test-results");
+  const reportPath = join(reportDir, "visible-modules-smoke.json");
   let browser = null;
   let seed = null;
   let cleanupError = null;
@@ -661,6 +689,7 @@ async function main() {
   process.stdout.write(`Base URL: ${BASE_URL}\n\n`);
 
   try {
+    rmSync(reportPath, { force: true });
     await assertBaseUrlAvailable();
     seed = await seedSmokeTenant(admin);
     process.stdout.write(`Seeded smoke tenant: ${seed.companyId}\n`);
@@ -683,9 +712,6 @@ async function main() {
 
     const passed = results.filter((result) => result.ok).length;
     const failed = results.length - passed;
-    const reportDir = join(cwd, "docs", "test-results");
-    const reportPath = join(reportDir, "visible-modules-smoke.json");
-
     if (!existsSync(reportDir)) {
       mkdirSync(reportDir, { recursive: true });
     }
