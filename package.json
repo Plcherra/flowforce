@@ -19,6 +19,7 @@
     "lint:ci": "npm run lint && npm run typecheck",
     "test:smoke": "node scripts/smoke-visible-modules.mjs",
     "check:supabase": "node scripts/check-supabase-contract.mjs",
+    "audit:restore-domains": "node scripts/audit-restore-migration-domains.mjs",
     "gen:section": "node scripts/generate-section.mjs",
     "seed:kpi-insights": "node scripts/seedKpiInsights.mjs",
     "roster:sync": "node scripts/nightlyRosterSync.mjs",

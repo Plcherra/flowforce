@@ -25,6 +25,7 @@ As of 2026-05-24:
 - Phase 14 authenticated module smoke contracts are implemented in `supabase/migrations/20260524001700_phase14_custom_sections_smoke_contract.sql` through `supabase/migrations/20260524002100_phase14_inventory_smoke_contracts.sql`; all Phase 14 migrations are applied remotely.
 - Phase 15 release gates are implemented in `.github/workflows/release-gates.yml`; the workflow blocks PR/main changes on local migration rebuild, Supabase contract checks, pgTAP security suites, TypeScript, production build, onboarding E2E, and authenticated production smoke.
 - Phase 16 remote deploy drift gate is implemented in `scripts/check-supabase-migration-drift.mjs`, `npm run check:deploy`, and `.github/workflows/deploy-readiness.yml`; it blocks deploy readiness when remote migration history or remote Supabase security contracts drift from source control.
+- Phase 17 restore-migration domain inventory is implemented in `scripts/audit-restore-migration-domains.mjs`, `npm run audit:restore-domains`, and `docs/reports/phase-17-restore-domain-inventory-2026-05-24.md`; it classifies all 172 restore tables and 4 placeholder views across shipment domains before forward replacement migrations are written.
 - Production profile/company demo fallbacks are disabled in `src/contexts/ProfileContext.tsx` and `src/hooks/useCompany.tsx`; development fallbacks remain available.
 - `npm run test:db:security` now runs Phase 3 through Phase 7 and Phase 10 through Phase 14 pgTAP isolation/privacy/smoke-contract suites.
 - `npm run test:e2e:onboarding` verifies the real onboarding API endpoint creates the tenant baseline, retries idempotently, and cleans up the generated test tenant.
@@ -375,8 +376,8 @@ Acceptance:
 
 ## Immediate Priority Order
 
-1. Run the hosted GitHub Actions release/deploy workflows once after push and fix any runner-specific environment or secret issue.
-2. Replace the giant restore migration with reviewed domain migrations.
+1. Replace the giant restore migration with reviewed domain migrations, starting with core tenant/auth and scheduling placeholder views.
+2. Clean up the remaining restore-era broad grants from source history once domain migrations own explicit grants/policies.
 3. Clean up or migrate historical free-text public storage URLs from pre-privacy rows.
 4. Decide the release cadence for pinned CI tools, starting with Supabase CLI `2.101.0`.
 
@@ -384,4 +385,4 @@ Acceptance:
 
 The first stabilization PR is effectively complete across Phases 1-13: broad grants were revoked, core and business RLS/policies were added, app-required RPCs/views/storage were source-controlled, local reset was restored, production demo fallbacks were disabled, storage writes were company-prefixed, all active sensitive buckets are private, the production onboarding endpoint now uses the idempotent setup RPC, missing tenant context has a repair screen, restored public tables now have RLS enabled, and two-tenant/onboarding/business/storage/API isolation tests were added.
 
-The next PR should focus on hardening the hosted CI/deploy path by running the release-gates and deploy-readiness workflows remotely, then start replacing the restore migration with reviewed domain migrations.
+The hosted CI/deploy path is now hardened and passing remotely. The next PR should focus on replacing the restore migration with reviewed forward domain migrations, using the Phase 17 inventory as the ownership checklist.
