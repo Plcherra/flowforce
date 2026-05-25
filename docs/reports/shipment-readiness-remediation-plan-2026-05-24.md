@@ -26,6 +26,7 @@ As of 2026-05-24:
 - Phase 15 release gates are implemented in `.github/workflows/release-gates.yml`; the workflow blocks PR/main changes on local migration rebuild, Supabase contract checks, pgTAP security suites, TypeScript, production build, onboarding E2E, and authenticated production smoke.
 - Phase 16 remote deploy drift gate is implemented in `scripts/check-supabase-migration-drift.mjs`, `npm run check:deploy`, and `.github/workflows/deploy-readiness.yml`; it blocks deploy readiness when remote migration history or remote Supabase security contracts drift from source control.
 - Phase 17 restore-migration domain inventory is implemented in `scripts/audit-restore-migration-domains.mjs`, `npm run audit:restore-domains`, and `docs/reports/phase-17-restore-domain-inventory-2026-05-24.md`; it classifies all 172 restore tables and 4 placeholder views across shipment domains before forward replacement migrations are written.
+- Phase 18 core/scheduling domain replacement is implemented in `supabase/migrations/20260525000100_phase18_core_scheduling_domain_replacement.sql` and `supabase/tests/phase18_core_scheduling_domain_contracts.test.sql`; it adds reviewed core tenant constraints, an `audit_logs` compatibility view, explicit calendar/vendor RLS, and real `calendar_events_full`, `calendar_unified_view`, and `vendor_event` views.
 - Production profile/company demo fallbacks are disabled in `src/contexts/ProfileContext.tsx` and `src/hooks/useCompany.tsx`; development fallbacks remain available.
 - `npm run test:db:security` now runs Phase 3 through Phase 7 and Phase 10 through Phase 14 pgTAP isolation/privacy/smoke-contract suites.
 - `npm run test:e2e:onboarding` verifies the real onboarding API endpoint creates the tenant baseline, retries idempotently, and cleans up the generated test tenant.
@@ -376,8 +377,8 @@ Acceptance:
 
 ## Immediate Priority Order
 
-1. Replace the giant restore migration with reviewed domain migrations, starting with core tenant/auth and scheduling placeholder views.
-2. Clean up the remaining restore-era broad grants from source history once domain migrations own explicit grants/policies.
+1. Continue replacing the giant restore migration with reviewed domain migrations, moving next into people/HR and messages/announcements.
+2. Clean up the remaining restore-era broad grants from source history once all domain migrations own explicit grants/policies.
 3. Clean up or migrate historical free-text public storage URLs from pre-privacy rows.
 4. Decide the release cadence for pinned CI tools, starting with Supabase CLI `2.101.0`.
 

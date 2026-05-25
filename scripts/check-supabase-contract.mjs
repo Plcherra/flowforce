@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 const REQUIRED_RELATIONS_BY_MODULE = [
   {
     module: "Core / onboarding",
-    relations: ["companies", "profiles"],
+    relations: ["companies", "profiles", "audit_log", "audit_logs"],
   },
   {
     module: "Dashboard",
@@ -72,6 +72,7 @@ const REQUIRED_RELATIONS_BY_MODULE = [
     module: "Calendar",
     relations: [
       "calendar_events_full",
+      "calendar_unified_view",
       "calendar_events",
       "event_participants",
       "event_shift_links",
@@ -257,6 +258,9 @@ const ANON_DENY_RELATIONS = [
   "schedules",
   "company_updates",
   "calendar_events",
+  "calendar_events_full",
+  "calendar_unified_view",
+  "vendor_event",
   "payments",
   "expenses",
   "inventory_transactions",
@@ -267,6 +271,7 @@ const ANON_DENY_RELATIONS = [
   "gamification_leaderboard",
   "recognition_events",
   "audit_log",
+  "audit_logs",
   "system_logs",
 ];
 
