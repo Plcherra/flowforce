@@ -44,7 +44,8 @@ const IGNORED_CONSOLE_PATTERNS = [
   /using placeholder client/i,
   /missing environment variable: next_public_openai/i,
   /task notifications subscription closed/i,
-  /websocket connection to .*supabase.*realtime.*failed/i,
+  /task notifications subscription channel_error/i,
+  /websocket connection to .*\/realtime\/v1\/websocket.*failed/i,
   /websocket is closed before the connection is established/i,
 ];
 
