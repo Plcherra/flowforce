@@ -8,6 +8,14 @@ const cwd = process.cwd();
 const migrationsDir = resolve(cwd, "supabase", "migrations");
 const skipDryRun = process.argv.includes("--skip-dry-run");
 
+function withRemotePassword(args) {
+  if (!process.env.SUPABASE_DB_PASSWORD) {
+    return args;
+  }
+
+  return [...args, "--password", process.env.SUPABASE_DB_PASSWORD];
+}
+
 function fail(message) {
   process.stderr.write(`${message}\n`);
   process.exit(1);
@@ -82,7 +90,9 @@ const localVersions = readLocalMigrationVersions();
 process.stdout.write("FlowForce Supabase remote migration drift check\n");
 process.stdout.write(`Local migration files: ${localVersions.length}\n`);
 
-const listResult = runSupabase(["migration", "list", "--linked"]);
+const listResult = runSupabase(
+  withRemotePassword(["migration", "list", "--linked"]),
+);
 const listOutput = `${listResult.stdout}${listResult.stderr}`;
 
 if (listResult.status !== 0) {
@@ -124,7 +134,9 @@ if (
 }
 
 if (!skipDryRun) {
-  const dryRunResult = runSupabase(["db", "push", "--dry-run"]);
+  const dryRunResult = runSupabase(
+    withRemotePassword(["db", "push", "--dry-run", "--linked"]),
+  );
   const dryRunOutput = `${dryRunResult.stdout}${dryRunResult.stderr}`;
 
   if (dryRunResult.status !== 0) {

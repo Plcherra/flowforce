@@ -13,11 +13,10 @@ Prevent production deploys when the linked Supabase project is not in the same m
 - Added `npm run check:deploy`, which runs the remote migration drift check and the Supabase schema/security contract check.
 - Added `.github/workflows/deploy-readiness.yml`.
 - The deploy-readiness workflow is pinned to Node.js `22` and Supabase CLI `2.101.0`.
-- The workflow links the remote Supabase project, verifies migration history, runs `supabase db push --dry-run`, and checks the remote schema/security contract.
+- The workflow uses the committed Supabase project ref plus `SUPABASE_DB_PASSWORD`, verifies migration history, runs `supabase db push --dry-run`, and checks the remote schema/security contract.
 
 ## Required GitHub Secrets
 
-- `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_DB_PASSWORD`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
