@@ -12,6 +12,7 @@ Make the Phase 1-14 readiness checks enforceable in CI so migrations, RLS/securi
 - The workflow runs on `pull_request`, `push` to `main`, and manual dispatch.
 - CI pins Supabase CLI to `2.101.0` and Node.js to `22`.
 - CI starts local Supabase, rebuilds the database from source-controlled migrations, exports local Supabase credentials into the job environment, then runs the release gates.
+- CI starts only the local Supabase services required by the gate and retries startup to reduce hosted-runner image-pull flakiness.
 - CI uploads the authenticated smoke JSON and production server log as artifacts for failed investigations.
 - Fixed a production-only inventory route regression exposed by the new gate: `InventoryNav` still linked to legacy `/inventory/...` paths, which caused production RSC 404 fetches from `/app/inventory-actions`.
 - Added real `/app/inventory/...` route wrappers for dashboard, cookbook, items, counts, count detail, prep, purchasing, actions, and reports.

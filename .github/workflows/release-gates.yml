@@ -52,7 +52,20 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Start local Supabase
-        run: supabase start
+        shell: bash
+        run: |
+          excluded_services="analytics,edge-runtime,functions,imgproxy,inbucket,meta,realtime,studio,vector"
+          for attempt in 1 2 3; do
+            if supabase start --exclude "$excluded_services"; then
+              exit 0
+            fi
+
+            echo "Supabase start failed on attempt $attempt; cleaning up before retry."
+            supabase stop --no-backup || true
+            sleep $((attempt * 20))
+          done
+
+          supabase start --exclude "$excluded_services" --debug
 
       - name: Rebuild local database from migrations
         run: supabase db reset
