@@ -35,3 +35,4 @@ export const FUNCTIONS_BASE = SUPABASE_URL
   ? `${SUPABASE_URL}/functions/v1`
   : "";
 export const REST_BASE = SUPABASE_URL ? `${SUPABASE_URL}/rest/v1` : "";
+export const ENABLE_AI_INSIGHTS = appEnv.VITE_ENABLE_AI_INSIGHTS;

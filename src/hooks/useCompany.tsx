@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Tables } from "@/integrations/supabase/public-types";
+import { appEnv } from "@/lib/env";
 import {
   CompanyRole,
   Position,
@@ -136,12 +137,14 @@ export function useCompany() {
   const { user } = useAuth();
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (user) {
       fetchCompany();
     } else {
       setCompany(null);
+      setError(null);
       setLoading(false);
     }
   }, [user]);
@@ -172,20 +175,35 @@ export function useCompany() {
   const fetchCompany = async () => {
     if (!user) {
       setCompany(null);
+      setError(null);
       setLoading(false);
       return;
     }
 
     const handleDemoFallback = (reason: string) => {
-      logger.warn("[useCompany] Falling back to demo company", {
-        context: { reason },
-        tags: ["warning"],
-      });
-      setCompany(getDemoCompany(user?.id));
+      const nextError = new Error(reason);
+      logger.warn(
+        appEnv.DEV
+          ? "[useCompany] Falling back to demo company"
+          : "[useCompany] Company context unavailable",
+        {
+          context: { reason },
+          tags: ["warning"],
+        },
+      );
+
+      if (appEnv.DEV) {
+        setCompany(getDemoCompany(user?.id));
+      } else {
+        setCompany(null);
+      }
+
+      setError(nextError);
       setLoading(false);
     };
 
     try {
+      setError(null);
       // First get the user's profile to find their company_id
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -217,6 +235,7 @@ export function useCompany() {
 
         if (companyData) {
           setCompany(parseCompanyData(companyData));
+          setError(null);
         } else {
           handleDemoFallback("company row not found");
           return;
@@ -230,7 +249,11 @@ export function useCompany() {
         handleDemoFallback("RLS recursion when loading company");
         return;
       }
-      handleError(error, "fetchCompany");
+      const handledError = handleError(error, "fetchCompany");
+      logger.warn("[useCompany] Failed to load company context", {
+        error: handledError,
+        tags: ["warning"],
+      });
       handleDemoFallback(
         "encountered an unexpected error while loading company",
       );
@@ -326,6 +349,7 @@ export function useCompany() {
 
       const parsedCompany = parseCompanyData(createdCompany);
       setCompany(parsedCompany);
+      setError(null);
 
       // Refresh the company data to ensure everything is properly loaded
       await fetchCompany();
@@ -364,6 +388,7 @@ export function useCompany() {
       if (error) throw error;
       const parsedCompany = parseCompanyData(data);
       setCompany(parsedCompany);
+      setError(null);
       return parsedCompany;
     } catch (error) {
       throw handleError(error, "updating company");
@@ -373,6 +398,7 @@ export function useCompany() {
   return {
     company,
     loading,
+    error,
     createCompany,
     updateCompany,
     refetchCompany: fetchCompany,

@@ -143,7 +143,7 @@ export default function WasteTrackingPage() {
                     Start tracking waste events to monitor your inventory losses
                   </p>
                   <Button asChild>
-                    <Link to="/inventory/actions">Record Waste</Link>
+                    <Link to="/app/inventory/actions">Record Waste</Link>
                   </Button>
                 </div>
               ) : (

@@ -10,6 +10,7 @@ import {
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 type LegacyProfileFields = {
@@ -55,6 +56,8 @@ type ProfileContextValue = {
 const ProfileContext = createContext<ProfileContextValue | undefined>(
   undefined,
 );
+
+const ALLOW_PROFILE_PLACEHOLDER = appEnv.DEV;
 
 const profileCache = new Map<string, ProfileDetails>();
 
@@ -246,20 +249,34 @@ async function loadProfileState({
     );
     if (signal?.cancelled) return;
 
-    const resolvedProfile = fetchedProfile ?? buildProfilePlaceholder(user);
-    profileCache.set(cacheKey, resolvedProfile);
+    const resolvedProfile =
+      fetchedProfile ??
+      (ALLOW_PROFILE_PLACEHOLDER ? buildProfilePlaceholder(user) : null);
+
+    if (resolvedProfile) {
+      profileCache.set(cacheKey, resolvedProfile);
+    } else {
+      profileCache.delete(cacheKey);
+    }
 
     setProfile(resolvedProfile);
-    setError(null);
+    setError(fetchedProfile ? null : "Profile setup is incomplete.");
     lastLoadedKeyRef.current = cacheKey;
   } catch (error) {
     if (signal?.cancelled) return;
 
-    const placeholder = buildProfilePlaceholder(user);
-    profileCache.set(cacheKey, placeholder);
-    setProfile(placeholder);
     const message =
       error instanceof Error ? error.message : "Failed to load profile";
+
+    if (ALLOW_PROFILE_PLACEHOLDER) {
+      const placeholder = buildProfilePlaceholder(user);
+      profileCache.set(cacheKey, placeholder);
+      setProfile(placeholder);
+    } else {
+      profileCache.delete(cacheKey);
+      setProfile(null);
+    }
+
     setError(message);
   } finally {
     if (!signal?.cancelled) {
@@ -310,7 +327,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const safeProfile = profile ?? buildProfilePlaceholder(user);
+  const safeProfile =
+    profile ?? (ALLOW_PROFILE_PLACEHOLDER ? buildProfilePlaceholder(user) : null);
   const contextValue: ProfileContextValue = {
     profile: safeProfile,
     loading: authLoading || loading,

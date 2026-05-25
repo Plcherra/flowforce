@@ -14,7 +14,7 @@ export default function InventoryCountExecution() {
         <div className="text-center">
           <h1 className="text-2xl font-bold">Count not found</h1>
           <Button
-            onClick={() => navigate("/inventory/counts")}
+            onClick={() => navigate("/app/inventory/counts")}
             className="mt-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -34,7 +34,7 @@ export default function InventoryCountExecution() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/inventory/counts")}
+              onClick={() => navigate("/app/inventory/counts")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Counts

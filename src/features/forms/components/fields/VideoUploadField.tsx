@@ -4,13 +4,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Video, Upload, X, Play } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { createSignedStorageUrl } from "@/lib/signedStorageUrls";
+import {
+  getStorageObjectUrl,
+  isStorageObjectReference,
+  type StorageObjectReference,
+  type StorageObjectValue,
+} from "@/lib/storageObjects";
 
 interface VideoUploadFieldProps {
   label: string;
   description?: string;
-  value?: string[];
-  onChange: (value: string[]) => void;
+  value?: StorageObjectValue[];
+  onChange: (value: StorageObjectValue[]) => void;
   required?: boolean;
   maxFiles?: number;
   maxSize?: number; // in MB
@@ -27,14 +39,22 @@ export function VideoUploadField({
   maxSize = 100,
   className = "",
 }: VideoUploadFieldProps) {
+  const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFile = useCallback(async (file: File): Promise<string | null> => {
+  const uploadFile = useCallback(async (file: File): Promise<StorageObjectReference | null> => {
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `form-videos/${fileName}`;
+      const companyId = resolveProfileCompanyId(profile);
+      if (!companyId) {
+        throw new Error("Your account is not attached to a company yet.");
+      }
+
+      const filePath = buildCompanyStoragePath(
+        companyId,
+        "forms/videos",
+        file.name,
+      );
 
       const { error: uploadError } = await supabase.storage
         .from("form-videos")
@@ -48,16 +68,18 @@ export function VideoUploadField({
         return null;
       }
 
-      const { data } = supabase.storage
-        .from("form-videos")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
+      return {
+        bucket: "form-videos",
+        path: filePath,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      };
     } catch (error) {
       logger.error("Error uploading file:", { error, tags: ["error"] });
       return null;
     }
-  }, []);
+  }, [profile]);
 
   const handleFileSelect = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +125,7 @@ export function VideoUploadField({
         const results = await Promise.all(uploadPromises);
 
         const successfulUploads = results.filter(
-          (url): url is string => url !== null,
+          (item): item is StorageObjectReference => item !== null,
         );
         const failedUploads = results.length - successfulUploads.length;
 
@@ -182,16 +204,12 @@ export function VideoUploadField({
 
       {value.length > 0 && (
         <div className="space-y-3">
-          {value.map((url, index) => (
+          {value.map((item, index) => (
             <Card key={index} className="relative group">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-shrink-0 w-16 h-16 bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
-                    <video
-                      src={url}
-                      className="w-full h-full object-cover"
-                      preload="metadata"
-                    />
+                    <SignedVideoPreview value={item} />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                       <Play className="h-4 w-4 text-white" />
                     </div>
@@ -244,6 +262,44 @@ export function VideoUploadField({
         </div>
       )}
     </div>
+  );
+}
+
+function SignedVideoPreview({ value }: { value: StorageObjectValue }) {
+  const [src, setSrc] = useState<string | null>(() => getStorageObjectUrl(value));
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const url = getStorageObjectUrl(value);
+    if (url) {
+      setSrc(url);
+      return;
+    }
+
+    if (!isStorageObjectReference(value)) {
+      setSrc(null);
+      return;
+    }
+
+    createSignedStorageUrl(value.bucket, value.path, { expiresIn: 300 })
+      .then((signedUrl) => {
+        if (!cancelled) setSrc(signedUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setSrc(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
+
+  if (!src) {
+    return <div className="h-full w-full bg-muted" />;
+  }
+
+  return (
+    <video src={src} className="w-full h-full object-cover" preload="metadata" />
   );
 }
 

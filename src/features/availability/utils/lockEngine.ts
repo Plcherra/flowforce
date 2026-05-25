@@ -1,11 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/public-types";
+import type { AvailabilityLockMode } from "@/types/availability";
 import { logger } from "@/utils/logger";
 
 export const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
-type AvailabilityLockMode =
-  Database["public"]["Enums"]["availability_lock_mode"];
 interface OrgPreferenceRow {
   id: string;
   availability_lock_mode: AvailabilityLockMode;

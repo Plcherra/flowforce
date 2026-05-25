@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { FileText, Video } from "lucide-react";
 
 import type { WizardFormData } from "./types";
+import { SignedUpdateMediaImage } from "./SignedUpdateMediaImage";
 
 interface CompanyUpdatePreviewProps {
   data: WizardFormData;
@@ -83,10 +84,9 @@ export function CompanyUpdatePreview({
                   className="flex items-center gap-3 rounded-xl border bg-muted/30 p-2 text-sm"
                 >
                   {media.type === "image" ? (
-                    <img
-                      src={media.url}
-                      alt={media.name}
-                      className="h-12 w-12 rounded-lg object-cover"
+                    <SignedUpdateMediaImage
+                      media={media}
+                      className="h-12 w-12 rounded-lg object-cover bg-muted"
                     />
                   ) : media.type === "video" ? (
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background/70 text-muted-foreground">

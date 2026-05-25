@@ -4,11 +4,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PenTool, RotateCcw, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
 
 interface SignatureData {
   signature_data: string; // Base64 encoded
   signature_url?: string;
+  signature_bucket?: string;
+  signature_path?: string;
   signer_name?: string;
   signed_at: string;
 }
@@ -32,6 +39,7 @@ export function SignatureField({
   signerName,
   className = "",
 }: SignatureFieldProps) {
+  const { profile } = useProfile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -134,7 +142,15 @@ export function SignatureField({
 
       // Upload to Supabase storage
       const fileName = `signature_${Date.now()}.png`;
-      const filePath = `form-signatures/${fileName}`;
+      const companyId = resolveProfileCompanyId(profile);
+      if (!companyId) {
+        throw new Error("Your account is not attached to a company yet.");
+      }
+      const filePath = buildCompanyStoragePath(
+        companyId,
+        "forms/signatures",
+        fileName,
+      );
 
       const { error: uploadError } = await supabase.storage
         .from("form-signatures")
@@ -153,13 +169,10 @@ export function SignatureField({
         return;
       }
 
-      const { data } = supabase.storage
-        .from("form-signatures")
-        .getPublicUrl(filePath);
-
       const signature: SignatureData = {
         signature_data: signatureData,
-        signature_url: data.publicUrl,
+        signature_bucket: "form-signatures",
+        signature_path: filePath,
         signer_name: signerName,
         signed_at: new Date().toISOString(),
       };
@@ -179,7 +192,7 @@ export function SignatureField({
     } finally {
       setUploading(false);
     }
-  }, [hasDrawn, onChange, signerName]);
+  }, [hasDrawn, onChange, profile, signerName]);
 
   // Initialize canvas
   React.useEffect(() => {

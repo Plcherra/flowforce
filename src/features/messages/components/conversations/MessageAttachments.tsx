@@ -5,9 +5,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Paperclip, X, File, Image, Download, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import type { MessageAttachment } from "@/types/messages";
 import { logger } from "@/utils/logger";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
+
+const MESSAGE_ATTACHMENTS_BUCKET = "message-attachments";
 
 interface MessageAttachmentsProps {
   messageId?: string;
@@ -23,6 +31,7 @@ export function MessageAttachments({
   readOnly = false,
 }: MessageAttachmentsProps) {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -33,6 +42,16 @@ export function MessageAttachments({
   ) => {
     const files = event.target.files;
     if (!files || !user || !messageId) return;
+    const companyId = resolveProfileCompanyId(profile);
+
+    if (!companyId) {
+      toast({
+        title: "Missing company",
+        description: "Your account is not attached to a company yet.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setUploading(true);
     setUploadProgress(0);
@@ -42,12 +61,14 @@ export function MessageAttachments({
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${user.id}/${messageId}/${crypto.randomUUID()}.${fileExt}`;
+        const fileName = buildCompanyStoragePath(
+          companyId,
+          `messages/${messageId}`,
+          file.name,
+        );
 
-        // Upload to Supabase Storage
         const { data, error } = await supabase.storage
-          .from("message-attachments")
+          .from(MESSAGE_ATTACHMENTS_BUCKET)
           .upload(fileName, file, {
             cacheControl: "3600",
             upsert: false,
@@ -55,17 +76,11 @@ export function MessageAttachments({
 
         if (error) throw error;
 
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from("message-attachments")
-          .getPublicUrl(data.path);
-
         newAttachments.push({
           id: crypto.randomUUID(),
           name: file.name,
           size: file.size,
           type: file.type,
-          url: urlData.publicUrl,
           path: data.path,
         });
 
@@ -100,7 +115,7 @@ export function MessageAttachments({
       // Remove from storage if it has a path
       if (attachment.path) {
         await supabase.storage
-          .from("message-attachments")
+          .from(MESSAGE_ATTACHMENTS_BUCKET)
           .remove([attachment.path]);
       }
 
@@ -127,7 +142,7 @@ export function MessageAttachments({
     try {
       if (attachment.path) {
         const { data, error } = await supabase.storage
-          .from("message-attachments")
+          .from(MESSAGE_ATTACHMENTS_BUCKET)
           .download(attachment.path);
 
         if (error) throw error;
@@ -141,6 +156,11 @@ export function MessageAttachments({
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        return;
+      }
+
+      if (attachment.url) {
+        window.open(attachment.url, "_blank", "noopener,noreferrer");
       }
     } catch (error) {
       logger.error("Download error", { error, tags: ["error"] });
@@ -161,6 +181,26 @@ export function MessageAttachments({
   };
 
   const isImage = (type: string) => type.startsWith("image/");
+
+  const previewAttachment = async (attachment: MessageAttachment) => {
+    try {
+      if (attachment.path) {
+        await openSignedStorageUrl(MESSAGE_ATTACHMENTS_BUCKET, attachment.path);
+        return;
+      }
+
+      if (attachment.url) {
+        window.open(attachment.url, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      logger.error("Preview error", { error, tags: ["error"] });
+      toast({
+        title: "Error",
+        description: "Failed to open file preview",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -230,16 +270,17 @@ export function MessageAttachments({
 
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {/* Preview button for images */}
-                    {isImage(attachment.type) && attachment.url && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => window.open(attachment.url, "_blank")}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
+                    {isImage(attachment.type) &&
+                      (attachment.path || attachment.url) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => void previewAttachment(attachment)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
 
                     {/* Download button */}
                     <Button

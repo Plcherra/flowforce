@@ -129,7 +129,15 @@ export function useMessageChannels() {
       }
 
       try {
-        const channel = await createChannelService(channelData, userId);
+        if (!companyId) {
+          throw new Error("Company context is required to create a channel.");
+        }
+
+        const channel = await createChannelService(
+          channelData,
+          userId,
+          companyId,
+        );
         // Reset retry count before refetching after successful creation
         retryCountRef.current = 0;
         await fetchChannels();
@@ -144,7 +152,7 @@ export function useMessageChannels() {
         return { data: null, error: issue };
       }
     },
-    [fetchChannels, enabled, userId],
+    [companyId, fetchChannels, enabled, userId],
   );
 
   const joinChannel = useCallback(
@@ -204,7 +212,7 @@ export function useMessageChannels() {
       }
 
       try {
-        await deleteChannelService(channelId, userId);
+        await deleteChannelService(channelId, userId, companyId);
         // Reset retry count before refetching after successful deletion
         retryCountRef.current = 0;
         await fetchChannels();
@@ -219,7 +227,7 @@ export function useMessageChannels() {
         return { error: issue };
       }
     },
-    [fetchChannels, enabled, userId],
+    [companyId, fetchChannels, enabled, userId],
   );
 
   return {

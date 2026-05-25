@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { importFormFromFile } from "@/features/forms/services/formImportService";
 import { logger } from "@/utils/logger";
@@ -111,6 +112,7 @@ export default function CreateFormDialog({
 }: CreateFormDialogProps) {
   const { createForm } = useForms();
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState<CreationStep>("select-method");
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(
@@ -150,9 +152,17 @@ export default function CreateFormDialog({
               "You must be signed in to import forms from files.",
             );
           }
+          const companyId = profile?.companyId ?? profile?.company_id ?? null;
+          if (!companyId) {
+            throw new Error("Company context is required to import forms.");
+          }
 
           const baseName = uploadedFile.name.replace(/\.[^/.]+$/, "");
-          const { form } = await importFormFromFile(uploadedFile, user.id);
+          const { form } = await importFormFromFile(
+            uploadedFile,
+            user.id,
+            companyId,
+          );
           setUploadedFile(null);
           onFormCreated?.(form.id);
           resetDialog();

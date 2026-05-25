@@ -115,6 +115,7 @@ export interface InventoryRecipe {
 
 export interface InventoryTransaction {
   id: string;
+  company_id?: string | null;
   item_id: string;
   transaction_type: string;
   quantity: number;

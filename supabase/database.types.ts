@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       analytics_cache: {
@@ -194,21 +169,45 @@ export type Database = {
       }
       audit_log: {
         Row: {
+          action: string | null
+          actor_id: string | null
           company_id: string | null
           created_at: string | null
           id: string
+          metadata: Json
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          target_user_id: string | null
           updated_at: string | null
         }
         Insert: {
+          action?: string | null
+          actor_id?: string | null
           company_id?: string | null
           created_at?: string | null
           id?: string
+          metadata?: Json
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          action?: string | null
+          actor_id?: string | null
           company_id?: string | null
           created_at?: string | null
           id?: string
+          metadata?: Json
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -519,6 +518,7 @@ export type Database = {
       channel_members: {
         Row: {
           channel_id: string | null
+          company_id: string | null
           id: string
           joined_at: string | null
           last_read_at: string | null
@@ -527,6 +527,7 @@ export type Database = {
         }
         Insert: {
           channel_id?: string | null
+          company_id?: string | null
           id?: string
           joined_at?: string | null
           last_read_at?: string | null
@@ -535,6 +536,7 @@ export type Database = {
         }
         Update: {
           channel_id?: string | null
+          company_id?: string | null
           id?: string
           joined_at?: string | null
           last_read_at?: string | null
@@ -703,18 +705,21 @@ export type Database = {
         Row: {
           added_at: string | null
           company_id: string | null
+          id: string
           role: string | null
           user_id: string | null
         }
         Insert: {
           added_at?: string | null
           company_id?: string | null
+          id?: string
           role?: string | null
           user_id?: string | null
         }
         Update: {
           added_at?: string | null
           company_id?: string | null
+          id?: string
           role?: string | null
           user_id?: string | null
         }
@@ -1493,6 +1498,7 @@ export type Database = {
       }
       employee_report: {
         Row: {
+          attachment: Json | null
           category: string | null
           created_at: string | null
           created_by: string | null
@@ -1504,6 +1510,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          attachment?: Json | null
           category?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -1515,6 +1522,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          attachment?: Json | null
           category?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -1613,25 +1621,49 @@ export type Database = {
       }
       event_participants: {
         Row: {
+          avatar_url: string | null
+          company_id: string | null
+          created_at: string
+          email: string | null
           event_id: string | null
           id: string
+          metadata: Json | null
+          name: string | null
           profile_id: string | null
+          response_status: string | null
           role: string | null
           rsvp_status: string | null
+          updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
           event_id?: string | null
           id?: string
+          metadata?: Json | null
+          name?: string | null
           profile_id?: string | null
+          response_status?: string | null
           role?: string | null
           rsvp_status?: string | null
+          updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
           event_id?: string | null
           id?: string
+          metadata?: Json | null
+          name?: string | null
           profile_id?: string | null
+          response_status?: string | null
           role?: string | null
           rsvp_status?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1641,21 +1673,33 @@ export type Database = {
           created_at: string | null
           event_id: string | null
           id: string
+          linked_at: string | null
+          metadata: Json | null
           shift_id: string | null
+          store_id: string | null
+          updated_at: string
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
           event_id?: string | null
           id?: string
+          linked_at?: string | null
+          metadata?: Json | null
           shift_id?: string | null
+          store_id?: string | null
+          updated_at?: string
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
           event_id?: string | null
           id?: string
+          linked_at?: string | null
+          metadata?: Json | null
           shift_id?: string | null
+          store_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1686,6 +1730,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           category: string | null
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -1704,6 +1749,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -1722,6 +1768,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -1919,6 +1966,7 @@ export type Database = {
       }
       form_fields: {
         Row: {
+          company_id: string | null
           created_at: string | null
           dependent_fields: Json | null
           description: string | null
@@ -1941,6 +1989,7 @@ export type Database = {
           validation_rules: Json | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           dependent_fields?: Json | null
           description?: string | null
@@ -1963,6 +2012,7 @@ export type Database = {
           validation_rules?: Json | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           dependent_fields?: Json | null
           description?: string | null
@@ -2078,6 +2128,7 @@ export type Database = {
       }
       form_submissions: {
         Row: {
+          company_id: string | null
           form_id: string | null
           id: string
           ip_address: string | null
@@ -2087,6 +2138,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          company_id?: string | null
           form_id?: string | null
           id?: string
           ip_address?: string | null
@@ -2096,6 +2148,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          company_id?: string | null
           form_id?: string | null
           id?: string
           ip_address?: string | null
@@ -2108,6 +2161,7 @@ export type Database = {
       }
       forms: {
         Row: {
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           department_id: string | null
@@ -2123,6 +2177,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           department_id?: string | null
@@ -2138,6 +2193,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           department_id?: string | null
@@ -2202,6 +2258,7 @@ export type Database = {
       gamification_xp: {
         Row: {
           amount: number | null
+          company_id: string | null
           created_at: string | null
           id: string
           reason: string | null
@@ -2209,6 +2266,7 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          company_id?: string | null
           created_at?: string | null
           id?: string
           reason?: string | null
@@ -2216,6 +2274,7 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          company_id?: string | null
           created_at?: string | null
           id?: string
           reason?: string | null
@@ -2292,6 +2351,7 @@ export type Database = {
       goal_rewards: {
         Row: {
           awarded_at: string | null
+          company_id: string | null
           created_by: string | null
           goal_id: string | null
           id: string
@@ -2301,6 +2361,7 @@ export type Database = {
         }
         Insert: {
           awarded_at?: string | null
+          company_id?: string | null
           created_by?: string | null
           goal_id?: string | null
           id?: string
@@ -2310,6 +2371,7 @@ export type Database = {
         }
         Update: {
           awarded_at?: string | null
+          company_id?: string | null
           created_by?: string | null
           goal_id?: string | null
           id?: string
@@ -3513,6 +3575,7 @@ export type Database = {
       inventory_items: {
         Row: {
           category_id: string | null
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -3533,6 +3596,7 @@ export type Database = {
         }
         Insert: {
           category_id?: string | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -3553,6 +3617,7 @@ export type Database = {
         }
         Update: {
           category_id?: string | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -3575,6 +3640,7 @@ export type Database = {
       }
       inventory_transactions: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           item_id: string | null
@@ -3587,6 +3653,7 @@ export type Database = {
           unit_price: number | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           item_id?: string | null
@@ -3599,6 +3666,7 @@ export type Database = {
           unit_price?: number | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           item_id?: string | null
@@ -3950,6 +4018,7 @@ export type Database = {
       }
       message_channels: {
         Row: {
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           department_id: string | null
@@ -3961,6 +4030,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           department_id?: string | null
@@ -3972,6 +4042,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           department_id?: string | null
@@ -3986,6 +4057,7 @@ export type Database = {
       }
       message_reactions: {
         Row: {
+          company_id: string | null
           created_at: string | null
           emoji: string | null
           id: string
@@ -3993,6 +4065,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           emoji?: string | null
           id?: string
@@ -4000,6 +4073,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           emoji?: string | null
           id?: string
@@ -4012,6 +4086,7 @@ export type Database = {
         Row: {
           attachments: Json | null
           channel_id: string | null
+          company_id: string | null
           content: string | null
           created_at: string | null
           edited_at: string | null
@@ -4024,6 +4099,7 @@ export type Database = {
         Insert: {
           attachments?: Json | null
           channel_id?: string | null
+          company_id?: string | null
           content?: string | null
           created_at?: string | null
           edited_at?: string | null
@@ -4036,6 +4112,7 @@ export type Database = {
         Update: {
           attachments?: Json | null
           channel_id?: string | null
+          company_id?: string | null
           content?: string | null
           created_at?: string | null
           edited_at?: string | null
@@ -4341,6 +4418,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           attachments: Json | null
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -4363,6 +4441,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachments?: Json | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -4385,6 +4464,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           attachments?: Json | null
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -4971,6 +5051,7 @@ export type Database = {
         Row: {
           assigned_at: string | null
           assigned_by: string | null
+          company_id: string | null
           confirmed_at: string | null
           created_at: string | null
           id: string
@@ -4982,6 +5063,7 @@ export type Database = {
         Insert: {
           assigned_at?: string | null
           assigned_by?: string | null
+          company_id?: string | null
           confirmed_at?: string | null
           created_at?: string | null
           id?: string
@@ -4993,6 +5075,7 @@ export type Database = {
         Update: {
           assigned_at?: string | null
           assigned_by?: string | null
+          company_id?: string | null
           confirmed_at?: string | null
           created_at?: string | null
           id?: string
@@ -5504,23 +5587,100 @@ export type Database = {
       system_logs: {
         Row: {
           company_id: string | null
+          context: Json
           created_at: string | null
           id: string
+          level: string | null
+          location: string | null
+          message: string | null
+          org_id: string | null
+          request_id: string | null
+          stack: string | null
+          tags: string[]
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           company_id?: string | null
+          context?: Json
           created_at?: string | null
           id?: string
+          level?: string | null
+          location?: string | null
+          message?: string | null
+          org_id?: string | null
+          request_id?: string | null
+          stack?: string | null
+          tags?: string[]
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           company_id?: string | null
+          context?: Json
           created_at?: string | null
           id?: string
+          level?: string | null
+          location?: string | null
+          message?: string | null
+          org_id?: string | null
+          request_id?: string | null
+          stack?: string | null
+          tags?: string[]
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
+      }
+      system_settings: {
+        Row: {
+          admin_config: Json
+          appearance: Json
+          company_id: string | null
+          created_at: string
+          general: Json
+          id: string
+          integrations: Json
+          localization: Json
+          notifications: Json
+          security: Json
+          updated_at: string
+        }
+        Insert: {
+          admin_config?: Json
+          appearance?: Json
+          company_id?: string | null
+          created_at?: string
+          general?: Json
+          id?: string
+          integrations?: Json
+          localization?: Json
+          notifications?: Json
+          security?: Json
+          updated_at?: string
+        }
+        Update: {
+          admin_config?: Json
+          appearance?: Json
+          company_id?: string | null
+          created_at?: string
+          general?: Json
+          id?: string
+          integrations?: Json
+          localization?: Json
+          notifications?: Json
+          security?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       task_activities: {
         Row: {
@@ -5772,6 +5932,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          company_id: string | null
           created_at: string | null
           end_date: string | null
           id: string
@@ -5786,6 +5947,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          company_id?: string | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -5800,6 +5962,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          company_id?: string | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -5986,6 +6149,7 @@ export type Database = {
       }
       user_unavailability: {
         Row: {
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           end_time: string | null
@@ -5998,6 +6162,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           end_time?: string | null
@@ -6010,6 +6175,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           end_time?: string | null
@@ -6086,6 +6252,7 @@ export type Database = {
           location: string | null
           service_type: string | null
           start_time: string | null
+          updated_at: string
           vendor_name: string | null
         }
         Insert: {
@@ -6102,6 +6269,7 @@ export type Database = {
           location?: string | null
           service_type?: string | null
           start_time?: string | null
+          updated_at?: string
           vendor_name?: string | null
         }
         Update: {
@@ -6118,6 +6286,7 @@ export type Database = {
           location?: string | null
           service_type?: string | null
           start_time?: string | null
+          updated_at?: string
           vendor_name?: string | null
         }
         Relationships: []
@@ -6352,15 +6521,22 @@ export type Database = {
       }
       recognitions: {
         Row: {
+          award_rule: string | null
+          awarded_at: string | null
           badge_description: string | null
           badge_icon_url: string | null
           badge_id: string | null
           badge_name: string | null
           badge_slug: string | null
+          company_id: string | null
+          created_by: string | null
           earned_at: string | null
+          goal_id: string | null
           id: string | null
           recipient_avatar: string | null
           recipient_name: string | null
+          reward_details: Json | null
+          reward_type: string | null
           threshold_xp: number | null
           user_id: string | null
           xp_snapshot: number | null
@@ -6380,11 +6556,137 @@ export type Database = {
           start_time: string | null
           vendor_name: string | null
         }
+        Insert: {
+          company_id?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date?: never
+          event_end_date?: never
+          id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date?: never
+          event_end_date?: never
+          id?: string | null
+          location?: string | null
+          service_type?: string | null
+          start_time?: string | null
+          vendor_name?: string | null
+        }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      assert_company_membership: {
+        Args: { p_company_id: string }
+        Returns: undefined
+      }
+      create_company_invite: {
+        Args: {
+          company_uuid?: string
+          employee_birth_date?: string
+          employee_first_name?: string
+          employee_last_name?: string
+          employee_phone?: string
+          invite_email?: string
+          invite_role?: string
+        }
+        Returns: string
+      }
+      create_company_with_setup: {
+        Args: {
+          company_data: Json
+          custom_roles?: Json
+          owner_user_id?: string
+          positions_data?: Json
+        }
+        Returns: string
+      }
+      current_user_company_ids: { Args: never; Returns: string[] }
+      current_user_is_company_admin: {
+        Args: { target_company_id: string }
+        Returns: boolean
+      }
+      get_ai_kpi_insights: {
+        Args: { company_id: string; range_end?: string; range_start?: string }
+        Returns: Json
+      }
+      get_company_roles: {
+        Args: { company_uuid?: string }
+        Returns: {
+          color: string
+          description: string
+          hierarchy_level: number
+          icon: string
+          id: string
+          is_active: boolean
+          is_system_role: boolean
+          name: string
+          permissions: Json
+        }[]
+      }
+      get_dashboard_stats: {
+        Args: { p_company_id: string; p_today?: string }
+        Returns: Json
+      }
+      get_kpi_summary: {
+        Args: { company_id: string; range_end?: string; range_start?: string }
+        Returns: Json
+      }
+      get_recipient_insights: {
+        Args: { recipients_filter?: Json }
+        Returns: Json
+      }
+      get_security_contract_status: {
+        Args: {
+          bucket_ids?: string[]
+          grant_tables?: string[]
+          rls_tables?: string[]
+        }
+        Returns: Json
+      }
+      log_audit_event: {
+        Args: {
+          event_action?: string
+          next_values?: Json
+          previous_values?: Json
+          target_record_id?: string
+          target_table?: string
+          target_user_id?: string
+        }
+        Returns: undefined
+      }
+      replace_event_participants: {
+        Args: {
+          p_company_id: string
+          p_event_id: string
+          p_participants?: Json
+        }
+        Returns: undefined
+      }
+      replace_event_shift_links: {
+        Args: {
+          p_company_id: string
+          p_event_id: string
+          p_shift_ids?: string[]
+        }
+        Returns: undefined
+      }
+      storage_object_company_id: {
+        Args: { object_name: string }
+        Returns: string
+      }
+      trigger_onboarding_checklist: {
+        Args: { invite_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
@@ -6513,9 +6815,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

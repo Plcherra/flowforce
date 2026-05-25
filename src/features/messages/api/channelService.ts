@@ -33,12 +33,17 @@ export async function deleteChannel(
 export async function createChannel(
   channelData: CreateChannelData,
   ownerId: string,
+  companyId?: string | null,
 ) {
   let channel: MessageChannel;
 
   try {
     // Step 1: Create the channel
-    channel = await messagesRepository.createChannel(channelData, ownerId);
+    channel = await messagesRepository.createChannel(
+      channelData,
+      ownerId,
+      companyId,
+    );
     logger.debug("Channel created successfully", {
       channelId: channel.id,
       tags: ["channels"],

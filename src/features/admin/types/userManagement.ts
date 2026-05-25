@@ -37,7 +37,7 @@ export interface CopilotInsight {
   positionId?: string;
 }
 
-export type UserRoleEnum = Database["public"]["Enums"]["user_role"];
+export type UserRoleEnum = string;
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type PositionRow = Database["public"]["Tables"]["positions"]["Row"];
 export type DepartmentRow = Database["public"]["Tables"]["departments"]["Row"];

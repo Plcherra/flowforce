@@ -14,7 +14,7 @@ export default function InventoryCountsPage() {
   const navigate = useNavigate();
 
   const handleViewCount = (countId: string) => {
-    navigate(`/inventory/counts/${countId}`);
+    navigate(`/app/inventory/counts/${countId}`);
   };
 
   return (

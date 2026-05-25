@@ -41,7 +41,11 @@ async function createDefaultFields(formId: string, documentTitle: string) {
   await supabase.from("form_fields").insert(fields);
 }
 
-export async function importFormFromFile(file: File, userId: string) {
+export async function importFormFromFile(
+  file: File,
+  userId: string,
+  companyId: string,
+) {
   const baseName = file.name.replace(/\.[^/.]+$/, "");
   let documentId: string | undefined;
   let storagePath: string | undefined;
@@ -75,6 +79,7 @@ export async function importFormFromFile(file: File, userId: string) {
   const { data: form, error } = await supabase
     .from("forms")
     .insert({
+      company_id: companyId,
       title: baseName,
       description: extractedSnippet ? `Imported from ${file.name}` : undefined,
       created_by: userId,

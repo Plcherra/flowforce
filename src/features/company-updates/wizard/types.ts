@@ -37,7 +37,7 @@ export interface WizardFormData {
 
 export interface UpdateMediaItem {
   id: string;
-  url: string;
+  url?: string;
   type: "image" | "video" | "file";
   name: string;
   mimeType: string;

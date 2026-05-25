@@ -230,7 +230,7 @@ export default function CountDetailPage({
       });
 
       // Navigate back to counts list
-      navigate("/inventory/counts");
+      navigate("/app/inventory/counts");
     } catch (error) {
       logger.error("Error completing count", { error, tags: ["error"] });
       toast({
@@ -326,7 +326,7 @@ export default function CountDetailPage({
         <div className="text-center">
           <h1 className="text-2xl font-bold">Count not found</h1>
           <Button
-            onClick={() => navigate("/inventory/counts")}
+            onClick={() => navigate("/app/inventory/counts")}
             className="mt-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -358,7 +358,7 @@ export default function CountDetailPage({
               <div className="flex items-start gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/inventory/counts")}
+                  onClick={() => navigate("/app/inventory/counts")}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>

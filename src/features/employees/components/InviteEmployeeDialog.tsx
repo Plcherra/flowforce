@@ -69,10 +69,17 @@ export function InviteEmployeeDialog({
   useEffect(() => {
     if (!roleOptions.length) return;
     const firstRole = roleOptions[0];
-    setForm((prev) => ({
-      ...prev,
-      role: prev.role ?? firstRole.id,
-    }));
+    setForm((prev) => {
+      const roleStillExists = roleOptions.some((role) => role.id === prev.role);
+      const nextRole = roleStillExists ? prev.role : firstRole.id;
+      if (prev.role === nextRole) {
+        return prev;
+      }
+      return {
+        ...prev,
+        role: nextRole,
+      };
+    });
   }, [roleOptions]);
 
   const handleSubmit = async (event: React.FormEvent) => {

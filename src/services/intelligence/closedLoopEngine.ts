@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/public-types";
+import { ENABLE_AI_INSIGHTS } from "@/lib/config";
 import {
   ScheduleGuardrailEngine,
   type GuardrailResult,
@@ -439,7 +440,7 @@ async function fetchAiSummary(
   aiType: BuildClosedLoopStateParams["aiType"],
   context: string,
 ): Promise<{ summary: string; generatedAt: string | null; source?: string }> {
-  if (!include) {
+  if (!include || !ENABLE_AI_INSIGHTS) {
     return {
       summary: "AI summary disabled for this query.",
       generatedAt: null,

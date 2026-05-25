@@ -7,6 +7,7 @@ import type {
   CalendarEventRow,
   CalendarEventRowWithRelations,
 } from "@/features/calendar/repositories/calendarEventsRepository";
+import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
 
 type VendorVisitRow = Tables<"vendor_visits">;
@@ -44,15 +45,21 @@ type CalendarEventsViewRow = CalendarEventRow & {
   participants?: Tables<"event_participants">[] | null;
 };
 
-const AUTH_HEADERS = {
-  apikey: SUPABASE_ANON_KEY,
-  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+const getAuthHeaders = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const token = session?.access_token ?? SUPABASE_ANON_KEY;
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${token}`,
+  };
 };
 
-const JSON_HEADERS = {
-  ...AUTH_HEADERS,
+const getJsonHeaders = async () => ({
+  ...(await getAuthHeaders()),
   "Content-Type": "application/json",
-};
+});
 
 const isNetworkError = (error: unknown) => {
   if (error instanceof TypeError) return true;
@@ -173,7 +180,7 @@ const fetchCalendarViewRows = async (
   const url = `${REST_BASE}/calendar_events_full?${searchParams.toString()}`;
   return request<CalendarEventsViewRow[]>(
     url,
-    { headers: AUTH_HEADERS },
+    { headers: await getAuthHeaders() },
     "fetchEvents",
   );
 };
@@ -195,7 +202,7 @@ const fetchShiftLinks = async (
   const url = `${REST_BASE}/event_shift_links?${searchParams.toString()}`;
   const rows = await request<EventShiftLinkRow[]>(
     url,
-    { headers: AUTH_HEADERS },
+    { headers: await getAuthHeaders() },
     "fetchEventShiftLinks",
   );
   return rows.reduce((map, row) => {
@@ -214,7 +221,7 @@ const invokeScheduleEvent = async (
     url,
     {
       method: "POST",
-      headers: JSON_HEADERS,
+      headers: await getJsonHeaders(),
       body: JSON.stringify(body),
     },
     "scheduleEvent",

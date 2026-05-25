@@ -11,6 +11,11 @@ import type {
   SignatureData,
   TaskData,
 } from "@/types/forms";
+import {
+  getStorageObjectName,
+  isStorageObjectReference,
+  type StorageObjectValue,
+} from "@/lib/storageObjects";
 
 /**
  * Format attachment value for display
@@ -28,7 +33,9 @@ export function formatAttachmentValue(value: unknown): React.ReactNode {
       <div className="space-y-1">
         {value.map((item, index) => (
           <div key={index} className="text-sm">
-            {typeof item === "string" ? item : String(item)}
+            {typeof item === "string" || isStorageObjectReference(item)
+              ? getStorageObjectName(item as StorageObjectValue)
+              : String(item)}
           </div>
         ))}
       </div>
@@ -40,8 +47,8 @@ export function formatAttachmentValue(value: unknown): React.ReactNode {
     if ("url" in obj && typeof obj.url === "string") {
       return <span className="text-sm">{obj.url}</span>;
     }
-    if ("path" in obj && typeof obj.path === "string") {
-      return <span className="text-sm">{obj.path}</span>;
+    if (isStorageObjectReference(value)) {
+      return <span className="text-sm">{getStorageObjectName(value)}</span>;
     }
     return <span className="text-sm">{JSON.stringify(value)}</span>;
   }

@@ -36,6 +36,11 @@ export const appEnv = {
       process.env.VITE_ENABLE_REMOTE_LOGS,
     "true",
   ),
+  VITE_ENABLE_AI_INSIGHTS: boolFromEnv(
+    process.env.NEXT_PUBLIC_ENABLE_AI_INSIGHTS ??
+      process.env.VITE_ENABLE_AI_INSIGHTS,
+    "false",
+  ),
   VITE_REMOTE_LOG_ENDPOINT:
     process.env.NEXT_PUBLIC_REMOTE_LOG_ENDPOINT ??
     process.env.VITE_REMOTE_LOG_ENDPOINT ??

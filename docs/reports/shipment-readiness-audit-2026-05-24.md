@@ -2,6 +2,18 @@
 
 Date: 2026-05-24
 
+## Update 2026-05-24
+
+Phase 1 through Phase 6 remediation have now been applied after this audit was written. The original finding that `check:supabase` could report false-positive RPC readiness has been addressed: the checker now performs real read RPC calls, safe mutating RPC existence probes, anon exposure checks, 61-table RLS checks, sensitive anon-grant checks, and storage contract checks.
+
+Phase 3 added an idempotent `create_company_with_setup` RPC, local pgTAP coverage for core two-tenant isolation and setup retry behavior, and production guards that stop silently substituting placeholder profile/company data when tenant setup is incomplete.
+
+Phase 4 added company-scoped RLS for the first high-risk business tables: tasks, goals, calendar events, event participants/shift links, company updates/comments/reactions, payments, expenses, inventory items, and inventory transactions. The local security suite now includes business-table tenant isolation checks.
+
+Phase 5 added company-scoped ownership, triggers, RLS, and two-tenant tests for messaging, forms, schedules, assignments, templates, time off, and user unavailability.
+
+Phase 6 added company-scoped RLS and tests for analytics, operations, documents, vendor visits, learning, recognition, gamification, and recognition/analytics views.
+
 ## Executive Verdict
 
 FlowForce is not shipment-ready yet. The account-creation path is materially improved: signup now calls a server-side onboarding endpoint and can create the company/profile rows with the service role. The larger post-signup error pattern is coming from a database recovery migration that creates a broad schema surface without the production guarantees a multi-tenant SaaS needs.
@@ -102,7 +114,7 @@ Required fix:
 - Add real primary keys, unique constraints, foreign keys, checks, and indexes.
 - Delete accidental/public migration bookkeeping tables.
 
-### P1: Account creation is fixed tactically, but not transactionally complete
+### P1: Account creation is fixed tactically, but not fully routed through the transactional path
 
 The new onboarding endpoint verifies the auth user and creates/updates company and profile rows with the service role:
 
@@ -118,11 +130,11 @@ Remaining risks:
 
 Required fix:
 
-- Move onboarding completion into one transactional `security definer` RPC, or call a server-side database function inside the API route.
-- Make onboarding idempotent by `owner_id` or a dedicated `onboarding_runs` table.
-- Persist and reuse slug after first company creation.
+- Route onboarding completion through the idempotent `create_company_with_setup` RPC added in Phase 3, or remove the duplicated route-side write path.
+- Add an onboarding E2E that proves exactly one company/profile/membership/settings baseline after signup and retry.
+- Persist and reuse slug after first company creation for any remaining route-side update path.
 
-### P1: Fallbacks are masking broken tenant linkage
+### P1: Fallbacks were masking broken tenant linkage
 
 `ProfileContext` returns a placeholder profile when the real profile is missing:
 
@@ -137,8 +149,8 @@ This is useful for dev resilience, but dangerous for shipment because it can hid
 
 Required fix:
 
-- In production, block app access if profile/company linkage is missing.
-- Replace demo fallback with a setup-repair screen or support-safe error.
+- In production, block app access if profile/company linkage is missing. Phase 3 implemented this guard.
+- Replace the null/error state with a setup-repair screen or support-safe error.
 - Emit structured errors for missing profile, missing company, policy denial, and schema mismatch.
 
 ### P1: System settings and storage surfaces are not restored
@@ -201,14 +213,14 @@ Required fix:
 
 ### Phase 3: Harden onboarding
 
-- Convert onboarding completion to a transactional DB function.
-- Make retries idempotent.
-- Create required post-onboarding rows: settings, default roles, initial company membership, audit event.
-- Replace placeholder profile/company fallbacks in production.
+- Convert onboarding completion to a transactional DB function. Implemented for `create_company_with_setup`; remaining work is routing the production endpoint through it.
+- Make retries idempotent. Implemented in Phase 3 and covered by pgTAP.
+- Create required post-onboarding rows: settings, default roles, initial company membership, audit event. Implemented in Phase 3 and covered by pgTAP.
+- Replace placeholder profile/company fallbacks in production. Implemented in Phase 3; remaining work is a polished repair/setup screen.
 
 ### Phase 4: Prove SaaS readiness
 
-- Add two-tenant Playwright/API tests.
+- Add two-tenant Playwright/API tests. SQL-level two-tenant coverage now exists for core onboarding and the first high-risk business tables.
 - Add storage bucket policy tests.
 - Add module smoke tests against a seeded tenant.
 - Require clean build, typecheck, lint budget, Supabase contract, RLS audit, and E2E onboarding before release.

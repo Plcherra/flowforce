@@ -4,11 +4,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileIcon, Upload, X, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
 import { showErrorToast } from "@/utils/errorHandler";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
+import {
+  getStorageObjectName,
+  getStorageObjectUrl,
+  isStorageObjectReference,
+  type StorageObjectReference,
+} from "@/lib/storageObjects";
 
-interface FileUploadData {
-  url: string;
+interface FileUploadData extends StorageObjectReference {
+  bucket: "form-uploads";
+  path: string;
   filename: string;
   size: number;
   type: string;
@@ -37,15 +50,23 @@ export function FileUploadField({
   acceptedTypes = [],
   className = "",
 }: FileUploadFieldProps) {
+  const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFile = useCallback(
     async (file: File): Promise<FileUploadData | null> => {
       try {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random().toString(36).substring(2)}_${file.name}`;
-        const filePath = `form-uploads/${fileName}`;
+        const companyId = resolveProfileCompanyId(profile);
+        if (!companyId) {
+          throw new Error("Your account is not attached to a company yet.");
+        }
+
+        const filePath = buildCompanyStoragePath(
+          companyId,
+          "forms/uploads",
+          file.name,
+        );
 
         const { error: uploadError } = await supabase.storage
           .from("form-uploads")
@@ -62,12 +83,9 @@ export function FileUploadField({
           return null;
         }
 
-        const { data } = supabase.storage
-          .from("form-uploads")
-          .getPublicUrl(filePath);
-
         return {
-          url: data.publicUrl,
+          bucket: "form-uploads",
+          path: filePath,
           filename: file.name,
           size: file.size,
           type: file.type,
@@ -80,7 +98,7 @@ export function FileUploadField({
         return null;
       }
     },
-    [],
+    [profile],
   );
 
   const handleFileSelect = useCallback(
@@ -197,6 +215,18 @@ export function FileUploadField({
   const acceptString =
     acceptedTypes.length > 0 ? acceptedTypes.join(",") : undefined;
 
+  const openUploadedFile = async (fileData: FileUploadData) => {
+    if (isStorageObjectReference(fileData)) {
+      await openSignedStorageUrl(fileData.bucket, fileData.path, {
+        download: fileData.filename,
+      });
+      return;
+    }
+
+    const url = getStorageObjectUrl(fileData);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className={`space-y-3 ${className}`}>
       <div>
@@ -229,10 +259,10 @@ export function FileUploadField({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm truncate">
-                      {fileData.filename}
+                      {getStorageObjectName(fileData)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatFileSize(fileData.size)} •{" "}
+                      {formatFileSize(fileData.size ?? 0)} •{" "}
                       {fileData.type.split("/")[1]?.toUpperCase() || "File"}
                     </p>
                   </div>
@@ -242,7 +272,7 @@ export function FileUploadField({
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      onClick={() => window.open(fileData.url, "_blank")}
+                      onClick={() => void openUploadedFile(fileData)}
                     >
                       <Download className="h-3 w-3" />
                     </Button>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { AlertTriangle, FileText, Loader2, Plus, Upload } from "lucide-react";
+import { AlertTriangle, Download, FileText, Loader2, Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +17,15 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { notifyManagersNewRequest } from "@/notifications/availability";
 import type { EmployeeReportCategory } from "@/types/people";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
+import type { StorageObjectReference } from "@/lib/storageObjects";
 
 const DEFAULT_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -30,6 +37,10 @@ interface ReportFormValues {
   notes: string;
   attachment?: File | null;
 }
+
+type EmployeeReportAttachment = StorageObjectReference & {
+  bucket: "attachments";
+};
 
 const categories: { value: EmployeeReportCategory; label: string }[] = [
   { value: "performance", label: "Performance" },
@@ -50,6 +61,7 @@ export function ReportInbox() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   const [formValues, setFormValues] = useState<ReportFormValues>({
     employeeId: "",
@@ -78,7 +90,7 @@ export function ReportInbox() {
       const { data, error } = await supabase
         .from("employee_report")
         .select(
-          "id, employee_id, date, category, severity, notes, created_at, created_by, updated_at",
+          "id, employee_id, date, category, severity, notes, attachment, created_at, created_by, updated_at",
         )
         .order("date", { ascending: false })
         .limit(50);
@@ -101,18 +113,27 @@ export function ReportInbox() {
   const createReportMutation = useMutation({
     mutationFn: async (values: ReportFormValues) => {
       if (!user) throw new Error("You must be signed in to create a report.");
+      const companyId = resolveProfileCompanyId(profile);
+      if (!companyId) throw new Error("Your account is not attached to a company yet.");
 
-      let attachmentUrl: string | null = null;
+      let attachment: EmployeeReportAttachment | null = null;
       if (values.attachment) {
-        const path = `employee-reports/${values.employeeId}/${Date.now()}-${values.attachment.name}`;
+        const path = buildCompanyStoragePath(
+          companyId,
+          `employee-reports/${values.employeeId}`,
+          values.attachment.name,
+        );
         const { error: uploadError } = await supabase.storage
           .from("attachments")
           .upload(path, values.attachment);
         if (uploadError) throw uploadError;
-        const { data: signed } = supabase.storage
-          .from("attachments")
-          .getPublicUrl(path);
-        attachmentUrl = signed?.publicUrl ?? null;
+        attachment = {
+          bucket: "attachments",
+          path,
+          name: values.attachment.name,
+          type: values.attachment.type,
+          size: values.attachment.size,
+        };
       }
 
       const insertPayload = {
@@ -120,9 +141,8 @@ export function ReportInbox() {
         category: values.category,
         severity: values.severity,
         date: values.date,
-        notes:
-          values.notes +
-          (attachmentUrl ? `\nAttachment: ${attachmentUrl}` : ""),
+        notes: values.notes,
+        attachment,
         created_by: user.id,
       };
 
@@ -183,6 +203,25 @@ export function ReportInbox() {
       });
     },
   });
+
+  const openReportAttachment = async (
+    attachment: EmployeeReportAttachment,
+  ) => {
+    try {
+      await openSignedStorageUrl(attachment.bucket, attachment.path, {
+        download: attachment.name,
+      });
+    } catch (error) {
+      toast({
+        title: "Attachment unavailable",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to create a secure attachment link.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -415,6 +454,20 @@ export function ReportInbox() {
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                     {report.notes}
                   </p>
+                  {isEmployeeReportAttachment(report.attachment) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 gap-2"
+                      onClick={() =>
+                        void openReportAttachment(report.attachment)
+                      }
+                    >
+                      <Download className="h-4 w-4" />
+                      {report.attachment.name ?? "Download attachment"}
+                    </Button>
+                  )}
                 </div>
               );
             })}
@@ -471,3 +524,11 @@ async function generateWeeklySummary(
 }
 
 export default ReportInbox;
+
+function isEmployeeReportAttachment(
+  value: unknown,
+): value is EmployeeReportAttachment {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  return record.bucket === "attachments" && typeof record.path === "string";
+}

@@ -815,7 +815,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                     setCurrentStep("type");
                     // Navigate to the count page
                     if (createdCount?.id) {
-                      navigate(`/inventory/counts/${createdCount.id}`);
+                      navigate(`/app/inventory/counts/${createdCount.id}`);
                     }
                   } catch (error) {
                     // Error already handled in hook

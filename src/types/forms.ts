@@ -86,6 +86,8 @@ export interface LocationData {
 export interface SignatureData {
   signature_data: string; // Base64 encoded
   signature_url?: string;
+  signature_bucket?: string;
+  signature_path?: string;
   signer_name?: string;
   signed_at: string;
 }

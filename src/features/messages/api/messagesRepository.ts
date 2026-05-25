@@ -28,6 +28,7 @@ const DepartmentSchema = z.object({
 const MessageChannelSchema = z
   .object({
     id: z.string(),
+    company_id: z.string().nullable().optional(),
     name: z.string(),
     description: z.string().nullable().optional(),
     type: z.string(),
@@ -185,10 +186,12 @@ async function listChannels(
 async function createChannel(
   channelData: CreateChannelData,
   creatorId: string,
+  companyId?: string | null,
 ): Promise<MessageChannel> {
   const { data, error } = await supabase
     .from("message_channels")
     .insert({
+      company_id: channelData.company_id ?? companyId ?? null,
       name: channelData.name,
       description: channelData.description ?? null,
       type: channelData.type ?? "team",
@@ -347,7 +350,7 @@ const MessageContentSchema = z
 const MessageAttachmentInputSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().min(1).max(255),
-  path: z.string().url().nullable().optional(),
+  path: z.string().min(1).max(1024).nullable().optional(),
   url: z.string().url().nullable().optional(),
   type: z.string().max(100).nullable().optional(),
   size: z.number().int().positive().nullable().optional(),

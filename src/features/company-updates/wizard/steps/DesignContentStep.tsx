@@ -36,6 +36,10 @@ import type { UpdateMediaItem } from "../types";
 import { GRADIENT_PRESETS, BACKGROUND_PATTERNS } from "@/data/updateTemplates";
 import { CompanyUpdatePreview } from "@/features/company-updates/wizard/CompanyUpdatePreview";
 import { RichTextEditor } from "@/features/company-updates/wizard/RichTextEditor";
+import {
+  SignedUpdateMediaImage,
+  useSignedUpdateMediaUrl,
+} from "@/features/company-updates/wizard/SignedUpdateMediaImage";
 import { useUploadMedia } from "@/features/company-updates/wizard/useUploadMedia";
 
 interface DesignContentStepProps {
@@ -127,6 +131,7 @@ export function DesignContentStep({
   };
 
   const mediaItems = formData.updateMedia ?? [];
+  const previewMediaUrl = useSignedUpdateMediaUrl(previewMedia);
   const bodyPlainText = formData.bodyPlainText ?? stripHtml(formData.body);
   const charactersRemaining = Math.max(
     0,
@@ -339,10 +344,9 @@ export function DesignContentStep({
                     className="group relative overflow-hidden rounded-2xl border bg-muted/30 p-2 text-left"
                   >
                     {media.type === "image" ? (
-                      <img
-                        src={media.url}
-                        alt={media.name}
-                        className="h-32 w-full rounded-xl object-cover"
+                      <SignedUpdateMediaImage
+                        media={media}
+                        className="h-32 w-full rounded-xl object-cover bg-muted"
                       />
                     ) : media.type === "video" ? (
                       <div className="flex h-32 w-full items-center justify-center rounded-xl bg-background/70">
@@ -581,16 +585,15 @@ export function DesignContentStep({
             <DialogTitle>{previewMedia?.name}</DialogTitle>
           </DialogHeader>
           {previewMedia?.type === "image" && (
-            <img
-              src={previewMedia.url}
-              alt={previewMedia.name}
-              className="w-full rounded-xl object-contain"
+            <SignedUpdateMediaImage
+              media={previewMedia}
+              className="w-full rounded-xl object-contain bg-muted"
             />
           )}
-          {previewMedia?.type === "video" && (
+          {previewMedia?.type === "video" && previewMediaUrl && (
             <video
               controls
-              src={previewMedia.url}
+              src={previewMediaUrl}
               className="w-full rounded-xl"
             />
           )}
@@ -602,7 +605,7 @@ export function DesignContentStep({
               </p>
               <Button size="sm" asChild>
                 <a
-                  href={previewMedia.url}
+                  href={previewMediaUrl ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -49,9 +49,9 @@ import type {
   DocumentWithRelations,
 } from "@/types/ingestion";
 import { can, type Role, type UserIdentity } from "@/lib/auth/acl";
-import { supabase } from "@/integrations/supabase/client";
 import { getReportsBucket } from "@/services/ingestion";
 import { CreateDocumentTaskDialog } from "@/features/analytics/components/reports/builder/CreateDocumentTaskDialog";
+import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
 
 const STATUS_META: Record<
   DocumentProcessingState,
@@ -86,15 +86,6 @@ function buildIdentity(
   if (!user) return null;
   const role = (user.user_metadata?.role ?? "manager") as Role;
   return { id: user.id, role };
-}
-
-function getFileUrl(document: DocumentWithRelations | null) {
-  if (!document?.file) return null;
-  const bucket = getReportsBucket();
-  const { data } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(document.file.storage_path);
-  return data.publicUrl ?? null;
 }
 
 function summarizeText(text?: string | null) {
@@ -160,6 +151,32 @@ export default function ReportsPage() {
   const handleCreateTask = (doc: DocumentWithRelations) => {
     setSelectedDocumentId(doc.id);
     setIsTaskDialogOpen(true);
+  };
+
+  const handleDownloadOriginal = async (document: DocumentWithRelations) => {
+    if (!document.file?.storage_path) {
+      toast({
+        title: "Download unavailable",
+        description: "This report does not have a stored source file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await openSignedStorageUrl(getReportsBucket(), document.file.storage_path, {
+        download: document.file.filename,
+      });
+    } catch (error) {
+      toast({
+        title: "Download unavailable",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to create a secure file link.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!canView) {
@@ -428,19 +445,9 @@ export default function ReportsPage() {
                         variant="outline"
                         size="sm"
                         className="gap-2"
-                        onClick={() => {
-                          const url = getFileUrl(selectedDocument);
-                          if (url) {
-                            window.open(url, "_blank");
-                          } else {
-                            toast({
-                              title: "Download unavailable",
-                              description:
-                                "This storage bucket is private. Please configure public access or signed URLs.",
-                              variant: "destructive",
-                            });
-                          }
-                        }}
+                        onClick={() =>
+                          void handleDownloadOriginal(selectedDocument)
+                        }
                       >
                         <ArrowDownToLine className="h-4 w-4" />
                         Download original

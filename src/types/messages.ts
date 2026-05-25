@@ -40,6 +40,7 @@ export interface CreateChannelData {
   name: string;
   description?: string;
   type: string;
+  company_id?: string | null;
   department_id?: string;
   is_private?: boolean;
   member_ids?: string[];

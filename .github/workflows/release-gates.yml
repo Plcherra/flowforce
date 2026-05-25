@@ -1,0 +1,126 @@
+name: Release Gates
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-gates-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  SUPABASE_CLI_VERSION: "2.101.0"
+  NEXT_TELEMETRY_DISABLED: "1"
+  NEXT_PUBLIC_ENABLE_AI_INSIGHTS: "false"
+  NEXT_PUBLIC_ENABLE_REMOTE_LOGS: "false"
+  SMOKE_TIMEOUT_MS: "30000"
+  TEST_URL: "http://127.0.0.1:3000"
+  ONBOARDING_E2E_BASE_URL: "http://127.0.0.1:3000"
+
+jobs:
+  release-gates:
+    name: Release gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Supabase CLI
+        run: npm install --global supabase@${{ env.SUPABASE_CLI_VERSION }}
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Rebuild local database from migrations
+        run: supabase db reset
+
+      - name: Export local Supabase environment
+        shell: bash
+        run: |
+          status_json="$(supabase status -o json)"
+          {
+            echo "SUPABASE_URL=$(jq -r '.API_URL' <<< "$status_json")"
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r '.API_URL' <<< "$status_json")"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(jq -r '.ANON_KEY' <<< "$status_json")"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(jq -r '.SERVICE_ROLE_KEY' <<< "$status_json")"
+          } >> "$GITHUB_ENV"
+
+      - name: Supabase schema and security contract
+        run: npm run check:supabase
+
+      - name: Database tenant-isolation and storage tests
+        run: npm run test:db:security
+
+      - name: Typecheck source
+        run: npm run typecheck:src
+
+      - name: Typecheck app, tests, and Supabase functions
+        run: npm run typecheck
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Start production server
+        shell: bash
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/flowforce-next.log 2>&1 &
+          echo "$!" > /tmp/flowforce-next.pid
+          for i in {1..90}; do
+            if curl -fsS "$TEST_URL" > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/flowforce-next.log
+          exit 1
+
+      - name: Onboarding E2E
+        run: npm run test:e2e:onboarding
+
+      - name: Authenticated visible-module smoke
+        run: npm run test:smoke
+
+      - name: Upload smoke report and server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-artifacts
+          path: |
+            docs/test-results/visible-modules-smoke.json
+            /tmp/flowforce-next.log
+          if-no-files-found: ignore
+
+      - name: Stop app server
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/flowforce-next.pid ]; then
+            kill "$(cat /tmp/flowforce-next.pid)" 2>/dev/null || true
+          fi
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop --no-backup

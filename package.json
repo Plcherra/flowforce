@@ -6,6 +6,8 @@
   "scripts": {
     "test:pages": "node scripts/test-all-pages.mjs",
     "test:pages:simple": "node scripts/test-pages-simple.mjs",
+    "test:e2e:onboarding": "node scripts/e2e-onboarding-complete.mjs",
+    "test:db:security": "supabase test db --local supabase/tests/phase3_tenant_isolation.test.sql && supabase test db --local supabase/tests/phase4_business_tenant_isolation.test.sql && supabase test db --local supabase/tests/phase5_messaging_forms_scheduling_isolation.test.sql && supabase test db --local supabase/tests/phase6_analytics_ops_learning_isolation.test.sql && supabase test db --local supabase/tests/phase7_storage_path_isolation.test.sql && supabase test db --local supabase/tests/phase10_sensitive_storage_privacy.test.sql && supabase test db --local supabase/tests/phase11_form_storage_privacy.test.sql && supabase test db --local supabase/tests/phase12_remaining_storage_privacy.test.sql && supabase test db --local supabase/tests/phase13_restore_rls_containment.test.sql && supabase test db --local supabase/tests/phase14_custom_sections_smoke_contract.test.sql && supabase test db --local supabase/tests/phase14_visible_module_contracts.test.sql && supabase test db --local supabase/tests/phase14_tasks_scheduling_smoke_contracts.test.sql && supabase test db --local supabase/tests/phase14_inventory_smoke_contracts.test.sql",
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "dev:fast": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbo",
@@ -24,7 +26,9 @@
     "typecheck:app": "NODE_OPTIONS='--max-old-space-size=4096' tsc -p tsconfig.typecheck.app.json --pretty false",
     "typecheck:src": "NODE_OPTIONS='--max-old-space-size=4096' tsc -p tsconfig.typecheck.src.json --pretty false",
     "typecheck:tests": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.tests.json --pretty false",
-    "typecheck:supabase": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.supabase.json --pretty false"
+    "typecheck:supabase": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.supabase.json --pretty false",
+    "check:supabase:remote-drift": "node scripts/check-supabase-migration-drift.mjs",
+    "check:deploy": "npm run check:supabase:remote-drift && npm run check:supabase"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

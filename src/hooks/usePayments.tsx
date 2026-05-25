@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
 
 interface User {
@@ -19,6 +20,7 @@ function isUser(u: any): u is User {
 
 export interface Payment {
   id: string;
+  company_id?: string | null;
   payment_type: string;
   recipient_type: string;
   recipient_id?: string;
@@ -58,10 +60,17 @@ type PaymentWithUsers = Payment & {
 export function usePayments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { profile, loading: profileLoading } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const { data: payments = [], isLoading } = useQuery<PaymentWithUsers[]>({
-    queryKey: ["payments"],
+    queryKey: ["payments", companyId],
+    enabled: Boolean(companyId) && !profileLoading,
     queryFn: async () => {
+      if (!companyId) {
+        throw new Error("Company context is required to fetch payments.");
+      }
+
       const { data, error } = await supabase
         .from("payments")
         .select(
@@ -71,6 +80,7 @@ export function usePayments() {
           creator:profiles!payments_created_by_fkey(first_name, last_name)
         `,
         )
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -100,12 +110,21 @@ export function usePayments() {
     mutationFn: async (
       paymentData: Omit<
         Payment,
-        "id" | "created_at" | "updated_at" | "approver" | "creator"
+        | "id"
+        | "company_id"
+        | "created_at"
+        | "updated_at"
+        | "approver"
+        | "creator"
       >,
     ) => {
+      if (!companyId) {
+        throw new Error("Company context is required to create a payment.");
+      }
+
       const { data, error } = await supabase
         .from("payments")
-        .insert(paymentData)
+        .insert({ ...paymentData, company_id: companyId })
         .select()
         .single();
 
@@ -134,10 +153,17 @@ export function usePayments() {
       id,
       ...updates
     }: Partial<Payment> & { id: string }) => {
+      if (!companyId) {
+        throw new Error("Company context is required to update a payment.");
+      }
+
+      const { company_id: _ignoredCompanyId, ...safeUpdates } = updates;
+
       const { data, error } = await supabase
         .from("payments")
-        .update(updates)
+        .update(safeUpdates)
         .eq("id", id)
+        .eq("company_id", companyId)
         .select()
         .single();
 
@@ -163,7 +189,7 @@ export function usePayments() {
 
   return {
     payments,
-    isLoading,
+    isLoading: isLoading || profileLoading,
     createPayment,
     updatePayment,
   };

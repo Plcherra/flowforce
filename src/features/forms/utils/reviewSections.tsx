@@ -14,6 +14,12 @@ import {
 } from "@/features/forms/components/presentation";
 import { NARRATIVE_TYPES, ATTACHMENT_TYPES } from "../types/formFill";
 import { formatAttachmentValue, formatListValue } from "./formValueFormatters";
+import { createSignedStorageUrl } from "@/lib/signedStorageUrls";
+import {
+  getStorageObjectUrl,
+  isStorageObjectReference,
+  type StorageObjectValue,
+} from "@/lib/storageObjects";
 
 const narrativeTypes = new Set(NARRATIVE_TYPES);
 const attachmentTypes = new Set(ATTACHMENT_TYPES);
@@ -53,10 +59,10 @@ export function buildReviewSections(
           <div key={field.id} className="space-y-3">
             <FormLabelValueRow label={field.label} />
             {images.length > 0 ? (
-              images.map((src, index) => (
-                <FormImageBlock
-                  key={`${src}-${index}`}
-                  src={typeof src === "string" ? src : undefined}
+              images.map((item, index) => (
+                <SignedFormImageBlock
+                  key={`${field.id}-${index}`}
+                  value={item as StorageObjectValue}
                   caption={`Image ${index + 1}`}
                 />
               ))
@@ -145,4 +151,44 @@ export function buildReviewSections(
   }
 
   return sections;
+}
+
+function SignedFormImageBlock({
+  value,
+  caption,
+}: {
+  value: StorageObjectValue;
+  caption: string;
+}) {
+  const [src, setSrc] = React.useState<string | null>(() =>
+    getStorageObjectUrl(value),
+  );
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const url = getStorageObjectUrl(value);
+    if (url) {
+      setSrc(url);
+      return;
+    }
+
+    if (!isStorageObjectReference(value)) {
+      setSrc(null);
+      return;
+    }
+
+    createSignedStorageUrl(value.bucket, value.path, { expiresIn: 300 })
+      .then((signedUrl) => {
+        if (!cancelled) setSrc(signedUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setSrc(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
+
+  return <FormImageBlock src={src ?? undefined} caption={caption} />;
 }

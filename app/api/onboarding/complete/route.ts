@@ -47,17 +47,6 @@ const readString = (source: JsonRecord, key: string) => {
   return typeof value === "string" ? value : "";
 };
 
-const createCompanySlug = (companyName: string) => {
-  const base =
-    companyName
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "company";
-
-  return `${base}-${crypto.randomUUID().slice(0, 8)}`;
-};
-
 const transformRolesForDatabase = (roles: unknown) => {
   if (!Array.isArray(roles)) return [];
 
@@ -138,12 +127,12 @@ export async function POST(request: Request) {
       return jsonError("Onboarding email does not match created account.", 403);
     }
 
-    const now = new Date().toISOString();
     const templateName = readString(template, "name");
     const templateId = readString(template, "id");
+    const ownerPhone =
+      normalizeText(userInfo.phone) ?? normalizeText(companyInfo.phone);
     const companyPayload = {
       name: companyName,
-      slug: createCompanySlug(companyName),
       website: normalizeWebsite(companyInfo.website),
       phone: normalizeText(companyInfo.phone),
       industry: normalizeText(companyIndustry),
@@ -170,84 +159,43 @@ export async function POST(request: Request) {
       registration_complete: true,
       created_by: userId,
       owner_id: userId,
-      updated_at: now,
-    };
-
-    const { data: existingProfile, error: existingProfileError } =
-      await supabaseAdmin
-        .from("profiles")
-        .select("company_id")
-        .eq("id", userId)
-        .maybeSingle();
-
-    if (existingProfileError) {
-      logger.warn("Unable to check existing onboarding profile", {
-        error: existingProfileError,
-        context: { userId },
-      });
-    }
-
-    let companyId = existingProfile?.company_id ?? null;
-
-    if (companyId) {
-      const { error: updateCompanyError } = await supabaseAdmin
-        .from("companies")
-        .update(companyPayload)
-        .eq("id", companyId);
-
-      if (updateCompanyError) {
-        logger.error("Unable to update onboarding company", {
-          error: updateCompanyError,
-          context: { userId, companyId },
-        });
-        return jsonError("Unable to update company workspace.", 500);
-      }
-    } else {
-      const { data: company, error: companyError } = await supabaseAdmin
-        .from("companies")
-        .insert(companyPayload)
-        .select("id")
-        .single();
-
-      if (companyError || !company?.id) {
-        logger.error("Unable to create onboarding company", {
-          error: companyError,
-          context: { userId, companyName },
-        });
-        return jsonError(
-          "Unable to create company workspace.",
-          500,
-          companyError,
-        );
-      }
-
-      companyId = company.id;
-    }
-
-    const ownerPhone =
-      normalizeText(userInfo.phone) ?? normalizeText(companyInfo.phone);
-    const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
-      {
-        id: userId,
-        company_id: companyId,
+      owner_profile: {
         first_name: firstName,
         last_name: lastName,
         email,
-        role: "owner",
         phone: ownerPhone,
-        is_company_admin: true,
-        employment_status: "active",
-        updated_at: now,
       },
-      { onConflict: "id" },
+    };
+
+    const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
+      "create_company_with_setup",
+      {
+        company_data: companyPayload,
+        custom_roles: customRoles,
+        positions_data: positions,
+        owner_user_id: userId,
+      },
     );
 
-    if (profileError) {
-      logger.error("Unable to create onboarding profile", {
-        error: profileError,
+    if (setupError || !companyId) {
+      logger.error("Unable to complete onboarding setup RPC", {
+        error: setupError,
+        context: { userId, companyName },
+      });
+      return jsonError("Unable to complete company workspace setup.", 500, setupError);
+    }
+
+    const { data: company, error: companyError } = await supabaseAdmin
+      .from("companies")
+      .select("slug")
+      .eq("id", companyId)
+      .single();
+
+    if (companyError) {
+      logger.warn("Unable to read onboarding company metadata", {
+        error: companyError,
         context: { userId, companyId },
       });
-      return jsonError("Unable to create owner profile.", 500, profileError);
     }
 
     const { error: metadataError } =
@@ -261,7 +209,7 @@ export async function POST(request: Request) {
           company_id: companyId,
           active_company_id: companyId,
           company_name: companyName,
-          company_slug: companyPayload.slug,
+          company_slug: company?.slug ?? null,
         },
       });
 

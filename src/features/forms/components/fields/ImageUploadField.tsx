@@ -4,13 +4,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageIcon, Upload, X, Camera } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { createSignedStorageUrl } from "@/lib/signedStorageUrls";
+import {
+  getStorageObjectUrl,
+  isStorageObjectReference,
+  type StorageObjectReference,
+  type StorageObjectValue,
+} from "@/lib/storageObjects";
+
+type ImageUploadValue = StorageObjectValue;
 
 interface ImageUploadFieldProps {
   label: string;
   description?: string;
-  value?: string[];
-  onChange: (value: string[]) => void;
+  value?: ImageUploadValue[];
+  onChange: (value: ImageUploadValue[]) => void;
   required?: boolean;
   maxFiles?: number;
   maxSize?: number; // in MB
@@ -27,14 +41,22 @@ export function ImageUploadField({
   maxSize = 10,
   className = "",
 }: ImageUploadFieldProps) {
+  const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFile = useCallback(async (file: File): Promise<string | null> => {
+  const uploadFile = useCallback(async (file: File): Promise<StorageObjectReference | null> => {
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `form-images/${fileName}`;
+      const companyId = resolveProfileCompanyId(profile);
+      if (!companyId) {
+        throw new Error("Your account is not attached to a company yet.");
+      }
+
+      const filePath = buildCompanyStoragePath(
+        companyId,
+        "forms/images",
+        file.name,
+      );
 
       const { error: uploadError } = await supabase.storage
         .from("form-images")
@@ -48,16 +70,18 @@ export function ImageUploadField({
         return null;
       }
 
-      const { data } = supabase.storage
-        .from("form-images")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
+      return {
+        bucket: "form-images",
+        path: filePath,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      };
     } catch (error) {
       logger.error("Error uploading file:", { error, tags: ["error"] });
       return null;
     }
-  }, []);
+  }, [profile]);
 
   const handleFileSelect = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +127,7 @@ export function ImageUploadField({
         const results = await Promise.all(uploadPromises);
 
         const successfulUploads = results.filter(
-          (url): url is string => url !== null,
+          (item): item is StorageObjectReference => item !== null,
         );
         const failedUploads = results.length - successfulUploads.length;
 
@@ -174,14 +198,13 @@ export function ImageUploadField({
 
       {value.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {value.map((url, index) => (
+          {value.map((item, index) => (
             <Card key={index} className="relative group">
               <CardContent className="p-0">
                 <div className="aspect-square relative overflow-hidden rounded-lg">
-                  <img
-                    src={url}
+                  <SignedImagePreview
+                    value={item}
                     alt={`Upload ${index + 1}`}
-                    className="w-full h-full object-cover"
                   />
                   <Button
                     type="button"
@@ -226,6 +249,48 @@ export function ImageUploadField({
       )}
     </div>
   );
+}
+
+function SignedImagePreview({
+  value,
+  alt,
+}: {
+  value: ImageUploadValue;
+  alt: string;
+}) {
+  const [src, setSrc] = useState<string | null>(() => getStorageObjectUrl(value));
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const url = getStorageObjectUrl(value);
+    if (url) {
+      setSrc(url);
+      return;
+    }
+
+    if (!isStorageObjectReference(value)) {
+      setSrc(null);
+      return;
+    }
+
+    createSignedStorageUrl(value.bucket, value.path, { expiresIn: 300 })
+      .then((signedUrl) => {
+        if (!cancelled) setSrc(signedUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setSrc(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
+
+  if (!src) {
+    return <div className="h-full w-full bg-muted" />;
+  }
+
+  return <img src={src} alt={alt} className="w-full h-full object-cover" />;
 }
 
 // For form builder preview

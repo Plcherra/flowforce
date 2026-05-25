@@ -25,6 +25,7 @@ export type FormSubmissionRow = Tables<"form_submissions">;
 
 const formRowSchema = z.object({
   id: z.string(),
+  company_id: z.string().nullable().optional(),
   title: z.string(),
   description: z.string().nullable(),
   status: z.string() as z.ZodType<FormRow["status"]>,
@@ -41,6 +42,7 @@ const formRowSchema = z.object({
 
 const formFieldRowSchema = z.object({
   id: z.string(),
+  company_id: z.string().nullable().optional(),
   form_id: z.string(),
   field_order: z.number(),
   field_type: z.string() as z.ZodType<FormFieldRow["field_type"]>,
@@ -64,6 +66,7 @@ const formFieldRowSchema = z.object({
 
 const formSubmissionRowSchema = z.object({
   id: z.string(),
+  company_id: z.string().nullable().optional(),
   form_id: z.string(),
   submission_data: jsonSchema,
   submitted_at: z.string(),
@@ -168,6 +171,7 @@ export async function fetchFormsWithRelations(
         latest_submission:form_submissions(submitted_at)
       `,
     )
+    .eq("company_id", companyId)
     .eq("created_profile.company_id", companyId)
     .order("created_at", { ascending: false })
     .order("submitted_at", {
@@ -200,6 +204,7 @@ export async function fetchFormWithRelations(
       `,
     )
     .eq("id", formId)
+    .eq("company_id", companyId)
     .eq("created_profile.company_id", companyId)
     .order("submitted_at", {
       foreignTable: "latest_submission",
@@ -222,7 +227,7 @@ export async function insertFormRow(
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
     .from("forms")
-    .insert(payload)
+    .insert({ ...payload, company_id: companyId })
     .select("*")
     .single();
   if (error) {
@@ -241,6 +246,7 @@ export async function updateFormRow(
     .from("forms")
     .update(updates)
     .eq("id", formId)
+    .eq("company_id", companyId)
     .select("*")
     .maybeSingle();
   if (error) {
@@ -254,7 +260,11 @@ export async function deleteFormRow(
   formId: string,
 ): Promise<void> {
   await ensureCompanyScope(companyId);
-  const { error } = await supabase.from("forms").delete().eq("id", formId);
+  const { error } = await supabase
+    .from("forms")
+    .delete()
+    .eq("id", formId)
+    .eq("company_id", companyId);
   if (error) {
     throw error;
   }
@@ -269,6 +279,7 @@ export async function fetchFormFields(
     .from("form_fields")
     .select("*")
     .eq("form_id", formId)
+    .eq("company_id", companyId)
     .order("field_order", { ascending: true });
 
   if (error) {
@@ -292,7 +303,8 @@ export async function replaceFormFields(
   const { error: deleteError } = await supabase
     .from("form_fields")
     .delete()
-    .eq("form_id", formId);
+    .eq("form_id", formId)
+    .eq("company_id", companyId);
   if (deleteError) {
     throw deleteError;
   }
@@ -303,6 +315,7 @@ export async function replaceFormFields(
 
   const fieldsToInsert = fields.map((field, index) => ({
     ...field,
+    company_id: companyId,
     form_id: formId,
     field_order: index + 1,
   }));
@@ -327,6 +340,7 @@ export async function fetchFormSubmissions(
       `,
     )
     .eq("form_id", formId)
+    .eq("company_id", companyId)
     .order("submitted_at", { ascending: false });
 
   if (error) {
@@ -343,7 +357,7 @@ export async function insertFormSubmission(
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
     .from("form_submissions")
-    .insert(payload)
+    .insert({ ...payload, company_id: companyId })
     .select("*")
     .single();
   if (error) {

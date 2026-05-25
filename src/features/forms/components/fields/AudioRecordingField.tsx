@@ -4,13 +4,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Square, Play, Pause, Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
+import {
+  buildCompanyStoragePath,
+  resolveProfileCompanyId,
+} from "@/lib/storagePaths";
+import { createSignedStorageUrl } from "@/lib/signedStorageUrls";
+import {
+  getStorageObjectUrl,
+  isStorageObjectReference,
+  type StorageObjectReference,
+  type StorageObjectValue,
+} from "@/lib/storageObjects";
 
 interface AudioRecordingFieldProps {
   label: string;
   description?: string;
-  value?: string[];
-  onChange: (value: string[]) => void;
+  value?: StorageObjectValue[];
+  onChange: (value: StorageObjectValue[]) => void;
   required?: boolean;
   maxRecordings?: number;
   maxDuration?: number; // in seconds
@@ -27,6 +39,7 @@ export function AudioRecordingField({
   maxDuration = 300, // 5 minutes
   className = "",
 }: AudioRecordingFieldProps) {
+  const { profile } = useProfile();
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState<number | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -39,9 +52,21 @@ export function AudioRecordingField({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadAudio = useCallback(
-    async (blob: Blob, filename: string): Promise<string | null> => {
+    async (
+      blob: Blob,
+      filename: string,
+    ): Promise<StorageObjectReference | null> => {
       try {
-        const filePath = `form-audio/${filename}`;
+        const companyId = resolveProfileCompanyId(profile);
+        if (!companyId) {
+          throw new Error("Your account is not attached to a company yet.");
+        }
+
+        const filePath = buildCompanyStoragePath(
+          companyId,
+          "forms/audio",
+          filename,
+        );
 
         const { error: uploadError } = await supabase.storage
           .from("form-audio")
@@ -58,17 +83,19 @@ export function AudioRecordingField({
           return null;
         }
 
-        const { data } = supabase.storage
-          .from("form-audio")
-          .getPublicUrl(filePath);
-
-        return data.publicUrl;
+        return {
+          bucket: "form-audio",
+          path: filePath,
+          name: filename,
+          type: blob.type || "audio/webm",
+          size: blob.size,
+        };
       } catch (error) {
         logger.error("Error uploading audio:", { error, tags: ["error"] });
         return null;
       }
     },
-    [],
+    [profile],
   );
 
   const startRecording = useCallback(async () => {
@@ -103,11 +130,11 @@ export function AudioRecordingField({
         const fileName = `recording_${Date.now()}.webm`;
 
         setUploading(true);
-        const url = await uploadAudio(audioBlob, fileName);
+        const audioValue = await uploadAudio(audioBlob, fileName);
         setUploading(false);
 
-        if (url) {
-          onChange([...value, url]);
+        if (audioValue) {
+          onChange([...value, audioValue]);
           toast({
             title: "Success",
             description: "Recording saved successfully",
@@ -222,7 +249,7 @@ export function AudioRecordingField({
 
         const results = await Promise.all(uploadPromises);
         const successfulUploads = results.filter(
-          (url): url is string => url !== null,
+          (item): item is StorageObjectReference => item !== null,
         );
 
         if (successfulUploads.length > 0) {
@@ -278,7 +305,7 @@ export function AudioRecordingField({
 
       {value.length > 0 && (
         <div className="space-y-2">
-          {value.map((url, index) => (
+          {value.map((item, index) => (
             <Card key={index} className="relative group">
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
@@ -317,9 +344,16 @@ export function AudioRecordingField({
                   ref={(el) => {
                     if (el) audioRefs.current[index] = el;
                   }}
-                  src={url}
+                  src={getStorageObjectUrl(item) ?? undefined}
                   onEnded={() => setIsPlaying(null)}
                   preload="metadata"
+                />
+                <SignedAudioSource
+                  value={item}
+                  onReady={(src) => {
+                    const audio = audioRefs.current[index];
+                    if (audio) audio.src = src;
+                  }}
                 />
               </CardContent>
             </Card>
@@ -391,6 +425,37 @@ export function AudioRecordingField({
       )}
     </div>
   );
+}
+
+function SignedAudioSource({
+  value,
+  onReady,
+}: {
+  value: StorageObjectValue;
+  onReady: (src: string) => void;
+}) {
+  React.useEffect(() => {
+    let cancelled = false;
+    const url = getStorageObjectUrl(value);
+    if (url) {
+      onReady(url);
+      return;
+    }
+
+    if (!isStorageObjectReference(value)) return;
+
+    createSignedStorageUrl(value.bucket, value.path, { expiresIn: 300 })
+      .then((signedUrl) => {
+        if (!cancelled) onReady(signedUrl);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onReady, value]);
+
+  return null;
 }
 
 // For form builder preview

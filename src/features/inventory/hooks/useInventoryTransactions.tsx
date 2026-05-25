@@ -67,14 +67,25 @@ export function useInventoryTransactions() {
 export function useCreateInventoryTransaction() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   return useMutation({
     mutationFn: async (
       transactionData: Omit<InventoryTransaction, "id" | "created_at">,
     ) => {
+      if (!companyId) {
+        throw new Error(
+          "Company context is required to create an inventory transaction.",
+        );
+      }
+
+      const { company_id: _ignoredCompanyId, ...safeTransactionData } =
+        transactionData;
+
       const { data, error } = await supabase
         .from("inventory_transactions")
-        .insert(transactionData)
+        .insert({ ...safeTransactionData, company_id: companyId })
         .select()
         .single();
 
