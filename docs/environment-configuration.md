@@ -18,7 +18,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 Optional:
 
 ```bash
-NEXT_PUBLIC_CONNECTEAM_API_BASE=https://api.connecteam.com/v1
 NEXT_PUBLIC_LOG_LEVEL=info
 NEXT_PUBLIC_REMOTE_LOG_LEVEL=warn
 NEXT_PUBLIC_ENABLE_REMOTE_LOGS=true
@@ -44,11 +43,11 @@ Optional by feature:
 ```bash
 OPENAI_API_KEY=
 CRON_SECRET=
-CONNECTEAM_API_KEY=
 LOG_INGEST_TOKEN=
 LOG_LEVEL=info
 LOG_PERSIST_LEVEL=warn
 LOG_PERSISTENCE=true
+SUPPORT_ADMIN_TOKEN=
 ```
 
 ## Test And Smoke Variables
@@ -90,6 +89,7 @@ SUPABASE_CLI_VERSION=2.101.0
 - Server code should read server-only values directly or through `src/lib/env.ts`.
 - Production builds assert required public config at startup.
 - Service-role access still fails lazily and clearly when admin operations are used without `SUPABASE_SERVICE_ROLE_KEY`.
+- Internal support tooling is disabled unless `SUPPORT_ADMIN_TOKEN` is set; never expose it as a public variable.
 - Legacy `VITE_*` fallbacks remain only for migration compatibility. New variables should use the normalized names in this document.
 
 ## Local Setup

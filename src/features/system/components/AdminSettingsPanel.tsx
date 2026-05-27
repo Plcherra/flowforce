@@ -23,8 +23,28 @@ import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useAdminSettings } from "../hooks/useAdminSettings";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { DEFAULT_ADMIN_CONFIG } from "../hooks/systemSettingsDefaults";
+import {
+  BILLING_ACCOUNT_STATUSES,
+  BILLING_PLANS,
+  type BillingAccountStatus,
+  type BillingPlanKey,
+  getBillingPlanDefinition,
+} from "@/services/billing/billingPlans";
+import type { TenantManagementSettings } from "@/types/system-settings";
 
-const PLAN_OPTIONS = ["starter", "growth", "enterprise"];
+const SUBSCRIPTION_STATUS_OPTIONS = [
+  "none",
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+  "unpaid",
+] as const;
+
+type SubscriptionStatus = TenantManagementSettings["subscriptionStatus"];
+
+const toBillingIsoDate = (value: string) =>
+  value ? new Date(`${value}T23:59:59.000Z`).toISOString() : null;
 
 export function AdminSettingsPanel() {
   const system = useSystemSettingsContext();
@@ -51,6 +71,7 @@ export function AdminSettingsPanel() {
 
   const tenant =
     state.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement;
+  const selectedPlan = getBillingPlanDefinition(tenant?.plan);
 
   return (
     <div className="space-y-6">
@@ -94,15 +115,71 @@ export function AdminSettingsPanel() {
                   tenantManagement: {
                     ...(prev.tenantManagement ??
                       DEFAULT_ADMIN_CONFIG.tenantManagement),
-                    plan: event.target.value,
+                    plan: event.target.value as BillingPlanKey,
                   },
                 }))
               }
               disabled={!canEdit || loading}
             >
-              {PLAN_OPTIONS.map((option) => (
+              {BILLING_PLANS.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              {selectedPlan.description}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant-account-status">Account status</Label>
+            <select
+              id="tenant-account-status"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              value={tenant?.accountStatus ?? "trialing"}
+              onChange={(event) =>
+                setState((prev) => ({
+                  ...prev,
+                  tenantManagement: {
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    accountStatus: event.target.value as BillingAccountStatus,
+                  },
+                }))
+              }
+              disabled={!canEdit || loading}
+            >
+              {BILLING_ACCOUNT_STATUSES.map((option) => (
                 <option key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                  {option.replace("_", " ")}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant-subscription-status">
+              Subscription status
+            </Label>
+            <select
+              id="tenant-subscription-status"
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              value={tenant?.subscriptionStatus ?? "none"}
+              onChange={(event) =>
+                setState((prev) => ({
+                  ...prev,
+                  tenantManagement: {
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    subscriptionStatus: event.target
+                      .value as SubscriptionStatus,
+                  },
+                }))
+              }
+              disabled={!canEdit || loading}
+            >
+              {SUBSCRIPTION_STATUS_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option.replace("_", " ")}
                 </option>
               ))}
             </select>
@@ -146,6 +223,64 @@ export function AdminSettingsPanel() {
                         prev.tenantManagement ??
                         DEFAULT_ADMIN_CONFIG.tenantManagement
                       ).maxSeats,
+                  },
+                }))
+              }
+              disabled={!canEdit || loading}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant-billing-email">Billing email</Label>
+            <Input
+              id="tenant-billing-email"
+              type="email"
+              value={tenant?.billingEmail ?? ""}
+              onChange={(event) =>
+                setState((prev) => ({
+                  ...prev,
+                  tenantManagement: {
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    billingEmail: event.target.value || null,
+                  },
+                }))
+              }
+              disabled={!canEdit || loading}
+              placeholder="billing@example.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant-trial-ends">Trial ends</Label>
+            <Input
+              id="tenant-trial-ends"
+              type="date"
+              value={tenant?.trialEndsAt?.slice(0, 10) ?? ""}
+              onChange={(event) =>
+                setState((prev) => ({
+                  ...prev,
+                  tenantManagement: {
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    trialEndsAt: toBillingIsoDate(event.target.value),
+                  },
+                }))
+              }
+              disabled={!canEdit || loading}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant-period-ends">Current period ends</Label>
+            <Input
+              id="tenant-period-ends"
+              type="date"
+              value={tenant?.currentPeriodEndsAt?.slice(0, 10) ?? ""}
+              onChange={(event) =>
+                setState((prev) => ({
+                  ...prev,
+                  tenantManagement: {
+                    ...(prev.tenantManagement ??
+                      DEFAULT_ADMIN_CONFIG.tenantManagement),
+                    currentPeriodEndsAt: toBillingIsoDate(event.target.value),
                   },
                 }))
               }

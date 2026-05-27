@@ -56,14 +56,14 @@ Status:
 ### Phase 2: Define The Replacement Stack
 
 - [x] Document what FlowForce replaces from Jolt.
-- [x] Document what FlowForce replaces from Connecteam.
+- [x] Document what FlowForce replaces from frontline workforce tools.
 - [x] Document what FlowForce replaces from MarketMan.
 - [x] Document what FlowForce should not replace in v1.
 
 Replacement stack definition:
 
 - Jolt replacement target: restaurant operations execution, checklists/SOPs, food-safety style workflows, task follow-through, manager review, and compliance reporting.
-- Connecteam replacement target: frontline employee scheduling, tasks, communication, updates, forms, HR/training basics, availability, permissions, and team execution.
+- Frontline workforce replacement target: employee scheduling, tasks, communication, updates, forms, HR/training basics, availability, permissions, and team execution.
 - MarketMan replacement target: restaurant inventory items, units, counts, suppliers, purchasing, recipes/production, waste, COGS-style reporting, and food-cost visibility.
 
 FlowForce v1 should not claim:

@@ -36,7 +36,7 @@ Verification:
 
 - Import tests cover valid and invalid files.
 
-### Phase 3: Connecteam Migration Path
+### Phase 3: Workforce Platform Migration Path
 
 - [ ] Define imported data: employees, roles, schedules, tasks, messages where possible.
 - [ ] Create mapping docs.
@@ -45,7 +45,7 @@ Verification:
 
 Acceptance:
 
-- A Connecteam customer has a path into FlowForce.
+- A workforce platform customer has a path into FlowForce.
 
 Verification:
 
@@ -155,4 +155,3 @@ Acceptance:
 Verification:
 
 - A test tenant can be populated from migration samples.
-

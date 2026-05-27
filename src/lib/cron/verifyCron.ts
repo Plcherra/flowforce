@@ -1,4 +1,5 @@
 import type { IncomingHttpHeaders } from "node:http";
+import { timingSafeEqual } from "node:crypto";
 
 type HeaderValue = string | string[] | undefined;
 
@@ -47,7 +48,13 @@ export function verifyCronRequest(
     return { ok: false, reason: "missing_header" };
   }
 
-  if (providedSecret !== expectedSecret) {
+  const providedBuffer = Buffer.from(providedSecret);
+  const expectedBuffer = Buffer.from(expectedSecret);
+  const matches =
+    providedBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(providedBuffer, expectedBuffer);
+
+  if (!matches) {
     return { ok: false, reason: "mismatch", providedSecret };
   }
 

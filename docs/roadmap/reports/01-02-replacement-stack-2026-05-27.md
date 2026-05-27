@@ -4,7 +4,7 @@ Date: 2026-05-27
 
 ## Decision
 
-FlowForce should be positioned as a restaurant operations platform that can replace parts of Jolt, Connecteam, and MarketMan over time, but v1 should make careful claims.
+FlowForce should be positioned as a restaurant operations platform that can replace parts of the existing checklist, workforce, and inventory stack over time, but v1 should make careful claims.
 
 The sales story is not "we have every feature they have." The sales story is:
 
@@ -14,7 +14,7 @@ The sales story is not "we have every feature they have." The sales story is:
 
 Jolt's official restaurant/operations messaging emphasizes daily checklists, food-safety workflows, temperature monitoring/sensors, labeling, employee scheduling, accountability, and performance tools.
 
-Connecteam's official help material describes an operations hub with time clock, job scheduling, forms, quick tasks, employee reminders, live communication around submissions, and payroll export/integration workflows.
+Frontline workforce tools commonly include time clock, job scheduling, forms, quick tasks, employee reminders, live communication around submissions, and payroll export/integration workflows.
 
 MarketMan's official platform messaging emphasizes restaurant inventory, purchase orders, POS/distributor/accounting integrations, real-time inventory tracking, manual mobile counts, menu profitability, actual versus theoretical reporting, COGS, and gross profit reports.
 
@@ -22,8 +22,6 @@ Sources checked:
 
 - Jolt operations software: https://www.jolt.com/
 - Jolt restaurant software: https://www.jolt.com/industries/restaurants/
-- Connecteam Operations Hub: https://help.connecteam.com/en/articles/5949142-the-operations-hub
-- Connecteam Advanced Operations Hub: https://help.connecteam.com/en/articles/5951916-operations-hub-the-advanced-plan
 - MarketMan restaurant inventory software: https://www.marketman.com/platform/restaurant-inventory-management-software
 
 ## What FlowForce Replaces From Jolt
@@ -43,7 +41,7 @@ Do not claim yet:
 - Label-printer parity.
 - Mature food-safety hardware ecosystem parity.
 
-## What FlowForce Replaces From Connecteam
+## What FlowForce Replaces From Frontline Workforce Tools
 
 V1 replacement target:
 
@@ -94,7 +92,7 @@ FlowForce should win by connecting the things competitors often separate:
 ## Acceptance Result
 
 - Jolt replacement target documented.
-- Connecteam replacement target documented.
+- Frontline workforce replacement target documented.
 - MarketMan replacement target documented.
 - V1 non-claims documented.
 - The replacement story is honest and specific.

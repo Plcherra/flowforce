@@ -63,4 +63,4 @@ The first version of FlowForce should not try to be a generic workforce tool. It
 
 ## Next Phase
 
-Continue to Phase 01.02: define the replacement stack against Jolt, Connecteam, and MarketMan.
+Continue to Phase 01.02: define the replacement stack against checklist, workforce, and inventory tools.

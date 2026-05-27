@@ -14,7 +14,7 @@ Date: 2026-05-27
 ## Important Decisions
 
 - `NEXT_PUBLIC_*` is reserved for values that can safely appear in the browser bundle.
-- `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `CONNECTEAM_API_KEY`, `CRON_SECRET`, and `LOG_INGEST_TOKEN` are server-only.
+- `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `CRON_SECRET`, and `LOG_INGEST_TOKEN` are server-only.
 - Legacy `VITE_*` fallbacks remain to avoid breaking older local setups, but new implementation should use the normalized names.
 - Production builds assert required public config early; service-role config remains lazy so admin-only routes fail clearly when used.
 

@@ -84,7 +84,6 @@ export const DEFAULT_INTEGRATIONS: IntegrationsSettings = {
     toast: { status: "disconnected", authType: "api_key" },
     marketman: { status: "disconnected", authType: "api_key" },
     quickbooks: { status: "disconnected", authType: "oauth" },
-    connecteam: { status: "disconnected", authType: "oauth" },
   },
   syncMappings: {
     autoSync: {
@@ -143,6 +142,10 @@ const DEFAULT_TENANT_MANAGEMENT: TenantManagementSettings = {
   activeSeats: 0,
   maxSeats: 10,
   plan: "starter",
+  accountStatus: "trialing",
+  subscriptionStatus: "none",
+  billingEmail: null,
+  currentPeriodEndsAt: null,
   trialEndsAt: null,
 };
 
@@ -180,4 +183,3 @@ export function seedSystemSettings(company: Company | null) {
     admin_config: DEFAULT_ADMIN_CONFIG,
   };
 }
-

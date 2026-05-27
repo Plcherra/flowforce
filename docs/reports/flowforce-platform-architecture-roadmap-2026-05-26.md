@@ -6,14 +6,14 @@ Date: 2026-05-26
 
 The plan is to turn FlowForce into a restaurant/retail operations platform that can replace a multi-app stack:
 
-- Connecteam-like workforce management: employees, schedules, messaging, tasks, recognition, training.
+- Workforce management: employees, schedules, messaging, tasks, recognition, training.
 - Jolt-like operations execution: checklists, SOPs, forms, compliance, manager workflows.
 - MarketMan-like inventory and purchasing: items, units, counts, suppliers, purchasing, production, waste, food-cost tracking.
 - FlowForce-only advantage: connect those modules together so staffing, inventory, labor cost, food cost, compliance, and AI recommendations share one tenant data model.
 
 The business positioning is:
 
-> Replace Jolt + Connecteam + MarketMan with one connected operating system for restaurants and service businesses.
+> Replace fragmented checklist, workforce, and inventory tools with one connected operating system for restaurants and service businesses.
 
 The technical direction discussed was:
 
@@ -139,7 +139,7 @@ Acceptance:
 
 - FlowForce can answer: "What will this schedule cost in labor and inventory?"
 - The dashboard shows combined labor, inventory, purchasing, and waste signals.
-- This becomes the core sales argument against Jolt, Connecteam, and MarketMan.
+- This becomes the core sales argument against fragmented checklist, workforce, and inventory tools.
 
 ### Phase 6: AI Operations Copilot Foundation
 

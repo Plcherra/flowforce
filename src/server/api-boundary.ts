@@ -70,6 +70,24 @@ export const apiBoundaryDefinitions: ApiBoundaryDefinition[] = [
     owner: "app/api/cron/* and app/api/run-detectors",
   },
   {
+    name: "Internal support tenant tooling",
+    kind: "next_route",
+    security: "internal_only",
+    mutationPolicy: "audited_service_role_write",
+    owner: "app/api/internal/support/tenant/route.ts",
+    notes:
+      "Requires SUPPORT_ADMIN_TOKEN, writes support_tool_runs, and blocks impersonation for v1.",
+  },
+  {
+    name: "Automation suggestion route",
+    kind: "next_route",
+    security: "authenticated",
+    mutationPolicy: "server_verified_write",
+    owner: "app/api/ops/issues/[issueId]/suggest-automation/route.ts",
+    notes:
+      "Requires bearer session, verifies tenant membership server-side, and keeps OpenAI keys server-only.",
+  },
+  {
     name: "Company setup and invite RPCs",
     kind: "supabase_rpc",
     security: "tenant_scoped",

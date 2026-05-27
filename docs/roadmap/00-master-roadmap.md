@@ -1,10 +1,10 @@
 # FlowForce Master Roadmap
 
-Date: 2026-05-26
+Date: 2026-05-27
 
 ## North Star
 
-FlowForce becomes the operating system for restaurant, retail, and service teams: one connected platform replacing the fragmented stack of Jolt, Connecteam, MarketMan, spreadsheets, messages, and manual manager follow-up.
+FlowForce becomes the operating system for restaurant, retail, and service teams: one connected platform replacing fragmented checklist, workforce, inventory, spreadsheet, message, and manual manager follow-up workflows.
 
 The product promise:
 
@@ -46,10 +46,10 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [03 Core SaaS Foundation](./03-core-saas-foundation.md)
-- Current phase: Phase 6, Billing Readiness
-- Last completed phase: 03.05, Audit Logs And Activity Trail
-- Last phase report: [03.05 Audit Logs And Activity Trail](./reports/03-05-audit-logs-and-activity-trail-2026-05-27.md)
+- Active plan: [04 Web App Product Completion](./04-web-app-product-completion.md)
+- Current phase: Phase 1, Visible Module Inventory
+- Last completed phase: 03.10, SaaS Foundation Signoff
+- Last phase report: [03.10 SaaS Foundation Signoff](./reports/03-10-saas-foundation-signoff-2026-05-27.md)
 
 ## Global Completion Criteria
 
@@ -67,7 +67,7 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 
 - [x] 1.  Product positioning and scope
 - [x] 2.  Platform architecture
-- [ ] 3.  Core SaaS foundation
+- [x] 3.  Core SaaS foundation
 - [ ] 4.  Web app product completion
 - [ ] 5.  Inventory finance cost engine
 - [ ] 6.  Operations workflows and compliance

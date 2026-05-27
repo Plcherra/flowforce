@@ -6,31 +6,36 @@ import {
   validateAutomationScript,
   type AutomationScript,
 } from "@/server/automation/validateScript";
-import { appEnv } from "@/lib/env";
+import { serverEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
-const apiKey = appEnv.VITE_OPENAI_API_KEY;
+const apiKey = serverEnv.OPENAI_API_KEY;
 const openai = apiKey
   ? new OpenAI({
       apiKey,
-      dangerouslyAllowBrowser: true,
     })
   : null;
+
+type SupabaseLikeClient = {
+  from: (table: string) => any;
+};
 
 export interface GenerateAutomationSuggestionInput {
   issueId: string;
   orgId: string;
+  client?: SupabaseLikeClient;
 }
 
 export async function generateAutomationSuggestion({
   issueId,
   orgId,
+  client = supabase,
 }: GenerateAutomationSuggestionInput) {
   if (!openai) {
     throw new Error("OpenAI key missing");
   }
 
-  const { data: issue, error } = await supabase
+  const { data: issue, error } = await client
     .from("ops_issues")
     .select("*")
     .eq("id", issueId)
@@ -79,7 +84,7 @@ export async function generateAutomationSuggestion({
     throw new Error("Generated script failed schema validation");
   }
 
-  const { data: suggestion, error: insertError } = await supabase
+  const { data: suggestion, error: insertError } = await client
     .from("ops_automation_suggestions")
     .insert({
       org_id: orgId,

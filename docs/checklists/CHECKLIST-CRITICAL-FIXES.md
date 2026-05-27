@@ -43,7 +43,7 @@ These are the technical issues that need to be fixed before the project can be c
 ## 4. Supabase Connection And Environment
 
 - [x] Audit `.env.example` against actual environment usage.
-  - Expanded `.env.example` to include Supabase, OpenAI, cron, Connecteam, logging, operations defaults, and validation-script variables.
+  - Expanded `.env.example` to include Supabase, OpenAI, cron, logging, operations defaults, and validation-script variables.
 - [x] Confirm required variables are documented: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and any OpenAI/API keys.
   - Required and optional variables are documented in `.env.example` and `docs/supabase-environment-audit.md`.
 - [x] Confirm local Supabase connection works or document that the project uses a remote Supabase instance.

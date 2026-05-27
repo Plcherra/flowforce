@@ -8,6 +8,7 @@ export const AUDIT_CATEGORIES = [
   "ai",
   "data",
   "security",
+  "support",
 ] as const;
 
 export type AuditCategory = (typeof AUDIT_CATEGORIES)[number];
@@ -30,6 +31,8 @@ export const AUDIT_ACTIONS = {
   userStatusUpdated: "user.status_updated",
   permissionOverridesUpdated: "permission.overrides_updated",
   settingsUpdated: "system_settings.updated",
+  supportTenantDiagnosticsViewed: "support.tenant_diagnostics_viewed",
+  supportTenantRepairExecuted: "support.tenant_repair_executed",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -91,6 +94,20 @@ export const AUDIT_EVENT_DEFINITIONS: AuditEventDefinition[] = [
     severity: "warning",
     description:
       "System settings were changed, including billing, integration, AI, security, or company configuration.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.supportTenantDiagnosticsViewed,
+    category: "support",
+    severity: "warning",
+    description: "Internal support diagnostics were viewed for a tenant.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.supportTenantRepairExecuted,
+    category: "support",
+    severity: "critical",
+    description: "Internal support tooling repaired a tenant baseline.",
     retention: "extended",
   },
 ];

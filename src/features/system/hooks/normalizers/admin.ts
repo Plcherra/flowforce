@@ -4,8 +4,14 @@ import type {
   BusinessStructureSettings,
   ApiMonitoringSettings,
   AICopilotSettings,
+  TenantManagementSettings,
 } from "@/types/system-settings";
 import { DEFAULT_ADMIN_CONFIG } from "../systemSettingsDefaults";
+import {
+  getBillingPlanDefinition,
+  normalizeBillingPlan,
+  normalizeBillingStatus,
+} from "@/services/billing/billingPlans";
 import {
   asBoolean,
   asNumber,
@@ -110,6 +116,35 @@ const normalizeAiCopilot = (value: unknown): AICopilotSettings => {
   };
 };
 
+const normalizeTenantManagement = (
+  value: unknown,
+): TenantManagementSettings => {
+  const source = isRecord(value) ? value : {};
+  const plan = normalizeBillingPlan(asString(source.plan));
+  const planDefinition = getBillingPlanDefinition(plan);
+  const subscriptionCandidate = asString(source.subscriptionStatus);
+  const subscriptionStatus: TenantManagementSettings["subscriptionStatus"] =
+    subscriptionCandidate === "trialing" ||
+    subscriptionCandidate === "active" ||
+    subscriptionCandidate === "past_due" ||
+    subscriptionCandidate === "canceled" ||
+    subscriptionCandidate === "unpaid"
+      ? subscriptionCandidate
+      : "none";
+
+  return {
+    primaryOwnerEmail: asString(source.primaryOwnerEmail),
+    activeSeats: asNumber(source.activeSeats, 0),
+    maxSeats: asNumber(source.maxSeats, planDefinition.seatLimit),
+    plan,
+    accountStatus: normalizeBillingStatus(asString(source.accountStatus)),
+    subscriptionStatus,
+    billingEmail: asString(source.billingEmail),
+    currentPeriodEndsAt: asString(source.currentPeriodEndsAt),
+    trialEndsAt: asString(source.trialEndsAt),
+  };
+};
+
 export const normalizeAdminConfig = (
   value: unknown,
   company: Company | null,
@@ -128,5 +163,6 @@ export const normalizeAdminConfig = (
       : DEFAULT_ADMIN_CONFIG.roleTemplates,
     apiMonitoring: normalizeApiMonitoring(source.apiMonitoring),
     aiCopilot: normalizeAiCopilot(source.aiCopilot),
+    tenantManagement: normalizeTenantManagement(source.tenantManagement),
   };
 };

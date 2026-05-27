@@ -29,7 +29,7 @@ export interface FeatureFlags {
   };
   intelligence: {
     oodaLoop: boolean;
-    connecteamFormsSync: boolean;
+    workforceFormsSync: boolean;
   };
 }
 
@@ -64,7 +64,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   },
   intelligence: {
     oodaLoop: true,
-    connecteamFormsSync: false,
+    workforceFormsSync: false,
   },
 };
 

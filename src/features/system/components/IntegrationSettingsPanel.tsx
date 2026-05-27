@@ -55,13 +55,6 @@ const PROVIDERS: ProviderMeta[] = [
     documentation: "https://www.marketman.com/",
   },
   {
-    key: "connecteam",
-    name: "Connecteam",
-    description: "Scheduling and HR data via OAuth",
-    authType: "oauth",
-    documentation: "https://www.connecteam.com/",
-  },
-  {
     key: "quickbooks",
     name: "QuickBooks Online",
     description: "Accounting and payroll sync",

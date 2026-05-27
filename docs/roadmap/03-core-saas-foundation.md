@@ -108,10 +108,10 @@ Status:
 
 ### Phase 6: Billing Readiness
 
-- [ ] Define plans and feature gates.
-- [ ] Add subscription/account status model.
-- [ ] Add billing-safe feature checks.
-- [ ] Add trial/disabled/suspended states.
+- [x] Define plans and feature gates.
+- [x] Add subscription/account status model.
+- [x] Add billing-safe feature checks.
+- [x] Add trial/disabled/suspended states.
 
 Acceptance:
 
@@ -121,12 +121,17 @@ Verification:
 
 - Feature flags react to account status.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.06 Billing Readiness](./reports/03-06-billing-readiness-2026-05-27.md)
+
 ### Phase 7: Data Lifecycle And Retention
 
-- [ ] Define deletion, archival, export, and restore behavior.
-- [ ] Add company data export plan.
-- [ ] Add soft-delete rules where needed.
-- [ ] Define legal/compliance retention defaults.
+- [x] Define deletion, archival, export, and restore behavior.
+- [x] Add company data export plan.
+- [x] Add soft-delete rules where needed.
+- [x] Define legal/compliance retention defaults.
 
 Acceptance:
 
@@ -136,12 +141,17 @@ Verification:
 
 - Export/retention paths are documented and testable.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.07 Data Lifecycle And Retention](./reports/03-07-data-lifecycle-and-retention-2026-05-27.md)
+
 ### Phase 8: Support And Admin Tooling
 
-- [ ] Add internal admin diagnostics.
-- [ ] Add tenant repair tools with strict authorization.
-- [ ] Add support-safe user impersonation decision.
-- [ ] Add health/status indicators for tenant setup.
+- [x] Add internal admin diagnostics.
+- [x] Add tenant repair tools with strict authorization.
+- [x] Add support-safe user impersonation decision.
+- [x] Add health/status indicators for tenant setup.
 
 Acceptance:
 
@@ -151,12 +161,17 @@ Verification:
 
 - Admin tools are service-protected and audited.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.08 Support And Admin Tooling](./reports/03-08-support-and-admin-tooling-2026-05-27.md)
+
 ### Phase 9: Security Review Pass
 
-- [ ] Review RLS, grants, storage, RPCs, and service routes.
-- [ ] Add missing high-risk tests.
-- [ ] Confirm anon exposure checks.
-- [ ] Confirm secrets never leak to client.
+- [x] Review RLS, grants, storage, RPCs, and service routes.
+- [x] Add missing high-risk tests.
+- [x] Confirm anon exposure checks.
+- [x] Confirm secrets never leak to client.
 
 Acceptance:
 
@@ -164,14 +179,20 @@ Acceptance:
 
 Verification:
 
-- `npm run test:db:security` and deploy checks pass.
+- Security review, Supabase contract, and deploy-readiness checks pass.
+- `npm run test:db:security` remains a clean local Supabase reset follow-up before release.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.09 Security Review Pass](./reports/03-09-security-review-pass-2026-05-27.md)
 
 ### Phase 10: SaaS Foundation Signoff
 
-- [ ] Update master roadmap status.
-- [ ] Update launch checklist.
-- [ ] Freeze foundation decisions for v1.
-- [ ] List remaining post-v1 SaaS enhancements.
+- [x] Update master roadmap status.
+- [x] Update launch checklist.
+- [x] Freeze foundation decisions for v1.
+- [x] List remaining post-v1 SaaS enhancements.
 
 Acceptance:
 
@@ -180,3 +201,8 @@ Acceptance:
 Verification:
 
 - A fresh tenant can be created, used, audited, and supported.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.10 SaaS Foundation Signoff](./reports/03-10-saas-foundation-signoff-2026-05-27.md)

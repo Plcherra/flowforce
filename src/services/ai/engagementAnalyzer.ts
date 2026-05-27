@@ -1,13 +1,3 @@
-import OpenAI from "openai";
-import { appEnv } from "@/lib/env";
-
-const apiKey = appEnv.VITE_OPENAI_API_KEY;
-
-const openai = new OpenAI({
-  apiKey,
-  dangerouslyAllowBrowser: true,
-});
-
 type AnalyzeEngagementInput = {
   title: string;
   body: string;
@@ -34,38 +24,21 @@ export async function analyzeEngagement({
     (likes * 2 + comments * 3 + views * 0.5) / 10,
   );
 
-  const prompt = `
-  You are an HR analytics assistant.
-  Analyze this company update and provide:
-  1. Sentiment (from -1 to +1)
-  2. A short motivational summary of the impact.
-  3. Advice for improving communication engagement.
-
-  ---
-  Title: ${title}
-  Body: ${body}
-  Likes: ${likes}
-  Comments: ${comments}
-  Views: ${views}
-  Engagement score baseline: ${engagementScore}
-  `;
-
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "system", content: prompt }],
-  });
-
-  const text = completion.choices[0]?.message?.content ?? "";
-  const normalizedText = text.toLowerCase();
-  const sentimentScore = normalizedText.includes("positive")
-    ? 0.8
-    : normalizedText.includes("neutral")
-      ? 0.0
-      : -0.5;
+  const normalizedText = `${title} ${body}`.toLowerCase();
+  const positiveSignals = ["great", "win", "thank", "improve", "celebrate"];
+  const negativeSignals = ["issue", "delay", "problem", "miss", "urgent"];
+  const sentimentScore =
+    positiveSignals.filter((signal) => normalizedText.includes(signal)).length *
+      0.2 -
+    negativeSignals.filter((signal) => normalizedText.includes(signal)).length *
+      0.2;
 
   return {
     engagementScore,
-    sentimentScore,
-    summary: text.trim(),
+    sentimentScore: Math.max(-1, Math.min(1, sentimentScore)),
+    summary:
+      engagementScore >= 50
+        ? "This update is generating strong engagement."
+        : "This update has room for clearer follow-up and manager visibility.",
   };
 }

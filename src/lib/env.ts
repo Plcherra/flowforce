@@ -16,19 +16,6 @@ export const appEnv = {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
     process.env.VITE_SUPABASE_ANON_KEY,
-  VITE_OPENAI_API_KEY:
-    process.env.OPENAI_API_KEY ??
-    process.env.NEXT_PUBLIC_OPENAI_API_KEY ??
-    process.env.VITE_OPENAI_API_KEY,
-  VITE_CONNECTEAM_API_BASE:
-    process.env.NEXT_PUBLIC_CONNECTEAM_API_BASE ??
-    process.env.VITE_CONNECTEAM_API_BASE ??
-    "https://api.connecteam.com/v1",
-  VITE_CONNECTEAM_API_KEY:
-    process.env.CONNECTEAM_API_KEY ??
-    process.env.NEXT_PUBLIC_CONNECTEAM_API_KEY ??
-    process.env.VITE_CONNECTEAM_API_KEY ??
-    "",
   VITE_LOG_LEVEL:
     process.env.NEXT_PUBLIC_LOG_LEVEL ?? process.env.VITE_LOG_LEVEL,
   VITE_REMOTE_LOG_LEVEL:
@@ -63,7 +50,6 @@ export const appEnv = {
 export const publicEnv = {
   NEXT_PUBLIC_SUPABASE_URL: appEnv.VITE_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: appEnv.VITE_SUPABASE_PUBLISHABLE_KEY,
-  NEXT_PUBLIC_CONNECTEAM_API_BASE: appEnv.VITE_CONNECTEAM_API_BASE,
   NEXT_PUBLIC_LOG_LEVEL: appEnv.VITE_LOG_LEVEL,
   NEXT_PUBLIC_REMOTE_LOG_LEVEL: appEnv.VITE_REMOTE_LOG_LEVEL,
   NEXT_PUBLIC_ENABLE_REMOTE_LOGS: appEnv.VITE_ENABLE_REMOTE_LOGS,
@@ -78,12 +64,12 @@ export const serverEnv = {
   SUPABASE_URL: process.env.SUPABASE_URL ?? appEnv.VITE_SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  CONNECTEAM_API_KEY: process.env.CONNECTEAM_API_KEY,
   CRON_SECRET: process.env.CRON_SECRET,
   LOG_INGEST_TOKEN: process.env.LOG_INGEST_TOKEN,
   LOG_LEVEL: process.env.LOG_LEVEL,
   LOG_PERSIST_LEVEL: process.env.LOG_PERSIST_LEVEL,
   LOG_PERSISTENCE: process.env.LOG_PERSISTENCE,
+  SUPPORT_ADMIN_TOKEN: process.env.SUPPORT_ADMIN_TOKEN,
 } satisfies EnvGroup;
 
 export const testEnv = {
@@ -148,9 +134,7 @@ const requiredEnvByScope = {
   deploy: REQUIRED_DEPLOY_ENV,
 } satisfies Record<EnvValidationScope, readonly string[]>;
 
-export const validateEnv = (
-  scope: EnvValidationScope,
-): EnvValidationResult => {
+export const validateEnv = (scope: EnvValidationScope): EnvValidationResult => {
   const group = envGroups[scope];
   const missing = requiredEnvByScope[scope].filter((key) => !group[key]);
 

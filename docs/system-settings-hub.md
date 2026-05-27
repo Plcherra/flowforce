@@ -8,7 +8,7 @@ The System Settings hub consolidates company configuration into one place. The h
 - **Security** – Two-factor enforcement, password rules, and session timeout. Changes persist in `system_settings.security`.
 - **Localization** – Timezone, language, currency, and regional formats. Timezone/currency sync to the `companies` table while the full config lives in `system_settings.localization`.
 - **Notifications** – Default delivery channels, digest schedule, per-module overrides, and escalation window with data stored in `system_settings.notifications`.
-- **Integrations** – Connect/disconnect Toast, MarketMan, Connecteam integrations. Connections, metadata, and provider status are tracked in `system_settings.integrations` and Supabase tables.
+- **Integrations** – Connect/disconnect approved third-party integrations. Connections, metadata, and provider status are tracked in `system_settings.integrations` and Supabase tables.
 - **Admin Configuration**:
   - **Business Structure** – Working hours saved to `companies.working_hours`; locations sync with `inv_locations`; departments stored in `system_settings.admin_config`.
   - **Role Templates** – Pull live company roles (via `useCompanyRoles`) and sync into `system_settings.admin_config.roleTemplates`.
