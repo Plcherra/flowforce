@@ -28,12 +28,13 @@ As of 2026-05-24:
 - Phase 17 restore-migration domain inventory is implemented in `scripts/audit-restore-migration-domains.mjs`, `npm run audit:restore-domains`, and `docs/reports/phase-17-restore-domain-inventory-2026-05-24.md`; it classifies all 172 restore tables and 4 placeholder views across shipment domains before forward replacement migrations are written.
 - Phase 18 core/scheduling domain replacement is implemented in `supabase/migrations/20260525000100_phase18_core_scheduling_domain_replacement.sql` and `supabase/tests/phase18_core_scheduling_domain_contracts.test.sql`; it adds reviewed core tenant constraints, an `audit_logs` compatibility view, explicit calendar/vendor RLS, and real `calendar_events_full`, `calendar_unified_view`, and `vendor_event` views.
 - Phase 19 people/messages domain replacement is implemented in `supabase/migrations/20260525000200_phase19_people_messages_domain_replacement.sql` and `supabase/tests/phase19_people_messages_domain_contracts.test.sql`; it adds reviewed people/HR and messages/announcements company ownership, inheritance triggers, foreign-key contracts, explicit tenant RLS policies, and two-tenant pgTAP coverage.
+- Phase 20 forms/documents domain replacement is implemented in `supabase/migrations/20260526000100_phase20_forms_documents_domain_replacement.sql` and `supabase/tests/phase20_forms_documents_domain_contracts.test.sql`; it adds reviewed form helper, custom section, custom report, document/file, helpdesk, and report event ownership, inheritance triggers, foreign-key contracts, explicit tenant RLS policies, and two-tenant pgTAP coverage.
 - Production profile/company demo fallbacks are disabled in `src/contexts/ProfileContext.tsx` and `src/hooks/useCompany.tsx`; development fallbacks remain available.
-- `npm run test:db:security` now runs Phase 3 through Phase 7, Phase 10 through Phase 14, and Phase 18 through Phase 19 pgTAP isolation/privacy/smoke/domain-contract suites.
+- `npm run test:db:security` now runs Phase 3 through Phase 7, Phase 10 through Phase 14, and Phase 18 through Phase 20 pgTAP isolation/privacy/smoke/domain-contract suites.
 - `npm run test:e2e:onboarding` verifies the real onboarding API endpoint creates the tenant baseline, retries idempotently, and cleans up the generated test tenant.
 - Docker/Colima is now available for local Supabase validation.
 - `supabase db reset` passes locally with `env -u DOCKER_HOST`.
-- `npm run check:supabase` now verifies real read RPC calls, mutating RPC presence, 43 anon-denial checks, 74 RLS tables, no public tables with RLS disabled, sensitive anon grants, 10 storage buckets, and storage policies.
+- `npm run check:supabase` now verifies real read RPC calls, mutating RPC presence, 58 anon-denial checks, 89 RLS tables, no public tables with RLS disabled, sensitive anon grants, 10 storage buckets, and storage policies.
 - Supabase TypeScript types were regenerated from the linked remote schema.
 
 ## Success Criteria
@@ -378,7 +379,7 @@ Acceptance:
 
 ## Immediate Priority Order
 
-1. Continue replacing the giant restore migration with reviewed domain migrations, moving next into forms/sections/documents, then inventory/finance, learning/recognition/gamification, and analytics/operations.
+1. Continue replacing the giant restore migration with reviewed domain migrations, moving next into inventory/finance, then learning/recognition/gamification, and analytics/operations.
 2. Clean up the remaining restore-era broad grants from source history once all domain migrations own explicit grants/policies.
 3. Clean up or migrate historical free-text public storage URLs from pre-privacy rows.
 4. Decide the release cadence for pinned CI tools, starting with Supabase CLI `2.101.0`.
