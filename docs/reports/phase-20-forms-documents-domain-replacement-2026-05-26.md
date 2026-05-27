@@ -69,7 +69,6 @@ Continue replacing the legacy restore migration with reviewed forward contracts 
 ## Remaining Work
 
 - Continue restore replacement by domain:
-  - inventory/finance
   - learning/recognition/gamification
   - analytics/operations/copilot
 - Once all domains own their explicit constraints, grants, and policies, retire the old restore migration as a historical stabilization artifact.
