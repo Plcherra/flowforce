@@ -1,4 +1,4 @@
-import { appEnv, requireEnv } from "@/lib/env";
+import { appEnv, assertProductionEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 // Safe getter that logs warnings instead of throwing during module init
@@ -22,6 +22,8 @@ const getEnvOrWarn = (value: string | undefined, key: string): string => {
   }
   return value;
 };
+
+assertProductionEnv("public");
 
 export const SUPABASE_URL = getEnvOrWarn(
   appEnv.VITE_SUPABASE_URL,

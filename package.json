@@ -19,6 +19,9 @@
     "lint:ci": "npm run lint && npm run typecheck",
     "test:smoke": "node scripts/smoke-visible-modules.mjs",
     "check:supabase": "node scripts/check-supabase-contract.mjs",
+    "check:architecture": "node scripts/check-architecture-contract.mjs",
+    "check:local": "npm run check:architecture && npm run typecheck:src",
+    "check:release": "npm run check:architecture && npm run typecheck && npm run build && npm run check:supabase",
     "audit:restore-domains": "node scripts/audit-restore-migration-domains.mjs",
     "gen:section": "node scripts/generate-section.mjs",
     "seed:kpi-insights": "node scripts/seedKpiInsights.mjs",
@@ -29,7 +32,7 @@
     "typecheck:tests": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.tests.json --pretty false",
     "typecheck:supabase": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.supabase.json --pretty false",
     "check:supabase:remote-drift": "node scripts/check-supabase-migration-drift.mjs",
-    "check:deploy": "npm run check:supabase:remote-drift && npm run check:supabase"
+    "check:deploy": "npm run check:architecture && npm run check:supabase:remote-drift && npm run check:supabase"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -108,7 +111,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
-    "baseline-browser-mapping": "^2.9.18",
+    "baseline-browser-mapping": "^2.10.32",
     "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",

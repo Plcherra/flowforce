@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Architecture contract
+        run: npm run check:architecture
+
       - name: Install Supabase CLI
         run: npm install --global supabase@${{ env.SUPABASE_CLI_VERSION }}
 

@@ -1,6 +1,6 @@
 # Supabase Environment Audit
 
-Last updated: 2026-05-13
+Last updated: 2026-05-27
 
 ## Current Connection
 
@@ -13,18 +13,20 @@ Last updated: 2026-05-13
 
 ## Required Environment Variables
 
+The canonical environment contract now lives in [`docs/environment-configuration.md`](./environment-configuration.md). Use that document when adding local, CI, remote Supabase, or VPS values.
+
 Required for the app:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 Optional but used by parts of the app:
 
 ```bash
-SUPABASE_URL=
 OPENAI_API_KEY=
 CRON_SECRET=
 CONNECTEAM_API_KEY=
@@ -40,11 +42,21 @@ LOG_PERSISTENCE=
 NEXT_PUBLIC_DEFAULT_COMPANY_ID=
 NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT=
 TEST_URL=
+ONBOARDING_E2E_BASE_URL=
 SMOKE_TIMEOUT_MS=
+SMOKE_HEADED=
+SMOKE_KEEP_DATA=
 KPI_RANGE_DAYS=
+SUPABASE_DB_PASSWORD=
+SUPABASE_ACCESS_TOKEN=
+SUPABASE_PROJECT_REF=
+SUPABASE_CLI_BIN=
+SUPABASE_CLI_VERSION=
 ```
 
 `.env.example` has been expanded to document these variables.
+
+Legacy `VITE_*` fallbacks still exist in `src/lib/env.ts` for migration compatibility, but new code should use the normalized `NEXT_PUBLIC_*`, server-only, test, and deploy names documented above.
 
 ## Runtime Client Behavior
 

@@ -4,6 +4,7 @@
 
 // Hooks
 export * from "./hooks";
+export * from "./services";
 
 // Components
 export * from "./components/charts";

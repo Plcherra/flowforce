@@ -26,6 +26,18 @@
       "@/*": [
         "./src/*"
       ],
+      "@app-shell/*": [
+        "./src/app-shell/*"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@server/*": [
+        "./src/server/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
       "react-router-dom": [
         "./src/lib/router-adapter"
       ]

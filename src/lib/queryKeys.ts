@@ -8,6 +8,31 @@ const normalizeDateArg = (value: DateArg) => {
 const normalizeId = (value?: string | null) => value ?? null;
 
 export const queryKeys = {
+  inventoryItems: (companyId?: string | null) =>
+    ["inventory", normalizeId(companyId), "items"] as const,
+  inventoryLocations: (companyId?: string | null) =>
+    ["inventory", normalizeId(companyId), "locations"] as const,
+  inventoryCounts: (companyId?: string | null, status?: string | null) =>
+    ["inventory", normalizeId(companyId), "counts", normalizeId(status)] as const,
+  inventoryPurchasing: (companyId?: string | null, status?: string | null) =>
+    [
+      "inventory",
+      normalizeId(companyId),
+      "purchasing",
+      normalizeId(status),
+    ] as const,
+  employeesDirectory: (companyId?: string | null) =>
+    ["employees", normalizeId(companyId), "directory"] as const,
+  employeesInvites: (companyId?: string | null) =>
+    ["employees", normalizeId(companyId), "invites"] as const,
+  tasksList: (companyId?: string | null, filters?: Record<string, unknown>) =>
+    ["tasks", normalizeId(companyId), "list", filters ?? null] as const,
+  taskTimeline: (companyId?: string | null, taskId?: string | null) =>
+    ["tasks", normalizeId(companyId), "timeline", normalizeId(taskId)] as const,
+  analyticsKpis: (companyId?: string | null, range?: string | null) =>
+    ["analytics", normalizeId(companyId), "kpis", normalizeId(range)] as const,
+  analyticsReports: (companyId?: string | null, range?: string | null) =>
+    ["analytics", normalizeId(companyId), "reports", normalizeId(range)] as const,
   shifts: (companyId?: string | null, start?: DateArg, end?: DateArg) =>
     [
       "shifts",

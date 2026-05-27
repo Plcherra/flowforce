@@ -71,20 +71,41 @@ export function InviteEmployeePanel() {
     setIsSubmitting(true);
     try {
       const rolePayload = deriveRolePayload(form.role, roles);
-      const { error } = await supabase.auth.admin.inviteUserByEmail(
-        form.email,
-        {
-          data: {
-            first_name: form.first,
-            last_name: form.last,
-            role: rolePayload.roleKey,
-            role_id: rolePayload.roleId,
-          },
-        },
-      );
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
 
-      if (error) {
-        throw error;
+      if (!accessToken) {
+        throw new Error("Your session expired. Please sign in again.");
+      }
+
+      const response = await fetch("/api/employees/invite", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: form.email,
+          firstName: form.first,
+          lastName: form.last,
+          role: rolePayload.roleKey,
+          roleId: rolePayload.roleId,
+        }),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => ({}))) as {
+          message?: string;
+          details?: { message?: string } | string;
+        };
+        const detailMessage =
+          typeof result.details === "string"
+            ? result.details
+            : result.details?.message;
+        throw new Error(
+          [result.message, detailMessage].filter(Boolean).join(": ") ||
+            "Failed to send invitation",
+        );
       }
 
       toast({

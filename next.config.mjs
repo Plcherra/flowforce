@@ -1,10 +1,20 @@
 const aliasPath = './src/lib/router-adapter';
+const migrationAliases = {
+  '@app-shell': './src/app-shell',
+  '@features': './src/features',
+  '@server': './src/server',
+  '@shared': './src/shared',
+  'react-router-dom': aliasPath,
+};
 
 const nextConfig = {
   reactStrictMode: true,
   // Optimize webpack for faster dev builds
   webpack: (config, { dev, isServer }) => {
-    config.resolve.alias['react-router-dom'] = aliasPath;
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      ...migrationAliases,
+    };
     
     // Speed up dev builds (only modify if needed)
     if (dev && !isServer) {
@@ -17,9 +27,7 @@ const nextConfig = {
     return config;
   },
   turbopack: {
-    resolveAlias: {
-      'react-router-dom': aliasPath,
-    },
+    resolveAlias: migrationAliases,
   },
   // Experimental features for faster dev
   experimental: {

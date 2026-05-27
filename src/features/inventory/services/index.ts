@@ -1,4 +1,9 @@
 import { InventoryService } from "./inventoryService";
+export * as inventoryCountsRepository from "../repositories/countsRepository";
+export * as inventoryItemsRepository from "../repositories/itemsRepository";
+export * as inventoryLocationsRepository from "../repositories/locationsRepository";
+export * as inventoryPurchasingRepository from "../repositories/purchasingRepository";
+export * as inventoryTransfersRepository from "../repositories/transfersRepository";
 
 /**
  * Lightweight facade so feature code can depend on a stable service surface
