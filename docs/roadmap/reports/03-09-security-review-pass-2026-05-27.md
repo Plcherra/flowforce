@@ -30,5 +30,5 @@ Phase 03.09 hardens the SaaS security baseline by tightening env hygiene, removi
 ## Notes
 
 - No Supabase migration is required for this phase.
-- `npm run test:db:security` remains the deeper local database security suite and requires local Supabase/Docker.
+- `npm run test:db:security` passes after a clean Colima-backed local Supabase reset.
 - Supabase Edge Functions should get a provider-by-provider production security review before broad production enablement.

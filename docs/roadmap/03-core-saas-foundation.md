@@ -180,7 +180,7 @@ Acceptance:
 Verification:
 
 - Security review, Supabase contract, and deploy-readiness checks pass.
-- `npm run test:db:security` remains a clean local Supabase reset follow-up before release.
+- `npm run test:db:security` passes after a clean Colima-backed local Supabase reset.
 
 Status:
 

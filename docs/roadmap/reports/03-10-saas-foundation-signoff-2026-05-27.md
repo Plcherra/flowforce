@@ -56,12 +56,13 @@ The checklist separates what is now complete in the SaaS foundation from what st
 - Passed: `npm run check:local`
 - Passed: `npm run typecheck`
 - Passed: `npm run build`
+- Passed: `supabase db reset && npm run test:db:security` with Colima profile `flowforce`
 - Passed: retired vendor/app mention scan
 - Remote Supabase migrations are aligned through `20260527000400`.
 
 ## Known Follow-Up
 
-The local Supabase DB security suite still needs a fresh local database reset against the current migrations before it can be used as a clean local release signal. Remote Supabase drift and contract checks are aligned, and the next phase should focus on visible web app route/module readiness.
+The local Supabase DB security suite is now a clean local release signal. Remote Supabase still needs the follow-up migration `20260527000500_remove_profile_company_read_fallback.sql` pushed before deploy readiness can be considered current again.
 
 ## Next Phase
 

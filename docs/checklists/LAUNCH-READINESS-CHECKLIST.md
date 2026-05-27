@@ -47,7 +47,7 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 - [x] Remote Supabase schema/security contract passes.
 - [x] Public/client code does not receive service secrets.
 - [x] Support admin route requires `SUPPORT_ADMIN_TOKEN`.
-- [ ] Local Supabase security test database is reset and re-run from current migrations.
+- [x] Local Supabase security test database is reset and re-run from current migrations.
 - [ ] Backup and restore process is tested with a pilot-shaped tenant.
 - [ ] Sensitive file storage is verified with signed URL/private bucket rules.
 
@@ -56,6 +56,7 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 - [x] `npm run check:local` passes.
 - [x] `npm run typecheck` passes.
 - [x] `npm run build` passes.
+- [x] Local database security suite passes from a clean local Supabase reset.
 - [ ] `npm run check:release` passes from a clean local Supabase reset.
 - [ ] GitHub Release Gates pass with repository secrets.
 - [ ] GitHub Deploy Readiness passes with repository secrets.
