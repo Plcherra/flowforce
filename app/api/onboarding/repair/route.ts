@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
+import { verifyOnboardingSetup } from "../../_server/onboardingSetup";
+import { ensureProductCompanyRoles } from "../../_server/productRolesSetup";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
 
@@ -21,25 +24,60 @@ const normalizeWebsite = (value: string | null) => {
   return /^https?:\/\//i.test(value) ? value : `https://${value}`;
 };
 
-const jsonError = (message: string, status = 400, details?: unknown) =>
-  NextResponse.json({ message, details }, { status });
+const publicErrorDetails = (error: unknown) => {
+  if (!error || typeof error !== "object") return undefined;
+  const candidate = error as {
+    code?: unknown;
+    details?: unknown;
+    hint?: unknown;
+    message?: unknown;
+  };
+
+  return {
+    code: typeof candidate.code === "string" ? candidate.code : undefined,
+    details:
+      typeof candidate.details === "string" ? candidate.details : undefined,
+    hint: typeof candidate.hint === "string" ? candidate.hint : undefined,
+    message:
+      typeof candidate.message === "string" ? candidate.message : undefined,
+  };
+};
+
+const jsonError = (
+  message: string,
+  status = 400,
+  details?: unknown,
+  requestId?: string,
+) => NextResponse.json({ message, details, requestId }, { status });
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const requestId = randomUUID();
+
   try {
     const authHeader = request.headers.get("authorization") ?? "";
     const token = authHeader.match(/^Bearer\s+(.+)$/i)?.[1];
 
     if (!token) {
-      return jsonError("Missing authenticated session.", 401);
+      return jsonError(
+        "Missing authenticated session.",
+        401,
+        undefined,
+        requestId,
+      );
     }
 
     const { data: userResult, error: userError } =
       await supabaseAdmin.auth.getUser(token);
 
     if (userError || !userResult?.user) {
-      return jsonError("Unable to verify session.", 401, userError);
+      return jsonError(
+        "Unable to verify session.",
+        401,
+        publicErrorDetails(userError),
+        requestId,
+      );
     }
 
     const user = userResult.user;
@@ -50,6 +88,8 @@ export async function POST(request: Request) {
       return jsonError(
         "This account does not have enough setup metadata to repair automatically.",
         409,
+        undefined,
+        requestId,
       );
     }
 
@@ -103,9 +143,45 @@ export async function POST(request: Request) {
     if (setupError || !companyId) {
       logger.error("Unable to repair onboarding setup", {
         error: setupError,
+        requestId,
         context: { userId: user.id },
       });
-      return jsonError("Unable to repair workspace setup.", 500, setupError);
+      return jsonError(
+        "Unable to repair workspace setup.",
+        500,
+        {
+          stage: "create_company_with_setup",
+          ...publicErrorDetails(setupError),
+        },
+        requestId,
+      );
+    }
+
+    await ensureProductCompanyRoles(supabaseAdmin, {
+      companyId,
+      userId: user.id,
+    });
+
+    const setupStatus = await verifyOnboardingSetup(supabaseAdmin, {
+      companyId,
+      userId: user.id,
+    });
+
+    if (!setupStatus.ok) {
+      logger.error("Onboarding repair verification failed", {
+        requestId,
+        context: { userId: user.id, companyId, setupStatus },
+      });
+      return jsonError(
+        "Workspace repair is incomplete after retry.",
+        500,
+        {
+          stage: "verify_onboarding_setup",
+          missing: setupStatus.missing,
+          counts: setupStatus.counts,
+        },
+        requestId,
+      );
     }
 
     const { data: company } = await supabaseAdmin
@@ -128,9 +204,14 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ companyId });
+    return NextResponse.json({ companyId, requestId, setup: setupStatus });
   } catch (error) {
-    logger.error("Unexpected onboarding repair error", { error });
-    return jsonError("Unexpected onboarding repair error.", 500);
+    logger.error("Unexpected onboarding repair error", { error, requestId });
+    return jsonError(
+      "Unexpected onboarding repair error.",
+      500,
+      undefined,
+      requestId,
+    );
   }
 }

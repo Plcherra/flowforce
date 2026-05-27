@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
+import { getAuditEventMetadata } from "./auditEvents";
 
 export interface AuditEventPayload {
   targetUserId?: string | null;
@@ -8,6 +9,7 @@ export interface AuditEventPayload {
   recordId?: string | null;
   oldValues?: Record<string, unknown> | null;
   newValues?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 /**
@@ -21,6 +23,7 @@ export async function logAuditEvent({
   recordId = null,
   oldValues = null,
   newValues = null,
+  metadata = null,
 }: AuditEventPayload): Promise<void> {
   if (!action || !tableName) {
     logger.warn(
@@ -37,6 +40,10 @@ export async function logAuditEvent({
     target_record_id: recordId,
     previous_values: oldValues,
     next_values: newValues,
+    event_metadata: {
+      ...getAuditEventMetadata(action),
+      ...(metadata ?? {}),
+    },
   });
 
   if (error) {

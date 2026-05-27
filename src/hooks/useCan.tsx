@@ -9,6 +9,7 @@ import {
   createPermissionResolver,
   type PermissionContext,
 } from "@/lib/permissions/resolver";
+import { normalizeProductRoleKey } from "@/features/roles/constants/productRoles";
 import { usePermissionAudit } from "./usePermissionAudit";
 import { logger } from "@/utils/logger";
 
@@ -46,16 +47,14 @@ export function useCan(permissionKey?: PermissionKey) {
     }
 
     // Find the user's role with better fallback handling
+    const normalizedProfileRole = normalizeProductRoleKey(profile.role);
     const userRole = roles?.find((role) => {
       // First try to match by role_id
       if (profile.role_id && role.id === profile.role_id) {
         return true;
       }
       // Fallback to matching by name (case insensitive)
-      if (
-        profile.role &&
-        role.name.toLowerCase() === profile.role.toLowerCase()
-      ) {
+      if (normalizedProfileRole === normalizeProductRoleKey(role.name)) {
         return true;
       }
       return false;

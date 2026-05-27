@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(19);
+select plan(23);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -41,7 +41,8 @@ delete from public.profiles
 where id in (
   '20000000-0000-4000-8000-000000000001',
   '20000000-0000-4000-8000-000000000002',
-  '20000000-0000-4000-8000-000000000003'
+  '20000000-0000-4000-8000-000000000003',
+  '20000000-0000-4000-8000-000000000005'
 );
 delete from public.companies
 where id in (
@@ -54,7 +55,8 @@ where id in (
   '20000000-0000-4000-8000-000000000001',
   '20000000-0000-4000-8000-000000000002',
   '20000000-0000-4000-8000-000000000003',
-  '20000000-0000-4000-8000-000000000004'
+  '20000000-0000-4000-8000-000000000004',
+  '20000000-0000-4000-8000-000000000005'
 );
 
 insert into auth.users (
@@ -75,7 +77,8 @@ values
   ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'owner-a@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false),
   ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'staff-a@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false),
   ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'owner-b@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false),
-  ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'owner-c@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false);
+  ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'owner-c@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false),
+  ('00000000-0000-0000-0000-000000000000', '20000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'profile-only@example.test', crypt('password', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, false);
 
 insert into public.companies (id, name, slug, created_by, owner_id, registration_complete)
 values
@@ -86,7 +89,8 @@ insert into public.profiles (id, company_id, first_name, last_name, email, role,
 values
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'Owner', 'A', 'owner-a@example.test', 'owner', true),
   ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', 'Staff', 'A', 'staff-a@example.test', 'employee', false),
-  ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000002', 'Owner', 'B', 'owner-b@example.test', 'owner', true);
+  ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000002', 'Owner', 'B', 'owner-b@example.test', 'owner', true),
+  ('20000000-0000-4000-8000-000000000005', '10000000-0000-4000-8000-000000000002', 'Profile', 'Only', 'profile-only@example.test', 'owner', true);
 
 insert into public.company_members (company_id, user_id, role, added_at)
 values
@@ -172,6 +176,33 @@ select throws_ok(
   '42501',
   'User is not a member of this company',
   'Tenant A owner cannot assert membership in Tenant B'
+);
+
+select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000005', true);
+
+select is(
+  (select count(*) from public.current_user_company_ids()),
+  0::bigint,
+  'profiles.company_id alone does not grant tenant membership'
+);
+
+select is(
+  (select count(*) from public.companies),
+  0::bigint,
+  'profiles.company_id alone does not expose a tenant company'
+);
+
+select is(
+  public.current_user_is_company_admin('10000000-0000-4000-8000-000000000002'::uuid),
+  false,
+  'profiles admin flags alone do not grant tenant admin rights'
+);
+
+select throws_ok(
+  $$ select public.assert_company_membership('10000000-0000-4000-8000-000000000002'::uuid) $$,
+  '42501',
+  'User is not a member of this company',
+  'Profile-only user cannot assert membership through profile shortcut'
 );
 
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);

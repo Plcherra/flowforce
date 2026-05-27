@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
+import { verifyOnboardingSetup } from "../../_server/onboardingSetup";
+import { ensureProductCompanyRoles } from "../../_server/productRolesSetup";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
 
@@ -74,12 +77,37 @@ const transformPositionsForDatabase = (positions: unknown) => {
   }));
 };
 
-const jsonError = (message: string, status = 400, details?: unknown) =>
-  NextResponse.json({ message, details }, { status });
+const publicErrorDetails = (error: unknown) => {
+  if (!error || typeof error !== "object") return undefined;
+  const candidate = error as {
+    code?: unknown;
+    details?: unknown;
+    hint?: unknown;
+    message?: unknown;
+  };
+
+  return {
+    code: typeof candidate.code === "string" ? candidate.code : undefined,
+    details:
+      typeof candidate.details === "string" ? candidate.details : undefined,
+    hint: typeof candidate.hint === "string" ? candidate.hint : undefined,
+    message:
+      typeof candidate.message === "string" ? candidate.message : undefined,
+  };
+};
+
+const jsonError = (
+  message: string,
+  status = 400,
+  details?: unknown,
+  requestId?: string,
+) => NextResponse.json({ message, details, requestId }, { status });
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const requestId = randomUUID();
+
   try {
     const body = readObject(await request.json());
     const userId = readString(body, "userId");
@@ -109,7 +137,12 @@ export async function POST(request: Request) {
       !companyIndustry ||
       !companySize
     ) {
-      return jsonError("Missing required onboarding fields.");
+      return jsonError(
+        "Missing required onboarding fields.",
+        400,
+        undefined,
+        requestId,
+      );
     }
 
     const { data: userResult, error: userError } =
@@ -118,13 +151,24 @@ export async function POST(request: Request) {
     if (userError || !userResult?.user) {
       logger.warn("Unable to verify onboarding user", {
         error: userError,
+        requestId,
         context: { userId },
       });
-      return jsonError("Unable to verify account before onboarding.", 401);
+      return jsonError(
+        "Unable to verify account before onboarding.",
+        401,
+        publicErrorDetails(userError),
+        requestId,
+      );
     }
 
     if (userResult.user.email?.toLowerCase() !== email) {
-      return jsonError("Onboarding email does not match created account.", 403);
+      return jsonError(
+        "Onboarding email does not match created account.",
+        403,
+        undefined,
+        requestId,
+      );
     }
 
     const templateName = readString(template, "name");
@@ -180,9 +224,45 @@ export async function POST(request: Request) {
     if (setupError || !companyId) {
       logger.error("Unable to complete onboarding setup RPC", {
         error: setupError,
+        requestId,
         context: { userId, companyName },
       });
-      return jsonError("Unable to complete company workspace setup.", 500, setupError);
+      return jsonError(
+        "Unable to complete company workspace setup.",
+        500,
+        {
+          stage: "create_company_with_setup",
+          ...publicErrorDetails(setupError),
+        },
+        requestId,
+      );
+    }
+
+    await ensureProductCompanyRoles(supabaseAdmin, {
+      companyId,
+      userId,
+    });
+
+    const setupStatus = await verifyOnboardingSetup(supabaseAdmin, {
+      companyId,
+      userId,
+    });
+
+    if (!setupStatus.ok) {
+      logger.error("Onboarding setup verification failed", {
+        requestId,
+        context: { userId, companyId, setupStatus },
+      });
+      return jsonError(
+        "Company workspace setup is incomplete after onboarding.",
+        500,
+        {
+          stage: "verify_onboarding_setup",
+          missing: setupStatus.missing,
+          counts: setupStatus.counts,
+        },
+        requestId,
+      );
     }
 
     const { data: company, error: companyError } = await supabaseAdmin
@@ -194,6 +274,7 @@ export async function POST(request: Request) {
     if (companyError) {
       logger.warn("Unable to read onboarding company metadata", {
         error: companyError,
+        requestId,
         context: { userId, companyId },
       });
     }
@@ -216,13 +297,22 @@ export async function POST(request: Request) {
     if (metadataError) {
       logger.warn("Unable to update onboarding user metadata", {
         error: metadataError,
+        requestId,
         context: { userId, companyId },
       });
     }
 
-    return NextResponse.json({ companyId });
+    return NextResponse.json({ companyId, requestId, setup: setupStatus });
   } catch (error) {
-    logger.error("Unexpected onboarding completion error", { error });
-    return jsonError("Unexpected onboarding completion error.", 500);
+    logger.error("Unexpected onboarding completion error", {
+      error,
+      requestId,
+    });
+    return jsonError(
+      "Unexpected onboarding completion error.",
+      500,
+      undefined,
+      requestId,
+    );
   }
 }

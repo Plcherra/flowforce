@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAuditLogs } from "@/hooks/useAuditLogs";
+import {
+  useAuditLogs,
+  type AuditLog as AuditLogEntry,
+} from "@/hooks/useAuditLogs";
 import { Activity, User, Clock } from "lucide-react";
 import { format } from "date-fns";
 
@@ -53,30 +56,53 @@ export default function AuditLog() {
     );
   }
 
-  const getRoleBadgeColor = (role: string) => {
+  const getSeverityBadgeColor = (severity?: string) => {
     const colors = {
-      staff: "bg-gray-100 text-gray-800",
-      supervisor: "bg-green-100 text-green-800",
-      manager: "bg-blue-100 text-blue-800",
-      admin: "bg-red-100 text-red-800",
-      owner: "bg-purple-100 text-purple-800",
-      employee: "bg-yellow-100 text-yellow-800",
+      critical: "bg-red-100 text-red-800",
+      warning: "bg-yellow-100 text-yellow-800",
+      info: "bg-blue-100 text-blue-800",
     };
-    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    return (
+      colors[severity as keyof typeof colors] || "bg-gray-100 text-gray-800"
+    );
   };
 
-  const formatRoleChange = (oldValues: any, newValues: any) => {
-    const oldRole = oldValues?.role || "unknown";
-    const newRole = newValues?.role || "unknown";
-    return { oldRole, newRole };
+  const formatAction = (action: string) =>
+    action
+      .replace(/[._-]/g, " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  const describeChange = (log: AuditLogEntry) => {
+    if (log.action === "user.role_updated") {
+      return `Role changed from ${log.old_values?.role ?? "unknown"} to ${log.new_values?.role ?? "unknown"}.`;
+    }
+
+    if (log.action === "user.status_updated") {
+      return `Status changed from ${log.old_values?.employment_status ?? "unknown"} to ${log.new_values?.employment_status ?? "unknown"}.`;
+    }
+
+    if (log.action === "permission.overrides_updated") {
+      return "Permission overrides were updated.";
+    }
+
+    if (log.action === "system_settings.updated") {
+      return `Updated settings: ${Object.keys(log.new_values ?? {}).join(", ") || "unknown"}.`;
+    }
+
+    if (log.action.includes("invite")) {
+      return `Invite activity for ${log.metadata?.email ?? log.new_values?.email ?? "unknown recipient"}.`;
+    }
+
+    return `${log.table_name}${log.record_id ? `:${log.record_id}` : ""}`;
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Role Change Audit Log</h2>
+        <h2 className="text-2xl font-bold">Activity Audit Log</h2>
         <p className="text-gray-600">
-          Track all role changes and administrative actions
+          Track privileged user, permission, settings, invite, and automation
+          actions.
         </p>
       </div>
 
@@ -88,18 +114,17 @@ export default function AuditLog() {
               No Audit Entries
             </h3>
             <p className="text-gray-500">
-              No role changes have been recorded yet. When users' roles are
-              modified, they will appear here.
+              No sensitive actions have been recorded yet. When admins change
+              roles, permissions, settings, invites, or automation controls,
+              they will appear here.
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {auditLogs.map((log) => {
-            const { oldRole, newRole } = formatRoleChange(
-              log.old_values,
-              log.new_values,
-            );
+            const category = log.metadata?.category ?? "data";
+            const severity = log.metadata?.severity ?? "info";
 
             return (
               <Card key={log.id}>
@@ -108,7 +133,9 @@ export default function AuditLog() {
                     <div className="flex items-center space-x-3">
                       <Activity className="h-5 w-5 text-blue-600" />
                       <div>
-                        <CardTitle className="text-base">Role Change</CardTitle>
+                        <CardTitle className="text-base">
+                          {formatAction(log.action)}
+                        </CardTitle>
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <User className="h-4 w-4" />
                           <span>
@@ -130,24 +157,16 @@ export default function AuditLog() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-600">
-                          From:
-                        </span>
-                        <Badge className={getRoleBadgeColor(oldRole)}>
-                          {oldRole.charAt(0).toUpperCase() + oldRole.slice(1)}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-600">
-                          To:
-                        </span>
-                        <Badge className={getRoleBadgeColor(newRole)}>
-                          {newRole.charAt(0).toUpperCase() + newRole.slice(1)}
-                        </Badge>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline">{category}</Badge>
+                      <Badge className={getSeverityBadgeColor(severity)}>
+                        {severity}
+                      </Badge>
+                      <Badge variant="secondary">{log.table_name}</Badge>
                     </div>
+                    <p className="text-sm text-gray-700">
+                      {describeChange(log)}
+                    </p>
 
                     {log.performed_by_profile && (
                       <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">

@@ -146,6 +146,76 @@ export function GeneralSettingsPanel() {
           </div>
         </div>
 
+        <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="primaryColor">Primary color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="primaryColor"
+                  type="color"
+                  value={state.primaryColor}
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      primaryColor: event.target.value,
+                    }))
+                  }
+                  disabled={!canEdit || loading}
+                  className="h-10 w-14 p-1"
+                />
+                <Input
+                  value={state.primaryColor}
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      primaryColor: event.target.value,
+                    }))
+                  }
+                  disabled={!canEdit || loading}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="secondaryColor">Secondary color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="secondaryColor"
+                  type="color"
+                  value={state.secondaryColor}
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      secondaryColor: event.target.value,
+                    }))
+                  }
+                  disabled={!canEdit || loading}
+                  className="h-10 w-14 p-1"
+                />
+                <Input
+                  value={state.secondaryColor}
+                  onChange={(event) =>
+                    setState((prev) => ({
+                      ...prev,
+                      secondaryColor: event.target.value,
+                    }))
+                  }
+                  disabled={!canEdit || loading}
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            className="flex min-h-28 flex-col justify-between rounded-lg border p-4 text-white"
+            style={{
+              background: `linear-gradient(135deg, ${state.primaryColor}, ${state.secondaryColor})`,
+            }}
+          >
+            <div className="text-sm font-medium">{state.companyName}</div>
+            <div className="text-xs opacity-80">Brand preview</div>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border bg-muted">
             {logoUrl ? (

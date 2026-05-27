@@ -46,10 +46,10 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [02 Platform Architecture](./02-platform-architecture.md)
-- Current phase: Phase 10, Architecture Baseline Freeze
-- Last completed phase: 02.09, Build And Test Architecture
-- Last phase report: [02.09 Build And Test Architecture](./reports/02-09-build-and-test-architecture-2026-05-27.md)
+- Active plan: [03 Core SaaS Foundation](./03-core-saas-foundation.md)
+- Current phase: Phase 6, Billing Readiness
+- Last completed phase: 03.05, Audit Logs And Activity Trail
+- Last phase report: [03.05 Audit Logs And Activity Trail](./reports/03-05-audit-logs-and-activity-trail-2026-05-27.md)
 
 ## Global Completion Criteria
 
@@ -65,13 +65,13 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 Use this as the high-level tracker. Each detailed file contains the actual tasks and acceptance criteria.
 
-- [x] 01. Product positioning and scope
-- [ ] 02. Platform architecture
-- [ ] 03. Core SaaS foundation
-- [ ] 04. Web app product completion
-- [ ] 05. Inventory finance cost engine
-- [ ] 06. Operations workflows and compliance
-- [ ] 07. AI copilot and automation
-- [ ] 08. Mobile app and offline mode
-- [ ] 09. Integrations and migration tools
+- [x] 1.  Product positioning and scope
+- [x] 2.  Platform architecture
+- [ ] 3.  Core SaaS foundation
+- [ ] 4.  Web app product completion
+- [ ] 5.  Inventory finance cost engine
+- [ ] 6.  Operations workflows and compliance
+- [ ] 7.  AI copilot and automation
+- [ ] 8.  Mobile app and offline mode
+- [ ] 9.  Integrations and migration tools
 - [ ] 10. Production infrastructure and launch

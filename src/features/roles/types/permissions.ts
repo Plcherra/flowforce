@@ -5,8 +5,9 @@
 import type { LucideIcon } from "lucide-react";
 import type { PermissionKey } from "@/hooks/useUserPermissions";
 import type { PositionAssignment } from "@/hooks/usePositions";
+import type { ProductRoleKey } from "../constants/productRoles";
 
-export type RoleKey = "owner" | "admin" | "manager" | "supervisor" | "staff";
+export type RoleKey = ProductRoleKey;
 
 export type ModuleId =
   | "workspace"

@@ -9,6 +9,7 @@ import {
   type PermissionValue,
 } from "@/lib/permissions/registry";
 import { createPermissionResolver } from "@/lib/permissions/resolver";
+import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
 
 export {
@@ -217,7 +218,7 @@ export function useSaveUserPermissions() {
       ) {
         await logAuditEvent({
           targetUserId: userId,
-          action: "permission.overrides_updated",
+          action: AUDIT_ACTIONS.permissionOverridesUpdated,
           tableName: "user_permissions",
           recordId: userId,
           oldValues: Object.keys(previousNormalized).length

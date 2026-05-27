@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
 import {
   CREATE_COMPANY_INVITE_FN,
@@ -39,11 +40,28 @@ export function useUserManagementMutations({
       userId: string;
       newRole: string;
     }) => {
+      const { data: previousProfile, error: previousError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (previousError) throw previousError;
+
       const { error } = await supabase
         .from("profiles")
         .update({ role: newRole })
         .eq("id", userId);
       if (error) throw error;
+
+      await logAuditEvent({
+        targetUserId: userId,
+        action: AUDIT_ACTIONS.userRoleUpdated,
+        tableName: "profiles",
+        recordId: userId,
+        oldValues: { role: previousProfile?.role ?? null },
+        newValues: { role: newRole },
+      });
     },
     onSuccess: () => {
       onEmployeesRefetch();
@@ -72,11 +90,30 @@ export function useUserManagementMutations({
       userId: string;
       status: "active" | "inactive";
     }) => {
+      const { data: previousProfile, error: previousError } = await supabase
+        .from("profiles")
+        .select("employment_status")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (previousError) throw previousError;
+
       const { error } = await supabase
         .from("profiles")
         .update({ employment_status: status })
         .eq("id", userId);
       if (error) throw error;
+
+      await logAuditEvent({
+        targetUserId: userId,
+        action: AUDIT_ACTIONS.userStatusUpdated,
+        tableName: "profiles",
+        recordId: userId,
+        oldValues: {
+          employment_status: previousProfile?.employment_status ?? null,
+        },
+        newValues: { employment_status: status },
+      });
     },
     onSuccess: (_, variables) => {
       onEmployeesRefetch();
@@ -153,7 +190,7 @@ export function useUserManagementMutations({
 
       void logAuditEvent({
         targetUserId: null,
-        action: "invite.created",
+        action: AUDIT_ACTIONS.inviteCreated,
         tableName: "company_invites",
         recordId: null,
         newValues: {

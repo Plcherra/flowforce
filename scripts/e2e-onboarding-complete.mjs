@@ -160,6 +160,12 @@ async function main() {
     );
     companyId = firstResult.companyId ?? null;
     assert(companyId, "Onboarding API did not return companyId");
+    assert(firstResult.setup?.ok === true, "Onboarding API setup verification did not pass");
+
+    await admin.from("audit_log").delete().eq("company_id", companyId);
+    await admin.from("company_members").delete().eq("company_id", companyId);
+    await admin.from("company_roles").delete().eq("company_id", companyId);
+    await admin.from("system_settings").delete().eq("company_id", companyId);
 
     const retryResponse = await fetch(`${baseUrl}/api/onboarding/complete`, {
       method: "POST",
@@ -178,6 +184,7 @@ async function main() {
       `Onboarding retry failed: ${retryResponse.status} ${JSON.stringify(retryResult)}`,
     );
     assert(retryResult.companyId === companyId, "Onboarding retry created a different company");
+    assert(retryResult.setup?.ok === true, "Onboarding retry did not repair setup baseline");
 
     const { data: company, error: companyError } = await admin
       .from("companies")
@@ -217,6 +224,10 @@ async function main() {
 
     const roleCount = await countRows(admin, "company_roles", "company_id", companyId);
     assert(roleCount >= 5, `Expected default roles plus custom role, got ${roleCount}`);
+    assert(
+      (await countRows(admin, "audit_log", "company_id", companyId)) >= 1,
+      "Expected at least one onboarding setup audit event",
+    );
 
     process.stdout.write(
       `OK onboarding E2E completed and retried idempotently for ${companyId}\n`,

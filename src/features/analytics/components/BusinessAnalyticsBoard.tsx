@@ -15,19 +15,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useBusinessAnalytics } from "@/hooks/useBusinessAnalytics";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { AssistantContext, AssistantInsight } from "@/types/ai";
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
-const preciseCurrencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 2,
-});
 
 const percent = (value: number, decimals = 0) => `${value.toFixed(decimals)}%`;
 
@@ -58,6 +47,7 @@ export function BusinessAnalyticsBoard({
     companyId,
     horizonDays: 28,
   });
+  const { formatAmount } = useCurrency();
 
   const snapshot = data?.snapshot;
   const metrics = snapshot?.metrics;
@@ -117,7 +107,7 @@ export function BusinessAnalyticsBoard({
               : metrics.laborEfficiencyIndex <= 85
                 ? "down"
                 : "steady",
-          helperText: `${preciseCurrencyFormatter.format(metrics.revenuePerLaborHour)}/hr`,
+          helperText: `${formatAmount(metrics.revenuePerLaborHour)}/hr`,
         },
       ],
       insights,
@@ -134,7 +124,14 @@ export function BusinessAnalyticsBoard({
     return () => {
       onContextChange(null);
     };
-  }, [snapshot, metrics, summary, breakdown?.goals.active, onContextChange]);
+  }, [
+    snapshot,
+    metrics,
+    summary,
+    breakdown?.goals.active,
+    formatAmount,
+    onContextChange,
+  ]);
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -215,8 +212,8 @@ export function BusinessAnalyticsBoard({
                   {metrics.laborEfficiencyIndex.toFixed(0)} index
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {preciseCurrencyFormatter.format(metrics.revenuePerLaborHour)}{" "}
-                  revenue per labor hour
+                  {formatAmount(metrics.revenuePerLaborHour)} revenue per labor
+                  hour
                 </p>
               </CardContent>
             </Card>
@@ -337,15 +334,11 @@ export function BusinessAnalyticsBoard({
                   <div className="font-medium text-foreground">Finance</div>
                   <div>
                     Trailing revenue{" "}
-                    {currencyFormatter.format(
-                      breakdown?.revenue.trailing30 ?? 0,
-                    )}
+                    {formatAmount(breakdown?.revenue.trailing30 ?? 0)}
                   </div>
                   <div>
                     Forecast next 30d{" "}
-                    {currencyFormatter.format(
-                      breakdown?.revenue.forecastNext30 ?? 0,
-                    )}
+                    {formatAmount(breakdown?.revenue.forecastNext30 ?? 0)}
                   </div>
                 </div>
               </CardContent>

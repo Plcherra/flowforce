@@ -6,6 +6,7 @@ import { PERMISSION_KEYS } from "@/hooks/useUserPermissions";
 import type { RoleKey, ModuleId } from "../types/permissions";
 import { ROLE_MODULES } from "../constants/modules";
 import { ROLE_ORDER } from "../constants/roles";
+import { normalizeProductRoleKey } from "../constants/productRoles";
 
 export const ALL_TRUE_PERMISSIONS = PERMISSION_KEYS.reduce<
   Record<string, boolean>
@@ -48,14 +49,7 @@ export function createDefaultMatrix(): Record<
  * Normalize role name to RoleKey
  */
 export function normalizeRoleName(name?: string | null): RoleKey | undefined {
-  if (!name) return undefined;
-  const lower = name.toLowerCase();
-  if (lower.includes("owner")) return "owner";
-  if (lower.includes("admin")) return "admin";
-  if (lower.includes("manager")) return "manager";
-  if (lower.includes("supervisor")) return "supervisor";
-  if (lower.includes("staff") || lower.includes("employee")) return "staff";
-  return undefined;
+  return normalizeProductRoleKey(name);
 }
 
 /**

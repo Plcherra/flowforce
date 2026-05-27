@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCompany } from "@/hooks/useCompany";
-import type { GeneralSettings } from "@/types/system-settings";
+import type {
+  AppearanceSettings,
+  GeneralSettings,
+} from "@/types/system-settings";
 import { showErrorToast, showSuccessToast } from "@/utils/errorHandler";
 import type { SystemSettingsHook } from "./useSystemSettings";
 
@@ -12,25 +14,40 @@ type GeneralFormState = {
   website: string;
   companyDescription: string;
   address: string;
+  primaryColor: string;
+  secondaryColor: string;
 };
 
-const toFormState = (general: GeneralSettings): GeneralFormState => ({
+const toFormState = (
+  general: GeneralSettings,
+  appearance?: AppearanceSettings,
+): GeneralFormState => ({
   companyName: general.companyName ?? "",
   contactEmail: general.contactEmail ?? "",
   contactPhone: general.contactPhone ?? "",
   website: general.website ?? "",
   companyDescription: general.companyDescription ?? "",
   address: general.address ?? "",
+  primaryColor: appearance?.primaryColor ?? "#3b82f6",
+  secondaryColor: appearance?.secondaryColor ?? "#1e40af",
 });
 
 export function useGeneralSettings(source: SystemSettingsHook) {
-  const { settings, company, updateSettings, loading, error, canEdit } = source;
-  const { updateCompany } = useCompany();
+  const {
+    settings,
+    company,
+    updateSettings,
+    loading,
+    error,
+    canEdit,
+    refresh,
+  } = source;
   const general = settings?.general;
+  const appearance = settings?.appearance;
 
   const [state, setState] = useState<GeneralFormState>(
     general
-      ? toFormState(general)
+      ? toFormState(general, appearance)
       : toFormState({
           companyName: "",
           contactEmail: null,
@@ -50,19 +67,19 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
   useEffect(() => {
     if (general) {
-      setState(toFormState(general));
+      setState(toFormState(general, appearance));
       setLogoUrl(general.logoUrl);
       setLogoFile(null);
     }
-  }, [general]);
+  }, [general, appearance]);
 
   const dirty = useMemo(() => {
     if (!general) return false;
     return (
-      JSON.stringify(state) !== JSON.stringify(toFormState(general)) ||
-      logoFile !== null
+      JSON.stringify(state) !==
+        JSON.stringify(toFormState(general, appearance)) || logoFile !== null
     );
-  }, [general, state, logoFile]);
+  }, [general, appearance, state, logoFile]);
 
   const uploadLogo = useCallback(
     async (file: File): Promise<string> => {
@@ -114,21 +131,34 @@ export function useGeneralSettings(source: SystemSettingsHook) {
         logoUrl: nextLogo ?? null,
       };
 
-      const updatedCompany = await updateCompany({
-        name: payload.companyName,
-        description: payload.companyDescription ?? undefined,
-        website: payload.website ?? undefined,
-        phone: payload.contactPhone ?? undefined,
-        logo_url: payload.logoUrl ?? undefined,
-      });
+      const { error: companyError } = await supabase
+        .from("companies")
+        .update({
+          name: payload.companyName,
+          description: payload.companyDescription,
+          website: payload.website,
+          phone: payload.contactPhone,
+          logo_url: payload.logoUrl,
+          primary_color: state.primaryColor,
+          secondary_color: state.secondaryColor,
+        })
+        .eq("id", company.id);
+
+      if (companyError) throw companyError;
 
       await updateSettings({
         general: payload,
         localization: {
           ...settings?.localization,
-          timezone: updatedCompany?.timezone ?? settings?.localization.timezone,
+          timezone: company.timezone ?? settings?.localization.timezone,
+        },
+        appearance: {
+          ...settings?.appearance,
+          primaryColor: state.primaryColor,
+          secondaryColor: state.secondaryColor,
         },
       });
+      await refresh();
 
       setLogoFile(null);
       showSuccessToast("General settings saved");
@@ -145,19 +175,20 @@ export function useGeneralSettings(source: SystemSettingsHook) {
     logoUrl,
     logoFile,
     uploadLogo,
-    updateCompany,
     updateSettings,
     company,
     settings?.localization,
+    settings?.appearance,
+    refresh,
   ]);
 
   const reset = useCallback(() => {
     if (!general) return;
-    setState(toFormState(general));
+    setState(toFormState(general, appearance));
     setLogoUrl(general.logoUrl);
     setLogoFile(null);
     setSaveError(null);
-  }, [general]);
+  }, [general, appearance]);
 
   return {
     loading,

@@ -12,6 +12,12 @@ export interface AuditLog {
   record_id: string;
   old_values: any;
   new_values: any;
+  metadata?: {
+    category?: string;
+    severity?: string;
+    retention?: string;
+    [key: string]: unknown;
+  } | null;
   performed_by: string;
   created_at: string;
   user_profile?: {

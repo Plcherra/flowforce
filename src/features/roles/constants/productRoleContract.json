@@ -1,0 +1,173 @@
+{
+  "roles": [
+    {
+      "key": "owner",
+      "label": "Owner",
+      "description": "Full workspace ownership, billing, security, and recovery authority.",
+      "color": "#111827",
+      "icon": "Crown",
+      "hierarchy_level": 4,
+      "permissions": ["*"]
+    },
+    {
+      "key": "admin",
+      "label": "Admin",
+      "description": "Company administration, team setup, permission management, and operational oversight.",
+      "color": "#2563eb",
+      "icon": "Shield",
+      "hierarchy_level": 3,
+      "permissions": [
+        "viewOwnProfile",
+        "editOwnProfile",
+        "viewTeamProfiles",
+        "editTeamProfiles",
+        "viewOwnSchedules",
+        "viewTeamSchedules",
+        "editSchedules",
+        "schedule.view",
+        "schedule.edit",
+        "schedule.create",
+        "schedule.delete",
+        "viewOwnTasks",
+        "viewTeamTasks",
+        "editTasks",
+        "viewOwnExpenses",
+        "viewTeamExpenses",
+        "approveExpenses",
+        "approveTimeOff",
+        "manageUsers",
+        "systemSettings",
+        "createForms",
+        "manageForms",
+        "approveFormSubmissions",
+        "managePositions",
+        "viewAIInsights",
+        "manageInventory",
+        "managePayments",
+        "directory.view",
+        "directory.manage",
+        "inventory.view",
+        "inventory.create",
+        "inventory.edit",
+        "inventory.delete",
+        "inventory.adjust",
+        "inventory.import",
+        "inventory.export",
+        "inventory.purchasing.view",
+        "inventory.purchasing.manage",
+        "inventory.counts.view",
+        "inventory.counts.create",
+        "inventory.counts.edit",
+        "inventory.counts.approve",
+        "inventory.waste.view",
+        "inventory.waste.create",
+        "inventory.prep.view",
+        "inventory.prep.edit",
+        "reports.view",
+        "reports.export",
+        "billing.view",
+        "admin.roles",
+        "admin.permissions",
+        "admin.settings"
+      ]
+    },
+    {
+      "key": "manager",
+      "label": "Manager",
+      "description": "Team, schedule, task, inventory, approval, and reporting access without system administration.",
+      "color": "#16a34a",
+      "icon": "Users",
+      "hierarchy_level": 2,
+      "permissions": [
+        "viewOwnProfile",
+        "editOwnProfile",
+        "viewTeamProfiles",
+        "editTeamProfiles",
+        "viewOwnSchedules",
+        "viewTeamSchedules",
+        "editSchedules",
+        "schedule.view",
+        "schedule.edit",
+        "schedule.create",
+        "viewOwnTasks",
+        "viewTeamTasks",
+        "editTasks",
+        "viewOwnExpenses",
+        "viewTeamExpenses",
+        "approveExpenses",
+        "approveTimeOff",
+        "createForms",
+        "approveFormSubmissions",
+        "viewAIInsights",
+        "manageInventory",
+        "directory.view",
+        "inventory.view",
+        "inventory.create",
+        "inventory.edit",
+        "inventory.adjust",
+        "inventory.purchasing.view",
+        "inventory.counts.view",
+        "inventory.counts.create",
+        "inventory.counts.edit",
+        "inventory.counts.approve",
+        "inventory.waste.view",
+        "inventory.waste.create",
+        "inventory.prep.view",
+        "inventory.prep.edit",
+        "reports.view"
+      ]
+    },
+    {
+      "key": "staff",
+      "label": "Staff",
+      "description": "Personal profile, own schedule, own tasks, and own expense visibility.",
+      "color": "#6b7280",
+      "icon": "Users",
+      "hierarchy_level": 1,
+      "permissions": [
+        "viewOwnProfile",
+        "editOwnProfile",
+        "viewOwnSchedules",
+        "viewOwnTasks",
+        "viewOwnExpenses"
+      ]
+    }
+  ],
+  "legacyAliases": {
+    "administrator": "admin",
+    "company_admin": "admin",
+    "employee": "staff",
+    "supervisor": "manager"
+  },
+  "routePermissionMap": [
+    {
+      "surface": "Role administration",
+      "routes": [
+        "/settings/permissions",
+        "/sections-permissions",
+        "/admin/users"
+      ],
+      "requiredAny": ["admin.roles", "admin.permissions", "manageUsers"]
+    },
+    {
+      "surface": "Company settings",
+      "routes": ["/settings", "/admin/settings"],
+      "requiredAny": ["admin.settings", "systemSettings"]
+    },
+    {
+      "surface": "Manager scheduling actions",
+      "routes": ["/scheduling", "/shift-management"],
+      "requiredAny": ["editSchedules", "schedule.edit", "approveTimeOff"]
+    },
+    {
+      "surface": "Inventory management",
+      "routes": ["/inventory", "/inventory/actions", "/inventory/counts"],
+      "requiredAny": ["inventory.edit", "inventory.adjust", "manageInventory"]
+    },
+    {
+      "surface": "Billing and payments",
+      "routes": ["/billing", "/settings/billing"],
+      "requiredAny": ["billing.view", "managePayments"]
+    }
+  ]
+}

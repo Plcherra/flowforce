@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
+import {
+  AUDIT_ACTIONS,
+  getAuditEventMetadata,
+} from "@/services/audit/auditEvents";
 
 type InviteRequestBody = {
   email?: unknown;
@@ -12,12 +16,7 @@ type InviteRequestBody = {
 };
 
 const logger = createServerLogger("employees-invite");
-const INVITE_ROLES = new Set([
-  "owner",
-  "admin",
-  "company_admin",
-  "manager",
-]);
+const INVITE_ROLES = new Set(["owner", "admin", "company_admin", "manager"]);
 
 const readString = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
@@ -32,9 +31,14 @@ const getBearerToken = (request: NextRequest) => {
 
 const normalizeRole = (value: string) => {
   const normalized = value.trim().toLowerCase();
-  return ["admin", "manager", "employee", "staff", "supervisor", "owner"].includes(
-    normalized,
-  )
+  return [
+    "admin",
+    "manager",
+    "employee",
+    "staff",
+    "supervisor",
+    "owner",
+  ].includes(normalized)
     ? normalized
     : "staff";
 };
@@ -178,7 +182,7 @@ export async function POST(request: NextRequest) {
         companyId,
         inviteId,
         email,
-        action: "employee_invite_email_failed",
+        action: AUDIT_ACTIONS.employeeInviteEmailFailed,
         metadata: { requestId, role, roleId, message: inviteError.message },
       });
 
@@ -194,7 +198,7 @@ export async function POST(request: NextRequest) {
       companyId,
       inviteId,
       email,
-      action: "employee_invite_sent",
+      action: AUDIT_ACTIONS.employeeInviteCreated,
       metadata: { requestId, role, roleId },
     });
 
@@ -227,6 +231,7 @@ async function writeInviteAudit({
     table_name: "company_invites",
     record_id: inviteId,
     metadata: {
+      ...getAuditEventMetadata(action),
       ...metadata,
       email,
     },

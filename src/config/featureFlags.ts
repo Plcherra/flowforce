@@ -57,7 +57,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   admin: {
     companyRoles: true,
     permissionOverrides: true,
-    auditLogs: false,
+    auditLogs: true,
   },
   operations: {
     engagementMetrics: false,

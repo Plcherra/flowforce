@@ -10,6 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
+import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
+import { logAuditEvent } from "@/services/audit/auditService";
+import {
+  normalizeProductRoleKey,
+  PRODUCT_ROLE_KEYS,
+  PRODUCT_ROLE_LABELS,
+} from "../constants/productRoles";
 import { Shield, Crown, Users, UserCheck, Star } from "lucide-react";
 
 interface RoleManagerProps {
@@ -27,26 +34,82 @@ export default function RoleManager({
 }: RoleManagerProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
-  const { roles } = useCompanyRoles();
+  const { roles, loading: rolesLoading } = useCompanyRoles();
+  const normalizedCurrentRole =
+    normalizeProductRoleKey(currentRole) ?? currentRole.toLowerCase();
+  const roleOptions = PRODUCT_ROLE_KEYS.map((roleKey) => ({
+    key: roleKey,
+    label: PRODUCT_ROLE_LABELS[roleKey],
+    dbRole: Array.isArray(roles)
+      ? roles.find((role) => normalizeProductRoleKey(role.name) === roleKey)
+      : undefined,
+  }));
 
   const handleRoleChange = async (newRole: string) => {
-    if (newRole === currentRole) return;
+    const normalizedRole = normalizeProductRoleKey(newRole);
+    if (!normalizedRole || normalizedRole === normalizedCurrentRole) return;
+    const selectedRole = roleOptions.find(
+      (role) => role.key === normalizedRole,
+    );
+    if (!selectedRole?.dbRole) {
+      toast({
+        title: "Role not available",
+        description: "The selected role preset is still loading.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsUpdating(true);
     try {
-      const { error } = await supabase
+      const { data: targetProfile, error: targetProfileError } = await supabase
         .from("profiles")
-        .update({ role: newRole as any })
+        .select("company_id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (targetProfileError) throw targetProfileError;
+
+      const previousRole = normalizedCurrentRole;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          role: normalizedRole,
+          role_id: selectedRole.dbRole.id,
+        })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      if (targetProfile?.company_id) {
+        const { error: membershipError } = await supabase
+          .from("company_members")
+          .update({ role: normalizedRole })
+          .eq("company_id", targetProfile.company_id)
+          .eq("user_id", userId);
+
+        if (membershipError) throw membershipError;
+      }
+
+      await logAuditEvent({
+        targetUserId: userId,
+        action: AUDIT_ACTIONS.userRoleUpdated,
+        tableName: "profiles",
+        recordId: userId,
+        oldValues: { role: previousRole },
+        newValues: {
+          role: normalizedRole,
+          role_id: selectedRole.dbRole.id,
+        },
+      });
 
       toast({
         title: "Success",
-        description: `${userName}'s role updated to ${newRole}`,
+        description: `${userName}'s role updated to ${PRODUCT_ROLE_LABELS[normalizedRole]}`,
       });
 
-      onRoleChange?.(newRole);
+      onRoleChange?.(normalizedRole);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -61,6 +124,7 @@ export default function RoleManager({
   };
 
   const getRoleBadge = (roleName: string) => {
+    const normalizedRole = normalizeProductRoleKey(roleName);
     const role = Array.isArray(roles)
       ? roles.find((r) => r.name.toLowerCase() === roleName.toLowerCase())
       : undefined;
@@ -81,19 +145,20 @@ export default function RoleManager({
     // Fallback for legacy roles
     const legacyIcons: Record<string, any> = {
       staff: Users,
-      supervisor: UserCheck,
       manager: Shield,
       admin: Crown,
       owner: Star,
     };
 
-    const IconComponent = legacyIcons[roleName] || Users;
+    const IconComponent = legacyIcons[normalizedRole ?? roleName] || Users;
 
     return (
       <Badge variant="secondary">
         <div className="flex items-center space-x-1">
           <IconComponent className="h-3 w-3" />
-          <span>{roleName}</span>
+          <span>
+            {normalizedRole ? PRODUCT_ROLE_LABELS[normalizedRole] : roleName}
+          </span>
         </div>
       </Badge>
     );
@@ -124,32 +189,30 @@ export default function RoleManager({
       </div>
 
       <Select
-        value={currentRole}
+        value={normalizedCurrentRole}
         onValueChange={handleRoleChange}
-        disabled={isUpdating}
+        disabled={isUpdating || rolesLoading}
       >
         <SelectTrigger className="w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {Array.isArray(roles) &&
-            roles.map((role) => {
-              const IconComponent = getIconComponent(role.icon);
-              return (
-                <SelectItem
-                  key={role.name.toLowerCase()}
-                  value={role.name.toLowerCase()}
-                >
-                  <div className="flex items-center space-x-2">
-                    <IconComponent
-                      className="h-3 w-3"
-                      style={{ color: role.color }}
-                    />
-                    <span>{role.name}</span>
-                  </div>
-                </SelectItem>
-              );
-            })}
+          {roleOptions.map((role) => {
+            const IconComponent = getIconComponent(
+              role.dbRole?.icon ?? "Users",
+            );
+            return (
+              <SelectItem key={role.key} value={role.key}>
+                <div className="flex items-center space-x-2">
+                  <IconComponent
+                    className="h-3 w-3"
+                    style={{ color: role.dbRole?.color }}
+                  />
+                  <span>{role.label}</span>
+                </div>
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
 

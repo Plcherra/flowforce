@@ -376,10 +376,10 @@ Status:
 
 ### Phase 10: Architecture Baseline Freeze
 
-- [ ] Update diagrams and file tree.
-- [ ] Record accepted conventions.
-- [ ] Mark deferred monorepo/native work.
-- [ ] Update master roadmap status.
+- [x] Update diagrams and file tree.
+- [x] Record accepted conventions.
+- [x] Mark deferred monorepo/native work.
+- [x] Update master roadmap status.
 
 Acceptance:
 
@@ -388,3 +388,8 @@ Acceptance:
 Verification:
 
 - A new engineer could navigate the repo from the docs.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.10 Architecture Baseline Freeze](./reports/02-10-architecture-baseline-freeze-2026-05-27.md)

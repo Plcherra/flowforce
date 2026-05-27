@@ -8,10 +8,10 @@ Make FlowForce reliable as a multi-tenant SaaS: onboarding, accounts, companies,
 
 ### Phase 1: Tenant Model Confirmation
 
-- [ ] Confirm `company_members` as long-term membership source.
-- [ ] Confirm `profiles.company_id` as current-company shortcut.
-- [ ] Document multi-company behavior.
-- [ ] Document tenant ownership rules for every new table.
+- [x] Confirm `company_members` as long-term membership source.
+- [x] Confirm `profiles.company_id` as current-company shortcut.
+- [x] Document multi-company behavior.
+- [x] Document tenant ownership rules for every new table.
 
 Acceptance:
 
@@ -21,12 +21,17 @@ Verification:
 
 - Supabase security tests encode the rule.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.01 Tenant Model Confirmation](./reports/03-01-tenant-model-confirmation-2026-05-27.md)
+
 ### Phase 2: Onboarding Production Hardening
 
-- [ ] Verify account creation creates company, profile, membership, roles, settings, and audit rows.
-- [ ] Add recovery for interrupted setup.
-- [ ] Improve error visibility for failed setup.
-- [ ] Add onboarding smoke coverage for production-like env.
+- [x] Verify account creation creates company, profile, membership, roles, settings, and audit rows.
+- [x] Add recovery for interrupted setup.
+- [x] Improve error visibility for failed setup.
+- [x] Add onboarding smoke coverage for production-like env.
 
 Acceptance:
 
@@ -36,12 +41,17 @@ Verification:
 
 - Onboarding E2E passes and retries are idempotent.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.02 Onboarding Production Hardening](./reports/03-02-onboarding-production-hardening-2026-05-27.md)
+
 ### Phase 3: Roles And Permissions Productization
 
-- [ ] Define default roles for owner, admin, manager, staff.
-- [ ] Map route/module permissions to product roles.
-- [ ] Add UI for role assignment and review.
-- [ ] Add tests for permission-sensitive modules.
+- [x] Define default roles for owner, admin, manager, staff.
+- [x] Map route/module permissions to product roles.
+- [x] Add UI for role assignment and review.
+- [x] Add tests for permission-sensitive modules.
 
 Acceptance:
 
@@ -51,12 +61,17 @@ Verification:
 
 - Staff cannot access manager/admin-only actions.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.03 Roles And Permissions Productization](./reports/03-03-roles-and-permissions-productization-2026-05-27.md)
+
 ### Phase 4: Company Settings System
 
-- [ ] Normalize company profile, location, timezone, currency, and brand settings.
-- [ ] Add settings save/preview behavior.
-- [ ] Ensure settings propagate to scheduling, finance, inventory, and reports.
-- [ ] Add audit events for critical settings changes.
+- [x] Normalize company profile, location, timezone, currency, and brand settings.
+- [x] Add settings save/preview behavior.
+- [x] Ensure settings propagate to scheduling, finance, inventory, and reports.
+- [x] Add audit events for critical settings changes.
 
 Acceptance:
 
@@ -66,12 +81,17 @@ Verification:
 
 - Changed currency/timezone affects dependent modules.
 
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.04 Company Settings System](./reports/03-04-company-settings-system-2026-05-27.md)
+
 ### Phase 5: Audit Logs And Activity Trail
 
-- [ ] Define audit categories.
-- [ ] Log critical user, permission, billing, integration, AI, and data changes.
-- [ ] Add admin activity review UI.
-- [ ] Add retention policy.
+- [x] Define audit categories.
+- [x] Log critical user, permission, billing, integration, AI, and data changes.
+- [x] Add admin activity review UI.
+- [x] Add retention policy.
 
 Acceptance:
 
@@ -80,6 +100,11 @@ Acceptance:
 Verification:
 
 - Tests or scripts confirm audit events for key mutations.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [03.05 Audit Logs And Activity Trail](./reports/03-05-audit-logs-and-activity-trail-2026-05-27.md)
 
 ### Phase 6: Billing Readiness
 
@@ -155,4 +180,3 @@ Acceptance:
 Verification:
 
 - A fresh tenant can be created, used, audited, and supported.
-

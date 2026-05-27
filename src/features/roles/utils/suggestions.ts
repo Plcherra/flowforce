@@ -40,24 +40,19 @@ export function generateSuggestions(
       });
     }
 
-    if (roleKey === "supervisor" && !modules.scheduling && employeeCount > 4) {
+    if (roleKey === "manager" && !modules.scheduling && employeeCount > 4) {
       results.push({
         id: `${roleKey}-enable-scheduling`,
         role: roleKey,
         moduleId: "scheduling",
         recommendation: true,
-        reason: `Supervisors oversee ${employeeCount} teammates but cannot adjust schedules. Enable to reduce approval backlog.`,
+        reason: `Managers oversee ${employeeCount} teammates but cannot adjust schedules. Enable to reduce approval backlog.`,
         confidence: 0.78,
         risk: "medium",
       });
     }
 
-    if (
-      (roleKey === "manager" ||
-        roleKey === "supervisor" ||
-        roleKey === "staff") &&
-      modules.system
-    ) {
+    if ((roleKey === "manager" || roleKey === "staff") && modules.system) {
       results.push({
         id: `${roleKey}-disable-system`,
         role: roleKey,

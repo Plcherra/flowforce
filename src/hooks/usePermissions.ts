@@ -9,6 +9,11 @@ import {
   createPermissionResolver,
   type PermissionContext,
 } from "@/lib/permissions/resolver";
+import {
+  normalizeProductRoleKey,
+  PRODUCT_ROLE_HIERARCHY,
+  type ProductRoleKey,
+} from "@/features/roles/constants/productRoles";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 
@@ -37,7 +42,7 @@ type Permission =
   | "manageInventory"
   | "managePayments";
 
-type UserRole = "staff" | "supervisor" | "manager" | "admin" | "owner";
+type UserRole = ProductRoleKey;
 
 const defaultPermissionHelpers = {
   can: () => false,
@@ -66,21 +71,11 @@ export function usePermissions() {
     };
   }
 
-  const roleHierarchy: Record<UserRole, number> = {
-    staff: 1,
-    supervisor: 2,
-    manager: 3,
-    admin: 4,
-    owner: 5,
-  };
-
-  const profileRole = profile.role as UserRole;
-  const positionRole = profile.position?.role as UserRole | undefined;
-  const effectiveRole = (positionRole || profileRole) as UserRole;
+  const profileRole = normalizeProductRoleKey(profile.role) ?? "staff";
+  const positionRole = normalizeProductRoleKey(profile.position?.role);
+  const effectiveRole = positionRole || profileRole;
   const companyRole = Array.isArray(roles)
-    ? roles.find(
-        (role) => role.name.toLowerCase() === effectiveRole.toLowerCase(),
-      )
+    ? roles.find((role) => normalizeProductRoleKey(role.name) === effectiveRole)
     : undefined;
 
   const context: PermissionContext = {
@@ -91,7 +86,7 @@ export function usePermissions() {
   };
 
   const resolver = createPermissionResolver(context);
-  const getCurrentRoleLevel = () => roleHierarchy[effectiveRole] || 0;
+  const getCurrentRoleLevel = () => PRODUCT_ROLE_HIERARCHY[effectiveRole] || 0;
 
   const can = (permission: Permission): boolean => {
     try {
@@ -107,12 +102,18 @@ export function usePermissions() {
 
     if (Array.isArray(requiredRole)) {
       return requiredRole.some((roleKey) => {
-        const requiredLevel = roleHierarchy[roleKey as UserRole] || 0;
+        const normalizedRequiredRole = normalizeProductRoleKey(roleKey);
+        const requiredLevel = normalizedRequiredRole
+          ? PRODUCT_ROLE_HIERARCHY[normalizedRequiredRole]
+          : 0;
         return getCurrentRoleLevel() >= requiredLevel;
       });
     }
 
-    const requiredLevel = roleHierarchy[requiredRole as UserRole] || 0;
+    const normalizedRequiredRole = normalizeProductRoleKey(requiredRole);
+    const requiredLevel = normalizedRequiredRole
+      ? PRODUCT_ROLE_HIERARCHY[normalizedRequiredRole]
+      : 0;
     return getCurrentRoleLevel() >= requiredLevel;
   };
 

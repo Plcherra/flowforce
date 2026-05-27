@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCompany, type Company } from "@/hooks/useCompany";
 import type { Tables } from "@/integrations/supabase/public-types";
 import type { SystemSettings as SystemSettingsModel } from "@/types/system-settings";
+import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
+import { logAuditEvent } from "@/services/audit/auditService";
 import { handleError } from "@/utils/errorHandler";
 import {
   DEFAULT_ADMIN_CONFIG,
@@ -25,6 +27,41 @@ type ProfileRow = Tables<"profiles">;
 type PartialUpdate = Record<string, unknown>;
 
 const allowedManagerRoles = ["admin", "owner", "company_admin", "manager"];
+const auditKeyMap: Record<string, keyof SystemSettingsModel> = {
+  general: "general",
+  security: "security",
+  localization: "localization",
+  notifications: "notifications",
+  integrations: "integrations",
+  appearance: "appearance",
+  admin_config: "adminConfig",
+};
+
+const pickAuditValues = (
+  current: SystemSettingsModel | null,
+  changes: PartialUpdate,
+) => {
+  if (!current) return null;
+
+  return Object.keys(changes).reduce<Record<string, unknown>>((acc, key) => {
+    const modelKey = auditKeyMap[key];
+    if (modelKey) {
+      acc[key] = current[modelKey];
+    }
+    return acc;
+  }, {});
+};
+
+const filterAuditChanges = (changes: PartialUpdate) =>
+  Object.entries(changes).reduce<Record<string, unknown>>(
+    (acc, [key, value]) => {
+      if (key !== "updated_at") {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {},
+  );
 
 const ensureDefaults = (
   company: Company,
@@ -212,15 +249,24 @@ export function useSystemSettings(
         throw updateError;
       }
 
+      const auditChanges = filterAuditChanges(changes);
+      await logAuditEvent({
+        action: AUDIT_ACTIONS.settingsUpdated,
+        tableName: "system_settings",
+        recordId: companyId,
+        oldValues: pickAuditValues(settings, auditChanges),
+        newValues: auditChanges,
+      });
+
       const normalized = normalizeSystemSettingsRow(
         data as SystemSettingsRow,
-        company ?? null,
+        null,
       );
 
       setSettings(normalized);
       return normalized;
     },
-    [companyId, company],
+    [companyId, settings],
   );
 
   const refresh = useCallback(async () => {
