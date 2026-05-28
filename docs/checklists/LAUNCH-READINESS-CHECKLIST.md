@@ -34,8 +34,8 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 
 ## Web App Pilot Surface
 
-- [ ] Every visible route has production, beta, hidden, or deprecated status.
-- [ ] Navigation only exposes usable product surfaces.
+- [x] Every visible route has production, beta, hidden, or deprecated status.
+- [x] Navigation only exposes usable product surfaces.
 - [ ] Dashboard shows operator-critical work, not generic metrics.
 - [ ] Employee, scheduling, tasks, messages, forms, reports, inventory, purchasing, and settings flows use real tenant data or clear empty states.
 - [ ] Demo-only data is removed from production-facing flows.

@@ -1,0 +1,616 @@
+{
+  "updatedAt": "2026-05-28",
+  "statusValues": ["production", "beta", "hidden", "deprecated"],
+  "routes": [
+    {
+      "label": "Dashboard",
+      "path": "/app/dashboard",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/dashboard",
+      "dataDependency": "tenant data",
+      "notes": "Default command-center entry."
+    },
+    {
+      "label": "Scheduling",
+      "path": "/app/enhanced-scheduling",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/scheduling",
+      "dataDependency": "tenant scheduling tables",
+      "notes": "Owns schedule, availability, and manager availability views."
+    },
+    {
+      "label": "Tasks",
+      "path": "/app/tasks",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/tasks",
+      "dataDependency": "tenant tasks tables",
+      "notes": "Pilot execution layer."
+    },
+    {
+      "label": "Messages",
+      "path": "/app/messages",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/messages",
+      "dataDependency": "tenant messaging tables",
+      "notes": "Primary team communication route."
+    },
+    {
+      "label": "Company Updates",
+      "path": "/app/company-updates",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/company-updates",
+      "dataDependency": "tenant company update tables",
+      "notes": "Announcements and updates."
+    },
+    {
+      "label": "Forms",
+      "path": "/app/forms",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/forms",
+      "dataDependency": "tenant forms tables",
+      "notes": "Checklist/form execution surface."
+    },
+    {
+      "label": "Inventory",
+      "path": "/app/inventory",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory tables",
+      "notes": "Canonical inventory module entry."
+    },
+    {
+      "label": "Purchasing / Waste",
+      "path": "/app/inventory/purchasing",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant purchasing and inventory tables",
+      "notes": "Canonical purchasing entry for pilot navigation."
+    },
+    {
+      "label": "Reports",
+      "path": "/app/reports",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/analytics",
+      "dataDependency": "tenant reporting tables",
+      "notes": "Pilot reporting entry; deeper analytics remains beta."
+    },
+    {
+      "label": "Team",
+      "path": "/app/employees",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/employees",
+      "dataDependency": "tenant employee/profile tables",
+      "notes": "Employee directory and team management."
+    },
+    {
+      "label": "Settings",
+      "path": "/app/settings",
+      "status": "production",
+      "sidebar": true,
+      "smoke": true,
+      "owner": "src/features/system",
+      "dataDependency": "tenant settings tables",
+      "notes": "Company settings, roles, feature gates, and admin configuration."
+    },
+    {
+      "label": "Messages Filter",
+      "path": "/app/messages/[filter]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/messages",
+      "dataDependency": "tenant messaging tables",
+      "notes": "Child route, not a sidebar entry."
+    },
+    {
+      "label": "Inventory Actions",
+      "path": "/app/inventory/actions",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory tables",
+      "notes": "Inventory child route, reached from the inventory module."
+    },
+    {
+      "label": "Inventory Counts",
+      "path": "/app/inventory/counts",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory count tables",
+      "notes": "Inventory child route."
+    },
+    {
+      "label": "Inventory Count Detail",
+      "path": "/app/inventory/counts/[countId]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory count tables",
+      "notes": "Inventory child detail route."
+    },
+    {
+      "label": "Inventory Items",
+      "path": "/app/inventory/items",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory item tables",
+      "notes": "Hidden until setup is complete."
+    },
+    {
+      "label": "Inventory Prep",
+      "path": "/app/inventory/prep",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory prep tables",
+      "notes": "Hidden until inventory setup supports prep workflows."
+    },
+    {
+      "label": "Inventory Reports",
+      "path": "/app/inventory/reports",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory reporting tables",
+      "notes": "Child report route."
+    },
+    {
+      "label": "Inventory Cookbook",
+      "path": "/app/inventory/cookbook",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant recipe/item tables",
+      "notes": "Hidden until item/unit setup is ready."
+    },
+    {
+      "label": "Legacy Inventory Actions",
+      "path": "/app/inventory-actions",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory tables",
+      "notes": "Flat alias; canonical route is /app/inventory/actions."
+    },
+    {
+      "label": "Legacy Inventory Count Execution",
+      "path": "/app/inventory-count-execution/[[...countId]]",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory count tables",
+      "notes": "Flat alias; canonical route is /app/inventory/counts."
+    },
+    {
+      "label": "Legacy Items Setup",
+      "path": "/app/items-setup",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant inventory item tables",
+      "notes": "Flat alias; canonical route is /app/inventory/items."
+    },
+    {
+      "label": "Legacy Purchasing",
+      "path": "/app/purchasing",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant purchasing tables",
+      "notes": "Flat alias; canonical route is /app/inventory/purchasing."
+    },
+    {
+      "label": "Legacy Cookbook",
+      "path": "/app/cookbook",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/inventory",
+      "dataDependency": "tenant recipe/item tables",
+      "notes": "Flat alias; canonical route is /app/inventory/cookbook."
+    },
+    {
+      "label": "Analytics",
+      "path": "/app/analytics",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/analytics",
+      "dataDependency": "tenant analytics tables",
+      "notes": "Beta until placeholder analytics are replaced with operator reports."
+    },
+    {
+      "label": "AI Insights",
+      "path": "/app/ai-insights",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/analytics/pages/AIInsights",
+      "dataDependency": "AI feature flag and tenant evidence tables",
+      "notes": "Beta until evidence and approval flows are complete."
+    },
+    {
+      "label": "Operations Intelligence",
+      "path": "/app/operations",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/operations",
+      "dataDependency": "tenant operations tables",
+      "notes": "Beta until operations workflows are completed in Plan 06."
+    },
+    {
+      "label": "Calendar",
+      "path": "/app/calendar",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/calendar",
+      "dataDependency": "tenant calendar/event tables",
+      "notes": "Beta route; scheduling remains the pilot calendar surface."
+    },
+    {
+      "label": "Events Calendar",
+      "path": "/app/events/calendar",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/calendar",
+      "dataDependency": "tenant calendar/event tables",
+      "notes": "Event-specific calendar route."
+    },
+    {
+      "label": "Goals",
+      "path": "/app/goals",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/goals",
+      "dataDependency": "tenant goals tables",
+      "notes": "Beta until task/goal workflow is completed."
+    },
+    {
+      "label": "Expenses",
+      "path": "/app/expenses",
+      "status": "beta",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/finance",
+      "dataDependency": "tenant finance tables",
+      "notes": "Beta until Plan 05 cost engine work."
+    },
+    {
+      "label": "Performance",
+      "path": "/app/performance",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/performance",
+      "dataDependency": "tenant performance tables",
+      "notes": "Hidden for v1 pilot unless explicitly enabled."
+    },
+    {
+      "label": "Recognition",
+      "path": "/app/recognition",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/recognition",
+      "dataDependency": "tenant recognition tables",
+      "notes": "Hidden for v1 pilot unless explicitly enabled."
+    },
+    {
+      "label": "Leaderboard",
+      "path": "/app/leaderboard",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/gamification",
+      "dataDependency": "tenant gamification tables",
+      "notes": "Hidden for v1 pilot unless explicitly enabled."
+    },
+    {
+      "label": "Certifications",
+      "path": "/app/certifications",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/learning",
+      "dataDependency": "tenant certification tables",
+      "notes": "Hidden until learning/certification scope is selected."
+    },
+    {
+      "label": "Learning Center",
+      "path": "/app/learning-center",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/learning",
+      "dataDependency": "tenant learning tables",
+      "notes": "Hidden until learning/training scope is selected."
+    },
+    {
+      "label": "Admin",
+      "path": "/app/admin",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/admin",
+      "dataDependency": "tenant role/profile tables",
+      "notes": "Admin work is routed through Team and Settings for v1."
+    },
+    {
+      "label": "Invite Employee",
+      "path": "/app/invite-employee",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/employees",
+      "dataDependency": "tenant invite tables",
+      "notes": "Use integrated Team Directory invite flow instead."
+    },
+    {
+      "label": "Position Management",
+      "path": "/app/position-management",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/employees",
+      "dataDependency": "tenant position tables",
+      "notes": "Hidden admin child surface."
+    },
+    {
+      "label": "Sections Permissions",
+      "path": "/app/sections-permissions",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/system",
+      "dataDependency": "tenant permissions tables",
+      "notes": "Handled from Settings/Team permissions."
+    },
+    {
+      "label": "Availability Redirect",
+      "path": "/app/availability",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/scheduling",
+      "dataDependency": "none",
+      "notes": "Redirects to enhanced scheduling availability tab."
+    },
+    {
+      "label": "Availability Manage Redirect",
+      "path": "/app/availability/manage",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/scheduling",
+      "dataDependency": "none",
+      "notes": "Redirects to enhanced scheduling team availability tab."
+    },
+    {
+      "label": "Schedule Lobby",
+      "path": "/app/schedule-lobby",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/scheduling",
+      "dataDependency": "tenant scheduling tables",
+      "notes": "Legacy scheduling entry."
+    },
+    {
+      "label": "Scheduling Time Off",
+      "path": "/app/scheduling/timeoff",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/scheduling",
+      "dataDependency": "tenant scheduling tables",
+      "notes": "Child scheduling route."
+    },
+    {
+      "label": "Time Off",
+      "path": "/app/time-off",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/scheduling",
+      "dataDependency": "tenant scheduling tables",
+      "notes": "Legacy time-off route."
+    },
+    {
+      "label": "Help Desk",
+      "path": "/app/help-desk",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/help-desk",
+      "dataDependency": "tenant helpdesk tables",
+      "notes": "Hidden for v1 pilot."
+    },
+    {
+      "label": "Meetings",
+      "path": "/app/meetings",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/calendar",
+      "dataDependency": "tenant meetings/event tables",
+      "notes": "Hidden for v1 pilot."
+    },
+    {
+      "label": "App Redirect",
+      "path": "/app",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "app/app/page.tsx",
+      "dataDependency": "none",
+      "notes": "Redirects to the dashboard."
+    },
+    {
+      "label": "Profile",
+      "path": "/app/profile",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/profile",
+      "dataDependency": "current user profile",
+      "notes": "User-menu route, not a primary module."
+    },
+    {
+      "label": "Resources",
+      "path": "/app/resources",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Hidden for v1 pilot."
+    },
+    {
+      "label": "Resource Blog Detail",
+      "path": "/app/resources/blog/[id]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource Docs",
+      "path": "/app/resources/docs",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource Docs Detail",
+      "path": "/app/resources/docs/[id]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource API Docs",
+      "path": "/app/resources/docs/api",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource Getting Started Docs",
+      "path": "/app/resources/docs/getting-started",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource Integration Docs",
+      "path": "/app/resources/docs/integrations",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource User Manual Docs",
+      "path": "/app/resources/docs/user-manual",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Resource Video Detail",
+      "path": "/app/resources/videos/[id]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/resources",
+      "dataDependency": "content data",
+      "notes": "Resource child route."
+    },
+    {
+      "label": "Custom Section",
+      "path": "/app/section/[path]/[[...wildcard]]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/sections",
+      "dataDependency": "tenant custom section tables",
+      "notes": "Custom section runtime route."
+    },
+    {
+      "label": "Add Section",
+      "path": "/app/add-section",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/sections",
+      "dataDependency": "tenant custom section tables",
+      "notes": "Internal/admin route."
+    },
+    {
+      "label": "Permission Demo",
+      "path": "/app/permission-demo",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/permissions",
+      "dataDependency": "none",
+      "notes": "Internal demo route."
+    }
+  ]
+}

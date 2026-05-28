@@ -8,10 +8,10 @@ Finish the current Next.js app into a coherent, real-data, production-quality we
 
 ### Phase 1: Visible Module Inventory
 
-- [ ] List all visible routes.
-- [ ] Mark production, beta, hidden, or deprecated status.
-- [ ] Identify demo-data dependencies.
-- [ ] Align navigation to real modules.
+- [x] List all visible routes.
+- [x] Mark production, beta, hidden, or deprecated status.
+- [x] Identify demo-data dependencies.
+- [x] Align navigation to real modules.
 
 Acceptance:
 
@@ -20,6 +20,11 @@ Acceptance:
 Verification:
 
 - Authenticated smoke route list matches the production navigation.
+
+Status:
+
+- Completed on 2026-05-28.
+- Phase report: [04.01 Visible Module Inventory](./reports/04-01-visible-module-inventory-2026-05-28.md)
 
 ### Phase 2: Dashboard Command Center
 
@@ -155,4 +160,3 @@ Acceptance:
 Verification:
 
 - Build, typecheck, smoke, Supabase gates, and release gates pass.
-

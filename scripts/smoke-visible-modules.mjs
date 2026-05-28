@@ -12,19 +12,16 @@ const TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS || 30000);
 const HEADLESS = process.env.SMOKE_HEADED !== "1";
 const KEEP_DATA = process.env.SMOKE_KEEP_DATA === "1";
 
-const ROUTES = [
-  { name: "Dashboard", path: "/app/dashboard" },
-  { name: "Employees", path: "/app/employees" },
-  { name: "Tasks", path: "/app/tasks" },
-  { name: "Messages", path: "/app/messages" },
-  { name: "Company updates", path: "/app/company-updates" },
-  { name: "Calendar", path: "/app/calendar" },
-  { name: "Scheduling", path: "/app/enhanced-scheduling" },
-  { name: "Forms", path: "/app/forms" },
-  { name: "Inventory actions", path: "/app/inventory-actions" },
-  { name: "Analytics", path: "/app/analytics" },
-  { name: "Settings", path: "/app/settings" },
-];
+const routeInventory = JSON.parse(
+  readFileSync(
+    join(cwd, "src/app-shell/navigation/moduleRouteInventory.json"),
+    "utf8",
+  ),
+);
+
+const ROUTES = routeInventory.routes
+  .filter((route) => route.smoke)
+  .map((route) => ({ name: route.label, path: route.path }));
 
 const ERROR_TEXT_PATTERNS = [
   /application error/i,
