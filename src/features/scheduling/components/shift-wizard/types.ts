@@ -25,6 +25,7 @@ export interface ShiftWizardFormData {
   job_position_id: string;
   job_position_input: string;
   required_headcount: number;
+  hourly_rate: string;
   required_level?: number;
   assigned_users: string[];
   can_claim: boolean;

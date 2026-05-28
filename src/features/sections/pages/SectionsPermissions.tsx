@@ -8,14 +8,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCan } from "@/hooks/useCan";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UnifiedSectionsManager } from "@/features/sections/components/UnifiedSectionsManager";
+import { SectionsReadinessPanel } from "@/features/sections/components/SectionsReadinessPanel";
 import RoleConfigurationTab from "@/features/roles/components/RoleConfigurationTab";
 import SectionPermissionsTab from "@/features/roles/components/SectionPermissionsTab";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
+import { useNavigate } from "@/lib/router-adapter";
 
 import {
   Layers,
@@ -23,13 +24,13 @@ import {
   Plus,
   Settings,
   LayoutTemplate,
-  Zap,
   Users,
 } from "lucide-react";
 
 export default function SectionsPermissions() {
   const { can } = useCan();
   const { hasRole } = usePermissions();
+  const navigate = useNavigate();
   const [enabledSections, setEnabledSections] = useState<string[]>(
     AVAILABLE_SECTIONS.filter((s) => s.enabled).map((s) => s.id),
   );
@@ -56,7 +57,7 @@ export default function SectionsPermissions() {
             Access Denied
           </h3>
           <p className="text-sm text-gray-500">
-            You don't have permission to access sections and permissions
+            You don&apos;t have permission to access sections and permissions
             management.
           </p>
         </div>
@@ -82,12 +83,16 @@ export default function SectionsPermissions() {
               <LayoutTemplate className="mr-2 h-4 w-4" />
               Import Template
             </Button>
-            <Button>
+            <Button onClick={() => navigate("/app/add-section")}>
               <Plus className="mr-2 h-4 w-4" />
               Create Custom Section
             </Button>
           </div>
         </div>
+
+        <SectionsReadinessPanel
+          onAddSection={() => navigate("/app/add-section")}
+        />
 
         <Tabs defaultValue="sections" className="space-y-6">
           <TabsList>

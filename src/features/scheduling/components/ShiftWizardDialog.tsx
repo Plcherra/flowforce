@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +21,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Users } from "lucide-react";
+import { AlertTriangle, Users } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { usePositions } from "@/hooks/usePositions";
 import { useEmployees } from "@/hooks/useEmployees";
@@ -29,6 +36,10 @@ import { UsersTab } from "./shift-wizard/UsersTab";
 import { TasksTab } from "./shift-wizard/TasksTab";
 import { NotesTab } from "./shift-wizard/NotesTab";
 import type { ShiftTask, ShiftWizardFormData } from "./shift-wizard/types";
+import {
+  buildShiftConflictWarnings,
+  getShiftLaborHours,
+} from "@/features/scheduling/utils/scheduleReadiness";
 import { queryKeys } from "@/lib/queryKeys";
 import { logger } from "@/utils/logger";
 
@@ -49,6 +60,12 @@ const DEFAULT_BREAK = {
 
 const timezoneFallback = "America/New_York";
 
+const parseHourlyRate = (value: string) => {
+  if (value.trim().length === 0) return null;
+  const rate = Number(value);
+  return Number.isFinite(rate) && rate >= 0 ? rate : null;
+};
+
 const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   title: "",
   date,
@@ -60,6 +77,7 @@ const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   job_position_id: "",
   job_position_input: "",
   required_headcount: 1,
+  hourly_rate: "",
   assigned_users: [],
   can_claim: false,
   breaks: [
@@ -105,6 +123,7 @@ export function ShiftWizardDialog({
   const {
     shifts,
     weekRange,
+    timeOff,
     unavailability,
     isFallbackData,
     refetchAll,
@@ -153,6 +172,88 @@ export function ShiftWizardDialog({
     formData.start_time,
   ]);
 
+  const getShiftWindow = useCallback(() => {
+    const date = formData.date;
+    const start = formData.is_all_day
+      ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0)
+      : parse(formData.start_time, "HH:mm", date);
+    const end = formData.is_all_day
+      ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59)
+      : parse(formData.end_time, "HH:mm", date);
+    return { start, end };
+  }, [
+    formData.date,
+    formData.end_time,
+    formData.is_all_day,
+    formData.start_time,
+  ]);
+
+  const draftShiftForWarnings = useMemo(
+    () => ({
+      id: "draft-shift",
+      company_id: companyId,
+      title: formData.title || "Draft shift",
+      role: formData.job_position_input || "Staff",
+      start_time: getShiftWindow().start.toISOString(),
+      end_time: getShiftWindow().end.toISOString(),
+      location: formData.location || null,
+      required_headcount: formData.required_headcount,
+      break_minutes: formData.breaks.reduce(
+        (sum, item) => sum + item.duration_minutes,
+        0,
+      ),
+      hourly_rate: parseHourlyRate(formData.hourly_rate),
+      color: "#3b82f6",
+      timezone: formData.timezone,
+      notes: formData.notes,
+      created_at: new Date().toISOString(),
+      created_by: user?.id ?? null,
+      updated_at: null,
+      is_all_day: formData.is_all_day,
+      is_published: false,
+      is_template: false,
+      position_id: formData.job_position_id || null,
+      template_id: null,
+      status: "scheduled",
+      requirements: [],
+      user_id: null,
+      assignments: formData.assigned_users.map((userId) => ({
+        id: `draft-assignment-${userId}`,
+        schedule_id: "draft-shift",
+        user_id: userId,
+        status: "assigned",
+        assigned_at: null,
+        assigned_by: user?.id ?? null,
+        confirmed_at: null,
+      })),
+    }),
+    [companyId, formData, getShiftWindow, user?.id],
+  );
+
+  const draftWarnings = useMemo(
+    () =>
+      buildShiftConflictWarnings({
+        shift: draftShiftForWarnings,
+        shifts,
+        timeOff,
+        unavailability,
+        assignedUserIds: formData.assigned_users,
+      }),
+    [
+      draftShiftForWarnings,
+      formData.assigned_users,
+      shifts,
+      timeOff,
+      unavailability,
+    ],
+  );
+
+  const draftLaborCost = useMemo(() => {
+    const rate = Number(formData.hourly_rate || 0);
+    if (!Number.isFinite(rate) || rate <= 0) return 0;
+    return getShiftLaborHours(draftShiftForWarnings) * rate;
+  }, [draftShiftForWarnings, formData.hourly_rate]);
+
   const unavailabilityEntries = useMemo(
     () =>
       (unavailability ?? []).map((entry) => ({
@@ -162,17 +263,6 @@ export function ShiftWizardDialog({
       })),
     [unavailability],
   );
-
-  const getShiftWindow = () => {
-    const date = formData.date;
-    const start = formData.is_all_day
-      ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0)
-      : parse(formData.start_time, "HH:mm", date);
-    const end = formData.is_all_day
-      ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59)
-      : parse(formData.end_time, "HH:mm", date);
-    return { start, end };
-  };
 
   const isUserAvailableForWindow = (userId: string) => {
     const { start, end } = getShiftWindow();
@@ -244,7 +334,7 @@ export function ShiftWizardDialog({
           (sum, item) => sum + item.duration_minutes,
           0,
         ),
-        hourly_rate: 15.0,
+        hourly_rate: parseHourlyRate(formData.hourly_rate),
         color: "#3b82f6",
         is_published: publish,
         is_template: false,
@@ -354,6 +444,18 @@ export function ShiftWizardDialog({
                 Live scheduling updates are disabled while demo data is active.
               </p>
             )}
+            {draftWarnings.length > 0 && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Conflict warning</AlertTitle>
+                <AlertDescription>
+                  {draftWarnings[0]?.message}
+                  {draftWarnings.length > 1
+                    ? ` ${draftWarnings.length - 1} more conflict${draftWarnings.length === 2 ? "" : "s"} found.`
+                    : ""}
+                </AlertDescription>
+              </Alert>
+            )}
           </DialogHeader>
 
           <Separator />
@@ -381,6 +483,7 @@ export function ShiftWizardDialog({
                         positions={positions}
                         distinctLocations={distinctLocations}
                         hours={hours}
+                        laborCost={draftLaborCost}
                       />
                     </TabsContent>
 

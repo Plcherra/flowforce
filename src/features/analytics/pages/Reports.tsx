@@ -4,6 +4,7 @@ import {
   AlertCircle,
   ArrowDownToLine,
   CheckCircle2,
+  ClipboardList,
   FileText,
   Loader2,
   Search,
@@ -39,6 +40,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import {
   useDocumentInbox,
   useUploadDocument,
@@ -58,7 +60,7 @@ const STATUS_META: Record<
   {
     label: string;
     tone: "default" | "warning" | "success" | "destructive";
-    icon: React.ComponentType<any>;
+    icon: React.ComponentType<{ className?: string }>;
   }
 > = {
   pending: { label: "Pending", tone: "warning", icon: Timer },
@@ -97,10 +99,15 @@ function summarizeText(text?: string | null) {
 
 export default function ReportsPage() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const identity = useMemo(() => buildIdentity(user), [user]);
   const canView = can(identity, "reports.view");
   const uploadInputRef = useRef<HTMLInputElement>(null);
-  const inboxOptions = useMemo(() => ({ limit: 50 }), []);
+  const inboxOptions = useMemo(
+    () => ({ limit: 50, companyId: companyId ?? undefined }),
+    [companyId],
+  );
   const {
     data: documents = [],
     isLoading,
@@ -125,6 +132,30 @@ export default function ReportsPage() {
     });
   }, [documents, search]);
 
+  const reportSummary = useMemo(() => {
+    const ready = filteredDocuments.filter(
+      (doc) => doc.processing_state === "ready",
+    ).length;
+    const processing = filteredDocuments.filter((doc) =>
+      ["pending", "processing"].includes(doc.processing_state ?? "pending"),
+    ).length;
+    const errors = filteredDocuments.filter(
+      (doc) => doc.processing_state === "error",
+    ).length;
+    const criticalEvents = filteredDocuments.reduce(
+      (sum, doc) =>
+        sum +
+        doc.events.filter((event) => event.severity === "critical").length,
+      0,
+    );
+    const followUps = filteredDocuments.reduce(
+      (sum, doc) => sum + (doc.originating_tasks?.length ?? 0),
+      0,
+    );
+
+    return { ready, processing, errors, criticalEvents, followUps };
+  }, [filteredDocuments]);
+
   const selectedDocument = useMemo(
     () => documents.find((doc) => doc.id === selectedDocumentId) ?? null,
     [documents, selectedDocumentId],
@@ -139,7 +170,10 @@ export default function ReportsPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      uploadMutation.mutate({ file });
+      uploadMutation.mutate({
+        file,
+        options: companyId ? { companyId } : undefined,
+      });
     }
     event.target.value = "";
   };
@@ -177,6 +211,36 @@ export default function ReportsPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleExportInbox = () => {
+    const rows = [
+      ["Report", "Status", "Events", "Critical events", "Follow-ups", "Uploaded"],
+      ...filteredDocuments.map((doc) => [
+        doc.title ?? doc.file?.filename ?? "Untitled report",
+        doc.processing_state ?? "pending",
+        doc.events.length,
+        doc.events.filter((event) => event.severity === "critical").length,
+        doc.originating_tasks?.length ?? 0,
+        doc.file?.uploaded_at ?? doc.created_at ?? "",
+      ]),
+    ];
+    const csv = rows
+      .map((row) =>
+        row
+          .map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`)
+          .join(","),
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `report-inbox-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
   };
 
   if (!canView) {
@@ -228,6 +292,15 @@ export default function ReportsPage() {
             onChange={handleFileChange}
           />
           <Button
+            variant="outline"
+            onClick={handleExportInbox}
+            disabled={filteredDocuments.length === 0}
+            className="gap-2"
+          >
+            <ArrowDownToLine className="h-4 w-4" />
+            Export CSV
+          </Button>
+          <Button
             onClick={() => uploadInputRef.current?.click()}
             disabled={uploadMutation.isPending}
             className="gap-2"
@@ -252,6 +325,60 @@ export default function ReportsPage() {
           </AlertDescription>
         </Alert>
       )}
+
+      <div className="grid gap-3 md:grid-cols-5">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Ready
+            </p>
+            <p className="mt-2 text-2xl font-semibold">
+              {reportSummary.ready}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Processing
+            </p>
+            <p className="mt-2 text-2xl font-semibold">
+              {reportSummary.processing}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Errors
+            </p>
+            <p className="mt-2 text-2xl font-semibold">
+              {reportSummary.errors}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Critical events
+            </p>
+            <p className="mt-2 text-2xl font-semibold">
+              {reportSummary.criticalEvents}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="flex items-center gap-1 text-xs font-medium uppercase text-muted-foreground">
+              <ClipboardList className="h-3.5 w-3.5" />
+              Follow-ups
+            </p>
+            <p className="mt-2 text-2xl font-semibold">
+              {reportSummary.followUps}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -297,7 +424,8 @@ export default function ReportsPage() {
               </TableHeader>
               <TableBody>
                 {filteredDocuments.map((doc) => {
-                  const status = STATUS_META[doc.processing_state];
+                  const processingState = doc.processing_state ?? "ready";
+                  const status = STATUS_META[processingState];
                   const Icon = status.icon;
 
                   return (
@@ -366,7 +494,7 @@ export default function ReportsPage() {
                           variant="secondary"
                           size="sm"
                           onClick={() => handleCreateTask(doc)}
-                          disabled={doc.processing_state !== "ready"}
+                          disabled={processingState !== "ready"}
                         >
                           Create task
                         </Button>
@@ -396,7 +524,10 @@ export default function ReportsPage() {
                 </SheetTitle>
                 <SheetDescription>
                   Source: {selectedDocument.source ?? "Uploaded"} · Status:{" "}
-                  {STATUS_META[selectedDocument.processing_state].label}
+                  {
+                    STATUS_META[selectedDocument.processing_state ?? "ready"]
+                      .label
+                  }
                 </SheetDescription>
               </SheetHeader>
 

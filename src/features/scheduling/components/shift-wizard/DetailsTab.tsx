@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Clock, Plus, X } from "lucide-react";
-import { format, addHours, differenceInMinutes, parse } from "date-fns";
+import { format, addHours, parse } from "date-fns";
 import type { Dispatch, SetStateAction } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ type DetailsTabProps = {
   positions: Position[];
   distinctLocations: string[];
   hours: { total: number; net: number };
+  laborCost: number;
 };
 
 type ShiftTemplate = {
@@ -46,6 +47,7 @@ export function DetailsTab({
   positions,
   distinctLocations,
   hours,
+  laborCost,
 }: DetailsTabProps) {
   const { user } = useAuth();
   const [showPositionSuggestions, setShowPositionSuggestions] = useState(false);
@@ -358,7 +360,7 @@ export function DetailsTab({
 
         <Card>
           <CardContent className="pt-4">
-            <div className="flex items-center space-x-4 text-sm">
+            <div className="flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
                 <span>{hours.total.toFixed(2)} Hours</span>
@@ -378,6 +380,12 @@ export function DetailsTab({
                   </span>
                 </div>
               )}
+              <div className="text-muted-foreground">
+                Estimated labor cost:{" "}
+                <span className="font-medium text-foreground">
+                  ${laborCost.toFixed(2)}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -454,6 +462,27 @@ export function DetailsTab({
             </Card>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="hourly_rate">Hourly Rate</Label>
+        <Input
+          id="hourly_rate"
+          type="number"
+          min={0}
+          step="0.01"
+          value={formData.hourly_rate}
+          onChange={(event) =>
+            setFormData((prev) => ({
+              ...prev,
+              hourly_rate: event.target.value,
+            }))
+          }
+          placeholder="Optional labor cost rate"
+        />
+        <p className="text-xs text-muted-foreground">
+          Used for labor-cost reporting. Leave blank if rates are not configured.
+        </p>
       </div>
 
       <div className="space-y-1">

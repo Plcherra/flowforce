@@ -11,15 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { EngagementPanel } from "@/features/employees/components/users/EngagementPanel";
-import type { Tables } from "@/integrations/supabase/public-types";
-
-type Profile = Tables<"profiles">;
+import type { Employee } from "@/hooks/useEmployees";
 
 interface UserOverviewTabProps {
-  user: Profile;
+  user: Employee;
 }
 
 export function UserOverviewTab({ user }: UserOverviewTabProps) {
+  const displayName =
+    `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
+    user.email ||
+    "Unnamed teammate";
+  const departmentName =
+    user.department?.name ?? user.department_id ?? "Not assigned";
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -47,7 +52,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
       <EngagementPanel
         employeeId={user.id}
         role={user.role}
-        displayName={`${user.first_name} ${user.last_name}`.trim()}
+        displayName={displayName}
       />
 
       {/* Contact Information */}
@@ -133,7 +138,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div>
               <p className="text-sm font-medium">Role</p>
               <Badge variant="outline" className="mt-1 capitalize">
-                {user.role}
+                {user.role ?? "Unassigned"}
               </Badge>
             </div>
 
@@ -145,7 +150,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
                 }
                 className="mt-1 capitalize"
               >
-                {user.employment_status}
+                {user.employment_status ?? "Unknown"}
               </Badge>
             </div>
 
@@ -159,7 +164,34 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div>
               <p className="text-sm font-medium">Department</p>
               <p className="text-sm text-muted-foreground">
-                {user.department_id || "Not assigned"}
+                {departmentName}
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <p className="text-sm font-medium">Skill Level</p>
+              <p className="text-sm text-muted-foreground">
+                {user.skillLevel ? `Level ${user.skillLevel}` : "Not assessed"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Certifications</p>
+              <p className="text-sm text-muted-foreground">
+                {user.badges?.length
+                  ? `${user.badges.length} on file`
+                  : "None on file"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Reliability</p>
+              <p className="text-sm text-muted-foreground">
+                {typeof user.reliability === "number"
+                  ? `${user.reliability}%`
+                  : "No performance data"}
               </p>
             </div>
           </div>

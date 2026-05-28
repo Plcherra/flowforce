@@ -238,7 +238,6 @@ const buildEmployeeRecords = async (
       };
     });
   } catch (error) {
-    // Create a proper Error object with all details
     let errorObj: Error;
     if (error instanceof Error) {
       errorObj = error;
@@ -266,7 +265,7 @@ const buildEmployeeRecords = async (
       },
       tags: ["error", "employees"],
     });
-    return [];
+    throw errorObj;
   }
 };
 
@@ -343,8 +342,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
   const effectiveCompanyId =
     companyIdOverride ?? resolvedCompanyId ?? metadataCompanyId;
   
-  // Validate that companyId is a valid UUID before querying
-  // Skip query if it's "demo-company" or any other non-UUID value
+  // Validate company context before querying tenant-scoped employee data.
   const isValidCompanyId = isValidUUID(effectiveCompanyId);
   
   const queryKey = employeesQueryKey(effectiveCompanyId, includeInactive);
@@ -354,18 +352,13 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
     enabled: Boolean(enabled && user?.id && effectiveCompanyId && isValidCompanyId),
     queryFn: async () => {
       if (!effectiveCompanyId || !isValidCompanyId) {
-        logger.debug("Skipping employee fetch - invalid or demo company ID", {
+        logger.debug("Skipping employee fetch - invalid company ID", {
           companyId: effectiveCompanyId,
           tags: ["employees"],
         });
         return [];
       }
-      try {
-        return await buildEmployeeRecords(effectiveCompanyId, includeInactive);
-      } catch (error) {
-        logger.error("Failed to load employees", { error, tags: ["error"] });
-        return [];
-      }
+      return buildEmployeeRecords(effectiveCompanyId, includeInactive);
     },
     staleTime: 30 * 1000,
   });

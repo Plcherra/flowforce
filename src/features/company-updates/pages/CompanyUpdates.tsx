@@ -17,6 +17,7 @@ import {
   CompanyUpdatesPagination,
   PAGE_SIZE_OPTIONS,
 } from "@/features/company-updates/components/CompanyUpdatesPagination";
+import { CompanyUpdatesReadinessPanel } from "@/features/company-updates/components/CompanyUpdatesReadinessPanel";
 import { CompanyUpdatesSetupState } from "@/features/company-updates/components/CompanyUpdatesSetupState";
 import { WizardFallback } from "@/features/company-updates/components/CompanyUpdatesSkeletons";
 import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
@@ -78,6 +79,15 @@ export default function CompanyUpdates() {
     searchTerm,
   });
   const {
+    updates: readinessUpdates,
+    loading: readinessLoading,
+    error: readinessError,
+  } = useCompanyUpdates({
+    page: 1,
+    pageSize: 100,
+    status: ["published", "draft", "scheduled"],
+  });
+  const {
     recognitions: recognitionFeed,
     loading: recognitionLoading,
     error: recognitionError,
@@ -119,6 +129,10 @@ export default function CompanyUpdates() {
   const recognitionErrorMessage = recognitionsSchemaMissing
     ? null
     : recognitionError;
+  const readinessSchemaMissing = isMissingBackendResourceError(
+    readinessError,
+    ["company_updates", "company_update"],
+  );
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = !moduleSchemaMissing && totalPages > 1;
@@ -299,6 +313,14 @@ export default function CompanyUpdates() {
             <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         </div>
+      )}
+
+      {!moduleSchemaMissing && !readinessSchemaMissing && !readinessLoading && (
+        <CompanyUpdatesReadinessPanel
+          updates={readinessUpdates}
+          canCreateUpdate={canCreateUpdate}
+          onCreate={openCreateWizard}
+        />
       )}
 
       {!moduleSchemaMissing && viewMode === "feed" && (

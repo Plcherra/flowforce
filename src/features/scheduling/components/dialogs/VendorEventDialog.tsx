@@ -34,11 +34,11 @@ interface Location {
 }
 
 interface Shift {
-  id: string;
+  id?: string | null;
   title?: string | null;
   role?: string | null;
-  start_time: string;
-  end_time: string;
+  start_time?: string | null;
+  end_time?: string | null;
 }
 
 interface VendorEventDialogProps {
@@ -90,7 +90,7 @@ export function VendorEventDialog({
         notes: vendorForm.notes || null,
       });
       onOpenChange(false);
-    } catch (err) {
+    } catch {
       toast({
         title: "Failed to schedule vendor",
         variant: "destructive",
@@ -189,11 +189,24 @@ export function VendorEventDialog({
                 </SelectTrigger>
                 <SelectContent className="z-50 bg-background border shadow-lg max-h-60 overflow-y-auto">
                   <SelectItem value="">No linked shift</SelectItem>
-                  {candidateVendorShifts.map((shift) => (
-                    <SelectItem key={shift.id} value={shift.id}>
-                      {`${shift.title || shift.role || "Shift"} • ${format(new Date(shift.start_time), "HH:mm")} - ${format(new Date(shift.end_time), "HH:mm")}`}
-                    </SelectItem>
-                  ))}
+                  {candidateVendorShifts
+                    .filter(
+                      (
+                        shift,
+                      ): shift is Shift & {
+                        id: string;
+                        start_time: string;
+                        end_time: string;
+                      } =>
+                        Boolean(shift.id) &&
+                        Boolean(shift.start_time) &&
+                        Boolean(shift.end_time),
+                    )
+                    .map((shift) => (
+                      <SelectItem key={shift.id} value={shift.id}>
+                        {`${shift.title || shift.role || "Shift"} • ${format(new Date(shift.start_time), "HH:mm")} - ${format(new Date(shift.end_time), "HH:mm")}`}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

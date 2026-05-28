@@ -5,15 +5,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGoals, type Goal } from "@/hooks/useGoals";
-import {
-  asArray,
-  safeArrayMap,
-  safeArrayLength,
-} from "@/utils/reactQueryTypes";
+import { safeArrayMap } from "@/utils/reactQueryTypes";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useGoalSuggestion } from "@/features/goals/hooks/useGoalSuggestion";
 import { GoalCard } from "@/features/goals/ui/GoalCard";
+import { GoalExecutionReadinessPanel } from "@/features/goals/ui/GoalExecutionReadinessPanel";
 import {
   GoalModal,
   type GoalModalSubmitPayload,
@@ -120,7 +117,7 @@ export default function GoalsPage() {
             description: values.description || null,
             target_completion_date: values.targetDate,
             reward_type: values.xpReward != null ? "recognition" : null,
-            reward_details: rewardDetails as unknown as any,
+            reward_details: rewardDetails,
           },
         });
       } else {
@@ -129,7 +126,7 @@ export default function GoalsPage() {
           description: values.description || null,
           target_completion_date: values.targetDate,
           reward_type: values.xpReward != null ? "recognition" : null,
-          reward_details: rewardDetails as unknown as any,
+          reward_details: rewardDetails,
           status: "active",
           progress: 0,
         });
@@ -217,6 +214,16 @@ export default function GoalsPage() {
             {error.message ?? "Please try again shortly."}
           </AlertDescription>
         </Alert>
+      )}
+
+      {!loading && (
+        <GoalExecutionReadinessPanel
+          goals={goals}
+          onCreateGoal={openCreateModal}
+          onSuggestGoal={handleSuggestGoal}
+          suggesting={suggesting}
+          canSuggest={Boolean(companyId)}
+        />
       )}
 
       {loading ? (

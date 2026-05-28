@@ -1,13 +1,9 @@
-import AIInsightsPanel from "@/features/ai/components/AIInsightsPanel";
-import AIChatAssistant from "@/features/ai/components/AIChatAssistant";
-import PerformanceRadarChart from "@/features/ai/components/PerformanceRadarChart";
-
 import DashboardHeader from "@/features/dashboard/components/DashboardHeader";
-import DashboardStats from "@/features/dashboard/components/DashboardStats";
 import ProfileCard from "@/features/dashboard/components/ProfileCard";
 import ActivityCard from "@/features/dashboard/components/ActivityCard";
 import CompanyUpdatesCard from "@/features/dashboard/components/CompanyUpdatesCard";
 import OperationsHealthCard from "@/features/dashboard/components/OperationsHealthCard";
+import OperatorCommandCenter from "@/features/dashboard/components/OperatorCommandCenter";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -62,15 +58,15 @@ export default function Dashboard() {
           </ErrorBoundary>
 
           <ErrorBoundary>
-            <DashboardStats
+            <OperatorCommandCenter
               stats={stats}
-              loading={statsLoading}
-              error={statsError}
+              statsLoading={statsLoading}
+              statsError={statsError}
               onRetry={refetch}
             />
           </ErrorBoundary>
 
-          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[2fr_1fr]">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[1.35fr_0.9fr]">
             <div className="space-y-4">
               <ErrorBoundary>
                 <OperationsHealthCard
@@ -81,19 +77,11 @@ export default function Dashboard() {
               </ErrorBoundary>
 
               <ErrorBoundary>
-                <PerformanceRadarChart className="min-h-[320px]" />
-              </ErrorBoundary>
-
-              <ErrorBoundary>
                 <CompanyUpdatesCard />
               </ErrorBoundary>
             </div>
 
             <div className="space-y-4">
-              <ErrorBoundary>
-                <AIInsightsPanel type="dashboard" className="min-h-[240px]" />
-              </ErrorBoundary>
-
               <ErrorBoundary>
                 <ProfileCard className="min-h-[220px]" />
               </ErrorBoundary>
@@ -104,11 +92,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        {/* AI Chat Assistant */}
-        <ErrorBoundary>
-          <AIChatAssistant context="dashboard" />
-        </ErrorBoundary>
       </PageAsyncWrapper>
       {devDiagnostics}
     </>

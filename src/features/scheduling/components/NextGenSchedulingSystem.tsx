@@ -32,8 +32,8 @@ import { sanitizeLocationFilter } from "@/features/scheduling/utils/locationFilt
 import {
   WeeklyHourSummary,
   FeatureUnavailableCard,
-  SchedulingHeader,
 } from "@/features/scheduling/components";
+import { ScheduleReadinessPanel } from "./ScheduleReadinessPanel";
 
 // Phase 4: Lazy load heavy scheduling components for better initial bundle size
 const EnhancedCalendarView = lazy(() =>
@@ -323,6 +323,8 @@ export function NextGenSchedulingSystem({
             </div>
           </Alert>
         ) : null}
+        <ScheduleReadinessPanel locationFilter={sanitizedLocationFilter} />
+
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}

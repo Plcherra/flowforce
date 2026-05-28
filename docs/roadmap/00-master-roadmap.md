@@ -46,14 +46,14 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [04 Web App Product Completion](./04-web-app-product-completion.md)
-- Current phase: Phase 2, Dashboard Command Center
-- Last completed phase: 04.01, Visible Module Inventory
-- Last phase report: [04.01 Visible Module Inventory](./reports/04-01-visible-module-inventory-2026-05-28.md)
+- Active plan: [05 Inventory Finance Cost Engine](./05-inventory-finance-cost-engine.md)
+- Current phase: Phase 1, Canonical Cost Model
+- Last completed phase: 04.10, Web App Production QA
+- Last phase report: [04.10 Web App Production QA](./reports/04-10-web-app-production-qa-2026-05-28.md)
 
 ## Global Completion Criteria
 
-- [ ] Web app is production-ready for paid pilot customers.
+- [x] Web app is production-ready for paid pilot customers.
 - [ ] Mobile app path is shippable on iOS and Android.
 - [ ] Core tenant data is secure, tested, and recoverable.
 - [ ] Restaurant/retail operators can see labor + inventory + waste + purchasing cost in one place.
@@ -68,7 +68,7 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 - [x] 1.  Product positioning and scope
 - [x] 2.  Platform architecture
 - [x] 3.  Core SaaS foundation
-- [ ] 4.  Web app product completion
+- [x] 4.  Web app product completion
 - [ ] 5.  Inventory finance cost engine
 - [ ] 6.  Operations workflows and compliance
 - [ ] 7.  AI copilot and automation

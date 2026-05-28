@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,7 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, BotOff, Download, Loader2, ShieldOff } from "lucide-react";
 import { ErrorState } from "./ErrorState";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useAdminSettings } from "../hooks/useAdminSettings";
@@ -64,6 +66,7 @@ export function AdminSettingsPanel() {
     syncError,
   } = useAdminSettings(system);
   const auditLogs = useAuditLogs();
+  const [dangerConfirmation, setDangerConfirmation] = useState("");
 
   if (globalError) {
     return <ErrorState message={globalError.message} />;
@@ -72,6 +75,56 @@ export function AdminSettingsPanel() {
   const tenant =
     state.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement;
   const selectedPlan = getBillingPlanDefinition(tenant?.plan);
+  const confirmationPhrase = system.company?.name?.trim() || "CONFIRM";
+  const dangerousActionsUnlocked =
+    dangerConfirmation.trim() === confirmationPhrase;
+
+  const handleExportSettingsBackup = () => {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            exportedAt: new Date().toISOString(),
+            company: system.company,
+            settings: system.settings,
+          },
+          null,
+          2,
+        ),
+      ],
+      { type: "application/json" },
+    );
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `flowforce-settings-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  };
+
+  const stageTenantSuspension = () => {
+    setState((prev) => ({
+      ...prev,
+      tenantManagement: {
+        ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
+        accountStatus: "suspended",
+      },
+    }));
+  };
+
+  const stageAiPause = () => {
+    setState((prev) => ({
+      ...prev,
+      aiCopilot: {
+        ...prev.aiCopilot,
+        enabled: false,
+        automationLevel: "suggestion",
+        lastAuditAt: new Date().toISOString(),
+      },
+    }));
+  };
 
   return (
     <div className="space-y-6">
@@ -328,6 +381,103 @@ export function AdminSettingsPanel() {
             </span>
           </div>
           {syncError && <ErrorState message={syncError.message} />}
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            High-risk admin actions
+          </CardTitle>
+          <CardDescription>
+            Stage sensitive tenant changes behind explicit confirmation. Changes
+            are not applied until you save admin settings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Confirmation required</AlertTitle>
+            <AlertDescription>
+              Type <span className="font-semibold">{confirmationPhrase}</span>{" "}
+              to unlock high-risk actions for this workspace.
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+            <div className="space-y-2">
+              <Label htmlFor="danger-confirmation">
+                Workspace confirmation
+              </Label>
+              <Input
+                id="danger-confirmation"
+                value={dangerConfirmation}
+                onChange={(event) => setDangerConfirmation(event.target.value)}
+                disabled={!canEdit || loading}
+                placeholder={confirmationPhrase}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExportSettingsBackup}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export backup
+            </Button>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Stage tenant suspension
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Marks the account as suspended for billing/admin review.
+                  </p>
+                </div>
+                <ShieldOff className="h-5 w-5 text-destructive" />
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="mt-4"
+                onClick={stageTenantSuspension}
+                disabled={!canEdit || !dangerousActionsUnlocked || loading}
+              >
+                Stage suspension
+              </Button>
+            </div>
+
+            <div className="rounded-lg border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Pause AI automation
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Disables AI execution and returns automation to suggestion
+                    mode.
+                  </p>
+                </div>
+                <BotOff className="h-5 w-5 text-destructive" />
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="mt-4"
+                onClick={stageAiPause}
+                disabled={!canEdit || !dangerousActionsUnlocked || loading}
+              >
+                Stage AI pause
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

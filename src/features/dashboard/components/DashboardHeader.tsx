@@ -26,14 +26,16 @@ export default function DashboardHeader() {
   const displayRole = useMemo(() => getDisplayRole(), [getDisplayRole]);
 
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold tracking-normal text-gray-900 sm:text-3xl">
           {greeting}, {displayName}!
         </h1>
-        <p className="text-gray-600 mt-1">{t("dashboard.welcome")}</p>
+        <p className="mt-1 text-sm text-gray-600 sm:text-base">
+          Today&apos;s labor, inventory, task, schedule, and risk command center.
+        </p>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline" className="text-sm">
           {displayRole}
         </Badge>

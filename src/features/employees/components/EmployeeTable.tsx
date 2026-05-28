@@ -34,6 +34,18 @@ export function EmployeeTable({
   departmentMap,
   onEmployeeClick,
 }: EmployeeTableProps) {
+  const getDisplayName = (employee: Employee) => {
+    const fullName =
+      `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
+    return fullName || employee.email || "Unnamed teammate";
+  };
+
+  const getInitials = (employee: Employee) => {
+    const first = employee.first_name?.trim()[0] ?? "";
+    const last = employee.last_name?.trim()[0] ?? "";
+    return `${first}${last}`.toUpperCase() || "TM";
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -58,14 +70,11 @@ export function EmployeeTable({
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={employee.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {employee.first_name[0]}
-                      {employee.last_name[0]}
-                    </AvatarFallback>
+                    <AvatarFallback>{getInitials(employee)}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
                     <div className="font-medium truncate">
-                      {employee.first_name} {employee.last_name}
+                      {getDisplayName(employee)}
                     </div>
                     <div className="text-xs text-muted-foreground truncate flex items-center gap-2">
                       <Mail className="h-3 w-3" />
@@ -75,7 +84,9 @@ export function EmployeeTable({
                 </div>
               </TableCell>
               <TableCell className="hidden md:table-cell capitalize">
-                <Badge variant="outline">{employee.role}</Badge>
+                <Badge variant="outline">
+                  {employee.role ?? "Unassigned"}
+                </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <div className="flex items-center gap-2">
@@ -103,6 +114,7 @@ export function EmployeeTable({
                   }
                 >
                   {employee.employment_status}
+                  {!employee.employment_status && "Unknown"}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">

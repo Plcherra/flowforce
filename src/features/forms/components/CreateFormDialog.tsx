@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
+import type { FormFieldRow } from "@/features/forms/hooks/useForms";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,10 @@ interface CreateFormDialogProps {
 }
 
 type CreationStep = "select-method" | "template-selection" | "file-upload";
+type TemplateField = Omit<
+  FormFieldRow,
+  "id" | "form_id" | "created_at" | "updated_at"
+>;
 
 interface FormTemplate {
   id: string;
@@ -46,9 +51,14 @@ interface FormTemplate {
   description: string;
   category: string;
   icon: LucideIcon;
-  fields: number;
+  fieldCount: number;
+  fieldPresets: TemplateField[];
   popular?: boolean;
 }
+
+const makeTemplateField = (
+  field: Omit<TemplateField, "field_order">,
+): TemplateField => field;
 
 const formTemplates: FormTemplate[] = [
   {
@@ -57,7 +67,8 @@ const formTemplates: FormTemplate[] = [
     description: "Collect feedback from employees about workplace satisfaction",
     category: "HR",
     icon: Users,
-    fields: 8,
+    fieldCount: 8,
+    fieldPresets: [],
     popular: true,
   },
   {
@@ -66,7 +77,8 @@ const formTemplates: FormTemplate[] = [
     description: "Register attendees for company events",
     category: "Events",
     icon: Calendar,
-    fields: 6,
+    fieldCount: 6,
+    fieldPresets: [],
   },
   {
     id: "incident-report",
@@ -74,7 +86,8 @@ const formTemplates: FormTemplate[] = [
     description: "Report workplace incidents and safety concerns",
     category: "Safety",
     icon: AlertTriangle,
-    fields: 10,
+    fieldCount: 10,
+    fieldPresets: [],
     popular: true,
   },
   {
@@ -83,7 +96,8 @@ const formTemplates: FormTemplate[] = [
     description: "Submit time off and leave requests",
     category: "HR",
     icon: Clock,
-    fields: 7,
+    fieldCount: 7,
+    fieldPresets: [],
   },
   {
     id: "customer-survey",
@@ -91,7 +105,8 @@ const formTemplates: FormTemplate[] = [
     description: "Gather customer feedback and satisfaction ratings",
     category: "Customer",
     icon: Star,
-    fields: 12,
+    fieldCount: 12,
+    fieldPresets: [],
   },
   {
     id: "training-evaluation",
@@ -99,7 +114,243 @@ const formTemplates: FormTemplate[] = [
     description: "Evaluate training effectiveness and gather feedback",
     category: "Training",
     icon: BookOpen,
-    fields: 9,
+    fieldCount: 9,
+    fieldPresets: [],
+  },
+  {
+    id: "restaurant-opening-checklist",
+    name: "Restaurant Opening Checklist",
+    description: "Prep the store, stations, safety checks, and manager signoff before service.",
+    category: "Restaurant",
+    icon: Clock,
+    fieldCount: 4,
+    fieldPresets: [
+      makeTemplateField({
+        field_type: "text",
+        label: "Opening manager",
+        placeholder: "Name",
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "checkbox",
+        label: "Stations ready",
+        placeholder: null,
+        description: null,
+        is_required: true,
+        options: ["Line", "Expo", "Dish", "Prep", "Register"],
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "location",
+        label: "Store location confirmation",
+        placeholder: null,
+        description: null,
+        is_required: false,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "signature",
+        label: "Manager signoff",
+        placeholder: null,
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+    ],
+    popular: true,
+  },
+  {
+    id: "food-safety-temperature-log",
+    name: "Food Safety Temperature Log",
+    description: "Capture cold holding, hot holding, corrective action, and evidence photos.",
+    category: "Restaurant",
+    icon: AlertTriangle,
+    fieldCount: 4,
+    fieldPresets: [
+      makeTemplateField({
+        field_type: "text",
+        label: "Station or unit",
+        placeholder: "Walk-in, hot well, prep table",
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "number",
+        label: "Temperature",
+        placeholder: "Degrees",
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: -20,
+        max_value: 250,
+        step_value: 0.1,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "image_upload",
+        label: "Evidence photo",
+        placeholder: null,
+        description: null,
+        is_required: false,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: { accepted_types: ["image/*"], max_files: 3, max_size: 10 },
+      }),
+      makeTemplateField({
+        field_type: "textarea",
+        label: "Corrective action",
+        placeholder: "What changed if temperature was out of range?",
+        description: null,
+        is_required: false,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+    ],
+  },
+  {
+    id: "retail-inventory-count",
+    name: "Retail Inventory Count",
+    description: "Scan items, count shelf/backroom stock, rate shelf condition, and attach photos.",
+    category: "Retail",
+    icon: Star,
+    fieldCount: 4,
+    fieldPresets: [
+      makeTemplateField({
+        field_type: "scanner",
+        label: "SKU or barcode",
+        placeholder: null,
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: { scan_types: ["barcode", "qr_code"], auto_submit: false },
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "number",
+        label: "On-hand count",
+        placeholder: "Units",
+        description: null,
+        is_required: true,
+        options: null,
+        validation_rules: null,
+        min_value: 0,
+        max_value: null,
+        step_value: 1,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "rating",
+        label: "Shelf condition",
+        placeholder: null,
+        description: null,
+        is_required: false,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: { max_rating: 5, rating_type: "stars" },
+        scan_config: null,
+        media_config: null,
+      }),
+      makeTemplateField({
+        field_type: "image_upload",
+        label: "Shelf photo",
+        placeholder: null,
+        description: null,
+        is_required: false,
+        options: null,
+        validation_rules: null,
+        min_value: null,
+        max_value: null,
+        step_value: null,
+        formula_expression: null,
+        dependent_fields: null,
+        rating_config: null,
+        scan_config: null,
+        media_config: { accepted_types: ["image/*"], max_files: 4, max_size: 10 },
+      }),
+    ],
   },
 ];
 
@@ -110,7 +361,7 @@ export default function CreateFormDialog({
   preferredMethod,
   onPreferredMethodHandled,
 }: CreateFormDialogProps) {
-  const { createForm } = useForms();
+  const { createForm, saveFormFields } = useForms();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -139,7 +390,7 @@ export default function CreateFormDialog({
     async (
       title: string = "New Form",
       description: string = "",
-      options?: { fromFile?: boolean },
+      options?: { fromFile?: boolean; templateFields?: TemplateField[] },
     ) => {
       setCreating(true);
       try {
@@ -157,7 +408,6 @@ export default function CreateFormDialog({
             throw new Error("Company context is required to import forms.");
           }
 
-          const baseName = uploadedFile.name.replace(/\.[^/.]+$/, "");
           const { form } = await importFormFromFile(
             uploadedFile,
             user.id,
@@ -185,6 +435,17 @@ export default function CreateFormDialog({
         if (error || !data) {
           throw error ?? new Error("Failed to create form");
         }
+
+        if (options?.templateFields?.length) {
+          const { error: fieldError } = await saveFormFields(
+            data.id,
+            options.templateFields,
+          );
+          if (fieldError) {
+            throw fieldError;
+          }
+        }
+
         onFormCreated?.(data.id);
         resetDialog();
         onOpenChange(false);
@@ -202,7 +463,17 @@ export default function CreateFormDialog({
         setCreating(false);
       }
     },
-    [createForm, onFormCreated, toast, uploadedFile, user],
+    [
+      createForm,
+      onFormCreated,
+      onOpenChange,
+      profile?.companyId,
+      profile?.company_id,
+      saveFormFields,
+      toast,
+      uploadedFile,
+      user,
+    ],
   );
 
   useEffect(() => {
@@ -398,7 +669,7 @@ export default function CreateFormDialog({
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <FileText className="h-3 w-3" />
-                    {template.fields} fields
+                    {template.fieldPresets.length || template.fieldCount} fields
                   </span>
                 </div>
               </CardContent>
@@ -414,6 +685,7 @@ export default function CreateFormDialog({
               createFormAndStartBuilder(
                 selectedTemplate.name,
                 selectedTemplate.description,
+                { templateFields: selectedTemplate.fieldPresets },
               )
             }
             disabled={creating}

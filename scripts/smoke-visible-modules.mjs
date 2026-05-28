@@ -11,6 +11,25 @@ const BASE_URL = process.env.TEST_URL || "http://127.0.0.1:3000";
 const TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS || 30000);
 const HEADLESS = process.env.SMOKE_HEADED !== "1";
 const KEEP_DATA = process.env.SMOKE_KEEP_DATA === "1";
+const VIEWPORT_PRESETS = {
+  desktop: { width: 1366, height: 900, isMobile: false },
+  mobile: { width: 390, height: 844, isMobile: true },
+};
+const VIEWPORT_NAMES = (process.env.SMOKE_VIEWPORTS || "desktop,mobile")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+const VIEWPORTS = VIEWPORT_NAMES.map((name) => {
+  const preset = VIEWPORT_PRESETS[name];
+  if (!preset) {
+    throw new Error(
+      `Unknown SMOKE_VIEWPORTS value "${name}". Valid values: ${Object.keys(
+        VIEWPORT_PRESETS,
+      ).join(", ")}`,
+    );
+  }
+  return { name, ...preset };
+});
 
 const routeInventory = JSON.parse(
   readFileSync(
@@ -582,11 +601,34 @@ async function signIn(context, seed) {
   await page.close();
 }
 
-async function testRoute(context, route) {
+async function detectHorizontalOverflow(page) {
+  return page.evaluate(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const viewportWidth = window.innerWidth;
+    const documentWidth = Math.max(
+      root?.scrollWidth ?? 0,
+      body?.scrollWidth ?? 0,
+    );
+
+    if (documentWidth <= viewportWidth + 4) {
+      return null;
+    }
+
+    return {
+      viewportWidth,
+      documentWidth,
+      overflowPx: documentWidth - viewportWidth,
+    };
+  });
+}
+
+async function testRoute(context, route, viewport) {
   const startedAt = Date.now();
   const page = await context.newPage();
   const result = {
     ...route,
+    viewport: viewport.name,
     status: "pending",
     finalUrl: null,
     durationMs: 0,
@@ -613,6 +655,14 @@ async function testRoute(context, route) {
     result.durationMs = Date.now() - startedAt;
     result.hasContent = bodyText.trim().length > 100;
     result.hasErrorShell = hasErrorShell(bodyText);
+    const overflow = await detectHorizontalOverflow(page);
+    if (overflow) {
+      result.errors.push({
+        type: "layout",
+        message: `Horizontal overflow ${overflow.overflowPx}px at ${overflow.viewportWidth}px viewport`,
+        details: overflow,
+      });
+    }
 
     const httpOk =
       typeof result.status === "number" &&
@@ -663,7 +713,7 @@ function printResult(result) {
   const status = String(result.status).padStart(5);
   const seconds = `${(result.durationMs / 1000).toFixed(2)}s`.padStart(7);
   process.stdout.write(
-    `${state} ${status} ${seconds} ${result.path} - ${result.name}\n`,
+    `${state} ${status} ${seconds} [${result.viewport}] ${result.path} - ${result.name}\n`,
   );
 
   for (const error of result.errors.slice(0, 5)) {
@@ -685,6 +735,9 @@ async function main() {
 
   process.stdout.write("FlowForce authenticated visible-module smoke test\n");
   process.stdout.write(`Base URL: ${BASE_URL}\n\n`);
+  process.stdout.write(
+    `Viewports: ${VIEWPORTS.map((viewport) => viewport.name).join(", ")}\n\n`,
+  );
 
   try {
     rmSync(reportPath, { force: true });
@@ -692,20 +745,28 @@ async function main() {
     seed = await seedSmokeTenant(admin);
     process.stdout.write(`Seeded smoke tenant: ${seed.companyId}\n`);
 
-    browser = await chromium.launch({ headless: HEADLESS });
-    const context = await browser.newContext({
-      viewport: { width: 1366, height: 900 },
-      ignoreHTTPSErrors: true,
-    });
-
-    await signIn(context, seed);
-    process.stdout.write("Signed in smoke owner through /auth\n\n");
-
     const results = [];
-    for (const route of ROUTES) {
-      const result = await testRoute(context, route);
-      results.push(result);
-      printResult(result);
+    browser = await chromium.launch({ headless: HEADLESS });
+
+    for (const viewport of VIEWPORTS) {
+      const context = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+        isMobile: viewport.isMobile,
+        ignoreHTTPSErrors: true,
+      });
+
+      await signIn(context, seed);
+      process.stdout.write(
+        `Signed in smoke owner through /auth (${viewport.name})\n\n`,
+      );
+
+      for (const route of ROUTES) {
+        const result = await testRoute(context, route, viewport);
+        results.push(result);
+        printResult(result);
+      }
+
+      await context.close().catch(() => {});
     }
 
     const passed = results.filter((result) => result.ok).length;

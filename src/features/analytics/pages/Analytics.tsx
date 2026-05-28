@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { AssistantAction, AssistantContext } from "@/types/ai";
 import BusinessAnalyticsBoard from "@/features/analytics/components/BusinessAnalyticsBoard";
 import { useCompany } from "@/hooks/useCompany";
+import { AnalyticsReadinessPanel } from "@/features/analytics/components/AnalyticsReadinessPanel";
 
 type TabValue = "business" | "analytics" | "insights" | "reports";
 
@@ -109,6 +110,10 @@ export default function Analytics() {
             trigger workflow actions in one place.
           </p>
         </div>
+      </div>
+
+      <div className={isMobile ? "px-4" : ""}>
+        <AnalyticsReadinessPanel />
       </div>
 
       <div className={isMobile ? "px-4" : ""}>

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import FormsSection from "@/features/forms/components/FormsSection";
+import { FormsReadinessPanel } from "@/features/forms/components/FormsReadinessPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -222,6 +223,12 @@ export default function Forms() {
             )}
           </div>
         </div>
+
+        <FormsReadinessPanel
+          forms={forms}
+          canCreateForms={canCreateForms}
+          onCreateForm={() => setCreateDialogOpen(true)}
+        />
 
         <Tabs
           value={statusFilter}

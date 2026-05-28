@@ -7,7 +7,6 @@ import type {
   EventType,
   ExtractedDocument,
   IngestedFile,
-  TaskRecord,
 } from "@/types/ingestion";
 
 const REPORTS_BUCKET = "operations-reports";
@@ -113,6 +112,22 @@ function buildStoragePath(companyId: string, fileName: string) {
   return `${companyId}/${uniqueId}-${sanitized}`;
 }
 
+function normalizeDocumentWithRelations(
+  item: Partial<DocumentWithRelations>,
+): DocumentWithRelations {
+  return {
+    ...item,
+    id: item.id ?? "",
+    company_id: item.company_id ?? "",
+    title: item.title ?? item.file?.filename ?? "Uploaded report",
+    source: item.source ?? "uploaded-report",
+    processing_state: item.processing_state ?? "ready",
+    events: item.events ?? [],
+    file: item.file ?? null,
+    originating_tasks: item.originating_tasks ?? [],
+  };
+}
+
 export async function uploadReportFile(
   file: File,
   params: UploadReportParams,
@@ -207,14 +222,7 @@ export async function listDocuments(
 
   let query = supabase
     .from("documents")
-    .select(
-      `
-      *,
-      file:files(*),
-      events(*),
-      originating_tasks:tasks!tasks_origin_document_id_fkey(*)
-    `,
-    )
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -232,18 +240,11 @@ export async function listDocuments(
     throw new Error(`Failed to load documents: ${error.message}`);
   }
 
-  const items = (data ?? []) as (DocumentWithRelations & {
-    events: DocumentEvent[] | null;
-    file: IngestedFile | null;
-    originating_tasks: TaskRecord[] | null;
-  })[];
-
-  return items.map((item) => ({
-    ...item,
-    events: item.events ?? [],
-    file: item.file ?? null,
-    originating_tasks: item.originating_tasks ?? [],
-  }));
+  return (data ?? [])
+    .map((item) =>
+      normalizeDocumentWithRelations(item as Partial<DocumentWithRelations>),
+    )
+    .filter((item) => item.id);
 }
 
 export async function markDocumentProcessing(documentId: string) {

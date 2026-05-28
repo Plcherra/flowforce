@@ -5,6 +5,7 @@ import { MessagesMobileLayout } from "./MessagesMobileLayout";
 import { MessagesDesktopLayout } from "./MessagesDesktopLayout";
 import { MessagesPortalContent } from "./MessagesPortalContent";
 import { MessagesWorkspaceHeader } from "./MessagesWorkspaceHeader";
+import { CommunicationReadinessPanel } from "@/features/messages/components/CommunicationReadinessPanel";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesShellProps {
@@ -70,6 +71,13 @@ export function MessagesShell({
             helpDeskActive={helpDeskOpen}
             onHelpDeskToggle={handleHelpDeskToggle}
           />
+          <CommunicationReadinessPanel
+            channels={vm.channels}
+            messages={vm.messages}
+            userId={vm.profile?.id ?? null}
+            onCreateChannel={() => vm.setShowCreateDialog(true)}
+            onCreateAnnouncement={() => vm.setShowCreateAnnouncement(true)}
+          />
           <div className="rounded-3xl border bg-background/95 shadow-sm">
             <MessagesMobileLayout vm={vm} />
           </div>
@@ -103,6 +111,13 @@ export function MessagesShell({
           vm={vm}
           helpDeskActive={helpDeskOpen}
           onHelpDeskToggle={handleHelpDeskToggle}
+        />
+        <CommunicationReadinessPanel
+          channels={vm.channels}
+          messages={vm.messages}
+          userId={vm.profile?.id ?? null}
+          onCreateChannel={() => vm.setShowCreateDialog(true)}
+          onCreateAnnouncement={() => vm.setShowCreateAnnouncement(true)}
         />
 
         <MessagesDesktopLayout

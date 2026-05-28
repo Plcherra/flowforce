@@ -2,7 +2,7 @@
  * Hook for managing vendor form state
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import type {
   PendingVendorEvent,
@@ -12,7 +12,7 @@ import type {
 interface UseVendorFormProps {
   pendingVendorEvent: PendingVendorEvent | null;
   locations: Array<{ id: string }>;
-  candidateVendorShifts: Array<{ id: string }>;
+  candidateVendorShifts: Array<{ id?: string | null }>;
   vendorModalOpen: boolean;
 }
 

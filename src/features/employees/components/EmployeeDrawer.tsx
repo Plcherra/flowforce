@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Tables } from "@/integrations/supabase/public-types";
+import type { Employee } from "@/hooks/useEmployees";
 import {
   Drawer,
   DrawerClose,
@@ -18,12 +18,10 @@ import { UserOverviewTab } from "@/features/employees/components/users/UserOverv
 import { usePermission } from "@/hooks/usePermission";
 import "@/styles/employee.css";
 
-type Profile = Tables<"profiles">;
-
 export type EmployeeDrawerTab = "profile" | "access" | "invite" | "roles";
 
 interface EmployeeDrawerProps {
-  employee: Profile | null;
+  employee: Employee | null;
   open: boolean;
   initialTab?: EmployeeDrawerTab;
   onOpenChange: (open: boolean) => void;
@@ -47,6 +45,7 @@ export function EmployeeDrawer({
   const canManageRoles = usePermission("assign_permissions");
 
   const hasEmployee = !!employee;
+  const employeeId = employee?.id ?? null;
 
   const tabs = useMemo<DrawerTabConfig[]>(() => {
     const baseTabs: DrawerTabConfig[] = [
@@ -82,10 +81,10 @@ export function EmployeeDrawer({
   }, [initialTab, tabs]);
 
   useEffect(() => {
-    if (employee) {
+    if (employeeId) {
       setActiveTab((current) => (current === "invite" ? current : "profile"));
     }
-  }, [employee?.id]);
+  }, [employeeId]);
 
   if (!tabs.length) {
     return null;
@@ -172,7 +171,7 @@ export function EmployeeDrawer({
   );
 }
 
-function HeaderContent({ employee }: { employee: Profile | null }) {
+function HeaderContent({ employee }: { employee: Employee | null }) {
   if (!employee) {
     return (
       <div className="flex items-center justify-between gap-4">
@@ -190,6 +189,10 @@ function HeaderContent({ employee }: { employee: Profile | null }) {
   const initials =
     `${employee.first_name?.[0] ?? ""}${employee.last_name?.[0] ?? ""}`.toUpperCase() ||
     "TM";
+  const displayName =
+    `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() ||
+    employee.email ||
+    "Unnamed teammate";
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -197,16 +200,14 @@ function HeaderContent({ employee }: { employee: Profile | null }) {
         <Avatar className="h-16 w-16">
           <AvatarImage
             src={employee.avatar_url || undefined}
-            alt={`${employee.first_name} ${employee.last_name}`}
+            alt={displayName}
           />
           <AvatarFallback className="text-lg font-semibold">
             {initials}
           </AvatarFallback>
         </Avatar>
         <div>
-          <DrawerTitle className="text-2xl">
-            {employee.first_name} {employee.last_name}
-          </DrawerTitle>
+          <DrawerTitle className="text-2xl">{displayName}</DrawerTitle>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {employee.role && (
               <Badge variant="secondary" className="capitalize">

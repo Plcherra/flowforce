@@ -22,16 +22,17 @@ export function ReportsList({
   documents,
   selectedReportId,
   onReportSelect,
-  followUpActions,
-  filteredDocumentsLength,
+  followUpActions: _followUpActions,
+  filteredDocumentsLength: _filteredDocumentsLength,
 }: ReportsListProps) {
   return (
     <ScrollArea className="max-h-[360px]">
       <div className="space-y-3">
-        {safeArrayMap(documents, (document: any) => {
+        {safeArrayMap(documents, (document: DocumentWithRelations) => {
           const isActive = document.id === selectedReportId;
           const tasks = document.originating_tasks?.length ?? 0;
           const accuracy = parseMetaAccuracy(document);
+          const processingState = document.processing_state ?? "ready";
           return (
             <button
               key={document.id}
@@ -46,12 +47,10 @@ export function ReportsList({
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
-                      document.processing_state === "ready"
-                        ? "default"
-                        : "secondary"
+                      processingState === "ready" ? "default" : "secondary"
                     }
                   >
-                    {document.processing_state}
+                    {processingState}
                   </Badge>
                   <span className="font-medium">
                     {document.title ??

@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { useTasks } from "@/hooks/useTasks";
+import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TaskNotifications } from "@/features/tasks/components/TaskNotifications";
@@ -29,6 +29,7 @@ import {
   TaskCard,
   TaskEmptyState,
 } from "@/features/tasks/components";
+import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -54,10 +55,12 @@ const RemindersPanel = lazy(() =>
   })),
 );
 
+type TaskListItem = TaskWithRelations & { id: string };
+
 export default function Tasks() {
   const isMobile = useIsMobile();
   const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
-  const tasks = asArray(tasksData) as any[];
+  const tasks = asArray(tasksData) as TaskListItem[];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const {
     statusFilter,
@@ -76,7 +79,7 @@ export default function Tasks() {
     closeTask,
     handleNotificationNavigate,
     getSelectionHandlers,
-  } = useTaskSelection<any>(tasks);
+  } = useTaskSelection<TaskListItem>(tasks);
 
   const totalTasks = tasks.length;
 
@@ -93,7 +96,13 @@ export default function Tasks() {
   );
 
   const filteredTasks = useMemo(
-    () => filterTasks(tasks, statusFilter, priorityFilter, searchTerm) as any[],
+    () =>
+      filterTasks(
+        tasks,
+        statusFilter,
+        priorityFilter,
+        searchTerm,
+      ) as TaskListItem[],
     [tasks, statusFilter, priorityFilter, searchTerm],
   );
 
@@ -168,6 +177,12 @@ export default function Tasks() {
         </Alert>
       )}
 
+      <TaskExecutionReadinessPanel
+        tasks={tasks}
+        onCreateTask={() => setShowCreateDialog(true)}
+        onOpenTask={openTask}
+      />
+
       <TaskMetricsCards metrics={metrics} />
 
       <Card className="border-dashed">
@@ -204,7 +219,7 @@ export default function Tasks() {
             />
           ) : (
             <div data-testid="tasks-list" className="space-y-4">
-              {filteredTasks.map((task: any) => {
+              {filteredTasks.map((task) => {
                 const dueBadge = calculateDueBadge(task);
                 const selectionHandlers = getSelectionHandlers(task.id);
 

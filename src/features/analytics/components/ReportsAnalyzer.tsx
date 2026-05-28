@@ -11,11 +11,12 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Download, FileBarChart2, BarChart3 } from "lucide-react";
-import { format } from "date-fns";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useDocumentInbox } from "@/hooks/useDocumentIngestion";
+import { useProfile } from "@/hooks/useProfile";
 import { asArray } from "@/utils/reactQueryTypes";
 import type { AssistantContext } from "@/types/ai";
+import type { DocumentWithRelations } from "@/types/ingestion";
 import { useReportsMetrics } from "@/features/analytics/hooks/useReportsMetrics";
 import { useReportsContext } from "@/features/analytics/hooks/useReportsContext";
 import { exportReportsData } from "@/features/analytics/utils/exportHelpers";
@@ -42,8 +43,13 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
   const [compareMetric, setCompareMetric] = useState<CompareMetric>("volume");
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { forms } = useForms();
-  const { data: documentsData, isLoading } = useDocumentInbox({ limit: 100 });
+  const { data: documentsData, isLoading } = useDocumentInbox({
+    limit: 100,
+    companyId: companyId ?? undefined,
+  });
   const documents = asArray(documentsData);
   const formsArray = Array.isArray(forms) ? forms : [];
 
@@ -59,12 +65,12 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
       if (!metrics?.filteredDocuments || !Array.isArray(metrics.filteredDocuments)) {
         return [];
       }
-      return [...metrics.filteredDocuments].sort((a: any, b: any) => {
+      return [...metrics.filteredDocuments].sort((a, b) => {
         const aDate = new Date(
-          (a?.created_at as string | undefined) ?? 0,
+          a.created_at ?? 0,
         ).getTime();
         const bDate = new Date(
-          (b?.created_at as string | undefined) ?? 0,
+          b.created_at ?? 0,
         ).getTime();
         return bDate - aDate;
       });
@@ -75,7 +81,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
   const selectedReport = useMemo(
     () =>
       sortedDocuments.find(
-        (document: any) => document.id === selectedReportId,
+        (document: DocumentWithRelations) => document.id === selectedReportId,
       ) ?? null,
     [sortedDocuments, selectedReportId],
   );

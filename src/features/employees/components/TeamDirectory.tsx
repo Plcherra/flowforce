@@ -5,14 +5,13 @@ import {
   useEffect,
   useMemo,
   useState,
-  type ChangeEvent,
 } from "react";
 import { useSearchParams } from "@/lib/router-adapter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Users } from "lucide-react";
+import { AlertTriangle, SearchX, Users } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInventorySuppliers, useCreateSupplier } from "@/hooks/useInventory";
@@ -42,6 +41,7 @@ import {
   DirectoryPagination,
   AddVendorDialog,
 } from "./";
+import { HrReadinessPanel } from "./HrReadinessPanel";
 import type { EmployeesTab } from "../types/directory";
 
 export function TeamDirectory() {
@@ -191,8 +191,6 @@ export function TeamDirectory() {
       return "We couldn’t load your team directory data. Please try again.";
     }
   }, [combinedError]);
-  const isFirstPage = page === 1;
-  const isLastPage = page === totalPages;
   const vendorErrorMessage = useMemo(() => {
     if (!companyId && !profileLoading) {
       return "Connect your profile to a company to see vendor records.";
@@ -202,59 +200,22 @@ export function TeamDirectory() {
     if (typeof vendorsError === "string") return vendorsError;
     return "We couldn’t load vendor data. Try refreshing once Supabase is back online.";
   }, [companyId, profileLoading, vendorsError]);
-  const isVendorSectionLoading =
-    vendorsLoading || (profileLoading && !companyId);
   const showEmptyState = !loading && !combinedError && employees.length === 0;
+  const showEmployeeFilterEmptyState =
+    !loading &&
+    !combinedError &&
+    activeTab !== "vendors" &&
+    employees.length > 0 &&
+    filteredEmployees.length === 0;
+  const showVendorEmptyState =
+    activeTab === "vendors" &&
+    !vendorsLoading &&
+    !vendorsError &&
+    filteredVendors.length === 0;
 
   useEffect(() => {
     setPage((current) => (current > totalPages ? totalPages : current));
   }, [totalPages]);
-
-  const paginationSequence = useMemo<
-    Array<number | "start-ellipsis" | "end-ellipsis">
-  >(() => {
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
-    }
-
-    const sequence: Array<number | "start-ellipsis" | "end-ellipsis"> = [1];
-    let start = Math.max(2, page - 1);
-    let end = Math.min(totalPages - 1, page + 1);
-
-    if (page <= 3) {
-      start = 2;
-      end = 4;
-    } else if (page >= totalPages - 2) {
-      start = totalPages - 3;
-      end = totalPages - 1;
-    }
-
-    if (start > 2) {
-      sequence.push("start-ellipsis");
-    }
-
-    for (let current = start; current <= end; current += 1) {
-      sequence.push(current);
-    }
-
-    if (end < totalPages - 1) {
-      sequence.push("end-ellipsis");
-    }
-
-    sequence.push(totalPages);
-    return sequence;
-  }, [page, totalPages]);
-
-  const handleSearchChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(event.target.value);
-    },
-    [],
-  );
-
-  const handleDepartmentFilterChange = useCallback((value: string): void => {
-    setDepartmentFilter(value);
-  }, []);
 
   const handleTabChange = useCallback((value: string) => {
     setActiveTab(value as EmployeesTab);
@@ -267,7 +228,9 @@ export function TeamDirectory() {
 
   const currentRole = currentUserProfile?.role?.toLowerCase() ?? "";
   const isAdmin = ["owner", "admin", "manager"].includes(currentRole);
-  const canManageEmployees = ["admin", "manager"].includes(currentRole);
+  const canManageEmployees = ["owner", "admin", "manager"].includes(
+    currentRole,
+  );
 
   const {
     active: activeEmployeesCount,
@@ -313,6 +276,14 @@ export function TeamDirectory() {
             />
           </div>
         </div>
+
+        <HrReadinessPanel
+          companyId={companyId}
+          employees={employees}
+          loading={loading}
+          canManageEmployees={canManageEmployees}
+          onOpenInvite={() => handleInviteChange(true)}
+        />
 
         {combinedErrorMessage && (
           <Alert
@@ -388,15 +359,34 @@ export function TeamDirectory() {
                         <div className="space-y-1">
                           <AlertTitle>Vendor data unavailable</AlertTitle>
                           <AlertDescription>
-                            {vendorsError instanceof Error
-                              ? vendorsError.message
-                              : "Unable to load vendor data"}
+                            {vendorErrorMessage ??
+                              "Unable to load vendor data"}
                           </AlertDescription>
                         </div>
                       </div>
                     </Alert>
                   ) : vendorsLoading ? (
                     <TableSkeleton />
+                  ) : showVendorEmptyState ? (
+                    <EmptyStateCard
+                      icon={<SearchX className="h-5 w-5" />}
+                      title="No vendors found"
+                      description={
+                        searchTerm
+                          ? "No vendors match the current search. Clear the search or add a vendor."
+                          : "Add vendors to keep purchasing contacts available from the team directory."
+                      }
+                      action={
+                        canManageEmployees ? (
+                          <Button
+                            type="button"
+                            onClick={() => setShowAddVendorDialog(true)}
+                          >
+                            Add vendor
+                          </Button>
+                        ) : undefined
+                      }
+                    />
                   ) : (
                     <VendorTable
                       vendors={paginatedVendors}
@@ -405,6 +395,25 @@ export function TeamDirectory() {
                   )
                 ) : loading ? (
                   <TableSkeleton />
+                ) : showEmployeeFilterEmptyState ? (
+                  <EmptyStateCard
+                    icon={<SearchX className="h-5 w-5" />}
+                    title="No teammates match these filters"
+                    description="Try a different search, status tab, or department filter."
+                    action={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setDepartmentFilter("all");
+                          setActiveTab("all");
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    }
+                  />
                 ) : (
                   <EmployeeTable
                     employees={paginatedEmployees}

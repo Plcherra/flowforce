@@ -6,14 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmployeeSelector } from "./EmployeeSelector";
 import {
   X,
-  Clock,
-  MapPin,
-  Users,
   FileText,
   Save,
   Eye,
@@ -31,6 +27,7 @@ import type {
   CopilotScheduleMetadata,
 } from "@/features/scheduling/services/autoScheduler";
 import { logger } from "@/utils/logger";
+import { buildShiftConflictWarnings } from "@/features/scheduling/utils/scheduleReadiness";
 
 const vendorLabelLookup: Record<string, string> = {
   ecolab: "Ecolab Service",
@@ -43,6 +40,12 @@ const vendorLabelLookup: Record<string, string> = {
 const getVendorLabel = (vendorType: string) =>
   vendorLabelLookup[vendorType] ?? vendorType.replace(/_/g, " ");
 
+const parseHourlyRate = (value: string) => {
+  if (value.trim().length === 0) return null;
+  const rate = Number(value);
+  return Number.isFinite(rate) && rate >= 0 ? rate : null;
+};
+
 interface ShiftDetailsPanelProps {
   shiftId: string;
   onClose: () => void;
@@ -54,6 +57,8 @@ export function ShiftDetailsPanel({
 }: ShiftDetailsPanelProps) {
   const {
     shifts,
+    timeOff,
+    unavailability,
     vendorEvents,
     mutations: { updateSchedule, deleteSchedule },
   } = useScheduling();
@@ -88,6 +93,7 @@ export function ShiftDetailsPanel({
     is_all_day: false,
     timezone: "UTC",
     color: "#3b82f6",
+    hourly_rate: "",
   });
 
   useEffect(() => {
@@ -101,6 +107,8 @@ export function ShiftDetailsPanel({
         is_all_day: shift.is_all_day || false,
         timezone: shift.timezone || "UTC",
         color: shift.color || "#3b82f6",
+        hourly_rate:
+          typeof shift.hourly_rate === "number" ? String(shift.hourly_rate) : "",
       });
     }
   }, [shift]);
@@ -112,6 +120,7 @@ export function ShiftDetailsPanel({
     try {
       await updateSchedule(shift.id, {
         ...formData,
+        hourly_rate: parseHourlyRate(formData.hourly_rate),
         start_time: new Date(formData.start_time).toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
       });
@@ -174,6 +183,18 @@ export function ShiftDetailsPanel({
     () =>
       shift ? vendorEvents.filter((event) => event.shift_id === shift.id) : [],
     [shift, vendorEvents],
+  );
+  const conflictWarnings = useMemo(
+    () =>
+      shift
+        ? buildShiftConflictWarnings({
+            shift,
+            shifts,
+            timeOff,
+            unavailability,
+          })
+        : [],
+    [shift, shifts, timeOff, unavailability],
   );
 
   useEffect(() => {
@@ -258,6 +279,31 @@ export function ShiftDetailsPanel({
                           · {(event.start_time ?? "").slice(0, 5) || "--"}-
                           {(event.end_time ?? "").slice(0, 5) || "--"}
                         </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {conflictWarnings.length > 0 && (
+                <div className="space-y-2 rounded-lg border border-red-200 bg-red-50/60 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-red-800">
+                      Conflict Warnings
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="border-red-200 bg-red-50 text-red-700"
+                    >
+                      {conflictWarnings.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {conflictWarnings.map((warning) => (
+                      <div
+                        key={warning.id}
+                        className="rounded-md border border-red-200 bg-background p-2 text-sm text-muted-foreground"
+                      >
+                        {warning.message}
                       </div>
                     ))}
                   </div>
@@ -357,6 +403,24 @@ export function ShiftDetailsPanel({
               </div>
 
               <div>
+                <Label htmlFor="hourly_rate">Hourly Rate</Label>
+                <Input
+                  id="hourly_rate"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={formData.hourly_rate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      hourly_rate: e.target.value,
+                    })
+                  }
+                  placeholder="Optional labor cost rate"
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
@@ -402,12 +466,12 @@ export function ShiftDetailsPanel({
                     const start = new Date(shift.start_time);
                     const end = new Date(shift.end_time);
                     const ev = await createVendorVisit({
-                      title: "Vendor Visit (demo)",
-                      description: "Demo vendor linked to this shift",
+                      title: "Vendor Visit",
+                      description: "Vendor visit linked to this shift",
                       start: start.toISOString(),
                       end: end.toISOString(),
                       location: shift.location || "Site",
-                      vendor: { name: "Demo Vendor" },
+                      vendor: { name: "Vendor" },
                       related_shift_ids: [shift.id],
                       checklist: [
                         {

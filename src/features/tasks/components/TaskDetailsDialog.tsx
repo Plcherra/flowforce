@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -23,11 +24,10 @@ import {
   ArrowRight,
   Calendar,
   CheckCircle,
-  Clock,
-  Flag,
   MessageSquare,
   Send,
   Target,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -46,10 +46,7 @@ import {
   TASK_STATUS_FLOW,
 } from "@/constants/taskStatus";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
-import {
-  useTaskComments,
-  type TaskCommentWithUser,
-} from "@/features/tasks/hooks";
+import { useTaskComments } from "@/features/tasks/hooks";
 import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { logger } from "@/utils/logger";
 
@@ -113,7 +110,7 @@ export function TaskDetailsDialog({
   onClose,
   onTaskUpdate,
 }: TaskDetailsDialogProps) {
-  const { updateStatus, updateTask } = useTasks();
+  const { updateStatus, updateTask, deleteTask } = useTasks();
   const { toast } = useToast();
   const {
     assignees,
@@ -132,6 +129,14 @@ export function TaskDetailsDialog({
   const [goalValue, setGoalValue] = useState("none");
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
   const [updatingGoal, setUpdatingGoal] = useState(false);
+  const [executionForm, setExecutionForm] = useState({
+    priority: "medium",
+    due_date: "",
+    estimated_hours: "",
+    actual_hours: "",
+  });
+  const [savingExecution, setSavingExecution] = useState(false);
+  const [deletingTask, setDeletingTask] = useState(false);
   const { comments, loadingComments, addingComment, submitComment } =
     useTaskComments(currentTask, open);
 
@@ -140,15 +145,106 @@ export function TaskDetailsDialog({
   }, [task]);
 
   useEffect(() => {
-    if (!currentTask) {
+    const task = currentTask;
+    if (!task) {
       setAssignmentValue("none");
       setGoalValue("none");
       return;
     }
 
-    setAssignmentValue(currentTask.assigned_to ?? "none");
-    setGoalValue(currentTask.goal_id ?? "none");
-  }, [currentTask?.id, currentTask?.assigned_to, currentTask?.goal_id]);
+    setAssignmentValue(task.assigned_to ?? "none");
+    setGoalValue(task.goal_id ?? "none");
+    setExecutionForm({
+      priority: task.priority ?? "medium",
+      due_date: task.due_date ? task.due_date.split("T")[0] : "",
+      estimated_hours:
+        task.estimated_hours != null
+          ? String(task.estimated_hours)
+          : "",
+      actual_hours: task.actual_hours != null ? String(task.actual_hours) : "",
+    });
+  }, [currentTask]);
+
+  const parseHoursInput = (value: string) => {
+    if (!value.trim()) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  };
+
+  const handleSaveExecution = async () => {
+    if (!currentTask) return;
+
+    setSavingExecution(true);
+    try {
+      const { data, error } = await updateTask(currentTask.id, {
+        priority: executionForm.priority,
+        due_date: executionForm.due_date
+          ? new Date(`${executionForm.due_date}T12:00:00`).toISOString()
+          : null,
+        estimated_hours: parseHoursInput(executionForm.estimated_hours),
+        actual_hours: parseHoursInput(executionForm.actual_hours),
+      });
+
+      if (error || !data) {
+        throw error ?? new Error("Unable to save task execution details");
+      }
+
+      const updatedTask: TaskWithRelations = {
+        ...currentTask,
+        ...data,
+      };
+
+      setCurrentTask(updatedTask);
+      onTaskUpdate?.(updatedTask);
+      toast({
+        title: "Execution details saved",
+        description: "Priority, due date, and hour tracking were updated.",
+      });
+    } catch (error) {
+      logger.error("Error saving task execution details:", {
+        error,
+        tags: ["error"],
+      });
+      toast({
+        title: "Execution update failed",
+        description: "Could not save the task details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingExecution(false);
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    if (!currentTask) return;
+
+    const confirmed = window.confirm(
+      `Delete task "${currentTask.title ?? "Untitled task"}"?`,
+    );
+    if (!confirmed) return;
+
+    setDeletingTask(true);
+    try {
+      const { error } = await deleteTask(currentTask.id);
+      if (error) {
+        throw error;
+      }
+      toast({
+        title: "Task deleted",
+        description: "The task has been removed.",
+      });
+      onClose();
+    } catch (error) {
+      logger.error("Error deleting task:", { error, tags: ["error"] });
+      toast({
+        title: "Delete failed",
+        description: "Could not delete this task. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingTask(false);
+    }
+  };
 
   const handleAssigneeChange = async (value: string) => {
     if (!currentTask) return;
@@ -483,6 +579,125 @@ export function TaskDetailsDialog({
             </div>
           </div>
 
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="text-base">Execution Controls</CardTitle>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 text-destructive hover:text-destructive"
+                  onClick={handleDeleteTask}
+                  disabled={deletingTask}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deletingTask ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Priority
+                </Label>
+                <Select
+                  value={executionForm.priority}
+                  onValueChange={(value) =>
+                    setExecutionForm((prev) => ({
+                      ...prev,
+                      priority: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="task-due-date"
+                  className="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  Due date
+                </Label>
+                <Input
+                  id="task-due-date"
+                  type="date"
+                  value={executionForm.due_date}
+                  onChange={(event) =>
+                    setExecutionForm((prev) => ({
+                      ...prev,
+                      due_date: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="task-estimated-hours"
+                  className="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  Estimated hours
+                </Label>
+                <Input
+                  id="task-estimated-hours"
+                  type="number"
+                  min={0}
+                  step="0.25"
+                  value={executionForm.estimated_hours}
+                  onChange={(event) =>
+                    setExecutionForm((prev) => ({
+                      ...prev,
+                      estimated_hours: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="task-actual-hours"
+                  className="text-xs font-semibold uppercase text-muted-foreground"
+                >
+                  Actual hours
+                </Label>
+                <Input
+                  id="task-actual-hours"
+                  type="number"
+                  min={0}
+                  step="0.25"
+                  value={executionForm.actual_hours}
+                  onChange={(event) =>
+                    setExecutionForm((prev) => ({
+                      ...prev,
+                      actual_hours: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="md:col-span-4 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={handleSaveExecution}
+                  disabled={savingExecution}
+                >
+                  {savingExecution ? "Saving..." : "Save execution details"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div className="space-y-4">
               <div className="space-y-2">
@@ -555,27 +770,6 @@ export function TaskDetailsDialog({
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Flag className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Priority:</span>
-                <span className="capitalize">{currentTask.priority}</span>
-              </div>
-              {currentTask.estimated_hours !== null &&
-                currentTask.estimated_hours !== undefined && (
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Estimated:</span>
-                    <span>{currentTask.estimated_hours}h</span>
-                  </div>
-                )}
-              {currentTask.actual_hours !== null &&
-                currentTask.actual_hours !== undefined && (
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Actual:</span>
-                    <span>{currentTask.actual_hours}h</span>
-                  </div>
-                )}
             </div>
 
             <div className="space-y-3">

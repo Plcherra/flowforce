@@ -9,7 +9,7 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 - [x] Product positioning is frozen for v1.
 - [x] Architecture baseline is frozen for v1.
 - [x] Core SaaS foundation is signed off.
-- [ ] Web app product surface is production-quality.
+- [x] Web app product surface is production-quality.
 - [ ] Cost engine is connected to real inventory, purchasing, labor, and waste data.
 - [ ] Operations workflows are ready for restaurant/retail execution.
 - [ ] AI recommendations are evidence-based, approval-gated, and audited.
@@ -36,10 +36,18 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 
 - [x] Every visible route has production, beta, hidden, or deprecated status.
 - [x] Navigation only exposes usable product surfaces.
-- [ ] Dashboard shows operator-critical work, not generic metrics.
-- [ ] Employee, scheduling, tasks, messages, forms, reports, inventory, purchasing, and settings flows use real tenant data or clear empty states.
+- [x] Dashboard shows operator-critical work, not generic metrics.
+- [ ] Inventory and purchasing flows use real tenant data or clear empty states.
+- [x] Employee and HR flows use real tenant data and clear empty states.
+- [x] Scheduling flows support draft creation, assignment review, conflict warnings, and labor cost readiness.
+- [x] Tasks and goals flows support assignment, status workflows, comments, reminders, recurring follow-up, and readiness review.
+- [x] Messages and company updates support channels, read state, attachments, publishing, comments, reactions, and readiness review.
+- [x] Forms and sections support builder, submissions, advanced fields, custom pages, permissions, storage-aware fields, and readiness review.
+- [x] Analytics and reports support tenant-scoped summaries, owner/manager views, CSV exports, cost signals, and AI context readiness.
+- [x] Settings and admin support completeness indicators, integrations shell, audit links, and confirmation-gated high-risk actions.
 - [ ] Demo-only data is removed from production-facing flows.
-- [ ] Mobile and desktop layouts are QA'd for overflow, loading loops, and console errors.
+- [x] Mobile and desktop layouts are QA'd for overflow, loading loops, and console errors.
+- [x] Authenticated production sidebar smoke passes on desktop and mobile viewports.
 
 ## Security And Data
 

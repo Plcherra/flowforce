@@ -8,6 +8,7 @@ import { ErrorState } from "./ErrorState";
 import { EmptyState } from "./EmptyState";
 import { SystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useSystemSettings } from "../hooks/useSystemSettings";
+import { SettingsReadinessPanel } from "./SettingsReadinessPanel";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
@@ -191,6 +192,11 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
               Refresh data
             </Button>
           </header>
+
+          <SettingsReadinessPanel
+            onOpenAdmin={() => setActiveTab("admin")}
+            onOpenIntegrations={() => setActiveTab("integrations")}
+          />
 
           {hasTabs ? (
             <Tabs

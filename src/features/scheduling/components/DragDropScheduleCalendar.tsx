@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
-import type { PendingVendorEvent, AIRecommendation } from "./drag-drop/types";
+import type { PendingVendorEvent } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,
   VENDOR_PALETTE,
@@ -32,7 +32,6 @@ import {
 import { useDragDropHandlers } from "@/features/scheduling/hooks/useDragDropHandlers";
 import { useVendorForm } from "@/features/scheduling/hooks/useVendorForm";
 import {
-  MultiAddShiftDialog,
   AddUnavailabilityDialog,
   AddTimeOffDialog,
   VendorEventDialog,
@@ -43,6 +42,26 @@ interface DragDropScheduleCalendarProps {
   onDateChange: (date: Date) => void;
   locationFilter?: string;
 }
+
+type VendorShiftOption = {
+  id?: string | null;
+  title?: string | null;
+  role?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+};
+
+const toVendorShiftOption = (shift: unknown): VendorShiftOption => {
+  if (!shift || typeof shift !== "object") return {};
+  const row = shift as Record<string, unknown>;
+  return {
+    id: typeof row.id === "string" ? row.id : null,
+    title: typeof row.title === "string" ? row.title : null,
+    role: typeof row.role === "string" ? row.role : null,
+    start_time: typeof row.start_time === "string" ? row.start_time : null,
+    end_time: typeof row.end_time === "string" ? row.end_time : null,
+  };
+};
 
 export function DragDropScheduleCalendar({
   selectedDate,
@@ -59,10 +78,8 @@ export function DragDropScheduleCalendar({
   const [draggedTemplate, setDraggedTemplate] = useState<
     (typeof ROLE_TEMPLATES)[number] | null
   >(null);
-  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
-  const [aiRecommendations, setAIRecommendations] = useState<
-    AIRecommendation[]
-  >([]);
+  const showAIRecommendations = false;
+  const aiRecommendations = [];
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [showShiftSheet, setShowShiftSheet] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -96,9 +113,6 @@ export function DragDropScheduleCalendar({
 
   const {
     employees,
-    timeOffRequests,
-    unavailability: unavailabilityList,
-    vendorEvents,
     vendorEventsThisWeek,
     weekSchedules,
     weekStart,
@@ -114,16 +128,18 @@ export function DragDropScheduleCalendar({
     actions,
   } = useScheduleBoard({ selectedDate, locationFilter, pendingVendorEvent });
 
+  const vendorShiftOptions = useMemo(
+    () => candidateVendorShifts.map(toVendorShiftOption),
+    [candidateVendorShifts],
+  );
+
   const {
     createSchedule,
-    updateSchedule,
     assign,
-    unassign,
     createVendorEvent,
     addUnavailability: addUnavailabilityAction,
     requestTimeOff: requestTimeOffAction,
     bulkCreateShifts: bulkCreateShiftsAction,
-    generateRecommendations: generateRecommendationsAction,
     refetchAll,
     autoFillWeek: autoFillWeekAction,
     copyPreviousWeek: copyPreviousWeekAction,
@@ -134,7 +150,7 @@ export function DragDropScheduleCalendar({
   const { vendorForm, setVendorForm } = useVendorForm({
     pendingVendorEvent,
     locations,
-    candidateVendorShifts: candidateVendorShifts as any,
+    candidateVendorShifts: vendorShiftOptions,
     vendorModalOpen,
   });
 
@@ -146,7 +162,7 @@ export function DragDropScheduleCalendar({
   } = useDragDropHandlers({
     draggedTemplate,
     draggedVendor,
-    createSchedule: createSchedule as any,
+    createSchedule,
     assign,
     refetchAll,
     setPendingVendorEvent,
@@ -160,29 +176,6 @@ export function DragDropScheduleCalendar({
     setSelectedShift(scheduleId);
     setShowShiftSheet(true);
   };
-
-  const generateAIRecommendations = async (scheduleId: string) => {
-    const recommendations = await generateRecommendationsAction(scheduleId);
-    if (recommendations.length > 0) {
-      setAIRecommendations(recommendations);
-      setShowAIRecommendations(true);
-      setSelectedShift(scheduleId);
-    }
-  };
-
-  const handleTimeOffTypeChange = useCallback(
-    (value: string) => {
-      if (
-        value === "vacation" ||
-        value === "sick" ||
-        value === "personal" ||
-        value === "other"
-      ) {
-        setToType(value);
-      }
-    },
-    [setToType],
-  );
 
   const exportWeekCsv = useCallback(() => {
     if (!weekCsvContent) return;
@@ -240,7 +233,7 @@ export function DragDropScheduleCalendar({
               end_time: "10:00",
               notes: "Quick vendor visit",
             });
-          } catch (error) {
+          } catch {
             toast({
               title: "Failed to log vendor visit",
               variant: "destructive",
@@ -435,7 +428,7 @@ export function DragDropScheduleCalendar({
                       required_headcount: multiHeadcount,
                       notes: null,
                       break_minutes: 30,
-                      hourly_rate: 15.0,
+                      hourly_rate: null,
                       is_published: false,
                       is_template: false,
                       template_id: null,
@@ -507,7 +500,7 @@ export function DragDropScheduleCalendar({
         pendingVendorEvent={pendingVendorEvent}
         vendorForm={vendorForm}
         locations={locations}
-        candidateVendorShifts={candidateVendorShifts as any}
+        candidateVendorShifts={vendorShiftOptions}
         onFormChange={setVendorForm}
         onCreateVendorEvent={createVendorEvent}
       />

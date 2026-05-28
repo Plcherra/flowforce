@@ -20,21 +20,59 @@ type Props = {
   onSectionToggle: (sectionId: string, enabled: boolean) => void;
 };
 
+type UnifiedCategory =
+  | "core"
+  | "industry"
+  | "operations"
+  | "hr"
+  | "communication"
+  | "custom";
+
+type CategoryFilter = "all" | UnifiedCategory;
+
 type UnifiedItem = {
   id: string;
   name: string;
   path: string;
-  category: "core" | "operations" | "hr" | "communication" | "custom" | string;
+  category: UnifiedCategory;
   type: "Core" | "Custom" | "Industry";
   description?: string;
 };
 
 const catClass: Record<string, string> = {
   core: "bg-gray-100 text-gray-800",
+  industry: "bg-amber-100 text-amber-800",
   communication: "bg-purple-100 text-purple-800",
   operations: "bg-green-100 text-green-800",
   hr: "bg-blue-100 text-blue-800",
   custom: "bg-gray-100 text-gray-800",
+};
+
+const categoryFilters: CategoryFilter[] = [
+  "all",
+  "core",
+  "industry",
+  "communication",
+  "operations",
+  "hr",
+  "custom",
+];
+
+const isUnifiedCategory = (value: string): value is UnifiedCategory =>
+  categoryFilters.includes(value as CategoryFilter) && value !== "all";
+
+const isCategoryFilter = (value: string): value is CategoryFilter =>
+  categoryFilters.includes(value as CategoryFilter);
+
+const getUnifiedCategory = (
+  value: string | null | undefined,
+  fallback: UnifiedCategory,
+): UnifiedCategory => {
+  if (value && isUnifiedCategory(value)) {
+    return value;
+  }
+
+  return fallback;
 };
 
 export function UnifiedSectionsManager({
@@ -43,9 +81,7 @@ export function UnifiedSectionsManager({
 }: Props) {
   const { sections: customSections } = useCustomSections();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<
-    "all" | "core" | "communication" | "operations" | "hr" | "custom"
-  >("all");
+  const [category, setCategory] = useState<CategoryFilter>("all");
   const navigate = useNavigate();
 
   const items = useMemo<UnifiedItem[]>(() => {
@@ -54,7 +90,7 @@ export function UnifiedSectionsManager({
       name: s.name,
       description: s.description,
       path: s.path,
-      category: (s.category as any) || "core",
+      category: getUnifiedCategory(s.category, "core"),
       type: s.category === "industry" ? "Industry" : "Core",
     }));
     const customs: UnifiedItem[] = customSections.map((cs) => ({
@@ -62,7 +98,7 @@ export function UnifiedSectionsManager({
       name: cs.name,
       description: cs.description || "",
       path: cs.path,
-      category: (cs.category as any) || "custom",
+      category: getUnifiedCategory(cs.category, "custom"),
       type: "Custom",
     }));
     return [...defaults, ...customs];
@@ -96,20 +132,28 @@ export function UnifiedSectionsManager({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <Select value={category} onValueChange={(v: any) => setCategory(v)}>
+            <Select
+              value={category}
+              onValueChange={(value) => {
+                if (isCategoryFilter(value)) {
+                  setCategory(value);
+                }
+              }}
+            >
               <SelectTrigger className="w-44">
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="core">Core</SelectItem>
+                <SelectItem value="industry">Industry</SelectItem>
                 <SelectItem value="communication">Communication</SelectItem>
                 <SelectItem value="operations">Operations</SelectItem>
                 <SelectItem value="hr">HR</SelectItem>
                 <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => navigate("/add-section")}>
+            <Button onClick={() => navigate("/app/add-section")}>
               Add New Section
             </Button>
           </div>
