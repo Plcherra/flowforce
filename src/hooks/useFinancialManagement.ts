@@ -69,6 +69,58 @@ type IntegrationStatus = {
   autoSync: boolean;
 };
 
+export type OwnerFinancialOverview = {
+  startDate: string | null;
+  endDate: string | null;
+  actualRevenue: number;
+  actualExpenses: number;
+  actualPayments: number;
+  importedCost: number;
+  estimatedCost: number;
+  estimatedLaborCost: number;
+  estimatedProductionCost: number;
+  estimatedWasteCost: number;
+  estimatedPurchasingCost: number;
+  pendingExpenseTotal: number;
+  pendingExpenseCount: number;
+  pendingPaymentTotal: number;
+  pendingPaymentCount: number;
+  pendingApprovalTotal: number;
+  pendingApprovalCount: number;
+  netOperatingPosition: number;
+  exportRowCount: number;
+  sourceBreakdown: {
+    actual: number;
+    imported: number;
+    estimated: number;
+    revenue: number;
+    pending: number;
+  };
+  dataQualityFlags: Record<string, unknown>;
+};
+
+type OwnerFinancialOverviewRow = {
+  start_date: string | null;
+  end_date: string | null;
+  actual_revenue: number | string | null;
+  actual_expenses: number | string | null;
+  actual_payments: number | string | null;
+  imported_cost: number | string | null;
+  estimated_cost: number | string | null;
+  estimated_labor_cost: number | string | null;
+  estimated_production_cost: number | string | null;
+  estimated_waste_cost: number | string | null;
+  estimated_purchasing_cost: number | string | null;
+  pending_expense_total: number | string | null;
+  pending_expense_count: number | string | null;
+  pending_payment_total: number | string | null;
+  pending_payment_count: number | string | null;
+  net_operating_position: number | string | null;
+  export_row_count: number | string | null;
+  source_breakdown: unknown;
+  data_quality_flags: unknown;
+};
+
 export type ManagerFinancialMetrics = {
   payrollTotal30d: number;
   payrollPendingApproval: number;
@@ -81,9 +133,12 @@ export type ManagerFinancialMetrics = {
   operatingExpenses30d: number;
   pendingExpenseTotal: number;
   pendingExpenseCount: number;
+  pendingPaymentTotal: number;
+  pendingPaymentCount: number;
   wasteCost30d: number;
   inventoryPurchase30d: number;
   inventorySales30d: number;
+  ownerFinancialOverview: OwnerFinancialOverview;
   profitLossTrend: MonthlyProfitLossPoint[];
   profitForecastNextMonth: number;
   integrations: IntegrationStatus[];
@@ -98,6 +153,116 @@ type ManagerFinancialSnapshot = Omit<
 >;
 
 const HOURS_IN_MILLISECOND = 1000 * 60 * 60;
+
+function toFiniteNumber(value: unknown) {
+  const numeric = Number(value ?? 0);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function asObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function createEmptyOwnerFinancialOverview(): OwnerFinancialOverview {
+  return {
+    startDate: null,
+    endDate: null,
+    actualRevenue: 0,
+    actualExpenses: 0,
+    actualPayments: 0,
+    importedCost: 0,
+    estimatedCost: 0,
+    estimatedLaborCost: 0,
+    estimatedProductionCost: 0,
+    estimatedWasteCost: 0,
+    estimatedPurchasingCost: 0,
+    pendingExpenseTotal: 0,
+    pendingExpenseCount: 0,
+    pendingPaymentTotal: 0,
+    pendingPaymentCount: 0,
+    pendingApprovalTotal: 0,
+    pendingApprovalCount: 0,
+    netOperatingPosition: 0,
+    exportRowCount: 0,
+    sourceBreakdown: {
+      actual: 0,
+      imported: 0,
+      estimated: 0,
+      revenue: 0,
+      pending: 0,
+    },
+    dataQualityFlags: {},
+  };
+}
+
+function mapOwnerFinancialOverview(
+  row: OwnerFinancialOverviewRow | null,
+): OwnerFinancialOverview {
+  if (!row) {
+    return createEmptyOwnerFinancialOverview();
+  }
+
+  const sourceBreakdown = asObject(row.source_breakdown);
+  const pendingExpenseTotal = toFiniteNumber(row.pending_expense_total);
+  const pendingPaymentTotal = toFiniteNumber(row.pending_payment_total);
+  const pendingExpenseCount = toFiniteNumber(row.pending_expense_count);
+  const pendingPaymentCount = toFiniteNumber(row.pending_payment_count);
+
+  return {
+    startDate: row.start_date,
+    endDate: row.end_date,
+    actualRevenue: toFiniteNumber(row.actual_revenue),
+    actualExpenses: toFiniteNumber(row.actual_expenses),
+    actualPayments: toFiniteNumber(row.actual_payments),
+    importedCost: toFiniteNumber(row.imported_cost),
+    estimatedCost: toFiniteNumber(row.estimated_cost),
+    estimatedLaborCost: toFiniteNumber(row.estimated_labor_cost),
+    estimatedProductionCost: toFiniteNumber(row.estimated_production_cost),
+    estimatedWasteCost: toFiniteNumber(row.estimated_waste_cost),
+    estimatedPurchasingCost: toFiniteNumber(row.estimated_purchasing_cost),
+    pendingExpenseTotal,
+    pendingExpenseCount,
+    pendingPaymentTotal,
+    pendingPaymentCount,
+    pendingApprovalTotal: pendingExpenseTotal + pendingPaymentTotal,
+    pendingApprovalCount: pendingExpenseCount + pendingPaymentCount,
+    netOperatingPosition: toFiniteNumber(row.net_operating_position),
+    exportRowCount: toFiniteNumber(row.export_row_count),
+    sourceBreakdown: {
+      actual: toFiniteNumber(sourceBreakdown.actual),
+      imported: toFiniteNumber(sourceBreakdown.imported),
+      estimated: toFiniteNumber(sourceBreakdown.estimated),
+      revenue: toFiniteNumber(sourceBreakdown.revenue),
+      pending: toFiniteNumber(sourceBreakdown.pending),
+    },
+    dataQualityFlags: asObject(row.data_quality_flags),
+  };
+}
+
+async function fetchOwnerFinancialOverview(params: {
+  companyId: string;
+  startDate: string;
+  endDate: string;
+}): Promise<{ data: OwnerFinancialOverviewRow | null; error: unknown | null }> {
+  try {
+    const { data, error } = await supabase
+      .rpc("get_owner_financial_overview", {
+        p_company_id: params.companyId,
+        p_start_date: params.startDate,
+        p_end_date: params.endDate,
+      })
+      .maybeSingle();
+
+    return {
+      data: (data as OwnerFinancialOverviewRow | null) ?? null,
+      error,
+    };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
 
 function calculateWeeklyHours(entries: TimeEntry[]) {
   const sorted = [...entries].sort(
@@ -570,9 +735,12 @@ function createEmptySnapshot(loading: boolean): ManagerFinancialSnapshot {
     operatingExpenses30d: 0,
     pendingExpenseTotal: 0,
     pendingExpenseCount: 0,
+    pendingPaymentTotal: 0,
+    pendingPaymentCount: 0,
     wasteCost30d: 0,
     inventoryPurchase30d: 0,
     inventorySales30d: 0,
+    ownerFinancialOverview: createEmptyOwnerFinancialOverview(),
     profitLossTrend: [],
     profitForecastNextMonth: 0,
     integrations: defaultIntegrations(),
@@ -594,16 +762,22 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           expenses: [] as Expense[],
           transactions: [] as InventoryTransaction[],
           waste: [] as WasteEvent[],
+          ownerOverview: null as OwnerFinancialOverviewRow | null,
         };
       }
 
-      const sixMonthsAgo = subMonths(new Date(), 6).toISOString();
+      const now = new Date();
+      const sixMonthsAgo = subMonths(now, 6).toISOString();
+      const thirtyDaysAgo = subWeeks(now, 4);
+      const ownerStartDate = format(thirtyDaysAgo, "yyyy-MM-dd");
+      const ownerEndDate = format(now, "yyyy-MM-dd");
 
       const [
         paymentsResponse,
         expensesResponse,
         transactionsResponse,
         wasteResponse,
+        ownerOverviewResponse,
       ] = await Promise.all([
         supabase
           .from("payments")
@@ -625,12 +799,19 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           .select("*")
           .eq("company_id", companyId)
           .gte("created_at", sixMonthsAgo),
+        fetchOwnerFinancialOverview({
+          companyId,
+          startDate: ownerStartDate,
+          endDate: ownerEndDate,
+        }),
       ]);
 
       if (paymentsResponse.error) throw paymentsResponse.error;
       if (expensesResponse.error) throw expensesResponse.error;
       if (transactionsResponse.error) throw transactionsResponse.error;
       if (wasteResponse.error) throw wasteResponse.error;
+      // The local fallback below keeps older preview databases usable while
+      // the 05.09 migration is still being promoted.
 
       return {
         payments: (paymentsResponse.data as Payment[]) ?? [],
@@ -638,6 +819,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
         transactions:
           (transactionsResponse.data as InventoryTransaction[]) ?? [],
         waste: (wasteResponse.data as WasteEvent[]) ?? [],
+        ownerOverview: ownerOverviewResponse.data,
       };
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Phase 4 optimization)
@@ -653,7 +835,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
       return createEmptySnapshot(false);
     }
 
-    const { payments, expenses, transactions, waste } = data;
+    const { payments, expenses, transactions, waste, ownerOverview } = data;
 
     const now = new Date();
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -699,6 +881,15 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
       0,
     );
     const pendingExpenseCount = pendingExpenses.length;
+
+    const pendingPayments = payments.filter(
+      (payment) => payment.status === "pending",
+    );
+    const pendingPaymentTotal = pendingPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0,
+    );
+    const pendingPaymentCount = pendingPayments.length;
 
     const recentExpenses = expenses.filter(
       (expense) => new Date(expense.created_at) >= thirtyDaysAgo,
@@ -754,6 +945,76 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           )
         : 0;
 
+    const ownerFinancialOverview = mapOwnerFinancialOverview(ownerOverview);
+
+    if (!ownerOverview) {
+      ownerFinancialOverview.startDate = format(thirtyDaysAgo, "yyyy-MM-dd");
+      ownerFinancialOverview.endDate = format(now, "yyyy-MM-dd");
+      ownerFinancialOverview.actualRevenue = Number(inventorySales30d.toFixed(2));
+      ownerFinancialOverview.actualExpenses = Number(
+        operatingExpenses30d.toFixed(2),
+      );
+      ownerFinancialOverview.actualPayments = Number(
+        (payrollApproved + vendorSpending30d + reimbursementVolume30d).toFixed(
+          2,
+        ),
+      );
+      ownerFinancialOverview.estimatedCost = Number(
+        (laborCostThisWeek + inventoryPurchase30d + wasteCost30d).toFixed(2),
+      );
+      ownerFinancialOverview.estimatedLaborCost = Number(
+        laborCostThisWeek.toFixed(2),
+      );
+      ownerFinancialOverview.estimatedWasteCost = Number(wasteCost30d.toFixed(2));
+      ownerFinancialOverview.estimatedPurchasingCost = Number(
+        inventoryPurchase30d.toFixed(2),
+      );
+      ownerFinancialOverview.pendingExpenseTotal = Number(
+        pendingExpenseTotal.toFixed(2),
+      );
+      ownerFinancialOverview.pendingExpenseCount = pendingExpenseCount;
+      ownerFinancialOverview.pendingPaymentTotal = Number(
+        pendingPaymentTotal.toFixed(2),
+      );
+      ownerFinancialOverview.pendingPaymentCount = pendingPaymentCount;
+      ownerFinancialOverview.pendingApprovalTotal = Number(
+        (pendingExpenseTotal + pendingPaymentTotal).toFixed(2),
+      );
+      ownerFinancialOverview.pendingApprovalCount =
+        pendingExpenseCount + pendingPaymentCount;
+      ownerFinancialOverview.netOperatingPosition = Number(
+        (
+          inventorySales30d -
+          operatingExpenses30d -
+          payrollApproved -
+          vendorSpending30d -
+          reimbursementVolume30d -
+          laborCostThisWeek -
+          inventoryPurchase30d -
+          wasteCost30d
+        ).toFixed(2),
+      );
+      ownerFinancialOverview.sourceBreakdown = {
+        actual: Number(
+          (
+            operatingExpenses30d +
+            payrollApproved +
+            vendorSpending30d +
+            reimbursementVolume30d
+          ).toFixed(2),
+        ),
+        imported: 0,
+        estimated: ownerFinancialOverview.estimatedCost,
+        revenue: ownerFinancialOverview.actualRevenue,
+        pending: ownerFinancialOverview.pendingApprovalTotal,
+      };
+      ownerFinancialOverview.dataQualityFlags = {
+        fallback: true,
+        has_estimates: ownerFinancialOverview.estimatedCost > 0,
+        pending_approvals: ownerFinancialOverview.pendingApprovalCount > 0,
+      };
+    }
+
     return {
       payrollTotal30d: Number(payrollTotal30d.toFixed(2)),
       payrollPendingApproval: Number(payrollPendingApproval.toFixed(2)),
@@ -766,9 +1027,12 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
       operatingExpenses30d: Number(operatingExpenses30d.toFixed(2)),
       pendingExpenseTotal: Number(pendingExpenseTotal.toFixed(2)),
       pendingExpenseCount,
+      pendingPaymentTotal: Number(pendingPaymentTotal.toFixed(2)),
+      pendingPaymentCount,
       wasteCost30d: Number(wasteCost30d.toFixed(2)),
       inventoryPurchase30d: Number(inventoryPurchase30d.toFixed(2)),
       inventorySales30d: Number(inventorySales30d.toFixed(2)),
+      ownerFinancialOverview,
       profitLossTrend,
       profitForecastNextMonth,
       integrations: defaultIntegrations(),

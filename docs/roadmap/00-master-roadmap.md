@@ -46,18 +46,18 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [05 Inventory Finance Cost Engine](./05-inventory-finance-cost-engine.md)
-- Current phase: Phase 1, Canonical Cost Model
-- Last completed phase: 04.10, Web App Production QA
-- Last phase report: [04.10 Web App Production QA](./reports/04-10-web-app-production-qa-2026-05-28.md)
+- Active plan: [06 Operations Workflows And Compliance](./06-operations-workflows-and-compliance.md)
+- Current phase: Phase 6, Operations Workflows And Compliance
+- Last completed phase: 06.07, Compliance Packs
+- Last phase report: [06.07 Compliance Packs](./reports/06-07-compliance-packs-2026-05-29.md)
 
 ## Global Completion Criteria
 
 - [x] Web app is production-ready for paid pilot customers.
 - [ ] Mobile app path is shippable on iOS and Android.
 - [ ] Core tenant data is secure, tested, and recoverable.
-- [ ] Restaurant/retail operators can see labor + inventory + waste + purchasing cost in one place.
-- [ ] Managers can run daily execution workflows from mobile.
+- [x] Restaurant/retail operators can see labor + inventory + waste + purchasing cost in one place.
+- [x] Managers can run daily execution workflows from mobile.
 - [ ] AI gives useful recommendations with audit trails and user approval.
 - [ ] Deploy, backup, monitoring, rollback, and release gates are documented and tested.
 
@@ -69,7 +69,7 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 - [x] 2.  Platform architecture
 - [x] 3.  Core SaaS foundation
 - [x] 4.  Web app product completion
-- [ ] 5.  Inventory finance cost engine
+- [x] 5.  Inventory finance cost engine
 - [ ] 6.  Operations workflows and compliance
 - [ ] 7.  AI copilot and automation
 - [ ] 8.  Mobile app and offline mode

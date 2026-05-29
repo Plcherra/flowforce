@@ -100,7 +100,13 @@ export function ProductionEventForm() {
     [items, form.item_id],
   );
 
-  const recipeLines = selectedItem?.recipes?.[0]?.lines ?? [];
+  const recipeLines = useMemo(
+    () => selectedItem?.recipes?.[0]?.lines ?? [],
+    [selectedItem],
+  );
+  const laborCost = Number(form.labor_cost || 0);
+  const overheadCost = Number(form.overhead_cost || 0);
+
   const relevantUnits = useMemo<InventoryUnit[]>(() => {
     const gathered = collectUnits([
       selectedItem?.unit,
@@ -130,6 +136,12 @@ export function ProductionEventForm() {
       item: selectedItem,
       producedQuantity: producedQuantityNumber,
       producedUnitId: form.produced_unit_id,
+      yieldQuantity: form.yield_quantity ? Number(form.yield_quantity) : null,
+      yieldUnitId: form.yield_unit_id || selectedItem.unit_id,
+      wasteQuantity: form.waste_quantity ? Number(form.waste_quantity) : null,
+      wasteUnitId: form.waste_unit_id || selectedItem.unit_id,
+      laborCost,
+      overheadCost,
       recipeLines: recipeLines.map((line) => ({
         ingredient_id: line.ingredient_id,
         quantity_needed: Number(line.quantity_needed ?? 0),
@@ -145,22 +157,19 @@ export function ProductionEventForm() {
   }, [
     form.produced_quantity,
     form.produced_unit_id,
+    form.waste_quantity,
+    form.waste_unit_id,
+    form.yield_quantity,
+    form.yield_unit_id,
+    laborCost,
+    overheadCost,
     recipeLines,
     relevantUnits,
     selectedItem,
   ]);
 
-  const laborCost = Number(form.labor_cost || 0);
-  const overheadCost = Number(form.overhead_cost || 0);
   const materialCost = preview?.materialCostTotal ?? 0;
-  const totalCost =
-    materialCost +
-    (Number.isFinite(laborCost) ? laborCost : 0) +
-    (Number.isFinite(overheadCost) ? overheadCost : 0);
-  const costPerUnit =
-    preview && preview.producedQuantityInItemUnit > 0
-      ? totalCost / preview.producedQuantityInItemUnit
-      : 0;
+  const costPerUnit = preview?.unitOutputCost ?? 0;
 
   const handleItemChange = (itemId: string) => {
     const item = items.find((candidate) => candidate.id === itemId);
@@ -226,7 +235,7 @@ export function ProductionEventForm() {
       }
 
       resetForm();
-    } catch (error) {
+    } catch {
       // Error handling delegated to mutation toast
     }
   };
@@ -236,6 +245,7 @@ export function ProductionEventForm() {
     !form.produced_unit_id ||
     !form.produced_quantity ||
     Number(form.produced_quantity) <= 0 ||
+    preview?.canRecord === false ||
     createProductionEvent.isPending;
 
   const unitsForSelect = useMemo<InventoryUnit[]>(() => {
@@ -574,6 +584,22 @@ export function ProductionEventForm() {
             </Alert>
           )}
 
+          {preview.blockingIssues.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Production cannot be recorded yet</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc space-y-1 pl-6">
+                  {preview.blockingIssues.map((issue, index) => (
+                    <li key={index} className="text-sm">
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -607,6 +633,11 @@ export function ProductionEventForm() {
                             <span className="text-xs text-muted-foreground">
                               Using recipe unit (
                               {unitLabel(material.recipeUnit)})
+                            </span>
+                          )}
+                          {material.warning && (
+                            <span className="text-xs text-amber-700">
+                              {material.warning}
                             </span>
                           )}
                         </div>

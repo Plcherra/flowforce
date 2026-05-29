@@ -4,6 +4,11 @@ import { Sparkles, Layers } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { IssuesStream } from "./IssuesStream";
 import { AutomationsPanel } from "./AutomationsPanel";
+import { SopChecklistBuilderPanel } from "./SopChecklistBuilderPanel";
+import { RecurringOperationsCalendarPanel } from "./RecurringOperationsCalendarPanel";
+import { FieldExecutionPanel } from "./FieldExecutionPanel";
+import { ManagerReviewQueuePanel } from "./ManagerReviewQueuePanel";
+import { CompliancePacksPanel } from "./CompliancePacksPanel";
 import { InventorySignalWidget } from "@/features/messages/components/ops/InventorySignalWidget";
 
 const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
@@ -77,6 +82,11 @@ export function OperationsHub() {
                 <InventorySignalWidget />
               </div>
             </div>
+            <SopChecklistBuilderPanel />
+            <RecurringOperationsCalendarPanel />
+            <FieldExecutionPanel />
+            <ManagerReviewQueuePanel />
+            <CompliancePacksPanel />
             <AutomationsPanel />
           </div>
         </motion.section>

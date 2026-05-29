@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "@/lib/router-adapter";
 import {
   Card,
@@ -31,6 +31,7 @@ import { ItemSelector } from "@/features/inventory/components/ItemSelector";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
 import { listInventoryCountEvents } from "@/features/inventory/repositories/countsRepository";
+import { summarizeCountLines } from "@/features/inventory/utils/stockPosition";
 import { logger } from "@/utils/logger";
 
 const getStatusColor = (status: string) => {
@@ -115,6 +116,17 @@ interface CountDetailPageProps {
   countId?: string;
 }
 
+type CountEvent = {
+  id: string;
+  event_type: string;
+  created_at: string;
+  payload?: Record<string, unknown> | null;
+  actor?: {
+    first_name?: string | null;
+    last_name?: string | null;
+  } | null;
+};
+
 export default function CountDetailPage({
   countId: propCountId,
 }: CountDetailPageProps) {
@@ -126,14 +138,12 @@ export default function CountDetailPage({
     counts,
     updateCount,
     completeCount,
-    submitCountForReview,
     approveCount: approveInventoryCount,
     rejectCount: rejectInventoryCount,
     refetch: refetchCounts,
   } = useInventoryCounts();
   const {
     countLines,
-    addItemToCount,
     addItemsToCount,
     updateCountLine,
     removeItemFromCount,
@@ -141,7 +151,7 @@ export default function CountDetailPage({
   } = useInventoryCountLines(countId);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [showItemSelector, setShowItemSelector] = useState(false);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<CountEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
 
   const count = counts.find((c) => c.id === countId);
@@ -150,32 +160,32 @@ export default function CountDetailPage({
     // Initialize quantities from count lines
     const initialQuantities: Record<string, number> = {};
     countLines.forEach((line) => {
-      if (line.counted_quantity !== null) {
-        initialQuantities[line.id] = line.counted_quantity;
+      if (line.counted_at || Number(line.counted_quantity ?? 0) > 0) {
+        initialQuantities[line.id] = line.counted_quantity ?? 0;
       }
     });
     setQuantities(initialQuantities);
   }, [countLines]);
 
-  useEffect(() => {
-    loadEvents();
-  }, [countId]);
-
-  const handleQuantityChange = (lineId: string, value: number) => {
-    setQuantities((prev) => ({ ...prev, [lineId]: value }));
-  };
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     if (!countId) return;
     setLoadingEvents(true);
     try {
       const data = await listInventoryCountEvents(countId);
-      setEvents(data);
+      setEvents(data as CountEvent[]);
     } catch (error) {
       logger.error("Error loading count events", { error, tags: ["error"] });
     } finally {
       setLoadingEvents(false);
     }
+  }, [countId]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  const handleQuantityChange = (lineId: string, value: number) => {
+    setQuantities((prev) => ({ ...prev, [lineId]: value }));
   };
 
   const handleSaveProgress = async () => {
@@ -199,7 +209,7 @@ export default function CountDetailPage({
         title: "Progress Saved",
         description: "Count progress has been saved successfully",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save progress",
@@ -253,7 +263,7 @@ export default function CountDetailPage({
       );
       await refetchCountLines();
       await loadEvents();
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -267,7 +277,7 @@ export default function CountDetailPage({
       setQuantities(newQuantities);
       await refetchCountLines();
       await loadEvents();
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -338,13 +348,8 @@ export default function CountDetailPage({
   }
 
   const StatusIcon = getStatusIcon(count.status);
-  const totalLines = countLines.length;
-  const completedLines = countLines.filter(
-    (line) =>
-      quantities[line.id] !== undefined || line.counted_quantity !== null,
-  ).length;
-  const completion =
-    totalLines > 0 ? Math.round((completedLines / totalLines) * 100) : 0;
+  const countSummary = summarizeCountLines(countLines, quantities);
+  const completion = countSummary.completionPercent;
   const reviewBadge =
     REVIEW_STATUS_CONFIG[count.review_status] ?? REVIEW_STATUS_CONFIG.pending;
 
@@ -451,6 +456,49 @@ export default function CountDetailPage({
                 {count.description}
               </p>
             )}
+
+            <div className="grid gap-3 sm:grid-cols-4">
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">
+                    Counted
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {countSummary.countedLines}/{countSummary.totalLines}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">
+                    Missing
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {countSummary.missingLines}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">
+                    Variance Lines
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {countSummary.varianceLines}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">
+                    Net Variance
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {countSummary.netVariance.toFixed(2)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           <Tabs defaultValue="counting" className="space-y-6">
@@ -523,6 +571,14 @@ export default function CountDetailPage({
                           : "System";
 
                         const payload = event.payload || {};
+                        const notes =
+                          typeof payload.notes === "string"
+                            ? payload.notes
+                            : null;
+                        const itemId =
+                          typeof payload.item_id === "string"
+                            ? payload.item_id
+                            : null;
 
                         return (
                           <div
@@ -542,12 +598,12 @@ export default function CountDetailPage({
                               <p className="text-xs text-muted-foreground">
                                 By {actorName}
                               </p>
-                              {payload.notes && (
-                                <p className="text-sm">{payload.notes}</p>
+                              {notes && (
+                                <p className="text-sm">{notes}</p>
                               )}
-                              {payload.item_id && (
+                              {itemId && (
                                 <p className="text-xs text-muted-foreground">
-                                  Item ID: {payload.item_id}
+                                  Item ID: {itemId}
                                 </p>
                               )}
                             </div>

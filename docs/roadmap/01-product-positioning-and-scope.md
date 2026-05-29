@@ -375,9 +375,9 @@ Demo narrative:
 3. Team and schedule: show employees, availability/time off, a schedule gap, and estimated labor impact.
 4. Daily execution: show opening/closing checklists, assigned tasks, overdue items, and manager follow-up.
 5. Inventory and purchasing: show counts, low-stock items, suppliers, suggested purchase needs, and one waste event.
-6. Cost visibility: show labor, purchasing, inventory, and waste impact in the cost dashboard.
+6. Cost visibility: show labor, purchasing, inventory, production, waste, and pending approvals in the cost dashboard.
 7. AI insight: show an evidence-linked recommendation that suggests a task, purchase, or schedule correction for manager approval.
-8. Owner report: show the weekly picture with labor, inventory, waste, checklist completion, and unresolved exceptions.
+8. Owner report: show actual revenue/cost, imported cost, estimated operating cost, pending approvals, labor, inventory, waste, checklist completion, and unresolved exceptions.
 9. Mobile staff view: show a staff member checking schedule, messages, tasks, and assigned checklist work.
 
 Required demo seed data:
@@ -389,7 +389,8 @@ Required demo seed data:
 - Inventory locations, categories, units, items, suppliers, par levels, item costs, and one purchase order.
 - One inventory count, one low-stock item, one adjustment, one production/prep item, and one waste event.
 - Tasks, reminders, messages/company updates, and manager approvals connected to the above events.
-- Dashboard/report metrics that make the labor + inventory + waste + execution story visible without manual setup.
+- Dashboard/report metrics that make the labor + inventory + production + waste + execution story visible without manual setup.
+- Source-labeled financial records: actual/manual, imported, estimated, pending, and sample/demo records that are excluded from owner actuals.
 
 Screenshots or video moments:
 
@@ -397,9 +398,9 @@ Screenshots or video moments:
 - Schedule view showing a labor or coverage issue.
 - Checklist run with failed item and follow-up task.
 - Inventory count, low-stock item, purchase need, and waste capture.
-- Cost dashboard showing labor, purchasing, inventory, and waste together.
+- Cost dashboard showing labor, purchasing, inventory, production, waste, and approval queues together.
 - AI recommendation with cited evidence and an approval action.
-- Owner report with weekly operating summary.
+- Owner report with actual, imported, estimated, and pending approval totals separated.
 - Mobile/staff view for schedule, messages, tasks, and checklist work.
 
 Demo readiness rule:

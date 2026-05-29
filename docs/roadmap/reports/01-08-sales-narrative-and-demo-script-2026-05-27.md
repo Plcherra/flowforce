@@ -34,7 +34,7 @@ The demo should prove this sentence:
    - Message: inventory work is connected to purchasing, waste, and management action.
 
 6. Cost visibility, 5:45-7:00
-   - Show labor, purchasing, inventory, and waste impact in the cost dashboard.
+   - Show labor, purchasing, inventory, production, waste, and approval impact in the cost dashboard.
    - Message: FlowForce turns daily execution into cost awareness.
 
 7. AI insight, 7:00-8:15
@@ -43,7 +43,7 @@ The demo should prove this sentence:
    - Message: AI supports the manager with traceable evidence and approval, rather than silently changing operations.
 
 8. Owner report, 8:15-9:15
-   - Show the weekly picture with labor, inventory, waste, checklist completion, and unresolved exceptions.
+   - Show the weekly picture with actual revenue/cost, imported cost, estimated operating cost, pending approvals, labor, inventory, waste, checklist completion, and unresolved exceptions.
    - Message: the owner no longer needs to stitch together separate tools and spreadsheets.
 
 9. Mobile staff view, 9:15-10:00
@@ -62,6 +62,7 @@ The demo should prove this sentence:
 - One purchase order or suggested purchase need.
 - Tasks, reminders, messages, company updates, and manager approvals connected to demo events.
 - Dashboard and report metrics that show labor, inventory, waste, purchasing, and execution without manual setup.
+- Source-labeled financial records for actual/manual, imported, estimated, pending, and sample/demo data so the owner overview proves production actuals are not polluted by demo records.
 
 ## Required Screenshot Or Video Moments
 
@@ -69,14 +70,16 @@ The demo should prove this sentence:
 - Schedule view showing a labor or coverage issue.
 - Checklist run with a failed item and follow-up task.
 - Inventory count, low-stock item, purchase need, and waste capture.
-- Cost dashboard showing labor, purchasing, inventory, and waste together.
+- Cost dashboard showing labor, purchasing, inventory, production, waste, and approval queues together.
 - AI recommendation with cited evidence and approval action.
-- Owner report with weekly operating summary.
+- Owner report with actual, imported, estimated, and pending approval totals separated.
 - Mobile/staff view for schedule, messages, tasks, and checklist work.
 
 ## Product Implication
 
 Later build phases should create a seeded demo tenant and reset script before customer-facing demos become a sales dependency.
+
+Plan 05.10 completed the cost-engine signoff and updated this demo flow to use the signed-off owner financial overview. Any seeded demo tenant must label sample records as `sample` and imported records as `imported`.
 
 The demo must also enforce the visibility rules from Phase 01.07:
 

@@ -19,14 +19,21 @@ export interface InventoryWaste {
     | "damaged"
     | "other";
   reason?: string;
+  reason_category?: string | null;
   cost_impact?: number;
+  shift_id?: string | null;
+  metadata?: Record<string, unknown> | null;
   recorded_by: string;
   waste_date: string;
   created_at: string;
   updated_at?: string;
   item?: {
     name: string;
+    cost_per_unit?: number | null;
     unit?: { name: string };
+  };
+  unit?: {
+    name: string;
   };
   location?: {
     name: string;
@@ -53,6 +60,17 @@ export interface CreateWasteData {
   reason?: string;
   cost_impact?: number;
   waste_date?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateAdjustmentData {
+  item_id: string;
+  location_id?: string;
+  adjustment_type: "increase" | "decrease" | string;
+  quantity: number;
+  reason: string;
+  cost_impact?: number;
+  metadata?: Record<string, unknown>;
 }
 
 // Fetch waste records
@@ -74,6 +92,8 @@ export function useCreateWaste() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
       toast({
         title: "Waste Recorded",
         description: "Waste entry has been successfully logged",
@@ -84,6 +104,36 @@ export function useCreateWaste() {
       toast({
         title: "Error",
         description: "Failed to record waste. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useCreateInventoryAdjustment() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (adjustmentData: CreateAdjustmentData) =>
+      InventoryService.adjustQuantity(adjustmentData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
+      toast({
+        title: "Adjustment recorded",
+        description: "Inventory adjustment has been applied.",
+      });
+    },
+    onError: (error) => {
+      logger.error("Error creating inventory adjustment", {
+        error,
+        tags: ["error"],
+      });
+      toast({
+        title: "Adjustment failed",
+        description: "Failed to record adjustment. Please try again.",
         variant: "destructive",
       });
     },

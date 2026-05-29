@@ -26,6 +26,7 @@ import {
   useInventoryItems,
   useInventoryLocations,
   useCreateWaste,
+  useCreateInventoryAdjustment,
 } from "@/hooks/useInventory";
 import { asArray, safeArrayMap } from "@/utils/reactQueryTypes";
 import { InventoryTransfersPanel } from "@/features/inventory/components/InventoryTransfersPanel";
@@ -78,6 +79,7 @@ export default function InventoryActionsPage() {
   const items = asArray(itemsData);
   const locations = asArray(locationsData);
   const createWaste = useCreateWaste();
+  const createAdjustment = useCreateInventoryAdjustment();
   const isReferenceDataLoading = itemsLoading || locationsLoading;
 
   const {
@@ -128,7 +130,8 @@ export default function InventoryActionsPage() {
     [locations],
   );
   const wasteFormDisabled = createWaste.isPending || isReferenceDataLoading;
-  const adjustmentFormDisabled = isReferenceDataLoading;
+  const adjustmentFormDisabled =
+    createAdjustment.isPending || isReferenceDataLoading;
 
   const buildSelectHandler = useCallback(
     <Form extends Record<string, string>>(
@@ -193,28 +196,24 @@ export default function InventoryActionsPage() {
   );
 
   const handleAdjustmentSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
-      const result = processAdjustmentForm({
+      await processAdjustmentForm({
         form: adjustmentForm,
+        items,
         setErrors: setAdjustmentErrors,
         showValidationToast,
+        resetForm: resetAdjustmentForm,
+        mutateAdjustment: createAdjustment.mutateAsync,
       });
-
-      if (result === "success") {
-        toast({
-          title: "Adjustment recorded",
-          description: "Inventory adjustment has been applied.",
-        });
-        resetAdjustmentForm();
-      }
     },
     [
       adjustmentForm,
-      resetAdjustmentForm,
+      createAdjustment.mutateAsync,
+      items,
       setAdjustmentErrors,
       showValidationToast,
-      toast,
+      resetAdjustmentForm,
     ],
   );
 
@@ -722,7 +721,9 @@ export default function InventoryActionsPage() {
                           className="flex-1"
                           disabled={adjustmentFormDisabled}
                         >
-                          Apply Adjustment
+                          {createAdjustment.isPending
+                            ? "Applying..."
+                            : "Apply Adjustment"}
                         </Button>
                       </div>
                     </form>

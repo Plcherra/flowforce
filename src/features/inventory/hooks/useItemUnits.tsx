@@ -149,7 +149,7 @@ export function useCreateItemUnit() {
         description: "Item unit configuration added successfully",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to add item unit configuration",
@@ -191,7 +191,7 @@ export function useUpdateItemUnit() {
         description: "Item unit configuration updated successfully",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to update item unit configuration",
@@ -239,6 +239,16 @@ export const convertBetweenUnits = (
   fromUnit: InventoryItemUnit,
   toUnit: InventoryItemUnit,
 ): number => {
+  if (
+    !Number.isFinite(quantity) ||
+    !Number.isFinite(fromUnit.conversion_factor) ||
+    !Number.isFinite(toUnit.conversion_factor) ||
+    fromUnit.conversion_factor <= 0 ||
+    toUnit.conversion_factor <= 0
+  ) {
+    return 0;
+  }
+
   // Convert to base units first, then to target unit
   const baseQuantity = quantity * fromUnit.conversion_factor;
   return baseQuantity / toUnit.conversion_factor;

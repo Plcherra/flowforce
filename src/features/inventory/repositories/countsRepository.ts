@@ -7,7 +7,12 @@ import type {
   InventoryItem,
   InventoryItemUnit,
 } from "@/features/inventory/hooks/types";
-import { buildUnitMetaIndex, collectUnits } from "@/utils/inventoryUnits";
+import {
+  buildStockPositionMap,
+  expectedQuantityForCountUnit,
+  stockPositionKey,
+  type StockPositionRow,
+} from "@/features/inventory/utils/stockPosition";
 
 const inventoryCountSchema = z
   .object({
@@ -62,7 +67,7 @@ type ScopedCountItem = {
     | "unit"
     | "unit_quantity"
   >;
-  expectedQuantity: number;
+  expectedQuantity?: number;
   units: InventoryItemUnit[];
 };
 
@@ -405,7 +410,7 @@ export async function listInventoryCountLines(
 export async function addInventoryItemToCount(
   countId: string,
   itemId: string,
-  expectedQuantity = 0,
+  expectedQuantity?: number,
   options: CountRepositoryOptions = {},
 ) {
   return addInventoryItemsToCount(
@@ -423,7 +428,13 @@ export async function addInventoryItemsToCount(
   if (!items.length) return;
   const client = options.supabaseClient ?? supabase;
   const companyId = await resolveActiveCompanyId(client, options.companyId);
-  const scopedItems = await buildScopedItemsForIds(client, items, companyId);
+  const locationIds = await getCountLocationIds(client, countId);
+  const scopedItems = await buildScopedItemsForIds(
+    client,
+    items,
+    companyId,
+    locationIds,
+  );
   if (!scopedItems.length) return;
 
   await bootstrapCountLines(client, countId, scopedItems);
@@ -444,6 +455,16 @@ export async function updateInventoryCountLine(
   };
   if (updates.counted_quantity !== undefined) {
     payload.counted_at = new Date().toISOString();
+    if (payload.variance === undefined) {
+      const { data: currentLine, error: currentLineError } = await client
+        .from("inv_count_lines")
+        .select("expected_quantity")
+        .eq("id", lineId)
+        .maybeSingle();
+      if (currentLineError) throw currentLineError;
+      payload.variance =
+        updates.counted_quantity - Number(currentLine?.expected_quantity ?? 0);
+    }
   }
 
   const { data, error } = await client
@@ -459,6 +480,7 @@ export async function updateInventoryCountLine(
       item_id: data.item_id,
       unit_id: data.unit_id,
       counted_quantity: updates.counted_quantity,
+      variance: payload.variance,
     });
   }
 }
@@ -540,9 +562,10 @@ async function resolveCountScopeItems(
       client,
       countData.items.map((item) => ({
         id: item.id,
-        expectedQuantity: item.expectedQuantity ?? 0,
+        expectedQuantity: item.expectedQuantity,
       })),
       companyId,
+      countData.locations,
     );
   }
 
@@ -568,16 +591,23 @@ async function resolveCountScopeItems(
   const items = (data ?? []) as unknown as InventoryItem[];
   const scoped = items.map((item) => ({
     item,
-    expectedQuantity: 0,
+    expectedQuantity: undefined,
     units: [],
   }));
-  return attachUnitsToItems(client, scoped);
+  const scopedWithUnits = await attachUnitsToItems(client, scoped);
+  return attachExpectedStockToItems(
+    client,
+    scopedWithUnits,
+    companyId,
+    countData.locations,
+  );
 }
 
 async function buildScopedItemsForIds(
   client: SupabaseClient,
   items: Array<{ id: string; expectedQuantity?: number }>,
   companyId: string,
+  locationIds: string[] = [],
 ): Promise<ScopedCountItem[]> {
   if (!items.length) return [];
 
@@ -600,12 +630,18 @@ async function buildScopedItemsForIds(
   const scoped = ((data ?? []) as unknown as InventoryItem[]).map<ScopedCountItem>(
     (item) => ({
       item,
-      expectedQuantity: expectedMap.get(item.id) ?? 0,
+      expectedQuantity: expectedMap.get(item.id),
       units: [],
     }),
   );
 
-  return attachUnitsToItems(client, scoped);
+  const scopedWithUnits = await attachUnitsToItems(client, scoped);
+  return attachExpectedStockToItems(
+    client,
+    scopedWithUnits,
+    companyId,
+    locationIds,
+  );
 }
 
 async function attachUnitsToItems(
@@ -667,7 +703,7 @@ async function bootstrapCountLines(
 
   const payload: Array<Record<string, unknown>> = [];
 
-  scopedItems.forEach(({ item, expectedQuantity, units }) => {
+  scopedItems.forEach(({ item, expectedQuantity = 0, units }) => {
     const fallbackUnitId = item.unit?.id || item.unit_id;
     const candidateUnits =
       units.length > 0
@@ -691,8 +727,9 @@ async function bootstrapCountLines(
       payload.push({
         count_id: countId,
         item_id: item.id,
-        expected_quantity: expectedQuantity,
+        expected_quantity: expectedQuantityForCountUnit(expectedQuantity, unit),
         counted_quantity: 0,
+        variance: -expectedQuantityForCountUnit(expectedQuantity, unit),
         unit_id: resolvedUnitId,
         unit_level: unit.unit_level ?? 1,
         conversion_factor: unit.conversion_factor ?? 1,
@@ -710,4 +747,62 @@ async function bootstrapCountLines(
     const { error } = await client.from("inv_count_lines").insert(chunk);
     if (error) throw error;
   }
+}
+
+async function attachExpectedStockToItems(
+  client: SupabaseClient,
+  scopedItems: ScopedCountItem[],
+  companyId: string,
+  locationIds: string[] = [],
+) {
+  const missingExpected = scopedItems.filter(
+    (entry) => entry.expectedQuantity === undefined,
+  );
+  if (!missingExpected.length) return scopedItems;
+
+  const itemIds = missingExpected.map((entry) => entry.item.id);
+  const { data, error } = await client
+    .from("inv_stock_positions")
+    .select("company_id,item_id,location_id,quantity_on_hand,stock_value")
+    .eq("company_id", companyId)
+    .in("item_id", itemIds);
+
+  if (error) throw error;
+
+  const positions = ((data ?? []) as StockPositionRow[]).filter((row) => {
+    if (!locationIds.length) return true;
+    return row.location_id ? locationIds.includes(row.location_id) : false;
+  });
+  const stockByItem = buildStockPositionMap(positions);
+
+  return scopedItems.map((entry) => {
+    if (entry.expectedQuantity !== undefined) {
+      return entry;
+    }
+
+    const expectedFromSelectedLocations = locationIds.reduce(
+      (sum, locationId) =>
+        sum + (stockByItem[stockPositionKey(entry.item.id, locationId)] ?? 0),
+      0,
+    );
+    const expectedQuantity = locationIds.length
+      ? expectedFromSelectedLocations
+      : stockByItem[stockPositionKey(entry.item.id, null)] ?? 0;
+
+    return {
+      ...entry,
+      expectedQuantity,
+    };
+  });
+}
+
+async function getCountLocationIds(client: SupabaseClient, countId: string) {
+  const { data, error } = await client
+    .from("inv_count_locations")
+    .select("location_id")
+    .eq("count_id", countId);
+  if (error) throw error;
+  return (data ?? [])
+    .map((entry) => entry.location_id)
+    .filter((locationId): locationId is string => Boolean(locationId));
 }

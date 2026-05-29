@@ -1,0 +1,124 @@
+{
+  "version": "2026-05-28",
+  "sourceOfTruth": {
+    "tenant": "company_members",
+    "workflowTemplate": "workflows",
+    "workflowSteps": "workflow_steps",
+    "workflowRuns": "task_workflow_instances",
+    "stepRuns": "workflow_step_instances",
+    "forms": "forms",
+    "tasks": "tasks",
+    "issues": "ops_issues",
+    "audit": "audit_log"
+  },
+  "domainObjects": [
+    {
+      "key": "workflow",
+      "table": "workflows",
+      "definition": "Reusable SOP, checklist, inspection, approval, or incident-response template.",
+      "requiredFields": ["company_id", "workflow_kind", "name", "status", "review_required"]
+    },
+    {
+      "key": "checklist_step",
+      "table": "workflow_steps",
+      "definition": "Ordered executable step with required evidence, exception policy, optional form field binding, and escalation metadata.",
+      "requiredFields": ["company_id", "workflow_id", "step_number", "step_type", "evidence_required"]
+    },
+    {
+      "key": "assignment",
+      "table": "workflow_assignments",
+      "definition": "Location, role, or person assignment rule that can later generate recurring runs.",
+      "requiredFields": ["company_id", "workflow_id", "assignment_type", "schedule_rule", "due_window", "escalation_rule"]
+    },
+    {
+      "key": "run",
+      "table": "task_workflow_instances",
+      "definition": "Executable workflow occurrence with due window, assignee, status, and review state.",
+      "requiredFields": ["company_id", "workflow_id", "status", "due_at", "review_status"]
+    },
+    {
+      "key": "step_run",
+      "table": "workflow_step_instances",
+      "definition": "Per-step execution state with evidence status, notes, failed reason, and exception status.",
+      "requiredFields": ["company_id", "workflow_instance_id", "step_id", "status", "evidence_status"]
+    },
+    {
+      "key": "evidence",
+      "table": "workflow_evidence",
+      "definition": "Attachment, signature, scan, rating, reading, note, or structured value captured during execution.",
+      "requiredFields": ["company_id", "evidence_type", "value", "captured_at", "retention_until"]
+    },
+    {
+      "key": "review",
+      "table": "workflow_reviews",
+      "definition": "Manager approval/rejection record for runs requiring review.",
+      "requiredFields": ["company_id", "workflow_instance_id", "review_status", "reviewer_id"]
+    },
+    {
+      "key": "exception",
+      "table": "workflow_exceptions",
+      "definition": "Failed, missed, unsafe, or out-of-standard condition that must be owned and resolved.",
+      "requiredFields": ["company_id", "severity", "status", "title", "owner_id", "linked_task_id", "linked_ops_issue_id"]
+    }
+  ],
+  "reuseMap": [
+    {
+      "currentSurface": "forms",
+      "workflowUse": "Builder field schema and evidence capture primitives.",
+      "decision": "Reuse forms/form_fields for complex input controls; workflows own scheduling, execution, review, and exceptions."
+    },
+    {
+      "currentSurface": "tasks",
+      "workflowUse": "Follow-up work, exceptions, and automation outcomes.",
+      "decision": "Reuse tasks for work ownership; do not use tasks as checklist templates."
+    },
+    {
+      "currentSurface": "ops_issues",
+      "workflowUse": "Operational issue stream and AI automation suggestions.",
+      "decision": "Reuse ops_issues for incident/exception visibility, with workflow_exceptions linking back to root execution evidence."
+    },
+    {
+      "currentSurface": "audit_log",
+      "workflowUse": "Immutable manager actions, approval decisions, automation hooks, and compliance exports.",
+      "decision": "Keep audit_log as the system audit destination; workflow tables carry operational state."
+    }
+  ],
+  "plannedArtifacts": {
+    "tables": [
+      "workflow_assignments",
+      "workflow_evidence",
+      "workflow_reviews",
+      "workflow_exceptions"
+    ],
+    "extendedTables": [
+      "workflows",
+      "workflow_steps",
+      "task_workflow_instances",
+      "workflow_step_instances"
+    ],
+    "views": ["workflow_domain_model_v"]
+  },
+  "tenantRules": [
+    "Every workflow-owned row must carry company_id.",
+    "Workflow child rows inherit company_id from workflow, run, step, or step run triggers.",
+    "Every workflow table must have RLS enabled and filter by current_user_company_ids().",
+    "Forms and tasks can be linked only when they belong to the same company_id."
+  ],
+  "permissionRules": [
+    "Owners and admins can manage templates, assignments, compliance packs, and review policy.",
+    "Managers can launch runs, review exceptions, and approve or reject runs.",
+    "Employees can execute assigned runs and upload required evidence.",
+    "Automated workflow actions must create tasks/issues through audited service routes."
+  ],
+  "auditEvents": [
+    "workflow.template.created",
+    "workflow.template.updated",
+    "workflow.run.started",
+    "workflow.run.completed",
+    "workflow.review.approved",
+    "workflow.review.rejected",
+    "workflow.exception.opened",
+    "workflow.exception.resolved",
+    "workflow.automation.triggered"
+  ]
+}

@@ -25,6 +25,7 @@ import {
   Edit,
   Trash2,
   History,
+  ShieldCheck,
 } from "lucide-react";
 import {
   useInventoryItems,
@@ -35,6 +36,7 @@ import { useInventoryCategories } from "@/features/inventory/hooks/useInventoryC
 import InventoryItemForm from "@/features/inventory/components/InventoryItemForm";
 import { InventoryRecipeDialog } from "@/features/inventory/components/InventoryRecipeDialog";
 import { getUnitHierarchyDisplay } from "@/features/inventory/hooks/useItemUnits";
+import { summarizeSetupHealth } from "@/features/inventory/utils/itemSetupHealth";
 import type { InventoryItem } from "@/features/inventory/hooks/types";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
@@ -53,6 +55,7 @@ export default function ItemsSetup() {
   const items = asArray(itemsData);
   const categories = asArray(categoriesData);
   const deleteItem = useDeleteInventoryItem();
+  const setupSummary = summarizeSetupHealth(items);
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -133,6 +136,21 @@ export default function ItemsSetup() {
       ? `$${value.toFixed(2)}`
       : "N/A";
 
+  const getSetupBadge = (item: InventoryItem) => {
+    const health = item.setup_health;
+    if (!health) return <Badge variant="outline">Setup unknown</Badge>;
+
+    if (health.status === "ready") {
+      return <Badge className="bg-emerald-600 text-white">Cost ready</Badge>;
+    }
+
+    if (health.status === "warning") {
+      return <Badge variant="secondary">Setup warnings</Badge>;
+    }
+
+    return <Badge variant="destructive">Setup incomplete</Badge>;
+  };
+
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -155,6 +173,49 @@ export default function ItemsSetup() {
               Add Item
             </Button>
           </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Setup ready
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                {setupSummary.readyPercent}%
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Cost-ready items
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                {setupSummary.ready}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Warnings
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                {setupSummary.warning}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Incomplete
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-destructive">
+                {setupSummary.incomplete}
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="items" className="space-y-4">
@@ -264,9 +325,10 @@ export default function ItemsSetup() {
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-2">
                               <div>
-                                <h3 className="font-semibold text-lg flex items-center gap-2">
+                                <h3 className="font-semibold text-lg flex flex-wrap items-center gap-2">
                                   {item.name}
                                   {getStockBadge(stockStatus)}
+                                  {getSetupBadge(item)}
                                 </h3>
                                 {item.description && (
                                   <p className="text-muted-foreground">
@@ -349,6 +411,21 @@ export default function ItemsSetup() {
                                 Recipe ingredients: {recipeLineCount}
                               </p>
                             )}
+                            {item.setup_health?.issues.length ? (
+                              <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                                <div className="flex items-center gap-2 font-medium">
+                                  <ShieldCheck className="h-4 w-4" />
+                                  Setup fixes needed
+                                </div>
+                                <ul className="mt-2 list-disc space-y-1 pl-5">
+                                  {item.setup_health.issues
+                                    .slice(0, 3)
+                                    .map((issue) => (
+                                      <li key={issue.code}>{issue.message}</li>
+                                    ))}
+                                </ul>
+                              </div>
+                            ) : null}
                           </div>
 
                           <div className="flex items-center gap-2 ml-4">

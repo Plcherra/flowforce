@@ -8,10 +8,10 @@ Build Jolt-style execution: checklists, SOPs, inspections, incidents, recurring 
 
 ### Phase 1: Workflow Domain Model
 
-- [ ] Define workflow, checklist, step, assignment, run, evidence, review, and exception models.
-- [ ] Map existing forms/tasks to workflow concepts.
-- [ ] Decide what is reused versus newly modeled.
-- [ ] Define permissions and audit needs.
+- [x] Define workflow, checklist, step, assignment, run, evidence, review, and exception models.
+- [x] Map existing forms/tasks to workflow concepts.
+- [x] Decide what is reused versus newly modeled.
+- [x] Define permissions and audit needs.
 
 Acceptance:
 
@@ -21,12 +21,20 @@ Verification:
 
 - Domain model maps to current and new tables.
 
+Status:
+
+- Completed on 2026-05-28.
+- Domain model: [docs/operations-workflow-domain-model.md](../operations-workflow-domain-model.md)
+- Contract: [src/services/operations/operationsWorkflowContract.json](../../src/services/operations/operationsWorkflowContract.json)
+- Migration: [20260528001200_phase6_workflow_domain_model.sql](../../supabase/migrations/20260528001200_phase6_workflow_domain_model.sql)
+- Phase report: [06.01 Workflow Domain Model](./reports/06-01-workflow-domain-model-2026-05-28.md)
+
 ### Phase 2: SOP And Checklist Builder
 
-- [ ] Create template builder for opening, closing, cleaning, safety, and inventory routines.
-- [ ] Support required fields, attachments, signatures, ratings, and scans.
-- [ ] Support location/role assignment.
-- [ ] Add preview mode.
+- [x] Create template builder for opening, closing, cleaning, safety, and inventory routines.
+- [x] Support required fields, attachments, signatures, ratings, and scans.
+- [x] Support location/role assignment.
+- [x] Add preview mode.
 
 Acceptance:
 
@@ -36,12 +44,20 @@ Verification:
 
 - Builder creates executable workflows.
 
+Status:
+
+- Completed on 2026-05-28.
+- Builder doc: [docs/sop-checklist-builder.md](../sop-checklist-builder.md)
+- Builder service: [src/services/operations/sopChecklistBuilder.ts](../../src/services/operations/sopChecklistBuilder.ts)
+- Migration: [20260528001300_phase6_sop_checklist_builder.sql](../../supabase/migrations/20260528001300_phase6_sop_checklist_builder.sql)
+- Phase report: [06.02 SOP And Checklist Builder](./reports/06-02-sop-and-checklist-builder-2026-05-28.md)
+
 ### Phase 3: Recurring Operations Calendar
 
-- [ ] Schedule recurring workflow runs.
-- [ ] Assign by location, role, or person.
-- [ ] Add due windows and escalation rules.
-- [ ] Show daily manager workload.
+- [x] Schedule recurring workflow runs.
+- [x] Assign by location, role, or person.
+- [x] Add due windows and escalation rules.
+- [x] Show daily manager workload.
 
 Acceptance:
 
@@ -51,12 +67,20 @@ Verification:
 
 - Recurring runs are generated idempotently.
 
+Status:
+
+- Completed on 2026-05-28.
+- Calendar doc: [docs/recurring-operations-calendar.md](../recurring-operations-calendar.md)
+- Calendar service: [src/services/operations/recurringOperationsCalendar.ts](../../src/services/operations/recurringOperationsCalendar.ts)
+- Migration: [20260528001400_phase6_recurring_operations_calendar.sql](../../supabase/migrations/20260528001400_phase6_recurring_operations_calendar.sql)
+- Phase report: [06.03 Recurring Operations Calendar](./reports/06-03-recurring-operations-calendar-2026-05-28.md)
+
 ### Phase 4: Field Execution UI
 
-- [ ] Build mobile-first run interface.
-- [ ] Support save-draft and resume.
-- [ ] Support required evidence.
-- [ ] Support failed step notes and escalation.
+- [x] Build mobile-first run interface.
+- [x] Support save-draft and resume.
+- [x] Support required evidence.
+- [x] Support failed step notes and escalation.
 
 Acceptance:
 
@@ -66,12 +90,20 @@ Verification:
 
 - Mobile viewport QA passes.
 
+Status:
+
+- Completed on 2026-05-28.
+- Execution doc: [docs/field-execution-ui.md](../field-execution-ui.md)
+- Execution service: [src/services/operations/fieldExecution.ts](../../src/services/operations/fieldExecution.ts)
+- Migration: [20260528001600_phase6_field_execution_ui.sql](../../supabase/migrations/20260528001600_phase6_field_execution_ui.sql)
+- Phase report: [06.04 Field Execution UI](./reports/06-04-field-execution-ui-2026-05-28.md)
+
 ### Phase 5: Manager Review Queue
 
-- [ ] Add review states.
-- [ ] Add approve/reject/comment actions.
-- [ ] Add exception prioritization.
-- [ ] Add audit trail.
+- [x] Add review states.
+- [x] Add approve/reject/comment actions.
+- [x] Add exception prioritization.
+- [x] Add audit trail.
 
 Acceptance:
 
@@ -81,12 +113,20 @@ Verification:
 
 - Review actions are permission-gated and audited.
 
+Status:
+
+- Completed on 2026-05-28.
+- Review doc: [docs/manager-review-queue.md](../manager-review-queue.md)
+- Review service: [src/services/operations/managerReviewQueue.ts](../../src/services/operations/managerReviewQueue.ts)
+- Migration: [20260528001500_phase6_manager_review_queue.sql](../../supabase/migrations/20260528001500_phase6_manager_review_queue.sql)
+- Phase report: [06.05 Manager Review Queue](./reports/06-05-manager-review-queue-2026-05-28.md)
+
 ### Phase 6: Incident And Issue Tracking
 
-- [ ] Model incidents, issues, severity, owner, due date, and resolution.
-- [ ] Connect issues to tasks, workflows, inventory, and AI suggestions.
-- [ ] Add status and SLA indicators.
-- [ ] Add reporting.
+- [x] Model incidents, issues, severity, owner, due date, and resolution.
+- [x] Connect issues to tasks, workflows, inventory, and AI suggestions.
+- [x] Add status and SLA indicators.
+- [x] Add reporting.
 
 Acceptance:
 
@@ -96,12 +136,20 @@ Verification:
 
 - Issue lifecycle tests pass.
 
+Status:
+
+- Completed on 2026-05-29.
+- Issue doc: [docs/incident-issue-tracking.md](../incident-issue-tracking.md)
+- Issue service: [src/services/operations/incidentIssueTracking.ts](../../src/services/operations/incidentIssueTracking.ts)
+- Migration: [20260528001700_phase6_incident_issue_tracking.sql](../../supabase/migrations/20260528001700_phase6_incident_issue_tracking.sql)
+- Phase report: [06.06 Incident And Issue Tracking](./reports/06-06-incident-and-issue-tracking-2026-05-29.md)
+
 ### Phase 7: Compliance Packs
 
-- [ ] Create templates for food safety, labor compliance, training, cleaning, and equipment.
-- [ ] Add evidence retention rules.
-- [ ] Add compliance dashboard.
-- [ ] Add exportable audit reports.
+- [x] Create templates for food safety, labor compliance, training, cleaning, and equipment.
+- [x] Add evidence retention rules.
+- [x] Add compliance dashboard.
+- [x] Add exportable audit reports.
 
 Acceptance:
 
@@ -110,6 +158,14 @@ Acceptance:
 Verification:
 
 - Compliance reports generate from real runs/evidence.
+
+Status:
+
+- Completed on 2026-05-29.
+- Compliance doc: [docs/compliance-packs.md](../compliance-packs.md)
+- Compliance service: [src/services/operations/compliancePacks.ts](../../src/services/operations/compliancePacks.ts)
+- Migration: [20260528001800_phase6_compliance_packs.sql](../../supabase/migrations/20260528001800_phase6_compliance_packs.sql)
+- Phase report: [06.07 Compliance Packs](./reports/06-07-compliance-packs-2026-05-29.md)
 
 ### Phase 8: Workflow Automation Hooks
 
@@ -155,4 +211,3 @@ Acceptance:
 Verification:
 
 - Workflow demo works on desktop and mobile.
-

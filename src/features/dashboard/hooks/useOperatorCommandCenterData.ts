@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { calculateScheduleLaborCost } from "@/services/costing/scheduleLabor";
 import { logger } from "@/utils/logger";
 
 type ScheduleRow = {
@@ -13,6 +14,7 @@ type ScheduleRow = {
   status: string | null;
   is_published: boolean | null;
   required_headcount: number | null;
+  requirements: Record<string, unknown> | null;
 };
 
 type TaskRow = {
@@ -38,9 +40,31 @@ type PurchaseRow = {
   total_amount: number | null;
 };
 
+type CostEngineSummaryRow = {
+  total_operating_cost: number | null;
+  labor_cost: number | null;
+  production_cost: number | null;
+  waste_cost: number | null;
+  purchasing_cost: number | null;
+  expense_cost: number | null;
+  payment_cost: number | null;
+  shortage_item_count: number | null;
+  overstaffed_shift_count: number | null;
+  understaffed_shift_count: number | null;
+};
+
 export type OperatorCommandCenterData = {
   laborHoursToday: number;
   laborCostToday: number;
+  totalOperatingCostToday: number;
+  productionCostToday: number;
+  wasteCostToday: number;
+  purchasingCostToday: number;
+  expenseCostToday: number;
+  paymentCostToday: number;
+  shortageSignalsToday: number;
+  overstaffedShiftsToday: number;
+  understaffedShiftsToday: number;
   unassignedShiftsToday: number;
   draftShiftsToday: number;
   openTasks: number;
@@ -56,6 +80,15 @@ export type OperatorCommandCenterData = {
 const DEFAULT_DATA: OperatorCommandCenterData = {
   laborHoursToday: 0,
   laborCostToday: 0,
+  totalOperatingCostToday: 0,
+  productionCostToday: 0,
+  wasteCostToday: 0,
+  purchasingCostToday: 0,
+  expenseCostToday: 0,
+  paymentCostToday: 0,
+  shortageSignalsToday: 0,
+  overstaffedShiftsToday: 0,
+  understaffedShiftsToday: 0,
   unassignedShiftsToday: 0,
   draftShiftsToday: 0,
   openTasks: 0,
@@ -91,16 +124,6 @@ function getLocalDateIso(date = new Date()) {
   return offsetDate.toISOString().slice(0, 10);
 }
 
-function computeShiftHours(row: ScheduleRow) {
-  if (!row.start_time || !row.end_time) return 0;
-  const start = new Date(row.start_time);
-  const end = new Date(row.end_time);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
-  const grossHours = (end.getTime() - start.getTime()) / 3_600_000;
-  const breakHours = Math.max(row.break_minutes ?? 0, 0) / 60;
-  return Math.max(grossHours - breakHours, 0);
-}
-
 function isOpenTask(row: TaskRow) {
   const status = (row.status ?? "").toLowerCase();
   return !row.completed_at && !terminalTaskStatuses.has(status);
@@ -122,6 +145,33 @@ function isLowStock(row: InventoryItemRow) {
   if (!Number.isFinite(minimum) || minimum <= 0) return false;
   const current = Number(row.unit_quantity ?? 0);
   return Number.isFinite(current) && current <= minimum;
+}
+
+function toFiniteNumber(value: unknown) {
+  const numeric = Number(value ?? 0);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+async function fetchCostEngineSummary(params: {
+  companyId: string;
+  dateIso: string;
+}): Promise<{ data: CostEngineSummaryRow | null; error: unknown | null }> {
+  try {
+    const { data, error } = await supabase
+      .rpc("get_cost_engine_summary", {
+        p_company_id: params.companyId,
+        p_start_date: params.dateIso,
+        p_end_date: params.dateIso,
+      })
+      .maybeSingle();
+
+    return {
+      data: (data as CostEngineSummaryRow | null) ?? null,
+      error,
+    };
+  } catch (error) {
+    return { data: null, error };
+  }
 }
 
 export function useOperatorCommandCenterData() {
@@ -146,12 +196,23 @@ export function useOperatorCommandCenterData() {
     const dayEnd = `${todayIso}T23:59:59`;
 
     try {
-      const [scheduleResult, taskResult, itemResult, purchaseResult] =
+      const costSummaryPromise = fetchCostEngineSummary({
+        companyId,
+        dateIso: todayIso,
+      });
+
+      const [
+        scheduleResult,
+        taskResult,
+        itemResult,
+        purchaseResult,
+        costSummaryResult,
+      ] =
         await Promise.all([
           supabase
             .from("schedules")
             .select(
-              "id,start_time,end_time,hourly_rate,break_minutes,user_id,status,is_published,required_headcount",
+              "id,start_time,end_time,hourly_rate,break_minutes,user_id,status,is_published,required_headcount,requirements",
             )
             .eq("company_id", companyId)
             .gte("start_time", dayStart)
@@ -169,6 +230,7 @@ export function useOperatorCommandCenterData() {
             .from("inv_purchases")
             .select("id,expected_date,status,total_amount")
             .eq("company_id", companyId),
+          costSummaryPromise,
         ]);
 
       if (scheduleResult.error) throw scheduleResult.error;
@@ -180,15 +242,22 @@ export function useOperatorCommandCenterData() {
       const tasks = (taskResult.data ?? []) as TaskRow[];
       const items = (itemResult.data ?? []) as InventoryItemRow[];
       const purchases = (purchaseResult.data ?? []) as PurchaseRow[];
+      if (costSummaryResult.error) {
+        logger.warn("Cost engine summary unavailable for command center", {
+          error: costSummaryResult.error,
+          tags: ["dashboard", "operator-command-center", "cost-engine"],
+        });
+      }
+      const costSummary = costSummaryResult.data;
 
-      const laborHoursToday = schedules.reduce(
-        (sum, row) => sum + computeShiftHours(row),
+      const scheduleCosts = schedules.map(calculateScheduleLaborCost);
+      const laborHoursToday = scheduleCosts.reduce(
+        (sum, cost) => sum + cost.plannedLaborHours,
         0,
       );
       const laborCostToday = schedules.reduce((sum, row) => {
-        const hourlyRate = Number(row.hourly_rate ?? 0);
-        if (!Number.isFinite(hourlyRate) || hourlyRate <= 0) return sum;
-        return sum + computeShiftHours(row) * hourlyRate;
+        const cost = calculateScheduleLaborCost(row);
+        return sum + (cost.plannedLaborCost ?? 0);
       }, 0);
       const unassignedShiftsToday = schedules.filter((row) => !row.user_id).length;
       const draftShiftsToday = schedules.filter(
@@ -202,7 +271,24 @@ export function useOperatorCommandCenterData() {
 
       setData({
         laborHoursToday,
-        laborCostToday,
+        laborCostToday: toFiniteNumber(
+          costSummary?.labor_cost ?? laborCostToday,
+        ),
+        totalOperatingCostToday: toFiniteNumber(
+          costSummary?.total_operating_cost,
+        ),
+        productionCostToday: toFiniteNumber(costSummary?.production_cost),
+        wasteCostToday: toFiniteNumber(costSummary?.waste_cost),
+        purchasingCostToday: toFiniteNumber(costSummary?.purchasing_cost),
+        expenseCostToday: toFiniteNumber(costSummary?.expense_cost),
+        paymentCostToday: toFiniteNumber(costSummary?.payment_cost),
+        shortageSignalsToday: toFiniteNumber(costSummary?.shortage_item_count),
+        overstaffedShiftsToday: toFiniteNumber(
+          costSummary?.overstaffed_shift_count,
+        ),
+        understaffedShiftsToday: toFiniteNumber(
+          costSummary?.understaffed_shift_count,
+        ),
         unassignedShiftsToday,
         draftShiftsToday,
         openTasks: openTasks.length,

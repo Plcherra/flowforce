@@ -6,8 +6,6 @@ import type {
   InventoryItemUpdate,
   InventoryRecipeLine,
   InventoryUnit,
-  InventoryCount,
-  InventorySupplier,
   SupplierIntegrationDetails,
   ProductionEvent,
   ProductionEventInput,
@@ -35,21 +33,38 @@ type CreateLocationPayload = Omit<CreateInventoryLocationInput, "companyId"> & {
   companyId?: string;
 };
 
-type CountLocationRow = {
-  location: {
-    id: string;
-    name: string;
-    location_type: string;
-  } | null;
-};
-
-type CountWithLocations = InventoryCount & {
-  locations?: CountLocationRow[] | null;
-};
-
 type RecipeLineWithDetails = InventoryRecipeLine & {
   ingredient?: InventoryItem | null;
   unit?: InventoryUnit | null;
+};
+
+type NamedRelation = { name?: string | null } | Array<{ name?: string | null }> | null;
+
+type InventoryCostContext = {
+  id: string;
+  company_id?: string | null;
+  cost_per_unit?: number | null;
+  default_location_id?: string | null;
+  unit_id?: string | null;
+};
+
+const WASTE_REASON_CATEGORY_PATTERNS: Array<{
+  category: string;
+  terms: string[];
+}> = [
+  { category: "expiration", terms: ["expire", "expired", "date", "old"] },
+  { category: "prep_error", terms: ["prep", "overcook", "burn", "mistake"] },
+  { category: "spoilage", terms: ["spoil", "mold", "bad", "rotten"] },
+  { category: "damage", terms: ["damage", "broken", "spill", "dropped"] },
+  { category: "theft", terms: ["theft", "missing", "stolen"] },
+];
+
+const relationName = (relation: NamedRelation, fallback: string) => {
+  if (Array.isArray(relation)) {
+    return relation[0]?.name || fallback;
+  }
+
+  return relation?.name || fallback;
 };
 
 async function resolveActiveCompanyId(
@@ -92,6 +107,60 @@ async function resolveActiveCompanyId(
     });
     return null;
   }
+}
+
+async function getAuthenticatedUser(client: SupabaseClient = supabase) {
+  const { data, error } = await client.auth.getUser();
+  if (error) throw error;
+  const user = data.user;
+  if (!user) {
+    throw new Error("Authenticated user required");
+  }
+  return user;
+}
+
+async function getInventoryCostContext(
+  itemId: string,
+  client: SupabaseClient = supabase,
+): Promise<InventoryCostContext> {
+  const { data, error } = await client
+    .from("inv_items")
+    .select("id, company_id, cost_per_unit, default_location_id, unit_id")
+    .eq("id", itemId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("Inventory item not found.");
+  return data as InventoryCostContext;
+}
+
+function calculateCostImpact(
+  quantity: number,
+  item: Pick<InventoryCostContext, "cost_per_unit">,
+  explicitCostImpact?: number,
+) {
+  if (Number.isFinite(explicitCostImpact) && explicitCostImpact !== undefined) {
+    return explicitCostImpact;
+  }
+
+  const unitCost = Number(item.cost_per_unit ?? 0);
+  if (!Number.isFinite(quantity) || !Number.isFinite(unitCost)) return 0;
+  return Math.max(0, quantity * unitCost);
+}
+
+function classifyWasteReason(wasteType: string, reason?: string | null) {
+  if (wasteType === "expired") return "expiration";
+  if (wasteType === "prep_error") return "prep_error";
+  if (wasteType === "spoilage") return "spoilage";
+  if (wasteType === "damaged" || wasteType === "accident") return "damage";
+  if (wasteType === "theft") return "theft";
+
+  const normalizedReason = reason?.toLowerCase() ?? "";
+  const match = WASTE_REASON_CATEGORY_PATTERNS.find(({ terms }) =>
+    terms.some((term) => normalizedReason.includes(term)),
+  );
+
+  return match?.category ?? "unclassified";
 }
 
 // Centralized API service for inventory operations
@@ -234,8 +303,6 @@ export class InventoryService {
     return (
       data
         ?.map((item) => {
-          const unitRelation = item.inv_units as any;
-
           return {
             name: item.name,
             current: Math.max(
@@ -243,10 +310,7 @@ export class InventoryService {
               (item.min_stock_level || 10) - Math.floor(Math.random() * 15),
             ),
             min: item.min_stock_level || 0,
-            unit:
-              (Array.isArray(unitRelation)
-                ? unitRelation[0]?.name
-                : unitRelation?.name) || "units",
+            unit: relationName(item.inv_units as NamedRelation, "units"),
             item_id: item.id,
           };
         })
@@ -271,14 +335,10 @@ export class InventoryService {
 
     return (
       adjustments?.map((adj) => {
-        const itemRelation = adj.inv_items as any;
         const timeStr = new Date(adj.created_at).toLocaleString();
         return {
           action: `${adj.adjustment_type} adjustment`,
-          item:
-            (Array.isArray(itemRelation)
-              ? itemRelation[0]?.name
-              : itemRelation?.name) || "Unknown item",
+          item: relationName(adj.inv_items as NamedRelation, "Unknown item"),
           time: timeStr,
           type: adj.adjustment_type,
         };
@@ -309,17 +369,32 @@ export class InventoryService {
     reason: string;
     location_id?: string;
     cost_impact?: number;
+    metadata?: Record<string, unknown>;
   }) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
+    const item = await getInventoryCostContext(adjustment.item_id);
+    const quantity = Number(adjustment.quantity);
+    const costImpact = calculateCostImpact(
+      quantity,
+      item,
+      adjustment.cost_impact,
+    );
 
     const { data, error } = await supabase
       .from("inv_adjustments")
       .insert({
         ...adjustment,
-        adjusted_by: user?.id,
+        company_id: item.company_id,
+        quantity,
+        location_id: adjustment.location_id || item.default_location_id || null,
+        cost_impact: costImpact,
+        adjusted_by: user.id,
         adjustment_date: new Date().toISOString().split("T")[0],
+        metadata: {
+          source: "manual_adjustment",
+          unit_cost: item.cost_per_unit ?? null,
+          ...(adjustment.metadata ?? {}),
+        },
       })
       .select()
       .single();
@@ -336,25 +411,72 @@ export class InventoryService {
     reason?: string;
     cost_impact?: number;
     location_id?: string;
+    unit_id?: string;
     waste_type: string;
     waste_date?: string;
+    metadata?: Record<string, unknown>;
   }) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
+    const item = await getInventoryCostContext(wasteEvent.item_id);
+    const quantity = Number(wasteEvent.quantity);
+    const wasteDate =
+      wasteEvent.waste_date || new Date().toISOString().split("T")[0];
+    const locationId = wasteEvent.location_id || item.default_location_id || null;
+    const costImpact = calculateCostImpact(quantity, item, wasteEvent.cost_impact);
+    const reasonCategory = classifyWasteReason(
+      wasteEvent.waste_type,
+      wasteEvent.reason,
+    );
 
     const { data, error } = await supabase
       .from("inv_waste")
       .insert({
         ...wasteEvent,
-        recorded_by: user?.id,
-        waste_date:
-          wasteEvent.waste_date || new Date().toISOString().split("T")[0],
+        company_id: item.company_id,
+        quantity,
+        location_id: locationId,
+        unit_id: wasteEvent.unit_id ?? item.unit_id ?? null,
+        cost_impact: costImpact,
+        reason_category: reasonCategory,
+        metadata: {
+          source: "waste_log",
+          unit_cost: item.cost_per_unit ?? null,
+          ...(wasteEvent.metadata ?? {}),
+        },
+        recorded_by: user.id,
+        waste_date: wasteDate,
       })
       .select()
       .single();
 
     if (error) throw error;
+
+    const { error: adjustmentError } = await supabase
+      .from("inv_adjustments")
+      .insert({
+        company_id: item.company_id,
+        item_id: wasteEvent.item_id,
+        location_id: locationId,
+        adjustment_type: "waste",
+        quantity,
+        reason: `waste:${wasteEvent.waste_type}:${wasteEvent.reason ?? reasonCategory}`,
+        reference_number: data.id,
+        cost_impact: costImpact,
+        adjusted_by: user.id,
+        adjustment_date: wasteDate,
+        metadata: {
+          source: "waste_log",
+          waste_id: data.id,
+          waste_type: wasteEvent.waste_type,
+          reason_category: reasonCategory,
+        },
+      });
+
+    if (adjustmentError) {
+      await supabase.from("inv_waste").delete().eq("id", data.id);
+      throw adjustmentError;
+    }
+
     return data;
   }
 
@@ -366,8 +488,10 @@ export class InventoryService {
         *,
         item:inv_items(
           name,
+          cost_per_unit,
           unit:inv_units(name)
         ),
+        unit:inv_units(name),
         location:inv_locations(name),
         recorder:profiles!recorded_by(first_name, last_name)
       `,
@@ -531,6 +655,12 @@ export class InventoryService {
       item: item as InventoryItem,
       producedQuantity: Number(input.produced_quantity),
       producedUnitId: input.produced_unit_id,
+      yieldQuantity: input.yield_quantity,
+      yieldUnitId: input.yield_unit_id,
+      wasteQuantity: input.waste_quantity,
+      wasteUnitId: input.waste_unit_id,
+      laborCost: input.labor_cost,
+      overheadCost: input.overhead_cost,
       recipeLines: ((recipeLines ?? []) as RecipeLineWithDetails[]).map(
         (line) => ({
           ingredient_id: line.ingredient_id,
@@ -546,18 +676,15 @@ export class InventoryService {
       units: unitBucket,
     });
 
-    const laborCost = Number.isFinite(input.labor_cost)
-      ? Number(input.labor_cost)
-      : 0;
-    const overheadCost = Number.isFinite(input.overhead_cost)
-      ? Number(input.overhead_cost)
-      : 0;
+    if (!calculation.canRecord) {
+      throw new Error(calculation.blockingIssues.join(" "));
+    }
+
     const materialCost = calculation.materialCostTotal;
-    const totalOutputCost = materialCost + laborCost + overheadCost;
-    const unitOutputCost =
-      calculation.producedQuantityInItemUnit > 0
-        ? totalOutputCost / calculation.producedQuantityInItemUnit
-        : null;
+    const laborCost = calculation.laborCost;
+    const overheadCost = calculation.overheadCost;
+    const totalOutputCost = calculation.totalOutputCost;
+    const unitOutputCost = calculation.unitOutputCost;
 
     let eventId: string | null = null;
     try {
@@ -570,7 +697,7 @@ export class InventoryService {
           produced_quantity: Number(input.produced_quantity),
           produced_unit_id: input.produced_unit_id,
           yield_quantity:
-            input.yield_quantity ?? calculation.producedQuantityInItemUnit,
+            input.yield_quantity ?? calculation.yieldQuantityInItemUnit,
           yield_unit_id: input.yield_unit_id ?? item.unit_id,
           waste_quantity: input.waste_quantity ?? null,
           waste_unit_id: input.waste_unit_id ?? null,
@@ -593,6 +720,7 @@ export class InventoryService {
 
       if (calculation.materials.length > 0) {
         const materialsPayload = calculation.materials.map((material) => ({
+          company_id: item.company_id,
           production_id: event.id,
           ingredient_item_id: material.ingredientId,
           quantity_used: material.quantityUsed,
@@ -611,6 +739,7 @@ export class InventoryService {
       const { error: approvalError } = await supabase
         .from("inv_production_approvals")
         .insert({
+          company_id: item.company_id,
           production_id: event.id,
           action: "submitted",
           action_by: user.id,
@@ -624,6 +753,7 @@ export class InventoryService {
       const adjustmentDate = new Date().toISOString().split("T")[0];
       const adjustmentsPayload = [
         {
+          company_id: item.company_id,
           item_id: input.item_id,
           adjustment_type: "increase",
           quantity: calculation.producedQuantityInItemUnit,
@@ -634,8 +764,11 @@ export class InventoryService {
           adjustment_date: adjustmentDate,
         },
         ...calculation.materials
-          .filter((material) => material.quantityUsed > 0)
+          .filter(
+            (material) => material.canDeductInventory && material.quantityUsed > 0,
+          )
           .map((material) => ({
+            company_id: item.company_id,
             item_id: material.ingredientId,
             adjustment_type: "decrease",
             quantity: material.quantityUsed,
@@ -657,9 +790,33 @@ export class InventoryService {
         if (adjustmentsError) throw adjustmentsError;
       }
 
+      if (calculation.wasteQuantityInItemUnit > 0) {
+        const { error: wasteError } = await supabase.from("inv_waste").insert({
+          company_id: item.company_id,
+          item_id: input.item_id,
+          location_id: item.default_location_id ?? null,
+          quantity: calculation.wasteQuantityInItemUnit,
+          reason: `production_waste:${event.id}`,
+          cost_impact: calculation.wasteCostEstimate,
+          waste_type: "production",
+          waste_date: adjustmentDate,
+          recorded_by: user.id,
+        });
+
+        if (wasteError) throw wasteError;
+      }
+
       return { eventId: event.id, warnings: calculation.warnings };
     } catch (error) {
       if (eventId) {
+        await supabase
+          .from("inv_adjustments")
+          .delete()
+          .eq("reference_number", eventId);
+        await supabase
+          .from("inv_waste")
+          .delete()
+          .eq("reason", `production_waste:${eventId}`);
         await supabase
           .from("inv_production_materials")
           .delete()

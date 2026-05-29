@@ -104,8 +104,20 @@ function getTaskSeverity(data: OperatorCommandCenterData): Severity {
 }
 
 function getInventorySeverity(data: OperatorCommandCenterData): Severity {
-  if (data.lowStockItems > 5 || data.overduePurchases > 0) return "urgent";
-  if (data.lowStockItems > 0 || data.openPurchases > 0) return "watch";
+  if (
+    data.lowStockItems > 5 ||
+    data.shortageSignalsToday > 5 ||
+    data.overduePurchases > 0
+  ) {
+    return "urgent";
+  }
+  if (
+    data.lowStockItems > 0 ||
+    data.shortageSignalsToday > 0 ||
+    data.openPurchases > 0
+  ) {
+    return "watch";
+  }
   return "good";
 }
 
@@ -115,6 +127,9 @@ function getLaborSeverity(
 ): Severity {
   if (data.unassignedShiftsToday > 0 || data.draftShiftsToday > 0) {
     return "urgent";
+  }
+  if (data.overstaffedShiftsToday > 0 || data.understaffedShiftsToday > 0) {
+    return "watch";
   }
   if (stats.hoursUtilization > 95 || stats.hoursUtilization < 55) {
     return "watch";
@@ -139,7 +154,7 @@ function buildCards(
     {
       label: "Labor plan",
       value: formatHours(data.laborHoursToday),
-      detail: `${currencyFormatter.format(data.laborCostToday)} scheduled labor, ${data.draftShiftsToday} draft shifts`,
+      detail: `${currencyFormatter.format(data.laborCostToday)} scheduled labor, ${data.overstaffedShiftsToday} overstaffed shifts`,
       icon: Clock3,
       severity: getLaborSeverity(stats, data),
       href: "/app/enhanced-scheduling",
@@ -156,7 +171,7 @@ function buildCards(
     },
     {
       label: "Inventory posture",
-      value: String(data.lowStockItems),
+      value: String(data.shortageSignalsToday || data.lowStockItems),
       detail: `${data.activeInventoryItems} active items, ${data.openPurchases} open purchases`,
       icon: Boxes,
       severity: getInventorySeverity(data),
@@ -169,16 +184,16 @@ function buildCards(
         stats.pendingTimeOff +
           data.unassignedShiftsToday +
           data.overdueTasks +
-          data.lowStockItems +
+          Math.max(data.shortageSignalsToday, data.lowStockItems) +
           data.overduePurchases,
       ),
-      detail: `${stats.pendingTimeOff} time-off requests, ${data.overduePurchases} late purchases`,
+      detail: `${stats.pendingTimeOff} time-off requests, ${data.shortageSignalsToday} shortage signals`,
       icon: ShieldAlert,
       severity:
         stats.pendingTimeOff +
           data.unassignedShiftsToday +
           data.overdueTasks +
-          data.lowStockItems +
+          Math.max(data.shortageSignalsToday, data.lowStockItems) +
           data.overduePurchases >
         0
           ? "urgent"
@@ -225,7 +240,7 @@ function buildManagerActions(
   if (data.lowStockItems > 0) {
     actions.push({
       label: "Reorder low-stock items",
-      detail: `${data.lowStockItems} inventory items are at or below par.`,
+      detail: `${data.shortageSignalsToday || data.lowStockItems} inventory items are at or below par.`,
       href: "/app/inventory",
       severity: data.lowStockItems > 5 ? "urgent" : "watch",
     });
@@ -237,6 +252,15 @@ function buildManagerActions(
       detail: `${data.openPurchases} open purchases total ${currencyFormatter.format(data.openPurchaseValue)}.`,
       href: "/app/inventory/purchasing",
       severity: data.overduePurchases > 0 ? "urgent" : "watch",
+    });
+  }
+
+  if (data.overstaffedShiftsToday > 0) {
+    actions.push({
+      label: "Trim overstaffed shifts",
+      detail: `${data.overstaffedShiftsToday} shifts are above planned headcount in the cost engine.`,
+      href: "/app/enhanced-scheduling",
+      severity: "watch",
     });
   }
 
@@ -475,11 +499,13 @@ export default function OperatorCommandCenter({
                   <div>
                     <div className="text-2xl font-semibold">
                       {currencyFormatter.format(
-                        data.laborCostToday + data.openPurchaseValue,
+                        data.totalOperatingCostToday ||
+                          data.laborCostToday + data.openPurchaseValue,
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Scheduled labor plus open purchase exposure.
+                      Today&apos;s labor, production, waste, purchasing, and
+                      expense cost.
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
@@ -492,7 +518,21 @@ export default function OperatorCommandCenter({
                     <div className="rounded-md bg-background p-3">
                       <div className="text-muted-foreground">Purchasing</div>
                       <div className="font-semibold">
-                        {currencyFormatter.format(data.openPurchaseValue)}
+                        {currencyFormatter.format(
+                          data.purchasingCostToday || data.openPurchaseValue,
+                        )}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-background p-3">
+                      <div className="text-muted-foreground">Waste</div>
+                      <div className="font-semibold">
+                        {currencyFormatter.format(data.wasteCostToday)}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-background p-3">
+                      <div className="text-muted-foreground">Production</div>
+                      <div className="font-semibold">
+                        {currencyFormatter.format(data.productionCostToday)}
                       </div>
                     </div>
                   </div>

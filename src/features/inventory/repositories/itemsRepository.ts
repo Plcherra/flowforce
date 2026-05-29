@@ -13,7 +13,9 @@ import {
   buildUnitMetaIndex,
   collectUnits,
   convertQuantity,
+  tryGetConversionFactor,
 } from "@/utils/inventoryUnits";
+import { buildInventoryItemSetupHealth } from "@/features/inventory/utils/itemSetupHealth";
 import { logger } from "@/utils/logger";
 
 // Note: Using passthrough() as InventoryItem has complex nested types
@@ -69,7 +71,7 @@ export async function listInventoryItems({
 
   const itemIds = items.map((item) => item.id);
 
-  const [unitsResult, recipeResult] = await Promise.all([
+  const [unitsResult, recipeResult, unitsCatalogResult] = await Promise.all([
     client
       .from("inv_item_units")
       .select(
@@ -93,10 +95,12 @@ export async function listInventoryItems({
         `,
       )
       .in("item_id", itemIds),
+    client.from("inv_units").select("*").eq("is_active", true),
   ]);
 
   if (unitsResult.error) throw unitsResult.error;
   if (recipeResult.error) throw recipeResult.error;
+  if (unitsCatalogResult.error) throw unitsCatalogResult.error;
 
   const unitsByItem = (unitsResult.data ?? []).reduce<
     Record<string, InventoryItemUnit[]>
@@ -115,6 +119,7 @@ export async function listInventoryItems({
   }, {});
 
   const unitCollection = collectUnits([
+    unitsCatalogResult.data as InventoryUnit[],
     items.map((item) => item.unit),
     items.map((item) => item.recipe_yield_unit),
     (unitsResult.data ?? []).map((u) => u.unit as InventoryUnit),
@@ -130,8 +135,7 @@ export async function listInventoryItems({
     const itemUnits = unitsByItem[item.id] || [];
     const recipeLines = recipesByItem[item.id] || [];
     const recipeCost = calculateRecipeCost(item, recipeLines, unitMeta);
-
-    return {
+    const itemWithRelations: InventoryItem = {
       ...item,
       units: itemUnits,
       recipes: recipeLines.length
@@ -140,8 +144,8 @@ export async function listInventoryItems({
               id: `recipe-${item.id}`,
               item_id: item.id,
               lines: recipeLines,
-              total_cost: recipeCost.totalCost,
-              cost_per_unit: recipeCost.costPerUnit,
+              total_cost: recipeCost.totalCost ?? undefined,
+              cost_per_unit: recipeCost.costPerUnit ?? undefined,
               yield_quantity:
                 item.recipe_yield_quantity ?? recipeLines[0]?.yield_amount ?? 1,
               yield_unit_id:
@@ -154,6 +158,11 @@ export async function listInventoryItems({
       recipe_cost_per_unit: recipeCost.costPerUnit ?? undefined,
       calculated_cost_per_unit:
         recipeCost.costPerUnit ?? item.cost_per_unit ?? undefined,
+    };
+
+    return {
+      ...itemWithRelations,
+      setup_health: buildInventoryItemSetupHealth(itemWithRelations, unitMeta),
     };
   });
 }
@@ -194,8 +203,8 @@ function calculateRecipeCost(
 ) {
   if (!lines.length) {
     return {
-      totalCost: 0,
-      costPerUnit: item.cost_per_unit || 0,
+      totalCost: item.cost_per_unit ?? null,
+      costPerUnit: item.cost_per_unit ?? null,
     };
   }
 
@@ -213,13 +222,22 @@ function calculateRecipeCost(
 
     const ingredientUnitId = ingredient.unit_id || ingredient.unit?.id || null;
 
+    const conversion = tryGetConversionFactor(
+      unitMeta,
+      line.unit_id,
+      ingredientUnitId,
+    );
+
+    if (conversion.factor === null) {
+      return sum;
+    }
+
     const normalizedQuantity = convertQuantity(
       unitMeta,
       lineQuantity,
       line.unit_id,
       ingredientUnitId,
     );
-
     const lineCost = normalizedQuantity * ingredientCost;
     return Number.isFinite(lineCost) ? sum + lineCost : sum;
   }, 0);
@@ -237,6 +255,6 @@ function calculateRecipeCost(
 
   return {
     totalCost,
-    costPerUnit: totalCost / normalizedYield,
+    costPerUnit: totalCost > 0 ? totalCost / normalizedYield : null,
   };
 }

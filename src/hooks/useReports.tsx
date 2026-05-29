@@ -8,9 +8,9 @@ export interface CustomReport {
   name: string;
   description?: string;
   report_type: string;
-  filters: any;
+  filters: Record<string, unknown>;
   columns: string[];
-  chart_config: any;
+  chart_config: Record<string, unknown>;
   is_public: boolean;
   created_at: string;
   updated_at: string;
@@ -131,7 +131,10 @@ export function useDeleteReport() {
   });
 }
 
-export function useReportData(reportType: string, filters: any = {}) {
+export function useReportData(
+  reportType: string,
+  filters: Record<string, unknown> = {},
+) {
   return useQuery({
     queryKey: ["reportData", reportType, filters],
     queryFn: async () => {
@@ -144,6 +147,8 @@ export function useReportData(reportType: string, filters: any = {}) {
         forms: "forms",
         expenses: "expenses",
         inventory: "inventory_items",
+        shift_profitability: "cost_day_location_summary_v",
+        cost_engine: "cost_day_location_summary_v",
       };
 
       const tableName = tableMap[reportType];
@@ -151,7 +156,7 @@ export function useReportData(reportType: string, filters: any = {}) {
         throw new Error(`Invalid report type: ${reportType}`);
       }
 
-      let query = supabase.from(tableName as any).select("*");
+      let query = supabase.from(tableName).select("*");
 
       // Apply filters dynamically
       Object.entries(filters).forEach(([key, value]) => {

@@ -45,9 +45,23 @@ Purpose: track what must be true before FlowForce is offered to paid pilot custo
 - [x] Forms and sections support builder, submissions, advanced fields, custom pages, permissions, storage-aware fields, and readiness review.
 - [x] Analytics and reports support tenant-scoped summaries, owner/manager views, CSV exports, cost signals, and AI context readiness.
 - [x] Settings and admin support completeness indicators, integrations shell, audit links, and confirmation-gated high-risk actions.
-- [ ] Demo-only data is removed from production-facing flows.
+- [x] Demo-only data is removed from production-facing flows.
 - [x] Mobile and desktop layouts are QA'd for overflow, loading loops, and console errors.
 - [x] Authenticated production sidebar smoke passes on desktop and mobile viewports.
+
+## Cost Engine
+
+- [x] Canonical cost terms are defined for labor, inventory, purchasing, waste, production, and shift cost.
+- [x] Cost precision, currency, tenant rules, and permission rules are documented.
+- [x] Inventory item/unit cost basis is reliable.
+- [x] Recipe and production costing are fully connected.
+- [x] Counts and stock position rollups are reliable.
+- [x] Purchasing receipts update inventory and cost basis.
+- [x] Waste events calculate cost impact consistently.
+- [x] Schedule labor cost rollups are tenant-scoped.
+- [x] Shift/day/location profitability summaries are available.
+- [x] Owner financial overview separates actual, estimated, and imported data.
+- [x] Cost engine regression tests cover key labor, production, waste, owner finance, and demo-exclusion calculations.
 
 ## Security And Data
 

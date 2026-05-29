@@ -2,39 +2,13 @@ import type {
   InventoryItem,
   InventoryUnit,
 } from "@/features/inventory/hooks/types";
+import {
+  buildUnitMetaIndex,
+  tryGetConversionFactor,
+} from "@/utils/inventoryUnits";
 
 type UnitLookup = Record<string, InventoryUnit>;
-
-type ManualUnitGroup = "weight" | "count" | "volume";
-
-type ManualUnitDefinition = {
-  keys: string[];
-  factor: number;
-  group: ManualUnitGroup;
-};
-
-const MANUAL_UNIT_DEFINITIONS: ManualUnitDefinition[] = [
-  { keys: ["g", "gram", "grams"], factor: 1, group: "weight" },
-  { keys: ["kg", "kilogram", "kilograms"], factor: 1000, group: "weight" },
-  { keys: ["mg", "milligram", "milligrams"], factor: 0.001, group: "weight" },
-  {
-    keys: ["lb", "lbs", "pound", "pounds"],
-    factor: 453.59237,
-    group: "weight",
-  },
-  { keys: ["oz", "ounce", "ounces"], factor: 28.349523125, group: "weight" },
-  { keys: ["each", "ea", "unit", "units"], factor: 1, group: "count" },
-];
-
-const manualUnitMap = (() => {
-  const map = new Map<string, { factor: number; group: ManualUnitGroup }>();
-  for (const def of MANUAL_UNIT_DEFINITIONS) {
-    def.keys.forEach((key) => {
-      map.set(key.toLowerCase(), { factor: def.factor, group: def.group });
-    });
-  }
-  return map;
-})();
+type UnitMetaIndex = ReturnType<typeof buildUnitMetaIndex>;
 
 export type ProductionRecipeLine = {
   ingredient_id: string;
@@ -56,21 +30,40 @@ export type ProductionMaterialUsage = {
   totalCost: number;
   recipeUnit?: InventoryUnit | null;
   conversionFactor?: number | null;
+  canDeductInventory: boolean;
+  costStatus: "costed" | "uncosted";
+  warning?: string;
 };
 
 export type ProductionCalculationInput = {
   item: InventoryItem;
   producedQuantity: number;
   producedUnitId: string;
+  yieldQuantity?: number | null;
+  yieldUnitId?: string | null;
+  wasteQuantity?: number | null;
+  wasteUnitId?: string | null;
+  laborCost?: number | null;
+  overheadCost?: number | null;
   recipeLines: ProductionRecipeLine[];
   units: InventoryUnit[];
 };
 
 export type ProductionCalculationResult = {
   producedQuantityInItemUnit: number;
+  yieldQuantityInItemUnit: number;
+  wasteQuantityInItemUnit: number;
+  costedOutputQuantity: number;
   materials: ProductionMaterialUsage[];
   materialCostTotal: number;
+  laborCost: number;
+  overheadCost: number;
+  totalOutputCost: number;
+  unitOutputCost: number | null;
+  wasteCostEstimate: number;
+  canRecord: boolean;
   warnings: string[];
+  blockingIssues: string[];
 };
 
 function buildUnitLookup(units: InventoryUnit[]): UnitLookup {
@@ -80,113 +73,28 @@ function buildUnitLookup(units: InventoryUnit[]): UnitLookup {
   }, {});
 }
 
-function normaliseUnitKey(unit?: InventoryUnit | null): string | null {
-  if (!unit) return null;
-  return (unit.abbreviation || unit.name || "").toLowerCase() || null;
-}
-
-function manualConversionFactor(
-  from?: InventoryUnit | null,
-  to?: InventoryUnit | null,
-): number | null {
-  if (!from || !to) return null;
-  const fromKey = normaliseUnitKey(from);
-  const toKey = normaliseUnitKey(to);
-  if (!fromKey || !toKey) return null;
-
-  const fromDef = manualUnitMap.get(fromKey);
-  const toDef = manualUnitMap.get(toKey);
-  if (!fromDef || !toDef) return null;
-  if (fromDef.group !== toDef.group) return null;
-
-  return fromDef.factor / toDef.factor;
-}
-
-function factorToRoot(
-  unitsById: UnitLookup,
-  unitId: string,
-): { rootId: string; factor: number } | null {
-  const visited = new Set<string>();
-  let current = unitsById[unitId];
-  if (!current) {
-    return null;
-  }
-  let factor = 1;
-
-  while (current) {
-    if (visited.has(current.id)) {
-      return null;
-    }
-    visited.add(current.id);
-
-    if (current.base_unit_id && current.conversion_factor) {
-      const parent = unitsById[current.base_unit_id];
-      if (!parent) {
-        return null;
-      }
-      factor *= current.conversion_factor || 1;
-      current = parent;
-      continue;
-    }
-
-    if (current.parent_unit_id && current.conversion_to_parent) {
-      const parent = unitsById[current.parent_unit_id];
-      if (!parent) {
-        return null;
-      }
-      factor *= current.conversion_to_parent || 1;
-      current = parent;
-      continue;
-    }
-
-    break;
-  }
-
-  return { rootId: current?.id ?? unitId, factor };
-}
-
 export function getConversionFactor(
-  unitsById: UnitLookup,
+  unitMeta: UnitMetaIndex,
   fromUnitId: string,
   toUnitId: string,
 ): number | null {
-  if (fromUnitId === toUnitId) {
-    return 1;
-  }
-
-  const fromPath = factorToRoot(unitsById, fromUnitId);
-  const toPath = factorToRoot(unitsById, toUnitId);
-
-  if (fromPath && toPath && fromPath.rootId === toPath.rootId) {
-    if (toPath.factor === 0) {
-      return null;
-    }
-    return fromPath.factor / toPath.factor;
-  }
-
-  const fromUnit = unitsById[fromUnitId];
-  const toUnit = unitsById[toUnitId];
-  const manualFactor = manualConversionFactor(fromUnit, toUnit);
-  if (manualFactor) {
-    return manualFactor;
-  }
-
-  return null;
+  return tryGetConversionFactor(unitMeta, fromUnitId, toUnitId).factor;
 }
 
 export function convertQuantityWithFallback(
-  unitsById: UnitLookup,
+  unitMeta: UnitMetaIndex,
   quantity: number,
   fromUnitId: string,
   toUnitId: string,
-): { value: number; factor: number | null } {
+): { value: number; factor: number | null; reason?: string } {
   if (quantity === 0 || fromUnitId === toUnitId) {
     return { value: quantity, factor: 1 };
   }
 
-  const factor = getConversionFactor(unitsById, fromUnitId, toUnitId);
+  const conversion = tryGetConversionFactor(unitMeta, fromUnitId, toUnitId);
+  const factor = conversion.factor;
   if (factor == null) {
-    return { value: quantity, factor: null };
+    return { value: quantity, factor: null, reason: conversion.reason };
   }
 
   return { value: quantity * factor, factor };
@@ -200,25 +108,73 @@ function round(value: number, precision = 4): number {
 export function calculateProductionMaterials(
   input: ProductionCalculationInput,
 ): ProductionCalculationResult {
-  const { item, producedQuantity, producedUnitId, recipeLines, units } = input;
+  const {
+    item,
+    producedQuantity,
+    producedUnitId,
+    yieldQuantity,
+    yieldUnitId,
+    wasteQuantity,
+    wasteUnitId,
+    recipeLines,
+    units,
+  } = input;
   const unitsById = buildUnitLookup(units);
+  const unitMeta = buildUnitMetaIndex(units);
   const warnings: string[] = [];
+  const blockingIssues: string[] = [];
 
   const { value: producedQuantityInItemUnit, factor: producedFactor } =
     convertQuantityWithFallback(
-      unitsById,
+      unitMeta,
       producedQuantity,
       producedUnitId,
       item.unit_id,
     );
 
   if (producedFactor == null) {
-    warnings.push(
-      `No unit conversion path from production unit (${producedUnitId}) to item unit (${item.unit_id}); using entered quantity`,
+    blockingIssues.push(
+      `No unit conversion path from production unit (${producedUnitId}) to item unit (${item.unit_id}).`,
     );
   }
 
   const finalProducedQuantity = round(producedQuantityInItemUnit, 4);
+  let yieldQuantityInItemUnit = finalProducedQuantity;
+  if (yieldQuantity != null && Number.isFinite(yieldQuantity) && yieldQuantity > 0) {
+    const { value, factor } = convertQuantityWithFallback(
+      unitMeta,
+      yieldQuantity,
+      yieldUnitId ?? item.unit_id,
+      item.unit_id,
+    );
+    if (factor == null) {
+      warnings.push(
+        `Could not convert actual yield to item unit; using produced quantity for unit cost.`,
+      );
+    } else {
+      yieldQuantityInItemUnit = round(value, 4);
+    }
+  }
+
+  let wasteQuantityInItemUnit = 0;
+  if (wasteQuantity != null && Number.isFinite(wasteQuantity) && wasteQuantity > 0) {
+    const { value, factor } = convertQuantityWithFallback(
+      unitMeta,
+      wasteQuantity,
+      wasteUnitId ?? item.unit_id,
+      item.unit_id,
+    );
+    if (factor == null) {
+      warnings.push("Could not convert waste quantity to item unit.");
+    } else {
+      wasteQuantityInItemUnit = round(value, 4);
+    }
+  }
+
+  if (!recipeLines.length) {
+    warnings.push("No recipe lines configured; production material cost is zero.");
+  }
+
   const materials: ProductionMaterialUsage[] = [];
 
   for (const line of recipeLines) {
@@ -242,7 +198,7 @@ export function calculateProductionMaterials(
 
     const { value: quantityInIngredientUnit, factor: conversionFactor } =
       convertQuantityWithFallback(
-        unitsById,
+        unitMeta,
         quantityInRecipeUnit,
         line.unit_id,
         ingredientUnitId,
@@ -251,30 +207,39 @@ export function calculateProductionMaterials(
     if (conversionFactor == null && line.unit_id !== ingredientUnitId) {
       const fromUnit = unitsById[line.unit_id];
       const toUnit = unitsById[ingredientUnitId];
+      const warning = `Could not convert ${quantityInRecipeUnit} ${fromUnit?.abbreviation || fromUnit?.name || "units"} of ${
+        ingredient?.name || "ingredient"
+      } to ${toUnit?.abbreviation || toUnit?.name || "target unit"}; not deducting or costing this line.`;
       warnings.push(
-        `Could not convert ${quantityInRecipeUnit} ${fromUnit?.abbreviation || fromUnit?.name || "units"} of ${
-          ingredient?.name || "ingredient"
-        } to ${toUnit?.abbreviation || toUnit?.name || "target unit"}; using recipe unit`,
+        warning,
       );
+
+      materials.push({
+        ingredientId: line.ingredient_id,
+        ingredient,
+        quantityUsed: round(quantityInRecipeUnit, 4),
+        quantityInRecipeUnit: round(quantityInRecipeUnit, 4),
+        unitId: line.unit_id,
+        unit: unitsById[line.unit_id],
+        recipeUnit: unitsById[line.unit_id],
+        unitCost: 0,
+        totalCost: 0,
+        conversionFactor,
+        canDeductInventory: false,
+        costStatus: "uncosted",
+        warning,
+      });
+      continue;
     }
 
     const unitCost = ingredient?.cost_per_unit ?? 0;
-    const totalCost = round(
-      (conversionFactor == null
-        ? quantityInRecipeUnit
-        : quantityInIngredientUnit) * unitCost,
-      4,
-    );
+    const quantityUsed = round(quantityInIngredientUnit, 4);
+    const totalCost = round(quantityUsed * unitCost, 4);
 
     materials.push({
       ingredientId: line.ingredient_id,
       ingredient,
-      quantityUsed: round(
-        conversionFactor == null
-          ? quantityInRecipeUnit
-          : quantityInIngredientUnit,
-        4,
-      ),
+      quantityUsed,
       quantityInRecipeUnit: round(quantityInRecipeUnit, 4),
       unitId: ingredientUnitId,
       unit: unitsById[ingredientUnitId],
@@ -282,18 +247,55 @@ export function calculateProductionMaterials(
       unitCost,
       totalCost,
       conversionFactor,
+      canDeductInventory: true,
+      costStatus: unitCost > 0 ? "costed" : "uncosted",
+      warning:
+        unitCost > 0
+          ? undefined
+          : `Missing positive unit cost for ${ingredient?.name || "ingredient"}.`,
     });
+
+    if (unitCost <= 0) {
+      warnings.push(
+        `Missing positive unit cost for ${ingredient?.name || "ingredient"}.`,
+      );
+    }
   }
 
   const materialCostTotal = round(
     materials.reduce((sum, material) => sum + (material.totalCost || 0), 0),
     4,
   );
+  const laborCost = Number.isFinite(input.laborCost ?? NaN)
+    ? Number(input.laborCost)
+    : 0;
+  const overheadCost = Number.isFinite(input.overheadCost ?? NaN)
+    ? Number(input.overheadCost)
+    : 0;
+  const totalOutputCost = round(materialCostTotal + laborCost + overheadCost, 4);
+  const costedOutputQuantity = yieldQuantityInItemUnit > 0
+    ? yieldQuantityInItemUnit
+    : finalProducedQuantity;
+  const unitOutputCost =
+    costedOutputQuantity > 0 ? round(totalOutputCost / costedOutputQuantity, 6) : null;
+  const wasteCostEstimate = unitOutputCost
+    ? round(wasteQuantityInItemUnit * unitOutputCost, 4)
+    : 0;
 
   return {
     producedQuantityInItemUnit: finalProducedQuantity,
+    yieldQuantityInItemUnit,
+    wasteQuantityInItemUnit,
+    costedOutputQuantity,
     materials,
     materialCostTotal,
+    laborCost,
+    overheadCost,
+    totalOutputCost,
+    unitOutputCost,
+    wasteCostEstimate,
+    canRecord: blockingIssues.length === 0,
     warnings,
+    blockingIssues,
   };
 }

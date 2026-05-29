@@ -1,5 +1,8 @@
 import type { InventoryItem } from "@/features/inventory/hooks/types";
-import type { CreateWasteData } from "@/features/inventory/hooks/useInventoryWaste";
+import type {
+  CreateAdjustmentData,
+  CreateWasteData,
+} from "@/features/inventory/hooks/useInventoryWaste";
 
 export const wasteTypes = [
   { value: "spoilage", label: "Spoilage" },
@@ -120,15 +123,21 @@ export async function submitWasteForm({
 
 type AdjustmentSubmitDeps = {
   form: AdjustmentFormValues;
+  items: InventoryItem[];
   setErrors: (errors: FormErrors<AdjustmentFormValues>) => void;
   showValidationToast: () => void;
+  resetForm: () => void;
+  mutateAdjustment: (payload: CreateAdjustmentData) => Promise<unknown>;
 };
 
-export function processAdjustmentForm({
+export async function processAdjustmentForm({
   form,
+  items,
   setErrors,
   showValidationToast,
-}: AdjustmentSubmitDeps): "validation_error" | "success" {
+  resetForm,
+  mutateAdjustment,
+}: AdjustmentSubmitDeps): Promise<"validation_error" | "success"> {
   const validationErrors = validateAdjustmentForm(form);
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
@@ -136,5 +145,26 @@ export function processAdjustmentForm({
     return "validation_error";
   }
 
+  const quantityValue = Number(form.quantity);
+  const selectedItem = items.find((item) => item.id === form.item_id);
+  const costImpact =
+    selectedItem?.cost_per_unit && Number.isFinite(quantityValue)
+      ? quantityValue * selectedItem.cost_per_unit
+      : undefined;
+
+  await mutateAdjustment({
+    item_id: form.item_id,
+    location_id: form.location_id || undefined,
+    adjustment_type: form.adjustment_type,
+    quantity: quantityValue,
+    reason: form.reason,
+    cost_impact: costImpact,
+    metadata: {
+      source: "inventory_actions_form",
+      unit_cost: selectedItem?.cost_per_unit ?? null,
+    },
+  });
+
+  resetForm();
   return "success";
 }

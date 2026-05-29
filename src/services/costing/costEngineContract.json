@@ -1,0 +1,215 @@
+{
+  "version": "2026-05-28",
+  "sourceOfTruth": {
+    "tenant": "company_members",
+    "currency": "companies.currency",
+    "inventory": "inv_items",
+    "purchasing": "inv_purchases",
+    "laborEstimate": "schedules",
+    "actualLaborFuture": "labor_entries"
+  },
+  "precision": {
+    "databaseType": "numeric",
+    "calculationScale": 6,
+    "displayScale": 2,
+    "roundingRule": "round only at persisted rollups and presentation boundaries"
+  },
+  "components": [
+    {
+      "key": "labor_cost",
+      "label": "Labor cost",
+      "definition": "Scheduled labor estimate from shift duration, unpaid break minutes, required headcount, and hourly rate.",
+      "formula": "net_shift_hours * required_headcount * hourly_rate",
+      "tables": {
+        "schedules": [
+          "company_id",
+          "start_time",
+          "end_time",
+          "break_minutes",
+          "required_headcount",
+          "hourly_rate",
+          "location",
+          "position_id",
+          "is_published",
+          "status"
+        ],
+        "labor_entries": ["company_id", "created_at", "updated_at"]
+      }
+    },
+    {
+      "key": "inventory_cost",
+      "label": "Inventory cost",
+      "definition": "Current stock value based on item/unit cost basis and lot quantities when lots exist.",
+      "formula": "quantity_in_base_unit * cost_per_base_unit",
+      "tables": {
+        "inv_items": [
+          "company_id",
+          "cost_per_unit",
+          "unit_id",
+          "unit_quantity",
+          "default_location_id",
+          "is_active"
+        ],
+        "inv_item_units": [
+          "company_id",
+          "item_id",
+          "unit_id",
+          "conversion_factor",
+          "cost_per_unit",
+          "is_primary"
+        ],
+        "inv_units": [
+          "id",
+          "base_unit_id",
+          "conversion_factor",
+          "conversion_to_parent",
+          "unit_type"
+        ],
+        "inv_stock_lots": [
+          "company_id",
+          "item_id",
+          "location_id",
+          "quantity",
+          "unit_cost",
+          "is_active"
+        ]
+      }
+    },
+    {
+      "key": "purchasing_cost",
+      "label": "Purchasing cost",
+      "definition": "Committed and received supplier spend from purchase headers and line items.",
+      "formula": "sum(line_total) or sum(quantity_received * unit_cost), reconciled to purchase total_amount",
+      "tables": {
+        "inv_purchases": [
+          "company_id",
+          "supplier_id",
+          "order_date",
+          "expected_date",
+          "received_date",
+          "status",
+          "subtotal",
+          "tax_amount",
+          "total_amount"
+        ],
+        "inv_purchase_lines": [
+          "company_id",
+          "purchase_id",
+          "item_id",
+          "quantity_ordered",
+          "quantity_received",
+          "unit_cost",
+          "line_total",
+          "received_date"
+        ]
+      }
+    },
+    {
+      "key": "waste_cost",
+      "label": "Waste cost",
+      "definition": "Cost impact of discarded or unusable inventory, using persisted cost impact first and item cost fallback second.",
+      "formula": "cost_impact ?? quantity * item_cost_basis",
+      "tables": {
+        "inv_waste": [
+          "company_id",
+          "item_id",
+          "location_id",
+          "lot_id",
+          "quantity",
+          "cost_impact",
+          "waste_type",
+          "reason",
+          "waste_date"
+        ],
+        "inv_items": ["company_id", "cost_per_unit"]
+      }
+    },
+    {
+      "key": "production_cost",
+      "label": "Production cost",
+      "definition": "Cost of produced/prepped inventory from material usage, labor cost, and overhead.",
+      "formula": "material_cost + labor_cost + overhead_cost = total_output_cost; total_output_cost / produced_quantity = unit_output_cost",
+      "tables": {
+        "inv_production_events": [
+          "company_id",
+          "item_id",
+          "produced_quantity",
+          "produced_unit_id",
+          "material_cost",
+          "labor_cost",
+          "overhead_cost",
+          "total_output_cost",
+          "unit_output_cost",
+          "produced_at",
+          "approval_status"
+        ],
+        "inv_production_materials": [
+          "company_id",
+          "production_id",
+          "ingredient_item_id",
+          "quantity_used",
+          "unit_id",
+          "unit_cost",
+          "total_cost",
+          "waste_quantity"
+        ],
+        "inv_recipes": [
+          "company_id",
+          "item_id",
+          "ingredient_id",
+          "quantity_needed",
+          "unit_id",
+          "yield_amount"
+        ]
+      }
+    },
+    {
+      "key": "shift_cost",
+      "label": "Shift cost",
+      "definition": "Unified operating cost by shift/date/location from scheduled labor, production, waste, purchases, inventory movement, expenses, and payments.",
+      "formula": "labor_cost + production_cost + waste_cost + allocated_purchasing_cost + allocated_expense_cost",
+      "tables": {
+        "schedules": ["company_id", "start_time", "end_time", "location"],
+        "inv_production_events": ["company_id", "produced_at", "total_output_cost"],
+        "inv_waste": ["company_id", "waste_date", "cost_impact"],
+        "inv_purchases": ["company_id", "received_date", "total_amount"],
+        "expenses": ["company_id", "expense_date", "amount", "currency", "status"],
+        "payments": ["company_id", "paid_date", "amount", "currency", "status"]
+      }
+    }
+  ],
+  "plannedArtifacts": {
+    "views": [
+      "cost_item_unit_basis_v",
+      "cost_inventory_position_v",
+      "cost_purchase_receipts_v",
+      "cost_waste_events_v",
+      "cost_production_batches_v",
+      "cost_schedule_labor_v",
+      "cost_inventory_shortage_v",
+      "cost_day_location_summary_v",
+      "cost_shift_summary_v",
+      "owner_financial_daily_v",
+      "owner_financial_export_v"
+    ],
+    "rpcs": [
+      "get_cost_engine_summary",
+      "get_shift_cost_breakdown",
+      "recalculate_item_cost_basis",
+      "get_owner_financial_overview",
+      "get_owner_financial_export"
+    ]
+  },
+  "tenantRules": [
+    "Every tenant-owned input table must carry company_id.",
+    "Every rollup/view must filter by company_id and current_user_company_ids().",
+    "inv_units may be globally readable but item/unit price joins must be tenant scoped.",
+    "No cross-company currency aggregation is allowed."
+  ],
+  "permissionRules": [
+    "Owners and admins can manage cost settings and corrections.",
+    "Managers can view operational cost dashboards and create cost-affecting inventory records.",
+    "Employees can create operational records only when feature permissions allow it.",
+    "All cost overrides and recalculations must be audit logged."
+  ]
+}

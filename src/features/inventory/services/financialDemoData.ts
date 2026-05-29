@@ -74,8 +74,11 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
         approved_at: formatISO(date),
         created_by: user.id,
         created_at: formatISO(date),
+        data_source: "sample",
+        source_system: "demo_generator",
         notes: "Seeded via demo generator",
         attachments: [],
+        export_metadata: { demo: true, generatedBy: "financialDemoData" },
       };
     });
 
@@ -119,7 +122,10 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
         employee_id: user.id,
         created_by: user.id,
         created_at: formatISO(date),
+        data_source: "sample",
+        source_system: "demo_generator",
         notes: "Seeded via demo generator",
+        metadata: { demo: true, generatedBy: "financialDemoData" },
       };
     });
 

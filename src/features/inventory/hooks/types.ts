@@ -9,7 +9,7 @@ export interface InventoryUnit {
   conversion_to_parent?: number | null;
   is_base_unit?: boolean | null;
   is_active: boolean;
-  packaging_info?: any;
+  packaging_info?: Record<string, unknown> | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -58,6 +58,17 @@ export interface InventoryItem {
   recipes?: InventoryRecipe[];
   calculated_cost_per_unit?: number;
   recipe_cost_per_unit?: number;
+  setup_health?: {
+    status: "ready" | "warning" | "incomplete";
+    score: number;
+    issues: Array<{
+      code: string;
+      severity: "blocking" | "warning";
+      message: string;
+    }>;
+    blockingCount: number;
+    warningCount: number;
+  };
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -75,6 +86,7 @@ export type InventoryItemInsert = Omit<
   | "recipe_yield_unit"
   | "calculated_cost_per_unit"
   | "recipe_cost_per_unit"
+  | "setup_health"
   | "created_at"
   | "updated_at"
 >;
@@ -144,18 +156,22 @@ export interface SupplierIntegrationDetails {
 export interface PurchaseOrderItem {
   id: string;
   po_id: string;
+  company_id?: string | null;
   item_id?: string | null;
   item_name: string;
   quantity: number;
   unit_price: number;
   total_price: number;
   received_quantity?: number | null;
+  received_at?: string | null;
+  stock_lot_id?: string | null;
   created_at: string;
   inventory_item?: InventoryItem | null;
 }
 
 export interface PurchaseOrder {
   id: string;
+  company_id?: string | null;
   po_number: string;
   supplier_name: string;
   supplier_contact?: {
@@ -173,6 +189,7 @@ export interface PurchaseOrder {
     | "received"
     | "cancelled"
     | string;
+  approval_status?: "pending" | "approved" | "rejected" | "cancelled";
   order_date: string;
   expected_delivery_date?: string | null;
   actual_delivery_date?: string | null;
@@ -181,6 +198,8 @@ export interface PurchaseOrder {
   notes?: string | null;
   created_by: string;
   approved_by?: string | null;
+  approved_at?: string | null;
+  cancelled_at?: string | null;
   created_at: string;
   updated_at: string;
   creator?: {
@@ -239,7 +258,7 @@ export interface InventoryCountLine {
   unit_level?: number | null;
   conversion_factor?: number | null;
   counted_in_base_units?: number | null;
-  notes_per_unit?: Record<string, any> | null;
+  notes_per_unit?: Record<string, unknown> | null;
   item?: {
     id: string;
     name: string;
@@ -287,6 +306,9 @@ export interface ProductionMaterialUsage {
   quantityInRecipeUnit?: number;
   recipeUnit?: InventoryUnit | null;
   conversionFactor?: number | null;
+  canDeductInventory?: boolean;
+  costStatus?: "costed" | "uncosted";
+  warning?: string;
 }
 
 export interface ProductionApproval {

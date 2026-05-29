@@ -21,7 +21,6 @@ import { useManagerFinancialMetrics } from "@/hooks/useFinancialManagement";
 import { useSystemSettings } from "@/features/system/hooks/useSystemSettings";
 import { useIntegrationSettings } from "@/features/system/hooks/useIntegrationSettings";
 import { useToast } from "@/hooks/use-toast";
-import { generateFinancialDemoData } from "@/features/inventory/services/financialDemoData";
 import {
   Area,
   Bar,
@@ -38,10 +37,10 @@ import {
   Briefcase,
   Building2,
   Factory,
+  FileDown,
   Loader2,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
   Store,
   TrendingDown,
   TrendingUp,
@@ -135,7 +134,6 @@ export function ManagerFinancialOverview() {
   const [autoSyncBusy, setAutoSyncBusy] = useState<IntegrationId | null>(null);
   const [syncingIntegration, setSyncingIntegration] =
     useState<IntegrationId | null>(null);
-  const [seeding, setSeeding] = useState(false);
 
   const autoSyncMap = useMemo(() => {
     const raw = integrationSettings?.syncMappings?.autoSync;
@@ -205,6 +203,16 @@ export function ManagerFinancialOverview() {
 
   const netInventory = metrics.inventorySales30d - metrics.inventoryPurchase30d;
   const inventoryTrendPositive = netInventory >= 0;
+  const ownerSummary = metrics.ownerFinancialOverview;
+  const ownerActualCost =
+    ownerSummary.actualExpenses + ownerSummary.actualPayments;
+  const ownerRange =
+    ownerSummary.startDate && ownerSummary.endDate
+      ? `${ownerSummary.startDate} to ${ownerSummary.endDate}`
+      : "Last 30 days";
+  const qualityFlags = Object.entries(ownerSummary.dataQualityFlags).filter(
+    ([, value]) => value != null && value !== false,
+  );
 
   const handleToggleAutoSync = async (id: IntegrationId, value: boolean) => {
     if (!integrationSettings) return;
@@ -295,47 +303,34 @@ export function ManagerFinancialOverview() {
     }
   };
 
-  const handleSeedDemoData = async () => {
-    setSeeding(true);
-    try {
-      const result = await generateFinancialDemoData();
-      await metrics.refresh();
+  const handleExportOwnerSummary = () => {
+    const rows = [
+      ["Range", ownerRange],
+      ["Actual revenue", ownerSummary.actualRevenue.toFixed(2)],
+      ["Actual expenses", ownerSummary.actualExpenses.toFixed(2)],
+      ["Actual payments", ownerSummary.actualPayments.toFixed(2)],
+      ["Imported cost", ownerSummary.importedCost.toFixed(2)],
+      ["Estimated cost", ownerSummary.estimatedCost.toFixed(2)],
+      ["Pending approvals", ownerSummary.pendingApprovalTotal.toFixed(2)],
+      ["Net operating position", ownerSummary.netOperatingPosition.toFixed(2)],
+    ];
+    const csv = rows
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `owner-financial-overview-${ownerSummary.endDate ?? "latest"}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
 
-      const created: string[] = [];
-      if (result.paymentsInserted)
-        created.push(`${result.paymentsInserted} payments`);
-      if (result.expensesInserted)
-        created.push(`${result.expensesInserted} expenses`);
-      if (result.transactionsInserted)
-        created.push(`${result.transactionsInserted} inventory transactions`);
-
-      const parts: string[] = [];
-      if (result.alreadySeeded && created.length === 0) {
-        parts.push("Demo financial records already exist for this workspace.");
-      } else if (created.length) {
-        parts.push(`Inserted ${created.join(", ")}.`);
-      } else {
-        parts.push("No financial data was added.");
-      }
-
-      if (result.skippedTransactions) {
-        parts.push(result.skippedTransactions);
-      }
-
-      toast({
-        title: "Demo financial data ready",
-        description: parts.join(" "),
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      toast({
-        title: "Unable to generate demo data",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setSeeding(false);
-    }
+    toast({
+      title: "Owner summary exported",
+      description: "Downloaded the separated actual, imported, and estimated cost summary.",
+    });
   };
 
   if (metrics.loading || settingsLoading) {
@@ -344,32 +339,115 @@ export function ManagerFinancialOverview() {
 
   return (
     <div className="space-y-6">
-      {canEdit ? (
-        <div className="flex justify-end">
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={handleSeedDemoData}
-                  disabled={seeding || metrics.refreshing}
-                >
-                  {seeding ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="mr-2 h-4 w-4 text-primary" />
-                  )}
-                  Generate Sample Data
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                Prefill demo payroll, expenses, and inventory transactions to
-                validate analytics.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      ) : null}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="text-base font-semibold">
+                Owner Financial Overview
+              </CardTitle>
+              <CardDescription>
+                Actual, imported, and estimated operating data kept separate
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleExportOwnerSummary}
+              disabled={metrics.refreshing}
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Export summary
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-5">
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Actual revenue
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                ${ownerSummary.actualRevenue.toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Actual cost
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                ${ownerActualCost.toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Imported cost
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                ${ownerSummary.importedCost.toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Estimated cost
+              </p>
+              <p className="mt-2 text-2xl font-semibold">
+                ${ownerSummary.estimatedCost.toFixed(2)}
+              </p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-xs font-medium uppercase text-muted-foreground">
+                Net position
+              </p>
+              <p
+                className={`mt-2 text-2xl font-semibold ${
+                  ownerSummary.netOperatingPosition >= 0
+                    ? "text-emerald-700"
+                    : "text-rose-700"
+                }`}
+              >
+                ${ownerSummary.netOperatingPosition.toFixed(2)}
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="rounded-lg bg-muted/40 p-3 text-sm">
+              <span className="font-medium">Labor estimate</span>
+              <span className="float-right">
+                ${ownerSummary.estimatedLaborCost.toFixed(2)}
+              </span>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-3 text-sm">
+              <span className="font-medium">Production estimate</span>
+              <span className="float-right">
+                ${ownerSummary.estimatedProductionCost.toFixed(2)}
+              </span>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-3 text-sm">
+              <span className="font-medium">Waste estimate</span>
+              <span className="float-right">
+                ${ownerSummary.estimatedWasteCost.toFixed(2)}
+              </span>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-3 text-sm">
+              <span className="font-medium">Purchasing estimate</span>
+              <span className="float-right">
+                ${ownerSummary.estimatedPurchasingCost.toFixed(2)}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant="secondary">{ownerRange}</Badge>
+            <Badge variant="outline">
+              {ownerSummary.exportRowCount} export rows
+            </Badge>
+            {qualityFlags.map(([key]) => (
+              <Badge key={key} variant="outline">
+                {formatCategoryLabel(key)}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -587,13 +665,13 @@ export function ManagerFinancialOverview() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-dashed border-muted p-3">
               <div>
-                <p className="text-sm font-medium">Payroll Approvals</p>
+                <p className="text-sm font-medium">Payment Approvals</p>
                 <p className="text-sm text-muted-foreground">
-                  ${metrics.payrollPendingApproval.toFixed(2)} awaiting review
+                  ${metrics.pendingPaymentTotal.toFixed(2)} awaiting review
                 </p>
               </div>
               <Badge variant="secondary" className="text-xs">
-                {metrics.payrollPendingApprovalCount} items
+                {metrics.pendingPaymentCount} items
               </Badge>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-dashed border-muted p-3">
@@ -606,6 +684,17 @@ export function ManagerFinancialOverview() {
               </div>
               <Badge variant="secondary" className="text-xs">
                 {metrics.pendingExpenseCount} items
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+              <div>
+                <p className="text-sm font-medium">Total Pending</p>
+                <p className="text-sm text-muted-foreground">
+                  Expenses and payments that need owner or manager action
+                </p>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                ${metrics.ownerFinancialOverview.pendingApprovalTotal.toFixed(2)}
               </Badge>
             </div>
             <TooltipProvider delayDuration={100}>

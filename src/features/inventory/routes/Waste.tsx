@@ -7,43 +7,52 @@ import {
   MapPin,
   Calendar,
   DollarSign,
+  TrendingDown,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 import { useInventoryWaste } from "@/hooks/useInventory";
 import { formatDistanceToNow } from "date-fns";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
 import { Link } from "@/lib/router-adapter";
+import {
+  calculateWasteOutliers,
+  summarizeWasteIntelligence,
+} from "@/features/inventory/utils/wasteIntelligence";
+import { useMemo } from "react";
 
-const wasteTypeColors = {
+const wasteTypeColors: Record<string, string> = {
   spoilage: "bg-red-100 text-red-800",
   prep_error: "bg-orange-100 text-orange-800",
   accident: "bg-yellow-100 text-yellow-800",
   theft: "bg-purple-100 text-purple-800",
   expired: "bg-red-100 text-red-800",
   damaged: "bg-gray-100 text-gray-800",
+  production: "bg-amber-100 text-amber-800",
   other: "bg-blue-100 text-blue-800",
 };
 
-const wasteTypeLabels = {
+const wasteTypeLabels: Record<string, string> = {
   spoilage: "Spoilage",
   prep_error: "Prep Error",
   accident: "Accident",
   theft: "Theft",
   expired: "Expired",
   damaged: "Damaged",
+  production: "Production",
   other: "Other",
 };
 
 export default function WasteTrackingPage() {
   const { data: wasteRecords = [], isLoading } = useInventoryWaste();
-
-  const totalWasteValue = wasteRecords.reduce(
-    (sum, record) => sum + (record.cost_impact || 0),
-    0,
+  const summary = useMemo(
+    () => summarizeWasteIntelligence(wasteRecords),
+    [wasteRecords],
   );
-  const totalWasteQuantity = wasteRecords.reduce(
-    (sum, record) => sum + record.quantity,
-    0,
+  const outliers = useMemo(
+    () => calculateWasteOutliers(wasteRecords).slice(0, 3),
+    [wasteRecords],
   );
 
   if (isLoading) {
@@ -76,7 +85,7 @@ export default function WasteTrackingPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
@@ -85,7 +94,9 @@ export default function WasteTrackingPage() {
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{wasteRecords.length}</div>
+                <div className="text-2xl font-bold">
+                  {summary.totalRecords}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   All time waste events
                 </p>
@@ -101,7 +112,7 @@ export default function WasteTrackingPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {totalWasteQuantity.toFixed(1)}
+                  {summary.totalQuantity.toFixed(1)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Units across all items
@@ -118,11 +129,107 @@ export default function WasteTrackingPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ${totalWasteValue.toFixed(2)}
+                  ${summary.totalCost.toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Estimated cost impact
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  7-Day Trend
+                </CardTitle>
+                {summary.trendDirection === "down" ? (
+                  <TrendingDown className="h-4 w-4 text-emerald-600" />
+                ) : (
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {summary.trendPercent.toFixed(0)}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  ${summary.currentPeriodCost.toFixed(2)} this week
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Target className="h-4 w-4" />
+                  Highest Impact
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Type</span>
+                  <span className="font-medium">
+                    {summary.topWasteType
+                      ? wasteTypeLabels[summary.topWasteType] ??
+                        summary.topWasteType
+                      : "None"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Item</span>
+                  <span className="font-medium">
+                    {summary.topItemName ?? "None"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="font-medium">
+                    {summary.topLocationName ?? "None"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-base">Outliers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {outliers.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No high-cost outliers in the current data.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {outliers.map((record) => (
+                      <div
+                        key={record.id}
+                        className="flex items-center justify-between rounded-lg border p-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {record.item?.name || "Unknown Item"}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {wasteTypeLabels[record.waste_type] ??
+                              record.waste_type}{" "}
+                            · {record.location?.name ?? "No location"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">
+                            ${(record.cost_impact ?? 0).toFixed(2)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {record.outlier_score.toFixed(1)}x average
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -158,9 +265,13 @@ export default function WasteTrackingPage() {
                               {record.item?.name || "Unknown Item"}
                             </span>
                             <Badge
-                              className={wasteTypeColors[record.waste_type]}
+                              className={
+                                wasteTypeColors[record.waste_type] ??
+                                wasteTypeColors.other
+                              }
                             >
-                              {wasteTypeLabels[record.waste_type]}
+                              {wasteTypeLabels[record.waste_type] ??
+                                record.waste_type}
                             </Badge>
                           </div>
 
@@ -169,7 +280,9 @@ export default function WasteTrackingPage() {
                               <Package className="h-3 w-3" />
                               <span>
                                 {record.quantity}{" "}
-                                {record.item?.unit?.name || "units"}
+                                {record.unit?.name ||
+                                  record.item?.unit?.name ||
+                                  "units"}
                               </span>
                             </div>
 

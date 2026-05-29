@@ -15,6 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useFeatureFlag } from "@/hooks/useFeatureFlags";
 import { recordInventoryCountScan } from "@/features/inventory/repositories/countsRepository";
 import type { InventoryCountLine } from "@/features/inventory/hooks/types";
+import {
+  calculateCountVariance,
+  summarizeCountLines,
+} from "@/features/inventory/utils/stockPosition";
 import { Barcode, Trash } from "lucide-react";
 import { logger } from "@/utils/logger";
 
@@ -92,6 +96,10 @@ export function MarketManCountingInterface({
       return current !== original ? total + 1 : total;
     }, 0);
   }, [lines, quantities]);
+  const summary = useMemo(
+    () => summarizeCountLines(lines, quantities),
+    [lines, quantities],
+  );
 
   const handleQuantityInput = (lineId: string, value: string) => {
     const parsed = Number(value);
@@ -190,7 +198,10 @@ export function MarketManCountingInterface({
               const currentQuantity =
                 quantities[line.id] ?? line.counted_quantity ?? 0;
               const expectedQuantity = line.expected_quantity ?? 0;
-              const variance = currentQuantity - expectedQuantity;
+              const variance = calculateCountVariance(
+                currentQuantity,
+                expectedQuantity,
+              );
               const isDirty =
                 quantities[line.id] !== undefined &&
                 currentQuantity !== (line.counted_quantity ?? 0);
@@ -243,7 +254,17 @@ export function MarketManCountingInterface({
                   >
                     {variance.toFixed(2)}
                   </TableCell>
-                  <TableCell>{renderStatusBadge(line, isDirty)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-2">
+                      {renderStatusBadge(line, isDirty)}
+                      {!line.counted_at && !isDirty ? (
+                        <Badge variant="outline">Missing</Badge>
+                      ) : null}
+                      {Math.abs(variance) > 0.0001 ? (
+                        <Badge variant="secondary">Variance</Badge>
+                      ) : null}
+                    </div>
+                  </TableCell>
                   <TableCell className="flex justify-end gap-2">
                     {barcodeEnabled && !readOnly && (
                       <Button
@@ -304,6 +325,15 @@ export function MarketManCountingInterface({
         </span>
         <span>
           Unsaved changes: <strong>{unsavedCount}</strong>
+        </span>
+        <span>
+          Missing: <strong>{summary.missingLines}</strong>
+        </span>
+        <span>
+          Variance lines: <strong>{summary.varianceLines}</strong>
+        </span>
+        <span>
+          Net variance: <strong>{summary.netVariance.toFixed(2)}</strong>
         </span>
       </div>
     </div>
