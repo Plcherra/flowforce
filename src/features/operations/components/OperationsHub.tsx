@@ -9,6 +9,8 @@ import { RecurringOperationsCalendarPanel } from "./RecurringOperationsCalendarP
 import { FieldExecutionPanel } from "./FieldExecutionPanel";
 import { ManagerReviewQueuePanel } from "./ManagerReviewQueuePanel";
 import { CompliancePacksPanel } from "./CompliancePacksPanel";
+import { WorkflowAutomationHooksPanel } from "./WorkflowAutomationHooksPanel";
+import { ExecutionQualityPanel } from "./ExecutionQualityPanel";
 import { InventorySignalWidget } from "@/features/messages/components/ops/InventorySignalWidget";
 
 const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
@@ -87,6 +89,8 @@ export function OperationsHub() {
             <FieldExecutionPanel />
             <ManagerReviewQueuePanel />
             <CompliancePacksPanel />
+            <WorkflowAutomationHooksPanel />
+            <ExecutionQualityPanel />
             <AutomationsPanel />
           </div>
         </motion.section>

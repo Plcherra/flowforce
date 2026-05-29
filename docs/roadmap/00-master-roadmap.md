@@ -46,10 +46,10 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [06 Operations Workflows And Compliance](./06-operations-workflows-and-compliance.md)
-- Current phase: Phase 6, Operations Workflows And Compliance
-- Last completed phase: 06.07, Compliance Packs
-- Last phase report: [06.07 Compliance Packs](./reports/06-07-compliance-packs-2026-05-29.md)
+- Active plan: [07 AI Copilot And Automation](./07-ai-copilot-and-automation.md)
+- Current phase: Phase 7, AI Copilot And Automation
+- Last completed phase: 06.10, Operations Workflow Signoff
+- Last phase report: [06.10 Operations Workflow Signoff](./reports/06-10-operations-workflow-signoff-2026-05-29.md)
 
 ## Global Completion Criteria
 
@@ -70,7 +70,7 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 - [x] 3.  Core SaaS foundation
 - [x] 4.  Web app product completion
 - [x] 5.  Inventory finance cost engine
-- [ ] 6.  Operations workflows and compliance
+- [x] 6.  Operations workflows and compliance
 - [ ] 7.  AI copilot and automation
 - [ ] 8.  Mobile app and offline mode
 - [ ] 9.  Integrations and migration tools

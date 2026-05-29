@@ -81,6 +81,8 @@ Later build phases should create a seeded demo tenant and reset script before cu
 
 Plan 05.10 completed the cost-engine signoff and updated this demo flow to use the signed-off owner financial overview. Any seeded demo tenant must label sample records as `sample` and imported records as `imported`.
 
+Plan 06.10 completed the operations workflow signoff and added `install_operations_workflow_demo(company_id)`. The demo can now seed opening, closing, cleaning, and food-safety workflows with sample-labeled runs, evidence, review queue items, exceptions, automation hooks, and execution quality analytics.
+
 The demo must also enforce the visibility rules from Phase 01.07:
 
 - Staff should only see staff-facing work.

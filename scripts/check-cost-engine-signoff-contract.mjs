@@ -177,8 +177,9 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [06 Operations Workflows And Compliance]",
+    "Active plan: [07 AI Copilot And Automation]",
     "[x] 5.  Inventory finance cost engine",
+    "[x] 6.  Operations workflows and compliance",
   ],
   "master roadmap",
 );

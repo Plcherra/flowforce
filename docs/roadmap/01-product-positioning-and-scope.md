@@ -408,6 +408,8 @@ Demo readiness rule:
 - The demo tenant must be seedable and resettable.
 - The demo must not depend on live customer data.
 - Every visible module in the demo must match the pilot navigation and role rules from Phase 01.07.
+- Plan 06.10 signs off `install_operations_workflow_demo(company_id)` for opening, closing, cleaning, and food-safety workflow proof on `/app/operations`.
+- Operations demo records must stay sample-labeled and prove runs, evidence, review, exceptions, automation, and execution quality analytics without touching production actuals.
 
 Acceptance:
 

@@ -169,10 +169,10 @@ Status:
 
 ### Phase 8: Workflow Automation Hooks
 
-- [ ] Trigger tasks from failed checklist steps.
-- [ ] Trigger inventory adjustments or reviews from count/waste workflows.
-- [ ] Trigger notifications for overdue critical runs.
-- [ ] Log every automated action.
+- [x] Trigger tasks from failed checklist steps.
+- [x] Trigger inventory adjustments or reviews from count/waste workflows.
+- [x] Trigger notifications for overdue critical runs.
+- [x] Log every automated action.
 
 Acceptance:
 
@@ -182,12 +182,20 @@ Verification:
 
 - Automation tests cover idempotence and permissions.
 
+Status:
+
+- Completed on 2026-05-29.
+- Automation doc: [docs/workflow-automation-hooks.md](../workflow-automation-hooks.md)
+- Automation service: [src/services/operations/workflowAutomationHooks.ts](../../src/services/operations/workflowAutomationHooks.ts)
+- Migration: [20260528001900_phase6_workflow_automation_hooks.sql](../../supabase/migrations/20260528001900_phase6_workflow_automation_hooks.sql)
+- Phase report: [06.08 Workflow Automation Hooks](./reports/06-08-workflow-automation-hooks-2026-05-29.md)
+
 ### Phase 9: Analytics For Execution Quality
 
-- [ ] Track completion, overdue, exception, and repeat-failure metrics.
-- [ ] Show trends by location, department, and role.
-- [ ] Connect results to performance and training.
-- [ ] Add manager coaching insights.
+- [x] Track completion, overdue, exception, and repeat-failure metrics.
+- [x] Show trends by location, department, and role.
+- [x] Connect results to performance and training.
+- [x] Add manager coaching insights.
 
 Acceptance:
 
@@ -197,12 +205,20 @@ Verification:
 
 - Dashboard/report data matches workflow records.
 
+Status:
+
+- Completed on 2026-05-29.
+- Analytics doc: [docs/execution-quality-analytics.md](../execution-quality-analytics.md)
+- Analytics service: [src/services/operations/executionQualityAnalytics.ts](../../src/services/operations/executionQualityAnalytics.ts)
+- Migration: [20260528002000_phase6_execution_quality_analytics.sql](../../supabase/migrations/20260528002000_phase6_execution_quality_analytics.sql)
+- Phase report: [06.09 Execution Quality Analytics](./reports/06-09-execution-quality-analytics-2026-05-29.md)
+
 ### Phase 10: Operations Workflow Signoff
 
-- [ ] Seed demo workflows.
-- [ ] Add smoke coverage.
-- [ ] Update sales/demo script.
-- [ ] Update roadmap status.
+- [x] Seed demo workflows.
+- [x] Add smoke coverage.
+- [x] Update sales/demo script.
+- [x] Update roadmap status.
 
 Acceptance:
 
@@ -211,3 +227,11 @@ Acceptance:
 Verification:
 
 - Workflow demo works on desktop and mobile.
+
+Status:
+
+- Completed on 2026-05-29.
+- Signoff doc: [docs/operations-workflow-signoff.md](../operations-workflow-signoff.md)
+- Signoff service: [src/services/operations/operationsWorkflowSignoff.ts](../../src/services/operations/operationsWorkflowSignoff.ts)
+- Migration: [20260528002100_phase6_operations_workflow_signoff.sql](../../supabase/migrations/20260528002100_phase6_operations_workflow_signoff.sql)
+- Phase report: [06.10 Operations Workflow Signoff](./reports/06-10-operations-workflow-signoff-2026-05-29.md)
