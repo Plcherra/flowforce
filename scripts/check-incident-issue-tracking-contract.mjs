@@ -19,7 +19,9 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const doc = readText("docs/incident-issue-tracking.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const report = readText(
   "docs/roadmap/reports/06-06-incident-and-issue-tracking-2026-05-29.md",
 );
@@ -30,7 +32,9 @@ const service = readText("src/services/operations/incidentIssueTracking.ts");
 const issuesPanel = readText(
   "src/features/operations/components/IssuesStream.tsx",
 );
-const dbTest = readText("supabase/tests/phase6_incident_issue_tracking.test.sql");
+const dbTest = readText(
+  "supabase/tests/phase6_incident_issue_tracking.test.sql",
+);
 const packageJson = readText("package.json");
 
 requireIncludes(

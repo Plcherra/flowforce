@@ -23,8 +23,12 @@ const requireIncludes = (text, needles, label) => {
 const doc = readText("docs/ai-learning-loop.md");
 const roadmap = readText("docs/roadmap/07-ai-copilot-and-automation.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const report = readText("docs/roadmap/reports/07-08-learning-loop-2026-05-29.md");
-const migration = readText("supabase/migrations/20260529000800_phase7_learning_loop.sql");
+const report = readText(
+  "docs/roadmap/reports/07-08-learning-loop-2026-05-29.md",
+);
+const migration = readText(
+  "supabase/migrations/20260529000800_phase7_learning_loop.sql",
+);
 const dbTest = readText("supabase/tests/phase7_learning_loop.test.sql");
 const service = readText("src/services/ai/aiLearningLoop.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
@@ -39,7 +43,7 @@ requireIncludes(
     "buildAILearningAdjustment",
     "isAILearningFeedbackSafe",
     "no_cross_tenant_training",
-    "feedbackScope: \"tenant\"",
+    'feedbackScope: "tenant"',
     "ai_recommendation_feedback",
   ],
   "AI learning loop service",
@@ -103,7 +107,9 @@ requireIncludes(
   "Plan 07 roadmap",
 );
 
-const phaseEightBlock = roadmap.match(/### Phase 8: Learning Loop[\s\S]*?### Phase 9:/)?.[0];
+const phaseEightBlock = roadmap.match(
+  /### Phase 8: Learning Loop[\s\S]*?### Phase 9:/,
+)?.[0];
 
 if (!phaseEightBlock || phaseEightBlock.includes("- [ ]")) {
   throw new Error("Plan 07 phase 8 still has unchecked tasks");
@@ -112,8 +118,8 @@ if (!phaseEightBlock || phaseEightBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -140,7 +146,9 @@ requireIncludes(
   "package scripts",
 );
 
-const learningLoop = await jiti.import(join(root, "src/services/ai/aiLearningLoop.ts"));
+const learningLoop = await jiti.import(
+  join(root, "src/services/ai/aiLearningLoop.ts"),
+);
 
 const acceptedSignal = learningLoop.buildAILearningSignal({
   companyId: "sample-company",
@@ -159,7 +167,10 @@ if (acceptedSignal.reason_code !== "useful") {
   throw new Error("Learning loop did not normalize accepted reason code");
 }
 
-if (!acceptedSignal.no_cross_tenant_training || acceptedSignal.feedback_scope !== "tenant") {
+if (
+  !acceptedSignal.no_cross_tenant_training ||
+  acceptedSignal.feedback_scope !== "tenant"
+) {
   throw new Error("Learning loop signal is not tenant-only");
 }
 
@@ -197,7 +208,9 @@ const rejectedSummary = summaries[0];
 const adjustment = learningLoop.buildAILearningAdjustment(rejectedSummary);
 
 if (adjustment.recommendation !== "deprioritize") {
-  throw new Error("Learning loop did not deprioritize repeatedly rejected suggestions");
+  throw new Error(
+    "Learning loop did not deprioritize repeatedly rejected suggestions",
+  );
 }
 
 const safe = learningLoop.isAILearningFeedbackSafe({

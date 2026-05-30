@@ -4,12 +4,12 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
-const contractPath = join(
-  root,
-  "src/services/costing/costEngineContract.json",
-);
+const contractPath = join(root, "src/services/costing/costEngineContract.json");
 const docsPath = join(root, "docs/cost-engine-canonical-model.md");
-const roadmapPath = join(root, "docs/roadmap/05-inventory-finance-cost-engine.md");
+const roadmapPath = join(
+  root,
+  "docs/roadmap/05-inventory-finance-cost-engine.md",
+);
 const typesPath = join(root, "src/integrations/supabase/types.ts");
 const migrationsDir = join(root, "supabase/migrations");
 
@@ -44,7 +44,9 @@ const docs = readFileSync(docsPath, "utf8");
 const roadmap = readFileSync(roadmapPath, "utf8");
 const schemaCorpus = [
   readFileSync(typesPath, "utf8"),
-  ...walkSqlFiles(migrationsDir).map((filePath) => readFileSync(filePath, "utf8")),
+  ...walkSqlFiles(migrationsDir).map((filePath) =>
+    readFileSync(filePath, "utf8"),
+  ),
 ].join("\n");
 
 const requiredTopLevelKeys = [
@@ -92,7 +94,9 @@ for (const component of contract.components) {
 
     for (const field of fields) {
       if (!schemaCorpus.includes(field)) {
-        fail(`schema corpus missing field ${table}.${field} for ${component.key}`);
+        fail(
+          `schema corpus missing field ${table}.${field} for ${component.key}`,
+        );
       }
 
       if (!docs.includes(field)) {
@@ -133,13 +137,12 @@ for (const artifactType of ["views", "rpcs"]) {
             `view public."${artifact}"`,
             `view if not exists public."${artifact}"`,
           ]
-        : [
-            `function public.${artifact}`,
-            `function public."${artifact}"`,
-          ];
+        : [`function public.${artifact}`, `function public."${artifact}"`];
 
     if (!definitionPatterns.some((pattern) => schemaCorpus.includes(pattern))) {
-      fail(`schema corpus missing ${artifactType.slice(0, -1)} definition for planned artifact ${artifact}`);
+      fail(
+        `schema corpus missing ${artifactType.slice(0, -1)} definition for planned artifact ${artifact}`,
+      );
     }
   }
 }

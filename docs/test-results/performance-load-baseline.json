@@ -1,0 +1,172 @@
+{
+  "generatedAt": "2026-05-30T17:49:30.330Z",
+  "baseUrl": null,
+  "budgets": {
+    "nextStaticMbMax": 25,
+    "nextServerMbMax": 150,
+    "pageP95MsMax": 2500,
+    "apiP95MsMax": 500,
+    "healthLoadP95MsMax": 500,
+    "healthLoadFailureRateMax": 0,
+    "pilotConcurrentUsers": 50,
+    "pilotBurstRequestsPerMinute": 600
+  },
+  "build": {
+    "next": {
+      "directory": ".next",
+      "totalBytes": 2824303601,
+      "totalMb": 2693.47,
+      "fileCount": 8225,
+      "largestFiles": [
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00000195.sst",
+          "bytes": 249714223
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001555.sst",
+          "bytes": 248647877
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00000693.sst",
+          "bytes": 246776422
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00000748.sst",
+          "bytes": 245521043
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001211.sst",
+          "bytes": 244011773
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00000142.sst",
+          "bytes": 234195599
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001047.sst",
+          "bytes": 233398656
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001556.sst",
+          "bytes": 215162165
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001593.sst",
+          "bytes": 79042459
+        },
+        {
+          "path": ".next/dev/cache/turbopack/ee6e79b1/00001591.sst",
+          "bytes": 77010240
+        }
+      ]
+    },
+    "nextStatic": {
+      "directory": ".next/static",
+      "totalBytes": 10258861,
+      "totalMb": 9.78,
+      "fileCount": 199,
+      "largestFiles": [
+        {
+          "path": ".next/static/chunks/007q6rxg~.ido.js",
+          "bytes": 594477
+        },
+        {
+          "path": ".next/static/chunks/0008l587crn_j.js",
+          "bytes": 382144
+        },
+        {
+          "path": ".next/static/chunks/100rqztapt9qt.js",
+          "bytes": 382144
+        },
+        {
+          "path": ".next/static/chunks/077l~ybie2lq..js",
+          "bytes": 373009
+        },
+        {
+          "path": ".next/static/chunks/0c3yl3i4o8r6k.js",
+          "bytes": 373009
+        },
+        {
+          "path": ".next/static/chunks/0uh_1l2kiyqhq.js",
+          "bytes": 373009
+        },
+        {
+          "path": ".next/static/chunks/1424sumv._11d.js",
+          "bytes": 373009
+        },
+        {
+          "path": ".next/static/chunks/14e56-e10l5.v.js",
+          "bytes": 299964
+        },
+        {
+          "path": ".next/static/chunks/13nr~n3bxvoui.js",
+          "bytes": 227651
+        },
+        {
+          "path": ".next/static/chunks/0y72hffdpm26t.js",
+          "bytes": 173318
+        }
+      ]
+    },
+    "nextServer": {
+      "directory": ".next/server",
+      "totalBytes": 67156480,
+      "totalMb": 64.05,
+      "fileCount": 2423,
+      "largestFiles": [
+        {
+          "path": ".next/server/chunks/ssr/node_modules_0byvz1.._.js.map",
+          "bytes": 1807206
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_0eou~n6._.js.map",
+          "bytes": 1807182
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_0fakrp6._.js.map",
+          "bytes": 1652562
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_11u29f1._.js.map",
+          "bytes": 1652012
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_0y6mul5._.js.map",
+          "bytes": 1651962
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_0e6uf8e._.js.map",
+          "bytes": 1651842
+        },
+        {
+          "path": ".next/server/chunks/[root-of-the-server]__13dd-rg._.js.map",
+          "bytes": 1442863
+        },
+        {
+          "path": ".next/server/chunks/ssr/[root-of-the-server]__0nflo74._.js.map",
+          "bytes": 1287671
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_next_dist_0-g.jog._.js.map",
+          "bytes": 1216887
+        },
+        {
+          "path": ".next/server/chunks/ssr/node_modules_next_dist_0h9llsw._.js.map",
+          "bytes": 819155
+        }
+      ]
+    }
+  },
+  "pageProbes": [],
+  "loadProbe": {
+    "skipped": true,
+    "reason": "PERF_BASE_URL was not provided."
+  },
+  "hotQueryFamilies": [
+    "company_id-scoped list pages ordered by created_at or updated_at",
+    "user_id-scoped task, notification, and scheduling lookups",
+    "inventory item/unit/stock joins scoped by company_id",
+    "workflow instance and evidence lookups scoped by company_id and status",
+    "system_logs warning/error lookups ordered by created_at desc"
+  ]
+}

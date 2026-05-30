@@ -23,7 +23,9 @@ const requireIncludes = (text, needles, label) => {
 const doc = readText("docs/mobile-responsive-qa-baseline.md");
 const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const report = readText("docs/roadmap/reports/08-02-responsive-web-qa-baseline-2026-05-29.md");
+const report = readText(
+  "docs/roadmap/reports/08-02-responsive-web-qa-baseline-2026-05-29.md",
+);
 const service = readText("src/services/mobile/mobileResponsiveBaseline.ts");
 const smoke = readText("scripts/smoke-visible-modules.mjs");
 const layout = readText("app/layout.tsx");
@@ -69,8 +71,8 @@ requireIncludes(
 requireIncludes(
   layout,
   [
-    "viewportFit: \"cover\"",
-    "width: \"device-width\"",
+    'viewportFit: "cover"',
+    'width: "device-width"',
     "initialScale: 1",
     "themeColor",
   ],
@@ -91,10 +93,7 @@ requireIncludes(
 
 requireIncludes(
   appShell,
-  [
-    "app-viewport",
-    "overflow-hidden bg-background",
-  ],
+  ["app-viewport", "overflow-hidden bg-background"],
   "app shell mobile viewport",
 );
 
@@ -136,10 +135,10 @@ if (!phaseTwoBlock || phaseTwoBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Current phase: Phase 9, Integrations And Migration Tools",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
-    "Last phase report: [09.04 Checklist Platform Migration Path]",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Current phase: Phase 10, Production Infrastructure And Launch",
+    "Last completed phase: 10.08, CI/CD Release Gates",
+    "Last phase report: [10.08 CI/CD Release Gates]",
     "[x] Mobile app path is shippable on iOS and Android.",
     "[x] 8.  Mobile app and offline mode",
   ],
@@ -182,10 +181,14 @@ if (smokeReport.summary?.total !== 22 || smokeReport.summary?.failed !== 0) {
   throw new Error("Visible module smoke report is not green for all 22 routes");
 }
 
-const smokeResults = Array.isArray(smokeReport.results) ? smokeReport.results : [];
+const smokeResults = Array.isArray(smokeReport.results)
+  ? smokeReport.results
+  : [];
 const smokeViewports = new Set(smokeResults.map((result) => result.viewport));
 if (!smokeViewports.has("desktop") || !smokeViewports.has("mobile")) {
-  throw new Error("Visible module smoke report must include desktop and mobile viewports");
+  throw new Error(
+    "Visible module smoke report must include desktop and mobile viewports",
+  );
 }
 
 const failedSmokeEntries = smokeResults.filter(
@@ -198,7 +201,9 @@ if (failedSmokeEntries.length > 0) {
   const labels = failedSmokeEntries
     .map((result) => `${result.viewport}:${result.path}`)
     .join(", ");
-  throw new Error(`Visible module smoke report has errors or warnings: ${labels}`);
+  throw new Error(
+    `Visible module smoke report has errors or warnings: ${labels}`,
+  );
 }
 
 process.stdout.write("OK mobile responsive baseline contract\n");

@@ -25,7 +25,9 @@ const doc = readText("docs/operations-workflow-domain-model.md");
 const migration = readText(
   "supabase/migrations/20260528001200_phase6_workflow_domain_model.sql",
 );
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const report = readText(
   "docs/roadmap/reports/06-01-workflow-domain-model-2026-05-28.md",
 );
@@ -42,12 +44,19 @@ for (const key of [
   "auditEvents",
 ]) {
   if (!(key in contract)) {
-    throw new Error(`operations workflow contract missing top-level key: ${key}`);
+    throw new Error(
+      `operations workflow contract missing top-level key: ${key}`,
+    );
   }
 }
 
-if (!Array.isArray(contract.domainObjects) || contract.domainObjects.length < 8) {
-  throw new Error("operations workflow contract must define at least eight domain objects");
+if (
+  !Array.isArray(contract.domainObjects) ||
+  contract.domainObjects.length < 8
+) {
+  throw new Error(
+    "operations workflow contract must define at least eight domain objects",
+  );
 }
 
 for (const object of contract.domainObjects) {
@@ -72,8 +81,8 @@ requireIncludes(
     "create table if not exists public.workflow_evidence",
     "create table if not exists public.workflow_reviews",
     "create table if not exists public.workflow_exceptions",
-    "create policy \"Company members can manage workflows\"",
-    "create policy \"Company members can manage workflow evidence\"",
+    'create policy "Company members can manage workflows"',
+    'create policy "Company members can manage workflow evidence"',
     "create or replace view public.workflow_domain_model_v",
     "current_user_company_ids()",
     "set_workflow_child_company_id",

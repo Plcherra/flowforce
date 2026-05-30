@@ -14,7 +14,9 @@ const smokePath = join(cwd, "scripts/smoke-visible-modules.mjs");
 const allowedStatuses = new Set(["production", "beta", "hidden", "deprecated"]);
 
 function fail(message) {
-  process.stderr.write(`Visible module inventory contract failed: ${message}\n`);
+  process.stderr.write(
+    `Visible module inventory contract failed: ${message}\n`,
+  );
   process.exit(1);
 }
 
@@ -81,14 +83,20 @@ if (routes.length === 0) {
 }
 
 const paths = routes.map((route) => route.path);
-const duplicatePaths = paths.filter((path, index) => paths.indexOf(path) !== index);
+const duplicatePaths = paths.filter(
+  (path, index) => paths.indexOf(path) !== index,
+);
 if (duplicatePaths.length) {
-  fail(`duplicate route inventory paths: ${toSortedUnique(duplicatePaths).join(", ")}`);
+  fail(
+    `duplicate route inventory paths: ${toSortedUnique(duplicatePaths).join(", ")}`,
+  );
 }
 
 for (const route of routes) {
   if (!route.label || !route.path || !route.owner) {
-    fail(`route entries require label, path, and owner: ${JSON.stringify(route)}`);
+    fail(
+      `route entries require label, path, and owner: ${JSON.stringify(route)}`,
+    );
   }
 
   if (!allowedStatuses.has(route.status)) {
@@ -105,23 +113,37 @@ for (const route of routes) {
 }
 
 const sidebarRoutes = toSortedUnique(
-  routes.filter((route) => route.sidebar).map((route) => normalizePath(route.path)),
+  routes
+    .filter((route) => route.sidebar)
+    .map((route) => normalizePath(route.path)),
 );
 
 const smokeRoutes = toSortedUnique(
-  routes.filter((route) => route.smoke).map((route) => normalizePath(route.path)),
+  routes
+    .filter((route) => route.smoke)
+    .map((route) => normalizePath(route.path)),
 );
 
-assertSameSet(smokeRoutes, sidebarRoutes, "smoke routes and production sidebar routes");
+assertSameSet(
+  smokeRoutes,
+  sidebarRoutes,
+  "smoke routes and production sidebar routes",
+);
 
 const navigationText = readFileSync(navigationPath, "utf8");
-const navigationHrefMatches = [...navigationText.matchAll(/href:\s*"([^"]+)"/g)];
+const navigationHrefMatches = [
+  ...navigationText.matchAll(/href:\s*"([^"]+)"/g),
+];
 const navigationRoutes = toSortedUnique([
   "/app/dashboard",
   ...navigationHrefMatches.map((match) => normalizePath(match[1])),
 ]);
 
-assertSameSet(navigationRoutes, sidebarRoutes, "static sidebar navigation and inventory");
+assertSameSet(
+  navigationRoutes,
+  sidebarRoutes,
+  "static sidebar navigation and inventory",
+);
 
 const smokeText = readFileSync(smokePath, "utf8");
 if (!smokeText.includes("moduleRouteInventory.json")) {

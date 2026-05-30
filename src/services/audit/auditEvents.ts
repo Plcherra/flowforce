@@ -60,6 +60,30 @@ export const AUDIT_ACTIONS = {
   integrationCsvImportCompleted: "integration.csv_import.completed",
   integrationCsvImportFailed: "integration.csv_import.failed",
   integrationCsvImportRolledBack: "integration.csv_import.rolled_back",
+  integrationPosCredentialPending: "integration.pos.credential_pending",
+  integrationPosCredentialConnected: "integration.pos.credential_connected",
+  integrationPosCredentialRevoked: "integration.pos.credential_revoked",
+  integrationPosHealthChecked: "integration.pos.health_checked",
+  integrationPosSyncAttempted: "integration.pos.sync_attempted",
+  integrationAccountingExportQueued: "integration.accounting_export.queued",
+  integrationAccountingExportCompleted:
+    "integration.accounting_export.completed",
+  integrationAccountingExportFailed: "integration.accounting_export.failed",
+  integrationPayrollImportValidated: "integration.payroll_import.validated",
+  integrationReconciliationViewed: "integration.reconciliation.viewed",
+  integrationPublicApiKeyCreated: "integration.public_api_key.created",
+  integrationPublicApiKeyUsed: "integration.public_api_key.used",
+  integrationPublicApiKeyRevoked: "integration.public_api_key.revoked",
+  integrationWebhookSubscriptionCreated:
+    "integration.webhook_subscription.created",
+  integrationWebhookDeliveryAttempted: "integration.webhook_delivery.attempted",
+  integrationWebhookDeliveryFailed: "integration.webhook_delivery.failed",
+  integrationPublicApiRateLimitExceeded:
+    "integration.public_api.rate_limit_exceeded",
+  integrationMonitoringHealthChecked: "integration.monitoring.health_checked",
+  integrationMonitoringAlertTriggered: "integration.monitoring.alert_triggered",
+  integrationMonitoringDiagnosticsGenerated:
+    "integration.monitoring.diagnostics_generated",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -316,6 +340,163 @@ export const AUDIT_EVENT_DEFINITIONS: AuditEventDefinition[] = [
     category: "integration",
     severity: "critical",
     description: "A tenant CSV migration import batch was rolled back.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPosCredentialPending,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant POS integration credential setup was started and awaits server-side custody.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPosCredentialConnected,
+    category: "integration",
+    severity: "critical",
+    description:
+      "A tenant POS integration credential was connected through server-side custody.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPosCredentialRevoked,
+    category: "integration",
+    severity: "critical",
+    description: "A tenant POS integration credential was revoked.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPosHealthChecked,
+    category: "integration",
+    severity: "info",
+    description: "A tenant POS integration health check was recorded.",
+    retention: "standard",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPosSyncAttempted,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant POS integration sync attempt was recorded with checkpoint, retry, or error state.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationAccountingExportQueued,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant accounting export was queued with payload hash, destination, and idempotency key.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationAccountingExportCompleted,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant accounting export was accepted by the destination provider.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationAccountingExportFailed,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant accounting export failed and recorded retry or reconciliation state.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPayrollImportValidated,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant payroll or labor import payload was validated before applying mapped records.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationReconciliationViewed,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant accounting or payroll reconciliation view was opened for mismatch review.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPublicApiKeyCreated,
+    category: "integration",
+    severity: "critical",
+    description:
+      "A tenant public API key was created with scopes, expiry, and hashed secret custody.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPublicApiKeyUsed,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant public API key authenticated a request with scope and rate-limit context.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPublicApiKeyRevoked,
+    category: "integration",
+    severity: "critical",
+    description: "A tenant public API key was revoked.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationWebhookSubscriptionCreated,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant webhook subscription was created with endpoint, events, and signing secret custody.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationWebhookDeliveryAttempted,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant webhook delivery attempt was recorded with payload hash, request id, and signature version.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationWebhookDeliveryFailed,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant webhook delivery failed and recorded retry or terminal failure state.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationPublicApiRateLimitExceeded,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A tenant public API or webhook delivery rate limit was exceeded.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationMonitoringHealthChecked,
+    category: "integration",
+    severity: "info",
+    description:
+      "A tenant integration monitoring health snapshot was generated.",
+    retention: "standard",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationMonitoringAlertTriggered,
+    category: "integration",
+    severity: "critical",
+    description:
+      "A tenant integration monitoring alert was triggered for a critical sync or repeated failure.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.integrationMonitoringDiagnosticsGenerated,
+    category: "integration",
+    severity: "warning",
+    description:
+      "A support-safe integration diagnostic bundle was generated for a failing or warning integration.",
     retention: "extended",
   },
 ];

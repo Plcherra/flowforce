@@ -26,8 +26,12 @@ const report = readText(
 );
 const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const service = readText("src/services/mobile/mobileOfflineCriticalWorkflows.ts");
-const inventoryHook = readText("src/features/inventory/hooks/useInventoryCounts.tsx");
+const service = readText(
+  "src/services/mobile/mobileOfflineCriticalWorkflows.ts",
+);
+const inventoryHook = readText(
+  "src/features/inventory/hooks/useInventoryCounts.tsx",
+);
 const formsHook = readText("src/features/forms/hooks/useForms.tsx");
 const packageJson = readText("package.json");
 
@@ -113,9 +117,9 @@ if (!phaseEightBlock || phaseEightBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
-    "Last phase report: [09.04 Checklist Platform Migration Path]",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
+    "Last phase report: [10.08 CI/CD Release Gates]",
   ],
   "master roadmap",
 );
@@ -155,7 +159,9 @@ const { sanitized, evidenceSummary } =
   });
 
 if (!evidenceSummary.hasEvidence || evidenceSummary.fileCount !== 1) {
-  throw new Error("Offline evidence summary should detect one evidence payload");
+  throw new Error(
+    "Offline evidence summary should detect one evidence payload",
+  );
 }
 
 if (sanitized.attachment?.offlineEvidence !== true) {

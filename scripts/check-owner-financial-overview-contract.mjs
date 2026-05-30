@@ -96,7 +96,9 @@ if (
   component.includes("Generate Sample Data") ||
   component.includes("generateFinancialDemoData")
 ) {
-  throw new Error("manager financial overview still exposes sample data generation");
+  throw new Error(
+    "manager financial overview still exposes sample data generation",
+  );
 }
 
 requireIncludes(
@@ -118,7 +120,9 @@ if (roadmap.includes("- [ ] Finish owner P&L-style overview.")) {
 
 requireIncludes(
   checklist,
-  ["[x] Owner financial overview separates actual, estimated, and imported data."],
+  [
+    "[x] Owner financial overview separates actual, estimated, and imported data.",
+  ],
   "launch checklist",
 );
 

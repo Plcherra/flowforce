@@ -32,7 +32,9 @@ const config = readText("capacitor.config.ts");
 const fallback = readText("mobile-shell/index.html");
 const service = readText("src/services/mobile/mobileCapacitorShell.ts");
 const doc = readText("docs/mobile-capacitor-shell.md");
-const report = readText("docs/roadmap/reports/08-03-capacitor-shell-2026-05-29.md");
+const report = readText(
+  "docs/roadmap/reports/08-03-capacitor-shell-2026-05-29.md",
+);
 const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const androidManifest = readText("android/app/src/main/AndroidManifest.xml");
 const androidStrings = readText("android/app/src/main/res/values/strings.xml");

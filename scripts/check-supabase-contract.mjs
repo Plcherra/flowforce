@@ -222,7 +222,12 @@ const READ_RPC_CHECKS = [
   {
     name: "get_recipient_insights",
     args: {
-      recipients_filter: { type: "all", departments: [], roles: [], groups: [] },
+      recipients_filter: {
+        type: "all",
+        departments: [],
+        roles: [],
+        groups: [],
+      },
     },
   },
 ];
@@ -510,9 +515,7 @@ const REQUIRED_STORAGE_BUCKETS = [
   "attachments",
 ];
 
-const EXPECTED_PUBLIC_STORAGE_BUCKETS = [
-  "company-assets",
-];
+const EXPECTED_PUBLIC_STORAGE_BUCKETS = ["company-assets"];
 
 const EXPECTED_PRIVATE_STORAGE_BUCKETS = [
   "attachments",
@@ -608,10 +611,7 @@ function summarizeError(error) {
 }
 
 async function checkRelation(supabase, relation) {
-  const { error } = await supabase
-    .from(relation)
-    .select("*")
-    .limit(0);
+  const { error } = await supabase.from(relation).select("*").limit(0);
 
   if (!error) {
     return { name: relation, status: "ok" };
@@ -665,7 +665,12 @@ async function checkAnonExposure(anonSupabase, relation) {
     return { name: relation, status: "exposed", count, httpStatus: status };
   }
 
-  return { name: relation, status: "empty-or-filtered", count, httpStatus: status };
+  return {
+    name: relation,
+    status: "empty-or-filtered",
+    count,
+    httpStatus: status,
+  };
 }
 
 async function checkSecurityContract(supabase, usingServiceRole) {
@@ -752,11 +757,15 @@ async function checkSecurityContract(supabase, usingServiceRole) {
 
 function printModuleResults(results) {
   for (const result of results) {
-    const missing = result.relations.filter((item) => item.status === "missing");
+    const missing = result.relations.filter(
+      (item) => item.status === "missing",
+    );
     const errors = result.relations.filter((item) => item.status === "error");
 
     if (missing.length === 0 && errors.length === 0) {
-      process.stdout.write(`OK ${result.module}: ${result.relations.length} ok\n`);
+      process.stdout.write(
+        `OK ${result.module}: ${result.relations.length} ok\n`,
+      );
       continue;
     }
 
@@ -783,7 +792,9 @@ function printRpcResults(results, mutatingResults) {
   );
   const okMutating = mutatingResults.filter((item) => item.status === "ok");
 
-  process.stdout.write(`\nRead RPC checks: ${ok.length}/${results.length} ok\n`);
+  process.stdout.write(
+    `\nRead RPC checks: ${ok.length}/${results.length} ok\n`,
+  );
 
   for (const item of missing) {
     process.stdout.write(`  - missing RPC: ${item.name}\n`);
@@ -837,9 +848,7 @@ function printSecurityContractResult(result) {
   }
 
   if (result.status !== "ok") {
-    process.stdout.write(
-      `  - failed: ${summarizeError(result.error)}\n`,
-    );
+    process.stdout.write(`  - failed: ${summarizeError(result.error)}\n`);
     return;
   }
 

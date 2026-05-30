@@ -177,7 +177,7 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
+    "Active plan: [10 Production Infrastructure And Launch]",
     "[x] 5.  Inventory finance cost engine",
     "[x] 6.  Operations workflows and compliance",
   ],

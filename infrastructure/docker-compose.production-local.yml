@@ -1,0 +1,36 @@
+services:
+  web:
+    image: flowforce-web:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_LOG_LEVEL: ${NEXT_PUBLIC_LOG_LEVEL:-info}
+        NEXT_PUBLIC_REMOTE_LOG_LEVEL: ${NEXT_PUBLIC_REMOTE_LOG_LEVEL:-warn}
+        NEXT_PUBLIC_ENABLE_REMOTE_LOGS: ${NEXT_PUBLIC_ENABLE_REMOTE_LOGS:-false}
+        NEXT_PUBLIC_REMOTE_LOG_ENDPOINT: ${NEXT_PUBLIC_REMOTE_LOG_ENDPOINT:-/api/logs}
+        NEXT_PUBLIC_ENABLE_AI_INSIGHTS: ${NEXT_PUBLIC_ENABLE_AI_INSIGHTS:-false}
+        NEXT_PUBLIC_DEFAULT_COMPANY_ID: ${NEXT_PUBLIC_DEFAULT_COMPANY_ID:-}
+        NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT: ${NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT:-}
+    env_file:
+      - ../.env.production.local
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('node:http');const req=http.get({host:'127.0.0.1',port:3000,path:'/api/health',timeout:4000},res=>process.exit(res.statusCode===200?0:1));req.on('error',()=>process.exit(1));req.on('timeout',()=>{req.destroy();process.exit(1);});",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3

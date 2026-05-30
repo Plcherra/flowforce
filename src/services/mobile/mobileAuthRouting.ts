@@ -39,12 +39,17 @@ const SAFE_REDIRECT_PREFIXES = [
   "/features",
 ] as const;
 
-const UNSAFE_CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/;
+function hasUnsafeControlCharacter(value: string) {
+  return Array.from(value).some((character) => {
+    const code = character.charCodeAt(0);
+    return code <= 0x1f || code === 0x7f;
+  });
+}
 
 export function isSafeMobileAuthRedirect(value: string | null | undefined) {
   if (!value) return false;
   if (!value.startsWith("/") || value.startsWith("//")) return false;
-  if (UNSAFE_CONTROL_CHARACTER_PATTERN.test(value)) return false;
+  if (hasUnsafeControlCharacter(value)) return false;
 
   try {
     const parsed = new URL(value, "https://flowforce.local");

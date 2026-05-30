@@ -126,9 +126,9 @@ if (!phaseSevenBlock || phaseSevenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
-    "Last phase report: [09.04 Checklist Platform Migration Path]",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
+    "Last phase report: [10.08 CI/CD Release Gates]",
   ],
   "master roadmap",
 );

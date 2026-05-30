@@ -23,7 +23,9 @@ const requireIncludes = (text, needles, label) => {
 const signoff = readText("docs/ai-copilot-signoff.md");
 const roadmap = readText("docs/roadmap/07-ai-copilot-and-automation.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const report = readText("docs/roadmap/reports/07-10-ai-copilot-signoff-2026-05-29.md");
+const report = readText(
+  "docs/roadmap/reports/07-10-ai-copilot-signoff-2026-05-29.md",
+);
 const dbTest = readText("supabase/tests/phase7_ai_copilot_signoff.test.sql");
 const hardeningMigration = readText(
   "supabase/migrations/20260529001000_phase7_ai_security_hardening.sql",
@@ -93,7 +95,9 @@ requireIncludes(
   "Plan 07 roadmap",
 );
 
-const phaseTenBlock = roadmap.match(/### Phase 10: AI Copilot Signoff[\s\S]*$/)?.[0];
+const phaseTenBlock = roadmap.match(
+  /### Phase 10: AI Copilot Signoff[\s\S]*$/,
+)?.[0];
 
 if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
   throw new Error("Plan 07 phase 10 still has unchecked tasks");
@@ -102,8 +106,8 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "AI gives useful recommendations with audit trails and user approval.",
     "[x] 7.  AI copilot and automation",
   ],
@@ -133,21 +137,33 @@ requireIncludes(
   "package scripts",
 );
 
-const governance = await jiti.import(join(root, "src/services/ai/aiGovernance.ts"));
-const scheduling = await jiti.import(join(root, "src/services/ai/aiSchedulingAssistant.ts"));
-const observability = await jiti.import(join(root, "src/services/ai/aiObservability.ts"));
+const governance = await jiti.import(
+  join(root, "src/services/ai/aiGovernance.ts"),
+);
+const scheduling = await jiti.import(
+  join(root, "src/services/ai/aiSchedulingAssistant.ts"),
+);
+const observability = await jiti.import(
+  join(root, "src/services/ai/aiObservability.ts"),
+);
 
 const suggestedActionPolicy = governance.aiGovernancePolicies.find(
   (policy) => policy.policyKey === "suggested_action",
 );
 
-if (!suggestedActionPolicy?.requiresHumanApproval || suggestedActionPolicy.allowsBackgroundAutomation) {
+if (
+  !suggestedActionPolicy?.requiresHumanApproval ||
+  suggestedActionPolicy.allowsBackgroundAutomation
+) {
   throw new Error("Suggested action governance is not approval-gated");
 }
 
 const fallback = observability.buildSafeAIFallback("signoff check");
 
-if (fallback.writesAllowed !== false || fallback.requiresHumanApproval !== true) {
+if (
+  fallback.writesAllowed !== false ||
+  fallback.requiresHumanApproval !== true
+) {
   throw new Error("AI fallback is not write-safe");
 }
 
@@ -157,13 +173,23 @@ const suggestion = scheduling.buildSchedulingSuggestions({
   modules: {
     scheduling: {
       freshness_at: new Date().toISOString(),
-      summary: { scheduled_shifts: 0, unassigned_shifts: 1, required_headcount: 3 },
+      summary: {
+        scheduled_shifts: 0,
+        unassigned_shifts: 1,
+        required_headcount: 3,
+      },
     },
-    employees: { freshness_at: new Date().toISOString(), summary: { active_employees: 2 } },
+    employees: {
+      freshness_at: new Date().toISOString(),
+      summary: { active_employees: 2 },
+    },
     inventory: { freshness_at: new Date().toISOString(), summary: {} },
     tasks: { freshness_at: new Date().toISOString(), summary: {} },
     forms: { freshness_at: new Date().toISOString(), summary: {} },
-    cost: { freshness_at: new Date().toISOString(), summary: { labor_cost: 0 } },
+    cost: {
+      freshness_at: new Date().toISOString(),
+      summary: { labor_cost: 0 },
+    },
   },
 })[0];
 

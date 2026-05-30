@@ -41,6 +41,8 @@ Release Gates must remain the full shipment gate:
 - Run database security tests.
 - Run TypeScript checks.
 - Build the production app.
+- Run the Docker image build gate for the VPS artifact.
+- Run the Mobile Android build gate for the active Capacitor shell.
 - Start the production server.
 - Run onboarding and visible-module smoke tests.
 
@@ -64,13 +66,11 @@ Keep this check fast. Add rules only after the corresponding boundary exists in 
 
 ## Mobile Build Gate Policy
 
-Mobile build checks are not mandatory yet because the product is still a Next.js PWA/mobile web app.
+Mobile build checks are now mandatory because the active Capacitor shell exists in `android/`, `ios/`, and `capacitor.config.ts`.
 
-Mobile checks become mandatory when any of these are true:
+Release Gates runs:
 
-- A native app directory is added, such as `apps/mobile`, `mobile`, `ios`, or `android`.
-- A Capacitor, React Native, Expo, Flutter, or native wrapper build is added to package scripts.
-- Shared packages are consumed by both web and mobile runtimes.
-- Offline sync, push notifications, native storage, camera, location, or background jobs become release-critical.
+- `npm run mobile:android:sync`
+- `npm run mobile:android:debug`
 
-When that happens, Release Gates must add a mobile compile check and a minimal smoke check for the selected app path.
+iOS compile/signing remains outside the Linux Release Gates runner until Apple signing and provisioning are ready for a macOS CI lane.

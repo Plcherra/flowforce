@@ -9,6 +9,7 @@ const migrationAliases = {
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   // Optimize webpack for faster dev builds
   webpack: (config, { dev, isServer }) => {
     config.resolve.alias = {

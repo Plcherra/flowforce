@@ -101,10 +101,10 @@ Status:
 
 ### Phase 5: MarketMan Migration Path
 
-- [ ] Define imported data: items, units, suppliers, purchases, recipes, counts, waste.
-- [ ] Add unit conversion validation.
-- [ ] Add cost basis validation.
-- [ ] Add inventory setup completeness report.
+- [x] Define imported data: items, units, suppliers, purchases, recipes, counts, waste.
+- [x] Add unit conversion validation.
+- [x] Add cost basis validation.
+- [x] Add inventory setup completeness report.
 
 Acceptance:
 
@@ -114,12 +114,20 @@ Verification:
 
 - Sample inventory import supports cost engine calculations.
 
+Status:
+
+- Completed on 2026-05-30.
+- Mapping: [MarketMan Migration Path](../marketman-migration-path.md)
+- Contract: `src/services/integrations/marketmanMigrationPath.ts`
+- Checker: `npm run check:marketman-migration`
+- Phase report: [09.05 MarketMan Migration Path](./reports/09-05-marketman-migration-2026-05-30.md)
+
 ### Phase 6: POS Integration Foundation
 
-- [ ] Choose first POS target, likely Toast or Square.
-- [ ] Define sales, menu item, labor, and location sync needs.
-- [ ] Add secure credential model.
-- [ ] Add integration health UI.
+- [x] Choose first POS target, likely Toast or Square.
+- [x] Define sales, menu item, labor, and location sync needs.
+- [x] Add secure credential model.
+- [x] Add integration health UI.
 
 Acceptance:
 
@@ -129,12 +137,20 @@ Verification:
 
 - Integration config is tenant-scoped and audited.
 
+Status:
+
+- Completed on 2026-05-30.
+- Foundation: [POS Integration Foundation](../pos-integration-foundation.md)
+- Contract: `src/services/integrations/posIntegrationFoundation.ts`
+- Checker: `npm run check:pos-integration-foundation`
+- Phase report: [09.06 POS Integration Foundation](./reports/09-06-pos-integration-foundation-2026-05-30.md)
+
 ### Phase 7: Accounting And Payroll Integrations
 
-- [ ] Define QuickBooks/Xero export scope.
-- [ ] Define payroll/labor import scope.
-- [ ] Add export logs and retry behavior.
-- [ ] Add reconciliation views.
+- [x] Define QuickBooks/Xero export scope.
+- [x] Define payroll/labor import scope.
+- [x] Add export logs and retry behavior.
+- [x] Add reconciliation views.
 
 Acceptance:
 
@@ -144,12 +160,20 @@ Verification:
 
 - Export files/API payloads match expected schemas.
 
+Status:
+
+- Completed on 2026-05-30.
+- Foundation: [Accounting And Payroll Integrations](../accounting-payroll-integrations.md)
+- Contract: `src/services/integrations/accountingPayrollIntegrations.ts`
+- Checker: `npm run check:accounting-payroll-integrations`
+- Phase report: [09.07 Accounting And Payroll Integrations](./reports/09-07-accounting-payroll-integrations-2026-05-30.md)
+
 ### Phase 8: Webhooks And Public API
 
-- [ ] Define API key model.
-- [ ] Add webhook subscriptions.
-- [ ] Add event catalog.
-- [ ] Add rate limits and audit logs.
+- [x] Define API key model.
+- [x] Add webhook subscriptions.
+- [x] Add event catalog.
+- [x] Add rate limits and audit logs.
 
 Acceptance:
 
@@ -159,12 +183,20 @@ Verification:
 
 - API/webhook tests cover auth, tenant scoping, and retries.
 
+Status:
+
+- Completed on 2026-05-30.
+- Foundation: [Webhooks And Public API](../public-api-webhooks.md)
+- Contract: `src/services/integrations/publicApiWebhooks.ts`
+- Checker: `npm run check:public-api-webhooks`
+- Phase report: [09.08 Webhooks And Public API](./reports/09-08-public-api-webhooks-2026-05-30.md)
+
 ### Phase 9: Integration Monitoring
 
-- [ ] Add sync status dashboard.
-- [ ] Add last successful sync, failures, retries, and warnings.
-- [ ] Add alerting for broken critical syncs.
-- [ ] Add support diagnostics.
+- [x] Add sync status dashboard.
+- [x] Add last successful sync, failures, retries, and warnings.
+- [x] Add alerting for broken critical syncs.
+- [x] Add support diagnostics.
 
 Acceptance:
 
@@ -174,12 +206,20 @@ Verification:
 
 - Simulated failures appear clearly.
 
+Status:
+
+- Completed on 2026-05-30.
+- Foundation: [Integration Monitoring](../integration-monitoring.md)
+- Contract: `src/services/integrations/integrationMonitoring.ts`
+- Checker: `npm run check:integration-monitoring`
+- Phase report: [09.09 Integration Monitoring](./reports/09-09-integration-monitoring-2026-05-30.md)
+
 ### Phase 10: Migration And Integration Signoff
 
-- [ ] Create customer migration playbook.
-- [ ] Create sample data packs.
-- [ ] Add demo migration flow.
-- [ ] Update roadmap status.
+- [x] Create customer migration playbook.
+- [x] Create sample data packs.
+- [x] Add demo migration flow.
+- [x] Update roadmap status.
 
 Acceptance:
 
@@ -188,3 +228,11 @@ Acceptance:
 Verification:
 
 - A test tenant can be populated from migration samples.
+
+Status:
+
+- Completed on 2026-05-30.
+- Signoff: [Migration And Integration Signoff](../migration-and-integration-signoff.md)
+- Contract: `src/services/integrations/migrationIntegrationSignoff.ts`
+- Checker: `npm run check:migration-integration-signoff`
+- Phase report: [09.10 Migration And Integration Signoff](./reports/09-10-migration-integration-signoff-2026-05-30.md)

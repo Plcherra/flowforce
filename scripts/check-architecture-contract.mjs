@@ -34,10 +34,7 @@ const ignoredLeakPaths = new Set([
   "src/services/supabase/admin.ts",
 ]);
 
-const ignoredLeakPrefixes = [
-  "app/api/",
-  "src/server/",
-];
+const ignoredLeakPrefixes = ["app/api/", "src/server/"];
 
 const codeExtensions = new Set([".js", ".jsx", ".mjs", ".ts", ".tsx"]);
 
@@ -88,23 +85,25 @@ const walk = (relativeDir) => {
     return [];
   }
 
-  return fs.readdirSync(absoluteDir, { withFileTypes: true }).flatMap((entry) => {
-    const relativePath = toPosix(path.join(relativeDir, entry.name));
+  return fs
+    .readdirSync(absoluteDir, { withFileTypes: true })
+    .flatMap((entry) => {
+      const relativePath = toPosix(path.join(relativeDir, entry.name));
 
-    if (entry.isDirectory()) {
-      if (entry.name === "node_modules" || entry.name === ".next") {
+      if (entry.isDirectory()) {
+        if (entry.name === "node_modules" || entry.name === ".next") {
+          return [];
+        }
+
+        return walk(relativePath);
+      }
+
+      if (!entry.isFile() || !codeExtensions.has(path.extname(entry.name))) {
         return [];
       }
 
-      return walk(relativePath);
-    }
-
-    if (!entry.isFile() || !codeExtensions.has(path.extname(entry.name))) {
-      return [];
-    }
-
-    return [relativePath];
-  });
+      return [relativePath];
+    });
 };
 
 const shouldIgnoreLeakPath = (relativePath) =>
@@ -122,7 +121,9 @@ for (const file of [...walk("src"), ...walk("app")]) {
   );
 
   if (leakedPattern) {
-    fail(`Server-only Supabase admin usage leaked into client surface: ${file}`);
+    fail(
+      `Server-only Supabase admin usage leaked into client surface: ${file}`,
+    );
   }
 }
 

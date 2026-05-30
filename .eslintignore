@@ -1,4 +1,0 @@
-dist/
-build/
-supabase/
-src/integrations/supabase/types.ts

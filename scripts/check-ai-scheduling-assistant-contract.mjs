@@ -26,7 +26,9 @@ const master = readText("docs/roadmap/00-master-roadmap.md");
 const report = readText(
   "docs/roadmap/reports/07-05-scheduling-assistant-2026-05-29.md",
 );
-const migration = readText("supabase/migrations/20260529000500_phase7_scheduling_assistant.sql");
+const migration = readText(
+  "supabase/migrations/20260529000500_phase7_scheduling_assistant.sql",
+);
 const dbTest = readText("supabase/tests/phase7_scheduling_assistant.test.sql");
 const service = readText("src/services/ai/aiSchedulingAssistant.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
@@ -123,8 +125,8 @@ if (!phaseFiveBlock || phaseFiveBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -151,7 +153,9 @@ requireIncludes(
   "package scripts",
 );
 
-const schedulingAssistant = await jiti.import(join(root, "src/services/ai/aiSchedulingAssistant.ts"));
+const schedulingAssistant = await jiti.import(
+  join(root, "src/services/ai/aiSchedulingAssistant.ts"),
+);
 
 const sampleSnapshot = {
   company_id: "sample-company",
@@ -205,13 +209,18 @@ const sampleSnapshot = {
   },
 };
 
-const result = schedulingAssistant.buildValidatedSchedulingAssistant(sampleSnapshot);
+const result =
+  schedulingAssistant.buildValidatedSchedulingAssistant(sampleSnapshot);
 
 if (!result.validation.ok) {
-  throw new Error(`Scheduling assistant draft failed validation: ${result.validation.issues.join("; ")}`);
+  throw new Error(
+    `Scheduling assistant draft failed validation: ${result.validation.issues.join("; ")}`,
+  );
 }
 
-if (!result.suggestions.some((suggestion) => suggestion.type === "understaffing")) {
+if (
+  !result.suggestions.some((suggestion) => suggestion.type === "understaffing")
+) {
   throw new Error("Scheduling assistant did not detect understaffing");
 }
 

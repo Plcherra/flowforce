@@ -1,0 +1,42 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$FLOWFORCE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-Server
+	}
+
+	handle_path /healthz {
+		rewrite * /api/health
+		reverse_proxy web:3000
+	}
+
+	reverse_proxy web:3000 {
+		header_up X-Real-IP {remote_host}
+		health_uri /api/health
+		health_interval 30s
+		health_timeout 5s
+	}
+
+	log {
+		output file /var/log/caddy/flowforce-access.log {
+			roll_size 50MiB
+			roll_keep 5
+			roll_keep_for 720h
+		}
+		format json
+	}
+}
+
+www.{$FLOWFORCE_DOMAIN} {
+	redir https://{$FLOWFORCE_DOMAIN}{uri} permanent
+}

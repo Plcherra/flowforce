@@ -34,7 +34,9 @@ const dbTest = readText("supabase/tests/phase7_ai_governance_model.test.sql");
 const security = readText("docs/security-review-pass.md");
 const roles = readText("docs/roles-and-permissions.md");
 const registry = readText("src/lib/permissions/registry.ts");
-const roleContract = readText("src/features/roles/constants/productRoleContract.json");
+const roleContract = readText(
+  "src/features/roles/constants/productRoleContract.json",
+);
 const auditEvents = readText("src/services/audit/auditEvents.ts");
 const packageJson = readText("package.json");
 

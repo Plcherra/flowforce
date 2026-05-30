@@ -29,7 +29,9 @@ const report = readText(
 const migration = readText(
   "supabase/migrations/20260529000300_phase7_prompt_contract_registry.sql",
 );
-const dbTest = readText("supabase/tests/phase7_prompt_contract_registry.test.sql");
+const dbTest = readText(
+  "supabase/tests/phase7_prompt_contract_registry.test.sql",
+);
 const service = readText("src/services/ai/aiPromptContracts.ts");
 const packageJson = readText("package.json");
 
@@ -113,8 +115,8 @@ if (!phaseThreeBlock || phaseThreeBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -199,17 +201,22 @@ const validResult = promptContracts.validateAIPromptOutput(
 );
 
 if (!validResult.ok) {
-  throw new Error(`Valid AI prompt output was rejected: ${validResult.issues.join("; ")}`);
+  throw new Error(
+    `Valid AI prompt output was rejected: ${validResult.issues.join("; ")}`,
+  );
 }
 
-const invalidResult = promptContracts.validateAIPromptOutput("scheduling_assistant", {
-  prompt_key: "scheduling_assistant",
-  summary: "Please create a schedule change.",
-  safety: {
-    requires_human_approval: false,
-    writes_allowed: true,
+const invalidResult = promptContracts.validateAIPromptOutput(
+  "scheduling_assistant",
+  {
+    prompt_key: "scheduling_assistant",
+    summary: "Please create a schedule change.",
+    safety: {
+      requires_human_approval: false,
+      writes_allowed: true,
+    },
   },
-});
+);
 
 if (invalidResult.ok) {
   throw new Error("Invalid AI prompt output was accepted");

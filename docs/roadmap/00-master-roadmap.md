@@ -46,10 +46,10 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [09 Integrations And Migration Tools](./09-integrations-and-migration-tools.md)
-- Current phase: Phase 9, Integrations And Migration Tools
-- Last completed phase: 09.04, Checklist Platform Migration Path
-- Last phase report: [09.04 Checklist Platform Migration Path](./reports/09-04-checklist-platform-migration-2026-05-30.md)
+- Active plan: [10 Production Infrastructure And Launch](./10-production-infrastructure-and-launch.md)
+- Current phase: Phase 10, Production Infrastructure And Launch
+- Last completed phase: 10.08, CI/CD Release Gates
+- Last phase report: [10.08 CI/CD Release Gates](./reports/10-08-ci-cd-release-gates-2026-05-30.md)
 
 ## Global Completion Criteria
 
@@ -73,5 +73,5 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 - [x] 6.  Operations workflows and compliance
 - [x] 7.  AI copilot and automation
 - [x] 8.  Mobile app and offline mode
-- [ ] 9.  Integrations and migration tools
+- [x] 9.  Integrations and migration tools
 - [ ] 10. Production infrastructure and launch

@@ -23,7 +23,9 @@ const requireIncludes = (text, needles, label) => {
 const decision = readText("docs/mobile-strategy-decision.md");
 const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const report = readText("docs/roadmap/reports/08-01-mobile-strategy-decision-2026-05-29.md");
+const report = readText(
+  "docs/roadmap/reports/08-01-mobile-strategy-decision-2026-05-29.md",
+);
 const service = readText("src/services/mobile/mobileStrategy.ts");
 const packageJson = readText("package.json");
 const architecture = readText("docs/platform-architecture-baseline.md");
@@ -74,7 +76,7 @@ requireIncludes(
   plan,
   [
     "- [x] Choose Capacitor-first or Expo-first for v1 mobile.",
-    "- [x] Define what \"mobile app\" must do for pilot customers.",
+    '- [x] Define what "mobile app" must do for pilot customers.',
     "- [x] Define app store requirements.",
     "- [x] Define what remains web-only.",
     "08.01 Mobile Strategy Decision",
@@ -94,10 +96,10 @@ if (!phaseOneBlock || phaseOneBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Current phase: Phase 9, Integrations And Migration Tools",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
-    "Last phase report: [09.04 Checklist Platform Migration Path]",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Current phase: Phase 10, Production Infrastructure And Launch",
+    "Last completed phase: 10.08, CI/CD Release Gates",
+    "Last phase report: [10.08 CI/CD Release Gates]",
     "[x] Mobile app path is shippable on iOS and Android.",
     "[x] 8.  Mobile app and offline mode",
   ],
@@ -119,14 +121,13 @@ requireIncludes(
 
 requireIncludes(
   packageJson,
-  [
-    "check:mobile-strategy",
-    "scripts/check-mobile-strategy-contract.mjs",
-  ],
+  ["check:mobile-strategy", "scripts/check-mobile-strategy-contract.mjs"],
   "package scripts",
 );
 
-const mobileStrategy = await jiti.import(join(root, "src/services/mobile/mobileStrategy.ts"));
+const mobileStrategy = await jiti.import(
+  join(root, "src/services/mobile/mobileStrategy.ts"),
+);
 
 if (!mobileStrategy.isMobileStrategyReady()) {
   throw new Error("Mobile strategy contract is not ready");

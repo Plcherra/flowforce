@@ -19,7 +19,9 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const doc = readText("docs/workflow-automation-hooks.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const report = readText(
   "docs/roadmap/reports/06-08-workflow-automation-hooks-2026-05-29.md",
 );
@@ -31,7 +33,9 @@ const panel = readText(
   "src/features/operations/components/WorkflowAutomationHooksPanel.tsx",
 );
 const hub = readText("src/features/operations/components/OperationsHub.tsx");
-const dbTest = readText("supabase/tests/phase6_workflow_automation_hooks.test.sql");
+const dbTest = readText(
+  "supabase/tests/phase6_workflow_automation_hooks.test.sql",
+);
 const packageJson = readText("package.json");
 
 requireIncludes(

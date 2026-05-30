@@ -21,7 +21,9 @@ const requireIncludes = (text, needles, label) => {
 const doc = readText("docs/recipe-production-costing.md");
 const production = readText("src/lib/inventory/production.ts");
 const service = readText("src/features/inventory/services/inventoryService.ts");
-const form = readText("src/features/inventory/components/ProductionEventForm.tsx");
+const form = readText(
+  "src/features/inventory/components/ProductionEventForm.tsx",
+);
 const migration = readText(
   "supabase/migrations/20260528000300_phase5_recipe_production_costing_contract.sql",
 );

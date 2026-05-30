@@ -26,8 +26,12 @@ const master = readText("docs/roadmap/00-master-roadmap.md");
 const report = readText(
   "docs/roadmap/reports/07-06-inventory-and-waste-assistant-2026-05-29.md",
 );
-const migration = readText("supabase/migrations/20260529000600_phase7_inventory_waste_assistant.sql");
-const dbTest = readText("supabase/tests/phase7_inventory_waste_assistant.test.sql");
+const migration = readText(
+  "supabase/migrations/20260529000600_phase7_inventory_waste_assistant.sql",
+);
+const dbTest = readText(
+  "supabase/tests/phase7_inventory_waste_assistant.test.sql",
+);
 const service = readText("src/services/ai/aiInventoryWasteAssistant.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
 const packageJson = readText("package.json");
@@ -125,8 +129,8 @@ if (!phaseSixBlock || phaseSixBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -153,7 +157,9 @@ requireIncludes(
   "package scripts",
 );
 
-const inventoryWasteAssistant = await jiti.import(join(root, "src/services/ai/aiInventoryWasteAssistant.ts"));
+const inventoryWasteAssistant = await jiti.import(
+  join(root, "src/services/ai/aiInventoryWasteAssistant.ts"),
+);
 
 const sampleSnapshot = {
   company_id: "sample-company",
@@ -213,21 +219,30 @@ const sampleSnapshot = {
   },
 };
 
-const result = inventoryWasteAssistant.buildValidatedInventoryWasteAssistant(sampleSnapshot);
+const result =
+  inventoryWasteAssistant.buildValidatedInventoryWasteAssistant(sampleSnapshot);
 
 if (!result.inventoryValidation.ok) {
-  throw new Error(`Inventory assistant draft failed validation: ${result.inventoryValidation.issues.join("; ")}`);
+  throw new Error(
+    `Inventory assistant draft failed validation: ${result.inventoryValidation.issues.join("; ")}`,
+  );
 }
 
 if (!result.wasteValidation.ok) {
-  throw new Error(`Waste assistant draft failed validation: ${result.wasteValidation.issues.join("; ")}`);
+  throw new Error(
+    `Waste assistant draft failed validation: ${result.wasteValidation.issues.join("; ")}`,
+  );
 }
 
-if (!result.suggestions.some((suggestion) => suggestion.type === "stockout_risk")) {
+if (
+  !result.suggestions.some((suggestion) => suggestion.type === "stockout_risk")
+) {
   throw new Error("Inventory/waste assistant did not detect stockout risk");
 }
 
-if (!result.suggestions.some((suggestion) => suggestion.type === "waste_outlier")) {
+if (
+  !result.suggestions.some((suggestion) => suggestion.type === "waste_outlier")
+) {
   throw new Error("Inventory/waste assistant did not detect waste outlier");
 }
 

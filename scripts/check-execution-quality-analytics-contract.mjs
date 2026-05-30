@@ -19,7 +19,9 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const doc = readText("docs/execution-quality-analytics.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const masterRoadmap = readText("docs/roadmap/00-master-roadmap.md");
 const report = readText(
   "docs/roadmap/reports/06-09-execution-quality-analytics-2026-05-29.md",
@@ -27,12 +29,16 @@ const report = readText(
 const migration = readText(
   "supabase/migrations/20260528002000_phase6_execution_quality_analytics.sql",
 );
-const service = readText("src/services/operations/executionQualityAnalytics.ts");
+const service = readText(
+  "src/services/operations/executionQualityAnalytics.ts",
+);
 const panel = readText(
   "src/features/operations/components/ExecutionQualityPanel.tsx",
 );
 const hub = readText("src/features/operations/components/OperationsHub.tsx");
-const dbTest = readText("supabase/tests/phase6_execution_quality_analytics.test.sql");
+const dbTest = readText(
+  "supabase/tests/phase6_execution_quality_analytics.test.sql",
+);
 const packageJson = readText("package.json");
 
 requireIncludes(

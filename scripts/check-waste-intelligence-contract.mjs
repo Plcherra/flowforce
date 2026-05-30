@@ -20,9 +20,13 @@ const requireIncludes = (text, needles, label) => {
 
 const doc = readText("docs/waste-adjustment-intelligence.md");
 const service = readText("src/features/inventory/services/inventoryService.ts");
-const wasteHook = readText("src/features/inventory/hooks/useInventoryWaste.tsx");
+const wasteHook = readText(
+  "src/features/inventory/hooks/useInventoryWaste.tsx",
+);
 const actions = readText("src/features/inventory/routes/Actions.tsx");
-const helpers = readText("src/features/inventory/routes/inventoryActionsHelpers.ts");
+const helpers = readText(
+  "src/features/inventory/routes/inventoryActionsHelpers.ts",
+);
 const wastePage = readText("src/features/inventory/routes/Waste.tsx");
 const intelligence = readText(
   "src/features/inventory/utils/wasteIntelligence.ts",
@@ -52,9 +56,9 @@ requireIncludes(
     "classifyWasteReason",
     "calculateCostImpact",
     "getInventoryCostContext",
-    "adjustment_type: \"waste\"",
+    'adjustment_type: "waste"',
     "reason_category",
-    "source: \"manual_adjustment\"",
+    'source: "manual_adjustment"',
   ],
   "inventory service",
 );
@@ -82,11 +86,7 @@ requireIncludes(
 
 requireIncludes(
   helpers,
-  [
-    "mutateAdjustment",
-    "cost_impact",
-    "source: \"inventory_actions_form\"",
-  ],
+  ["mutateAdjustment", "cost_impact", 'source: "inventory_actions_form"'],
   "actions helpers",
 );
 

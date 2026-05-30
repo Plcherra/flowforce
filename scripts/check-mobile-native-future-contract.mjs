@@ -91,9 +91,9 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
-    "Last phase report: [09.04 Checklist Platform Migration Path]",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
+    "Last phase report: [10.08 CI/CD Release Gates]",
     "- [x] Mobile app path is shippable on iOS and Android.",
     "- [x] 8.  Mobile app and offline mode",
   ],
@@ -130,11 +130,15 @@ if (!nativeFuture.isMobileNativeFutureEvaluationReady()) {
 }
 
 if (!nativeFuture.shouldStartNativeRewrite(["offline_data_loss"])) {
-  throw new Error("Offline data loss should trigger native rewrite consideration");
+  throw new Error(
+    "Offline data loss should trigger native rewrite consideration",
+  );
 }
 
 if (nativeFuture.shouldStartNativeRewrite(["field_performance_pressure"])) {
-  throw new Error("Field performance monitoring alone should not force rewrite");
+  throw new Error(
+    "Field performance monitoring alone should not force rewrite",
+  );
 }
 
 process.stdout.write("OK mobile native future contract\n");

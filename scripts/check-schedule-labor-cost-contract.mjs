@@ -94,7 +94,11 @@ requireIncludes(
   "roadmap phase 05.07",
 );
 
-if (roadmap.includes("- [ ] Connect scheduled shifts to pay rates or labor estimates.")) {
+if (
+  roadmap.includes(
+    "- [ ] Connect scheduled shifts to pay rates or labor estimates.",
+  )
+) {
   throw new Error("roadmap phase 05.07 still has unchecked tasks");
 }
 

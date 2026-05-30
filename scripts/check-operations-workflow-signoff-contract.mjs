@@ -19,7 +19,9 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const signoff = readText("docs/operations-workflow-signoff.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const master = readText("docs/roadmap/00-master-roadmap.md");
 const demo = readText("docs/roadmap/01-product-positioning-and-scope.md");
 const demoReport = readText(
@@ -31,8 +33,12 @@ const report = readText(
 const migration = readText(
   "supabase/migrations/20260528002100_phase6_operations_workflow_signoff.sql",
 );
-const service = readText("src/services/operations/operationsWorkflowSignoff.ts");
-const dbTest = readText("supabase/tests/phase6_operations_workflow_signoff.test.sql");
+const service = readText(
+  "src/services/operations/operationsWorkflowSignoff.ts",
+);
+const dbTest = readText(
+  "supabase/tests/phase6_operations_workflow_signoff.test.sql",
+);
 const packageJson = readText("package.json");
 
 requireIncludes(
@@ -113,8 +119,8 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 6.  Operations workflows and compliance",
   ],
   "master roadmap",

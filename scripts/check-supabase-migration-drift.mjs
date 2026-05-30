@@ -101,8 +101,14 @@ if (listResult.status !== 0) {
 }
 
 const rows = parseMigrationList(listOutput);
-const listedLocalVersions = rows.map((row) => row.local).filter(Boolean).sort();
-const remoteVersions = rows.map((row) => row.remote).filter(Boolean).sort();
+const listedLocalVersions = rows
+  .map((row) => row.local)
+  .filter(Boolean)
+  .sort();
+const remoteVersions = rows
+  .map((row) => row.remote)
+  .filter(Boolean)
+  .sort();
 const rowMismatches = rows.filter(
   (row) => row.local && row.remote && row.local !== row.remote,
 );
@@ -115,7 +121,10 @@ process.stdout.write(`Remote applied migrations: ${remoteVersions.length}\n`);
 
 printList("Local migrations missing on remote:", missingOnRemote);
 printList("Remote migrations missing locally:", extraOnRemote);
-printList("Local migrations not shown by Supabase CLI:", missingFromCliLocalList);
+printList(
+  "Local migrations not shown by Supabase CLI:",
+  missingFromCliLocalList,
+);
 
 if (rowMismatches.length > 0) {
   process.stdout.write("\nMismatched migration rows:\n");
@@ -146,7 +155,9 @@ if (!skipDryRun) {
 
   if (!/Remote database is up to date\./i.test(dryRunOutput)) {
     process.stdout.write(dryRunOutput);
-    fail("Supabase dry-run push did not report the remote database as up to date.");
+    fail(
+      "Supabase dry-run push did not report the remote database as up to date.",
+    );
   }
 }
 

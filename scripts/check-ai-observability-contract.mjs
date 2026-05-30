@@ -23,9 +23,15 @@ const requireIncludes = (text, needles, label) => {
 const doc = readText("docs/ai-observability-and-cost-controls.md");
 const roadmap = readText("docs/roadmap/07-ai-copilot-and-automation.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
-const report = readText("docs/roadmap/reports/07-09-ai-observability-and-cost-controls-2026-05-29.md");
-const migration = readText("supabase/migrations/20260529000900_phase7_ai_observability_cost_controls.sql");
-const hardeningMigration = readText("supabase/migrations/20260529001000_phase7_ai_security_hardening.sql");
+const report = readText(
+  "docs/roadmap/reports/07-09-ai-observability-and-cost-controls-2026-05-29.md",
+);
+const migration = readText(
+  "supabase/migrations/20260529000900_phase7_ai_observability_cost_controls.sql",
+);
+const hardeningMigration = readText(
+  "supabase/migrations/20260529001000_phase7_ai_security_hardening.sql",
+);
 const dbTest = readText("supabase/tests/phase7_ai_observability.test.sql");
 const service = readText("src/services/ai/aiObservability.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
@@ -129,7 +135,9 @@ requireIncludes(
   "Plan 07 roadmap",
 );
 
-const phaseNineBlock = roadmap.match(/### Phase 9: AI Observability And Cost Controls[\s\S]*?### Phase 10:/)?.[0];
+const phaseNineBlock = roadmap.match(
+  /### Phase 9: AI Observability And Cost Controls[\s\S]*?### Phase 10:/,
+)?.[0];
 
 if (!phaseNineBlock || phaseNineBlock.includes("- [ ]")) {
   throw new Error("Plan 07 phase 9 still has unchecked tasks");
@@ -138,8 +146,8 @@ if (!phaseNineBlock || phaseNineBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -166,7 +174,9 @@ requireIncludes(
   "package scripts",
 );
 
-const observability = await jiti.import(join(root, "src/services/ai/aiObservability.ts"));
+const observability = await jiti.import(
+  join(root, "src/services/ai/aiObservability.ts"),
+);
 
 const usageEvent = observability.buildAIUsageEvent({
   companyId: "sample-company",
@@ -227,7 +237,10 @@ if (!budgetStatus.shouldAlert || budgetStatus.shouldBlock) {
 
 const fallback = observability.buildSafeAIFallback("budget reached");
 
-if (fallback.writesAllowed !== false || fallback.requiresHumanApproval !== true) {
+if (
+  fallback.writesAllowed !== false ||
+  fallback.requiresHumanApproval !== true
+) {
   throw new Error("AI fallback is not safe");
 }
 

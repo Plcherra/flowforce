@@ -19,14 +19,18 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const doc = readText("docs/recurring-operations-calendar.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const report = readText(
   "docs/roadmap/reports/06-03-recurring-operations-calendar-2026-05-28.md",
 );
 const migration = readText(
   "supabase/migrations/20260528001400_phase6_recurring_operations_calendar.sql",
 );
-const service = readText("src/services/operations/recurringOperationsCalendar.ts");
+const service = readText(
+  "src/services/operations/recurringOperationsCalendar.ts",
+);
 const panel = readText(
   "src/features/operations/components/RecurringOperationsCalendarPanel.tsx",
 );

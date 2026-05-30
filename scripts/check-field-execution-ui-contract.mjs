@@ -19,7 +19,9 @@ const requireIncludes = (text, needles, label) => {
 };
 
 const doc = readText("docs/field-execution-ui.md");
-const roadmap = readText("docs/roadmap/06-operations-workflows-and-compliance.md");
+const roadmap = readText(
+  "docs/roadmap/06-operations-workflows-and-compliance.md",
+);
 const report = readText(
   "docs/roadmap/reports/06-04-field-execution-ui-2026-05-28.md",
 );

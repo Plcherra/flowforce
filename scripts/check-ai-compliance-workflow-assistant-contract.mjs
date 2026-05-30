@@ -26,8 +26,12 @@ const master = readText("docs/roadmap/00-master-roadmap.md");
 const report = readText(
   "docs/roadmap/reports/07-07-compliance-and-workflow-assistant-2026-05-29.md",
 );
-const migration = readText("supabase/migrations/20260529000700_phase7_compliance_workflow_assistant.sql");
-const dbTest = readText("supabase/tests/phase7_compliance_workflow_assistant.test.sql");
+const migration = readText(
+  "supabase/migrations/20260529000700_phase7_compliance_workflow_assistant.sql",
+);
+const dbTest = readText(
+  "supabase/tests/phase7_compliance_workflow_assistant.test.sql",
+);
 const service = readText("src/services/ai/aiComplianceWorkflowAssistant.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
 const packageJson = readText("package.json");
@@ -123,8 +127,8 @@ if (!phaseSevenBlock || phaseSevenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -151,7 +155,9 @@ requireIncludes(
   "package scripts",
 );
 
-const complianceWorkflowAssistant = await jiti.import(join(root, "src/services/ai/aiComplianceWorkflowAssistant.ts"));
+const complianceWorkflowAssistant = await jiti.import(
+  join(root, "src/services/ai/aiComplianceWorkflowAssistant.ts"),
+);
 
 const sampleSnapshot = {
   company_id: "sample-company",
@@ -208,18 +214,35 @@ const sampleSnapshot = {
   },
 };
 
-const result = complianceWorkflowAssistant.buildValidatedComplianceWorkflowAssistant(sampleSnapshot);
+const result =
+  complianceWorkflowAssistant.buildValidatedComplianceWorkflowAssistant(
+    sampleSnapshot,
+  );
 
 if (!result.validation.ok) {
-  throw new Error(`Compliance workflow assistant draft failed validation: ${result.validation.issues.join("; ")}`);
+  throw new Error(
+    `Compliance workflow assistant draft failed validation: ${result.validation.issues.join("; ")}`,
+  );
 }
 
-if (!result.suggestions.some((suggestion) => suggestion.type === "overdue_workflow")) {
-  throw new Error("Compliance workflow assistant did not detect overdue workflow pressure");
+if (
+  !result.suggestions.some(
+    (suggestion) => suggestion.type === "overdue_workflow",
+  )
+) {
+  throw new Error(
+    "Compliance workflow assistant did not detect overdue workflow pressure",
+  );
 }
 
-if (!result.suggestions.some((suggestion) => suggestion.type === "training_followup")) {
-  throw new Error("Compliance workflow assistant did not detect training follow-up");
+if (
+  !result.suggestions.some(
+    (suggestion) => suggestion.type === "training_followup",
+  )
+) {
+  throw new Error(
+    "Compliance workflow assistant did not detect training follow-up",
+  );
 }
 
 const safe = complianceWorkflowAssistant.isComplianceWorkflowSuggestionSafe({

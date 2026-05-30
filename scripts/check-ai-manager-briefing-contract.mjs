@@ -26,7 +26,9 @@ const master = readText("docs/roadmap/00-master-roadmap.md");
 const report = readText(
   "docs/roadmap/reports/07-04-manager-briefing-2026-05-29.md",
 );
-const migration = readText("supabase/migrations/20260529000400_phase7_manager_briefing.sql");
+const migration = readText(
+  "supabase/migrations/20260529000400_phase7_manager_briefing.sql",
+);
 const dbTest = readText("supabase/tests/phase7_manager_briefing.test.sql");
 const service = readText("src/services/ai/aiManagerBriefing.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
@@ -91,17 +93,14 @@ requireIncludes(
 
 requireIncludes(
   auditEvents,
-  [
-    "aiManagerBriefingGenerated",
-    "ai.manager_briefing.generated",
-  ],
+  ["aiManagerBriefingGenerated", "ai.manager_briefing.generated"],
   "audit events",
 );
 
 requireIncludes(
   roadmap,
   [
-    "Build \"today's operations briefing.\"",
+    'Build "today\'s operations briefing."',
     "Include staffing risks, inventory risks, overdue tasks, workflow exceptions, and cost anomalies.",
     "Add evidence links.",
     "Add refresh/logging behavior.",
@@ -122,8 +121,8 @@ if (!phaseFourBlock || phaseFourBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [09 Integrations And Migration Tools]",
-    "Last completed phase: 09.04, Checklist Platform Migration Path",
+    "Active plan: [10 Production Infrastructure And Launch]",
+    "Last completed phase: 10.08, CI/CD Release Gates",
     "[x] 7.  AI copilot and automation",
   ],
   "master roadmap",
@@ -150,7 +149,9 @@ requireIncludes(
   "package scripts",
 );
 
-const managerBriefing = await jiti.import(join(root, "src/services/ai/aiManagerBriefing.ts"));
+const managerBriefing = await jiti.import(
+  join(root, "src/services/ai/aiManagerBriefing.ts"),
+);
 
 const sampleSnapshot = {
   company_id: "sample-company",
@@ -203,10 +204,14 @@ const sampleSnapshot = {
 const result = managerBriefing.buildValidatedManagerBriefing(sampleSnapshot);
 
 if (!result.validation.ok) {
-  throw new Error(`Manager briefing draft failed validation: ${result.validation.issues.join("; ")}`);
+  throw new Error(
+    `Manager briefing draft failed validation: ${result.validation.issues.join("; ")}`,
+  );
 }
 
-if (!result.evidence.some((item) => item.route === "/app/enhanced-scheduling")) {
+if (
+  !result.evidence.some((item) => item.route === "/app/enhanced-scheduling")
+) {
   throw new Error("Manager briefing evidence is missing scheduling route");
 }
 

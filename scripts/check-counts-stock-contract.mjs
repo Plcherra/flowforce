@@ -20,9 +20,13 @@ const requireIncludes = (text, needles, label) => {
 
 const doc = readText("docs/counts-stock-position.md");
 const stockPosition = readText("src/features/inventory/utils/stockPosition.ts");
-const repository = readText("src/features/inventory/repositories/countsRepository.ts");
+const repository = readText(
+  "src/features/inventory/repositories/countsRepository.ts",
+);
 const countDetail = readText("src/features/inventory/routes/CountDetail.tsx");
-const countTable = readText("src/features/inventory/components/MarketManCountingInterface.tsx");
+const countTable = readText(
+  "src/features/inventory/components/MarketManCountingInterface.tsx",
+);
 const migration = readText(
   "supabase/migrations/20260528000400_phase5_counts_stock_position_contract.sql",
 );
@@ -71,12 +75,7 @@ requireIncludes(
 
 requireIncludes(
   countDetail,
-  [
-    "summarizeCountLines",
-    "Missing",
-    "Variance Lines",
-    "Net Variance",
-  ],
+  ["summarizeCountLines", "Missing", "Variance Lines", "Net Variance"],
   "count detail",
 );
 

@@ -1,0 +1,46 @@
+services:
+  web:
+    image: flowforce-web:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_LOG_LEVEL: ${NEXT_PUBLIC_LOG_LEVEL:-info}
+        NEXT_PUBLIC_REMOTE_LOG_LEVEL: ${NEXT_PUBLIC_REMOTE_LOG_LEVEL:-warn}
+        NEXT_PUBLIC_ENABLE_REMOTE_LOGS: ${NEXT_PUBLIC_ENABLE_REMOTE_LOGS:-false}
+        NEXT_PUBLIC_REMOTE_LOG_ENDPOINT: ${NEXT_PUBLIC_REMOTE_LOG_ENDPOINT:-/api/logs}
+        NEXT_PUBLIC_ENABLE_AI_INSIGHTS: ${NEXT_PUBLIC_ENABLE_AI_INSIGHTS:-false}
+        NEXT_PUBLIC_DEFAULT_COMPANY_ID: ${NEXT_PUBLIC_DEFAULT_COMPANY_ID:-}
+        NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT: ${NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT:-}
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    expose:
+      - "3000"
+    restart: unless-stopped
+
+  proxy:
+    image: caddy:2.10-alpine
+    depends_on:
+      - web
+    env_file:
+      - ./.env.production
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  caddy_logs:

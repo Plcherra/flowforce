@@ -75,9 +75,9 @@ for (const term of [
 for (const symbol of [
   "tryGetConversionFactor",
   "canConvertUnits",
-  "status: \"ready\"",
-  "status: \"invalid\"",
-  "status: \"cycle\"",
+  'status: "ready"',
+  'status: "invalid"',
+  'status: "cycle"',
 ]) {
   if (!units.includes(symbol)) {
     fail(`inventoryUnits missing ${symbol}`);
