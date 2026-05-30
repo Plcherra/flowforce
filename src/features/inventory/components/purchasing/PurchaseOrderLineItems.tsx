@@ -122,6 +122,7 @@ export function PurchaseOrderLineItems({
                   <Input
                     type="number"
                     min="0"
+                    className="min-w-20"
                     value={line.quantity}
                     onChange={(event) =>
                       onLineItemQuantity(line.id, event.target.value)
@@ -133,6 +134,7 @@ export function PurchaseOrderLineItems({
                     type="number"
                     min="0"
                     step="0.01"
+                    className="min-w-24"
                     value={line.unitPrice}
                     onChange={(event) =>
                       onLineItemPrice(line.id, event.target.value)

@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/loading-states";
+import { buildMobileAuthRedirectPath } from "@/services/mobile/mobileAuthRouting";
 
 interface NavigationGuardProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const currentPath = location.pathname;
+  const currentTarget = `${location.pathname}${location.search}`;
   const isProtectedRoute = protectedRoutes.some((route) =>
     currentPath.startsWith(route),
   );
@@ -40,7 +42,9 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
 
     // Redirect unauthenticated users from protected routes
     if (!user && isProtectedRoute) {
-      redirectTo("/auth", { from: currentPath });
+      redirectTo(buildMobileAuthRedirectPath(currentPath, location.search), {
+        from: currentTarget,
+      });
       return;
     }
 
@@ -49,7 +53,16 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
       redirectTo("/app/dashboard");
       return;
     }
-  }, [user, loading, currentPath, isProtectedRoute, isAuthRoute, redirectTo]);
+  }, [
+    user,
+    loading,
+    currentPath,
+    currentTarget,
+    location.search,
+    isProtectedRoute,
+    isAuthRoute,
+    redirectTo,
+  ]);
 
   if (loading && isProtectedRoute) {
     return (

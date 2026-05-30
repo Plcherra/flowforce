@@ -200,6 +200,42 @@ export const PERMISSION_DEFINITIONS = [
     category: "General",
   },
   {
+    key: "ai.insights.view",
+    label: "AI: View Insights",
+    description: "View AI-generated tenant-scoped guidance",
+    category: "General",
+  },
+  {
+    key: "ai.actions.suggest",
+    label: "AI: Suggest Actions",
+    description: "Ask AI to draft operational recommendations without writes",
+    category: "General",
+  },
+  {
+    key: "ai.actions.approve",
+    label: "AI: Approve Actions",
+    description: "Approve AI-originated actions before product writes occur",
+    category: "General",
+  },
+  {
+    key: "ai.actions.automate",
+    label: "AI: Automate Actions",
+    description: "Enable pre-approved low-risk AI automation",
+    category: "General",
+  },
+  {
+    key: "ai.audit.view",
+    label: "AI: View Audit",
+    description: "Review AI governance, usage, and audit trails",
+    category: "General",
+  },
+  {
+    key: "ai.governance.manage",
+    label: "AI: Manage Governance",
+    description: "Configure AI scopes, restrictions, and automation levels",
+    category: "General",
+  },
+  {
     key: "managePayments",
     label: "Manage Payments",
     description: "Manage payment workflows",

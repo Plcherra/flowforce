@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build Jolt-style execution: checklists, SOPs, inspections, incidents, recurring workflows, approvals, compliance history, and manager review.
+Build checklist-driven execution: checklists, SOPs, inspections, incidents, recurring workflows, approvals, compliance history, and manager review.
 
 ## Phases
 

@@ -65,6 +65,12 @@ Service routes now have explicit protection:
 - Onboarding repair uses bearer session verification.
 - Automation suggestion route now requires bearer session verification and server-side tenant membership checks.
 
+### AI Governance Baseline
+
+Phase 07.01 adds an explicit AI governance model so AI cannot become an uncontrolled side door. The baseline separates read-only insight, suggested action, approved action, and automated action before richer context or prompt contracts are added.
+
+AI access must stay tenant-scoped and must not include raw PII, payroll detail, secret material, or cross-tenant data. AI-originated writes require explicit permission, approval state, and audit events.
+
 ### Support Route Safety
 
 The support route remains internal-only:

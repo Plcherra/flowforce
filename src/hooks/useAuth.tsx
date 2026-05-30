@@ -30,6 +30,11 @@ import { toast } from "@/hooks/use-toast";
 import { AuthError, UserMetadata } from "@/types/common";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/config";
 import { logger } from "@/utils/logger";
+import {
+  getMobilePasswordResetRedirectUrl,
+  getMobileSignUpRedirectUrl,
+  registerMobileAppResumeHandler,
+} from "@/services/mobile/mobileAuthRouting";
 
 interface AuthContextType {
   user: User | null;
@@ -90,27 +95,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let hasHandledInitialUrl = false;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!isMounted) return;
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-      setLoading(false);
-    });
-
-    const hydrateSession = async () => {
+    const syncSession = async (source: string) => {
       try {
+        const url =
+          typeof window !== "undefined"
+            ? new URL(window.location.href)
+            : null;
+        const authCode = url?.searchParams.get("code");
+
+        if (!hasHandledInitialUrl && authCode) {
+          hasHandledInitialUrl = true;
+          const { data, error } =
+            await supabase.auth.exchangeCodeForSession(authCode);
+          if (error) throw error;
+
+          if (url && typeof window !== "undefined") {
+            url.searchParams.delete("code");
+            window.history.replaceState(
+              window.history.state,
+              document.title,
+              `${url.pathname}${url.search}${url.hash}`,
+            );
+          }
+
+          if (!isMounted) return;
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+          return;
+        }
+
         const { data } = await supabase.auth.getSession();
         if (!isMounted) return;
 
         setSession(data.session);
         setUser(data.session?.user ?? null);
       } catch (error) {
-        logger.error("Failed to hydrate auth session", {
+        logger.error("Failed to sync auth session", {
           error,
-          tags: ["error"],
+          context: { source },
+          tags: ["error", "auth", "mobile-app-shell"],
         });
         if (isMounted) {
           setSession(null);
@@ -123,7 +148,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    hydrateSession().catch((error) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!isMounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setLoading(false);
+    });
+
+    const unregisterResumeHandler = registerMobileAppResumeHandler(() => {
+      syncSession("app_resume").catch((error) => {
+        logger.error("Unexpected auth resume error", {
+          error,
+          tags: ["error", "auth", "mobile-app-shell"],
+        });
+      });
+    });
+
+    syncSession("initial_hydration").catch((error) => {
       logger.error("Unexpected auth initialization error", {
         error,
         tags: ["error"],
@@ -135,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false;
+      unregisterResumeHandler();
       subscription.unsubscribe();
     };
   }, []);
@@ -238,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     lastName: string,
     metadata: UserMetadata = {} as UserMetadata,
   ) => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = getMobileSignUpRedirectUrl();
 
     try {
       const { error } = await supabase.auth.signUp({
@@ -284,7 +328,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+        redirectTo: getMobilePasswordResetRedirectUrl(),
       });
 
       if (error) {

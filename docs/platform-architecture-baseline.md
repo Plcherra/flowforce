@@ -17,6 +17,8 @@ Accepted near-term path:
 - Native wrapper later: Capacitor-first after pilot workflows are stable on mobile web.
 - Native rewrite later: Expo/React Native or Flutter only if the wrapper path fails pilot-critical needs.
 
+Plan 08.01 formalized this into the mobile product decision: Capacitor-first for the v1 app-store path, Expo/native later only for proven field-workflow pressure, and no Flutter rewrite for v1.
+
 ## Runtime Diagram
 
 ```mermaid

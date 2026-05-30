@@ -236,7 +236,13 @@ export interface InventoryCount {
   notes?: string;
   counted_by: string;
   submitted_at?: string | null;
-  review_status: "pending" | "under_review" | "approved" | "rejected";
+  review_status:
+    | "pending"
+    | "under_review"
+    | "approved"
+    | "rejected"
+    | "pending_offline_sync"
+    | "pending_review_sync";
   reviewed_by?: string | null;
   reviewed_at?: string | null;
   review_notes?: string | null;
@@ -270,6 +276,7 @@ export interface InventoryCountLine {
     name: string;
     abbreviation?: string | null;
   } | null;
+  review_status?: "pending_offline_sync";
 }
 
 export interface InventorySupplier {

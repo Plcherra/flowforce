@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import {
   addInventoryItemToCount,
   addInventoryItemsToCount,
@@ -18,12 +20,41 @@ import {
 } from "@/features/inventory/repositories/countsRepository";
 import type { CreateInventoryCountInput } from "@/features/inventory/repositories/countsRepository";
 import type { InventoryCount, InventoryCountLine } from "./types";
+import {
+  isOfflineQueueableError,
+  queueOfflineInventoryCountCreate,
+  queueOfflineInventoryCountLineUpdate,
+  queueOfflineInventoryCountSubmit,
+  queueOfflineInventoryCountUpdate,
+} from "@/services/mobile/mobileOfflineCriticalWorkflows";
 import { logger } from "@/utils/logger";
+
+const buildOfflineCountStub = (
+  queueId: string,
+  userId: string,
+  payload: CreateInventoryCountInput,
+): InventoryCount =>
+  ({
+    id: queueId,
+    count_type: payload.type,
+    count_period: payload.period ?? null,
+    count_date: payload.scheduleDate,
+    status: "planned",
+    review_status: "pending_offline_sync",
+    notes: payload.notes ?? "",
+    description: payload.description ?? null,
+    counted_by: userId,
+    locations: [],
+    created_at: new Date().toISOString(),
+  }) as unknown as InventoryCount;
 
 export function useInventoryCounts() {
   const [counts, setCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const fetchCounts = async () => {
     setLoading(true);
@@ -55,6 +86,25 @@ export function useInventoryCounts() {
       return created;
     } catch (error: unknown) {
       logger.error("Error creating count:", { error, tags: ["error"] });
+      if (isOfflineQueueableError(error) && user?.id && companyId) {
+        const queued = queueOfflineInventoryCountCreate({
+          companyId,
+          userId: user.id,
+          payload: countData as unknown as Record<string, unknown>,
+        });
+        const offlineCount = buildOfflineCountStub(
+          queued.optimisticKey,
+          user.id,
+          countData,
+        );
+        setCounts((current) => [offlineCount, ...current]);
+        toast({
+          title: "Saved offline",
+          description: "Inventory count will sync when connection returns.",
+        });
+        return offlineCount;
+      }
+
       const message =
         error instanceof Error
           ? error.message
@@ -83,6 +133,32 @@ export function useInventoryCounts() {
       fetchCounts();
     } catch (error: unknown) {
       logger.error("Error updating count:", { error, tags: ["error"] });
+      if (isOfflineQueueableError(error) && user?.id && companyId) {
+        queueOfflineInventoryCountUpdate({
+          companyId,
+          userId: user.id,
+          countId,
+          updates: updates as Record<string, unknown>,
+        });
+        setCounts((current) =>
+          current.map((count) =>
+            count.id === countId
+              ? {
+                  ...count,
+                  ...updates,
+                  review_status:
+                    updates.review_status ?? "pending_offline_sync",
+                }
+              : count,
+          ),
+        );
+        toast({
+          title: "Saved offline",
+          description: "Count changes will sync when connection returns.",
+        });
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Failed to update count";
       toast({
@@ -106,6 +182,31 @@ export function useInventoryCounts() {
       fetchCounts();
     } catch (error: unknown) {
       logger.error("Error completing count:", { error, tags: ["error"] });
+      if (isOfflineQueueableError(error) && user?.id && companyId) {
+        queueOfflineInventoryCountSubmit({
+          companyId,
+          userId: user.id,
+          countId,
+          operation: "complete",
+        });
+        setCounts((current) =>
+          current.map((count) =>
+            count.id === countId
+              ? {
+                  ...count,
+                  status: "completed",
+                  review_status: "pending_review_sync",
+                }
+              : count,
+          ),
+        );
+        toast({
+          title: "Saved offline",
+          description: "Completed count will sync for review when online.",
+        });
+        return;
+      }
+
       const message =
         error instanceof Error ? error.message : "Failed to complete count";
       toast({
@@ -150,6 +251,31 @@ export function useInventoryCounts() {
       fetchCounts();
     } catch (error: unknown) {
       logger.error("Error submitting count:", { error, tags: ["error"] });
+      if (isOfflineQueueableError(error) && user?.id && companyId) {
+        queueOfflineInventoryCountSubmit({
+          companyId,
+          userId: user.id,
+          countId,
+          operation: "submit",
+        });
+        setCounts((current) =>
+          current.map((count) =>
+            count.id === countId
+              ? {
+                  ...count,
+                  status: "submitted",
+                  review_status: "pending_review_sync",
+                }
+              : count,
+          ),
+        );
+        toast({
+          title: "Saved offline",
+          description: "Count review request will sync when online.",
+        });
+        return;
+      }
+
       const message =
         error instanceof Error
           ? error.message
@@ -229,6 +355,9 @@ export function useInventoryCountLines(countId?: string) {
   const [countLines, setCountLines] = useState<InventoryCountLine[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const fetchCountLines = async () => {
     if (!countId) {
@@ -295,6 +424,32 @@ export function useInventoryCountLines(countId?: string) {
       fetchCountLines();
     } catch (error) {
       logger.error("Error updating count line:", { error, tags: ["error"] });
+      if (isOfflineQueueableError(error) && user?.id && companyId && countId) {
+        queueOfflineInventoryCountLineUpdate({
+          companyId,
+          userId: user.id,
+          countId,
+          lineId,
+          updates: updates as Record<string, unknown>,
+        });
+        setCountLines((current) =>
+          current.map((line) =>
+            line.id === lineId
+              ? {
+                  ...line,
+                  ...updates,
+                  review_status: "pending_offline_sync",
+                }
+              : line,
+          ),
+        );
+        toast({
+          title: "Saved offline",
+          description: "Count line will sync when connection returns.",
+        });
+        return;
+      }
+
       toast({
         title: "Error",
         description: "Failed to update count line",

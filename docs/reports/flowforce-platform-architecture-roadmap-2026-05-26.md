@@ -7,7 +7,7 @@ Date: 2026-05-26
 The plan is to turn FlowForce into a restaurant/retail operations platform that can replace a multi-app stack:
 
 - Workforce management: employees, schedules, messaging, tasks, recognition, training.
-- Jolt-like operations execution: checklists, SOPs, forms, compliance, manager workflows.
+- Restaurant operations execution: checklists, SOPs, forms, compliance, manager workflows.
 - MarketMan-like inventory and purchasing: items, units, counts, suppliers, purchasing, production, waste, food-cost tracking.
 - FlowForce-only advantage: connect those modules together so staffing, inventory, labor cost, food cost, compliance, and AI recommendations share one tenant data model.
 

@@ -117,7 +117,7 @@ FlowForce should not only promise lower software bills. The stronger savings sto
 
 The software replacement story remains useful:
 
-- Jolt-style operations.
+- Checklist-driven operations.
 - Workforce coordination.
 - MarketMan-style inventory/cost basics.
 

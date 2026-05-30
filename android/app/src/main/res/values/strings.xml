@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FlowForce</string>
+    <string name="title_activity_main">FlowForce</string>
+    <string name="package_name">com.flowforce.app</string>
+    <string name="custom_url_scheme">com.flowforce.app</string>
+    <string name="camera_permission_reason">FlowForce uses the camera only when you scan a code or attach workflow evidence.</string>
+    <string name="microphone_permission_reason">FlowForce uses the microphone only when you record audio evidence in a form or workflow.</string>
+    <string name="notification_permission_reason">FlowForce sends notifications for urgent operational work.</string>
+</resources>

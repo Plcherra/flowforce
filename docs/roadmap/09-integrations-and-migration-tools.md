@@ -8,10 +8,10 @@ Make FlowForce easy to adopt by importing data from existing tools and connectin
 
 ### Phase 1: Integration Strategy
 
-- [ ] Rank integrations by pilot value.
-- [ ] Separate imports, exports, syncs, and live APIs.
-- [ ] Define OAuth/API-key storage rules.
-- [ ] Define integration logging and retry needs.
+- [x] Rank integrations by pilot value.
+- [x] Separate imports, exports, syncs, and live APIs.
+- [x] Define OAuth/API-key storage rules.
+- [x] Define integration logging and retry needs.
 
 Acceptance:
 
@@ -21,12 +21,20 @@ Verification:
 
 - Integration roadmap matches product positioning.
 
+Status:
+
+- Completed on 2026-05-30.
+- Strategy: [Integration Strategy](../integration-strategy.md)
+- Contract: `src/services/integrations/integrationStrategy.ts`
+- Checker: `npm run check:integration-strategy`
+- Phase report: [09.01 Integration Strategy](./reports/09-01-integration-strategy-2026-05-30.md)
+
 ### Phase 2: CSV Import Framework
 
-- [ ] Build generic CSV upload, mapping, preview, validation, and import result flow.
-- [ ] Add rollback/error reporting.
-- [ ] Add import audit logs.
-- [ ] Add templates for employees, inventory items, suppliers, schedules, and tasks.
+- [x] Build generic CSV upload, mapping, preview, validation, and import result flow.
+- [x] Add rollback/error reporting.
+- [x] Add import audit logs.
+- [x] Add templates for employees, inventory items, suppliers, schedules, and tasks.
 
 Acceptance:
 
@@ -36,12 +44,21 @@ Verification:
 
 - Import tests cover valid and invalid files.
 
+Status:
+
+- Completed on 2026-05-30.
+- Framework: [CSV Import Framework](../csv-import-framework.md)
+- Contract: `src/services/integrations/csvImportFramework.ts`
+- Migration: `supabase/migrations/20260530000200_phase9_csv_import_framework.sql`
+- Checker: `npm run check:csv-import-framework`
+- Phase report: [09.02 CSV Import Framework](./reports/09-02-csv-import-framework-2026-05-30.md)
+
 ### Phase 3: Workforce Platform Migration Path
 
-- [ ] Define imported data: employees, roles, schedules, tasks, messages where possible.
-- [ ] Create mapping docs.
-- [ ] Add CSV/import adapters.
-- [ ] Add migration completion report.
+- [x] Define imported data: employees, roles, schedules, tasks, messages where possible.
+- [x] Create mapping docs.
+- [x] Add CSV/import adapters.
+- [x] Add migration completion report.
 
 Acceptance:
 
@@ -51,20 +68,36 @@ Verification:
 
 - Sample import creates expected tenant data.
 
-### Phase 4: Jolt Migration Path
+Status:
 
-- [ ] Define imported data: checklists, SOPs, forms, locations, recurring tasks.
-- [ ] Add template mapping.
-- [ ] Add import preview and validation.
-- [ ] Add post-import workflow review.
+- Completed on 2026-05-30.
+- Mapping: [Workforce Platform Migration Path](../workforce-platform-migration.md)
+- Contract: `src/services/integrations/workforceMigrationPath.ts`
+- Checker: `npm run check:workforce-migration`
+- Phase report: [09.03 Workforce Platform Migration Path](./reports/09-03-workforce-platform-migration-2026-05-30.md)
+
+### Phase 4: Checklist Platform Migration Path
+
+- [x] Define imported data: checklists, SOPs, forms, locations, recurring tasks.
+- [x] Add template mapping.
+- [x] Add import preview and validation.
+- [x] Add post-import workflow review.
 
 Acceptance:
 
-- Jolt-style operations can be recreated in FlowForce.
+- Checklist-driven operations can be recreated in FlowForce.
 
 Verification:
 
 - Sample checklist imports into executable workflow templates.
+
+Status:
+
+- Completed on 2026-05-30.
+- Mapping: [Checklist Platform Migration Path](../checklist-platform-migration.md)
+- Contract: `src/services/integrations/checklistMigrationPath.ts`
+- Checker: `npm run check:checklist-migration`
+- Phase report: [09.04 Checklist Platform Migration Path](./reports/09-04-checklist-platform-migration-2026-05-30.md)
 
 ### Phase 5: MarketMan Migration Path
 

@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { appEnv } from "@/lib/env";
 import { TenantSetupRequired } from "@/app-shell/tenant/TenantSetupRequired";
+import { useMobilePushNotifications } from "@/hooks/useMobilePushNotifications";
+import { MobileOfflineQueueStatus } from "@/app-shell/mobile/MobileOfflineQueueStatus";
 
 interface AppShellProps {
   children?: ReactNode;
@@ -17,10 +19,14 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const { user, loading } = useAuth();
   const profileState = useProfile();
+  useMobilePushNotifications({
+    userId: user?.id,
+    companyId: profileState.profile?.companyId,
+  });
 
   if (loading || profileState.loading || !user) {
     return (
-      <div className="flex flex-col h-screen overflow-hidden bg-background">
+      <div className="app-viewport flex flex-col overflow-hidden bg-background">
         <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center">
           <LoadingSpinner
             text={
@@ -40,7 +46,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col h-screen overflow-hidden bg-background">
+      <div className="app-viewport flex flex-col overflow-hidden bg-background">
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Persistent Sidebar - never remounts */}
           <AppSidebar />
@@ -54,6 +60,7 @@ export default function AppShell({ children }: AppShellProps) {
 
             {/* Main Content - with scroll restoration and loading states */}
             <main className="flex-1 overflow-y-auto min-h-0">
+              <MobileOfflineQueueStatus />
               <ErrorBoundary showDetails={appEnv.DEV}>
                 <Suspense
                   fallback={

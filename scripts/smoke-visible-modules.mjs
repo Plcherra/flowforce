@@ -7,7 +7,7 @@ import { chromium } from "playwright";
 import { createClient } from "@supabase/supabase-js";
 
 const cwd = process.cwd();
-const BASE_URL = process.env.TEST_URL || "http://127.0.0.1:3000";
+const BASE_URL = process.env.TEST_URL || "http://localhost:3000";
 const TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS || 30000);
 const HEADLESS = process.env.SMOKE_HEADED !== "1";
 const KEEP_DATA = process.env.SMOKE_KEEP_DATA === "1";
@@ -623,6 +623,59 @@ async function detectHorizontalOverflow(page) {
   });
 }
 
+async function detectTouchTargetWarnings(page) {
+  return page.evaluate(() => {
+    const selectors = [
+      "button:not([disabled])",
+      "a[href]",
+      "input:not([type='hidden']):not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "[role='button']",
+      "[role='tab']",
+      "[role='menuitem']",
+      "[data-mobile='true']",
+    ];
+    const targets = [...document.querySelectorAll(selectors.join(","))];
+    const smallTargets = [];
+
+    for (const target of targets) {
+      const rect = target.getBoundingClientRect();
+      const style = window.getComputedStyle(target);
+      if (
+        rect.width === 0 ||
+        rect.height === 0 ||
+        (rect.width <= 8 && rect.height <= 8) ||
+        style.visibility === "hidden" ||
+        style.display === "none"
+      ) {
+        continue;
+      }
+
+      if (rect.width < 36 || rect.height < 36) {
+        smallTargets.push({
+          tag: target.tagName.toLowerCase(),
+          text: (target.textContent || target.getAttribute("aria-label") || "")
+            .trim()
+            .slice(0, 80),
+          type: target.getAttribute("type") || "",
+          id: target.getAttribute("id") || "",
+          name: target.getAttribute("name") || "",
+          placeholder: target.getAttribute("placeholder") || "",
+          className:
+            typeof target.className === "string"
+              ? target.className.slice(0, 160)
+              : "",
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        });
+      }
+    }
+
+    return smallTargets.slice(0, 20);
+  });
+}
+
 async function testRoute(context, route, viewport) {
   const startedAt = Date.now();
   const page = await context.newPage();
@@ -662,6 +715,16 @@ async function testRoute(context, route, viewport) {
         message: `Horizontal overflow ${overflow.overflowPx}px at ${overflow.viewportWidth}px viewport`,
         details: overflow,
       });
+    }
+    if (viewport.isMobile) {
+      const touchTargetWarnings = await detectTouchTargetWarnings(page);
+      if (touchTargetWarnings.length > 0) {
+        result.warnings.push({
+          type: "layout",
+          message: `${touchTargetWarnings.length} visible touch targets below 36px minimum`,
+          details: touchTargetWarnings,
+        });
+      }
     }
 
     const httpOk =

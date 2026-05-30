@@ -113,8 +113,8 @@ if (!phaseTenBlock || phaseTenBlock.includes("- [ ]")) {
 requireIncludes(
   master,
   [
-    "Active plan: [07 AI Copilot And Automation]",
-    "Last completed phase: 06.10, Operations Workflow Signoff",
+    "Active plan: [09 Integrations And Migration Tools]",
+    "Last completed phase: 09.04, Checklist Platform Migration Path",
     "[x] 6.  Operations workflows and compliance",
   ],
   "master roadmap",

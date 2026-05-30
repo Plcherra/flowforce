@@ -135,7 +135,7 @@ Status:
 
 Acceptance:
 
-- Forms support Jolt-style execution basics.
+- Forms support checklist-driven execution basics.
 
 Verification:
 

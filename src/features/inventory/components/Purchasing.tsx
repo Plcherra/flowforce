@@ -830,6 +830,7 @@ export default function InventoryPurchasingPage() {
                                         <Input
                                           type="number"
                                           min="0"
+                                          className="min-w-20"
                                           value={line.quantity}
                                           onChange={(event) =>
                                             handleLineItemQuantity(
@@ -844,6 +845,7 @@ export default function InventoryPurchasingPage() {
                                           type="number"
                                           min="0"
                                           step="0.01"
+                                          className="min-w-24"
                                           value={line.unitPrice}
                                           onChange={(event) =>
                                             handleLineItemPrice(
@@ -1361,6 +1363,7 @@ export default function InventoryPurchasingPage() {
                                               type="number"
                                               min="0"
                                               max={remaining}
+                                              className="min-w-20"
                                               value={
                                                 receiveOrders.receivingLines[
                                                   line.id

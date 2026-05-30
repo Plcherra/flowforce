@@ -1,0 +1,44 @@
+{
+  "profiles": [
+    {
+      "id": "local_dev",
+      "platform": "both",
+      "command": "CAPACITOR_SERVER_URL=http://localhost:3000 npm run mobile:cap:sync",
+      "signingRequired": false,
+      "purpose": "Local simulator/device development against the Next.js dev server."
+    },
+    {
+      "id": "internal_testing",
+      "platform": "both",
+      "command": "npm run mobile:cap:doctor && npm run mobile:cap:sync",
+      "signingRequired": true,
+      "purpose": "Prepare signed builds for product-team QA."
+    },
+    {
+      "id": "testflight",
+      "platform": "ios",
+      "command": "npm run mobile:ios:open",
+      "signingRequired": true,
+      "purpose": "Open Xcode to archive and upload an iOS build to TestFlight."
+    },
+    {
+      "id": "play_internal",
+      "platform": "android",
+      "command": "npm run mobile:android:bundle",
+      "signingRequired": true,
+      "purpose": "Create an Android App Bundle for Play Console internal testing."
+    },
+    {
+      "id": "production",
+      "platform": "both",
+      "command": "npm run check:release && npm run mobile:cap:sync",
+      "signingRequired": true,
+      "purpose": "Final store-submission gate after release checks pass."
+    }
+  ],
+  "signingNotes": [
+    "Apple signing certificates and provisioning profiles are intentionally not committed.",
+    "Android upload keys and keystore passwords are intentionally not committed.",
+    "Production builds must use company-owned Apple Developer and Google Play Console accounts."
+  ]
+}

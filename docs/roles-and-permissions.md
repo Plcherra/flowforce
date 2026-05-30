@@ -38,6 +38,20 @@ The contract maps sensitive product surfaces to at least one required permission
 - Manager scheduling actions: `editSchedules`, `schedule.edit`, or `approveTimeOff`.
 - Inventory management: `inventory.edit`, `inventory.adjust`, or `manageInventory`.
 - Billing and payments: `billing.view` or `managePayments`.
+- AI governance: `ai.insights.view`, `ai.audit.view`, or `ai.governance.manage`.
+
+## AI Governance Permissions
+
+Plan 07 separates AI permissions from general analytics:
+
+- `ai.insights.view`: view tenant-scoped AI guidance.
+- `ai.actions.suggest`: ask AI to draft recommendations without product writes.
+- `ai.actions.approve`: approve AI-originated writes.
+- `ai.actions.automate`: enable pre-approved low-risk automation.
+- `ai.audit.view`: review AI audit and governance status.
+- `ai.governance.manage`: configure AI scopes, restricted modules, and automation level.
+
+The older `viewAIInsights` permission remains as a compatibility alias for read-only insights.
 
 The role matrix exposes the same four product roles and removes `supervisor` as a default product role.
 

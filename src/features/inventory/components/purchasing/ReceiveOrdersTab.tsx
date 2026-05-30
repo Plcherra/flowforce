@@ -228,6 +228,7 @@ export function ReceiveOrdersTab({
                                     type="number"
                                     min="0"
                                     max={remaining}
+                                    className="min-w-20"
                                     value={receivingLines[line.id] ?? 0}
                                     onChange={(event) => {
                                       const value = Math.min(

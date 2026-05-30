@@ -4,6 +4,7 @@ import ActivityCard from "@/features/dashboard/components/ActivityCard";
 import CompanyUpdatesCard from "@/features/dashboard/components/CompanyUpdatesCard";
 import OperationsHealthCard from "@/features/dashboard/components/OperationsHealthCard";
 import OperatorCommandCenter from "@/features/dashboard/components/OperatorCommandCenter";
+import { MobileCoreWorkflowActions } from "@/features/dashboard/components/MobileCoreWorkflowActions";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -56,6 +57,12 @@ export default function Dashboard() {
           <ErrorBoundary>
             <DashboardHeader />
           </ErrorBoundary>
+
+          {isMobile && (
+            <ErrorBoundary>
+              <MobileCoreWorkflowActions />
+            </ErrorBoundary>
+          )}
 
           <ErrorBoundary>
             <OperatorCommandCenter

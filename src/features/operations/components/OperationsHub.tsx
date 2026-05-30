@@ -43,7 +43,7 @@ export function OperationsHub() {
             <div className="hidden text-sm text-muted-foreground lg:flex lg:flex-col lg:items-end">
               <span>Updated every 15 min</span>
               <span className="text-xs uppercase tracking-[0.4em]">
-                Chronique + FlowForce
+                FlowForce Operations
               </span>
             </div>
           </div>

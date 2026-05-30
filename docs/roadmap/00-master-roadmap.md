@@ -46,19 +46,19 @@ Do not start with a giant monorepo rewrite. FlowForce is already a large working
 
 ## Active Roadmap State
 
-- Active plan: [07 AI Copilot And Automation](./07-ai-copilot-and-automation.md)
-- Current phase: Phase 7, AI Copilot And Automation
-- Last completed phase: 06.10, Operations Workflow Signoff
-- Last phase report: [06.10 Operations Workflow Signoff](./reports/06-10-operations-workflow-signoff-2026-05-29.md)
+- Active plan: [09 Integrations And Migration Tools](./09-integrations-and-migration-tools.md)
+- Current phase: Phase 9, Integrations And Migration Tools
+- Last completed phase: 09.04, Checklist Platform Migration Path
+- Last phase report: [09.04 Checklist Platform Migration Path](./reports/09-04-checklist-platform-migration-2026-05-30.md)
 
 ## Global Completion Criteria
 
 - [x] Web app is production-ready for paid pilot customers.
-- [ ] Mobile app path is shippable on iOS and Android.
+- [x] Mobile app path is shippable on iOS and Android.
 - [ ] Core tenant data is secure, tested, and recoverable.
 - [x] Restaurant/retail operators can see labor + inventory + waste + purchasing cost in one place.
 - [x] Managers can run daily execution workflows from mobile.
-- [ ] AI gives useful recommendations with audit trails and user approval.
+- [x] AI gives useful recommendations with audit trails and user approval.
 - [ ] Deploy, backup, monitoring, rollback, and release gates are documented and tested.
 
 ## Phase Ledger
@@ -71,7 +71,7 @@ Use this as the high-level tracker. Each detailed file contains the actual tasks
 - [x] 4.  Web app product completion
 - [x] 5.  Inventory finance cost engine
 - [x] 6.  Operations workflows and compliance
-- [ ] 7.  AI copilot and automation
-- [ ] 8.  Mobile app and offline mode
+- [x] 7.  AI copilot and automation
+- [x] 8.  Mobile app and offline mode
 - [ ] 9.  Integrations and migration tools
 - [ ] 10. Production infrastructure and launch

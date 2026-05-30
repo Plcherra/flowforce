@@ -31,7 +31,7 @@ The forms and sections readiness surfaces read:
 
 ## Acceptance Check
 
-Forms support Jolt-style execution basics:
+Forms support checklist-driven execution basics:
 
 - Managers can see builder readiness and form setup gaps.
 - Published forms surface missing review and no-submission conditions.

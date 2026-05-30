@@ -21,6 +21,14 @@ const bannedPatterns = [
     label: "retired dough brand variant",
     pattern: new RegExp(["bom", "\\s*-?\\s*", "dough"].join(""), "i"),
   },
+  {
+    label: "retired operations brand name",
+    pattern: new RegExp(["chro", "nique"].join(""), "i"),
+  },
+  {
+    label: "retired checklist vendor name",
+    pattern: new RegExp(["jo", "lt"].join(""), "i"),
+  },
 ];
 
 const walk = (relativeDir = ".") => {

@@ -99,12 +99,16 @@ export function IntegrationSettingsPanel() {
     const connection: IntegrationConnection = {
       id: `${provider.key}-${Date.now()}`,
       provider: provider.key,
-      status: "connected",
+      status: "pending",
       authType: provider.authType,
-      lastSyncedAt: new Date().toISOString(),
+      lastSyncedAt: null,
       metadata:
         provider.authType === "api_key"
-          ? { apiKey: apiKey.trim(), notes }
+          ? {
+              credentialMode: "server_vault_required",
+              keyLast4: apiKey.trim().slice(-4),
+              notes,
+            }
           : undefined,
     };
     await connectIntegration(provider.key, connection);
@@ -270,6 +274,11 @@ export function IntegrationSettingsPanel() {
               <DialogHeader>
                 <DialogTitle>Connect {activeProvider.name}</DialogTitle>
               </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Raw API keys are never stored in browser-readable settings.
+                This marks setup as pending until server-side credential custody
+                is configured.
+              </p>
               {activeProvider.authType === "api_key" ? (
                 <div className="space-y-4">
                   <div className="space-y-2">

@@ -62,6 +62,18 @@ export interface NotificationsSettings {
   digestEnabled: boolean;
   digestHour: number;
   moduleOverrides: Record<string, ModuleNotificationOverride>;
+  mobilePush?: {
+    enabled: boolean;
+    provider: "capacitor_push_notifications";
+    preferences: {
+      tasks: boolean;
+      schedule_changes: boolean;
+      messages: boolean;
+      approvals: boolean;
+      low_stock: boolean;
+      overdue_workflows: boolean;
+    };
+  };
   escalations: {
     criticalModules: string[];
     reminderWindowMinutes: number;

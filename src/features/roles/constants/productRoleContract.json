@@ -42,6 +42,12 @@
         "approveFormSubmissions",
         "managePositions",
         "viewAIInsights",
+        "ai.insights.view",
+        "ai.actions.suggest",
+        "ai.actions.approve",
+        "ai.actions.automate",
+        "ai.audit.view",
+        "ai.governance.manage",
         "manageInventory",
         "managePayments",
         "directory.view",
@@ -99,6 +105,10 @@
         "createForms",
         "approveFormSubmissions",
         "viewAIInsights",
+        "ai.insights.view",
+        "ai.actions.suggest",
+        "ai.actions.approve",
+        "ai.audit.view",
         "manageInventory",
         "directory.view",
         "inventory.view",
@@ -168,6 +178,11 @@
       "surface": "Billing and payments",
       "routes": ["/billing", "/settings/billing"],
       "requiredAny": ["billing.view", "managePayments"]
+    },
+    {
+      "surface": "AI governance",
+      "routes": ["/ai-insights", "/settings/ai"],
+      "requiredAny": ["ai.insights.view", "ai.audit.view", "ai.governance.manage"]
     }
   ]
 }

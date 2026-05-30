@@ -98,6 +98,9 @@ jobs:
       - name: Supabase schema and security contract
         run: npm run check:supabase
 
+      - name: AI copilot contract gates
+        run: npm run check:ai-copilot
+
       - name: Database tenant-isolation and storage tests
         run: npm run test:db:security
 

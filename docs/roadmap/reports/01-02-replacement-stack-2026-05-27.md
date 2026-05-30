@@ -12,7 +12,7 @@ The sales story is not "we have every feature they have." The sales story is:
 
 ## Competitor Reference Points
 
-Jolt's official restaurant/operations messaging emphasizes daily checklists, food-safety workflows, temperature monitoring/sensors, labeling, employee scheduling, accountability, and performance tools.
+Dedicated restaurant checklist platforms commonly emphasize daily checklists, food-safety workflows, temperature monitoring/sensors, labeling, employee scheduling, accountability, and performance tools.
 
 Frontline workforce tools commonly include time clock, job scheduling, forms, quick tasks, employee reminders, live communication around submissions, and payroll export/integration workflows.
 
@@ -20,11 +20,9 @@ MarketMan's official platform messaging emphasizes restaurant inventory, purchas
 
 Sources checked:
 
-- Jolt operations software: https://www.jolt.com/
-- Jolt restaurant software: https://www.jolt.com/industries/restaurants/
 - MarketMan restaurant inventory software: https://www.marketman.com/platform/restaurant-inventory-management-software
 
-## What FlowForce Replaces From Jolt
+## What FlowForce Replaces From Dedicated Checklist Platforms
 
 V1 replacement target:
 
@@ -91,7 +89,7 @@ FlowForce should win by connecting the things competitors often separate:
 
 ## Acceptance Result
 
-- Jolt replacement target documented.
+- Dedicated checklist platform replacement target documented.
 - Frontline workforce replacement target documented.
 - MarketMan replacement target documented.
 - V1 non-claims documented.

@@ -55,20 +55,20 @@ Status:
 
 ### Phase 2: Define The Replacement Stack
 
-- [x] Document what FlowForce replaces from Jolt.
+- [x] Document what FlowForce replaces from dedicated checklist tools.
 - [x] Document what FlowForce replaces from frontline workforce tools.
 - [x] Document what FlowForce replaces from MarketMan.
 - [x] Document what FlowForce should not replace in v1.
 
 Replacement stack definition:
 
-- Jolt replacement target: restaurant operations execution, checklists/SOPs, food-safety style workflows, task follow-through, manager review, and compliance reporting.
+- Dedicated checklist tool replacement target: restaurant operations execution, checklists/SOPs, food-safety style workflows, task follow-through, manager review, and compliance reporting.
 - Frontline workforce replacement target: employee scheduling, tasks, communication, updates, forms, HR/training basics, availability, permissions, and team execution.
 - MarketMan replacement target: restaurant inventory items, units, counts, suppliers, purchasing, recipes/production, waste, COGS-style reporting, and food-cost visibility.
 
 FlowForce v1 should not claim:
 
-- Full remote sensor/hardware replacement for Jolt temperature sensors or label-printing devices.
+- Full remote sensor/hardware replacement for temperature sensors or label-printing devices.
 - Full time-clock/payroll platform parity until clock-in, payroll export, labor-law rules, and payroll integrations are implemented and tested.
 - Full MarketMan distributor/POS/accounting integration parity until integrations are live, monitored, and documented.
 - Enterprise multi-region/franchise analytics parity until multi-location reporting and permission models are proven.

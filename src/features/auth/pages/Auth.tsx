@@ -11,6 +11,10 @@ import InviteSignUpForm from "@/features/auth/components/InviteSignUpForm";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 import PasswordResetForm from "@/features/auth/components/PasswordResetForm";
 import type { UserMetadata } from "@/types/common";
+import {
+  getSafeMobileAuthRedirect,
+  mobileAuthRedirectParam,
+} from "@/services/mobile/mobileAuthRouting";
 
 export default function Auth() {
   const { t } = useTranslation();
@@ -23,17 +27,20 @@ export default function Auth() {
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const inviteCode = searchParams.get("invite");
   const isPasswordReset = searchParams.get("reset") === "true";
+  const authSuccessPath = getSafeMobileAuthRedirect(
+    searchParams.get(mobileAuthRedirectParam),
+  );
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/app/dashboard");
+      navigate(authSuccessPath);
     }
 
     // Check if this is a password reset redirect
     if (isPasswordReset) {
       setShowPasswordReset(true);
     }
-  }, [user, loading, navigate, isPasswordReset]);
+  }, [user, loading, navigate, isPasswordReset, authSuccessPath]);
 
   const handleSignIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -41,7 +48,7 @@ export default function Auth() {
     const { error } = await signIn(email, password);
 
     if (!error) {
-      navigate("/app/dashboard");
+      navigate(authSuccessPath);
     }
 
     setIsLoading(false);
@@ -79,7 +86,7 @@ export default function Auth() {
 
     if (!error) {
       setShowPasswordReset(false);
-      navigate("/app/dashboard");
+      navigate(authSuccessPath);
     }
   };
 

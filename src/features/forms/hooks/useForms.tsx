@@ -21,6 +21,10 @@ import type {
   FormSubmissionRow,
   FormQueryRow,
 } from "@/features/forms/repositories/formsRepository";
+import {
+  isOfflineQueueableError,
+  queueOfflineFormSubmission,
+} from "@/services/mobile/mobileOfflineCriticalWorkflows";
 
 export type {
   FormRow,
@@ -473,6 +477,50 @@ export function useForms() {
         error,
         tags: ["forms", "submit"],
       });
+
+      if (isOfflineQueueableError(error) && user?.id && companyId) {
+        const userAgent =
+          typeof navigator !== "undefined" ? navigator.userAgent : null;
+        const queued = queueOfflineFormSubmission({
+          companyId,
+          userId: user.id,
+          formId,
+          submissionData,
+          userAgent,
+        });
+        const submittedAt = queued.createdAt;
+        const offlineSubmission = {
+          id: queued.optimisticKey,
+          form_id: formId,
+          submitted_by: user.id,
+          submitted_at: submittedAt,
+          submission_data: submissionData,
+          ip_address: null,
+          user_agent: userAgent,
+          offline_queue_id: queued.id,
+          review_status: "pending_review_sync",
+        } as unknown as FormSubmissionRow;
+
+        updateFormsCache((current) =>
+          current.map((form) =>
+            form.id === formId
+              ? {
+                  ...form,
+                  submissions_count: form.submissions_count + 1,
+                  latest_submission_at: submittedAt,
+                }
+              : form,
+          ),
+        );
+
+        toast({
+          title: "Saved offline",
+          description: "Form response will sync when connection returns.",
+        });
+
+        return { data: offlineSubmission, error: null };
+      }
+
       toast({
         title: "Error",
         description: "Failed to submit form",

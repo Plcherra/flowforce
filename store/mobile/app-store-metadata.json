@@ -1,0 +1,34 @@
+{
+  "appName": "FlowForce",
+  "bundleId": "com.flowforce.app",
+  "category": "Business",
+  "supportUrl": "https://flowforce.app/support",
+  "privacyPolicy": "store/mobile/privacy-policy.md",
+  "shortDescription": "Run team operations, tasks, forms, schedules, inventory, and manager alerts from one secure mobile app.",
+  "description": "FlowForce helps restaurant, retail, and service teams run daily operations from one secure system. Managers and staff can view urgent work, complete tasks and checklists, submit forms, receive schedule and approval notifications, run inventory counts, and keep field work safe during weak connectivity.",
+  "keywords": [
+    "operations",
+    "tasks",
+    "scheduling",
+    "inventory",
+    "forms",
+    "restaurants",
+    "retail"
+  ],
+  "screenshots": {
+    "ios": [
+      "Dashboard with urgent work",
+      "Tasks and checklists",
+      "Inventory counts",
+      "Forms and evidence",
+      "Notifications and settings"
+    ],
+    "android": [
+      "Dashboard with urgent work",
+      "Tasks and checklists",
+      "Inventory counts",
+      "Forms and evidence",
+      "Notifications and settings"
+    ]
+  }
+}
