@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(23);
+select plan(27);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -205,6 +205,15 @@ select throws_ok(
   'Profile-only user cannot assert membership through profile shortcut'
 );
 
+select throws_ok(
+  $$ update public.profiles
+     set is_company_admin = false
+     where id = '20000000-0000-4000-8000-000000000005' $$,
+  '42501',
+  'Profile tenant and role fields require company admin access',
+  'Profile-only user cannot mutate protected tenant or role fields'
+);
+
 select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);
 
 create temporary table phase3_update_result (updated_count bigint) on commit drop;
@@ -323,6 +332,46 @@ select throws_ok(
   '42501',
   'owner_user_id must match the authenticated user',
   'Authenticated user cannot create setup for a different owner id'
+);
+
+select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000005', true);
+
+create temporary table phase3_profile_shortcut_setup_result (company_id uuid) on commit drop;
+
+insert into phase3_profile_shortcut_setup_result
+select public.create_company_with_setup(
+  '{"name":"Profile Shortcut Hardening Co","enabled_sections":[],"template_config":{},"owner_profile":{"first_name":"Profile","last_name":"Only","email":"profile-only@example.test"}}'::jsonb,
+  '[]'::jsonb,
+  '[]'::jsonb,
+  '20000000-0000-4000-8000-000000000005'::uuid
+);
+
+select isnt(
+  (select company_id from phase3_profile_shortcut_setup_result),
+  '10000000-0000-4000-8000-000000000002'::uuid,
+  'Company setup does not reuse a profile shortcut owned by another tenant'
+);
+
+select is(
+  (
+    select count(*)
+    from public.company_members
+    where user_id = '20000000-0000-4000-8000-000000000005'
+      and company_id = '10000000-0000-4000-8000-000000000002'
+  ),
+  0::bigint,
+  'Company setup does not grant membership to the foreign profile shortcut company'
+);
+
+select ok(
+  exists (
+    select 1
+    from public.company_members cm
+    join phase3_profile_shortcut_setup_result result
+      on result.company_id = cm.company_id
+    where cm.user_id = '20000000-0000-4000-8000-000000000005'
+  ),
+  'Company setup creates membership on the hardened owner company'
 );
 
 select * from finish();

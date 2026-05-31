@@ -10,6 +10,7 @@ import {
 } from "@/services/support/supportToolingPolicy";
 import { supabaseAdmin } from "../../../_server/supabaseAdmin";
 import { verifyOnboardingSetup } from "../../../_server/onboardingSetup";
+import { ensureProductCompanyRoles } from "../../../_server/productRolesSetup";
 import { auditServiceRoleOperation } from "../../../_server/supabaseAdminAudit";
 import { createServerLogger } from "../../../_server/utils/logger";
 
@@ -312,65 +313,7 @@ const repairOnboardingBaseline = async (params: {
     .from("system_settings")
     .upsert({ company_id: companyId }, { onConflict: "company_id" });
 
-  const defaultRoles = [
-    {
-      name: "Owner",
-      description: "Full workspace ownership",
-      color: "#111827",
-      icon: "Crown",
-      hierarchy_level: 1,
-      permissions: { admin: true, owner: true },
-    },
-    {
-      name: "Administrator",
-      description: "Administrative workspace access",
-      color: "#2563eb",
-      icon: "Shield",
-      hierarchy_level: 2,
-      permissions: { admin: true },
-    },
-    {
-      name: "Manager",
-      description: "Team and operations management",
-      color: "#16a34a",
-      icon: "Users",
-      hierarchy_level: 3,
-      permissions: { manageTeam: true },
-    },
-    {
-      name: "Employee",
-      description: "Standard employee access",
-      color: "#6b7280",
-      icon: "User",
-      hierarchy_level: 4,
-      permissions: { viewOwnProfile: true },
-    },
-  ];
-
-  const { data: existingRoles } = await supabaseAdmin
-    .from("company_roles")
-    .select("name")
-    .eq("company_id", companyId);
-  const existingNames = new Set(
-    (existingRoles ?? []).map((role: { name: string | null }) =>
-      role.name?.toLowerCase(),
-    ),
-  );
-
-  const missingRoles = defaultRoles.filter(
-    (role) => !existingNames.has(role.name.toLowerCase()),
-  );
-  if (missingRoles.length > 0) {
-    await supabaseAdmin.from("company_roles").insert(
-      missingRoles.map((role) => ({
-        company_id: companyId,
-        ...role,
-        is_system_role: true,
-        is_active: true,
-        created_by: userId,
-      })),
-    );
-  }
+  await ensureProductCompanyRoles(supabaseAdmin, { companyId, userId });
 
   await supabaseAdmin.from("audit_log").insert({
     company_id: companyId,
