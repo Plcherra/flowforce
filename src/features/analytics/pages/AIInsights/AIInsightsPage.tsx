@@ -366,9 +366,12 @@ export function AIInsightsPage() {
       />
 
       {error && (
-        <Alert variant="destructive">
-          <AlertTitle>Unable to load performance data</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+        <Alert>
+          <AlertTitle>Performance insights limited</AlertTitle>
+          <AlertDescription>
+            Some review data could not be loaded. Charts below use available
+            tenant records only.
+          </AlertDescription>
         </Alert>
       )}
 

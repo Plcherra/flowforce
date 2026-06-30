@@ -2,7 +2,11 @@ import { ReactNode, Suspense } from "react";
 import { Outlet } from "@/lib/router-adapter";
 import { AppSidebar } from "@/app-shell/navigation/AppSidebar";
 import { TopNavbar } from "@/app-shell/layout/TopNavbar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,60 +20,65 @@ interface AppShellProps {
   children?: ReactNode;
 }
 
+function WorkspaceLoadingState({ text }: { text: string }) {
+  return (
+    <div className="app-viewport flex w-full flex-col overflow-hidden bg-background">
+      <div className="flex flex-1 min-h-0 items-center justify-center overflow-y-auto">
+        <LoadingSpinner text={text} />
+      </div>
+    </div>
+  );
+}
+
 export default function AppShell({ children }: AppShellProps) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const profileState = useProfile();
+  const resolvedProfile = profileState.profile;
+  const companyId =
+    resolvedProfile?.companyId ?? resolvedProfile?.company_id ?? null;
+
   useMobilePushNotifications({
     userId: user?.id,
-    companyId: profileState.profile?.companyId,
+    companyId: companyId ?? undefined,
   });
 
-  if (loading || !user) {
-    return (
-      <div className="app-viewport flex flex-col overflow-hidden bg-background">
-        <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center">
-          <LoadingSpinner text="Preparing your workspace..." />
-        </div>
-      </div>
-    );
+  if (authLoading || !user) {
+    return <WorkspaceLoadingState text="Preparing your workspace..." />;
   }
 
-  if (!profileState.profile?.companyId) {
+  if (!profileState.isReady || profileState.loading) {
+    return <WorkspaceLoadingState text="Loading your profile..." />;
+  }
+
+  if (!companyId || resolvedProfile?.isPlaceholder) {
     return <TenantSetupRequired profileState={profileState} />;
   }
 
   return (
-    <SidebarProvider>
-      <div className="app-viewport flex flex-col overflow-hidden bg-background">
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* Persistent Sidebar - never remounts */}
-          <AppSidebar />
+    <SidebarProvider className="app-viewport min-h-0 w-full overflow-hidden">
+      <AppSidebar />
 
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Top Navigation Bar with Sidebar Trigger */}
-            <header className="h-12 flex items-center border-b border-primary/20 bg-background/95 backdrop-blur-sm shrink-0 px-2 md:px-4">
-              <SidebarTrigger className="mr-2 md:mr-4" />
-              <TopNavbar />
-            </header>
+      <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-12 shrink-0 items-center border-b border-primary/20 bg-background/95 px-2 backdrop-blur-sm md:px-4">
+          <SidebarTrigger className="mr-2 md:mr-4" />
+          <TopNavbar />
+        </header>
 
-            {/* Main Content - with scroll restoration and loading states */}
-            <main className="flex-1 overflow-y-auto min-h-0">
-              <MobileOfflineQueueStatus />
-              <ErrorBoundary showDetails={appEnv.DEV}>
-                <Suspense
-                  fallback={
-                    <div className="p-6">
-                      <LoadingSpinner text="Loading page..." />
-                    </div>
-                  }
-                >
-                  {children || <Outlet />}
-                </Suspense>
-              </ErrorBoundary>
-            </main>
-          </div>
-        </div>
-      </div>
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <MobileOfflineQueueStatus />
+          <ErrorBoundary showDetails={appEnv.DEV}>
+            <Suspense
+              fallback={
+                <div className="p-6">
+                  <LoadingSpinner text="Loading page..." />
+                </div>
+              }
+            >
+              {children || <Outlet />}
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

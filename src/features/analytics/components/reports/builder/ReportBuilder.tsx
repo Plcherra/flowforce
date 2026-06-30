@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  _Dialog,
-  _DialogContent,
+  Dialog,
+  DialogContent,
   DialogHeader,
   DialogTitle,
-  _DialogTrigger,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   useCreateReport,

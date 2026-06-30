@@ -1,17 +1,27 @@
 import {
-  MessageSquare,
-  Megaphone,
-  CheckSquare,
-  FileText,
-  CalendarRange,
+  BarChart3,
   Calculator,
+  CalendarDays,
+  CalendarRange,
+  CheckSquare,
+  ClipboardList,
+  DollarSign,
+  FileText,
+  GraduationCap,
+  Megaphone,
+  MessageSquare,
+  Package,
+  Settings,
+  Shield,
   ShoppingCart,
+  Sparkles,
+  Target,
+  Trophy,
   Users,
   User,
   UserCheck,
-  Shield,
   Crown,
-  Settings,
+  Wrench,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -34,9 +44,21 @@ interface NavigationSection {
 
 export const navigationSections: NavigationSection[] = [
   {
-    title: "Communication",
-    translationKey: "communication",
+    title: "Daily Operations",
+    translationKey: "dailyOperations",
     items: [
+      {
+        name: "Scheduling",
+        href: "/enhanced-scheduling",
+        icon: CalendarRange,
+        translationKey: "scheduling",
+      },
+      {
+        name: "Tasks",
+        href: "/tasks",
+        icon: CheckSquare,
+        translationKey: "tasks",
+      },
       {
         name: "Messages",
         href: "/messages",
@@ -49,18 +71,6 @@ export const navigationSections: NavigationSection[] = [
         icon: Megaphone,
         translationKey: "companyUpdates",
       },
-    ],
-  },
-  {
-    title: "Operations",
-    translationKey: "operations",
-    items: [
-      {
-        name: "Tasks",
-        href: "/tasks",
-        icon: CheckSquare,
-        translationKey: "tasks",
-      },
       {
         name: "Forms",
         href: "/forms",
@@ -68,33 +78,15 @@ export const navigationSections: NavigationSection[] = [
         translationKey: "forms",
       },
       {
-        name: "Scheduling",
-        href: "/enhanced-scheduling",
-        icon: CalendarRange,
-        translationKey: "scheduling",
+        name: "Operations",
+        href: "/operations",
+        icon: Wrench,
+        translationKey: "operationsIntelligence",
       },
     ],
   },
   {
-    title: "Team",
-    translationKey: "team",
-    items: [
-      {
-        name: "Team Directory",
-        href: "/employees",
-        icon: Users,
-        translationKey: "employees",
-      },
-      {
-        name: "Settings",
-        href: "/settings",
-        icon: Settings,
-        translationKey: "settings",
-      },
-    ],
-  },
-  {
-    title: "Inventory",
+    title: "Inventory & Cost",
     translationKey: "inventory",
     items: [
       {
@@ -104,15 +96,51 @@ export const navigationSections: NavigationSection[] = [
         translationKey: "inventory",
       },
       {
+        name: "Items Setup",
+        href: "/inventory/items",
+        icon: Package,
+        translationKey: "itemsSetup",
+      },
+      {
+        name: "Counts",
+        href: "/inventory/counts",
+        icon: ClipboardList,
+        translationKey: "inventoryCountExecution",
+      },
+      {
         name: "Purchasing / Waste",
         href: "/inventory/purchasing",
         icon: ShoppingCart,
         translationKey: "purchasing",
       },
+      {
+        name: "Prep",
+        href: "/inventory/prep",
+        icon: Package,
+        translationKey: "inventory",
+      },
+      {
+        name: "Cookbook",
+        href: "/inventory/cookbook",
+        icon: FileText,
+        translationKey: "inventory",
+      },
+      {
+        name: "Inventory Reports",
+        href: "/inventory/reports",
+        icon: BarChart3,
+        translationKey: "reports",
+      },
+      {
+        name: "Expenses",
+        href: "/expenses",
+        icon: DollarSign,
+        translationKey: "expenses",
+      },
     ],
   },
   {
-    title: "Reports",
+    title: "Reports & Intelligence",
     translationKey: "analyticsReports",
     items: [
       {
@@ -121,9 +149,110 @@ export const navigationSections: NavigationSection[] = [
         icon: FileText,
         translationKey: "reports",
       },
+      {
+        name: "Analytics",
+        href: "/analytics",
+        icon: BarChart3,
+        translationKey: "analytics",
+      },
+      {
+        name: "AI Insights",
+        href: "/ai-insights",
+        icon: Sparkles,
+        translationKey: "aiInsights",
+      },
     ],
   },
-  // All admin functions now handled in Team Directory
+  {
+    title: "Team & HR",
+    translationKey: "team",
+    items: [
+      {
+        name: "Team Directory",
+        href: "/employees",
+        icon: Users,
+        translationKey: "employees",
+      },
+      {
+        name: "Performance",
+        href: "/performance",
+        icon: Target,
+        translationKey: "performance",
+      },
+      {
+        name: "Recognition",
+        href: "/recognition",
+        icon: Trophy,
+        translationKey: "recognition",
+      },
+      {
+        name: "Leaderboard",
+        href: "/leaderboard",
+        icon: Trophy,
+        translationKey: "leaderboard",
+      },
+      {
+        name: "Learning Center",
+        href: "/learning-center",
+        icon: GraduationCap,
+        translationKey: "learning",
+      },
+      {
+        name: "Certifications",
+        href: "/certifications",
+        icon: GraduationCap,
+        translationKey: "certifications",
+      },
+    ],
+  },
+  {
+    title: "Calendar & Events",
+    translationKey: "calendarEvents",
+    items: [
+      {
+        name: "Calendar",
+        href: "/calendar",
+        icon: CalendarDays,
+        translationKey: "calendar",
+      },
+      {
+        name: "Events",
+        href: "/events/calendar",
+        icon: CalendarDays,
+        translationKey: "events",
+      },
+      {
+        name: "Meetings",
+        href: "/meetings",
+        icon: CalendarDays,
+        translationKey: "meetings",
+      },
+    ],
+  },
+  {
+    title: "Administration",
+    translationKey: "adminSetup",
+    items: [
+      {
+        name: "Settings",
+        href: "/settings",
+        icon: Settings,
+        translationKey: "settings",
+      },
+      {
+        name: "Admin",
+        href: "/admin",
+        icon: Shield,
+        translationKey: "settings",
+      },
+      {
+        name: "Resources",
+        href: "/resources",
+        icon: FileText,
+        translationKey: "reports",
+      },
+    ],
+  },
 ];
 
 const normalizeRole = (role: string) => role.trim().toLowerCase();

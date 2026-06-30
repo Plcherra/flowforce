@@ -65,7 +65,7 @@ export function useInviteMutations({
         onboardingTriggered,
       };
     },
-    onSuccess: ({ _inviteToken, onboardingTriggered }) => {
+    onSuccess: ({ onboardingTriggered }) => {
       queryClient.invalidateQueries({ queryKey: COMPANY_INVITES_QUERY_KEY });
       onInvitesCreated?.();
       toast({

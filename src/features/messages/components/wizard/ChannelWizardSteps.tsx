@@ -32,5 +32,4 @@ export const CHANNEL_TYPE_OPTIONS = [
   { value: "group", label: "Group Channel" },
   { value: "department", label: "Department Channel" },
   { value: "direct", label: "Direct Message" },
-  { value: "helpdesk", label: "Help Desk Channel" },
 ];

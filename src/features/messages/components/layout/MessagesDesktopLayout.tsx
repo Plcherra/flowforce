@@ -2,37 +2,19 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MessagesSidebar } from "./MessagesSidebar";
 import { MessagesMainArea } from "./MessagesMainArea";
-import { HelpDeskPanel } from "../../components/helpdesk/HelpDeskPanel";
 import { InventorySignalWidget } from "../../components/ops/InventorySignalWidget";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesDesktopLayoutProps {
   vm: MessagesViewModel;
-  helpDeskOpen: boolean;
-  onToggleHelpDesk: () => void;
-  organizationId?: string | null;
-  organizationName?: string | null;
 }
 
-export function MessagesDesktopLayout({
-  vm,
-  helpDeskOpen,
-  onToggleHelpDesk,
-  organizationId,
-  organizationName,
-}: MessagesDesktopLayoutProps) {
+export function MessagesDesktopLayout({ vm }: MessagesDesktopLayoutProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
       <ChannelColumn vm={vm} />
       <ConversationColumn vm={vm} />
-      <OperationsColumn
-        helpDeskOpen={helpDeskOpen}
-        onToggleHelpDesk={onToggleHelpDesk}
-        organizationId={organizationId}
-        organizationName={organizationName}
-      />
+      <OperationsColumn />
     </div>
   );
 }
@@ -99,17 +81,7 @@ function ConversationColumn({ vm }: { vm: MessagesViewModel }) {
   );
 }
 
-function OperationsColumn({
-  helpDeskOpen,
-  onToggleHelpDesk,
-  organizationId,
-  organizationName,
-}: {
-  helpDeskOpen: boolean;
-  onToggleHelpDesk: () => void;
-  organizationId?: string | null;
-  organizationName?: string | null;
-}) {
+function OperationsColumn() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -118,44 +90,16 @@ function OperationsColumn({
       className="flex flex-col gap-4"
     >
       <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-              Ops
-            </p>
-            <h3 className="text-lg font-semibold">Support + Inventory</h3>
-            <p className="text-sm text-muted-foreground">
-              Surface help tickets and low-stock stories beside conversations.
-            </p>
-          </div>
-          <Badge variant={helpDeskOpen ? "default" : "outline"}>
-            {helpDeskOpen ? "Help Desk on" : "Help Desk off"}
-          </Badge>
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
+            Ops
+          </p>
+          <h3 className="text-lg font-semibold">Inventory signals</h3>
+          <p className="text-sm text-muted-foreground">
+            Surface low-stock stories beside conversations.
+          </p>
         </div>
-        <Button
-          className="mt-4 w-full"
-          variant={helpDeskOpen ? "outline" : "default"}
-          onClick={onToggleHelpDesk}
-        >
-          {helpDeskOpen ? "Hide Help Desk" : "Open Help Desk"}
-        </Button>
       </div>
-
-      {helpDeskOpen && (
-        <motion.div
-          key="helpdesk-panel"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 16 }}
-          transition={{ duration: 0.25 }}
-        >
-          <HelpDeskPanel
-            companyId={organizationId}
-            organizationName={organizationName}
-            onClose={onToggleHelpDesk}
-          />
-        </motion.div>
-      )}
 
       <InventorySignalWidget />
     </motion.div>

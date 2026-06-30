@@ -24,7 +24,7 @@ import { useAvailabilityStatus } from "./useAvailabilityStatus";
 import { useChannelActions } from "./useChannelActions";
 import { useMessageActions } from "./useMessageActions";
 
-type FilterType = "all" | "unread" | "teams" | "helpdesk";
+type FilterType = "all" | "unread" | "teams";
 type CallType = "video" | "audio";
 type ProfileDetails = ReturnType<typeof useProfile>["profile"];
 
@@ -136,7 +136,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
         case "all":
         case "unread":
         case "teams":
-        case "helpdesk":
           return normalized as FilterType;
         default:
           return null;
@@ -240,14 +239,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
     if (activeFilter === "teams") {
       list = list.filter((channel) => channel.type !== "direct");
-    }
-
-    if (activeFilter === "helpdesk") {
-      list = list.filter(
-        (channel) =>
-          (channel.type ?? "").toLowerCase() === "helpdesk" ||
-          (channel.name ?? "").toLowerCase().includes("help"),
-      );
     }
 
     if (query.trim()) {

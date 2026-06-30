@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { HelpDeskPanel } from "@/features/messages/components/helpdesk/HelpDeskPanel";
+import React from "react";
 import { MessagesMobileLayout } from "./MessagesMobileLayout";
 import { MessagesDesktopLayout } from "./MessagesDesktopLayout";
 import { MessagesPortalContent } from "./MessagesPortalContent";
@@ -12,42 +10,16 @@ interface MessagesShellProps {
   viewModel: MessagesViewModel;
   organizationId?: string | null;
   organizationName?: string | null;
-  hideContent?: boolean; // When true, only render dialogs/modals, not main content
+  hideContent?: boolean;
 }
 
 export function MessagesShell({
   viewModel: vm,
-  organizationId,
-  organizationName,
   hideContent = false,
 }: MessagesShellProps) {
-  const [helpDeskOpen, setHelpDeskOpen] = useState(
-    vm.activeFilter === "helpdesk",
-  );
-
-  // Always call hooks unconditionally (before any early returns)
-  useEffect(() => {
-    if (vm.activeFilter === "helpdesk") {
-      setHelpDeskOpen(true);
-    }
-  }, [vm.activeFilter]);
-
-  // If hideContent is true, only render dialogs/modals
   if (hideContent) {
     return <MessagesPortalContent vm={vm} />;
   }
-
-  const handleHelpDeskToggle = () => {
-    setHelpDeskOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        vm.setActiveFilter("helpdesk");
-      } else if (vm.activeFilter === "helpdesk") {
-        vm.setActiveFilter("all");
-      }
-      return next;
-    });
-  };
 
   if (vm.loading) {
     return (
@@ -66,11 +38,7 @@ export function MessagesShell({
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-6">
         <div className="space-y-4">
-          <MessagesWorkspaceHeader
-            vm={vm}
-            helpDeskActive={helpDeskOpen}
-            onHelpDeskToggle={handleHelpDeskToggle}
-          />
+          <MessagesWorkspaceHeader vm={vm} />
           <CommunicationReadinessPanel
             channels={vm.channels}
             messages={vm.messages}
@@ -81,23 +49,6 @@ export function MessagesShell({
           <div className="rounded-3xl border bg-background/95 shadow-sm">
             <MessagesMobileLayout vm={vm} />
           </div>
-          <AnimatePresence>
-            {helpDeskOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 12 }}
-                transition={{ duration: 0.25 }}
-                className="rounded-3xl border bg-background/95 p-4 shadow-sm"
-              >
-                <HelpDeskPanel
-                  companyId={organizationId}
-                  organizationName={organizationName}
-                  onClose={() => setHelpDeskOpen(false)}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
         <MessagesPortalContent vm={vm} />
       </div>
@@ -107,11 +58,7 @@ export function MessagesShell({
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/40 py-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 lg:px-0">
-        <MessagesWorkspaceHeader
-          vm={vm}
-          helpDeskActive={helpDeskOpen}
-          onHelpDeskToggle={handleHelpDeskToggle}
-        />
+        <MessagesWorkspaceHeader vm={vm} />
         <CommunicationReadinessPanel
           channels={vm.channels}
           messages={vm.messages}
@@ -120,13 +67,7 @@ export function MessagesShell({
           onCreateAnnouncement={() => vm.setShowCreateAnnouncement(true)}
         />
 
-        <MessagesDesktopLayout
-          vm={vm}
-          helpDeskOpen={helpDeskOpen}
-          onToggleHelpDesk={handleHelpDeskToggle}
-          organizationId={organizationId}
-          organizationName={organizationName}
-        />
+        <MessagesDesktopLayout vm={vm} />
       </div>
 
       <MessagesPortalContent vm={vm} />

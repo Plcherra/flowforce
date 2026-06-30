@@ -225,7 +225,8 @@ export function PerformancePage() {
   };
 
   const combinedError =
-    performanceError ?? recognitionsError ?? leaderboardError ?? null;
+    performanceError ?? recognitionsError ?? null;
+  const leaderboardWarning = leaderboardError ?? null;
 
   return (
     <div className="space-y-6 p-6">
@@ -239,6 +240,17 @@ export function PerformancePage() {
         <Alert variant="destructive">
           <AlertTitle>Unable to load some performance data</AlertTitle>
           <AlertDescription>{combinedError}</AlertDescription>
+        </Alert>
+      )}
+
+      {leaderboardWarning && !combinedError && (
+        <Alert>
+          <AlertTitle>Leaderboard data unavailable</AlertTitle>
+          <AlertDescription>
+            Performance reviews loaded, but XP leaderboard sync is not ready yet.
+            Apply the latest Supabase migrations or refresh after managers sync
+            the board.
+          </AlertDescription>
         </Alert>
       )}
 

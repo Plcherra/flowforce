@@ -9,6 +9,7 @@ import {
   OnboardingRole,
 } from "@/types/onboarding";
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
+import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
 
 interface RegistrationData {
@@ -55,6 +56,7 @@ export function useCompanyRegistration() {
   const [error, setError] = useState<RegistrationError | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { refreshProfile } = useProfile();
 
   const validateRegistrationData = (
     data: RegistrationData,
@@ -341,6 +343,16 @@ export function useCompanyRegistration() {
       // Create user and company in a single flow
       await createCompanyWithUser(data);
 
+      const { error: sessionError } = await supabase.auth.refreshSession();
+      if (sessionError) {
+        logger.warn("Session refresh after onboarding failed", {
+          error: sessionError,
+          tags: ["warning", "onboarding"],
+        });
+      }
+
+      await refreshProfile();
+
       // Success feedback
       toast({
         title: "Welcome to FlowForce!",
@@ -348,7 +360,7 @@ export function useCompanyRegistration() {
       });
 
       // Navigate to dashboard
-      navigate("/app/dashboard");
+      navigate("/app/dashboard", { replace: true });
     } catch (error) {
       const registrationError = handleRegistrationError(error);
       setError(registrationError);

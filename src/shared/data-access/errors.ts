@@ -79,3 +79,21 @@ export const isDataAccessError = (
   );
 };
 
+/** PostgREST / Supabase errors when a table, view, or column is absent from schema cache. */
+export const isMissingSchemaResourceError = (error: unknown): boolean => {
+  const code = readStringField(error, "code");
+  const message = (
+    readStringField(error, "message") ??
+    (typeof error === "string" ? error : "")
+  ).toLowerCase();
+
+  return (
+    code === "PGRST205" ||
+    code === "42P01" ||
+    code === "42703" ||
+    message.includes("could not find the table") ||
+    message.includes("does not exist") ||
+    message.includes("schema cache")
+  );
+};
+

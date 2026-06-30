@@ -57,6 +57,9 @@
   "navigation": {
     "communication": "Communication",
     "operations": "Operations",
+    "team": "Team",
+    "dailyOperations": "Daily Operations",
+    "calendarEvents": "Calendar & Events",
     "operationsIntelligence": "Operations Intelligence",
     "hrDevelopment": "HR & Development",
     "inventory": "Inventory",

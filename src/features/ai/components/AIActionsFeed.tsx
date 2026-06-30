@@ -10,7 +10,6 @@ import {
   Loader2,
   RefreshCw,
   Sparkles,
-  Target,
   TrendingUp,
 } from "lucide-react";
 import {
@@ -85,13 +84,6 @@ const sourceStyles: Record<
     icon: ClipboardList,
     accent: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200",
     chip: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200",
-  },
-  goals: {
-    label: "Goals",
-    icon: Target,
-    accent:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-200",
-    chip: "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200",
   },
   reminders: {
     label: "Reminders",
@@ -463,7 +455,7 @@ export function AIActionsFeed({ className }: { className?: string }) {
               AI Actions Feed
             </CardTitle>
             <CardDescription>
-              Prioritised alerts across tasks, goals, reminders, scheduling, and
+              Prioritised alerts across tasks, reminders, scheduling, and
               spend signals.
             </CardDescription>
           </div>

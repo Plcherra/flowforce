@@ -82,10 +82,6 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
   const templateKey = (sectionRecord.template_id || "").toString().toLowerCase();
   const sectionRoute = (sectionRecord.path || "").toString().toLowerCase();
   const sectionName = (sectionRecord.name || "").toString().toLowerCase();
-  const isHelpDeskSection =
-    templateKey === "help-desk" ||
-    sectionRoute.includes("help-desk") ||
-    sectionName.includes("help desk");
 
   const handleWizardSave = async (updates: Record<string, unknown>) => {
     try {
@@ -200,10 +196,6 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
   };
 
   if (!pageSlug) {
-    if (isHelpDeskSection) {
-      return <Navigate to="/app/help-desk" replace />;
-    }
-
     if (
       templateKey.includes("event") ||
       sectionRoute.includes("event") ||

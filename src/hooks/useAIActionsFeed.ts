@@ -7,7 +7,6 @@ import {
   subDays,
 } from "date-fns";
 import { useTasks } from "./useTasks";
-import { useGoals } from "./useGoals";
 import { useReminders } from "./useReminders";
 import { useTaskNotifications } from "@/features/tasks";
 import { useProfile } from "./useProfile";
@@ -16,7 +15,6 @@ import { useExpenses, type Expense } from "./useExpenses";
 
 export type FeedSource =
   | "tasks"
-  | "goals"
   | "reminders"
   | "notifications"
   | "scheduling"
@@ -105,12 +103,6 @@ export function useAIActionsFeed() {
     refetchTasks,
   } = useTasks();
   const {
-    goals = [],
-    loading: goalsLoading,
-    calculateGoalProgress,
-    refetchGoals,
-  } = useGoals();
-  const {
     reminders = [],
     loading: remindersLoading,
     markAsCompleted: markReminderCompleted,
@@ -157,7 +149,6 @@ export function useAIActionsFeed() {
     }
 
     const now = new Date();
-    const upcomingThreshold = addDays(now, 7);
     const itemsAccumulator: AIActionsFeedItem[] = [];
 
     const isTaskClosed = (status?: string | null) =>
@@ -266,69 +257,6 @@ export function useAIActionsFeed() {
         ],
         timestamp: nextDue.due_date ?? undefined,
         score: dueSoonTasks.length,
-      });
-    }
-
-    const atRiskGoals = goals.filter((goal) => {
-      if (goal.status !== "active") return false;
-      if (!goal.target_completion_date) return false;
-      const due = new Date(goal.target_completion_date);
-      if (Number.isNaN(due.getTime())) return false;
-      const progress = calculateGoalProgress(goal);
-      if (due < now) return progress < 100;
-      if (due > upcomingThreshold) return false;
-      return progress < 70;
-    });
-
-    if (atRiskGoals.length > 0) {
-      const overdueGoals = atRiskGoals.filter(
-        (goal) =>
-          goal.target_completion_date &&
-          new Date(goal.target_completion_date) < now,
-      );
-      const severity: FeedSeverity =
-        overdueGoals.length > 0 ? "high" : "medium";
-      const headlineGoal = overdueGoals[0] ?? atRiskGoals[0];
-      const dueRelative = formatRelative(headlineGoal.target_completion_date);
-      itemsAccumulator.push({
-        id: "goals-at-risk",
-        title: `${atRiskGoals.length} goal${atRiskGoals.length > 1 ? "s" : ""} ${overdueGoals.length > 0 ? "overdue" : "at risk"}`,
-        description:
-          dueRelative && headlineGoal.title
-            ? `"${headlineGoal.title}" tracking ${calculateGoalProgress(headlineGoal)}% ${
-                overdueGoals.length > 0 ? "past due" : "with a looming deadline"
-              } (${dueRelative}).`
-            : "Key objectives need course correction to stay on target.",
-        severity,
-        source: "goals",
-        details: atRiskGoals.slice(0, 3).map((goal) => {
-          const rel = formatRelative(goal.target_completion_date);
-          const progress = calculateGoalProgress(goal);
-          return `${goal.title ?? "Untitled goal"} • ${progress}%${rel ? ` • due ${rel}` : ""}`;
-        }),
-        actions: [
-          {
-            type: "create_task",
-            label: "Schedule goal sync",
-            variant: "default",
-            payload: {
-              title: "Goal recovery session",
-              description: `Bring stakeholders together to unblock ${atRiskGoals.length} goal${
-                atRiskGoals.length > 1 ? "s" : ""
-              } trending behind.`,
-              priority: overdueGoals.length > 0 ? "high" : "medium",
-              dueDateOffsetDays: overdueGoals.length > 0 ? 1 : 3,
-            },
-          },
-          {
-            type: "open_route",
-            label: "Open goals",
-            variant: "outline",
-            payload: { path: "/goals" },
-          },
-        ],
-        timestamp: headlineGoal.target_completion_date ?? undefined,
-        score: atRiskGoals.length,
       });
     }
 
@@ -634,8 +562,6 @@ export function useAIActionsFeed() {
   }, [
     hasCompanyContext,
     tasks,
-    goals,
-    calculateGoalProgress,
     reminders,
     notifications,
     unreadCount,
@@ -646,7 +572,6 @@ export function useAIActionsFeed() {
   const refresh = useCallback(async () => {
     const refreshPromises: Array<Promise<unknown> | undefined> = [
       refetchTasks?.(),
-      refetchGoals?.(),
       refetchReminders?.(),
       refetchNotifications?.(),
     ];
@@ -668,7 +593,6 @@ export function useAIActionsFeed() {
   }, [
     hasCompanyContext,
     refetchTasks,
-    refetchGoals,
     refetchReminders,
     refetchNotifications,
     refetchScheduling,
@@ -685,7 +609,6 @@ export function useAIActionsFeed() {
   const loading =
     profileLoading ||
     tasksLoading ||
-    goalsLoading ||
     remindersLoading ||
     notificationsLoading ||
     schedulingLoadingEffective ||
@@ -702,7 +625,6 @@ export function useAIActionsFeed() {
     refetchNotifications,
     refetchReminders,
     refetchTasks,
-    refetchGoals,
     refetchExpenses: refetchExpenses,
     schedulingFallback: hasCompanyContext ? isUsingFallbackData : false,
   };

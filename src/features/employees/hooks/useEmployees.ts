@@ -234,7 +234,11 @@ const buildEmployeeRecords = async (
         lateCount: attendanceCounts.lates,
         noShowCount: attendanceCounts.noShows,
         department: employee.department ?? null,
-        departmentid: employee.departmentid ?? null,
+        departmentid:
+          employee.departmentid ??
+          employee.department_id ??
+          employee.department?.id ??
+          null,
       };
     });
   } catch (error) {

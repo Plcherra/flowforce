@@ -7,7 +7,7 @@ import type {
   TablesUpdate,
 } from "@/integrations/supabase/public-types";
 import { useProfile } from "@/hooks/useProfile";
-import { calculateGoalProgress } from "@/features/goals/services/goalProgressService";
+import { calculateGoalProgress } from "@/features/gamification/utils/goalProgress";
 
 type GoalRow = Tables<"goals">;
 type GoalTaskRow = Tables<"goal_tasks">;
@@ -122,7 +122,7 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
         )
       : fallbackProgress;
 
-  const { _goal_tasks, ...goalFields } = record;
+  const { goal_tasks: _goalTasks, ...goalFields } = record;
   return {
     ...goalFields,
     tasks,

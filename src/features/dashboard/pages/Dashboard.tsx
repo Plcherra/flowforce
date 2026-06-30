@@ -21,7 +21,6 @@ export default function Dashboard() {
     refetch,
   } = useDashboardData();
   const {
-    loading: profileLoading,
     error: profileError,
     refreshProfile,
   } = useProfile();
@@ -45,8 +44,8 @@ export default function Dashboard() {
   return (
     <>
       <PageAsyncWrapper
-        isLoading={profileLoading}
-        error={profileError}
+        isLoading={statsLoading}
+        error={statsError ?? profileError}
         onRetry={handleRetry}
         loadingTitle="Loading Dashboard"
         loadingDescription="Setting up your workspace..."

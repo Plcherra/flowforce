@@ -11,7 +11,6 @@ import {
   ClipboardList,
   Loader2,
   Sparkles,
-  Target,
   Zap,
 } from "lucide-react";
 import {
@@ -26,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useTasks } from "@/hooks/useTasks";
-import { useGoals } from "@/hooks/useGoals";
 import { useReminders } from "@/hooks/useReminders";
 import { useScenarioSimulator } from "@/hooks/useScenarioSimulator";
 import { useProfile } from "@/hooks/useProfile";
@@ -34,7 +32,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { DEFAULT_ADJUSTMENTS } from "@/lib/ai/scenarioEngine";
 import { cn } from "@/lib/utils";
 
-type QuickActionSource = "copilot" | "tasks" | "reminders" | "goals";
+type QuickActionSource = "copilot" | "tasks" | "reminders";
 
 interface QuickActionMetric {
   label: string;
@@ -74,13 +72,6 @@ export function AIQuickActions({ className }: { className?: string }) {
 
   const { tasks, loading: tasksLoading, createTask, refetchTasks } = useTasks();
   const {
-    goals,
-    loading: goalsLoading,
-    createGoal,
-    calculateGoalProgress,
-    refetchGoals,
-  } = useGoals();
-  const {
     reminders,
     loading: remindersLoading,
     createReminder,
@@ -102,7 +93,6 @@ export function AIQuickActions({ className }: { className?: string }) {
     copilot: [],
     tasks: [],
     reminders: [],
-    goals: [],
   });
 
   const activeTasks = useMemo(
@@ -161,47 +151,6 @@ export function AIQuickActions({ className }: { className?: string }) {
       );
     return upcoming[0] ?? null;
   }, [pendingReminders]);
-
-  const activeGoals = useMemo(
-    () => goals.filter((goal) => goal.status === "active"),
-    [goals],
-  );
-
-  const atRiskGoals = useMemo(
-    () =>
-      activeGoals.filter((goal) => {
-        const progress = calculateGoalProgress(goal);
-        const dueDate = goal.target_completion_date
-          ? new Date(goal.target_completion_date)
-          : null;
-
-        if (progress >= 70 && (!dueDate || dueDate > new Date())) {
-          return false;
-        }
-
-        if (!dueDate) {
-          return progress < 60;
-        }
-
-        if (dueDate < new Date()) {
-          return progress < 100;
-        }
-
-        return (
-          differenceInCalendarDays(dueDate, new Date()) <= 30 && progress < 70
-        );
-      }),
-    [activeGoals, calculateGoalProgress],
-  );
-
-  const averageGoalProgress = useMemo(() => {
-    if (activeGoals.length === 0) return 0;
-    const total = activeGoals.reduce(
-      (acc, goal) => acc + calculateGoalProgress(goal),
-      0,
-    );
-    return Math.round(total / activeGoals.length);
-  }, [activeGoals, calculateGoalProgress]);
 
   useEffect(() => {
     const copilotOutcome = simulate(DEFAULT_ADJUSTMENTS);
@@ -270,35 +219,13 @@ export function AIQuickActions({ className }: { className?: string }) {
       },
     ];
 
-    const goalsMetrics: QuickActionMetric[] = [
-      {
-        label: "Active goals",
-        value: `${activeGoals.length}`,
-        tone: activeGoals.length === 0 ? "warning" : "default",
-      },
-      {
-        label: "At risk",
-        value: `${atRiskGoals.length}`,
-        tone: atRiskGoals.length > 0 ? "danger" : "success",
-      },
-      {
-        label: "Average progress",
-        value: `${averageGoalProgress}%`,
-        tone: averageGoalProgress >= 75 ? "success" : "warning",
-      },
-    ];
-
     setMetricsSnapshot({
       copilot: copilotMetrics,
       tasks: tasksMetrics,
       reminders: remindersMetrics,
-      goals: goalsMetrics,
     });
   }, [
-    activeGoals,
     activeTasks.length,
-    atRiskGoals.length,
-    averageGoalProgress,
     dueSoonTasks.length,
     overdueReminders.length,
     overdueTasks.length,
@@ -457,52 +384,6 @@ export function AIQuickActions({ className }: { className?: string }) {
     }
   };
 
-  const handleCreateGoal = async () => {
-    if (!user) {
-      toast({
-        title: "Sign-in required",
-        description: "You must be signed in to create goals.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setPendingAction("goals");
-    try {
-      const targetCompletion = addDays(new Date(), 28).toISOString();
-
-      await createGoal({
-        title: "[AI] Goal checkpoint sprint",
-        description:
-          atRiskGoals.length > 0
-            ? `Stabilise ${atRiskGoals.length} at-risk goal${atRiskGoals.length === 1 ? "" : "s"} with milestone owners.`
-            : "Lock in current momentum by aligning the team on a short sprint objective.",
-        status: "active",
-        priority: atRiskGoals.length > 0 ? "high" : "medium",
-        target_completion_date: targetCompletion,
-      });
-
-      toast({
-        title: "Goal launched",
-        description:
-          "New checkpoint goal created. Assign tasks from the goal workspace.",
-      });
-
-      await refetchGoals?.();
-    } catch (error) {
-      toast({
-        title: "Unable to create goal",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Unexpected goal creation error.",
-        variant: "destructive",
-      });
-    } finally {
-      setPendingAction((current) => (current === "goals" ? null : current));
-    }
-  };
-
   const quickActions: QuickActionDescriptor[] = [
     {
       id: "copilot",
@@ -548,24 +429,9 @@ export function AIQuickActions({ className }: { className?: string }) {
       onPrimary: handleCreateReminder,
       onSecondary: () => navigate("/tasks#reminders"),
     },
-    {
-      id: "goals",
-      badge: "Goals",
-      title: "Launch checkpoint goal",
-      description:
-        atRiskGoals.length > 0
-          ? `Stabilise ${atRiskGoals.length} goal${atRiskGoals.length === 1 ? "" : "s"} trending behind.`
-          : "Lock in velocity by capturing a short checkpoint goal with linked tasks.",
-      icon: <Target className="h-5 w-5 text-purple-600" />,
-      metrics: metricsSnapshot.goals,
-      primaryLabel: "Create goal sprint",
-      secondaryLabel: "Review goals",
-      onPrimary: handleCreateGoal,
-      onSecondary: () => navigate("/goals"),
-    },
   ];
 
-  const overallLoading = tasksLoading || goalsLoading || remindersLoading;
+  const overallLoading = tasksLoading || remindersLoading;
 
   return (
     <Card className={className}>
@@ -581,7 +447,7 @@ export function AIQuickActions({ className }: { className?: string }) {
       <CardContent className="space-y-4">
         {overallLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, index) => (
+            {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`quick-action-skeleton-${index}`}
                 className="rounded-lg border border-dashed border-border/60 p-4"

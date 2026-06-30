@@ -14,7 +14,7 @@ import {
 } from "@/features/messages/components/conversations";
 import type { ChatUser } from "@/features/messages/components/users";
 
-export type ConversationFilter = "all" | "unread" | "teams" | "helpdesk";
+export type ConversationFilter = "all" | "unread" | "teams";
 
 interface ConversationsPanelProps {
   filter: ConversationFilter;
@@ -156,7 +156,6 @@ export function ConversationsPanel({
                 all: "All",
                 unread: "Unread",
                 teams: "Teams",
-                helpdesk: "Help Desk",
               }}
             />
             <Input

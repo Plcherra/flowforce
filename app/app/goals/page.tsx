@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import GoalsPage from "@/features/goals/pages/Goals";
-
-export default function Goals() {
-  return <GoalsPage />;
+/** Goals module removed; task execution lives under Tasks. */
+export default function GoalsRedirectPage() {
+  redirect("/app/tasks");
 }

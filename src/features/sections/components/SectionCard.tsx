@@ -45,7 +45,6 @@ export default function SectionCard({
   isOnboarding,
   onToggle,
   getSectionBadgeColor,
-  _onEdit,
   onDelete,
 }: SectionCardProps) {
   const { can } = useCan();

@@ -38,32 +38,54 @@ const positionRowSchema = z
   })
   .passthrough();
 
-const employeeProfileRowSchema = z
-  .object({
-    id: z.string(),
-    first_name: z.string().nullable(),
-    last_name: z.string().nullable(),
-    email: z.string(),
-    avatar_url: z.string().nullable(),
-    role: z.string().nullable(),
-    employment_status: z.string().nullable(),
-    departmentid: z.string().nullable(),
-    hire_date: z.string().nullable(),
-    employee_id: z.string().nullable(),
-    company_id: z.string().nullable(),
-    phone: z.string().nullable().optional(),
-    birth_date: z.string().nullable().optional(),
-    address: jsonSchema.nullable().optional(),
-    emergency_contact: jsonSchema.nullable().optional(),
-    created_at: z.string().nullable().optional(),
-    updated_at: z.string().nullable().optional(),
-  })
-  .passthrough();
-
-const employeeProfileWithRelationsSchema = employeeProfileRowSchema.extend({
-  department: departmentRowSchema.nullable().optional(),
-  position: positionRowSchema.nullable().optional(),
+const normalizeEmployeeDepartmentFields = <
+  T extends {
+    department_id?: string | null;
+    departmentid?: string | null;
+  },
+>(
+  row: T,
+) => ({
+  ...row,
+  department_id: row.department_id ?? row.departmentid ?? null,
+  departmentid: row.departmentid ?? row.department_id ?? null,
 });
+
+const employeeProfileFieldsSchema = {
+  id: z.string(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  email: z.string(),
+  avatar_url: z.string().nullable(),
+  role: z.string().nullable(),
+  employment_status: z.string().nullable(),
+  department_id: z.string().nullable().optional(),
+  departmentid: z.string().nullable().optional(),
+  position_id: z.string().nullable().optional(),
+  hire_date: z.string().nullable(),
+  employee_id: z.string().nullable(),
+  company_id: z.string().nullable(),
+  phone: z.string().nullable().optional(),
+  birth_date: z.string().nullable().optional(),
+  address: jsonSchema.nullable().optional(),
+  emergency_contact: jsonSchema.nullable().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+};
+
+const employeeProfileRowSchema = z
+  .object(employeeProfileFieldsSchema)
+  .passthrough()
+  .transform(normalizeEmployeeDepartmentFields);
+
+const employeeProfileWithRelationsSchema = z
+  .object({
+    ...employeeProfileFieldsSchema,
+    department: departmentRowSchema.nullable().optional(),
+    position: positionRowSchema.nullable().optional(),
+  })
+  .passthrough()
+  .transform(normalizeEmployeeDepartmentFields);
 
 const rosterCacheRowSchema = z
   .object({
@@ -215,8 +237,8 @@ async function fetchCompanyEmployees(params: {
     .select(
       `
         *,
-        department:departments!profiles_departmentid_fkey(id, name, company_id, created_at, updated_at, description, manager_id, type),
-        position:positions(id, name, role)
+        department:departments!profiles_department_id_fkey(id, name, company_id, created_at, updated_at, description, manager_id, type),
+        position:positions!profiles_position_id_fkey(id, name, role)
       `,
     )
     .eq("company_id", companyId)

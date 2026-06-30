@@ -182,7 +182,6 @@ export function generateChecklistPlan({
   checklists,
   existingTasks,
   supervisors,
-  _employeeNames,
   companyId,
 }: ChecklistPlanInput): ChecklistPlanResult {
   const creations: PlannedTaskCreation[] = [];

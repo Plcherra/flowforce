@@ -16,6 +16,7 @@ import type {
   ModuleAsset,
   PersonalLearningSnapshot,
 } from "@/types/learning";
+import { isMissingSchemaResourceError } from "@/shared/data-access/errors";
 import { logger } from "@/utils/logger";
 
 let learningClient = supabase;
@@ -80,19 +81,19 @@ type ModuleRow = z.infer<typeof moduleRowSchema>;
 
 const enrollmentRowSchema = z.object({
   id: z.string(),
-  course_id: z.string(),
+  course_id: z.string().optional().default(""),
   employee_id: z.string(),
   company_id: z.string().nullable(),
-  status: z.string(),
+  status: z.string().optional().default("in_progress"),
   progress_percent: nullableNumericLike.optional(),
   hours_completed: nullableNumericLike.optional(),
-  current_module: z.number().nullable(),
-  level: z.number().nullable(),
-  started_at: z.string(),
-  completed_at: z.string().nullable(),
-  last_activity_at: z.string(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  current_module: z.number().nullable().optional(),
+  level: z.number().nullable().optional(),
+  started_at: z.string().optional().default(() => new Date().toISOString()),
+  completed_at: z.string().nullable().optional(),
+  last_activity_at: z.string().optional().default(() => new Date().toISOString()),
+  created_at: z.string().optional().default(() => new Date().toISOString()),
+  updated_at: z.string().optional().default(() => new Date().toISOString()),
 });
 
 type EnrollmentRow = z.infer<typeof enrollmentRowSchema>;
@@ -248,7 +249,7 @@ const mapModule = (row: ModuleRow): LearningModule => {
 
 const mapEnrollment = (row: EnrollmentRow): LearningEnrollment => ({
   id: row.id,
-  courseId: row.course_id,
+  courseId: row.course_id || "",
   employeeId: row.employee_id,
   status: (row.status as LearningEnrollment["status"]) ?? "in_progress",
   progressPercent: toNumber(row.progress_percent),
@@ -342,7 +343,7 @@ export async function fetchLearningCatalog(
   const [
     { data: courseData, error: courseError },
     { data: moduleData, error: moduleError },
-    { data: metricsData },
+    metricsResult,
   ] = await Promise.all([
     fromTable<CourseRow>(TABLE_COURSES)
       .select("*")
@@ -354,25 +355,49 @@ export async function fetchLearningCatalog(
       .order("order_index", { ascending: true }),
     fromTable<MetricsRow>(VIEW_METRICS).select("*").eq("company_id", companyId),
   ]);
+  const { data: metricsData, error: metricsError } = metricsResult;
 
   if (courseError) throw courseError;
-  if (moduleError) throw moduleError;
+  if (moduleError) {
+    if (isMissingSchemaResourceError(moduleError)) {
+      logger.warn("[learning] learning_modules table unavailable; continuing without modules", {
+        tags: ["warning"],
+      });
+    } else {
+      throw moduleError;
+    }
+  }
 
   const courseRows = parseWithSchema(
     courseRowSchema.array(),
     courseData ?? [],
     TABLE_COURSES,
   );
-  const moduleRows = parseWithSchema(
-    moduleRowSchema.array(),
-    moduleData ?? [],
-    TABLE_MODULES,
-  );
-  const metricsRows = parseWithSchema(
-    metricsRowSchema.array(),
-    metricsData ?? [],
-    VIEW_METRICS,
-  );
+  const moduleRows =
+    moduleError && isMissingSchemaResourceError(moduleError)
+      ? []
+      : parseWithSchema(
+          moduleRowSchema.array(),
+          moduleData ?? [],
+          TABLE_MODULES,
+        );
+  if (metricsError && !isMissingSchemaResourceError(metricsError)) {
+    throw metricsError;
+  }
+  if (metricsError && isMissingSchemaResourceError(metricsError)) {
+    logger.warn("[learning] learning_course_metrics view unavailable", {
+      tags: ["warning"],
+    });
+  }
+
+  const metricsRows =
+    metricsError && isMissingSchemaResourceError(metricsError)
+      ? []
+      : parseWithSchema(
+          metricsRowSchema.array(),
+          metricsData ?? [],
+          VIEW_METRICS,
+        );
 
   const modulesByCourse = new Map<string, LearningModule[]>();
   moduleRows.forEach((row) => {
@@ -523,7 +548,15 @@ export async function fetchEnrollments(
     .eq("company_id", companyId)
     .order("updated_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      logger.warn("[learning] enrollments schema unavailable", {
+        tags: ["warning"],
+      });
+      return [];
+    }
+    throw error;
+  }
   const rows = parseWithSchema(
     enrollmentRowSchema.array(),
     data ?? [],
@@ -756,7 +789,12 @@ export async function fetchCourseMetrics(
   const { data, error } = await fromTable<MetricsRow>(VIEW_METRICS)
     .select("*")
     .eq("company_id", companyId);
-  if (error) throw error;
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return [];
+    }
+    throw error;
+  }
   const rows = parseWithSchema(
     metricsRowSchema.array(),
     data ?? [],

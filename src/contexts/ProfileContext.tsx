@@ -48,6 +48,7 @@ type ProfileDetails = {
 type ProfileContextValue = {
   profile: ProfileDetails | null;
   loading: boolean;
+  isReady: boolean;
   error: string | null;
   refreshProfile: () => Promise<void>;
   refetchProfile: () => Promise<void>;
@@ -193,20 +194,24 @@ async function getProfile(
 interface LoadProfileStateOptions {
   user: User | null;
   forceRefresh: boolean;
+  background?: boolean;
   lastLoadedKeyRef: MutableRefObject<string | null>;
   setProfile: (profile: ProfileDetails | null) => void;
   setError: (message: string | null) => void;
   setLoading: (value: boolean) => void;
+  setIsReady: (value: boolean) => void;
   signal?: { cancelled: boolean };
 }
 
 async function loadProfileState({
   user,
   forceRefresh,
+  background = false,
   lastLoadedKeyRef,
   setProfile,
   setError,
   setLoading,
+  setIsReady,
   signal,
 }: LoadProfileStateOptions) {
   if (!user?.id) {
@@ -214,6 +219,7 @@ async function loadProfileState({
       setProfile(null);
       setError(null);
       setLoading(false);
+      setIsReady(true);
       lastLoadedKeyRef.current = null;
     }
     return;
@@ -233,11 +239,12 @@ async function loadProfileState({
       );
       lastLoadedKeyRef.current = cacheKey;
       setLoading(false);
+      setIsReady(true);
       return;
     }
   }
 
-  if (!signal?.cancelled) {
+  if (!signal?.cancelled && !background) {
     setLoading(true);
   }
 
@@ -281,6 +288,7 @@ async function loadProfileState({
   } finally {
     if (!signal?.cancelled) {
       setLoading(false);
+      setIsReady(true);
     }
   }
 }
@@ -289,23 +297,47 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const lastLoadedKeyRef = useRef<string | null>(null);
+  const isReadyRef = useRef(false);
+  const activeCompanyId = resolveActiveCompanyIdFromUser(user);
 
   useEffect(() => {
     if (authLoading) {
       return;
     }
 
+    if (!user?.id) {
+      setProfile(null);
+      setError(null);
+      setLoading(false);
+      setIsReady(true);
+      isReadyRef.current = true;
+      lastLoadedKeyRef.current = null;
+      return;
+    }
+
+    const userChanged = !lastLoadedKeyRef.current?.startsWith(`${user.id}:`);
+    if (userChanged) {
+      isReadyRef.current = false;
+      setIsReady(false);
+    }
+
     const signal = { cancelled: false };
 
     loadProfileState({
       user,
-      forceRefresh: false,
+      forceRefresh: userChanged,
+      background: isReadyRef.current,
       lastLoadedKeyRef,
       setProfile,
       setError,
       setLoading,
+      setIsReady: (value) => {
+        isReadyRef.current = value;
+        setIsReady(value);
+      },
       signal,
     }).catch(() => {
       // Errors handled inside loadProfileState
@@ -314,17 +346,22 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return () => {
       signal.cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [authLoading, user?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when tenant metadata changes
+  }, [authLoading, user?.id, activeCompanyId]);
 
   const refreshProfile = async () => {
     await loadProfileState({
       user,
       forceRefresh: true,
+      background: true,
       lastLoadedKeyRef,
       setProfile,
       setError,
       setLoading,
+      setIsReady: (value) => {
+        isReadyRef.current = value;
+        setIsReady(value);
+      },
     });
   };
 
@@ -332,7 +369,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     profile ?? (ALLOW_PROFILE_PLACEHOLDER ? buildProfilePlaceholder(user) : null);
   const contextValue: ProfileContextValue = {
     profile: safeProfile,
-    loading: authLoading || (loading && profile === null),
+    loading: authLoading || (loading && !isReady),
+    isReady,
     error,
     refreshProfile,
     refetchProfile: refreshProfile,

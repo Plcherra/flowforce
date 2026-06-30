@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { useProfile } from "@/hooks/useProfile";
 import { useEmployees, type Employee } from "@/hooks/useEmployees";
 import { useLeaderboardInsightsStore } from "@/stores/useLeaderboardInsights";
+import { isMissingSchemaResourceError } from "@/shared/data-access/errors";
 import { ensureLeaderboardSynced } from "./syncLeaderboard";
 import {
   fetchLeaderboardProfiles,
@@ -335,7 +336,9 @@ export function useLeaderboardData(
     ? (leaderboardQuery.data?.lastUpdated ?? null)
     : null;
   const error = leaderboardQuery.error
-    ? "Unable to load leaderboard data at the moment."
+    ? isMissingSchemaResourceError(leaderboardQuery.error)
+      ? null
+      : "Unable to load leaderboard data at the moment."
     : null;
 
   useEffect(() => {

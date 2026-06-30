@@ -69,8 +69,12 @@ function normalizeSubmissionReviewerRows(
     .filter((row): row is Record<string, unknown> => Boolean(row))
     .map((row) => ({
       id: typeof row.id === "string" ? row.id : "",
-      submissionid:
-        typeof row.submissionid === "string" ? row.submissionid : null,
+      submission_id:
+        typeof row.submission_id === "string"
+          ? row.submission_id
+          : typeof row.submissionid === "string"
+            ? row.submissionid
+            : null,
       status: typeof row.status === "string" ? row.status : null,
     }))
     .filter((row) => row.id);
@@ -89,21 +93,28 @@ export function FormsReadinessPanel({
     queryKey: ["forms-readiness", companyId, formIds.join(",")],
     enabled: Boolean(companyId),
     queryFn: async () => {
+      const fieldsQuery =
+        formIds.length > 0
+          ? supabase
+              .from("form_fields")
+              .select("id, form_id, field_type, is_required")
+              .in("form_id", formIds)
+          : Promise.resolve({ data: [], error: null });
+
       const [fieldsResult, reviewerRulesResult, submissionReviewersResult] =
         await Promise.all([
-          supabase
-            .from("form_fields")
-            .select("id, form_id, field_type, is_required")
-            .eq("company_id", companyId),
+          fieldsQuery,
           formIds.length > 0
             ? supabase
                 .from("form_reviewer_rules")
                 .select("id, form_id")
                 .in("form_id", formIds)
             : Promise.resolve({ data: [], error: null }),
-          supabase
-            .from("form_submission_reviewers")
-            .select("id, submissionid, status"),
+          formIds.length > 0
+            ? supabase
+                .from("form_submission_reviewers")
+                .select("id, submission_id, status")
+            : Promise.resolve({ data: [], error: null }),
         ]);
 
       if (fieldsResult.error) throw fieldsResult.error;

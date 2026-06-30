@@ -22,6 +22,7 @@ import type {
   LeaderboardSyncMetrics,
   LeaderboardSyncRow,
 } from "./types";
+import { isMissingSchemaResourceError } from "@/shared/data-access/errors";
 
 type PeriodRange = {
   start: Dayjs | null;
@@ -436,9 +437,62 @@ export async function syncLeaderboard({
     }
   });
 
-  const { error } = await supabase
+  const dbRows = rows.map((row, index) => ({
+    company_id: row.company_id,
+    employee_id: row.employee_id,
+    departmentid: row.departmentid,
+    role: row.role,
+    period: row.period,
+    period_start: row.period_start,
+    total_xp: row.xp_total,
+    xp_total: row.xp_total,
+    xp_tasks: row.xp_tasks,
+    xp_goals: row.xp_goals,
+    xp_recognitions: row.xp_recognitions,
+    xp_training: row.xp_training,
+    badge_tier: row.badge_tier,
+    badge_codes: row.badge_codes,
+    achievements: row.achievements,
+    insights: row.insights,
+    challenges: row.challenges,
+    rank: index + 1,
+    last_challenge_triggered: row.last_challenge_triggered,
+    last_synced_at: row.last_synced_at,
+    updated_at: row.last_synced_at,
+  }));
+
+  let { error } = await supabase
     .from("gamification_leaderboard")
-    .upsert(rows, { onConflict: "employee_id,period,period_start" });
+    .upsert(dbRows, { onConflict: "company_id,employee_id,period,period_start" });
+
+  if (error && isMissingSchemaResourceError(error)) {
+    const legacyRows = dbRows.map(
+      ({
+        company_id,
+        employee_id,
+        period,
+        period_start,
+        total_xp,
+        rank,
+        challenges: rowChallenges,
+        last_synced_at,
+      }) => ({
+        company_id,
+        employee_id,
+        period,
+        period_start,
+        total_xp,
+        rank,
+        challenges: rowChallenges,
+        last_synced_at,
+        updated_at: last_synced_at,
+      }),
+    );
+
+    ({ error } = await supabase.from("gamification_leaderboard").upsert(legacyRows, {
+      onConflict: "company_id,employee_id,period,period_start",
+    }));
+  }
 
   if (error) {
     logger.error("[leaderboard] Failed to sync leaderboard", {

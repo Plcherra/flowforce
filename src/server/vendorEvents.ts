@@ -40,7 +40,6 @@ export async function upsertVendorEvent(payload: VendorEventInput) {
     event_date,
     start_time,
     end_time,
-    _shift_id,
     notes,
     location_id,
     ...rest

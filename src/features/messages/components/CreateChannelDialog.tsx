@@ -47,7 +47,7 @@ export function CreateChannelDialog({
 
     setLoading(true);
     try {
-      const { _data, error } = await createChannel({
+      const { error } = await createChannel({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         type: formData.type,
@@ -132,7 +132,6 @@ export function CreateChannelDialog({
                 <SelectItem value="group">Group Channel</SelectItem>
                 <SelectItem value="department">Department Channel</SelectItem>
                 <SelectItem value="direct">Direct Message</SelectItem>
-                <SelectItem value="helpdesk">Help Desk Channel</SelectItem>
               </SelectContent>
             </Select>
           </div>

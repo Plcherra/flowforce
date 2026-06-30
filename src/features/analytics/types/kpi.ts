@@ -4,7 +4,7 @@
 
 import type { LucideIcon } from "lucide-react";
 
-export type TileId = "tasks" | "goals" | "scheduling" | "performance";
+export type TileId = "tasks" | "scheduling" | "performance";
 
 export interface TileDescriptor {
   id: TileId;
@@ -31,19 +31,6 @@ export interface TasksMetrics {
     id: string;
     title: string;
     due_date: string | null;
-  }>;
-}
-
-export interface GoalsMetrics {
-  total: number;
-  active: number;
-  completed: number;
-  draft: number;
-  averageProgress: number;
-  topActive: Array<{
-    id: string;
-    title: string;
-    progress: number | null;
   }>;
 }
 

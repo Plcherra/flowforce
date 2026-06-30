@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { syncGoalProgress } from "@/features/goals/services/goalProgressService";
 export type { TaskWithRelations } from "@/features/tasks/repositories/tasksRepository";
 import { logger } from "@/utils/logger";
 
@@ -153,7 +152,6 @@ export function useTasks() {
 
       if (createdTask.goal_id) {
         await ensureGoalTaskLink(createdTask.goal_id, createdTask.id);
-        await syncGoalProgress(createdTask.goal_id);
       }
 
       await invalidateTasks();
@@ -189,12 +187,10 @@ export function useTasks() {
 
       if (previousGoalId && previousGoalId !== newGoalId) {
         await removeGoalTaskLink(previousGoalId, id);
-        await syncGoalProgress(previousGoalId);
       }
 
       if (newGoalId) {
         await ensureGoalTaskLink(newGoalId, id);
-        await syncGoalProgress(newGoalId);
       }
 
       await invalidateTasks();
@@ -207,18 +203,11 @@ export function useTasks() {
 
   const deleteTask = async (id: string) => {
     try {
-      const taskToDelete = tasks.find((task) => task.id === id);
-      const goalId = taskToDelete?.goal_id ?? null;
-
       if (!companyId) {
         throw new Error("Company context required to delete tasks");
       }
 
       await deleteTaskRow(id, companyId);
-
-      if (goalId) {
-        await syncGoalProgress(goalId);
-      }
 
       await invalidateTasks();
       return { error: null };

@@ -77,7 +77,7 @@ export function AnnouncementBanner({
             profile && typeof profile === "object" && profile !== null
               ? {
                   first_name: (profile as any).first_name || "Unknown",
-                  last_name: (profile as unknown).last_name || "User",
+                  last_name: (profile as any).last_name || "User",
                 }
               : { first_name: "Unknown", last_name: "User" };
 

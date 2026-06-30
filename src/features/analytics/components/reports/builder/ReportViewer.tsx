@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { CustomReport, useReportData } from "@/hooks/useReports";
 import {
-  _Download,
   FileSpreadsheet,
   FileText,
   Filter,
@@ -33,8 +32,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  _LineChart,
-  _Line,
 } from "recharts";
 
 interface ReportViewerProps {

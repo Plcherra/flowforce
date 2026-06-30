@@ -1,13 +1,6 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  _Select,
-  _SelectContent,
-  _SelectItem,
-  _SelectTrigger,
-  _SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,7 +61,6 @@ export default function FormPreview({
     const {
       fieldid,
       condition_type,
-      _condition_values = [],
     } = field.conditional_logic;
     if (!fieldid || !condition_type) return true;
 

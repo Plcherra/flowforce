@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type FilterKey = "all" | "unread" | "teams" | "helpdesk";
+type FilterKey = "all" | "unread" | "teams";
 
 type Props = {
   active: FilterKey;
@@ -20,7 +20,6 @@ export function MessageFilterBar({
     { key: "all", label: labels?.all ?? "All" },
     { key: "unread", label: labels?.unread ?? "Unread" },
     { key: "teams", label: labels?.teams ?? "Teams" },
-    { key: "helpdesk", label: labels?.helpdesk ?? "Help Desk" },
   ];
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>

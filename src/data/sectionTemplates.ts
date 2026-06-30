@@ -108,27 +108,6 @@ export const QUICK_TEMPLATES: QuickTemplate[] = [
       ],
     },
   },
-  {
-    id: "help-desk",
-    name: "Help Desk",
-    description: "Support tickets and IT requests",
-    icon: "Headphones",
-    category: "communication",
-    config: {
-      path: "/app/help-desk",
-      permissions: ["viewOwnProfile"],
-      pages: [
-        {
-          name: "tickets",
-          title: "Support Tickets",
-          icon: "Ticket",
-          route: "/app/help-desk",
-          content: [],
-          permissions: ["viewOwnProfile"],
-        },
-      ],
-    },
-  },
 
   // Operations Templates
   {

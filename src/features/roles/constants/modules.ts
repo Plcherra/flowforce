@@ -18,10 +18,10 @@ export const ROLE_MODULES: ModuleConfig[] = [
   {
     id: "workspace",
     label: "Workspace Essentials",
-    description: "Dashboard, messaging, tasks, and goal tracking.",
+    description: "Dashboard, messaging, and tasks.",
     icon: LayoutDashboard,
     permissions: ["viewOwnProfile", "viewOwnTasks", "viewTeamTasks"],
-    sections: ["dashboard", "messages", "tasks", "goals"],
+    sections: ["dashboard", "messages", "tasks"],
     defaults: {
       owner: true,
       admin: true,

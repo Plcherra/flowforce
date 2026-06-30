@@ -151,7 +151,7 @@ export const ExecuteStagePanel = () => (
     <ExecutePanel
       insights={sampleInsights}
       diagnostics={diagnosticsMock as any}
-      actionsState={actionsStateMock as unknown}
+      actionsState={actionsStateMock as any}
       stageDescription="Launch orchestrated playbooks and track automation."
       onStageComplete={() => void 0}
     />

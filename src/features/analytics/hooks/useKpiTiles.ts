@@ -3,11 +3,10 @@
  */
 
 import { useMemo } from "react";
-import { BarChart3, CalendarDays, CheckSquare, Target } from "lucide-react";
+import { BarChart3, CalendarDays, CheckSquare } from "lucide-react";
 import type { TileDescriptor, TileId } from "../types/kpi";
 import type {
   TasksMetrics,
-  GoalsMetrics,
   SchedulingMetrics,
   PerformanceMetrics,
 } from "../types/kpi";
@@ -18,14 +17,12 @@ import {
 
 interface UseKpiTilesProps {
   tasksMetrics: TasksMetrics;
-  goalsMetrics: GoalsMetrics;
   schedulingMetrics: SchedulingMetrics;
   performanceMetrics: PerformanceMetrics;
 }
 
 export function useKpiTiles({
   tasksMetrics,
-  goalsMetrics,
   schedulingMetrics,
   performanceMetrics,
 }: UseKpiTilesProps) {
@@ -33,11 +30,10 @@ export function useKpiTiles({
     () =>
       generateCopilotMessages(
         tasksMetrics,
-        goalsMetrics,
         schedulingMetrics,
         performanceMetrics,
       ),
-    [tasksMetrics, goalsMetrics, schedulingMetrics, performanceMetrics],
+    [tasksMetrics, schedulingMetrics, performanceMetrics],
   );
 
   const automationMessages = useMemo(() => generateAutomationMessages(), []);
@@ -67,36 +63,6 @@ export function useKpiTiles({
               : "On track"
             : "Getting started",
         suggestion: copilotMessages.tasks,
-      },
-      {
-        id: "goals",
-        title: "Goal Progress",
-        icon: Target,
-        accent:
-          "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300",
-        metric:
-          goalsMetrics.total > 0 ? `${goalsMetrics.averageProgress}%` : "—",
-        metricLabel:
-          goalsMetrics.total > 0
-            ? `${goalsMetrics.active} active • ${goalsMetrics.completed} completed`
-            : "No goals in play",
-        secondary:
-          goalsMetrics.total > 0
-            ? `${goalsMetrics.draft} draft goal${goalsMetrics.draft === 1 ? "" : "s"} waiting`
-            : "Launch your first objective to align the team",
-        trend:
-          goalsMetrics.total === 0
-            ? "flat"
-            : goalsMetrics.averageProgress >= 70
-              ? "up"
-              : "down",
-        trendLabel:
-          goalsMetrics.total === 0
-            ? "No baseline yet"
-            : goalsMetrics.averageProgress >= 70
-              ? "Pacing above target"
-              : "Needs lift",
-        suggestion: copilotMessages.goals,
       },
       {
         id: "scheduling",
@@ -164,7 +130,6 @@ export function useKpiTiles({
     return tilesConfig;
   }, [
     copilotMessages,
-    goalsMetrics,
     performanceMetrics,
     schedulingMetrics,
     tasksMetrics,

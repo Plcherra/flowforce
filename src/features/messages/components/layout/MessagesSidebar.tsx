@@ -35,8 +35,8 @@ interface MessagesSidebarProps {
   query?: string;
   onQueryChange?: (v: string) => void;
   // Filters
-  activeFilter?: "all" | "unread" | "teams" | "helpdesk";
-  onFilterChange?: (v: "all" | "unread" | "teams" | "helpdesk") => void;
+  activeFilter?: "all" | "unread" | "teams";
+  onFilterChange?: (v: "all" | "unread" | "teams") => void;
   // Availability toggle (optional)
   canShowAvailability?: boolean;
   available?: boolean;

@@ -158,7 +158,7 @@ export function buildAnalyticsReadinessSummary({
             id: "fallback-data",
             label: "Live analytics data unavailable",
             detail: business?.notice ?? "Business analytics is using simulator defaults.",
-            severity: "warning" as const,
+            severity: "info" as const,
           },
         ]
       : []),

@@ -35,17 +35,6 @@ export const AVAILABLE_SECTIONS: CustomSection[] = [
     order: 3,
     category: "core",
   },
-  {
-    id: "goals",
-    name: "Goals & Objectives",
-    description: "Track team goals and achievements",
-    icon: "Target",
-    path: "/goals",
-    permissions: ["viewOwnTasks"],
-    enabled: true,
-    order: 4,
-    category: "core",
-  },
 
   // Industry-specific sections
   {

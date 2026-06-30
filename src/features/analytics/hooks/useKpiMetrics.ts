@@ -1,32 +1,11 @@
 /**
  * Hook for calculating KPI tile metrics
- *
- * Aggregates and calculates metrics for KPI tiles including tasks, goals, scheduling,
- * and performance data. Returns memoized metrics objects for efficient rendering.
- *
- * @param props - KPI metrics calculation props
- * @param props.tasks - Array of tasks to analyze
- * @param props.goals - Array of goals to analyze
- * @param props.schedulingStats - Scheduling statistics (coverage, hours, etc.)
- * @param props.performanceData - Performance data array or null
- * @returns Memoized object containing tasksMetrics, goalsMetrics, schedulingMetrics, and performanceMetrics
- *
- * @example
- * ```tsx
- * const { tasksMetrics, goalsMetrics, schedulingMetrics, performanceMetrics } = useKpiMetrics({
- *   tasks,
- *   goals,
- *   schedulingStats,
- *   performanceData,
- * });
- * ```
  */
 
 import { useMemo } from "react";
 import { differenceInDays } from "date-fns";
 import type {
   TasksMetrics,
-  GoalsMetrics,
   SchedulingMetrics,
   PerformanceMetrics,
 } from "../types/kpi";
@@ -40,12 +19,6 @@ interface UseKpiMetricsProps {
     due_date?: string | null;
     title?: string | null;
     description?: string | null;
-  }>;
-  goals: Array<{
-    id?: string;
-    status?: string | null;
-    progress?: number | null;
-    title?: string | null;
   }>;
   schedulingStats: {
     coverageCompleteness?: number | null;
@@ -64,7 +37,6 @@ interface UseKpiMetricsProps {
 
 export function useKpiMetrics({
   tasks,
-  goals,
   schedulingStats,
   performanceData,
 }: UseKpiMetricsProps) {
@@ -137,51 +109,6 @@ export function useKpiMetrics({
     return { ...totals, completionRate, overdueList };
   }, [tasks]);
 
-  const goalsMetrics = useMemo((): GoalsMetrics => {
-    let active = 0;
-    let completed = 0;
-    let draft = 0;
-    let totalProgress = 0;
-    const activeGoals: Array<{
-      id?: string;
-      title?: string | null;
-      progress?: number | null;
-    }> = [];
-
-    goals.forEach((goal) => {
-      const status = (goal.status ?? "").toLowerCase();
-      if (status === "completed") {
-        completed += 1;
-      } else if (status === "active") {
-        active += 1;
-        activeGoals.push(goal);
-      } else {
-        draft += 1;
-      }
-      totalProgress += goal.progress ?? 0;
-    });
-
-    const averageProgress =
-      goals.length > 0 ? Math.round(totalProgress / goals.length) : 0;
-    const topActive = activeGoals
-      .sort((a, b) => (b.progress ?? 0) - (a.progress ?? 0))
-      .slice(0, 3)
-      .map((goal) => ({
-        id: goal.id ?? "",
-        title: goal.title ?? "Untitled goal",
-        progress: goal.progress ?? null,
-      }));
-
-    return {
-      total: goals.length,
-      active,
-      completed,
-      draft,
-      averageProgress,
-      topActive,
-    };
-  }, [goals]);
-
   const schedulingMetrics = useMemo((): SchedulingMetrics => {
     const coverage = schedulingStats.coverageCompleteness ?? 0;
     const hoursUtilization = schedulingStats.hoursUtilization ?? 0;
@@ -234,7 +161,6 @@ export function useKpiMetrics({
 
   return {
     tasksMetrics,
-    goalsMetrics,
     schedulingMetrics,
     performanceMetrics,
   };

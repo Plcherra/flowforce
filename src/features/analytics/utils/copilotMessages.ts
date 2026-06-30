@@ -4,7 +4,6 @@
 
 import type {
   TasksMetrics,
-  GoalsMetrics,
   SchedulingMetrics,
   PerformanceMetrics,
   TileId,
@@ -12,7 +11,6 @@ import type {
 
 interface CopilotMessages {
   tasks: string;
-  goals: string;
   scheduling: string;
   performance: string;
 }
@@ -22,7 +20,6 @@ interface CopilotMessages {
  */
 export function generateCopilotMessages(
   tasksMetrics: TasksMetrics,
-  goalsMetrics: GoalsMetrics,
   schedulingMetrics: SchedulingMetrics,
   performanceMetrics: PerformanceMetrics,
 ): CopilotMessages {
@@ -33,12 +30,6 @@ export function generateCopilotMessages(
         : tasksMetrics.dueSoon > 0
           ? `Co-Pilot suggests pre-assigning ${tasksMetrics.dueSoon} task${tasksMetrics.dueSoon === 1 ? "" : "s"} due soon so nothing slips before the weekend.`
           : "Co-Pilot confirms the task queue is cleared. This is a great moment to launch follow-up improvements.",
-    goals:
-      goalsMetrics.active === 0
-        ? "Co-Pilot recommends launching a mission-critical goal to keep momentum aligned with quarterly outcomes."
-        : goalsMetrics.averageProgress < 60
-          ? `Co-Pilot wants to tighten follow-through — average progress is ${goalsMetrics.averageProgress}%. Consider a checkpoint huddle.`
-          : "Co-Pilot is happy with goal velocity. Capture any wins in recognition before the cycle ends.",
     scheduling: (() => {
       const coverageAlert = schedulingMetrics.coverage < 80;
       const hoursAlert = schedulingMetrics.hoursUtilization > 110;
@@ -76,8 +67,6 @@ export function generateAutomationMessages(): Record<TileId, string> {
   return {
     tasks:
       "Co-Pilot will assemble a recovery checklist and push the plan to the AI Actions feed.",
-    goals:
-      "Co-Pilot will draft a refreshed OKR set and queue linked tasks for review.",
     scheduling:
       "Co-Pilot will balance staffing, apply the latest preferences, and return a publishing-ready draft.",
     performance:

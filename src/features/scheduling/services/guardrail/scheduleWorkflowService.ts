@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type {
   ScheduleRulebook,
-  _RulebookStep,
   StepCriterion,
 } from "@/types/scheduleRulebook";
 import { logger } from "@/utils/logger";

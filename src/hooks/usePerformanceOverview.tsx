@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPerformanceDataset } from "@/services/performance/performanceService";
 import type { PerformanceDataset } from "@/services/performance/performanceTypes";
+import { logger } from "@/utils/logger";
 
 export interface PerformanceEmployeeSummary {
   id: string;
@@ -44,7 +45,27 @@ export interface PerformanceReviewEntry {
 export function usePerformanceOverview() {
   const query = useQuery<PerformanceDataset, Error, PerformanceDataset>({
     queryKey: ["performance-dataset"],
-    queryFn: () => fetchPerformanceDataset(),
+    queryFn: async () => {
+      try {
+        return await fetchPerformanceDataset();
+      } catch (error) {
+        logger.warn("[performance] Falling back to empty dataset", {
+          error,
+          tags: ["warning"],
+        });
+        return {
+          employees: [],
+          goalReviews: [],
+          radar: [],
+          goalSummary: {
+            total: 0,
+            active: 0,
+            completed: 0,
+            averageProgress: 0,
+          },
+        };
+      }
+    },
     staleTime: 1000 * 60 * 5,
   });
 

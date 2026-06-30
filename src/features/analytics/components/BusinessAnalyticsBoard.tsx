@@ -159,11 +159,9 @@ export function BusinessAnalyticsBoard({
         </div>
       </div>
 
-      {data?.notice && (
+      {data?.notice && !data.isFallback && (
         <Alert variant="default">
-          <AlertTitle>
-            {data.isFallback ? "Using simulator defaults" : "Analytics status"}
-          </AlertTitle>
+          <AlertTitle>Analytics status</AlertTitle>
           <AlertDescription>{data.notice}</AlertDescription>
         </Alert>
       )}

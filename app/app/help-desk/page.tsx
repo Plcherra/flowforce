@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import HelpDeskPage from "@/features/helpdesk/pages/HelpDesk";
-
-export default function HelpDesk() {
-  return <HelpDeskPage />;
+/** Help Desk module removed; use Messages instead. */
+export default function HelpDeskRedirectPage() {
+  redirect("/app/messages");
 }

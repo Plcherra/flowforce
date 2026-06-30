@@ -166,11 +166,6 @@ export function useNavigationStructure() {
               .toString()
               .toLowerCase();
 
-            const isHelpDeskSection =
-              templateKey === "help-desk" ||
-              canonical.includes("help-desk") ||
-              normalizedName.includes("help desk");
-
             if (
               !canonical ||
               canonicalPaths.has(canonical) ||
@@ -186,22 +181,12 @@ export function useNavigationStructure() {
               return null;
             }
 
-            if (isHelpDeskSection) {
-              const helpDeskHref = "/app/help-desk";
-              const helpDeskCanonical = canonicalizePath(helpDeskHref);
-
-              if (canonicalPaths.has(helpDeskCanonical)) {
-                return null;
-              }
-
-              canonicalPaths.add(helpDeskCanonical);
-
-              return {
-                id: `custom-${customSection.id}`,
-                name: customSection.name || "Help Desk",
-                href: helpDeskHref,
-                icon: customSection.icon || "Headphones",
-              };
+            if (
+              templateKey === "help-desk" ||
+              canonical.includes("help-desk") ||
+              normalizedName.includes("help desk")
+            ) {
+              return null;
             }
 
             let href = resolvedPath;

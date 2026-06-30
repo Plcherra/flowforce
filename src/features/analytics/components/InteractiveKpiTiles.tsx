@@ -11,16 +11,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTasks } from "@/hooks/useTasks";
-import { useGoals } from "@/hooks/useGoals";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useEmployeePerformance } from "@/hooks/useAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog";
-import {
-  CreateGoalModal,
-  type GoalFormValues,
-} from "@/features/goals/components/CreateGoalModal";
 import { useKpiMetrics } from "@/features/analytics/hooks/useKpiMetrics";
 import { useKpiTiles } from "@/features/analytics/hooks/useKpiTiles";
 import { KpiTile, TileDetailPanel } from "@/features/analytics/components/kpi";
@@ -32,7 +27,6 @@ export default function InteractiveKpiTiles() {
   const isMobile = useIsMobile();
 
   const { tasks, loading: tasksLoading } = useTasks();
-  const { goals, isLoading: goalsLoading, createGoal, creating } = useGoals();
   const { stats: schedulingStats, loading: schedulingLoading } =
     useDashboardData();
   const { data: performanceData, isLoading: performanceLoading } =
@@ -40,21 +34,18 @@ export default function InteractiveKpiTiles() {
 
   const [activeTile, setActiveTile] = useState<TileId | null>(null);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
-  const [showGoalDialog, setShowGoalDialog] = useState(false);
 
   const isLoading =
-    tasksLoading || goalsLoading || schedulingLoading || performanceLoading;
+    tasksLoading || schedulingLoading || performanceLoading;
 
   const metrics = useKpiMetrics({
     tasks,
-    goals,
     schedulingStats,
     performanceData,
   });
 
   const { tiles, tileMap, copilotMessages, automationMessages } = useKpiTiles({
     tasksMetrics: metrics.tasksMetrics,
-    goalsMetrics: metrics.goalsMetrics,
     schedulingMetrics: metrics.schedulingMetrics,
     performanceMetrics: metrics.performanceMetrics,
   });
@@ -76,11 +67,11 @@ export default function InteractiveKpiTiles() {
           "grid gap-4",
           isMobile
             ? "grid-cols-1"
-            : "grid-cols-1 md:grid-cols-2 xl:grid-cols-4",
+            : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
         )}
       >
         {isLoading
-          ? Array.from({ length: isMobile ? 2 : 4 }).map((_, index) => (
+          ? Array.from({ length: isMobile ? 2 : 3 }).map((_, index) => (
               <Card
                 key={`kpi-skeleton-${index}`}
                 className="border-border/60 bg-muted/40"
@@ -133,13 +124,11 @@ export default function InteractiveKpiTiles() {
                 <TileDetailPanel
                   tileId={activeTile}
                   tasksMetrics={metrics.tasksMetrics}
-                  goalsMetrics={metrics.goalsMetrics}
                   schedulingMetrics={metrics.schedulingMetrics}
                   performanceMetrics={metrics.performanceMetrics}
                   copilotMessages={copilotMessages}
                   onAutomation={triggerCopilotAutomation}
                   onCreateTask={() => setShowTaskDialog(true)}
-                  onCreateGoal={() => setShowGoalDialog(true)}
                   onNavigate={(path) => navigate(path)}
                   onClose={() => setActiveTile(null)}
                 />
@@ -152,38 +141,6 @@ export default function InteractiveKpiTiles() {
       <CreateTaskDialog
         open={showTaskDialog}
         onClose={() => setShowTaskDialog(false)}
-      />
-      <CreateGoalModal
-        open={showGoalDialog}
-        onOpenChange={setShowGoalDialog}
-        saving={creating}
-        onSubmit={async (values: GoalFormValues) => {
-          const summary = values.rewardSummary?.trim() ?? "";
-          const xp =
-            values.xpValue != null && !Number.isNaN(values.xpValue)
-              ? values.xpValue
-              : null;
-          const rewardDetails =
-            summary || xp != null
-              ? {
-                  ...(summary ? { summary } : {}),
-                  ...(xp != null ? { xp } : {}),
-                }
-              : null;
-
-          await createGoal({
-            title: values.title,
-            description: values.description ?? null,
-            status: values.status,
-            target_completion_date: values.dueDate
-              ? values.dueDate.toISOString().split("T")[0]
-              : null,
-            priority: values.priority,
-            progress: values.progress,
-            reward_type: values.rewardType,
-            reward_details: rewardDetails,
-          });
-        }}
       />
     </>
   );

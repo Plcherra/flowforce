@@ -25,6 +25,11 @@ export function NavigationSection({
   const isCollapsed = sidebarState === "collapsed";
   const items = Array.isArray(section.items) ? section.items : [];
   const translationKey = section.translationKey || "custom";
+  const navLabel = t(`navigation.${translationKey}`);
+  const sectionLabel =
+    navLabel !== `navigation.${translationKey}`
+      ? navLabel
+      : section.title || translationKey;
 
   return (
     <SidebarGroup className="animate-fade-in">
@@ -33,7 +38,7 @@ export function NavigationSection({
           isCollapsed ? "hidden" : ""
         }`}
       >
-        {t(`navigation.${translationKey}`)}
+        {sectionLabel}
       </SidebarGroupLabel>
 
       <SidebarGroupContent>

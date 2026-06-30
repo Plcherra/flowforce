@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28",
+  "updatedAt": "2026-06-30",
   "statusValues": ["production", "beta", "hidden", "deprecated"],
   "routes": [
     {
@@ -135,8 +135,8 @@
     {
       "label": "Inventory Counts",
       "path": "/app/inventory/counts",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "production",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory count tables",
@@ -153,44 +153,44 @@
       "notes": "Inventory child detail route."
     },
     {
-      "label": "Inventory Items",
+      "label": "Items Setup",
       "path": "/app/inventory/items",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "production",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory item tables",
-      "notes": "Hidden until setup is complete."
+      "notes": "Inventory item and unit setup."
     },
     {
       "label": "Inventory Prep",
       "path": "/app/inventory/prep",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "production",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory prep tables",
-      "notes": "Hidden until inventory setup supports prep workflows."
+      "notes": "Prep and production workflows."
     },
     {
       "label": "Inventory Reports",
       "path": "/app/inventory/reports",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "production",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory reporting tables",
-      "notes": "Child report route."
+      "notes": "Inventory reporting route."
     },
     {
       "label": "Inventory Cookbook",
       "path": "/app/inventory/cookbook",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "production",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant recipe/item tables",
-      "notes": "Hidden until item/unit setup is ready."
+      "notes": "Recipes and cookbook."
     },
     {
       "label": "Legacy Inventory Actions",
@@ -246,7 +246,7 @@
       "label": "Analytics",
       "path": "/app/analytics",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/analytics",
       "dataDependency": "tenant analytics tables",
@@ -256,7 +256,7 @@
       "label": "AI Insights",
       "path": "/app/ai-insights",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/analytics/pages/AIInsights",
       "dataDependency": "AI feature flag and tenant evidence tables",
@@ -266,7 +266,7 @@
       "label": "Operations Intelligence",
       "path": "/app/operations",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/operations",
       "dataDependency": "tenant operations tables",
@@ -276,7 +276,7 @@
       "label": "Calendar",
       "path": "/app/calendar",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant calendar/event tables",
@@ -286,27 +286,17 @@
       "label": "Events Calendar",
       "path": "/app/events/calendar",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant calendar/event tables",
       "notes": "Event-specific calendar route."
     },
     {
-      "label": "Goals",
-      "path": "/app/goals",
-      "status": "beta",
-      "sidebar": false,
-      "smoke": false,
-      "owner": "src/features/goals",
-      "dataDependency": "tenant goals tables",
-      "notes": "Beta until task/goal workflow is completed."
-    },
-    {
       "label": "Expenses",
       "path": "/app/expenses",
       "status": "beta",
-      "sidebar": false,
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/finance",
       "dataDependency": "tenant finance tables",
@@ -315,8 +305,8 @@
     {
       "label": "Performance",
       "path": "/app/performance",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/performance",
       "dataDependency": "tenant performance tables",
@@ -325,8 +315,8 @@
     {
       "label": "Recognition",
       "path": "/app/recognition",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/recognition",
       "dataDependency": "tenant recognition tables",
@@ -335,8 +325,8 @@
     {
       "label": "Leaderboard",
       "path": "/app/leaderboard",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/gamification",
       "dataDependency": "tenant gamification tables",
@@ -345,8 +335,8 @@
     {
       "label": "Certifications",
       "path": "/app/certifications",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/learning",
       "dataDependency": "tenant certification tables",
@@ -355,8 +345,8 @@
     {
       "label": "Learning Center",
       "path": "/app/learning-center",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/learning",
       "dataDependency": "tenant learning tables",
@@ -365,8 +355,8 @@
     {
       "label": "Admin",
       "path": "/app/admin",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/admin",
       "dataDependency": "tenant role/profile tables",
@@ -453,20 +443,10 @@
       "notes": "Legacy time-off route."
     },
     {
-      "label": "Help Desk",
-      "path": "/app/help-desk",
-      "status": "hidden",
-      "sidebar": false,
-      "smoke": false,
-      "owner": "src/features/help-desk",
-      "dataDependency": "tenant helpdesk tables",
-      "notes": "Hidden for v1 pilot."
-    },
-    {
       "label": "Meetings",
       "path": "/app/meetings",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant meetings/event tables",
@@ -495,8 +475,8 @@
     {
       "label": "Resources",
       "path": "/app/resources",
-      "status": "hidden",
-      "sidebar": false,
+      "status": "beta",
+      "sidebar": true,
       "smoke": false,
       "owner": "src/features/resources",
       "dataDependency": "content data",
