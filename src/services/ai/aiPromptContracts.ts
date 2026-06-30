@@ -81,7 +81,7 @@ const safetySchema = z
   .object({
     requires_human_approval: z.literal(true),
     writes_allowed: z.literal(false),
-    blockeddata_classes_observed: z.array(z.string()).default([]),
+    blocked_data_classes_observed: z.array(z.string()).default([]),
   })
   .strict();
 

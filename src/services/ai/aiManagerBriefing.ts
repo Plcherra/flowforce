@@ -187,7 +187,7 @@ export function buildManagerBriefingDraft(snapshot: AIContextSnapshot) {
     safety: {
       requires_human_approval: true as const,
       writes_allowed: false as const,
-      blockeddata_classes_observed: [],
+      blocked_data_classes_observed: [],
     },
     briefing_sections: [
       {
