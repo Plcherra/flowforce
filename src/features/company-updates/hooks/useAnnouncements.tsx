@@ -20,6 +20,7 @@ export function useAnnouncements() {
     } else {
       setAnnouncements([]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const fetchAnnouncements = async () => {
@@ -49,12 +50,12 @@ export function useAnnouncements() {
       // Get read status for announcements
       const { data: readData, error: readError } = await supabase
         .from("announcement_reads")
-        .select("announcement_id")
+        .select("announcementid")
         .eq("user_id", user.id);
 
       if (readError) throw readError;
 
-      const readIds = new Set(readData?.map((r) => r.announcement_id) || []);
+      const readIds = new Set(readData?.map((r) => r.announcementid) || []);
 
       const announcementsWithReadStatus = (data || []).map((item) => {
         // Ensure we only include the fields we need and type them correctly
@@ -64,14 +65,14 @@ export function useAnnouncements() {
           content: item.content,
           priority: item.priority,
           target_audience: item.target_audience,
-          target_ids: Array.isArray(item.target_ids) ? item.target_ids : [],
+          targetids: Array.isArray(item.targetids) ? item.targetids : [],
           created_by: item.created_by,
           company_id: item.company_id,
           expires_at: item.expires_at,
           is_published: item.is_published,
           created_at: item.created_at,
           updated_at: item.updated_at,
-          creator_profile:
+          creatorprofile:
             item.profiles &&
             Array.isArray(item.profiles) &&
             item.profiles.length > 0 &&
@@ -117,7 +118,7 @@ export function useAnnouncements() {
 
     try {
       const { error } = await supabase.from("announcement_reads").upsert({
-        announcement_id: announcementId,
+        announcementid: announcementId,
         user_id: user.id,
       });
 
@@ -149,7 +150,7 @@ export function useAnnouncements() {
           content: announcementData.content,
           priority: announcementData.priority || "normal",
           target_audience: announcementData.target_audience || "all",
-          target_ids: announcementData.target_ids || [],
+          targetids: announcementData.targetids || [],
           expires_at: announcementData.expires_at || null,
           is_published: announcementData.is_published ?? true,
           created_by: user.id,

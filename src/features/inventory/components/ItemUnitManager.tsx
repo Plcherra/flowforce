@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Plus, Package, Trash2, Edit } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import {
   useItemUnits,
   useCreateItemUnit,
@@ -42,7 +41,7 @@ export function ItemUnitManager({
 
   const [isAddingUnit, setIsAddingUnit] = useState(false);
   const [newUnitData, setNewUnitData] = useState({
-    unit_id: "",
+    unitid: "",
     unit_level: 1,
     conversion_factor: 1,
     is_primary: false,
@@ -57,12 +56,12 @@ export function ItemUnitManager({
       : 1;
 
   const handleAddUnit = async () => {
-    if (!newUnitData.unit_id) return;
+    if (!newUnitData.unitid) return;
 
     try {
       await createItemUnit.mutateAsync({
         item_id: itemId,
-        unit_id: newUnitData.unit_id,
+        unitid: newUnitData.unitid,
         unit_level: newUnitData.unit_level || nextLevel,
         conversion_factor: newUnitData.conversion_factor,
         is_primary: newUnitData.is_primary,
@@ -73,7 +72,7 @@ export function ItemUnitManager({
       });
 
       setNewUnitData({
-        unit_id: "",
+        unitid: "",
         unit_level: nextLevel + 1,
         conversion_factor: 1,
         is_primary: false,
@@ -173,7 +172,7 @@ export function ItemUnitManager({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {sortedUnits.map((unit, index) => (
+                  {sortedUnits.map((unit, _index) => (
                     <div
                       key={unit.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
@@ -229,11 +228,11 @@ export function ItemUnitManager({
                     <Label htmlFor="unit-type">Unit Type</Label>
                     <select
                       id="unit-type"
-                      value={newUnitData.unit_id}
+                      value={newUnitData.unitid}
                       onChange={(e) =>
                         setNewUnitData((prev) => ({
                           ...prev,
-                          unit_id: e.target.value,
+                          unitid: e.target.value,
                         }))
                       }
                       className="w-full px-3 py-2 border rounded-md"
@@ -242,7 +241,7 @@ export function ItemUnitManager({
                       {availableUnits
                         ?.filter(
                           (unit) =>
-                            !itemUnits.some((iu) => iu.unit_id === unit.id),
+                            !itemUnits.some((iu) => iu.unitid === unit.id),
                         )
                         .map((unit) => (
                           <option key={unit.id} value={unit.id}>
@@ -354,7 +353,7 @@ export function ItemUnitManager({
                   </Button>
                   <Button
                     onClick={handleAddUnit}
-                    disabled={!newUnitData.unit_id || createItemUnit.isPending}
+                    disabled={!newUnitData.unitid || createItemUnit.isPending}
                   >
                     Add Unit Level
                   </Button>

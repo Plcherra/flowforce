@@ -24,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
@@ -147,11 +147,11 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
           ? parseFloat(formData.estimated_hours)
           : null,
         assigned_to: formData.assigned_to ? formData.assigned_to : null,
-        department_id: null,
+        departmentid: null,
         tags: null,
         attachments: [],
         parent_task_id: null,
-        workflow_id: null,
+        workflowid: null,
         actual_hours: null,
         goal_id: formData.goal_id ? formData.goal_id : null,
       };

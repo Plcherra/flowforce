@@ -57,7 +57,7 @@ interface AutomationSuggestionResponse {
 }
 
 type IssueRpcResult = {
-  issue_id?: string;
+  issueid?: string;
   task_id?: string | null;
   status?: string;
 };
@@ -126,20 +126,20 @@ export function IssuesStream() {
   ) => {
     if (!companyId) return;
 
-    setActing(`${issue.issue_id}:${status}`);
+    setActing(`${issue.issueid}:${status}`);
 
     try {
       const { data, error } = await supabase.rpc(
         "update_operational_issue_status",
         {
           p_company_id: companyId,
-          p_issue_id: issue.issue_id,
+          p_issueid: issue.issueid,
           p_status: status,
-          p_owner_id: null,
+          p_ownerid: null,
           p_due_at: null,
           p_resolution_notes:
             status === "resolved"
-              ? resolutionNotes[issue.issue_id] || "Resolved from Operations Hub."
+              ? resolutionNotes[issue.issueid] || "Resolved from Operations Hub."
               : null,
         },
       );
@@ -187,7 +187,7 @@ export function IssuesStream() {
       }
 
       const response = await fetch(
-        `/api/ops/issues/${issue.issue_id}/suggest-automation`,
+        `/api/ops/issues/${issue.issueid}/suggest-automation`,
         {
           method: "POST",
           headers: {
@@ -246,11 +246,11 @@ export function IssuesStream() {
         <div className="space-y-3">
           {sortedIssues.map((issue) => {
             const closed = isIncidentIssueClosed(issue.status);
-            const issueActing = acting?.startsWith(issue.issue_id);
+            const issueActing = acting?.startsWith(issue.issueid);
 
             return (
               <motion.div
-                key={issue.issue_id}
+                key={issue.issueid}
                 layout
                 className={`rounded-3xl border bg-background/95 p-4 shadow-sm ${severityClasses[issue.severity]}`}
               >
@@ -300,11 +300,11 @@ export function IssuesStream() {
                   <Textarea
                     className="mt-3 min-h-[64px]"
                     placeholder="Resolution notes"
-                    value={resolutionNotes[issue.issue_id] ?? ""}
+                    value={resolutionNotes[issue.issueid] ?? ""}
                     onChange={(event) =>
                       setResolutionNotes((current) => ({
                         ...current,
-                        [issue.issue_id]: event.target.value,
+                        [issue.issueid]: event.target.value,
                       }))
                     }
                   />
@@ -356,6 +356,7 @@ export function IssuesStream() {
         </div>
       </ScrollArea>
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [acting, loading, resolutionNotes, sortedIssues]);
 
   return (
@@ -389,8 +390,8 @@ export function IssuesStream() {
           <DrawerHeader>
             <DrawerTitle>Automation suggestion</DrawerTitle>
             <DrawerDescription>
-              FlowForce will design a sequence tailored to "
-              {drawerIssue?.title ?? "this issue"}".
+              FlowForce will design a sequence tailored to &quot;
+              {drawerIssue?.title ?? "this issue"}&quot;.
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">

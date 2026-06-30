@@ -88,7 +88,7 @@ export async function generateAutomationSuggestion({
     .from("ops_automation_suggestions")
     .insert({
       org_id: orgId,
-      issue_id: issueId,
+      issueid: issueId,
       suggestion_title: issue.title,
       suggestion_summary: `Automation for ${issue.issue_type ?? "ops"} (${issue.severity ?? "normal"})`,
       script: parsed,

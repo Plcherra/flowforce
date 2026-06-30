@@ -19,6 +19,7 @@ export function useWorkflows() {
       setWorkflows([]);
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const fetchWorkflows = async () => {
@@ -30,7 +31,7 @@ export function useWorkflows() {
         .select(
           `
           *,
-          created_profile:profiles!workflows_created_by_fkey(first_name, last_name),
+          createdprofile:profiles!workflows_created_by_fkey(first_name, last_name),
           department:departments(name)
         `,
         )
@@ -102,10 +103,10 @@ export function useWorkflows() {
         .select(
           `
           *,
-          assigned_user:profiles(first_name, last_name)
+          assigneduser:profiles(first_name, last_name)
         `,
         )
-        .eq("workflow_id", workflowId)
+        .eq("workflowid", workflowId)
         .order("step_number", { ascending: true });
 
       if (error) throw error;

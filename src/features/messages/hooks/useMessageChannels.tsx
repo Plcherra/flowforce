@@ -40,7 +40,7 @@ export function useMessageChannels() {
   // This prevents errors when "demo-company" or other non-UUID values are used
   const companyId = isValidUUID(rawCompanyId) ? rawCompanyId : null;
   
-  const queryKey = ["message_channels", userId, companyId];
+  const _queryKey = ["message_channels", userId, companyId];
 
   // Only fetch when user is authenticated
   const enabled = !!session?.user;

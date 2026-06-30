@@ -114,7 +114,7 @@ export function AvailabilityRequestForm({
     toISODate(getDateForOffset(weekStart, 6)),
   );
 
-  const { data: lockInfo, isLoading: lockInfoLoading, error: lockInfoError } = useQuery<LockInfo>({
+  const { data: lockInfo, isLoading: _lockInfoLoading, error: _lockInfoError } = useQuery<LockInfo>({
     queryKey: ["availability-lock-info", orgId, weekStart],
     queryFn: async () => {
       const { data: prefData, error: prefError } = await supabase
@@ -313,7 +313,7 @@ export function AvailabilityRequestForm({
     return Object.values(allowMap).some(Boolean);
   }, [lockInfo, allowMap]);
 
-  const locked = useMemo(() => {
+  const _locked = useMemo(() => {
     if (!lockInfo) return false;
     if (lockInfo.state === "open") return false;
     if (lockInfo.state === "locked") return true;
@@ -401,14 +401,14 @@ export function AvailabilityRequestForm({
         .single();
       if (error || !data) throw error ?? new Error("Unable to create request");
       // Type assertion for data since table is not in generated types
-      const insertData = data as { id: string };
+      const _insertData = data as { id: string };
 
       // TODO: Regenerate Supabase types to include audit_log table
       await supabase.from("audit_log" as any).insert({
-        actor_id: employeeId,
+        actorid: employeeId,
         action: "availability.request.submitted",
         entity: "availability_request",
-        entity_id: payload.employee_id,
+        entityid: payload.employee_id,
         meta: payload.payload,
       });
 

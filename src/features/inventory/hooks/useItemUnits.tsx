@@ -10,7 +10,7 @@ export interface EnhancedInventoryItem {
   sku?: string;
   category?: string;
   company_id: string;
-  unit_id: string;
+  unitid: string;
   unit_quantity?: number;
   min_stock_level?: number;
   max_stock_level?: number;
@@ -18,7 +18,7 @@ export interface EnhancedInventoryItem {
   preferred_supplier_id?: string;
   default_location_id?: string;
   shelf_life_days?: number;
-  is_prep_item?: boolean;
+  isprep_item?: boolean;
   is_active: boolean;
   created_by: string;
   created_at: string;
@@ -124,7 +124,7 @@ export function useCreateItemUnit() {
     mutationFn: async (
       unitData: Omit<InventoryItemUnit, "id" | "unit"> & {
         item_id: string;
-        unit_id: string;
+        unitid: string;
       },
     ) => {
       const { data, error } = await supabase

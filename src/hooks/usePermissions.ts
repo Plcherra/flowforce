@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "./useProfile";
 import { useCompanyRoles } from "./useCompanyRoles";
@@ -153,7 +152,7 @@ const SUPPORTED_PERMISSION_KEYS = [
     description: "Allow this role to assign and update team roles.",
   },
   {
-    key: "assign_permissions",
+    key: "assignpermissions",
     label: "Assign Permissions",
     description: "Allow this role to modify company permission presets.",
   },

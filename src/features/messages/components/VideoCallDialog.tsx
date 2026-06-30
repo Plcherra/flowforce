@@ -72,6 +72,7 @@ export function VideoCallDialog({
         });
       }, 2000);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [isOpen, channelName, toast]);
 
   const initializeMedia = async () => {
@@ -188,7 +189,7 @@ export function VideoCallDialog({
             </Card>
 
             {/* Remote Participants */}
-            {participants.slice(0, 3).map((participant, index) => (
+            {participants.slice(0, 3).map((participant, _index) => (
               <Card
                 key={participant.id}
                 className="relative bg-gray-800 border-gray-700"

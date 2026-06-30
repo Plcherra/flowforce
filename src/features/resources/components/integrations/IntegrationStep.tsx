@@ -1,4 +1,3 @@
-import { CheckCircle } from "lucide-react";
 
 interface IntegrationStepProps {
   step: string;

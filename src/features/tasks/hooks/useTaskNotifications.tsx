@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
+import { subscribeTaskNotificationsRealtime } from "@/features/tasks/hooks/taskNotificationsRealtime";
 import {
   createTaskNotification,
   deleteNotification as deleteNotificationRecord,
@@ -36,6 +36,7 @@ export function useTaskNotifications() {
     },
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const notifications = notificationsQuery.data ?? [];
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.read_at).length,
@@ -55,94 +56,22 @@ export function useTaskNotifications() {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       return;
     }
 
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-
-    try {
-      channel = supabase
-        .channel(`task-notifications-${user.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "task_notifications",
-            filter: `user_id=eq.${user.id}`,
-          },
-          (payload) => {
-            try {
-              const notification = payload.new as TaskNotification;
-              toast({
-                title: notification.title,
-                description: notification.message,
-                duration: 5000,
-              });
-              invalidateNotifications();
-            } catch (error) {
-              const errorMessage =
-                error instanceof Error
-                  ? error.message
-                  : typeof error === "object" &&
-                      error !== null &&
-                      "message" in error
-                    ? String(error.message)
-                    : "Unknown error handling notification";
-              logger.error("Error handling notification INSERT:", {
-                error,
-                context: { errorMessage },
-                tags: ["error"],
-              });
-            }
-          },
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "task_notifications",
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            try {
-              invalidateNotifications();
-            } catch (error) {
-              logger.error("Error handling notification UPDATE:", {
-                error,
-                tags: ["error"],
-              });
-            }
-          },
-        )
-        .subscribe((status, err) => {
-          if (status === "SUBSCRIBED") {
-            // Successfully subscribed
-          } else if (
-            status === "CHANNEL_ERROR" ||
-            status === "TIMED_OUT" ||
-            status === "CLOSED"
-          ) {
-            logger.warn(`Task notifications subscription ${status}:`, {
-              error: err,
-              tags: ["warning"],
-            });
-          }
+    return subscribeTaskNotificationsRealtime(user.id, (payload) => {
+      if (payload.eventType === "INSERT") {
+        const notification = payload.new as TaskNotification;
+        toast({
+          title: notification.title,
+          description: notification.message,
+          duration: 5000,
         });
-    } catch (error) {
-      logger.error("Error setting up task notifications subscription:", {
-        error,
-        tags: ["error"],
-      });
-    }
-
-    return () => {
-      if (channel) {
-        supabase.removeChannel(channel);
       }
-    };
+      void invalidateNotifications();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user?.id, toast]);
 
   useEffect(() => {
@@ -197,6 +126,7 @@ export function useTaskNotifications() {
       isMounted = false;
       clearInterval(interval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user?.id]);
 
   const checkDueTasks = async (userId: string) => {

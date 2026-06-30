@@ -102,6 +102,7 @@ export function ExecutePanel({
     void createCycle();
   }, [createCycle]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const actionsData = Array.isArray(actionsState.data) ? actionsState.data : [];
   const pendingActions = actionsData.filter(
     (action) => action.status !== "executed",

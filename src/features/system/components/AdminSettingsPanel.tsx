@@ -512,7 +512,7 @@ export function AdminSettingsPanel() {
                       {entry.action}
                     </TableCell>
                     <TableCell>
-                      {entry.performed_by_profile?.email ??
+                      {entry.performed_byprofile?.email ??
                         entry.performed_by ??
                         "Unknown"}
                     </TableCell>

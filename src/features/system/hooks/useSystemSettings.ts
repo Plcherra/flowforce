@@ -179,7 +179,7 @@ export function useSystemSettings(
     setMissingCompany(false);
     setFetching(true);
     try {
-      const { data: row, error: fetchError } = await supabase
+      const { data: row, error: _fetchError } = await supabase
         .from("system_settings" as any)
         .select("*")
         .eq("company_id", companyId)
@@ -301,7 +301,7 @@ export function useSystemSettings(
         const { data: created, error: createError } = await supabase.rpc(
           "create_company_with_setup",
           {
-            company_data: {
+            companydata: {
               name: "Demo Workspace",
               industry: null,
               size: null,
@@ -316,8 +316,8 @@ export function useSystemSettings(
               template_config: JSON.stringify({}),
             },
             custom_roles: [],
-            positions_data: [],
-            owner_user_id: user.id,
+            positionsdata: [],
+            owneruser_id: user.id,
           },
         );
 

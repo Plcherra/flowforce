@@ -73,7 +73,7 @@ export default function RoleConfigurationTab() {
           Access Denied
         </h3>
         <p className="text-sm text-gray-500">
-          You don't have permission to manage roles.
+          You don&apos;t have permission to manage roles.
         </p>
       </div>
     );

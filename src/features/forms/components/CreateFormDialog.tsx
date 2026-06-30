@@ -427,7 +427,7 @@ export default function CreateFormDialog({
         const formData = {
           title,
           description: description || undefined,
-          department_id: undefined,
+          departmentid: undefined,
           is_anonymous: false,
         };
 

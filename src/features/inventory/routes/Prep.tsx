@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,7 +55,7 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function PrepParPage() {
-  const { data: inventoryItems = [] } = useInventoryItems();
+  const { data: _inventoryItems = [] } = useInventoryItems();
   const { toast } = useToast();
 
   // Mock prep items since the real structure doesn't match the old interface
@@ -343,7 +343,7 @@ export default function PrepParPage() {
             <div className="p-4 bg-muted/50 rounded-lg border">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                  <h3 className="font-semibold">Today's Prep Summary</h3>
+                  <h3 className="font-semibold">Today&apos;s Prep Summary</h3>
                   <p className="text-sm text-muted-foreground">
                     {completedCount} of {mockPrepItems.length} prep items
                     completed

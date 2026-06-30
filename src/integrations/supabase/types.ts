@@ -179,7 +179,7 @@ export type Database = {
           old_values: Json | null
           record_id: string | null
           table_name: string | null
-          target_user_id: string | null
+          targetuser_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -193,7 +193,7 @@ export type Database = {
           old_values?: Json | null
           record_id?: string | null
           table_name?: string | null
-          target_user_id?: string | null
+          targetuser_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -207,7 +207,7 @@ export type Database = {
           old_values?: Json | null
           record_id?: string | null
           table_name?: string | null
-          target_user_id?: string | null
+          targetuser_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1042,7 +1042,7 @@ export type Database = {
       }
       copilot_action_events: {
         Row: {
-          actor_user_id: string | null
+          actoruser_id: string | null
           company_id: string | null
           copilot_action_id: string | null
           created_at: string | null
@@ -1056,7 +1056,7 @@ export type Database = {
           status: string | null
         }
         Insert: {
-          actor_user_id?: string | null
+          actoruser_id?: string | null
           company_id?: string | null
           copilot_action_id?: string | null
           created_at?: string | null
@@ -1070,7 +1070,7 @@ export type Database = {
           status?: string | null
         }
         Update: {
-          actor_user_id?: string | null
+          actoruser_id?: string | null
           company_id?: string | null
           copilot_action_id?: string | null
           created_at?: string | null
@@ -1089,7 +1089,7 @@ export type Database = {
         Row: {
           action_type: string | null
           actor_role: string | null
-          actor_user_id: string | null
+          actoruser_id: string | null
           approved_at: string | null
           approved_by: string | null
           company_id: string | null
@@ -1116,7 +1116,7 @@ export type Database = {
         Insert: {
           action_type?: string | null
           actor_role?: string | null
-          actor_user_id?: string | null
+          actoruser_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           company_id?: string | null
@@ -1143,7 +1143,7 @@ export type Database = {
         Update: {
           action_type?: string | null
           actor_role?: string | null
-          actor_user_id?: string | null
+          actoruser_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           company_id?: string | null
@@ -1907,7 +1907,7 @@ export type Database = {
           field_id: string | null
           id: string
           scan_data: string | null
-          scan_format: string | null
+          scanformat: string | null
           scan_type: string | null
           submission_id: string | null
         }
@@ -1916,7 +1916,7 @@ export type Database = {
           field_id?: string | null
           id?: string
           scan_data?: string | null
-          scan_format?: string | null
+          scanformat?: string | null
           scan_type?: string | null
           submission_id?: string | null
         }
@@ -1925,7 +1925,7 @@ export type Database = {
           field_id?: string | null
           id?: string
           scan_data?: string | null
-          scan_format?: string | null
+          scanformat?: string | null
           scan_type?: string | null
           submission_id?: string | null
         }
@@ -2098,7 +2098,7 @@ export type Database = {
       }
       form_submission_reviewers: {
         Row: {
-          assigned_user_id: string | null
+          assigneduser_id: string | null
           created_at: string | null
           id: string
           note: string | null
@@ -2107,7 +2107,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          assigned_user_id?: string | null
+          assigneduser_id?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
@@ -2116,7 +2116,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          assigned_user_id?: string | null
+          assigneduser_id?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
@@ -2975,7 +2975,7 @@ export type Database = {
         }
         Relationships: []
       }
-      inv_par_profiles: {
+      inv_parprofiles: {
         Row: {
           created_at: string | null
           created_by: string | null
@@ -5002,7 +5002,7 @@ export type Database = {
         }
         Relationships: []
       }
-      role_permissions: {
+      rolepermissions: {
         Row: {
           created_at: string | null
           id: string
@@ -5258,7 +5258,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           default_pages: Json | null
-          default_permissions: Json | null
+          defaultpermissions: Json | null
           description: string | null
           icon: string | null
           id: string
@@ -5272,7 +5272,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           default_pages?: Json | null
-          default_permissions?: Json | null
+          defaultpermissions?: Json | null
           description?: string | null
           icon?: string | null
           id?: string
@@ -5286,7 +5286,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           default_pages?: Json | null
-          default_permissions?: Json | null
+          defaultpermissions?: Json | null
           description?: string | null
           icon?: string | null
           id?: string
@@ -5330,11 +5330,11 @@ export type Database = {
           created_at: string | null
           id: string
           reason: string | null
-          requesting_user_id: string | null
+          requestinguser_id: string | null
           schedule_id: string | null
           status: string | null
           swap_type: string | null
-          target_user_id: string | null
+          targetuser_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -5343,11 +5343,11 @@ export type Database = {
           created_at?: string | null
           id?: string
           reason?: string | null
-          requesting_user_id?: string | null
+          requestinguser_id?: string | null
           schedule_id?: string | null
           status?: string | null
           swap_type?: string | null
-          target_user_id?: string | null
+          targetuser_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -5356,11 +5356,11 @@ export type Database = {
           created_at?: string | null
           id?: string
           reason?: string | null
-          requesting_user_id?: string | null
+          requestinguser_id?: string | null
           schedule_id?: string | null
           status?: string | null
           swap_type?: string | null
-          target_user_id?: string | null
+          targetuser_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -6093,7 +6093,7 @@ export type Database = {
         }
         Relationships: []
       }
-      user_permissions: {
+      userpermissions: {
         Row: {
           created_at: string | null
           created_by: string | null
@@ -6387,7 +6387,7 @@ export type Database = {
       workflow_steps: {
         Row: {
           assigned_role: string | null
-          assigned_user_id: string | null
+          assigneduser_id: string | null
           auto_assign: boolean | null
           conditions: Json | null
           created_at: string | null
@@ -6403,7 +6403,7 @@ export type Database = {
         }
         Insert: {
           assigned_role?: string | null
-          assigned_user_id?: string | null
+          assigneduser_id?: string | null
           auto_assign?: boolean | null
           conditions?: Json | null
           created_at?: string | null
@@ -6419,7 +6419,7 @@ export type Database = {
         }
         Update: {
           assigned_role?: string | null
-          assigned_user_id?: string | null
+          assigneduser_id?: string | null
           auto_assign?: boolean | null
           conditions?: Json | null
           created_at?: string | null
@@ -6523,7 +6523,7 @@ export type Database = {
         Row: {
           award_rule: string | null
           awarded_at: string | null
-          badge_description: string | null
+          badgedescription: string | null
           badge_icon_url: string | null
           badge_id: string | null
           badge_name: string | null
@@ -6604,13 +6604,13 @@ export type Database = {
         Args: {
           company_data: Json
           custom_roles?: Json
-          owner_user_id?: string
+          owneruser_id?: string
           positions_data?: Json
         }
         Returns: string
       }
-      current_user_company_ids: { Args: never; Returns: string[] }
-      current_user_is_company_admin: {
+      currentuser_company_ids: { Args: never; Returns: string[] }
+      currentuser_is_company_admin: {
         Args: { target_company_id: string }
         Returns: boolean
       }
@@ -6659,7 +6659,7 @@ export type Database = {
           previous_values?: Json
           target_record_id?: string
           target_table?: string
-          target_user_id?: string
+          targetuser_id?: string
         }
         Returns: undefined
       }

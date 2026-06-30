@@ -228,7 +228,7 @@ export const mobileCoreWorkflowChecks = [
   "staff_workflows_have_one_tap_entry_points",
   "manager_quick_actions_are_defined",
   "touch_targets_are_covered_by_visible_module_smoke",
-  "forms_and_counts_are_identified_as_field_execution_workflows",
+  "forms_and_counts_areidentified_as_field_execution_workflows",
 ] as const;
 
 export function getMobileCoreWorkflowById(id: MobileCoreWorkflowId) {

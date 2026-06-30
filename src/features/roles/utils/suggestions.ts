@@ -3,7 +3,6 @@
  */
 
 import type { RoleKey, ModuleId, Suggestion } from "../types/permissions";
-import { ROLE_MODULES } from "../constants/modules";
 import { ROLE_ORDER } from "../constants/roles";
 
 interface AssignmentInfo {

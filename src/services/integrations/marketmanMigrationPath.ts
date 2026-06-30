@@ -184,7 +184,7 @@ export const marketManMigrationDataObjects: MarketManMigrationDataObject[] = [
   {
     key: "waste",
     label: "Waste",
-    flowforceTarget: "inv_waste and cost_waste_daily_v",
+    flowforceTarget: "invwaste and costwaste_daily_v",
     notes:
       "Waste quantities must convert into item base units and use item cost basis for cost impact.",
   },

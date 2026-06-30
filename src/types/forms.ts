@@ -84,7 +84,7 @@ export interface LocationData {
 
 // Signature data interface
 export interface SignatureData {
-  signature_data: string; // Base64 encoded
+  signaturedata: string; // Base64 encoded
   signature_url?: string;
   signature_bucket?: string;
   signature_path?: string;
@@ -101,9 +101,9 @@ export interface RatingData {
 
 // Scanner data interface
 export interface ScanData {
-  scan_data: string;
+  scandata: string;
   scan_type: "barcode" | "qr_code";
-  scan_format?: string;
+  scanformat?: string;
 }
 
 export interface FormData {
@@ -123,10 +123,10 @@ export interface FormSubmission {
   data: Record<string, any>;
   created_at: string;
   // Enhanced submission data for complex field types
-  location_data?: Record<string, LocationData>;
-  signature_data?: Record<string, SignatureData>;
-  rating_data?: Record<string, RatingData>;
-  scan_data?: Record<string, ScanData>;
+  locationdata?: Record<string, LocationData>;
+  signaturedata?: Record<string, SignatureData>;
+  ratingdata?: Record<string, RatingData>;
+  scandata?: Record<string, ScanData>;
 }
 
 export interface CreateFormRequest {
@@ -152,8 +152,8 @@ export interface FormFieldTemplate {
 // Enhanced form submission with file attachments
 export interface FormSubmissionFile {
   id: string;
-  field_id: string;
-  submission_id: string;
+  fieldid: string;
+  submissionid: string;
   file_name: string;
   file_type: string;
   file_size: number;

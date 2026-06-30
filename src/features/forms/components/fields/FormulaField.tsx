@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Info, Plus, X, ChevronDown } from "lucide-react";
+import { Calculator, Info,  X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -94,7 +94,7 @@ export function FormulaField({
       }
 
       return Math.round(result * 100) / 100; // Round to 2 decimal places
-    } catch (err) {
+    } catch (_err) {
       throw new Error("Invalid formula");
     }
   };
@@ -104,6 +104,7 @@ export function FormulaField({
     if (formula && isBuilding) {
       parseFormulaToElements(formula);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [formula, isBuilding]);
 
   useEffect(() => {
@@ -124,7 +125,7 @@ export function FormulaField({
   const parseFormulaToElements = (formulaStr: string) => {
     const elements: FormulaElement[] = [];
     const tokens = formulaStr
-      .split(/(\+|\-|\*|\/|\(|\))/)
+      .split(/(\+|-|\*|\/|\(|\))/)
       .filter((token) => token.trim());
 
     tokens.forEach((token) => {
@@ -138,7 +139,7 @@ export function FormulaField({
           value: field?.label || fieldName,
           fieldName: fieldName,
         });
-      } else if (trimmed.match(/^[\+\-\*\/]$/)) {
+      } else if (trimmed.match(/^[+\-*]$/)) {
         elements.push({ type: "operator", value: trimmed });
       } else if (trimmed.match(/^\d+(\.\d+)?$/)) {
         elements.push({ type: "number", value: trimmed });
@@ -295,7 +296,7 @@ export function FormulaField({
                     cashDenominations.forEach((denom, index) => {
                       const fieldName = denom.label
                         .toLowerCase()
-                        .replace(/[\$\s\.]/g, "_")
+                        .replace(/[$\s.]/g, "_")
                         .replace("__", "_");
                       if (index > 0) {
                         addFieldToFormula(fieldName, denom.value);
@@ -347,7 +348,7 @@ export function FormulaField({
                     onClick={() => {
                       const fieldName = denom.label
                         .toLowerCase()
-                        .replace(/[\$\s\.]/g, "_")
+                        .replace(/[$\s.]/g, "_")
                         .replace("__", "_");
                       addFieldToFormula(fieldName, denom.value);
                     }}

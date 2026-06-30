@@ -63,7 +63,7 @@ export default function CreateUpdateDialog({
         category: "",
         isPinned: false,
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to create update. Please try again.",

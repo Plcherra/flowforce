@@ -122,7 +122,7 @@ const supervisorScore = (
   return storeLoad * 2 + otherLoad + state.hours * 0.1 + locationPenalty;
 };
 
-const standardScore = (state: EmployeeState, store: string) => {
+const _standardScore = (state: EmployeeState, store: string) => {
   const storeHours = state.hoursByStore[store] ?? 0;
   const storePenalty =
     state.employee.homeStore && state.employee.homeStore !== store ? 2 : 0;

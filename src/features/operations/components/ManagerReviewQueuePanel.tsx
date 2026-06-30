@@ -92,7 +92,7 @@ export function ManagerReviewQueuePanel() {
     try {
       const { data, error } = await supabase.rpc("review_workflow_run", {
         p_company_id: companyId,
-        p_workflow_instance_id: workflowInstanceId,
+        p_workflow_instanceid: workflowInstanceId,
         p_review_status: reviewStatus,
         p_comments:
           reviewStatus === "approved"
@@ -166,7 +166,7 @@ export function ManagerReviewQueuePanel() {
         ) : sortedRows.length ? (
           sortedRows.slice(0, 4).map((row) => (
             <div
-              key={row.workflow_instance_id}
+              key={row.workflow_instanceid}
               className="rounded-2xl border bg-muted/30 p-3"
             >
               <div className="flex items-start justify-between gap-3">
@@ -194,11 +194,11 @@ export function ManagerReviewQueuePanel() {
                 <Button
                   size="sm"
                   onClick={() =>
-                    handleReview(row.workflow_instance_id, "approved")
+                    handleReview(row.workflow_instanceid, "approved")
                   }
                   disabled={reviewingId !== null}
                 >
-                  {reviewingId === `${row.workflow_instance_id}:approved` ? (
+                  {reviewingId === `${row.workflow_instanceid}:approved` ? (
                     <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
@@ -209,7 +209,7 @@ export function ManagerReviewQueuePanel() {
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    handleReview(row.workflow_instance_id, "needs_changes")
+                    handleReview(row.workflow_instanceid, "needs_changes")
                   }
                   disabled={reviewingId !== null}
                 >
@@ -220,7 +220,7 @@ export function ManagerReviewQueuePanel() {
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    handleReview(row.workflow_instance_id, "rejected")
+                    handleReview(row.workflow_instanceid, "rejected")
                   }
                   disabled={reviewingId !== null}
                 >

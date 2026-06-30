@@ -3,7 +3,7 @@
  */
 
 import { format } from "date-fns";
-import { Calendar, User, Flag, Target, MessageSquare } from "lucide-react";
+import { Calendar, User, Flag, Target } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -82,12 +82,12 @@ export function TaskCard({
       <CardContent>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex flex-wrap items-center gap-4">
-            {task.assigned_profile && (
+            {task.assignedprofile && (
               <div className="flex items-center gap-1">
                 <User className="h-4 w-4" />
                 <span>
-                  {task.assigned_profile.first_name}{" "}
-                  {task.assigned_profile.last_name}
+                  {task.assignedprofile.first_name}{" "}
+                  {task.assignedprofile.last_name}
                 </span>
               </div>
             )}

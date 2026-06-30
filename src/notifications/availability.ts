@@ -2,15 +2,7 @@ import dayjs from "dayjs";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
 
-interface ProfileSummary {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-}
-
-const sendEmail = async (to: string[], subject: string, body: string) => {
-  logger.info("[notify][email]", {
+const sendEmail = async (to: string[], subject: string, body: string) => {  logger.info("[notify][email]", {
     context: { to, subject, body },
     tags: ["info"],
   });

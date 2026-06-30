@@ -103,7 +103,7 @@ const leaderboardEmployeeSchema = z
 
 export const LEADERBOARD_SELECT = `
     employee_id,
-    department_id,
+    departmentid,
     role,
     period,
     period_start,
@@ -119,7 +119,7 @@ export const LEADERBOARD_SELECT = `
     challenges,
     updated_at,
     last_synced_at,
-    department:departments!gamification_leaderboard_department_id_fkey(
+    department:departments!gamification_leaderboard_departmentid_fkey(
       id,
       name
     ),
@@ -144,7 +144,7 @@ export const LEADERBOARD_SELECT = `
 
 const leaderboardRowSchema = z.object({
   employee_id: z.string(),
-  department_id: stringOrNullSchema,
+  departmentid: stringOrNullSchema,
   role: z.string().nullable(),
   period: z.enum(["weekly", "monthly", "all_time"]),
   period_start: stringOrNullSchema,
@@ -189,7 +189,7 @@ const leaderboardProfileSchema = z
     avatar_url: stringOrNullSchema,
     role: stringOrNullSchema,
     employment_status: stringOrNullSchema,
-    department_id: stringOrNullSchema,
+    departmentid: stringOrNullSchema,
     department: leaderboardDepartmentSchema,
     position: leaderboardPositionSchema,
   })
@@ -236,7 +236,7 @@ export async function fetchLeaderboardProfiles(params: {
         avatar_url,
         role,
         employment_status,
-        department_id,
+        departmentid,
         department:departments(
           id,
           name

@@ -42,7 +42,7 @@ export function EmployeeDrawer({
   const [activeTab, setActiveTab] = useState<EmployeeDrawerTab>("profile");
   const canManageAccess = usePermission("manage_roles");
   const canInvite = usePermission("invite_employees");
-  const canManageRoles = usePermission("assign_permissions");
+  const canManageRoles = usePermission("assignpermissions");
 
   const hasEmployee = !!employee;
   const employeeId = employee?.id ?? null;

@@ -51,7 +51,7 @@ const getAuthHeaders = async () => {
   } = await supabase.auth.getSession();
   const token = session?.access_token ?? SUPABASE_ANON_KEY;
   return {
-    apikey: SUPABASE_ANON_KEY,
+    api_key: SUPABASE_ANON_KEY,
     Authorization: `Bearer ${token}`,
   };
 };

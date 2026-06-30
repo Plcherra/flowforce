@@ -40,7 +40,7 @@ export async function upsertVendorEvent(payload: VendorEventInput) {
     event_date,
     start_time,
     end_time,
-    shift_id,
+    _shift_id,
     notes,
     location_id,
     ...rest
@@ -92,7 +92,7 @@ export async function upsertVendorEvent(payload: VendorEventInput) {
     .single();
 }
 
-export async function linkToShift(eventId: string, shiftId: string | null) {
+export async function linkToShift(_eventId: string, _shiftId: string | null) {
   // Note: vendor_visits doesn't have shift_id field
   // If you need to link vendor visits to shifts, consider using linked_event_id
   // to link to a calendar_event that references the shift

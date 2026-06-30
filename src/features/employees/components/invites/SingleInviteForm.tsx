@@ -2,7 +2,6 @@
  * Single invite form component
  */
 
-import { useState } from "react";
 import { CheckCircle2, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { SingleInviteForm } from "../../types/invites";
-import { DEFAULT_SINGLE_INVITE } from "../../types/invites";
-import { buildInviteLink } from "../../utils/inviteHelpers";
 
 interface SingleInviteFormProps {
   form: SingleInviteForm;

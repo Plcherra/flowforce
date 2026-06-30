@@ -9,7 +9,7 @@ export interface InventoryWaste {
   item_id: string;
   location_id?: string;
   quantity: number;
-  unit_id?: string;
+  unitid?: string;
   waste_type:
     | "spoilage"
     | "prep_error"
@@ -19,7 +19,7 @@ export interface InventoryWaste {
     | "damaged"
     | "other";
   reason?: string;
-  reason_category?: string | null;
+  reasoncategory?: string | null;
   cost_impact?: number;
   shift_id?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -48,7 +48,7 @@ export interface CreateWasteData {
   item_id: string;
   location_id?: string;
   quantity: number;
-  unit_id?: string;
+  unitid?: string;
   waste_type:
     | "spoilage"
     | "prep_error"

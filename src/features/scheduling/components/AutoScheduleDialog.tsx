@@ -30,17 +30,6 @@ interface AutoScheduleDialogProps {
   companyId?: string;
 }
 
-function formatCoverage(
-  coverage: Record<
-    string,
-    { required: number; assigned: number; ratio: number }
-  >,
-) {
-  return Object.entries(coverage)
-    .map(([key, value]) => ({ key, ...value }))
-    .sort((a, b) => a.key.localeCompare(b.key));
-}
-
 export function AutoScheduleDialog({
   open,
   onOpenChange,

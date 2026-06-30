@@ -92,7 +92,7 @@ export function usePermissionAudit() {
           context: {
             old_value: oldValue,
             new_value: newValue,
-            target_user_id: targetUserId,
+            targetuser_id: targetUserId,
           },
           timestamp: new Date().toISOString(),
         };

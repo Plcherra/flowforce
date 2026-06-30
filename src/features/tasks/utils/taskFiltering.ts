@@ -11,7 +11,7 @@ interface Task {
   status?: string | null;
   priority?: string | null;
   goal?: { title?: string | null } | null;
-  assigned_profile?: {
+  assignedprofile?: {
     first_name?: string | null;
     last_name?: string | null;
   } | null;
@@ -47,7 +47,7 @@ export function filterTasks(
           : normalizedPriority === priorityFilter;
 
     const matchesSearch = search
-      ? `${task.title ?? ""} ${task.description ?? ""} ${task.goal?.title ?? ""} ${task.assigned_profile ? `${task.assigned_profile.first_name} ${task.assigned_profile.last_name}` : ""}`
+      ? `${task.title ?? ""} ${task.description ?? ""} ${task.goal?.title ?? ""} ${task.assignedprofile ? `${task.assignedprofile.first_name} ${task.assignedprofile.last_name}` : ""}`
           .toLowerCase()
           .includes(search)
       : true;

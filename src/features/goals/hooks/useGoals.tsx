@@ -58,7 +58,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
   const ownerIds = Array.from(
     new Set(
       rows
-        .map((goal) => goal.owner_id ?? goal.created_by)
+        .map((goal) => goal.ownerid ?? goal.created_by)
         .filter((value): value is string => Boolean(value)),
     ),
   );
@@ -126,7 +126,7 @@ async function fetchGoals(companyId: string): Promise<Goal[]> {
   }
 
   return rows.map((goal) => {
-    const ownerId = goal.owner_id ?? goal.created_by ?? null;
+    const ownerId = goal.ownerid ?? goal.created_by ?? null;
     const goalTasks = goalTasksMap.get(goal.id) ?? [];
     const recognitionList = recognitionsMap.get(goal.id) ?? [];
 
@@ -304,7 +304,7 @@ export function useGoals() {
 
       return id;
     },
-    onSuccess: (_id, variables) => {
+    onSuccess: (id, variables) => {
       void queryClient.invalidateQueries({
         queryKey: goalsQueryKey(companyId),
       });

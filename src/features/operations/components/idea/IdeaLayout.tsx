@@ -7,7 +7,7 @@ import { useIdeaDiagnostics } from "../../hooks/useIdeaDiagnostics";
 import { useIdeaActions } from "../../hooks/useIdeaActions";
 import { useIdeaAssessments } from "../../hooks/useIdeaAssessments";
 import IDEAHeader from "@/features/operations/components/idea/IDEAHeader";
-import { Suspense, lazy, useMemo } from "react";
+import { Suspense, lazy } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const IdentifyPanel = lazy(

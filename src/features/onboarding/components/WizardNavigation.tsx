@@ -18,7 +18,7 @@ export default function WizardNavigation({
   currentStep,
   totalSteps,
   canProceed,
-  isLastStep = false,
+  isLastStep: isLastStep = false,
   isCreatingAccount = false,
   onBack,
   onNext,

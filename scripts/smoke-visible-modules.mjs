@@ -110,7 +110,7 @@ function shouldIgnoreConsole(text) {
 
 function redactDiagnosticText(value) {
   return String(value)
-    .replace(/([?&]apikey=)[^&\s"'`]+/gi, "$1[redacted]")
+    .replace(/([?&]api_key=)[^&\s"'`]+/gi, "$1[redacted]")
     .replace(/([?&]access_token=)[^&\s"'`]+/gi, "$1[redacted]")
     .replace(/(Bearer\s+)[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "$1[redacted]")
     .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, "[redacted-jwt]");

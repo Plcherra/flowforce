@@ -70,7 +70,7 @@ export default function ItemsSetup() {
 
     const matchesCategory =
       selectedCategory === "all" ||
-      item.category_id === selectedCategory ||
+      item.categoryid === selectedCategory ||
       item.category === selectedCategory;
 
     return matchesSearch && matchesCategory;

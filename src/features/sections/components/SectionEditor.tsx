@@ -17,8 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -150,7 +148,7 @@ export default function SectionEditor({
         icon: template.icon,
         category: template.category,
         path: `/${template.name.toLowerCase().replace(/\s+/g, "-")}`,
-        permissions: template.default_permissions,
+        permissions: template.defaultpermissions,
         is_active: true,
         template_config: template.config,
       });

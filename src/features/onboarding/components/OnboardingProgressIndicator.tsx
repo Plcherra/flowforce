@@ -17,7 +17,7 @@ export const OnboardingProgressIndicator = memo(
     totalSteps,
     completionProgress,
     enabledSectionCount,
-    totalSections,
+    _totalSections,
     hasRequiredRoles,
   }: OnboardingProgressIndicatorProps) {
     const getProgressIcon = () => {

@@ -167,7 +167,7 @@ export async function uploadReportFile(
     .from("files")
     .insert({
       company_id: companyId,
-      uploader_id: userId,
+      uploaderid: userId,
       filename: file.name,
       mime_type: file.type || null,
       file_size: file.size,
@@ -187,7 +187,7 @@ export async function uploadReportFile(
     .from("documents")
     .insert({
       company_id: companyId,
-      file_id: fileRow.id,
+      fileid: fileRow.id,
       title: file.name,
       doc_date: toDateString(docDate),
       source: source ?? "uploaded-report",
@@ -322,7 +322,7 @@ export async function persistExtractedEvents(
   }
 
   const mapped = events.map((event) => ({
-    document_id: documentId,
+    documentid: documentId,
     company_id: companyId,
     event_type: event.event_type,
     severity: event.severity ?? "medium",

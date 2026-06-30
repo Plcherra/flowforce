@@ -13,9 +13,9 @@ export interface RecognitionDetails {
   icon?: string;
   source: RecognitionSourceType;
   goal_id?: string | null;
-  milestone_id?: string | null;
+  milestoneid?: string | null;
   task_id?: string | null;
-  training_assignment_id?: string | null;
+  training_assignmentid?: string | null;
   onboarding_step?: string | null;
   xp_awarded?: number | null;
   metadata?: Record<string, unknown>;

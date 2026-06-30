@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from "react";
-import { useNavigate } from "@/lib/router-adapter";
+import { useLocation, useNavigate } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
+import { buildMobileAuthRedirectPath } from "@/services/mobile/mobileAuthRouting";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,12 +10,17 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const userId = user?.id ?? null;
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
+    if (!loading && !userId) {
+      navigate(
+        buildMobileAuthRedirectPath(location.pathname, location.search),
+        { replace: true },
+      );
     }
-  }, [user, loading, navigate]);
+  }, [userId, loading, navigate, location.pathname, location.search]);
 
   if (loading) {
     return (
@@ -24,7 +30,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
+  if (!userId) {
     return null;
   }
 

@@ -2,7 +2,6 @@
  * Utility functions for hours and coverage calculations
  */
 
-import { parseISO } from "date-fns";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { AssignmentWithUser } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 

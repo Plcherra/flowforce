@@ -105,7 +105,7 @@ export function CompanyUpdateWizard({
       onComplete?.(draft.formData);
       onOpenChange(false);
       draft.reset();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Unable to publish",
         description: "We could not publish the update. Please try again.",

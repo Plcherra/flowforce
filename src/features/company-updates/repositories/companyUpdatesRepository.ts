@@ -92,7 +92,7 @@ const engagementSchema = z.object({
 
 const engagementRowSchema = z.object({
   id: z.string(),
-  update_id: z.string(),
+  updateid: z.string(),
   company_id: z.string(),
   likes_count: z.number().nullable().optional(),
   comments_count: z.number().nullable().optional(),
@@ -131,18 +131,18 @@ const companyUpdateRowSchema = z.object({
   created_by: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
-  author_profile: profileSchema,
+  authorprofile: profileSchema,
   company_update_engagement: z.array(engagementSchema).optional().nullable(),
 });
 
 const reactionRowSchema = z.object({
-  update_id: z.string(),
+  updateid: z.string(),
   reaction_type: z.union([z.literal("like"), z.literal("view")]),
 });
 
 const commentRowSchema = z.object({
   id: z.string(),
-  update_id: z.string(),
+  updateid: z.string(),
   company_id: z.string(),
   author_id: z.string(),
   content: z.string(),
@@ -176,7 +176,7 @@ const listUpdates = async ({
     .select(
       `
         *,
-        author_profile:profiles!company_updates_author_id_fkey (id, first_name, last_name, avatar_url, role),
+        authorprofile:profiles!company_updates_author_id_fkey (id, first_name, last_name, avatar_url, role),
         company_update_engagement (
           engagement_score,
           ai_summary,
@@ -256,10 +256,10 @@ const listReactions = async ({
 
   const { data, error } = await supabase
     .from("company_update_reactions")
-    .select("update_id, reaction_type")
+    .select("updateid, reaction_type")
     .eq("company_id", companyId)
     .eq("user_id", userId)
-    .in("update_id", updateIds);
+    .in("updateid", updateIds);
 
   if (error) {
     throw error;
@@ -279,7 +279,7 @@ const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
       "*, author:profiles!company_update_comments_author_id_fkey (id, first_name, last_name, avatar_url)",
     )
     .eq("company_id", companyId)
-    .in("update_id", updateIds)
+    .in("updateid", updateIds)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -372,11 +372,11 @@ const upsertReaction = async ({
   const { error } = await supabase.from("company_update_reactions").upsert(
     {
       company_id: companyId,
-      update_id: updateId,
+      updateid: updateId,
       user_id: userId,
       reaction_type: reactionType,
     },
-    { onConflict: "update_id,user_id,reaction_type" },
+    { onConflict: "updateid,user_id,reaction_type" },
   );
 
   if (error) {
@@ -394,7 +394,7 @@ const deleteReaction = async ({
     .from("company_update_reactions")
     .delete()
     .eq("company_id", companyId)
-    .eq("update_id", updateId)
+    .eq("updateid", updateId)
     .eq("user_id", userId)
     .eq("reaction_type", reactionType);
 
@@ -411,7 +411,7 @@ const createComment = async ({
 }: CreateCommentParams) => {
   const { error } = await supabase.from("company_update_comments").insert({
     company_id: companyId,
-    update_id: updateId,
+    updateid: updateId,
     author_id: userId,
     content,
   });

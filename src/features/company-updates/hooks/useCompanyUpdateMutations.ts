@@ -256,7 +256,7 @@ export function useCompanyUpdateMutations() {
       const now = new Date().toISOString();
       const optimisticComment: CommentRow = {
         id: tempId,
-        update_id: updateId,
+        updateid: updateId,
         company_id: companyId ?? "",
         author_id: profile?.id ?? "me",
         content,

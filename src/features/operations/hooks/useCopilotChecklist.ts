@@ -17,7 +17,7 @@ type ChecklistRow = {
 
 type TaskRow = {
   id: string;
-  checklist_id: string;
+  checklistid: string;
   assigned_to: string | null;
   store_id: string | null;
   day: string;
@@ -76,7 +76,7 @@ const INITIAL_STATE: ChecklistState = {
 type PlannedTaskCreation = {
   fingerprint: string;
   payload: {
-    checklist_id: string;
+    checklistid: string;
     company_id: string;
     store_id: string | null;
     day: string;
@@ -161,7 +161,7 @@ const mapTaskRowToChecklistTask = (
   employeeNames: Map<string, string>,
 ): ChecklistTask => ({
   id: row.id,
-  checklistId: row.checklist_id,
+  checklistId: row.checklistid,
   checklistName,
   title:
     (row.metadata as { defaultTitle?: string } | null)?.defaultTitle ??
@@ -182,7 +182,7 @@ export function generateChecklistPlan({
   checklists,
   existingTasks,
   supervisors,
-  employeeNames,
+  _employeeNames,
   companyId,
 }: ChecklistPlanInput): ChecklistPlanResult {
   const creations: PlannedTaskCreation[] = [];
@@ -209,13 +209,13 @@ export function generateChecklistPlan({
   const fingerprintsByTaskId = new Map<string, string>();
 
   existingTasks.forEach((task) => {
-    const checklist = checklistIndex.get(task.checklist_id);
+    const checklist = checklistIndex.get(task.checklistid);
     if (!checklist) return;
     const defaultTitle = (task.metadata as { defaultTitle?: string } | null)
       ?.defaultTitle;
     const fingerprint = defaultTitle
-      ? buildFingerprint(task.checklist_id, defaultTitle)
-      : buildFingerprint(task.checklist_id, task.id);
+      ? buildFingerprint(task.checklistid, defaultTitle)
+      : buildFingerprint(task.checklistid, task.id);
     fingerprintsByTaskId.set(task.id, fingerprint);
     if (!existingTaskMap.has(fingerprint)) {
       existingTaskMap.set(fingerprint, task);
@@ -225,14 +225,14 @@ export function generateChecklistPlan({
   // Ensure existing tasks without assignment are paired with supervisors
   existingTasks.forEach((task) => {
     if (!task.id || task.assigned_to) return;
-    const checklist = checklistIndex.get(task.checklist_id);
+    const checklist = checklistIndex.get(task.checklistid);
     if (!checklist) return;
     const defaultTasks = parseDefaultTasks(checklist.default_tasks);
     const defaultTitle =
       (task.metadata as { defaultTitle?: string } | null)?.defaultTitle ??
       defaultTasks[0]?.title ??
       "Task";
-    const fingerprint = buildFingerprint(task.checklist_id, defaultTitle);
+    const fingerprint = buildFingerprint(task.checklistid, defaultTitle);
     fingerprintsByTaskId.set(task.id, fingerprint);
 
     const supervisor = nextSupervisor();
@@ -241,7 +241,7 @@ export function generateChecklistPlan({
     updates.push({
       id: task.id,
       assigned_to: supervisor.employeeId,
-      checklistId: task.checklist_id,
+      checklistId: task.checklistid,
       title: defaultTitle,
       assigneeName: supervisor.employeeName,
     });
@@ -249,7 +249,7 @@ export function generateChecklistPlan({
     assignmentEvents.push({
       type: "updated",
       taskId: task.id,
-      checklistId: task.checklist_id,
+      checklistId: task.checklistid,
       title: defaultTitle,
       assigneeId: supervisor.employeeId,
       assigneeName: supervisor.employeeName,
@@ -280,7 +280,7 @@ export function generateChecklistPlan({
         assigneeId: supervisor?.employeeId ?? null,
         assigneeName: supervisor?.employeeName ?? null,
         payload: {
-          checklist_id: checklist.id,
+          checklistid: checklist.id,
           company_id: companyId,
           store_id: storeId,
           day,
@@ -336,7 +336,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
       const tasksQuery = supabase
         .from("operations_tasks")
         .select(
-          "id, checklist_id, assigned_to, store_id, day, status, metadata",
+          "id, checklistid, assigned_to, store_id, day, status, metadata",
         )
         .eq("company_id", companyId)
         .eq("day", targetDay);
@@ -427,7 +427,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
           .from("operations_tasks")
           .insert(plan.creations.map((item) => item.payload))
           .select(
-            "id, checklist_id, assigned_to, store_id, day, status, metadata",
+            "id, checklistid, assigned_to, store_id, day, status, metadata",
           );
         if (error) throw error;
         insertedRows = (data ?? []) as TaskRow[];
@@ -527,7 +527,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
       const baseTasks: ChecklistTask[] = rawTasks.map((task) => {
         const checklistName =
-          checklistNames.get(task.checklist_id) ?? "Checklist";
+          checklistNames.get(task.checklistid) ?? "Checklist";
         if (updatedTaskIds.has(task.id)) {
           const assignedTo = updatedTaskIds.get(task.id) ?? null;
           return {
@@ -543,7 +543,7 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
       const insertedTasks: ChecklistTask[] = insertedRows.map((row) => {
         const checklistName =
-          checklistNames.get(row.checklist_id) ?? "Checklist";
+          checklistNames.get(row.checklistid) ?? "Checklist";
         return mapTaskRowToChecklistTask(row, checklistName, employeeNames);
       });
 

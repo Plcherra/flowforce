@@ -112,7 +112,7 @@ export default function GettingStarted() {
 
               <h3 className="mt-8">Next Steps</h3>
               <p>
-                Once you've completed the basic setup, explore our other
+                Once you&apos;ve completed the basic setup, explore our other
                 documentation sections:
               </p>
               <ul>

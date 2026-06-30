@@ -8,10 +8,8 @@ import type { AssignmentWithUser } from "@/features/scheduling/hooks/useScheduli
 import {
   calculateHoursSummary,
   calculateCoveragePercentages,
-  type HoursSummary,
-  type CoveragePercentages,
 } from "../utils/hoursCalculation";
-import { processDailyHours, type DailyHourEntry } from "../utils/dailyHours";
+import { processDailyHours } from "../utils/dailyHours";
 import { filterShiftsByLocation } from "../utils/locationFilter";
 
 interface UseHoursSummaryProps {

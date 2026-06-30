@@ -5,11 +5,11 @@ export interface FormSubmission {
   id: string;
   form_id: string;
   submitted_by: string;
-  submission_data: unknown; // JSON data from form submission
+  submissiondata: unknown; // JSON data from form submission
   submitted_at: string;
   ip_address?: string;
   user_agent?: string;
-  submitted_profile?: {
+  submittedprofile?: {
     first_name: string;
     last_name: string;
   };
@@ -198,7 +198,7 @@ export interface FormAnalyticsData {
     completions: number;
   }>;
   fieldAnalytics: Array<{
-    field_id: string;
+    fieldid: string;
     completion_rate: number;
     avg_time: number;
   }>;
@@ -247,11 +247,11 @@ export interface Payment {
 type TaskRow = Tables<"tasks">;
 
 export type Task = TaskRow & {
-  assigned_profile?: {
+  assignedprofile?: {
     first_name: string;
     last_name: string;
   } | null;
-  created_profile?: {
+  createdprofile?: {
     first_name: string;
     last_name: string;
   } | null;

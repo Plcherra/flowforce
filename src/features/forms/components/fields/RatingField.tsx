@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Heart, ThumbsUp, Smile, Meh, Frown } from "lucide-react";
+import { Star,   Smile, Meh, Frown } from "lucide-react";
 
 interface RatingConfig {
   max_rating?: number;

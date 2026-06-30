@@ -110,7 +110,7 @@ export function useReportsMetrics({
     return Math.round((completed / totalItems) * 100);
   })();
 
-  const formsArray = asArray(forms);
+  const _formsArray = asArray(forms);
   const formsLength = safeArrayLength(forms);
   const formsCompletionRate =
     formsLength > 0

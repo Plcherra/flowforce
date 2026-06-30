@@ -93,7 +93,7 @@ export function EmployeeTable({
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span>
                     {getDepartmentName(
-                      employee.department_id ?? null,
+                      employee.departmentid ?? null,
                       employee.department?.name ?? null,
                       departmentMap,
                     )}

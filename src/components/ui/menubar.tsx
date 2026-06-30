@@ -212,7 +212,7 @@ const MenubarShortcut = ({
     />
   );
 };
-MenubarShortcut.displayname = "MenubarShortcut";
+MenubarShortcut.display_name = "MenubarShortcut";
 
 export {
   Menubar,

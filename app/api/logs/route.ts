@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     level: normalizeLevel(body.level),
     message,
     location: normalizeText(body.location, "client"),
-    request_id: normalizeText(body.requestId),
+    requestid: normalizeText(body.requestId),
     org_id: normalizeUuid(body.orgId),
     user_id: normalizeUuid(body.userId),
     context: normalizeContext(body.context),

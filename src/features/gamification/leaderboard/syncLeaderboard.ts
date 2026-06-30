@@ -398,8 +398,8 @@ export async function syncLeaderboard({
         const row: LeaderboardSyncRow = {
           company_id: companyId,
           employee_id: employeeId,
-          department_id:
-            employee.department_id ?? employee.department?.id ?? null,
+          departmentid:
+            employee.departmentid ?? employee.department?.id ?? null,
           role: employee.role,
           period,
           period_start: range.start ? range.start.format("YYYY-MM-DD") : null,

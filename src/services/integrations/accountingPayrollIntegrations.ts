@@ -93,14 +93,14 @@ export const accountingExportScopes: AccountingExportScope[] = [
     sourceTables: ["purchase_orders", "purchase_order_items", "inv_purchases"],
     destinationObject: "Bill",
     requiredFields: [
-      "vendor_external_id",
+      "vendor_externalid",
       "bill_date",
       "due_date",
       "line_item_account",
       "amount",
       "tax_code",
     ],
-    reconciliationKey: "provider_bill_id",
+    reconciliationKey: "provider_billid",
   },
   {
     key: "expenses",
@@ -115,7 +115,7 @@ export const accountingExportScopes: AccountingExportScope[] = [
       "amount",
       "payment_account",
     ],
-    reconciliationKey: "provider_expense_id",
+    reconciliationKey: "provider_expenseid",
   },
   {
     key: "payments",
@@ -125,12 +125,12 @@ export const accountingExportScopes: AccountingExportScope[] = [
     destinationObject: "Payment",
     requiredFields: [
       "payment_date",
-      "vendor_external_id",
+      "vendor_externalid",
       "payment_account",
       "amount",
       "approval_status",
     ],
-    reconciliationKey: "provider_payment_id",
+    reconciliationKey: "provider_paymentid",
   },
   {
     key: "vendor_credits",
@@ -139,19 +139,19 @@ export const accountingExportScopes: AccountingExportScope[] = [
     sourceTables: ["inv_adjustments", "purchase_order_items"],
     destinationObject: "VendorCredit",
     requiredFields: [
-      "vendor_external_id",
+      "vendor_externalid",
       "credit_date",
       "reason",
       "line_item_account",
       "amount",
     ],
-    reconciliationKey: "provider_credit_id",
+    reconciliationKey: "provider_creditid",
   },
   {
     key: "owner_summaries",
     label: "Owner summaries",
     providers: ["quickbooks", "xero"],
-    sourceTables: ["sales_ledger", "labor_entries", "inv_waste", "expenses"],
+    sourceTables: ["sales_ledger", "labor_entries", "invwaste", "expenses"],
     destinationObject: "ReportAttachment",
     requiredFields: [
       "period_start",
@@ -161,7 +161,7 @@ export const accountingExportScopes: AccountingExportScope[] = [
       "waste_cost",
       "controllable_expenses",
     ],
-    reconciliationKey: "period_summary_id",
+    reconciliationKey: "period_summaryid",
   },
   {
     key: "journal_entries",
@@ -176,7 +176,7 @@ export const accountingExportScopes: AccountingExportScope[] = [
       "amount",
       "memo",
     ],
-    reconciliationKey: "provider_journal_entry_id",
+    reconciliationKey: "provider_journal_entryid",
   },
 ] as const;
 
@@ -208,7 +208,7 @@ export const payrollLaborImportScopes: PayrollImportScope[] = [
       "regular_pay",
       "overtime_pay",
     ],
-    reconciliationKey: "provider_time_entry_id",
+    reconciliationKey: "provider_time_entryid",
   },
   {
     key: "pay_periods",
@@ -216,7 +216,7 @@ export const payrollLaborImportScopes: PayrollImportScope[] = [
     providers: ["gusto", "adp", "paychex"],
     destinationTables: ["labor_entries", "company_settings"],
     requiredFields: ["period_start", "period_end", "pay_date", "status"],
-    reconciliationKey: "provider_pay_period_id",
+    reconciliationKey: "provider_pay_periodid",
   },
   {
     key: "wage_rates",
@@ -229,7 +229,7 @@ export const payrollLaborImportScopes: PayrollImportScope[] = [
       "role",
       "hourly_rate",
     ],
-    reconciliationKey: "provider_wage_rate_id",
+    reconciliationKey: "provider_wage_rateid",
   },
   {
     key: "payroll_journal_summary",
@@ -244,7 +244,7 @@ export const payrollLaborImportScopes: PayrollImportScope[] = [
       "benefits",
       "total_payroll_cost",
     ],
-    reconciliationKey: "provider_payroll_journal_id",
+    reconciliationKey: "provider_payroll_journalid",
   },
 ] as const;
 

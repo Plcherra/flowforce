@@ -21,7 +21,6 @@ import { Trash2, Plus } from "lucide-react";
 import type { DraftLineItem } from "../../types/purchasing";
 import type { InventoryItem } from "../../hooks/types";
 import { formatCurrency } from "@/shared/utils";
-import { createDraftLineItem } from "../../types/purchasing";
 
 interface PurchaseOrderLineItemsProps {
   lineItems: DraftLineItem[];

@@ -67,8 +67,8 @@ function isActiveTask(task: TaskWithRelations) {
 function hasConnection(task: TaskWithRelations) {
   return Boolean(
     task.goal_id ||
-      task.workflow_id ||
-      task.origin_document_id ||
+      task.workflowid ||
+      task.origin_documentid ||
       task.origin_event_id ||
       task.parent_task_id ||
       task.source,

@@ -9,7 +9,7 @@ export type InventorySetupIssue = {
     | "missing_cost"
     | "missing_location"
     | "missing_supplier"
-    | "missing_category"
+    | "missingcategory"
     | "missing_countable_unit"
     | "missing_primary_unit"
     | "invalid_item_unit_conversion"
@@ -48,7 +48,7 @@ export function buildInventoryItemSetupHealth(
   const issues: InventorySetupIssue[] = [];
   const itemUnits = item.units ?? [];
 
-  if (!item.unit_id || !item.unit) {
+  if (!item.unitid || !item.unit) {
     addIssue(issues, {
       code: "missing_unit",
       severity: "blocking",
@@ -86,9 +86,9 @@ export function buildInventoryItemSetupHealth(
     });
   }
 
-  if (!item.category_id && !item.category_details && !item.category) {
+  if (!item.categoryid && !item.category_details && !item.category) {
     addIssue(issues, {
-      code: "missing_category",
+      code: "missingcategory",
       severity: "warning",
       message: "Item should have a category for reporting.",
     });
@@ -125,10 +125,10 @@ export function buildInventoryItemSetupHealth(
     }
 
     if (
-      item.unit_id &&
-      itemUnit.unit_id &&
-      itemUnit.unit_id !== item.unit_id &&
-      !canConvertUnits(unitMeta, itemUnit.unit_id, item.unit_id)
+      item.unitid &&
+      itemUnit.unitid &&
+      itemUnit.unitid !== item.unitid &&
+      !canConvertUnits(unitMeta, itemUnit.unitid, item.unitid)
     ) {
       addIssue(issues, {
         code: "invalid_item_unit_conversion",
@@ -151,12 +151,12 @@ export function buildInventoryItemSetupHealth(
 
   for (const recipe of item.recipes ?? []) {
     for (const line of recipe.lines ?? []) {
-      const ingredientUnitId = line.ingredient?.unit_id;
+      const ingredientUnitId = line.ingredient?.unitid;
       if (
-        line.unit_id &&
+        line.unitid &&
         ingredientUnitId &&
-        line.unit_id !== ingredientUnitId &&
-        !canConvertUnits(unitMeta, line.unit_id, ingredientUnitId)
+        line.unitid !== ingredientUnitId &&
+        !canConvertUnits(unitMeta, line.unitid, ingredientUnitId)
       ) {
         addIssue(issues, {
           code: "invalid_recipe_conversion",

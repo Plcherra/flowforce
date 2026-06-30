@@ -119,7 +119,7 @@ export function useHrReadiness(params: {
           (employee) => !hasCompleteProfile(employee),
         ).length,
         missingDepartments: activeEmployees.filter(
-          (employee) => !employee.department_id,
+          (employee) => !employee.departmentid,
         ).length,
         missingAvailability: activeEmployees.filter(
           (employee) => !availabilityUserIds.has(employee.id),
@@ -140,7 +140,7 @@ export function useHrReadiness(params: {
         (employee) => !hasCompleteProfile(employee),
       ).length,
       missingDepartments: activeEmployees.filter(
-        (employee) => !employee.department_id,
+        (employee) => !employee.departmentid,
       ).length,
       lowReliability: activeEmployees.filter(
         (employee) => (employee.reliability ?? 100) < 85,

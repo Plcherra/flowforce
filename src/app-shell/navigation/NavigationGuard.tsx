@@ -16,6 +16,7 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const userId = user?.id ?? null;
   const currentPath = location.pathname;
   const currentTarget = `${location.pathname}${location.search}`;
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -25,23 +26,35 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
 
   const redirectTo = useCallback(
     (destination: string, state?: Record<string, unknown>) => {
-      if (currentPath === destination) return;
+      const destinationPath = destination.split("?")[0] ?? destination;
+      const currentSearch = location.search;
+      const destinationSearch = destination.includes("?")
+        ? `?${destination.split("?")[1]}`
+        : "";
+
+      if (
+        currentPath === destinationPath &&
+        currentSearch === destinationSearch
+      ) {
+        return;
+      }
+
       navigate(destination, { replace: true, state });
     },
-    [currentPath, navigate],
+    [currentPath, location.search, navigate],
   );
 
   useEffect(() => {
     if (loading) return; // Wait for auth to resolve
 
     // Redirect authenticated users away from auth pages
-    if (user && isAuthRoute) {
+    if (userId && isAuthRoute) {
       redirectTo("/app/dashboard");
       return;
     }
 
     // Redirect unauthenticated users from protected routes
-    if (!user && isProtectedRoute) {
+    if (!userId && isProtectedRoute) {
       redirectTo(buildMobileAuthRedirectPath(currentPath, location.search), {
         from: currentTarget,
       });
@@ -49,12 +62,12 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
     }
 
     // Auto-redirect root path for authenticated users
-    if (user && currentPath === "/") {
+    if (userId && currentPath === "/") {
       redirectTo("/app/dashboard");
       return;
     }
   }, [
-    user,
+    userId,
     loading,
     currentPath,
     currentTarget,

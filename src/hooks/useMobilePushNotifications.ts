@@ -41,7 +41,7 @@ export function useMobilePushNotifications({
           const { error } = await supabase.rpc("register_mobile_push_device", {
             p_app_version: null,
             p_company_id: companyId,
-            p_device_id: null,
+            p_deviceid: null,
             p_device_token: token.value,
             p_metadata: {
               source: "capacitor",

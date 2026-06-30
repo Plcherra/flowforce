@@ -15,7 +15,7 @@ export function useVendorInvoices({
 }: UseVendorInvoicesProps) {
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState<InvoiceFormState>({
-    po_id: "",
+    poid: "",
     invoiceNumber: "",
     amount: "",
     dueDate: "",
@@ -24,8 +24,8 @@ export function useVendorInvoices({
   });
 
   const selectedInvoicePo = useMemo<PurchaseOrder | null>(
-    () => purchaseOrders.find((po) => po.id === invoiceForm.po_id) ?? null,
-    [purchaseOrders, invoiceForm.po_id],
+    () => purchaseOrders.find((po) => po.id === invoiceForm.poid) ?? null,
+    [purchaseOrders, invoiceForm.poid],
   );
 
   const invoicesForSelectedPo = useMemo(
@@ -64,7 +64,7 @@ export function useVendorInvoices({
 
   const resetInvoiceForm = useCallback(() => {
     setInvoiceForm({
-      po_id: "",
+      poid: "",
       invoiceNumber: "",
       amount: "",
       dueDate: "",

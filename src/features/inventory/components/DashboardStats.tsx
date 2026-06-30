@@ -63,7 +63,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{stats.prepCompletion}%</div>
           <p className="text-xs text-muted-foreground">
-            Today's prep completion
+            Today&apos;s prep completion
           </p>
         </CardContent>
       </Card>

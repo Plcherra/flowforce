@@ -93,7 +93,7 @@ export function CompliancePacksPanel() {
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
         title: "Compliance pack installed",
-        description: result.workflow_id
+        description: result.workflowid
           ? "Template workflow and evidence rules are ready."
           : "Pack is ready.",
       });
@@ -141,8 +141,8 @@ export function CompliancePacksPanel() {
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
         title: "Audit export ready",
-        description: result.export_id
-          ? `Export ${result.export_id.slice(0, 8)} created.`
+        description: result.exportid
+          ? `Export ${result.exportid.slice(0, 8)} created.`
           : "Compliance snapshot created.",
       });
     } catch (error) {

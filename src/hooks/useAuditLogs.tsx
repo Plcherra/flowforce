@@ -11,7 +11,7 @@ export interface AuditLog {
   table_name: string;
   record_id: string;
   old_values: any;
-  new_values: any;
+  new_values: unknown;
   metadata?: {
     category?: string;
     severity?: string;
@@ -20,12 +20,12 @@ export interface AuditLog {
   } | null;
   performed_by: string;
   created_at: string;
-  user_profile?: {
+  userprofile?: {
     first_name: string;
     last_name: string;
     email: string;
   };
-  performed_by_profile?: {
+  performed_byprofile?: {
     first_name: string;
     last_name: string;
     email: string;
@@ -87,8 +87,8 @@ export function useAuditLogs() {
 
             return {
               ...log,
-              user_profile: userProfile,
-              performed_by_profile: performedByProfile,
+              userprofile: userProfile,
+              performed_byprofile: performedByProfile,
             } as AuditLog;
           }),
         );

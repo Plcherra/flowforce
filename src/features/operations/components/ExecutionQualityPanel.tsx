@@ -157,14 +157,14 @@ export function ExecutionQualityPanel() {
                 trend.location_id ?? "all",
                 trend.assigned_role,
                 trend.workflow_kind ?? "workflow",
-                trend.template_category ?? "general",
+                trend.templatecategory ?? "general",
               ].join("-")}
               className="rounded-2xl border p-3"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold">
-                    {trend.template_category ?? trend.workflow_kind ?? "Workflow"}
+                    {trend.templatecategory ?? trend.workflow_kind ?? "Workflow"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {trend.assigned_role} · {trend.metric_date}

@@ -57,7 +57,7 @@ const defaultChecklist: Omit<ChecklistItem, "completed">[] = [
 export function WeeklySchedulingChecklist() {
   const { toast } = useToast();
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
-  const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date()));
+  const [currentWeek, _setCurrentWeek] = useState(() => startOfWeek(new Date()));
 
   // Initialize checklist for current week
   useEffect(() => {

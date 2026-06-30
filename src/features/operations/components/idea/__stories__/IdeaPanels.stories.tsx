@@ -81,7 +81,7 @@ const actionsStateMock = {
     {
       id: "act-1",
       company_id: "company-story",
-      cycle_id: "cycle-story",
+      cycleid: "cycle-story",
       action_name: "Rebalance weekend staffing",
       status: "pending",
       result: null,
@@ -151,7 +151,7 @@ export const ExecuteStagePanel = () => (
     <ExecutePanel
       insights={sampleInsights}
       diagnostics={diagnosticsMock as any}
-      actionsState={actionsStateMock as any}
+      actionsState={actionsStateMock as unknown}
       stageDescription="Launch orchestrated playbooks and track automation."
       onStageComplete={() => void 0}
     />

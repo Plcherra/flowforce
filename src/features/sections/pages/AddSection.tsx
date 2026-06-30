@@ -155,7 +155,7 @@ export default function AddSection() {
 
       const seenSlugs = new Set<string>();
       const pagesToInsert: any[] = [];
-      const pagesToUpdate: { id: string; values: any }[] = [];
+      const pagesToUpdate: { id: string; values: unknown }[] = [];
 
       finalPages.forEach(({ slug, payload }) => {
         seenSlugs.add(slug);

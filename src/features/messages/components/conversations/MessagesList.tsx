@@ -106,7 +106,7 @@ export function MessagesList({
           </div>
         ) : (
           safeArrayMap(safeMessages, (message) => {
-            const senderProfile = message.sender_profile ?? {
+            const senderProfile = message.senderprofile ?? {
               first_name: "",
               last_name: "",
               avatar_url: null,
@@ -127,7 +127,7 @@ export function MessagesList({
                 ? format(createdAt, "MMM dd, yyyy at h:mm a")
                 : "";
 
-            const replyProfile = message.reply_to_message?.sender_profile;
+            const replyProfile = message.reply_to_message?.senderprofile;
             const replyName = replyProfile
               ? [replyProfile.first_name, replyProfile.last_name]
                   .filter(Boolean)
@@ -139,7 +139,7 @@ export function MessagesList({
             const messageTime = createdAt ? createdAt.getTime() : 0;
             const readBy = channelMembers
               .filter((member) => {
-                if (member.user_id === message.sender_id) return false; // Don't show sender as read
+                if (member.user_id === message.senderid) return false; // Don't show sender as read
                 if (!member.last_read_at) return false;
                 const readTime = new Date(member.last_read_at).getTime();
                 return readTime >= messageTime;
@@ -243,7 +243,7 @@ export function MessagesList({
                               id: message.id,
                               content: message.content,
                               sender: {
-                                id: message.sender_id,
+                                id: message.senderid,
                                 name: displayName,
                                 avatar: senderProfile.avatar_url ?? undefined,
                               },
@@ -254,7 +254,7 @@ export function MessagesList({
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
-                        {message.sender_id === currentUserId &&
+                        {message.senderid === currentUserId &&
                           onUpdateMessage && (
                             <Button
                               variant="ghost"
@@ -268,7 +268,7 @@ export function MessagesList({
                               <Edit2 className="h-4 w-4" />
                             </Button>
                           )}
-                        {message.sender_id === currentUserId && (
+                        {message.senderid === currentUserId && (
                           <Button
                             variant="ghost"
                             size="sm"

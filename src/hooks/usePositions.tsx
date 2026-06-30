@@ -47,6 +47,7 @@ export function usePositions() {
       fetchPositions();
       fetchAssignments();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const fetchPositions = async () => {

@@ -18,10 +18,10 @@ export type ExecutionQualityDailyRow = {
   company_id: string;
   metric_date: string;
   location_id: string | null;
-  department_id: string | null;
+  departmentid: string | null;
   assigned_role: string;
   workflow_kind: string | null;
-  template_category: string | null;
+  templatecategory: string | null;
   total_runs: number;
   completed_runs: number;
   overdue_runs: number;
@@ -43,7 +43,7 @@ export type ExecutionQualityCoachingRow = {
   user_id: string;
   employee_name: string | null;
   email: string | null;
-  department_id: string | null;
+  departmentid: string | null;
   role_name: string;
   total_runs: number;
   completed_runs: number;

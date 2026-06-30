@@ -17,10 +17,10 @@ const generateSessionId = () => {
 
 // Get or create session ID
 const getSessionId = () => {
-  let sessionId = sessionStorage.getItem("navigation_session_id");
+  let sessionId = sessionStorage.getItem("navigation_sessionid");
   if (!sessionId) {
     sessionId = generateSessionId();
-    sessionStorage.setItem("navigation_session_id", sessionId);
+    sessionStorage.setItem("navigation_sessionid", sessionId);
   }
   return sessionId;
 };

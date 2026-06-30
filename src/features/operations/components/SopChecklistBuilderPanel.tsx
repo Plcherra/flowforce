@@ -13,9 +13,9 @@ import {
 import { logger } from "@/utils/logger";
 
 type CreatedTemplate = {
-  workflow_id?: string;
+  workflowid?: string;
   form_id?: string;
-  assignment_id?: string;
+  assignmentid?: string;
   step_count?: number;
 };
 

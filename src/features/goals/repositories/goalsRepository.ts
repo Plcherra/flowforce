@@ -24,7 +24,7 @@ const goalRowSchema = z
     company_id: z.string(),
     created_at: z.string(),
     updated_at: z.string().nullable(),
-    owner_id: z.string().nullable().optional(),
+    ownerid: z.string().nullable().optional(),
   })
   .passthrough();
 

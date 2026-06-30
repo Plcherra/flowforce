@@ -97,15 +97,15 @@ export function CreateDocumentTaskDialog({
         created_by: user.id,
         due_date: dueDate ? dueDate.toISOString() : null,
         assigned_to: null,
-        department_id: null,
+        departmentid: null,
         tags: null,
         attachments: [],
         parent_task_id: null,
-        workflow_id: null,
+        workflowid: null,
         estimated_hours: null,
         actual_hours: null,
         source: "from_report",
-        origin_document_id: document.id,
+        origin_documentid: document.id,
         links,
       });
 

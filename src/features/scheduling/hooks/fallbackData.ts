@@ -75,12 +75,12 @@ const createShift = (
   config: ShiftConfig,
   nowIso: string,
 ): { shift: ShiftWithAssignments; assignments: AssignmentWithUser[] } => {
-  const start_time = createDateTimeString(
+  const startTime = createDateTimeString(
     base,
     config.dayOffset,
     config.startTime,
   );
-  const end_time = createDateTimeString(base, config.dayOffset, config.endTime);
+  const endTime = createDateTimeString(base, config.dayOffset, config.endTime);
 
   const assignments: AssignmentWithUser[] = (config.assignments ?? []).map(
     (assignment, index) => ({
@@ -105,8 +105,8 @@ const createShift = (
     updated_at: nowIso,
     title: config.title,
     role: config.role,
-    start_time,
-    end_time,
+    start_time: startTime,
+    end_time: endTime,
     location: config.location,
     break_minutes: 30,
     color: config.color,

@@ -82,36 +82,18 @@ import {
   getStatusColor,
   getStatusIcon,
 } from "../utils/statusHelpers";
-import { extractInvoiceNumber, createDraftLineItem } from "../types/purchasing";
+import { extractInvoiceNumber } from "../types/purchasing";
 import type {
   InventoryItem,
   PurchaseOrder,
   SupplierIntegrationDetails,
 } from "../hooks/types";
-type DraftLineItem = {
-  id: string;
-  itemId?: string;
-  itemName: string;
-  category?: string | null;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-};
 
 type IntegrationFormState = {
   provider: SupplierIntegrationDetails["provider"];
   account_id: string;
   api_key: string;
   notes: string;
-};
-
-type InvoiceFormState = {
-  po_id: string;
-  invoiceNumber: string;
-  amount: string;
-  dueDate: string;
-  notes: string;
-  paymentMethod: string;
 };
 
 type VendorInvoiceRecord = {
@@ -258,11 +240,11 @@ export default function InventoryPurchasingPage() {
   // Initialize invoice form with first PO if available
   useEffect(() => {
     if (!purchaseOrders.length) return;
-    if (vendorInvoicesHook.invoiceForm.po_id) return;
+    if (vendorInvoicesHook.invoiceForm.poid) return;
 
     const defaultPo = purchaseOrders[0];
     vendorInvoicesHook.updateInvoiceForm({
-      po_id: defaultPo.id,
+      poid: defaultPo.id,
       amount: (defaultPo.total_amount ?? 0).toFixed(2),
     });
   }, [purchaseOrders, vendorInvoicesHook]);
@@ -1667,13 +1649,13 @@ export default function InventoryPurchasingPage() {
                   vendorInvoices={vendorInvoices}
                   invoicesLoading={invoicesLoading}
                   ordersLoading={ordersLoading}
-                  selectedInvoicePoId={vendorInvoicesHook.invoiceForm.po_id}
+                  selectedInvoicePoId={vendorInvoicesHook.invoiceForm.poid}
                   onInvoicePoChange={(poId) => {
                     const targetPo = purchaseOrders.find(
                       (po) => po.id === poId,
                     );
                     vendorInvoicesHook.updateInvoiceForm({
-                      po_id: poId,
+                      poid: poId,
                       amount: targetPo
                         ? (
                             outstandingByPo.get(targetPo.id) ??
@@ -1717,13 +1699,13 @@ export default function InventoryPurchasingPage() {
                               Purchase Order
                             </Label>
                             <Select
-                              value={vendorInvoicesHook.invoiceForm.po_id}
+                              value={vendorInvoicesHook.invoiceForm.poid}
                               onValueChange={(value) => {
                                 const targetPo = purchaseOrders.find(
                                   (po) => po.id === value,
                                 );
                                 vendorInvoicesHook.updateInvoiceForm({
-                                  po_id: value,
+                                  poid: value,
                                   amount: targetPo
                                     ? (
                                         outstandingByPo.get(targetPo.id) ??

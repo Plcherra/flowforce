@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type {
   ScheduleRulebook,
-  RulebookStep,
+  _RulebookStep,
   StepCriterion,
 } from "@/types/scheduleRulebook";
 import { logger } from "@/utils/logger";
@@ -39,10 +39,10 @@ export async function fetchWorkflowSnapshot(
     .select(
       `
       id,
-      rulebook_step_id,
+      rulebook_stepid,
       state,
       completed_at,
-      schedule_rulebook_step:rulebook_step_id(
+      schedule_rulebook_step:rulebook_stepid(
         slug,
         schedule_rulebook_step_criteria (
           id,
@@ -51,18 +51,18 @@ export async function fetchWorkflowSnapshot(
       ),
       schedule_workflow_criteria (
         id,
-        rulebook_criterion_id,
+        rulebook_criterionid,
         status,
         evidence_value,
         approved_by,
         approved_at,
-        schedule_rulebook_step_criteria:rulebook_criterion_id (
+        schedule_rulebook_step_criteria:rulebook_criterionid (
           slug
         )
       )
     `,
     )
-    .eq("workflow_id", workflowId);
+    .eq("workflowid", workflowId);
 
   if (error) {
     logger.error("Failed to load workflow snapshot", {
@@ -111,7 +111,7 @@ export async function fetchWorkflowSnapshot(
       stepEntry.criteria[criterionSlug] = {
         recordId: criterionRecord.id,
         workflowStepId: workflowStep.id,
-        rulebookCriterionId: criterionRecord.rulebook_criterion_id,
+        rulebookCriterionId: criterionRecord.rulebook_criterionid,
         status: (criterionRecord.status ??
           "pending") as WorkflowCriterionSnapshot["status"],
         value: parseEvidenceValue(criterionRecord.evidence_value),
@@ -134,8 +134,8 @@ export async function upsertWorkflowCriterionState(params: {
   value?: number | string | boolean;
 }): Promise<WorkflowCriterionSnapshot | null> {
   const payload: Record<string, unknown> = {
-    workflow_step_id: params.workflowStepId,
-    rulebook_criterion_id: params.rulebookCriterionId,
+    workflow_stepid: params.workflowStepId,
+    rulebook_criterionid: params.rulebookCriterionId,
     status: params.status,
     evidence_value:
       params.value !== undefined
@@ -151,7 +151,7 @@ export async function upsertWorkflowCriterionState(params: {
     .from("schedule_workflow_criteria")
     .upsert(payload, { onConflict: "id" })
     .select(
-      "id, workflow_step_id, rulebook_criterion_id, status, evidence_value, approved_by, approved_at",
+      "id, workflow_stepid, rulebook_criterionid, status, evidence_value, approved_by, approved_at",
     )
     .single();
 
@@ -165,8 +165,8 @@ export async function upsertWorkflowCriterionState(params: {
 
   return {
     recordId: data.id,
-    workflowStepId: data.workflow_step_id,
-    rulebookCriterionId: data.rulebook_criterion_id,
+    workflowStepId: data.workflow_stepid,
+    rulebookCriterionId: data.rulebook_criterionid,
     status: (data.status ?? "pending") as WorkflowCriterionSnapshot["status"],
     value: parseEvidenceValue(data.evidence_value),
     approvedBy: data.approved_by,
@@ -191,7 +191,7 @@ export async function setWorkflowCriterionApproval(params: {
     .update(payload)
     .eq("id", params.recordId)
     .select(
-      "id, workflow_step_id, rulebook_criterion_id, status, evidence_value, approved_by, approved_at",
+      "id, workflow_stepid, rulebook_criterionid, status, evidence_value, approved_by, approved_at",
     )
     .single();
 
@@ -205,8 +205,8 @@ export async function setWorkflowCriterionApproval(params: {
 
   return {
     recordId: data.id,
-    workflowStepId: data.workflow_step_id,
-    rulebookCriterionId: data.rulebook_criterion_id,
+    workflowStepId: data.workflow_stepid,
+    rulebookCriterionId: data.rulebook_criterionid,
     status: (data.status ?? "pending") as WorkflowCriterionSnapshot["status"],
     value: parseEvidenceValue(data.evidence_value),
     approvedBy: data.approved_by,
@@ -228,8 +228,8 @@ async function ensureWorkflowSteps(
 
   const { data, error } = await supabase
     .from("schedule_workflow_steps")
-    .select("rulebook_step_id")
-    .eq("workflow_id", workflowId);
+    .select("rulebook_stepid")
+    .eq("workflowid", workflowId);
 
   if (error) {
     logger.error("Failed to check workflow steps", { error, tags: ["error"] });
@@ -237,7 +237,7 @@ async function ensureWorkflowSteps(
   }
 
   const existing = new Set(
-    (data || []).map((row: any) => row.rulebook_step_id),
+    (data || []).map((row: any) => row.rulebook_stepid),
   );
 
   const missing = rulebookStepIds.filter((id) => !existing.has(id));
@@ -246,8 +246,8 @@ async function ensureWorkflowSteps(
   }
 
   const inserts = missing.map((rulebookStepId) => ({
-    workflow_id: workflowId,
-    rulebook_step_id: rulebookStepId,
+    workflowid: workflowId,
+    rulebook_stepid: rulebookStepId,
     state: "not_started",
   }));
 

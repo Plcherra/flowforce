@@ -147,8 +147,8 @@ function AnnouncementsBoardComponent() {
             </div>
             <CardDescription className="flex flex-wrap items-center gap-2 text-xs">
               <span>
-                {announcement.creator_profile?.first_name}{" "}
-                {announcement.creator_profile?.last_name}
+                {announcement.creatorprofile?.first_name}{" "}
+                {announcement.creatorprofile?.last_name}
               </span>
               {announcement.created_at && (
                 <span>

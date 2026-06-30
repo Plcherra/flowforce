@@ -81,7 +81,7 @@ const safetySchema = z
   .object({
     requires_human_approval: z.literal(true),
     writes_allowed: z.literal(false),
-    blocked_data_classes_observed: z.array(z.string()).default([]),
+    blockeddata_classes_observed: z.array(z.string()).default([]),
   })
   .strict();
 
@@ -296,7 +296,7 @@ export function buildAIPromptContractInput(
     prompt_key: promptKey,
     contract_version: definition.outputSchemaVersion,
     system: aiPromptSystemInstructions,
-    required_context_modules: definition.requiredContextModules,
+    required_contextmodules: definition.requiredContextModules,
     context_snapshot: contextSnapshot,
     output_requirements: {
       json_only: true,

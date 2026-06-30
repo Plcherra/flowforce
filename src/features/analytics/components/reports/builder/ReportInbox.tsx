@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { AlertTriangle, Download, FileText, Loader2, Plus, Upload } from "lucide-react";
+import { AlertTriangle, Download, FileText, Loader2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { notifyManagersNewRequest } from "@/notifications/availability";
 import type { EmployeeReportCategory } from "@/types/people";
 import {
   buildCompanyStoragePath,

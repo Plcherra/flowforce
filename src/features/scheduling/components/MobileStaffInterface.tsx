@@ -22,7 +22,7 @@ import {
   Languages,
   Download,
 } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { useProfile } from "@/hooks/useProfile";
 import { getRoleLabel } from "@/data/navigationData";
 

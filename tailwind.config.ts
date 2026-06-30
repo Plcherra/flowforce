@@ -158,7 +158,7 @@ export default {
 	},
 	plugins: [
 		tailwindcssAnimate,
-		function({ addUtilities, theme }: any) {
+		function({ addUtilities, _theme }: any) {
 			const newUtilities = {
 				'.micro-interaction': {
 					'@apply transition-all duration-200 hover:scale-105 active:scale-95': {},

@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Building2, User, LogOut, Bell, Search, Settings } from "lucide-react";
+import { User, LogOut,  Search, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useCan } from "@/hooks/useCan";
@@ -32,7 +32,7 @@ export function TopNavbar() {
     navigate(href);
   };
 
-  const getRoleIconWithStyle = (role: string) => {
+  const _getRoleIconWithStyle = (role: string) => {
     const Icon = getRoleIcon(role);
     if (!Icon) return null;
     return React.cloneElement(Icon, {

@@ -28,9 +28,9 @@ export interface CookbookRecipe {
 interface RawRecipeRecord {
   id: string;
   item_id: string;
-  ingredient_id: string;
+  ingredientid: string;
   quantity_needed: number;
-  unit_id: string;
+  unitid: string;
   yield_amount: number | null;
   notes: string | null;
   created_at: string;
@@ -43,7 +43,7 @@ interface RawRecipeRecord {
 interface ProductionEventInput {
   item_id: string;
   quantity: number;
-  unit_id?: string;
+  unitid?: string;
   note?: string;
   location_id?: string;
 }
@@ -57,14 +57,14 @@ export class CookbookService {
     const { data, error } = await supabase.from("inv_recipes").select(`
       id,
       item_id,
-      ingredient_id,
+      ingredientid,
       quantity_needed,
-      unit_id,
+      unitid,
       yield_amount,
       notes,
       created_at,
       updated_at,
-      ingredient:inv_items!inv_recipes_ingredient_id_fkey (
+      ingredient:inv_items!inv_recipes_ingredientid_fkey (
         *,
         unit:inv_units(*)
       ),
@@ -97,9 +97,9 @@ export class CookbookService {
       const line: InventoryRecipeLine = {
         id: row.id,
         item_id: row.item_id,
-        ingredient_id: row.ingredient_id,
+        ingredientid: row.ingredientid,
         quantity_needed: row.quantity_needed,
-        unit_id: row.unit_id,
+        unitid: row.unitid,
         notes: row.notes,
         yield_amount: row.yield_amount ?? undefined,
         ingredient: row.ingredient ?? undefined,
@@ -216,7 +216,7 @@ export class CookbookService {
     };
 
     const { data, error } = await supabase
-      .from("inv_prep_batches")
+      .from("invprep_batches")
       .insert(payload)
       .select()
       .single();
@@ -233,14 +233,14 @@ export class CookbookService {
     since.setDate(since.getDate() - days);
 
     const { data, error } = await supabase
-      .from("inv_prep_batches")
+      .from("invprep_batches")
       .select(
         `
         *,
         item:inv_items(
           id,
           name,
-          unit_id,
+          unitid,
           unit:inv_units(*)
         )
       `,
@@ -261,12 +261,12 @@ export class CookbookService {
 
     await Promise.all(
       recipe.lines
-        .filter((line) => line.ingredient_id)
+        .filter((line) => line.ingredientid)
         .map((line) => {
           const deductionQty = line.quantity_needed * quantity;
           if (deductionQty <= 0) return Promise.resolve();
           return InventoryService.adjustQuantity({
-            item_id: line.ingredient_id,
+            item_id: line.ingredientid,
             adjustment_type: "decrease",
             quantity: deductionQty,
             reason: `Recipe production: ${recipe.item.name}`,

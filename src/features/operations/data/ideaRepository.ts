@@ -17,7 +17,7 @@ const ideaKpiInsightSchema = z.object({
 const ideaActionSchema = z.object({
   id: z.string(),
   company_id: z.string(),
-  cycle_id: z.string().nullable(),
+  cycleid: z.string().nullable(),
   action_name: z.string(),
   status: z.enum(["pending", "executed", "failed"]),
   result: z.record(z.any()).nullable(),
@@ -101,7 +101,7 @@ export async function listIdeaActions(
     .eq("company_id", companyId);
 
   if (cycleId) {
-    query = query.eq("cycle_id", cycleId);
+    query = query.eq("cycleid", cycleId);
   }
 
   const { data, error } = await query.order("created_at", { ascending: false });
@@ -140,7 +140,7 @@ export async function insertIdeaAction(options: {
 
   const payload = {
     company_id: companyId,
-    cycle_id: cycleId,
+    cycleid: cycleId,
     action_name: action,
     status: autoExecute ? "executed" : "pending",
     result: Object.keys(resultPayload).length ? resultPayload : null,

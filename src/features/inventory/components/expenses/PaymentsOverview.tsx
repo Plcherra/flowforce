@@ -19,7 +19,7 @@ import {
 import { usePayments } from "@/hooks/usePayments";
 import { useProfile } from "@/hooks/useProfile";
 import { useCan } from "@/hooks/useCan";
-import { DollarSign, Clock, Check, X, Search, Filter } from "lucide-react";
+import { DollarSign, Clock, Check, X, Search } from "lucide-react";
 import PaymentForm from "./PaymentForm";
 import { format } from "date-fns";
 import { logger } from "@/utils/logger";

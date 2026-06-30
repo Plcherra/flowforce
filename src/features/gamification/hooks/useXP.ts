@@ -12,9 +12,9 @@ type RecognitionRow = Pick<
   Tables<"recognitions">,
   "id" | "company_id" | "user_id" | "goal_id" | "reward_type" | "awarded_at"
 > & {
-  milestone_id?: string | null;
+  milestoneid?: string | null;
   task_id?: string | null;
-  training_assignment_id?: string | null;
+  training_assignmentid?: string | null;
   reward_details: unknown;
 };
 
@@ -137,10 +137,10 @@ const mapRecognitionToEvent = (row: RecognitionRow): XPEvent => {
     description,
     context: {
       goalId: row.goal_id ?? details?.goal_id ?? null,
-      milestoneId: row.milestone_id ?? details?.milestone_id ?? null,
+      milestoneId: row.milestoneid ?? details?.milestoneid ?? null,
       taskId: row.task_id ?? details?.task_id ?? null,
       trainingAssignmentId:
-        row.training_assignment_id ?? details?.training_assignment_id ?? null,
+        row.training_assignmentid ?? details?.training_assignmentid ?? null,
     },
     metadata: details?.metadata ?? null,
   };
@@ -188,7 +188,7 @@ const fetchXpEvents = async (
   let query = supabase
     .from("recognitions")
     .select(
-      "id, company_id, user_id, goal_id, milestone_id, task_id, training_assignment_id, reward_details, reward_type, awarded_at",
+      "id, company_id, user_id, goal_id, milestoneid, task_id, training_assignmentid, reward_details, reward_type, awarded_at",
     )
     .eq("user_id", employeeId)
     .eq("company_id", companyId)

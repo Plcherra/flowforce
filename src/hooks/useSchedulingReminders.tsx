@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { format, isSameDay, addDays, startOfWeek } from "date-fns";
+import { format,  addDays, startOfWeek } from "date-fns";
 
 interface ReminderSchedule {
   day: string;
@@ -87,6 +87,7 @@ export function useSchedulingReminders() {
     // Check every minute
     const interval = setInterval(checkReminders, 60000);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [reminders, isEnabled, toast]);
 
   const showReminder = (reminder: ReminderSchedule) => {

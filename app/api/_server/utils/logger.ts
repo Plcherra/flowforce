@@ -135,7 +135,7 @@ async function persistLog(
       level,
       message,
       location: meta.location || scope,
-      request_id: meta.requestId,
+      requestid: meta.requestId,
       org_id: orgId ?? null,
       user_id: userId ?? null,
       context: sanitizeContext(meta.context),

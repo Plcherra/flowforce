@@ -94,8 +94,8 @@ export function DescriptionField({
 
 // For form builder preview
 export function DescriptionFieldPreview({
-  label = "Information",
-  description = "This is a description field that can contain important information or instructions.",
+  label: label = "Information",
+  description: description = "This is a description field that can contain important information or instructions.",
   content = "<p>You can use <strong>rich text formatting</strong> including:</p><ul><li>Bullet points</li><li><em>Italics</em> and <strong>bold text</strong></li><li>Links and other HTML elements</li></ul>",
   className = "",
 }: Partial<DescriptionFieldProps>) {

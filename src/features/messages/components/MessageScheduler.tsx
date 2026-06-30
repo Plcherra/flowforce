@@ -12,9 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Send, Trash2, Edit } from "lucide-react";
+import { Calendar, Clock, Send, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format, addMinutes, addHours, addDays } from "date-fns";
+import { format,  addHours, addDays } from "date-fns";
 
 interface ScheduledMessage {
   id: string;

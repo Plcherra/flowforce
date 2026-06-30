@@ -16,8 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   LifeBuoy,
   Plus,
@@ -67,7 +66,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 export default function HelpDeskPage() {
   const bootstrap = useCommunicationBootstrap();
   const { profile } = useProfile();
-  const isMobile = useIsMobile();
+  const _isMobile = useIsMobile();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<HelpDeskTicket | null>(
     null,
@@ -77,7 +76,7 @@ export default function HelpDeskPage() {
   const [statusFilter, setStatusFilter] = useState<
     HelpDeskTicketStatus | "all"
   >("all");
-  const [activeTab, setActiveTab] = useState<"all" | "my">("all");
+  const [_activeTab, _setActiveTab] = useState<"all" | "my">("all");
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 

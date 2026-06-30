@@ -51,11 +51,11 @@ export async function listInventoryItems({
     .select(
       `
       *,
-      unit:inv_units!unit_id(*),
-      recipe_yield_unit:inv_units!recipe_yield_unit_id(*),
+      unit:inv_units!unitid(*),
+      recipe_yield_unit:inv_units!recipe_yield_unitid(*),
       location:inv_locations!default_location_id(*),
       preferred_supplier:inv_suppliers!preferred_supplier_id(*),
-      category_details:inventory_categories!category_id(*)
+      category_details:inventory_categories!categoryid(*)
     `,
     )
     .eq("is_active", true)
@@ -148,10 +148,10 @@ export async function listInventoryItems({
               cost_per_unit: recipeCost.costPerUnit ?? undefined,
               yield_quantity:
                 item.recipe_yield_quantity ?? recipeLines[0]?.yield_amount ?? 1,
-              yield_unit_id:
-                item.recipe_yield_unit_id ??
-                recipeLines[0]?.unit_id ??
-                item.unit_id,
+              yield_unitid:
+                item.recipe_yield_unitid ??
+                recipeLines[0]?.unitid ??
+                item.unitid,
             },
           ]
         : [],
@@ -220,11 +220,11 @@ function calculateRecipeCost(
       return sum;
     }
 
-    const ingredientUnitId = ingredient.unit_id || ingredient.unit?.id || null;
+    const ingredientUnitId = ingredient.unitid || ingredient.unit?.id || null;
 
     const conversion = tryGetConversionFactor(
       unitMeta,
-      line.unit_id,
+      line.unitid,
       ingredientUnitId,
     );
 
@@ -235,7 +235,7 @@ function calculateRecipeCost(
     const normalizedQuantity = convertQuantity(
       unitMeta,
       lineQuantity,
-      line.unit_id,
+      line.unitid,
       ingredientUnitId,
     );
     const lineCost = normalizedQuantity * ingredientCost;

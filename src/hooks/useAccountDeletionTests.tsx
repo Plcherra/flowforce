@@ -83,7 +83,7 @@ export function useAccountDeletionTests() {
         description:
           "Check the results below to verify account deletion is working properly.",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Test Error",
         description: "An error occurred while running deletion tests.",

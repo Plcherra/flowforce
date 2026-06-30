@@ -79,8 +79,8 @@ export function mapToLeaderboardEntry(
   const fallbackDepartment =
     fallbackProfile?.department ?? row.department ?? null;
   const departmentId =
-    row.department_id ??
-    employee?.department_id ??
+    row.departmentid ??
+    employee?.departmentid ??
     employee?.department?.id ??
     fallbackDepartment?.id ??
     null;
@@ -289,7 +289,7 @@ export function useLeaderboardData(
             avatar_url: profile.avatar_url ?? undefined,
             role: profile.role ?? "employee",
             employment_status: profile.employment_status ?? "active",
-            department_id: profile.department_id ?? null,
+            departmentid: profile.departmentid ?? null,
             department: profile.department ?? null,
             position: profile.position ?? undefined,
             skillLevel: undefined,
@@ -381,7 +381,7 @@ export function useLeaderboardData(
 
     if (employees.length > 0) {
       employees.forEach((employee) => {
-        const key = employee.department_id ?? employee.department?.id ?? null;
+        const key = employee.departmentid ?? employee.department?.id ?? null;
         const name = employee.department?.name ?? null;
         if (!map.has(key)) {
           map.set(key, { id: key, name, count: 0 });

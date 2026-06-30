@@ -84,7 +84,7 @@ export function PropagationSummary({
           </p>
           {dirtySelectedRole ? (
             <p className="mt-2 text-xs font-medium text-primary">
-              Pending save – press "Save Changes" to sync updates.
+              Pending save – press &quot;Save Changes&quot; to sync updates.
             </p>
           ) : (
             <p className="mt-2 text-xs text-muted-foreground">

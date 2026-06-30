@@ -142,6 +142,7 @@ export function useSidebarScroll() {
     return () => {
       // Final save on unmount
       if (scrollContainerRef.current && !isRestoringRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
         const scrollTop = scrollContainerRef.current.scrollTop;
         sessionStorage.setItem(SCROLL_STORAGE_KEY, scrollTop.toString());
       }

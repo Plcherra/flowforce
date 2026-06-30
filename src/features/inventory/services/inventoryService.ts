@@ -45,7 +45,7 @@ type InventoryCostContext = {
   company_id?: string | null;
   cost_per_unit?: number | null;
   default_location_id?: string | null;
-  unit_id?: string | null;
+  unitid?: string | null;
 };
 
 const WASTE_REASON_CATEGORY_PATTERNS: Array<{
@@ -125,7 +125,7 @@ async function getInventoryCostContext(
 ): Promise<InventoryCostContext> {
   const { data, error } = await client
     .from("inv_items")
-    .select("id, company_id, cost_per_unit, default_location_id, unit_id")
+    .select("id, company_id, cost_per_unit, default_location_id, unitid")
     .eq("id", itemId)
     .maybeSingle();
 
@@ -258,7 +258,7 @@ export class InventoryService {
 
     // Get waste this week
     const { data: wasteData } = await supabase
-      .from("inv_waste")
+      .from("invwaste")
       .select("cost_impact")
       .gte("created_at", sevenDaysAgo.toISOString());
 
@@ -267,7 +267,7 @@ export class InventoryService {
 
     // Calculate prep completion
     const { data: prepData } = await supabase
-      .from("inv_prep_batches")
+      .from("invprep_batches")
       .select("status")
       .gte("created_at", sevenDaysAgo.toISOString());
 
@@ -411,7 +411,7 @@ export class InventoryService {
     reason?: string;
     cost_impact?: number;
     location_id?: string;
-    unit_id?: string;
+    unitid?: string;
     waste_type: string;
     waste_date?: string;
     metadata?: Record<string, unknown>;
@@ -429,15 +429,15 @@ export class InventoryService {
     );
 
     const { data, error } = await supabase
-      .from("inv_waste")
+      .from("invwaste")
       .insert({
         ...wasteEvent,
         company_id: item.company_id,
         quantity,
         location_id: locationId,
-        unit_id: wasteEvent.unit_id ?? item.unit_id ?? null,
+        unitid: wasteEvent.unitid ?? item.unitid ?? null,
         cost_impact: costImpact,
-        reason_category: reasonCategory,
+        reasoncategory: reasonCategory,
         metadata: {
           source: "waste_log",
           unit_cost: item.cost_per_unit ?? null,
@@ -466,14 +466,14 @@ export class InventoryService {
         adjustment_date: wasteDate,
         metadata: {
           source: "waste_log",
-          waste_id: data.id,
+          wasteid: data.id,
           waste_type: wasteEvent.waste_type,
-          reason_category: reasonCategory,
+          reasoncategory: reasonCategory,
         },
       });
 
     if (adjustmentError) {
-      await supabase.from("inv_waste").delete().eq("id", data.id);
+      await supabase.from("invwaste").delete().eq("id", data.id);
       throw adjustmentError;
     }
 
@@ -482,7 +482,7 @@ export class InventoryService {
 
   static async getWasteEvents() {
     const { data, error } = await supabase
-      .from("inv_waste")
+      .from("invwaste")
       .select(
         `
         *,
@@ -504,7 +504,7 @@ export class InventoryService {
 
   static async updateWaste(id: string, updates: Record<string, unknown>) {
     const { data, error } = await supabase
-      .from("inv_waste")
+      .from("invwaste")
       .update(updates)
       .eq("id", id)
       .select()
@@ -515,7 +515,7 @@ export class InventoryService {
   }
 
   static async deleteWaste(id: string) {
-    const { error } = await supabase.from("inv_waste").delete().eq("id", id);
+    const { error } = await supabase.from("invwaste").delete().eq("id", id);
 
     if (error) throw error;
   }
@@ -531,14 +531,14 @@ export class InventoryService {
           *,
           unit:inv_units(*)
         ),
-        produced_unit:inv_units!inv_production_events_produced_unit_id_fkey(*),
-        yield_unit:inv_units!inv_production_events_yield_unit_id_fkey(*),
-        waste_unit:inv_units!inv_production_events_waste_unit_id_fkey(*),
+        produced_unit:inv_units!inv_production_events_produced_unitid_fkey(*),
+        yield_unit:inv_units!inv_production_events_yield_unitid_fkey(*),
+        waste_unit:inv_units!inv_production_eventswaste_unitid_fkey(*),
         creator:profiles!inv_production_events_created_by_fkey(first_name, last_name),
         approver:profiles!inv_production_events_approved_by_fkey(first_name, last_name),
         materials:inv_production_materials(
           *,
-          unit:inv_units!inv_production_materials_unit_id_fkey(*),
+          unit:inv_units!inv_production_materials_unitid_fkey(*),
           ingredient:inv_items!inv_production_materials_ingredient_item_id_fkey(
             *,
             unit:inv_units(*)
@@ -569,7 +569,7 @@ export class InventoryService {
     if (!input.item_id) {
       throw new Error("Production item is required");
     }
-    if (!input.produced_unit_id) {
+    if (!input.produced_unitid) {
       throw new Error("A production unit must be selected");
     }
     if (
@@ -596,7 +596,7 @@ export class InventoryService {
           `
             *,
             unit:inv_units(*),
-            recipe_yield_unit:inv_units!recipe_yield_unit_id(*)
+            recipe_yield_unit:inv_units!recipe_yield_unitid(*)
           `,
         )
         .eq("id", input.item_id)
@@ -647,25 +647,25 @@ export class InventoryService {
       }
     };
 
-    ensureUnit(input.produced_unit_id);
-    ensureUnit(input.yield_unit_id);
-    ensureUnit(input.waste_unit_id);
+    ensureUnit(input.produced_unitid);
+    ensureUnit(input.yield_unitid);
+    ensureUnit(input.waste_unitid);
 
     const calculation = calculateProductionMaterials({
       item: item as InventoryItem,
       producedQuantity: Number(input.produced_quantity),
-      producedUnitId: input.produced_unit_id,
+      producedUnitId: input.produced_unitid,
       yieldQuantity: input.yield_quantity,
-      yieldUnitId: input.yield_unit_id,
+      yieldUnitId: input.yield_unitid,
       wasteQuantity: input.waste_quantity,
-      wasteUnitId: input.waste_unit_id,
+      wasteUnitId: input.waste_unitid,
       laborCost: input.labor_cost,
       overheadCost: input.overhead_cost,
       recipeLines: ((recipeLines ?? []) as RecipeLineWithDetails[]).map(
         (line) => ({
-          ingredient_id: line.ingredient_id,
+          ingredientid: line.ingredientid,
           quantity_needed: Number(line.quantity_needed ?? 0),
-          unit_id: line.unit_id,
+          unitid: line.unitid,
           yield_amount: Number.isFinite(line.yield_amount)
             ? Number(line.yield_amount)
             : Number(item.recipe_yield_quantity ?? 1),
@@ -695,12 +695,12 @@ export class InventoryService {
           item_id: input.item_id,
           production_type: input.production_type,
           produced_quantity: Number(input.produced_quantity),
-          produced_unit_id: input.produced_unit_id,
+          produced_unitid: input.produced_unitid,
           yield_quantity:
             input.yield_quantity ?? calculation.yieldQuantityInItemUnit,
-          yield_unit_id: input.yield_unit_id ?? item.unit_id,
+          yield_unitid: input.yield_unitid ?? item.unitid,
           waste_quantity: input.waste_quantity ?? null,
-          waste_unit_id: input.waste_unit_id ?? null,
+          waste_unitid: input.waste_unitid ?? null,
           material_cost: materialCost,
           labor_cost: laborCost,
           overhead_cost: overheadCost,
@@ -721,10 +721,10 @@ export class InventoryService {
       if (calculation.materials.length > 0) {
         const materialsPayload = calculation.materials.map((material) => ({
           company_id: item.company_id,
-          production_id: event.id,
+          productionid: event.id,
           ingredient_item_id: material.ingredientId,
           quantity_used: material.quantityUsed,
-          unit_id: material.unitId,
+          unitid: material.unitId,
           unit_cost: material.unitCost,
           total_cost: material.totalCost,
         }));
@@ -740,7 +740,7 @@ export class InventoryService {
         .from("inv_production_approvals")
         .insert({
           company_id: item.company_id,
-          production_id: event.id,
+          productionid: event.id,
           action: "submitted",
           action_by: user.id,
           notes: input.submission_note ?? null,
@@ -791,12 +791,12 @@ export class InventoryService {
       }
 
       if (calculation.wasteQuantityInItemUnit > 0) {
-        const { error: wasteError } = await supabase.from("inv_waste").insert({
+        const { error: wasteError } = await supabase.from("invwaste").insert({
           company_id: item.company_id,
           item_id: input.item_id,
           location_id: item.default_location_id ?? null,
           quantity: calculation.wasteQuantityInItemUnit,
-          reason: `production_waste:${event.id}`,
+          reason: `productionwaste:${event.id}`,
           cost_impact: calculation.wasteCostEstimate,
           waste_type: "production",
           waste_date: adjustmentDate,
@@ -814,17 +814,17 @@ export class InventoryService {
           .delete()
           .eq("reference_number", eventId);
         await supabase
-          .from("inv_waste")
+          .from("invwaste")
           .delete()
-          .eq("reason", `production_waste:${eventId}`);
+          .eq("reason", `productionwaste:${eventId}`);
         await supabase
           .from("inv_production_materials")
           .delete()
-          .eq("production_id", eventId);
+          .eq("productionid", eventId);
         await supabase
           .from("inv_production_approvals")
           .delete()
-          .eq("production_id", eventId);
+          .eq("productionid", eventId);
         await supabase.from("inv_production_events").delete().eq("id", eventId);
       }
       throw error;
@@ -834,7 +834,7 @@ export class InventoryService {
   // Prep Plans (commented out until table exists)
   // static async listPrepPlans() {
   //   const { data, error } = await supabase
-  //     .from('inv_prep_plans')
+  //     .from('invprep_plans')
   //     .select('*')
   //     .order('created_at', { ascending: false });
 
@@ -844,7 +844,7 @@ export class InventoryService {
 
   // static async savePrepPlan(plan: any) {
   //   const { data, error } = await supabase
-  //     .from('inv_prep_plans')
+  //     .from('invprep_plans')
   //     .insert(plan)
   //     .select()
   //     .single();
@@ -918,7 +918,7 @@ export class InventoryService {
         `
           *,
           unit:inv_units(*),
-          ingredient:inv_items!inv_recipes_ingredient_id_fkey(
+          ingredient:inv_items!inv_recipes_ingredientid_fkey(
             *,
             unit:inv_units(*)
           )
@@ -934,9 +934,9 @@ export class InventoryService {
   static async upsertRecipeLine(line: {
     id?: string;
     item_id: string;
-    ingredient_id: string;
+    ingredientid: string;
     quantity_needed: number;
-    unit_id: string;
+    unitid: string;
     notes?: string | null;
     yield_amount?: number | null;
   }) {
@@ -944,9 +944,9 @@ export class InventoryService {
       const { data, error } = await supabase
         .from("inv_recipes")
         .update({
-          ingredient_id: line.ingredient_id,
+          ingredientid: line.ingredientid,
           quantity_needed: line.quantity_needed,
-          unit_id: line.unit_id,
+          unitid: line.unitid,
           notes: line.notes || null,
           yield_amount: line.yield_amount ?? null,
         })
@@ -962,9 +962,9 @@ export class InventoryService {
       .from("inv_recipes")
       .insert({
         item_id: line.item_id,
-        ingredient_id: line.ingredient_id,
+        ingredientid: line.ingredientid,
         quantity_needed: line.quantity_needed,
-        unit_id: line.unit_id,
+        unitid: line.unitid,
         notes: line.notes || null,
         yield_amount: line.yield_amount ?? null,
       })

@@ -78,7 +78,7 @@ const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   job_position_input: "",
   required_headcount: 1,
   hourly_rate: "",
-  assigned_users: [],
+  assignedusers: [],
   can_claim: false,
   breaks: [
     {
@@ -217,7 +217,7 @@ export function ShiftWizardDialog({
       status: "scheduled",
       requirements: [],
       user_id: null,
-      assignments: formData.assigned_users.map((userId) => ({
+      assignments: formData.assignedusers.map((userId) => ({
         id: `draft-assignment-${userId}`,
         schedule_id: "draft-shift",
         user_id: userId,
@@ -237,11 +237,11 @@ export function ShiftWizardDialog({
         shifts,
         timeOff,
         unavailability,
-        assignedUserIds: formData.assigned_users,
+        assignedUserIds: formData.assignedusers,
       }),
     [
       draftShiftForWarnings,
-      formData.assigned_users,
+      formData.assignedusers,
       shifts,
       timeOff,
       unavailability,
@@ -283,7 +283,7 @@ export function ShiftWizardDialog({
 
   const handleAssignUsers = async (shiftId: string) => {
     if (!assign) return;
-    const assignments = formData.assigned_users ?? [];
+    const assignments = formData.assignedusers ?? [];
     if (assignments.length === 0) return;
 
     const errors: string[] = [];

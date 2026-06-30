@@ -51,7 +51,7 @@ import { logger } from "@/utils/logger";
 
 interface UnitLevel {
   id?: string;
-  unit_id: string;
+  unitid: string;
   unit_level: number;
   cost_per_unit: string;
   conversion_factor: string;
@@ -112,26 +112,26 @@ export default function InventoryItemForm({
     name: "",
     description: "",
     category: "",
-    category_id: "",
+    categoryid: "",
     barcode: "",
     sku: "",
     cost_per_unit: "",
     min_stock_level: "",
     max_stock_level: "",
-    unit_id: "",
+    unitid: "",
     unit_quantity: "1",
     default_location_id: "",
     preferred_supplier_id: "",
     shelf_life_days: "",
     recipe_yield_quantity: "",
-    recipe_yield_unit_id: "",
+    recipe_yield_unitid: "",
   });
 
   // Multi-unit state - start with one unit
   const [unitLevels, setUnitLevels] = useState<UnitLevel[]>([
     {
       id: undefined,
-      unit_id: "",
+      unitid: "",
       unit_level: 1,
       cost_per_unit: "",
       conversion_factor: "1",
@@ -191,20 +191,20 @@ export default function InventoryItemForm({
         name: editItem.name || "",
         description: editItem.description || "",
         category: editItem.category || editItem.category_details?.name || "",
-        category_id:
-          editItem.category_id || editItem.category_details?.id || "",
+        categoryid:
+          editItem.categoryid || editItem.category_details?.id || "",
         barcode: editItem.barcode || "",
         sku: editItem.sku || "",
         cost_per_unit: editItem.cost_per_unit?.toString() || "",
         min_stock_level: editItem.min_stock_level?.toString() || "",
         max_stock_level: editItem.max_stock_level?.toString() || "",
-        unit_id: editItem.unit_id || "",
+        unitid: editItem.unitid || "",
         unit_quantity: editItem.unit_quantity?.toString() || "1",
         default_location_id: editItem.default_location_id || "",
         preferred_supplier_id: editItem.preferred_supplier_id || "",
         shelf_life_days: editItem.shelf_life_days?.toString() || "",
         recipe_yield_quantity: editItem.recipe_yield_quantity?.toString() || "",
-        recipe_yield_unit_id: editItem.recipe_yield_unit_id || "",
+        recipe_yield_unitid: editItem.recipe_yield_unitid || "",
       });
       setCategoryInput(
         editItem.category_details?.name || editItem.category || "",
@@ -223,7 +223,7 @@ export default function InventoryItemForm({
       if (existingItemUnits && existingItemUnits.length > 0) {
         const loadedUnits = existingItemUnits.map((itemUnit) => ({
           id: itemUnit.id,
-          unit_id: itemUnit.unit_id,
+          unitid: itemUnit.unitid,
           unit_level: itemUnit.unit_level,
           cost_per_unit: itemUnit.cost_per_unit?.toString() || "",
           conversion_factor: itemUnit.conversion_factor?.toString() || "1",
@@ -239,7 +239,7 @@ export default function InventoryItemForm({
         setUnitLevels([
           {
             id: undefined,
-            unit_id: editItem.unit_id || "",
+            unitid: editItem.unitid || "",
             unit_level: 1,
             cost_per_unit: editItem.cost_per_unit?.toString() || "",
             conversion_factor: "1",
@@ -252,19 +252,19 @@ export default function InventoryItemForm({
         name: "",
         description: "",
         category: "",
-        category_id: "",
+        categoryid: "",
         barcode: "",
         sku: "",
         cost_per_unit: "",
         min_stock_level: "",
         max_stock_level: "",
-        unit_id: "",
+        unitid: "",
         unit_quantity: "1",
         default_location_id: "",
         preferred_supplier_id: "",
         shelf_life_days: "",
         recipe_yield_quantity: "",
-        recipe_yield_unit_id: "",
+        recipe_yield_unitid: "",
       });
       setCategoryInput("");
       setLocationInput("");
@@ -272,7 +272,7 @@ export default function InventoryItemForm({
       setUnitLevels([
         {
           id: undefined,
-          unit_id: "",
+          unitid: "",
           unit_level: 1,
           cost_per_unit: "",
           conversion_factor: "1",
@@ -332,7 +332,7 @@ export default function InventoryItemForm({
     setFormData({
       ...formData,
       category: category.name,
-      category_id: category.id,
+      categoryid: category.id,
     });
     setShowSuggestions(false);
   };
@@ -347,7 +347,7 @@ export default function InventoryItemForm({
       setFormData({
         ...formData,
         category: newCategory.name,
-        category_id: newCategory.id,
+        categoryid: newCategory.id,
       });
       setShowSuggestions(false);
     } catch (error) {
@@ -365,9 +365,9 @@ export default function InventoryItemForm({
       try {
         await deleteCategory.mutateAsync(categoryId);
         // Clear the input and selection if the deleted category was selected
-        if (formData.category_id === categoryId) {
+        if (formData.categoryid === categoryId) {
           setCategoryInput("");
-          setFormData({ ...formData, category: "", category_id: "" });
+          setFormData({ ...formData, category: "", categoryid: "" });
         }
         setShowSuggestions(false);
       } catch (error) {
@@ -472,7 +472,7 @@ export default function InventoryItemForm({
         ? parsedYieldQuantity
         : undefined;
     const recipeYieldUnitId = recipeYieldQuantity
-      ? formData.recipe_yield_unit_id || formData.unit_id || units?.[0]?.id
+      ? formData.recipe_yield_unitid || formData.unitid || units?.[0]?.id
       : undefined;
 
     const itemData = {
@@ -482,8 +482,8 @@ export default function InventoryItemForm({
       sku: formData.sku || undefined,
       barcode: formData.barcode || undefined,
       category: formData.category || undefined,
-      category_id: formData.category_id || undefined,
-      unit_id: formData.unit_id || units?.[0]?.id,
+      categoryid: formData.categoryid || undefined,
+      unitid: formData.unitid || units?.[0]?.id,
       unit_quantity: formData.unit_quantity
         ? parseFloat(formData.unit_quantity)
         : 1,
@@ -502,8 +502,8 @@ export default function InventoryItemForm({
         ? parseInt(formData.shelf_life_days)
         : undefined,
       recipe_yield_quantity: recipeYieldQuantity,
-      recipe_yield_unit_id: recipeYieldUnitId,
-      is_prep_item: false,
+      recipe_yield_unitid: recipeYieldUnitId,
+      isprep_item: false,
       is_active: true,
       created_by: profile.id,
     };
@@ -525,7 +525,7 @@ export default function InventoryItemForm({
       // Upsert unit configurations after item save
       if (savedItem?.id && unitLevels.length > 0) {
         for (const unitLevel of unitLevels) {
-          if (!unitLevel.unit_id) continue;
+          if (!unitLevel.unitid) continue;
 
           const conversionFactor =
             unitLevel.unit_level === 1
@@ -534,7 +534,7 @@ export default function InventoryItemForm({
 
           const payload = {
             item_id: savedItem.id,
-            unit_id: unitLevel.unit_id,
+            unitid: unitLevel.unitid,
             unit_level: unitLevel.unit_level,
             conversion_factor: conversionFactor,
             is_primary: unitLevel.unit_level === 1,
@@ -581,19 +581,19 @@ export default function InventoryItemForm({
         name: "",
         description: "",
         category: "",
-        category_id: "",
+        categoryid: "",
         barcode: "",
         sku: "",
         cost_per_unit: "",
         min_stock_level: "",
         max_stock_level: "",
-        unit_id: "",
+        unitid: "",
         unit_quantity: "1",
         default_location_id: "",
         preferred_supplier_id: "",
         shelf_life_days: "",
         recipe_yield_quantity: "",
-        recipe_yield_unit_id: "",
+        recipe_yield_unitid: "",
       });
       setCategoryInput("");
       setLocationInput("");
@@ -601,7 +601,7 @@ export default function InventoryItemForm({
       setUnitLevels([
         {
           id: undefined,
-          unit_id: "",
+          unitid: "",
           unit_level: 1,
           cost_per_unit: "",
           conversion_factor: "1",
@@ -805,10 +805,10 @@ export default function InventoryItemForm({
                     setFormData({
                       ...formData,
                       category: matchingCategory.name,
-                      category_id: matchingCategory.id,
+                      categoryid: matchingCategory.id,
                     });
                   } else {
-                    setFormData({ ...formData, category: "", category_id: "" });
+                    setFormData({ ...formData, category: "", categoryid: "" });
                   }
                 }}
                 onFocus={() => setShowSuggestions(true)}
@@ -930,18 +930,18 @@ export default function InventoryItemForm({
                           Unit
                         </Label>
                         <Select
-                          value={unit.unit_id || ""}
+                          value={unit.unitid || ""}
                           onValueChange={(value) => {
                             const newUnits = [...unitLevels];
                             newUnits[index] = {
                               ...newUnits[index],
-                              unit_id: value,
+                              unitid: value,
                             };
                             setUnitLevels(newUnits);
                             if (index === 0) {
                               setFormData((prev) => ({
                                 ...prev,
-                                unit_id: value,
+                                unitid: value,
                               }));
                             }
                           }}
@@ -1070,7 +1070,7 @@ export default function InventoryItemForm({
                       ...unitLevels,
                       {
                         id: undefined,
-                        unit_id: "",
+                        unitid: "",
                         unit_level: unitLevels.length + 1,
                         cost_per_unit: "",
                         conversion_factor: "",
@@ -1229,9 +1229,9 @@ export default function InventoryItemForm({
                 }
               />
               <Select
-                value={formData.recipe_yield_unit_id || formData.unit_id || ""}
+                value={formData.recipe_yield_unitid || formData.unitid || ""}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, recipe_yield_unit_id: value })
+                  setFormData({ ...formData, recipe_yield_unitid: value })
                 }
               >
                 <SelectTrigger className="h-10">

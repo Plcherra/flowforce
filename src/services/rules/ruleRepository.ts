@@ -45,17 +45,17 @@ type DbRuleAction = {
 type DbRuleTarget = {
   id: string;
   target_type: string;
-  target_id: string | null;
+  targetid: string | null;
   metadata: unknown;
 };
 
 type DbRuleAudit = {
   id: string;
-  rule_id: string;
-  workflow_id: string | null;
+  ruleid: string;
+  workflowid: string | null;
   resource: string;
   action: string;
-  actor_id: string | null;
+  actorid: string | null;
   actor_role: string | null;
   status: "allowed" | "warning" | "blocked";
   message: string | null;
@@ -133,7 +133,7 @@ export async function listRuleAudits(
   const { data, error } = await supabase
     .from("app_rule_audits")
     .select("*")
-    .eq("rule_id", ruleId)
+    .eq("ruleid", ruleId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -192,7 +192,7 @@ function mapTarget(target: DbRuleTarget): RuleTarget {
   return {
     id: target.id,
     targetType: target.target_type,
-    targetId: target.target_id ?? undefined,
+    targetId: target.targetid ?? undefined,
     metadata:
       target.metadata && typeof target.metadata === "object"
         ? (target.metadata as Record<string, unknown>)
@@ -203,11 +203,11 @@ function mapTarget(target: DbRuleTarget): RuleTarget {
 function mapAudit(audit: DbRuleAudit): RuleAuditEntry {
   return {
     id: audit.id,
-    ruleId: audit.rule_id,
-    workflowId: audit.workflow_id ?? undefined,
+    ruleId: audit.ruleid,
+    workflowId: audit.workflowid ?? undefined,
     resource: audit.resource,
     action: audit.action,
-    actorId: audit.actor_id ?? undefined,
+    actorId: audit.actorid ?? undefined,
     actorRole: audit.actor_role ?? undefined,
     status: audit.status,
     message: audit.message ?? undefined,

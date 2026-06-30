@@ -276,7 +276,7 @@ export function TaskDetailsDialog({
       const updatedTask: TaskWithRelations = {
         ...currentTask,
         ...data,
-        assigned_profile: selectedAssignee
+        assignedprofile: selectedAssignee
           ? {
               first_name: selectedAssignee.first_name,
               last_name: selectedAssignee.last_name,

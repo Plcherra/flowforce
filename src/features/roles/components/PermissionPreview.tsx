@@ -13,9 +13,8 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import type { RoleKey, ModuleId } from "../types/permissions";
+import type { RoleKey } from "../types/permissions";
 import { ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
-import { ROLE_MODULES } from "../constants/modules";
 import { formatPermissionLabel } from "../utils/permissionHelpers";
 
 interface PermissionPreviewProps {

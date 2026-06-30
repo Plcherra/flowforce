@@ -61,7 +61,7 @@ export function filterEmployeesByDepartment(
 ): Employee[] {
   if (departmentFilter === "all") return employees;
   return employees.filter(
-    (employee) => employee.department_id === departmentFilter,
+    (employee) => employee.departmentid === departmentFilter,
   );
 }
 

@@ -60,7 +60,7 @@ export async function createChannel(
   // Step 2: Add members to the channel
   // Ensure owner is always included and is an admin
   const uniqueMembers = Array.from(
-    new Set([ownerId, ...(channelData.member_ids ?? [])]),
+    new Set([ownerId, ...(channelData.memberids ?? [])]),
   ).map((memberId) => ({
     user_id: memberId,
     role: memberId === ownerId ? "admin" : "member",

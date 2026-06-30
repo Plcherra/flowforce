@@ -18,7 +18,7 @@ type TimeEntry = Tables<"time_entries">;
 type Payment = Tables<"payments">;
 type Expense = Tables<"expenses">;
 type InventoryTransaction = Tables<"inventory_transactions">;
-type WasteEvent = Tables<"inv_waste">;
+type WasteEvent = Tables<"invwaste">;
 
 type HoursTrendPoint = {
   weekLabel: string;
@@ -109,7 +109,7 @@ type OwnerFinancialOverviewRow = {
   estimated_cost: number | string | null;
   estimated_labor_cost: number | string | null;
   estimated_production_cost: number | string | null;
-  estimated_waste_cost: number | string | null;
+  estimatedwaste_cost: number | string | null;
   estimated_purchasing_cost: number | string | null;
   pending_expense_total: number | string | null;
   pending_expense_count: number | string | null;
@@ -220,7 +220,7 @@ function mapOwnerFinancialOverview(
     estimatedCost: toFiniteNumber(row.estimated_cost),
     estimatedLaborCost: toFiniteNumber(row.estimated_labor_cost),
     estimatedProductionCost: toFiniteNumber(row.estimated_production_cost),
-    estimatedWasteCost: toFiniteNumber(row.estimated_waste_cost),
+    estimatedWasteCost: toFiniteNumber(row.estimatedwaste_cost),
     estimatedPurchasingCost: toFiniteNumber(row.estimated_purchasing_cost),
     pendingExpenseTotal,
     pendingExpenseCount,
@@ -462,13 +462,13 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
           supabase
             .from("payments")
             .select("*")
-            .eq("recipient_id", user.id)
+            .eq("recipientid", user.id)
             .in("status", ["approved", "paid"])
             .in("payment_type", ["wage", "bonus", "expense_reimbursement"]),
           supabase
             .from("payments")
             .select("*")
-            .eq("recipient_id", user.id)
+            .eq("recipientid", user.id)
             .eq("status", "pending")
             .in("payment_type", ["wage", "bonus", "expense_reimbursement"]),
         ]);
@@ -795,7 +795,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           .eq("company_id", companyId)
           .gte("created_at", sixMonthsAgo),
         supabase
-          .from("inv_waste")
+          .from("invwaste")
           .select("*")
           .eq("company_id", companyId)
           .gte("created_at", sixMonthsAgo),

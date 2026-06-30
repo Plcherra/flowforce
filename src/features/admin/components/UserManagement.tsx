@@ -39,7 +39,7 @@ import {
 
 export default function UserManagement() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const { toast } = useToast();
   const { can } = useCan();
   const { resetPassword } = useAuth();

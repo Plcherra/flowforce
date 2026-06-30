@@ -201,7 +201,7 @@ export function ChannelMembers({
           ) : (
             <div className="space-y-3">
               {members.map((member, index) => {
-                const profile = member.user_profile;
+                const profile = member.userprofile;
                 const firstName = profile?.first_name ?? "";
                 const lastName = profile?.last_name ?? "";
                 const displayName =

@@ -204,7 +204,7 @@ export function InventoryTransfersPanel() {
     const units = item?.units ?? [];
     const primaryUnit =
       units.find((entry) => entry.unit_level === 1) ?? units[0];
-    const fallbackUnitId = primaryUnit?.unit_id || item?.unit_id || "";
+    const fallbackUnitId = primaryUnit?.unitid || item?.unitid || "";
     const fallbackUnitCost =
       primaryUnit?.cost_per_unit ??
       item?.calculated_cost_per_unit ??
@@ -293,7 +293,7 @@ export function InventoryTransfersPanel() {
   const handleUnitChange = (index: number, rowKey: string, unitId: string) => {
     const itemId = lineItems[index]?.itemId;
     const item = items.find((entry) => entry.id === itemId);
-    const matchedUnit = item?.units?.find((unit) => unit.unit_id === unitId);
+    const matchedUnit = item?.units?.find((unit) => unit.unitid === unitId);
     const fallbackCost =
       matchedUnit?.cost_per_unit ??
       item?.calculated_cost_per_unit ??
@@ -338,13 +338,13 @@ export function InventoryTransfersPanel() {
       const item = items.find((entry) => entry.id === row.itemId);
       const availableUnits = new Set<string>();
       (item?.units ?? []).forEach((unit) => {
-        availableUnits.add(unit.unit_id);
+        availableUnits.add(unit.unitid);
       });
-      if (item?.unit_id) {
-        availableUnits.add(item.unit_id);
+      if (item?.unitid) {
+        availableUnits.add(item.unitid);
       }
 
-      const unitId = row.unitId || item?.unit_id || "";
+      const unitId = row.unitId || item?.unitid || "";
 
       if (!unitId) {
         nextErrors[row.key] = {
@@ -376,11 +376,11 @@ export function InventoryTransfersPanel() {
           row.costPerUnit ||
           (item?.cost_per_unit != null ? String(item.cost_per_unit) : "");
         const cost = Number.parseFloat(costString);
-        const unitId = row.unitId || item?.unit_id;
+        const unitId = row.unitId || item?.unitid;
         if (!unitId) return null;
         return {
           item_id: row.itemId,
-          unit_id: unitId,
+          unitid: unitId,
           quantity,
           cost_per_unit: Number.isFinite(cost) && cost >= 0 ? cost : undefined,
         };
@@ -391,7 +391,7 @@ export function InventoryTransfersPanel() {
         ): entry is NonNullable<typeof entry> => Boolean(entry),
       ) as {
           item_id: string;
-          unit_id: string;
+          unitid: string;
           quantity: number;
           cost_per_unit?: number;
         }[];
@@ -445,8 +445,8 @@ export function InventoryTransfersPanel() {
       await createTransfer.mutateAsync({
         from_location_id: form.fromLocationId,
         to_location_id: form.toLocationId,
-        fulfiller_id: form.fulfillerId,
-        recipient_id: form.recipientId,
+        fulfillerid: form.fulfillerId,
+        recipientid: form.recipientId,
         delivery_date: form.deliveryDate || undefined,
         comments: form.comments.trim() || undefined,
         status_note: form.comments.trim() || undefined,
@@ -507,20 +507,20 @@ export function InventoryTransfersPanel() {
   };
 
   const canMarkAsSent = (transfer: InventoryTransfer) =>
-    transfer.status === "requested" && transfer.fulfiller_id === currentUserId;
+    transfer.status === "requested" && transfer.fulfillerid === currentUserId;
 
   const canMarkAsReceived = (transfer: InventoryTransfer) =>
-    transfer.status === "sent" && transfer.recipient_id === currentUserId;
+    transfer.status === "sent" && transfer.recipientid === currentUserId;
 
   const canReject = (transfer: InventoryTransfer) => {
     if (transfer.status === "requested") {
       return (
-        transfer.fulfiller_id === currentUserId ||
-        transfer.recipient_id === currentUserId
+        transfer.fulfillerid === currentUserId ||
+        transfer.recipientid === currentUserId
       );
     }
     if (transfer.status === "sent") {
-      return transfer.recipient_id === currentUserId;
+      return transfer.recipientid === currentUserId;
     }
     return false;
   };
@@ -719,12 +719,12 @@ export function InventoryTransfersPanel() {
                   const item = items.find((entry) => entry.id === row.itemId);
                   const unitOptions = item?.units ?? [];
                   const includeBaseUnitOption =
-                    Boolean(item?.unit_id) &&
-                    !unitOptions.some((unit) => unit.unit_id === item?.unit_id);
+                    Boolean(item?.unitid) &&
+                    !unitOptions.some((unit) => unit.unitid === item?.unitid);
                   const resolvedUnit =
-                    unitOptions.find((unit) => unit.unit_id === row.unitId)
+                    unitOptions.find((unit) => unit.unitid === row.unitId)
                       ?.unit ||
-                    (row.unitId && row.unitId === item?.unit_id
+                    (row.unitId && row.unitId === item?.unitid
                       ? item?.unit
                       : undefined);
                   const unitLabel =
@@ -732,7 +732,7 @@ export function InventoryTransfersPanel() {
                     resolvedUnit?.name ||
                     getItemUnitLabel(item);
                   const hasUnitChoices =
-                    unitOptions.length > 0 || Boolean(item?.unit_id);
+                    unitOptions.length > 0 || Boolean(item?.unitid);
                   const unitError = lineItemErrors[row.key]?.unit;
 
                   return (
@@ -801,7 +801,7 @@ export function InventoryTransfersPanel() {
                                 {unitOptions.map((unit) => (
                                   <SelectItem
                                     key={unit.id}
-                                    value={unit.unit_id}
+                                    value={unit.unitid}
                                   >
                                     {unit.unit?.name || "Unit"}
                                     {unit.unit?.abbreviation
@@ -812,8 +812,8 @@ export function InventoryTransfersPanel() {
                                       : ""}
                                   </SelectItem>
                                 ))}
-                                {includeBaseUnitOption && item?.unit_id ? (
-                                  <SelectItem value={item.unit_id}>
+                                {includeBaseUnitOption && item?.unitid ? (
+                                  <SelectItem value={item.unitid}>
                                     {item.unit?.name || "Default unit"}
                                     {item.unit?.abbreviation
                                       ? ` (${item.unit.abbreviation})`

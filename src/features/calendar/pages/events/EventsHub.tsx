@@ -111,11 +111,15 @@ export default function EventsHubPage() {
     }
   }, [calendarSetupMissing, error, offline, toast]);
 
-  const mergedEvents = calendarSetupMissing
-    ? []
-    : offline
-      ? fallbackEvents
-      : events;
+  const mergedEvents = useMemo(
+    () =>
+      calendarSetupMissing
+        ? []
+        : offline
+          ? fallbackEvents
+          : events,
+    [calendarSetupMissing, offline, fallbackEvents, events],
+  );
   const mergedLoading = calendarSetupMissing
     ? false
     : offline

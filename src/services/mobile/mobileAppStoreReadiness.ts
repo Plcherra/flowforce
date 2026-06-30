@@ -114,7 +114,7 @@ export const mobileAppStoreReadinessChecks = [
   "privacy_policy_and_terms_paths_are_defined",
   "ios_and_android_permission_copy_is_defined",
   "screenshots_and_metadata_are_listed",
-  "build_profiles_cover_internal_testflight_play_and_production",
+  "buildprofiles_cover_internal_testflight_play_and_production",
   "internal_testing_flow_is_documented",
 ] as const;
 

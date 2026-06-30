@@ -42,7 +42,7 @@ export interface DashboardStats {
 type EmployeeRow = {
   id: string;
   employment_status: string | null;
-  department_id: string | null;
+  departmentid: string | null;
 };
 
 type ScheduleRow = {
@@ -107,8 +107,8 @@ const isSchemaMismatchError = (error: unknown): error is PostgrestError => {
 const deriveDepartmentCount = (employees: EmployeeRow[]) => {
   const ids = new Set<string>();
   employees.forEach((employee) => {
-    if (employee?.department_id) {
-      ids.add(employee.department_id);
+    if (employee?.departmentid) {
+      ids.add(employee.departmentid);
     }
   });
   return ids.size;
@@ -243,7 +243,7 @@ export function useDashboardData() {
       const [employeesResponse, schedulesResponse] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, employment_status, department_id")
+          .select("id, employment_status, departmentid")
           .eq("company_id", companyId),
         supabase
           .from("schedules")

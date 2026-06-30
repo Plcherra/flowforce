@@ -304,8 +304,8 @@ export const createEvent = async ({
         start_time: insertPayload.start_time,
         end_time: insertPayload.end_time ?? insertPayload.start_time,
         description: insertPayload.description ?? null,
-        integration_id: (payload.vendor as Record<string, unknown> | undefined)
-          ?.integration_id as string | undefined | null,
+        integrationid: (payload.vendor as Record<string, unknown> | undefined)
+          ?.integrationid as string | undefined | null,
         integration_type: (
           payload.vendor as Record<string, unknown> | undefined
         )?.integration_type as

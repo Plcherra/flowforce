@@ -114,11 +114,11 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(debugLocator).toContainText('"vendorEvents"');
   });
 
-  test('dragging staff onto shift shows assignment chip', async ({ page }) => {
+  test('dragging staff onto shift shows assignment chip', async ({ page: _page }) => {
     test.fixme(true, 'Requires draggable staff list hook-up for deterministic assignment interaction.');
   });
 
-  test('linking vendor event to supervisor shift surfaces chip', async ({ page }) => {
+  test('linking vendor event to supervisor shift surfaces chip', async ({ page: _page }) => {
     test.fixme(true, 'Requires deterministic vendor dialog selectors; pending UI data-test hooks.');
   });
 });

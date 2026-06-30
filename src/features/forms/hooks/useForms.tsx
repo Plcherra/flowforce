@@ -107,7 +107,7 @@ const buildMetaFromRow = (
   overrides: PartialFormMeta = {},
 ): FormWithMeta => ({
   ...row,
-  created_profile: overrides.created_profile,
+  createdprofile: overrides.createdprofile,
   department: overrides.department ?? null,
   submissions_count: overrides.submissions_count ?? 0,
   latest_submission_at: overrides.latest_submission_at ?? null,
@@ -139,9 +139,9 @@ export function useForms() {
       const rows = await fetchFormsWithRelations(tenantCompanyId);
 
       // Security: Validate that all forms belong to the company (defensive check)
-      // The repository query already filters by created_profile.company_id, but this ensures data integrity
+      // The repository query already filters by createdprofile.company_id, but this ensures data integrity
       const invalidForms = rows.filter(
-        (form) => form.created_profile?.company_id !== tenantCompanyId,
+        (form) => form.createdprofile?.company_id !== tenantCompanyId,
       );
       if (invalidForms.length > 0) {
         logger.error("SECURITY WARNING: Forms from other companies detected", {
@@ -157,7 +157,7 @@ export function useForms() {
       }
 
       const validForms = rows.filter(
-        (form) => form.created_profile?.company_id === tenantCompanyId,
+        (form) => form.createdprofile?.company_id === tenantCompanyId,
       );
       const schemaFallback = useFormSchemaStore.getState().schema;
       return validForms.map((form) =>
@@ -195,7 +195,7 @@ export function useForms() {
   const createForm = async (formData: {
     title: string;
     description?: string;
-    department_id?: string;
+    departmentid?: string;
     is_anonymous?: boolean;
   }) => {
     if (!user) return { data: null, error: "User not authenticated" };
@@ -225,7 +225,7 @@ export function useForms() {
         : undefined;
 
       updateFormsCache((current) => [
-        buildMetaFromRow(created, { created_profile: authorProfile }),
+        buildMetaFromRow(created, { createdprofile: authorProfile }),
         ...current,
       ]);
 
@@ -268,7 +268,7 @@ export function useForms() {
           current.map((form) =>
             form.id === formId
               ? buildMetaFromRow(updated, {
-                  created_profile: form.created_profile,
+                  createdprofile: form.createdprofile,
                   department: form.department,
                   submissions_count: form.submissions_count,
                   latest_submission_at: form.latest_submission_at,
@@ -448,7 +448,7 @@ export function useForms() {
       const submission = await insertFormSubmission(companyId, {
         form_id: formId,
         submitted_by: user?.id || null,
-        submission_data: submissionData,
+        submissiondata: submissionData,
         ip_address: null,
         user_agent: userAgent,
       });
@@ -494,10 +494,10 @@ export function useForms() {
           form_id: formId,
           submitted_by: user.id,
           submitted_at: submittedAt,
-          submission_data: submissionData,
+          submissiondata: submissionData,
           ip_address: null,
           user_agent: userAgent,
-          offline_queue_id: queued.id,
+          offline_queueid: queued.id,
           review_status: "pending_review_sync",
         } as unknown as FormSubmissionRow;
 

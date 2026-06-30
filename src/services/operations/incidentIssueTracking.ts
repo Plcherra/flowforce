@@ -17,13 +17,13 @@ export type IncidentIssueSlaStatus =
 
 export type IncidentIssueQueueRow = {
   company_id: string;
-  issue_id: string;
+  issueid: string;
   title: string | null;
   description: string | null;
   issue_type: string | null;
   severity: IncidentIssueSeverity;
   status: IncidentIssueStatus;
-  owner_id: string | null;
+  ownerid: string | null;
   owner_name: string | null;
   due_at: string | null;
   resolved_at: string | null;
@@ -31,14 +31,14 @@ export type IncidentIssueQueueRow = {
   task_id: string | null;
   task_title: string | null;
   task_status: string | null;
-  workflow_instance_id: string | null;
+  workflow_instanceid: string | null;
   workflow_run_status: string | null;
   workflow_name: string | null;
-  workflow_exception_id: string | null;
+  workflow_exceptionid: string | null;
   workflow_exception_severity: string | null;
   workflow_exception_status: string | null;
   inventory_item_id: string | null;
-  ai_suggestion_id: string | null;
+  ai_suggestionid: string | null;
   ai_suggestion_status: string | null;
   priority_rank: number;
   sla_status: IncidentIssueSlaStatus;

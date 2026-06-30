@@ -37,7 +37,7 @@ const LEADERBOARD_SCOPE = ["gamification", "leaderboard"] as const;
 const LEADERBOARD_SELECT = `
   id,
   employee_id,
-  department_id,
+  departmentid,
   role,
   period,
   period_start,
@@ -138,7 +138,7 @@ export function useLeaderboard(
         .order("xp_total", { ascending: false });
 
       if (departmentId) {
-        query = query.eq("department_id", departmentId);
+        query = query.eq("departmentid", departmentId);
       }
       if (monthStart) {
         query = query.eq("period_start", monthStart);

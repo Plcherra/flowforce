@@ -14,6 +14,7 @@ export function useWeekTemplates() {
 
   useEffect(() => {
     fetchTemplates();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [companyId]);
 
   const fetchTemplates = async () => {

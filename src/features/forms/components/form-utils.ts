@@ -10,8 +10,8 @@ export const formatDate = (value?: string | null) => {
 };
 
 export const getOwnerName = (form: FormWithMeta) => {
-  const first = form.created_profile?.first_name ?? "";
-  const last = form.created_profile?.last_name ?? "";
+  const first = form.createdprofile?.first_name ?? "";
+  const last = form.createdprofile?.last_name ?? "";
   const name = `${first} ${last}`.trim();
   return name || "Unassigned";
 };

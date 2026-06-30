@@ -93,7 +93,7 @@ export function CountingTable({
                         {
                           id: `${item.id}-base`,
                           item_id: item.id,
-                          unit_id: item.unit_id,
+                          unitid: item.unitid,
                           unit_level: 1,
                           conversion_factor: 1,
                           cost_per_unit: item.cost_per_unit ?? null,
@@ -122,7 +122,7 @@ export function CountingTable({
                             SKU: {item.sku}
                           </div>
                         )}
-                        {item.is_prep_item && (
+                        {item.isprep_item && (
                           <Badge variant="secondary" className="text-xs">
                             Prep Item
                           </Badge>
@@ -186,7 +186,7 @@ export function CountingTable({
                           // Calculate total quantity across all units for this item
                           const totalQuantityInBaseUnits = sortedUnits.reduce(
                             (total, unit) => {
-                              const unitKey = unit.id || unit.unit_id;
+                              const unitKey = unit.id || unit.unitid;
                               const unitValue =
                                 itemCounts.unit_counts[unitKey] || 0;
                               const factor = unit.conversion_factor || 1;
@@ -220,7 +220,7 @@ export function CountingTable({
                           }
 
                           return sortedUnits.map((unit) => {
-                            const unitKey = unit.id || unit.unit_id;
+                            const unitKey = unit.id || unit.unitid;
                             const factor = unit.conversion_factor || 1;
                             const unitLabel =
                               unit.unit?.abbreviation ||

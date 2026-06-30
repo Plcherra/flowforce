@@ -23,7 +23,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
     user.email ||
     "Unnamed teammate";
   const departmentName =
-    user.department?.name ?? user.department_id ?? "Not assigned";
+    user.department?.name ?? user.departmentid ?? "Not assigned";
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not set";

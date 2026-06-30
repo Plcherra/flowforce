@@ -3,10 +3,8 @@
  */
 
 import { format } from "date-fns";
-import { Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import type { TasksMetrics, TileId } from "../../types/kpi";
+import type { TasksMetrics } from "../../types/kpi";
 import { MetricBlock } from "./MetricBlock";
 import { CopilotRecommendation } from "./CopilotRecommendation";
 

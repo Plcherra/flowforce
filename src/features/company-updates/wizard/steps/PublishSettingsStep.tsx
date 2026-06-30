@@ -409,7 +409,7 @@ export function PublishSettingsStep({
                   <div className="space-y-0.5">
                     <Label className="text-base">Require Confirmation</Label>
                     <p className="text-sm text-muted-foreground">
-                      Users must confirm they've read it
+                      Users must confirm they&apos;ve read it
                     </p>
                   </div>
                   <Switch

@@ -31,7 +31,7 @@ const GOAL_TASKS_SELECT = `
   id,
   goal_id,
   task_id,
-  milestone_id,
+  milestoneid,
   weight,
   created_at,
   task:tasks (
@@ -63,7 +63,7 @@ const mapGoalTaskRow = (
   id: row.id,
   goal_id: row.goal_id,
   task_id: row.task_id,
-  milestone_id: row.milestone_id ?? null,
+  milestoneid: row.milestoneid ?? null,
   created_at: row.created_at,
   weight: row.weight,
   task: row.task

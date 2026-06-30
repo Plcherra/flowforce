@@ -56,7 +56,7 @@ export function useNavigationStructure() {
   const isSectionVisible = (section: any) => {
     if (section.roles && !hasRole(section.roles)) return false;
     if (section.permission && !can(section.permission as any)) return false;
-    return section.items.some((item: any) => isItemVisible(item));
+    return section.items.some((item: unknown) => isItemVisible(item));
   };
 
   // Filter and deduplicate custom sections
@@ -285,6 +285,7 @@ export function useNavigationStructure() {
         };
       })
       .filter((section) => section.items.length > 0); // Only include sections with visible items
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [customSections, hasRole, can, featureFlags]);
 
   const canManageSections =

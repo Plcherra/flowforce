@@ -50,12 +50,12 @@ const toCompanyUpdate = (
     name:
       row.author_name ||
       getFullName(
-        row.author_profile?.first_name,
-        row.author_profile?.last_name,
+        row.authorprofile?.first_name,
+        row.authorprofile?.last_name,
       ) ||
       "Company Updates",
-    avatar: row.author_avatar ?? row.author_profile?.avatar_url ?? null,
-    role: row.author_role ?? row.author_profile?.role ?? null,
+    avatar: row.author_avatar ?? row.authorprofile?.avatar_url ?? null,
+    role: row.author_role ?? row.authorprofile?.role ?? null,
   },
   publishDate: row.publish_date ?? row.created_at,
   scheduledDate: row.scheduled_date,
@@ -138,7 +138,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
     const set = new Set<string>();
     (reactionsQuery.data ?? []).forEach((row) => {
       if (row.reaction_type === "like") {
-        set.add(row.update_id);
+        set.add(row.updateid);
       }
     });
     return set;
@@ -148,7 +148,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
     const set = new Set<string>();
     (reactionsQuery.data ?? []).forEach((row) => {
       if (row.reaction_type === "view") {
-        set.add(row.update_id);
+        set.add(row.updateid);
       }
     });
     return set;

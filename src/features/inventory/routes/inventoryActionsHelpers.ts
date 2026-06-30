@@ -111,7 +111,7 @@ export async function submitWasteForm({
     item_id: form.item_id,
     location_id: form.location_id || undefined,
     quantity: quantityValue,
-    unit_id: selectedItem?.unit_id,
+    unitid: selectedItem?.unitid,
     waste_type: form.waste_type as WasteTypeValue,
     reason: form.reason || undefined,
     cost_impact: costImpact,

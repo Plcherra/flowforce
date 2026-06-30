@@ -43,7 +43,7 @@ export default function InventoryTransactionForm() {
     item_id: "",
     transaction_type: "",
     quantity: "",
-    unit_id: "",
+    unitid: "",
     unit_price: "",
     reference_number: "",
     notes: "",
@@ -64,7 +64,7 @@ export default function InventoryTransactionForm() {
   const primaryUnit =
     itemUnits.find((unit) => unit.unit_level === 1) || itemUnits[0];
   const selectedUnit =
-    itemUnits.find((unit) => unit.unit_id === formData.unit_id) || primaryUnit;
+    itemUnits.find((unit) => unit.unitid === formData.unitid) || primaryUnit;
   const baseCostPerUnit =
     selectedItem?.calculated_cost_per_unit ??
     selectedItem?.cost_per_unit ??
@@ -183,7 +183,7 @@ export default function InventoryTransactionForm() {
         item_id: "",
         transaction_type: "",
         quantity: "",
-        unit_id: "",
+        unitid: "",
         unit_price: "",
         reference_number: "",
         notes: "",
@@ -278,7 +278,7 @@ export default function InventoryTransactionForm() {
                   nextUnits.find((unit) => unit.unit_level === 1) ||
                   nextUnits[0];
                 const fallbackUnitId =
-                  nextPrimary?.unit_id || nextItem?.unit_id || "";
+                  nextPrimary?.unitid || nextItem?.unitid || "";
                 const baseCost =
                   nextPrimary?.cost_per_unit ??
                   nextItem?.calculated_cost_per_unit ??
@@ -287,7 +287,7 @@ export default function InventoryTransactionForm() {
                 setFormData((prev) => ({
                   ...prev,
                   item_id: value,
-                  unit_id: fallbackUnitId,
+                  unitid: fallbackUnitId,
                   unit_price:
                     baseCost !== undefined && baseCost !== null
                       ? baseCost.toFixed(2)
@@ -365,10 +365,10 @@ export default function InventoryTransactionForm() {
             <div>
               <Label htmlFor="unit">Unit</Label>
               <Select
-                value={formData.unit_id}
+                value={formData.unitid}
                 onValueChange={(value) => {
                   const nextUnit = itemUnits.find(
-                    (unit) => unit.unit_id === value,
+                    (unit) => unit.unitid === value,
                   );
                   const nextConversion = nextUnit?.conversion_factor || 1;
                   const baseCost =
@@ -382,7 +382,7 @@ export default function InventoryTransactionForm() {
 
                   setFormData((prev) => ({
                     ...prev,
-                    unit_id: value,
+                    unitid: value,
                     unit_price:
                       nextCost !== undefined && nextCost !== null
                         ? nextCost.toFixed(2)
@@ -402,7 +402,7 @@ export default function InventoryTransactionForm() {
                   {selectedItem ? (
                     itemUnits.length > 0 ? (
                       itemUnits.map((unit) => (
-                        <SelectItem key={unit.id} value={unit.unit_id}>
+                        <SelectItem key={unit.id} value={unit.unitid}>
                           {unit.unit?.name || "Unit"}
                           {unit.unit?.abbreviation
                             ? ` (${unit.unit.abbreviation})`
@@ -413,7 +413,7 @@ export default function InventoryTransactionForm() {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value={selectedItem.unit_id || ""}>
+                      <SelectItem value={selectedItem.unitid || ""}>
                         {selectedItem.unit?.name || "Default unit"}
                       </SelectItem>
                     )

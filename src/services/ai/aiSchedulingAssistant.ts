@@ -212,7 +212,7 @@ export function buildSchedulingAssistantDraft(snapshot: AIContextSnapshot) {
     safety: {
       requires_human_approval: true as const,
       writes_allowed: false as const,
-      blocked_data_classes_observed: [],
+      blockeddata_classes_observed: [],
     },
     staffing_risks: activeSuggestions.map((suggestion) => ({
       risk: suggestion.rationale,

@@ -1,4 +1,4 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert } from "@/integrations/supabase/public-types";
@@ -142,7 +142,7 @@ const metricsRowSchema = z.object({
 
 type MetricsRow = z.infer<typeof metricsRowSchema>;
 
-const fromTable = <Row>(table: string) =>
+const fromTable = <_Row>(table: string) =>
   (learningClient as any).from(table) as any;
 
 const parseWithSchema = <Schema extends z.ZodTypeAny>(

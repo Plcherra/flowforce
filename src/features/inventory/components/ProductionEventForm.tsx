@@ -47,14 +47,14 @@ type FormState = {
   item_id: string;
   production_type: ProductionType;
   produced_quantity: string;
-  produced_unit_id: string;
+  produced_unitid: string;
   produced_at: string;
   labor_cost: string;
   overhead_cost: string;
   yield_quantity: string;
-  yield_unit_id: string;
+  yield_unitid: string;
   waste_quantity: string;
-  waste_unit_id: string;
+  waste_unitid: string;
   batch_reference: string;
   notes: string;
   submission_note: string;
@@ -64,14 +64,14 @@ const defaultFormState: FormState = {
   item_id: "",
   production_type: "prep",
   produced_quantity: "",
-  produced_unit_id: "",
+  produced_unitid: "",
   produced_at: "",
   labor_cost: "",
   overhead_cost: "",
   yield_quantity: "",
-  yield_unit_id: "",
+  yield_unitid: "",
   waste_quantity: "",
-  waste_unit_id: "",
+  waste_unitid: "",
   batch_reference: "",
   notes: "",
   submission_note: "",
@@ -120,7 +120,7 @@ export function ProductionEventForm() {
   }, [allUnits, selectedItem, recipeLines]);
 
   const preview = useMemo(() => {
-    if (!selectedItem || !form.produced_unit_id || !form.produced_quantity) {
+    if (!selectedItem || !form.produced_unitid || !form.produced_quantity) {
       return null;
     }
 
@@ -135,17 +135,17 @@ export function ProductionEventForm() {
     return calculateProductionMaterials({
       item: selectedItem,
       producedQuantity: producedQuantityNumber,
-      producedUnitId: form.produced_unit_id,
+      producedUnitId: form.produced_unitid,
       yieldQuantity: form.yield_quantity ? Number(form.yield_quantity) : null,
-      yieldUnitId: form.yield_unit_id || selectedItem.unit_id,
+      yieldUnitId: form.yield_unitid || selectedItem.unitid,
       wasteQuantity: form.waste_quantity ? Number(form.waste_quantity) : null,
-      wasteUnitId: form.waste_unit_id || selectedItem.unit_id,
+      wasteUnitId: form.waste_unitid || selectedItem.unitid,
       laborCost,
       overheadCost,
       recipeLines: recipeLines.map((line) => ({
-        ingredient_id: line.ingredient_id,
+        ingredientid: line.ingredientid,
         quantity_needed: Number(line.quantity_needed ?? 0),
-        unit_id: line.unit_id,
+        unitid: line.unitid,
         yield_amount: Number.isFinite(line.yield_amount)
           ? Number(line.yield_amount)
           : Number(selectedItem.recipe_yield_quantity ?? 1),
@@ -156,11 +156,11 @@ export function ProductionEventForm() {
     });
   }, [
     form.produced_quantity,
-    form.produced_unit_id,
+    form.produced_unitid,
     form.waste_quantity,
-    form.waste_unit_id,
+    form.waste_unitid,
     form.yield_quantity,
-    form.yield_unit_id,
+    form.yield_unitid,
     laborCost,
     overheadCost,
     recipeLines,
@@ -176,9 +176,9 @@ export function ProductionEventForm() {
     setForm((prev) => ({
       ...prev,
       item_id: itemId,
-      produced_unit_id: item?.unit_id || "",
-      yield_unit_id:
-        item?.recipe_yield_unit_id || item?.unit_id || prev.yield_unit_id,
+      produced_unitid: item?.unitid || "",
+      yield_unitid:
+        item?.recipe_yield_unitid || item?.unitid || prev.yield_unitid,
     }));
     setSubmissionWarnings([]);
   };
@@ -211,7 +211,7 @@ export function ProductionEventForm() {
         item_id: form.item_id,
         production_type: form.production_type,
         produced_quantity: producedQuantityNumber,
-        produced_unit_id: form.produced_unit_id,
+        produced_unitid: form.produced_unitid,
         produced_at: form.produced_at
           ? new Date(form.produced_at).toISOString()
           : undefined,
@@ -220,11 +220,11 @@ export function ProductionEventForm() {
         yield_quantity: form.yield_quantity
           ? Number(form.yield_quantity)
           : undefined,
-        yield_unit_id: form.yield_unit_id || undefined,
+        yield_unitid: form.yield_unitid || undefined,
         waste_quantity: form.waste_quantity
           ? Number(form.waste_quantity)
           : undefined,
-        waste_unit_id: form.waste_unit_id || undefined,
+        waste_unitid: form.waste_unitid || undefined,
         notes: form.notes || undefined,
         batch_reference: form.batch_reference || undefined,
         submission_note: form.submission_note || undefined,
@@ -242,7 +242,7 @@ export function ProductionEventForm() {
 
   const disableSubmit =
     !form.item_id ||
-    !form.produced_unit_id ||
+    !form.produced_unitid ||
     !form.produced_quantity ||
     Number(form.produced_quantity) <= 0 ||
     preview?.canRecord === false ||
@@ -327,9 +327,9 @@ export function ProductionEventForm() {
           <Label>Produced Unit *</Label>
           <Select
             disabled={unitsLoading}
-            value={form.produced_unit_id}
+            value={form.produced_unitid}
             onValueChange={(value) =>
-              setForm((prev) => ({ ...prev, produced_unit_id: value }))
+              setForm((prev) => ({ ...prev, produced_unitid: value }))
             }
           >
             <SelectTrigger>
@@ -424,9 +424,9 @@ export function ProductionEventForm() {
         <div className="space-y-2">
           <Label>Yield Unit</Label>
           <Select
-            value={form.yield_unit_id}
+            value={form.yield_unitid}
             onValueChange={(value) =>
-              setForm((prev) => ({ ...prev, yield_unit_id: value }))
+              setForm((prev) => ({ ...prev, yield_unitid: value }))
             }
           >
             <SelectTrigger>
@@ -461,9 +461,9 @@ export function ProductionEventForm() {
         <div className="space-y-2">
           <Label>Waste Unit</Label>
           <Select
-            value={form.waste_unit_id}
+            value={form.waste_unitid}
             onValueChange={(value) =>
-              setForm((prev) => ({ ...prev, waste_unit_id: value }))
+              setForm((prev) => ({ ...prev, waste_unitid: value }))
             }
           >
             <SelectTrigger>

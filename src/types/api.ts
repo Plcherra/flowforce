@@ -23,7 +23,7 @@ export interface FormFieldData {
     | "radio"
     | "date"
     | "file";
-  field_label: string;
+  fieldlabel: string;
   placeholder?: string;
   is_required: boolean;
   options?: string[];
@@ -49,7 +49,7 @@ export interface Position {
   id: string;
   name: string;
   role: "staff" | "supervisor" | "manager" | "admin";
-  department_id?: string;
+  departmentid?: string;
   description?: string;
   permissions?: PositionPermissions;
   created_at: string;

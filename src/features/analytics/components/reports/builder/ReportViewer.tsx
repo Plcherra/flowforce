@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { CustomReport, useReportData } from "@/hooks/useReports";
 import {
-  Download,
+  _Download,
   FileSpreadsheet,
   FileText,
   Filter,
@@ -33,8 +33,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  _LineChart,
+  _Line,
 } from "recharts";
 
 interface ReportViewerProps {
@@ -44,7 +44,7 @@ interface ReportViewerProps {
 
 export default function ReportViewer({ report, onBack }: ReportViewerProps) {
   const [viewMode, setViewMode] = useState<"table" | "chart">("table");
-  const [filters, setFilters] = useState({});
+  const [filters, _setFilters] = useState({});
 
   const { data: reportData, isLoading } = useReportData(
     report.report_type,

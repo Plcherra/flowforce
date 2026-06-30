@@ -204,7 +204,7 @@ export function EditSectionDialog({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete the "{section.name}" section
+                    This will permanently delete the &quot;{section.name}&quot; section
                     and all its data. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

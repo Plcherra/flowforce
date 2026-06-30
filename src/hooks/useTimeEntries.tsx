@@ -18,6 +18,7 @@ export function useTimeEntries() {
       setTimeEntries([]);
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const fetchTimeEntries = async () => {

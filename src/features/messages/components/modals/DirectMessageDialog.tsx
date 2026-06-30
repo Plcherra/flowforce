@@ -40,7 +40,7 @@ export function DirectMessageDialog({
         description: `Direct message with ${channelName}`,
         type: "direct",
         is_private: true,
-        member_ids: [user.id],
+        memberids: [user.id],
       });
 
       if (error) throw error;

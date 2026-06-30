@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+﻿import React, { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -594,7 +594,7 @@ export function SectionConfigurationWizard({
                           key={index}
                           className="text-sm text-muted-foreground"
                         >
-                          • {page.title}
+                          ΓÇó {page.title}
                           {componentMeta && (
                             <span className="text-xs text-muted-foreground ml-2">
                               ({componentMeta.label})

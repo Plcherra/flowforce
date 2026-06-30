@@ -26,7 +26,7 @@ const inventoryCountSchema = z
 const inventoryCountLineSchema = z
   .object({
     id: z.string(),
-    count_id: z.string(),
+    countid: z.string(),
     item_id: z.string(),
     counted_quantity: z.number(),
   })
@@ -63,7 +63,7 @@ type ScopedCountItem = {
     | "category"
     | "sku"
     | "default_location_id"
-    | "unit_id"
+    | "unitid"
     | "unit"
     | "unit_quantity"
   >;
@@ -162,12 +162,12 @@ export async function createInventoryCount(
 
   if (payload.locations.length > 0) {
     const locationPayload = payload.locations.map((locationId) => ({
-      count_id: countId,
+      countid: countId,
       location_id: locationId,
     }));
     const { error: locationError } = await client
       .from("inv_count_locations")
-      .upsert(locationPayload, { onConflict: "count_id,location_id" });
+      .upsert(locationPayload, { onConflict: "countid,location_id" });
     if (locationError) throw locationError;
   }
 
@@ -219,7 +219,7 @@ export async function deleteInventoryCount(
   const { error: linesError } = await client
     .from("inv_count_lines")
     .delete()
-    .eq("count_id", countId);
+    .eq("countid", countId);
   if (linesError) throw linesError;
 
   const { error } = await client.from("inv_counts").delete().eq("id", countId);
@@ -333,7 +333,7 @@ export async function listInventoryCountEvents(
   const { data, error } = await client
     .from("inv_count_events")
     .select(`*, actor:profiles(id, first_name, last_name)`)
-    .eq("count_id", countId)
+    .eq("countid", countId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -348,7 +348,7 @@ export async function listInventoryCountScans(
   const { data, error } = await client
     .from("inv_count_scans")
     .select("*")
-    .eq("count_id", countId)
+    .eq("countid", countId)
     .order("scanned_at", { ascending: false });
 
   if (error) throw error;
@@ -367,7 +367,7 @@ export async function recordInventoryCountScan(
   const client = options.supabaseClient ?? supabase;
   const userId = await getCurrentUserId(client);
   const { error } = await client.from("inv_count_scans").insert({
-    count_id: countId,
+    countid: countId,
     item_id: options.itemId ?? null,
     scanned_code: scannedCode,
     scan_type: options.scanType ?? "barcode",
@@ -398,7 +398,7 @@ export async function listInventoryCountLines(
         unit:inv_units(id, name, abbreviation)
       `,
     )
-    .eq("count_id", countId)
+    .eq("countid", countId)
     .order("item_id", { ascending: true })
     .order("unit_level", { ascending: true });
   if (error) throw error;
@@ -471,14 +471,14 @@ export async function updateInventoryCountLine(
     .from("inv_count_lines")
     .update(payload)
     .eq("id", lineId)
-    .select("count_id, item_id, unit_id, counted_quantity")
+    .select("countid, item_id, unitid, counted_quantity")
     .single();
   if (error) throw error;
 
   if (updates.counted_quantity !== undefined && data) {
-    await logCountEvent(client, data.count_id, "item_counted", {
+    await logCountEvent(client, data.countid, "item_counted", {
       item_id: data.item_id,
-      unit_id: data.unit_id,
+      unitid: data.unitid,
       counted_quantity: updates.counted_quantity,
       variance: payload.variance,
     });
@@ -494,15 +494,15 @@ export async function removeInventoryItemFromCount(
     .from("inv_count_lines")
     .delete()
     .eq("id", lineId)
-    .select("count_id, item_id, unit_id")
+    .select("countid, item_id, unitid")
     .single();
   if (error) throw error;
 
   if (data) {
-    await logCountEvent(client, data.count_id, "note_added", {
+    await logCountEvent(client, data.countid, "note_added", {
       action: "item_removed",
       item_id: data.item_id,
-      unit_id: data.unit_id,
+      unitid: data.unitid,
     });
   }
 }
@@ -544,9 +544,9 @@ async function logCountEvent(
 ) {
   const actorId = await getCurrentUserId(client);
   const { error } = await client.from("inv_count_events").insert({
-    count_id: countId,
+    countid: countId,
     event_type: eventType,
-    actor_id: actorId,
+    actorid: actorId,
     payload,
   });
   if (error) throw error;
@@ -572,7 +572,7 @@ async function resolveCountScopeItems(
   let itemQuery = client
     .from("inv_items")
     .select(
-      `id, name, category, sku, default_location_id, unit_id, unit:inv_units(*)`,
+      `id, name, category, sku, default_location_id, unitid, unit:inv_units(*)`,
     )
     .eq("company_id", companyId)
     .eq("is_active", true);
@@ -614,7 +614,7 @@ async function buildScopedItemsForIds(
   const { data, error } = await client
     .from("inv_items")
     .select(
-      `id, name, category, sku, default_location_id, unit_id, unit:inv_units(*)`,
+      `id, name, category, sku, default_location_id, unitid, unit:inv_units(*)`,
     )
     .in(
       "id",
@@ -691,46 +691,46 @@ async function bootstrapCountLines(
 
   const { data: existingLines, error: existingError } = await client
     .from("inv_count_lines")
-    .select("item_id, unit_id")
-    .eq("count_id", countId);
+    .select("item_id, unitid")
+    .eq("countid", countId);
   if (existingError) throw existingError;
 
   const existingKeys = new Set<string>(
     (existingLines ?? []).map(
-      (line) => `${line.item_id}-${line.unit_id ?? "base"}`,
+      (line) => `${line.item_id}-${line.unitid ?? "base"}`,
     ),
   );
 
   const payload: Array<Record<string, unknown>> = [];
 
   scopedItems.forEach(({ item, expectedQuantity = 0, units }) => {
-    const fallbackUnitId = item.unit?.id || item.unit_id;
+    const fallbackUnitId = item.unit?.id || item.unitid;
     const candidateUnits =
       units.length > 0
         ? units
         : [
             {
               item_id: item.id,
-              unit_id: fallbackUnitId,
+              unitid: fallbackUnitId,
               unit_level: 1,
               conversion_factor: 1,
             } as InventoryItemUnit,
           ];
 
     candidateUnits.forEach((unit) => {
-      const resolvedUnitId = unit.unit_id || unit.unit?.id || fallbackUnitId;
+      const resolvedUnitId = unit.unitid || unit.unit?.id || fallbackUnitId;
       const key = `${item.id}-${resolvedUnitId ?? "base"}`;
       if (existingKeys.has(key)) {
         return;
       }
       existingKeys.add(key);
       payload.push({
-        count_id: countId,
+        countid: countId,
         item_id: item.id,
         expected_quantity: expectedQuantityForCountUnit(expectedQuantity, unit),
         counted_quantity: 0,
         variance: -expectedQuantityForCountUnit(expectedQuantity, unit),
-        unit_id: resolvedUnitId,
+        unitid: resolvedUnitId,
         unit_level: unit.unit_level ?? 1,
         conversion_factor: unit.conversion_factor ?? 1,
         notes: null,
@@ -800,7 +800,7 @@ async function getCountLocationIds(client: SupabaseClient, countId: string) {
   const { data, error } = await client
     .from("inv_count_locations")
     .select("location_id")
-    .eq("count_id", countId);
+    .eq("countid", countId);
   if (error) throw error;
   return (data ?? [])
     .map((entry) => entry.location_id)

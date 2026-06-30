@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -26,7 +26,7 @@ interface TicketRow {
   description?: string | null;
   status?: HelpDeskTicketStatus | null;
   priority?: HelpDeskTicketPriority | null;
-  requester_id?: string | null;
+  requesterid?: string | null;
   assigned_to?: string | null;
   company_id?: string | null;
   created_at?: string | null;
@@ -79,7 +79,7 @@ const mapRowToTicket = (row: TicketRow): HelpDeskTicket => ({
   description: row.description ?? null,
   status: (row.status as HelpDeskTicketStatus) ?? DEFAULT_TICKET_STATUS,
   priority: (row.priority as HelpDeskTicketPriority) ?? DEFAULT_TICKET_PRIORITY,
-  requesterId: row.requester_id ?? null,
+  requesterId: row.requesterid ?? null,
   assignedTo: row.assigned_to ?? null,
   category: row.category ?? null,
   createdAt: row.created_at ?? new Date().toISOString(),

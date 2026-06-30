@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Plus, Settings, Trash2 } from "lucide-react";
+import { Filter } from "lucide-react";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
 import {
   CustomSection as TemplateSection,
@@ -36,7 +35,7 @@ export default function SectionManager({
   >("all");
   const [sections, setSections] =
     useState<TemplateSection[]>(AVAILABLE_SECTIONS);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [_showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [editingSection, setEditingSection] = useState<
@@ -48,7 +47,7 @@ export default function SectionManager({
   const {
     sections: customSections,
     templates,
-    loading: customLoading,
+    loading: _customLoading,
     createSection,
     updateSection,
     deleteSection,

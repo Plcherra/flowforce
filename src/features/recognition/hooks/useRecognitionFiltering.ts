@@ -47,7 +47,7 @@ export function useRecognitionFiltering({
   const departmentIdByUser = useMemo(() => {
     const map = new Map<string, string | null>();
     employees.forEach((employee) => {
-      map.set(employee.id, employee.department_id ?? null);
+      map.set(employee.id, employee.departmentid ?? null);
     });
     return map;
   }, [employees]);

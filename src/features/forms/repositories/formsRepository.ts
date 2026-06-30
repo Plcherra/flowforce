@@ -32,7 +32,7 @@ const formRowSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   created_by: z.string(),
-  department_id: z.string().nullable(),
+  departmentid: z.string().nullable(),
   is_anonymous: z.boolean().nullable(),
   max_submissions: z.number().nullable(),
   settings: jsonSchema.nullable(),
@@ -68,7 +68,7 @@ const formSubmissionRowSchema = z.object({
   id: z.string(),
   company_id: z.string().nullable().optional(),
   form_id: z.string(),
-  submission_data: jsonSchema,
+  submissiondata: jsonSchema,
   submitted_at: z.string(),
   submitted_by: z.string().nullable(),
   ip_address: z.string().nullable(),
@@ -111,7 +111,7 @@ const latestSubmissionSchema = z
   .nullable();
 
 const formQueryRowSchema = formRowSchema.extend({
-  created_profile: profileSummarySchema,
+  createdprofile: profileSummarySchema,
   department: departmentSummarySchema,
   submission_stats: submissionStatsSchema,
   latest_submission: latestSubmissionSchema,
@@ -120,7 +120,7 @@ const formQueryRowSchema = formRowSchema.extend({
 export type FormQueryRow = z.infer<typeof formQueryRowSchema>;
 
 const formSubmissionWithProfileSchema = formSubmissionRowSchema.extend({
-  submitted_profile: z
+  submittedprofile: z
     .object({
       first_name: z.string().nullable().optional(),
       last_name: z.string().nullable().optional(),
@@ -165,14 +165,14 @@ export async function fetchFormsWithRelations(
     .select(
       `
         *,
-        created_profile:profiles!inner(id, first_name, last_name, company_id),
+        createdprofile:profiles!inner(id, first_name, last_name, company_id),
         department:departments(name),
         submission_stats:form_submissions(count),
         latest_submission:form_submissions(submitted_at)
       `,
     )
     .eq("company_id", companyId)
-    .eq("created_profile.company_id", companyId)
+    .eq("createdprofile.company_id", companyId)
     .order("created_at", { ascending: false })
     .order("submitted_at", {
       foreignTable: "latest_submission",
@@ -197,7 +197,7 @@ export async function fetchFormWithRelations(
     .select(
       `
         *,
-        created_profile:profiles!inner(id, first_name, last_name, company_id),
+        createdprofile:profiles!inner(id, first_name, last_name, company_id),
         department:departments(name),
         submission_stats:form_submissions(count),
         latest_submission:form_submissions(submitted_at)
@@ -205,7 +205,7 @@ export async function fetchFormWithRelations(
     )
     .eq("id", formId)
     .eq("company_id", companyId)
-    .eq("created_profile.company_id", companyId)
+    .eq("createdprofile.company_id", companyId)
     .order("submitted_at", {
       foreignTable: "latest_submission",
       ascending: false,
@@ -336,7 +336,7 @@ export async function fetchFormSubmissions(
     .select(
       `
         *,
-        submitted_profile:profiles(first_name, last_name)
+        submittedprofile:profiles(first_name, last_name)
       `,
     )
     .eq("form_id", formId)

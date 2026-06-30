@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   useAuditLogs,
@@ -74,11 +74,11 @@ export default function AuditLog() {
 
   const describeChange = (log: AuditLogEntry) => {
     if (log.action === "user.role_updated") {
-      return `Role changed from ${log.old_values?.role ?? "unknown"} to ${log.new_values?.role ?? "unknown"}.`;
+      return `Role changed from ${(log.old_values as Record<string, string> | null)?.role ?? "unknown"} to ${(log.new_values as Record<string, string> | null)?.role ?? "unknown"}.`;
     }
 
     if (log.action === "user.status_updated") {
-      return `Status changed from ${log.old_values?.employment_status ?? "unknown"} to ${log.new_values?.employment_status ?? "unknown"}.`;
+      return `Status changed from ${(log.old_values as Record<string, string> | null)?.employment_status ?? "unknown"} to ${(log.new_values as Record<string, string> | null)?.employment_status ?? "unknown"}.`;
     }
 
     if (log.action === "permission.overrides_updated") {
@@ -90,7 +90,7 @@ export default function AuditLog() {
     }
 
     if (log.action.includes("invite")) {
-      return `Invite activity for ${log.metadata?.email ?? log.new_values?.email ?? "unknown recipient"}.`;
+      return `Invite activity for ${log.metadata?.email ?? (log.new_values as Record<string, string> | null)?.email ?? "unknown recipient"}.`;
     }
 
     return `${log.table_name}${log.record_id ? `:${log.record_id}` : ""}`;
@@ -139,11 +139,11 @@ export default function AuditLog() {
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <User className="h-4 w-4" />
                           <span>
-                            {log.user_profile?.first_name}{" "}
-                            {log.user_profile?.last_name}
+                            {log.userprofile?.first_name}{" "}
+                            {log.userprofile?.last_name}
                           </span>
-                          <span className="text-gray-400">•</span>
-                          <span>{log.user_profile?.email}</span>
+                          <span className="text-gray-400">ΓÇó</span>
+                          <span>{log.userprofile?.email}</span>
                         </div>
                       </div>
                     </div>
@@ -168,12 +168,12 @@ export default function AuditLog() {
                       {describeChange(log)}
                     </p>
 
-                    {log.performed_by_profile && (
+                    {log.performed_byprofile && (
                       <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                         <strong>Changed by:</strong>{" "}
-                        {log.performed_by_profile.first_name}{" "}
-                        {log.performed_by_profile.last_name} (
-                        {log.performed_by_profile.email})
+                        {log.performed_byprofile.first_name}{" "}
+                        {log.performed_byprofile.last_name} (
+                        {log.performed_byprofile.email})
                       </div>
                     )}
                   </div>

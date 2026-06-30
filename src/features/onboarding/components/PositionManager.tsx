@@ -98,7 +98,7 @@ export default function PositionManager({
             </DialogTitle>
             <DialogDescription>
               Add and configure specific positions within this role. Each
-              position inherits the role's base permissions.
+              position inherits the role&apos;s base permissions.
             </DialogDescription>
           </DialogHeader>
 

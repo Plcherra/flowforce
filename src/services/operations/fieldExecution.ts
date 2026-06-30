@@ -1,9 +1,9 @@
 export type FieldExecutionRunRow = {
   company_id: string;
-  workflow_instance_id: string;
-  workflow_id: string | null;
+  workflow_instanceid: string;
+  workflowid: string | null;
   workflow_name: string | null;
-  template_category: string | null;
+  templatecategory: string | null;
   run_status: string;
   review_status: string | null;
   assigned_to: string | null;
@@ -14,7 +14,7 @@ export type FieldExecutionRunRow = {
   started_at: string | null;
   due_at: string | null;
   escalation_at: string | null;
-  current_step_id: string | null;
+  current_stepid: string | null;
   total_steps: number;
   completed_steps: number;
   draft_steps: number;
@@ -25,11 +25,11 @@ export type FieldExecutionRunRow = {
 
 export type FieldExecutionStepRow = {
   company_id: string;
-  step_instance_id: string;
-  workflow_instance_id: string;
-  step_id: string;
+  step_instanceid: string;
+  workflow_instanceid: string;
+  stepid: string;
   step_name: string;
-  step_description: string | null;
+  stepdescription: string | null;
   step_number: number;
   step_type: string | null;
   required: boolean | null;
@@ -37,7 +37,7 @@ export type FieldExecutionStepRow = {
   evidence_schema: Record<string, unknown> | null;
   exception_policy: Record<string, unknown> | null;
   failure_escalation: Record<string, unknown> | null;
-  form_field_id: string | null;
+  form_fieldid: string | null;
   step_status: string;
   evidence_status: string;
   evidence_payload: Record<string, unknown> | null;
@@ -49,12 +49,12 @@ export type FieldExecutionStepRow = {
 };
 
 export type FieldExecutionRpcResult = {
-  workflow_instance_id?: string;
-  step_instance_id?: string;
-  current_step_id?: string | null;
-  next_step_id?: string | null;
-  evidence_id?: string | null;
-  exception_id?: string | null;
+  workflow_instanceid?: string;
+  step_instanceid?: string;
+  current_stepid?: string | null;
+  next_stepid?: string | null;
+  evidenceid?: string | null;
+  exceptionid?: string | null;
   status?: string;
   review_status?: string;
 };

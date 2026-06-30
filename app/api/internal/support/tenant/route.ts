@@ -96,11 +96,11 @@ const writeAuditEvent = async (params: {
   const eventMetadata = getAuditEventMetadata(params.action);
   await supabaseAdmin.from("audit_log").insert({
     company_id: params.companyId,
-    actor_id: params.userId ?? null,
-    target_user_id: params.userId ?? null,
+    actorid: params.userId ?? null,
+    targetuser_id: params.userId ?? null,
     action: params.action,
     table_name: "support_tool_runs",
-    record_id: params.requestId,
+    recordid: params.requestId,
     metadata: {
       ...eventMetadata,
       requestId: params.requestId,
@@ -121,14 +121,14 @@ const startSupportRun = async (params: {
   const { data, error } = await supabaseAdmin
     .from("support_tool_runs")
     .insert({
-      request_id: params.requestId,
+      requestid: params.requestId,
       company_id: params.companyId,
-      target_user_id: params.userId,
+      targetuser_id: params.userId,
       tool: "tenant_support",
       action: params.action,
       status: "started",
       dry_run: params.dryRun,
-      actor_label: params.actorLabel,
+      actorlabel: params.actorLabel,
       metadata: params.metadata ?? {},
     })
     .select("id")
@@ -165,7 +165,7 @@ const collectDiagnostics = async (
   const { data: company, error: companyError } = await supabaseAdmin
     .from("companies")
     .select(
-      "id, name, owner_id, registration_complete, lifecycle_status, deleted_at, created_at, updated_at",
+      "id, name, ownerid, registration_complete, lifecycle_status, deleted_at, created_at, updated_at",
     )
     .eq("id", companyId)
     .maybeSingle();
@@ -186,7 +186,7 @@ const collectDiagnostics = async (
 
   const { data: profile, error: profileError } = await profileQuery;
   if (userId && (profileError || !profile)) {
-    missing.push("owner_profile");
+    missing.push("ownerprofile");
   }
 
   const counts = {
@@ -201,7 +201,7 @@ const collectDiagnostics = async (
       company_id: companyId,
       action: "company.setup_verified",
     }),
-    dataExports: await countRows("company_data_exports", {
+    dataExports: await countRows("companydata_exports", {
       company_id: companyId,
     }),
     activeLegalHolds: await countRows("lifecycle_legal_holds", {
@@ -234,7 +234,7 @@ const collectDiagnostics = async (
 
   const uniqueMissing = [...new Set(missing)];
   const health =
-    uniqueMissing.includes("company") || uniqueMissing.includes("owner_profile")
+    uniqueMissing.includes("company") || uniqueMissing.includes("ownerprofile")
       ? "critical"
       : uniqueMissing.length > 0
         ? "degraded"
@@ -263,7 +263,7 @@ const repairOnboardingBaseline = async (params: {
 
   const { data: company, error: companyError } = await supabaseAdmin
     .from("companies")
-    .select("id, name, owner_id")
+    .select("id, name, ownerid")
     .eq("id", companyId)
     .maybeSingle();
 
@@ -293,7 +293,7 @@ const repairOnboardingBaseline = async (params: {
   await supabaseAdmin
     .from("companies")
     .update({
-      owner_id: company.owner_id ?? userId,
+      ownerid: company.ownerid ?? userId,
       registration_complete: true,
       updated_at: new Date().toISOString(),
     })
@@ -317,11 +317,11 @@ const repairOnboardingBaseline = async (params: {
 
   await supabaseAdmin.from("audit_log").insert({
     company_id: companyId,
-    actor_id: userId,
-    target_user_id: userId,
+    actorid: userId,
+    targetuser_id: userId,
     action: "company.setup_verified",
     table_name: "companies",
-    record_id: companyId,
+    recordid: companyId,
     new_values: { source: "support.repair_onboarding_baseline", requestId },
   });
 };

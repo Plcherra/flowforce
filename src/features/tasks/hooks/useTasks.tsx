@@ -171,7 +171,7 @@ export function useTasks() {
     updates: Partial<
       Omit<
         TaskWithRelations,
-        "assigned_profile" | "created_profile" | "department" | "goal"
+        "assignedprofile" | "createdprofile" | "department" | "goal"
       >
     >,
   ) => {

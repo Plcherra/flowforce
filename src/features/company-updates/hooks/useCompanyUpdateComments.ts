@@ -33,13 +33,13 @@ export function useCompanyUpdateComments(updateIds: string[]) {
 
     return commentsQuery.data.reduce<Record<string, UpdateComment[]>>(
       (acc, row) => {
-        if (!acc[row.update_id]) {
-          acc[row.update_id] = [];
+        if (!acc[row.updateid]) {
+          acc[row.updateid] = [];
         }
 
-        acc[row.update_id].push({
+        acc[row.updateid].push({
           id: row.id,
-          updateId: row.update_id,
+          updateId: row.updateid,
           companyId: row.company_id,
           content: row.content,
           likes: row.likes_count ?? 0,

@@ -19,7 +19,7 @@ import {
   TableCaption,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuditLogs, type AuditLog } from "@/hooks/useAuditLogs";
 import type { Tables } from "@/integrations/supabase/public-types";
 
@@ -63,7 +63,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
       searchTerm === "" ||
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.table_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (log.user_profile?.first_name + " " + log.user_profile?.last_name)
+      (log.userprofile?.first_name + " " + log.userprofile?.last_name)
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
@@ -260,14 +260,14 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarFallback className="text-xs">
-                              {log.performed_by_profile
-                                ? `${log.performed_by_profile.first_name[0]}${log.performed_by_profile.last_name[0]}`
+                              {log.performed_byprofile
+                                ? `${log.performed_byprofile.first_name[0]}${log.performed_byprofile.last_name[0]}`
                                 : "SY"}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm">
-                            {log.performed_by_profile
-                              ? `${log.performed_by_profile.first_name} ${log.performed_by_profile.last_name}`
+                            {log.performed_byprofile
+                              ? `${log.performed_byprofile.first_name} ${log.performed_byprofile.last_name}`
                               : "System"}
                           </span>
                         </div>

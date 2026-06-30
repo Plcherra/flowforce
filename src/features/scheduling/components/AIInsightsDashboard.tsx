@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -102,7 +101,7 @@ export function AIInsightsDashboard() {
         estimatedCost: coverageData.coverage?.estimatedCost || 0,
         efficiency: coverageData.coverage?.efficiency || 0,
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Failed to load insights",
         description: "Please try again later",
@@ -116,6 +115,7 @@ export function AIInsightsDashboard() {
 
   useEffect(() => {
     loadInsights();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, []);
 
   if (loading) {

@@ -31,7 +31,7 @@ export interface MenuItem {
   description?: string;
   category?: string;
   pos_code?: string | null;
-  recipe_id?: string;
+  recipeid?: string;
   cost_per_serving?: number;
 }
 
@@ -176,7 +176,7 @@ export function useCookbook() {
       description: recipe.item.description || recipe.item.category || undefined,
       category: recipe.item.category || "recipe",
       pos_code: recipe.item.sku,
-      recipe_id: recipe.item.id,
+      recipeid: recipe.item.id,
       cost_per_serving: Number.isFinite(recipe.costPerUnit)
         ? Number(recipe.costPerUnit)
         : undefined,
@@ -187,7 +187,7 @@ export function useCookbook() {
     if (!items.length) return [];
 
     return items
-      .filter((item) => item.is_prep_item || recipeMap.has(item.id))
+      .filter((item) => item.isprep_item || recipeMap.has(item.id))
       .map((item) => ({
         id: item.id,
         name: item.name,
@@ -262,7 +262,7 @@ export function useCookbook() {
         await CookbookService.logProduction({
           item_id,
           quantity: qty,
-          unit_id: recipe.item.unit_id,
+          unitid: recipe.item.unitid,
           note,
         });
         await CookbookService.deductIngredients(recipe, qty);
@@ -431,14 +431,14 @@ function getDemoItems(): InventoryItem[] {
       description: "Calories: 520; Protein: 28g; Carbs: 32g; Fat: 30g",
       sku: "CB-001",
       category: "Entree",
-      unit_id: unitEach.id,
+      unitid: unitEach.id,
       unit: unitEach,
       unit_quantity: 1,
       cost_per_unit: 3.25,
       min_stock_level: 10,
       max_stock_level: 50,
       shelf_life_days: 3,
-      is_prep_item: true,
+      isprep_item: true,
       is_active: true,
       created_by: "demo-user",
       created_at: now,
@@ -450,14 +450,14 @@ function getDemoItems(): InventoryItem[] {
       name: "Burger Buns",
       sku: "ING-001",
       category: "Bread",
-      unit_id: unitEach.id,
+      unitid: unitEach.id,
       unit: unitEach,
       unit_quantity: 12,
       cost_per_unit: 0.45,
       min_stock_level: 24,
       max_stock_level: 100,
       shelf_life_days: 5,
-      is_prep_item: false,
+      isprep_item: false,
       is_active: true,
       description: "Soft brioche buns for burgers",
       created_by: "demo-user",
@@ -470,14 +470,14 @@ function getDemoItems(): InventoryItem[] {
       name: "Ground Beef 80/20",
       sku: "ING-002",
       category: "Protein",
-      unit_id: unitLb.id,
+      unitid: unitLb.id,
       unit: unitLb,
       unit_quantity: 10,
       cost_per_unit: 3.6,
       min_stock_level: 15,
       max_stock_level: 60,
       shelf_life_days: 4,
-      is_prep_item: false,
+      isprep_item: false,
       is_active: true,
       description: "Premium ground beef for burgers",
       created_by: "demo-user",
@@ -498,9 +498,9 @@ function buildDemoRecipes(items: InventoryItem[]): CookbookRecipe[] {
     {
       id: "demo-line-buns",
       item_id: recipeItem.id,
-      ingredient_id: bun.id,
+      ingredientid: bun.id,
       quantity_needed: 4,
-      unit_id: bun.unit_id,
+      unitid: bun.unitid,
       notes: "Ensure buns are toasted",
       yield_amount: 4,
       ingredient: bun,
@@ -511,9 +511,9 @@ function buildDemoRecipes(items: InventoryItem[]): CookbookRecipe[] {
     {
       id: "demo-line-beef",
       item_id: recipeItem.id,
-      ingredient_id: beef.id,
+      ingredientid: beef.id,
       quantity_needed: 1.5,
-      unit_id: beef.unit_id,
+      unitid: beef.unitid,
       notes: "Season with salt and pepper",
       yield_amount: 4,
       ingredient: beef,

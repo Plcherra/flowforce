@@ -92,7 +92,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
             {t("dashboard.profile.department")}:
           </span>
           <span className="text-sm text-muted-foreground">
-            {profile?.department_id
+            {profile?.departmentid
               ? t("dashboard.profile.assigned")
               : t("dashboard.profile.unassigned")}
           </span>

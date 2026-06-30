@@ -19,7 +19,7 @@ const getAllowedOrigin = (origin: string | null): string => {
 
 const corsHeaders = (origin: string | null) => ({
   'Access-Control-Allow-Origin': getAllowedOrigin(origin),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, api_key, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 });
 
@@ -149,7 +149,7 @@ serve(async (req) => {
 });
 
 // Generate smart shift recommendations based on AI analysis
-async function generateShiftRecommendations(supabase: any, { scheduleId, companyId }: any, userId: string, validatedCompanyId: string) {
+async function generateShiftRecommendations(supabase: any, { scheduleId, _companyId }: any, userId: string, validatedCompanyId: string) {
   if (!scheduleId) {
     throw Object.assign(new Error('scheduleId is required'), { status: 400 });
   }
@@ -218,7 +218,7 @@ async function generateShiftRecommendations(supabase: any, { scheduleId, company
 
     // Calculate fairness score (0-1) - lower if overworked
     const userAssignments = currentAssignments?.filter((a: any) => a.user_id === userId) || [];
-    const weeklyHours = userAssignments.reduce((sum: number, a: any) => {
+    const weeklyHours = userAssignments.reduce((sum: number, a: unknown) => {
       const start = new Date(a.schedules.start_time);
       const end = new Date(a.schedules.end_time);
       return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
@@ -265,7 +265,7 @@ async function generateShiftRecommendations(supabase: any, { scheduleId, company
 }
 
 // Analyze schedule coverage and identify gaps
-async function analyzeCoverage(supabase: any, { companyId, weekStart }: any, validatedCompanyId: string) {
+async function analyzeCoverage(supabase: any, { _companyId, weekStart }: any, validatedCompanyId: string) {
   if (!weekStart) {
     throw Object.assign(new Error('weekStart is required'), { status: 400 });
   }
@@ -289,7 +289,7 @@ async function analyzeCoverage(supabase: any, { companyId, weekStart }: any, val
   const coverageAnalysis = {
     totalShifts: schedules?.length || 0,
     assignedShifts: schedules?.filter((s: any) => s.schedule_assignments.length > 0).length || 0,
-    unassignedShifts: schedules?.filter((s: any) => s.schedule_assignments.length === 0) || [],
+    unassignedShifts: schedules?.filter((s: unknown) => s.schedule_assignments.length === 0) || [],
     overlapConflicts: [],
     gapAlerts: [],
     roleDistribution: {},
@@ -315,7 +315,7 @@ async function analyzeCoverage(supabase: any, { companyId, weekStart }: any, val
 }
 
 // Check compliance violations
-async function checkCompliance(supabase: any, { companyId, userId, schedules }: any, validatedCompanyId: string) {
+async function checkCompliance(supabase: any, { _companyId, _userId, schedules }: any, validatedCompanyId: string) {
   if (!schedules || !Array.isArray(schedules)) {
     throw Object.assign(new Error('schedules array is required'), { status: 400 });
   }
@@ -370,7 +370,7 @@ async function checkCompliance(supabase: any, { companyId, userId, schedules }: 
 }
 
 // Generate AI insights
-async function generateInsights(supabase: any, { companyId }: any, validatedCompanyId: string) {
+async function generateInsights(supabase: any, { _companyId }: any, validatedCompanyId: string) {
   const insights = {
     overworkedStaff: [],
     underutilizedStaff: [],
@@ -419,7 +419,7 @@ async function generateInsights(supabase: any, { companyId }: any, validatedComp
 }
 
 // Auto-generate schedule using AI
-async function autoGenerateSchedule(supabase: any, { companyId, weekStart, preferences }: any, validatedCompanyId: string) {
+async function autoGenerateSchedule(supabase: any, { _companyId, weekStart, _preferences }: any, validatedCompanyId: string) {
   if (!weekStart) {
     throw Object.assign(new Error('weekStart is required'), { status: 400 });
   }

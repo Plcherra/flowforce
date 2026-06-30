@@ -39,7 +39,7 @@ export function FieldExecutionPanel() {
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const sortedRuns = useMemo(() => sortExecutionRuns(runs), [runs]);
   const selectedRun =
-    sortedRuns.find((run) => run.workflow_instance_id === selectedRunId) ??
+    sortedRuns.find((run) => run.workflow_instanceid === selectedRunId) ??
     sortedRuns[0] ??
     null;
   const summary = selectedRun ? summarizeExecutionRun(selectedRun) : null;
@@ -49,7 +49,7 @@ export function FieldExecutionPanel() {
       const { data, error } = await supabase
         .from("operations_workflow_run_steps_v")
         .select("*")
-        .eq("workflow_instance_id", workflowInstanceId)
+        .eq("workflow_instanceid", workflowInstanceId)
         .order("step_number", { ascending: true });
 
       if (error) {
@@ -85,7 +85,7 @@ export function FieldExecutionPanel() {
       setRuns(loadedRuns);
       const nextRunId =
         selectedRunId ??
-        loadedRuns[0]?.workflow_instance_id ??
+        loadedRuns[0]?.workflow_instanceid ??
         null;
       setSelectedRunId(nextRunId);
 
@@ -147,7 +147,7 @@ export function FieldExecutionPanel() {
       async () => {
         const { data, error } = await supabase.rpc("start_workflow_run", {
           p_company_id: companyId,
-          p_workflow_instance_id: workflowInstanceId,
+          p_workflow_instanceid: workflowInstanceId,
         });
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
@@ -157,12 +157,12 @@ export function FieldExecutionPanel() {
 
   const saveStepDraft = (step: FieldExecutionStepRow) =>
     runAction(
-      `draft:${step.step_instance_id}`,
+      `draft:${step.step_instanceid}`,
       async () => {
-        const draftValue = stepDrafts[step.step_instance_id] ?? "";
+        const draftValue = stepDrafts[step.step_instanceid] ?? "";
         const { data, error } = await supabase.rpc("save_workflow_step_draft", {
           p_company_id: companyId,
-          p_step_instance_id: step.step_instance_id,
+          p_step_instanceid: step.step_instanceid,
           p_evidence_payload: buildStepEvidencePayload(draftValue, "completed"),
           p_notes: draftValue || null,
         });
@@ -174,15 +174,15 @@ export function FieldExecutionPanel() {
 
   const completeStep = (step: FieldExecutionStepRow) =>
     runAction(
-      `complete:${step.step_instance_id}`,
+      `complete:${step.step_instanceid}`,
       async () => {
-        const draftValue = stepDrafts[step.step_instance_id] ?? "";
+        const draftValue = stepDrafts[step.step_instanceid] ?? "";
         const payload = step.evidence_required
           ? buildStepEvidencePayload(draftValue, "completed")
           : {};
         const { data, error } = await supabase.rpc("complete_workflow_step", {
           p_company_id: companyId,
-          p_step_instance_id: step.step_instance_id,
+          p_step_instanceid: step.step_instanceid,
           p_step_status: "completed",
           p_evidence_payload: payload,
           p_notes: draftValue || null,
@@ -196,15 +196,15 @@ export function FieldExecutionPanel() {
 
   const failStep = (step: FieldExecutionStepRow) =>
     runAction(
-      `fail:${step.step_instance_id}`,
+      `fail:${step.step_instanceid}`,
       async () => {
-        const reason = failureDrafts[step.step_instance_id] ?? "";
+        const reason = failureDrafts[step.step_instanceid] ?? "";
         const { data, error } = await supabase.rpc("complete_workflow_step", {
           p_company_id: companyId,
-          p_step_instance_id: step.step_instance_id,
+          p_step_instanceid: step.step_instanceid,
           p_step_status: "failed",
           p_evidence_payload: buildStepEvidencePayload(reason, "failed"),
-          p_notes: stepDrafts[step.step_instance_id] || null,
+          p_notes: stepDrafts[step.step_instanceid] || null,
           p_failed_reason: reason,
         });
         if (error) throw error;
@@ -219,7 +219,7 @@ export function FieldExecutionPanel() {
       async () => {
         const { data, error } = await supabase.rpc("complete_workflow_run", {
           p_company_id: companyId,
-          p_workflow_instance_id: workflowInstanceId,
+          p_workflow_instanceid: workflowInstanceId,
         });
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
@@ -245,20 +245,20 @@ export function FieldExecutionPanel() {
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {sortedRuns.map((run) => (
           <Button
-            key={run.workflow_instance_id}
+            key={run.workflow_instanceid}
             variant={
-              selectedRun?.workflow_instance_id === run.workflow_instance_id
+              selectedRun?.workflow_instanceid === run.workflow_instanceid
                 ? "default"
                 : "outline"
             }
             size="sm"
             className="shrink-0"
             onClick={() => {
-              setSelectedRunId(run.workflow_instance_id);
-              void loadSteps(run.workflow_instance_id);
+              setSelectedRunId(run.workflow_instanceid);
+              void loadSteps(run.workflow_instanceid);
             }}
           >
-            {run.template_category ?? "Run"}
+            {run.templatecategory ?? "Run"}
           </Button>
         ))}
       </div>
@@ -287,7 +287,7 @@ export function FieldExecutionPanel() {
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 size="sm"
-                onClick={() => startRun(selectedRun.workflow_instance_id)}
+                onClick={() => startRun(selectedRun.workflow_instanceid)}
                 disabled={acting !== null || !companyId}
               >
                 <Play className="mr-2 h-3.5 w-3.5" />
@@ -296,7 +296,7 @@ export function FieldExecutionPanel() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => completeRun(selectedRun.workflow_instance_id)}
+                onClick={() => completeRun(selectedRun.workflow_instanceid)}
                 disabled={acting !== null || !companyId}
               >
                 <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
@@ -308,7 +308,7 @@ export function FieldExecutionPanel() {
           <div className="space-y-3">
             {steps.map((step) => (
               <div
-                key={step.step_instance_id}
+                key={step.step_instanceid}
                 className="rounded-2xl border bg-background p-3"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -331,11 +331,11 @@ export function FieldExecutionPanel() {
                       ? "Add required evidence or reading"
                       : "Add note"
                   }
-                  value={stepDrafts[step.step_instance_id] ?? ""}
+                  value={stepDrafts[step.step_instanceid] ?? ""}
                   onChange={(event) =>
                     setStepDrafts((current) => ({
                       ...current,
-                      [step.step_instance_id]: event.target.value,
+                      [step.step_instanceid]: event.target.value,
                     }))
                   }
                 />
@@ -343,11 +343,11 @@ export function FieldExecutionPanel() {
                 <Textarea
                   className="mt-2 min-h-[64px]"
                   placeholder="Failure reason for escalation"
-                  value={failureDrafts[step.step_instance_id] ?? ""}
+                  value={failureDrafts[step.step_instanceid] ?? ""}
                   onChange={(event) =>
                     setFailureDrafts((current) => ({
                       ...current,
-                      [step.step_instance_id]: event.target.value,
+                      [step.step_instanceid]: event.target.value,
                     }))
                   }
                 />

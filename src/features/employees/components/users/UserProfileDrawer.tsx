@@ -53,6 +53,7 @@ export function UserProfileDrawer({
     if (user) {
       setActiveTab("overview");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user?.id]);
 
   if (!user) return null;

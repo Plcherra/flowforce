@@ -30,7 +30,6 @@ import type {
   ValidationRules,
   WizardStepId,
 } from "../types/formFill";
-import type { FormFieldType } from "@/types/forms";
 interface FormFillDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -127,14 +126,14 @@ export default function FormFillDialog({
         return;
       }
 
-      const { field_id, condition_type, condition_values } = conditionalLogic;
-      if (!field_id || !condition_type) {
+      const { fieldid, condition_type, condition_values } = conditionalLogic;
+      if (!fieldid || !condition_type) {
         visible.add(field.id);
         return;
       }
 
       const referencedField = orderedFields.find(
-        (candidate) => candidate.id === field_id,
+        (candidate) => candidate.id === fieldid,
       );
       if (!referencedField) {
         visible.add(field.id);

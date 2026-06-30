@@ -10,10 +10,10 @@ export type ReviewPriority =
 
 export type ManagerReviewQueueRow = {
   company_id: string;
-  workflow_instance_id: string;
-  workflow_id: string | null;
+  workflow_instanceid: string;
+  workflowid: string | null;
   workflow_name: string | null;
-  template_category: string | null;
+  templatecategory: string | null;
   run_status: string | null;
   review_status: string;
   assigned_to: string | null;
@@ -27,15 +27,15 @@ export type ManagerReviewQueueRow = {
   open_exception_count: number;
   severe_exception_count: number;
   next_exception_due_at: string | null;
-  reviewer_id: string | null;
+  reviewerid: string | null;
   latest_review_comments: string | null;
   latest_reviewed_at: string | null;
   review_priority: ReviewPriority;
 };
 
 export type ReviewWorkflowRunResult = {
-  workflow_instance_id?: string;
-  review_id?: string;
+  workflow_instanceid?: string;
+  reviewid?: string;
   review_status?: WorkflowReviewStatus;
   open_exception_count?: number;
 };

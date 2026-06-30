@@ -44,7 +44,7 @@ export interface TrainingAssignment {
 
 export interface TrainingProgressLog {
   id: string;
-  assignment_id: string;
+  assignmentid: string;
   progress: number;
   status: TrainingStatus;
   recorded_at: string;

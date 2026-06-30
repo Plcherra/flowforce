@@ -26,8 +26,8 @@ export function isValidUrl(url: string): boolean {
  * Validate phone number
  */
 export function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+  const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+  const cleanPhone = phone.replace(/[\s\-()]/g, "");
   return phoneRegex.test(cleanPhone);
 }
 
@@ -35,5 +35,5 @@ export function isValidPhone(phone: string): boolean {
  * Sanitize user input by removing potentially dangerous characters
  */
 export function sanitizeUserInput(input: string): string {
-  return input.trim().replace(/[<>\"']/g, "");
+  return input.trim().replace(/[<>"']/g, "");
 }

@@ -46,7 +46,7 @@ export function UsersTab({
     if (!userViews.time && !userViews.qualified) {
       list = employees.slice();
     }
-    list = list.filter((emp) => !formData.assigned_users.includes(emp.id));
+    list = list.filter((emp) => !formData.assignedusers.includes(emp.id));
 
     const requiredLevel = formData.required_level ?? 1;
     return getReplacementCandidates({ employees: list, requiredLevel });
@@ -157,8 +157,8 @@ export function UsersTab({
                         onClick={() => {
                           setFormData((prev) => ({
                             ...prev,
-                            assigned_users: [
-                              ...prev.assigned_users,
+                            assignedusers: [
+                              ...prev.assignedusers,
                               employee.id,
                             ],
                           }));
@@ -182,16 +182,16 @@ export function UsersTab({
             </CardContent>
           </Card>
 
-          {formData.assigned_users.length > 0 && (
+          {formData.assignedusers.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  Selected Users ({formData.assigned_users.length})
+                  Selected Users ({formData.assignedusers.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {formData.assigned_users.map((userId: string) => {
+                  {formData.assignedusers.map((userId: string) => {
                     const employee = employees.find((emp) => emp.id === userId);
                     if (!employee) return null;
                     return (
@@ -222,7 +222,7 @@ export function UsersTab({
                           onClick={() =>
                             setFormData((prev) => ({
                               ...prev,
-                              assigned_users: prev.assigned_users.filter(
+                              assignedusers: prev.assignedusers.filter(
                                 (id) => id !== userId,
                               ),
                             }))

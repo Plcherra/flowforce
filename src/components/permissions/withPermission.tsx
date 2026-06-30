@@ -151,7 +151,7 @@ interface RouteGuardProps {
 
 export function RouteGuard({
   permission,
-  redirectTo = "/unauthorized",
+  redirectTo: redirectTo = "/unauthorized",
   fallbackComponent: FallbackComponent,
   children,
 }: RouteGuardProps) {
@@ -181,7 +181,7 @@ export function RouteGuard({
             Access Denied
           </h2>
           <p className="text-gray-600">
-            You don't have permission to access this page.
+            You don&apos;t have permission to access this page.
           </p>
         </div>
       </div>

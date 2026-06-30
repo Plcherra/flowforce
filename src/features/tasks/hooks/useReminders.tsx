@@ -170,7 +170,7 @@ export function useReminders() {
             // Fallback to default browser notification sound
             logger.debug("Sound notification triggered");
           });
-        } catch (error) {
+        } catch (_error) {
           logger.debug("Sound notification triggered (fallback)");
         }
       }

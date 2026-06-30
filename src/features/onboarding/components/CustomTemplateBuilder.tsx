@@ -63,7 +63,7 @@ const industries = [
   "Other",
 ];
 
-const companySizes = [
+const _companySizes = [
   "1-10 employees",
   "11-50 employees",
   "51-200 employees",
@@ -88,11 +88,11 @@ export default function CustomTemplateBuilder({
     updateTemplate({ branding });
   };
 
-  const updateSections = (sections: CustomSection[]) => {
+  const _updateSections = (sections: CustomSection[]) => {
     updateTemplate({ sections });
   };
 
-  const handleCompanySizeChange = (size: string, checked: boolean) => {
+  const _handleCompanySizeChange = (size: string, checked: boolean) => {
     const currentSizes = template.companySize || [];
     const newSizes = checked
       ? [...currentSizes, size]

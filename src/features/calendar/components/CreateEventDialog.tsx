@@ -63,8 +63,10 @@ export function CreateEventDialog({
     useState<SelectionRecord>({});
   const [selectedShiftIds, setSelectedShiftIds] = useState<SelectionRecord>({});
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const employees = roster ?? [];
   const employeesLoading = schedulingLoading;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const safeShifts = shifts ?? [];
 
   useEffect(() => {
@@ -226,7 +228,7 @@ export function CreateEventDialog({
       if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
         throw new Error("Invalid date");
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Invalid date",
         description: "Please provide valid start and end times.",

@@ -13,18 +13,18 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
+  _Dialog,
+  _DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  _DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   useCreateReport,
   useUpdateReport,
   CustomReport,
 } from "@/hooks/useReports";
-import { Plus, Save, ArrowLeft } from "lucide-react";
+import { Save, ArrowLeft } from "lucide-react";
 import { logger } from "@/utils/logger";
 
 interface ReportBuilderProps {
@@ -84,7 +84,7 @@ export default function ReportBuilder({
   onSuccess,
   onBack,
 }: ReportBuilderProps) {
-  const [open, setOpen] = useState(false);
+  const [_open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: report?.name || "",
     description: report?.description || "",

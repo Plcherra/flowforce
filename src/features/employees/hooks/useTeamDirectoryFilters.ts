@@ -2,7 +2,7 @@
  * Hook for managing team directory filters and pagination
  */
 
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import type { Employee } from "@/hooks/useEmployees";
 import type { InventorySupplier } from "@/hooks/useInventory";
 import type { EmployeesTab } from "../types/directory";

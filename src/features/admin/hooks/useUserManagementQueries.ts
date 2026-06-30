@@ -38,7 +38,7 @@ export function useUserManagementQueries() {
           role,
           employment_status,
           avatar_url,
-          department_id,
+          departmentid,
           position_id,
           reliability,
           badges,

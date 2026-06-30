@@ -31,8 +31,10 @@ export default function Auth() {
     searchParams.get(mobileAuthRedirectParam),
   );
 
+  const userId = user?.id ?? null;
+
   useEffect(() => {
-    if (user && !loading) {
+    if (userId && !loading) {
       navigate(authSuccessPath);
     }
 
@@ -40,7 +42,7 @@ export default function Auth() {
     if (isPasswordReset) {
       setShowPasswordReset(true);
     }
-  }, [user, loading, navigate, isPasswordReset, authSuccessPath]);
+  }, [userId, loading, navigate, isPasswordReset, authSuccessPath]);
 
   const handleSignIn = async (email: string, password: string) => {
     setIsLoading(true);

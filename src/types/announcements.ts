@@ -4,14 +4,14 @@ export interface Announcement {
   content: string;
   priority: string;
   target_audience: string;
-  target_ids: unknown; // Array of user/group IDs, stored as JSON
+  targetids: unknown; // Array of user/group IDs, stored as JSON
   created_by: string;
   company_id: string;
   expires_at?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;
-  creator_profile?: {
+  creatorprofile?: {
     first_name: string;
     last_name: string;
     avatar_url?: string;
@@ -24,7 +24,7 @@ export interface CreateAnnouncementData {
   content: string;
   priority?: string;
   target_audience?: string;
-  target_ids?: string[];
+  targetids?: string[];
   expires_at?: string;
   is_published?: boolean;
 }

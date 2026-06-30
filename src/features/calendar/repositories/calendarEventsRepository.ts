@@ -75,10 +75,6 @@ export type CalendarEventRowWithRelations = CalendarEventRow & {
   event_shift_links?: Tables<"event_shift_links">[] | null;
 };
 
-type CalendarEventViewRow = CalendarEventRow & {
-  participants?: Tables<"event_participants">[] | null;
-};
-
 const calendarEventViewRowSchema =
   calendarEventRowSchema.extend({
     participants: z.array(eventParticipantRowSchema).nullable().optional(),

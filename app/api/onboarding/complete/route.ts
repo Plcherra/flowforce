@@ -202,8 +202,8 @@ export async function POST(request: Request) {
       positions,
       registration_complete: true,
       created_by: userId,
-      owner_id: userId,
-      owner_profile: {
+      ownerid: userId,
+      ownerprofile: {
         first_name: firstName,
         last_name: lastName,
         email,
@@ -214,10 +214,10 @@ export async function POST(request: Request) {
     const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
       "create_company_with_setup",
       {
-        company_data: companyPayload,
+        companydata: companyPayload,
         custom_roles: customRoles,
-        positions_data: positions,
-        owner_user_id: userId,
+        positionsdata: positions,
+        owneruser_id: userId,
       },
     );
 

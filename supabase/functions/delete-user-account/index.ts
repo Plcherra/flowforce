@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, api_key, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
   const startTime = Date.now()
   let supabaseAdmin: any = null
-  let userSession: any = null
+  let userSession: unknown = null
   const deletionStats: DeletionStats = {
     initialCounts: {},
     finalCounts: {},

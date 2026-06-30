@@ -27,7 +27,7 @@ export interface ShiftWizardFormData {
   required_headcount: number;
   hourly_rate: string;
   required_level?: number;
-  assigned_users: string[];
+  assignedusers: string[];
   can_claim: boolean;
   breaks: BreakItem[];
   notes: string;

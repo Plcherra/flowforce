@@ -4,7 +4,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
-import type { SingleInviteForm, BulkInviteRow } from "../types/invites";
+import type { BulkInviteRow } from "../types/invites";
 
 /**
  * Build invite link from token
@@ -68,10 +68,10 @@ export function parseCsvForBulkInvites(text: string): {
     .map((column) => column.trim().toLowerCase());
   const emailIndex = header.findIndex((column) => column === "email");
   const firstNameIndex = header.findIndex((column) =>
-    ["first_name", "firstname", "first"].includes(column),
+    ["first_name", "first_name", "first"].includes(column),
   );
   const lastNameIndex = header.findIndex((column) =>
-    ["last_name", "lastname", "last"].includes(column),
+    ["last_name", "last_name", "last"].includes(column),
   );
   const roleIndex = header.findIndex((column) => column === "role");
 

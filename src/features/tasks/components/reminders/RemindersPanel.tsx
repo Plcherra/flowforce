@@ -119,7 +119,7 @@ export function RemindersPanel() {
         title: "Reminder Snoozed",
         description: "Reminder will appear again in 15 minutes.",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to snooze reminder.",
@@ -135,7 +135,7 @@ export function RemindersPanel() {
         title: "Test Notification",
         description: "Test reminder notification sent!",
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error",
         description: "Failed to send test notification.",

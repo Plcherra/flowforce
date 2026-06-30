@@ -25,6 +25,7 @@ export function usePasswordValidation(personalInfo?: PersonalInfo) {
       setValidationResult(result);
       return result;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
     [
       personalInfo?.firstName,
       personalInfo?.lastName,

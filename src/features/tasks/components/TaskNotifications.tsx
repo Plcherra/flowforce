@@ -220,7 +220,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                     No notifications yet
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    You'll see task updates here
+                    You&apos;ll see task updates here
                   </p>
                 </div>
               ) : (

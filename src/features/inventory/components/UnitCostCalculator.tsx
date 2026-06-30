@@ -2,7 +2,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 
 interface UnitLevel {
   unit_level: number;
-  unit_id: string;
+  unitid: string;
   conversion_factor: number;
   cost_per_unit?: number;
   unit_name?: string;

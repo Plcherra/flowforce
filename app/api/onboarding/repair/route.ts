@@ -115,14 +115,14 @@ export async function POST(request: Request) {
       phone: readMetadataValue(metadata, "company_phone"),
       industry: readMetadataValue(metadata, "company_industry") ?? "Other",
       size: readMetadataValue(metadata, "company_size") ?? "1-10 employees",
-      description: readMetadataValue(metadata, "company_description"),
+      description: readMetadataValue(metadata, "companydescription"),
       primary_color: "#3b82f6",
       secondary_color: "#1e40af",
       template_id: readMetadataValue(metadata, "onboarding_template_id"),
       template_name: readMetadataValue(metadata, "onboarding_template_name"),
       enabled_sections: [],
       template_config: {},
-      owner_profile: {
+      ownerprofile: {
         first_name: firstName,
         last_name: lastName,
         email: user.email ?? null,
@@ -133,10 +133,10 @@ export async function POST(request: Request) {
     const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
       "create_company_with_setup",
       {
-        company_data: companyPayload,
+        companydata: companyPayload,
         custom_roles: [],
-        positions_data: [],
-        owner_user_id: user.id,
+        positionsdata: [],
+        owneruser_id: user.id,
       },
     );
 

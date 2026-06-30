@@ -47,7 +47,7 @@ export function CreateChannelDialog({
 
     setLoading(true);
     try {
-      const { data, error } = await createChannel({
+      const { _data, error } = await createChannel({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         type: formData.type,

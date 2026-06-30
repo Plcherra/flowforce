@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Reply, Users, X, Send } from "lucide-react";
+import { MessageSquare, Reply,  X, Send } from "lucide-react";
 import { format } from "date-fns";
 
 interface ThreadMessage {

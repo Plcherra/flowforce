@@ -93,7 +93,7 @@ export interface LeaderboardSyncMetrics {
 export interface LeaderboardSyncRow {
   company_id: string;
   employee_id: string;
-  department_id: string | null;
+  departmentid: string | null;
   role: string;
   period: LeaderboardPeriod;
   period_start: string | null;

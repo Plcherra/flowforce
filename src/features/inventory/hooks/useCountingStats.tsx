@@ -23,7 +23,7 @@ export function useCountingStats(
             {
               id: `${item.id}-base`,
               item_id: item.id,
-              unit_id: item.unit_id,
+              unitid: item.unitid,
               unit_level: 1,
               conversion_factor: 1,
               is_primary: true,
@@ -39,7 +39,7 @@ export function useCountingStats(
       (total, [unitId, quantity]) => {
         if (!quantity || quantity <= 0) return total;
 
-        const unit = units.find((u) => (u.id || u.unit_id) === unitId);
+        const unit = units.find((u) => (u.id || u.unitid) === unitId);
         const unitCost =
           unit?.cost_per_unit ?? baseCost * (unit?.conversion_factor || 1);
 
@@ -59,7 +59,7 @@ export function useCountingStats(
             {
               id: `${item.id}-base`,
               item_id: item.id,
-              unit_id: item.unit_id,
+              unitid: item.unitid,
               unit_level: 1,
               conversion_factor: 1,
               is_primary: true,
@@ -72,7 +72,7 @@ export function useCountingStats(
     const totalCountedInBase = Object.entries(count.unit_counts).reduce(
       (sum, [unitId, qty]) => {
         if (!qty || qty <= 0) return sum;
-        const unit = units.find((u) => (u.id || u.unit_id) === unitId);
+        const unit = units.find((u) => (u.id || u.unitid) === unitId);
         const factor = unit?.conversion_factor || 1;
         return sum + qty * factor;
       },

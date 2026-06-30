@@ -37,7 +37,7 @@ export async function fetchTaskActivitiesForCompany(
     .select(
       `
         *,
-        actor:profiles!task_activities_user_id_fkey(first_name, last_name)
+        actor:profiles!task_activitiesuser_id_fkey(first_name, last_name)
       `,
     )
     .eq("company_id", companyId)

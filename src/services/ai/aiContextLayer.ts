@@ -24,7 +24,7 @@ export interface AIContextReadinessRow {
   has_forms: boolean;
   has_employees: boolean;
   has_cost: boolean;
-  all_modules_freshness_declared: boolean;
+  allmodules_freshness_declared: boolean;
   redaction_enforced: boolean;
   ready_for_prompt_contracts: boolean;
 }
@@ -55,14 +55,14 @@ export const aiContextModuleKeys: AIContextModuleKey[] = [
 
 export const aiContextBlockedDataClasses = [
   "raw_pii",
-  "cross_tenant_data",
+  "cross_tenantdata",
   "secret_material",
   "payroll_detail",
 ] as const;
 
 export const aiContextRedactionRules = {
   raw_pii: "blocked",
-  cross_tenant_data: "blocked",
+  cross_tenantdata: "blocked",
   secret_material: "blocked",
   payroll_detail: "blocked",
   names: "excluded",
@@ -90,7 +90,7 @@ export function isAIContextReady(row: AIContextReadinessRow) {
     row.has_forms &&
     row.has_employees &&
     row.has_cost &&
-    row.all_modules_freshness_declared &&
+    row.allmodules_freshness_declared &&
     row.redaction_enforced &&
     row.ready_for_prompt_contracts
   );
@@ -103,7 +103,7 @@ export function hasCompleteAIContextSnapshot(snapshot: AIContextSnapshot) {
       module?.summary &&
         module.freshness_at &&
         module.redaction?.raw_pii === "blocked" &&
-        module.redaction?.cross_tenant_data === "blocked",
+        module.redaction?.cross_tenantdata === "blocked",
     );
   });
 }

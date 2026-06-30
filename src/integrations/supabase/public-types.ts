@@ -6,8 +6,6 @@ export type Database = GeneratedDatabase;
 
 type DatabaseWithoutInternals = Omit<GeneratedDatabase, "__InternalSupabase">;
 type DefaultSchema = DatabaseWithoutInternals["public"];
-type DefaultTables = DefaultSchema["Tables"];
-type DefaultViews = DefaultSchema["Views"];
 type AnyRow = any;
 type AnyInsert = any;
 type AnyUpdate = any;
@@ -16,18 +14,18 @@ type AnyUpdate = any;
 // the database contract is stabilized, app-facing table helpers stay permissive
 // so stale generated table columns do not block TypeScript validation.
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends string | { schema: string },
-  TableName extends string = never,
+  _DefaultSchemaTableNameOrOptions extends string | { schema: string },
+  _TableName extends string = never,
 > = AnyRow;
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends string | { schema: string },
-  TableName extends string = never,
+  _DefaultSchemaTableNameOrOptions extends string | { schema: string },
+  _TableName extends string = never,
 > = AnyInsert;
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends string | { schema: string },
-  TableName extends string = never,
+  _DefaultSchemaTableNameOrOptions extends string | { schema: string },
+  _TableName extends string = never,
 > = AnyUpdate;
 
 export type Enums<

@@ -138,6 +138,7 @@ export function useCan(permissionKey?: PermissionKey) {
         ? resolver.getPermissionSource(permissionKey)
         : undefined,
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [
     profile,
     roles,

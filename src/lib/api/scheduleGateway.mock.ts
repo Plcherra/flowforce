@@ -81,7 +81,7 @@ const buildVendorVisitRow = (
     end_time: payload.vendor.end_time ?? payload.calendar.end_time ?? timestamp,
     description:
       payload.vendor.description ?? payload.calendar.description ?? null,
-    integration_id: payload.vendor.integration_id ?? null,
+    integrationid: payload.vendor.integrationid ?? null,
     integration_type: payload.vendor.integration_type ?? null,
     linked_event_id: linkedEventId,
     created_at: (payload.vendor as VendorInsertPayload).created_at ?? timestamp,

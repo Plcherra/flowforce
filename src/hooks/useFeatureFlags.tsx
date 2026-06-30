@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   DEFAULT_FEATURE_FLAGS,
-  type FeatureFlags,
   getFeatureFlag,
 } from "@/config/featureFlags";
 import { supabase } from "@/integrations/supabase/client";

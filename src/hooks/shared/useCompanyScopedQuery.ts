@@ -9,13 +9,13 @@
  * - Date-range queries (`.gte()`, `.lte()`)
  */
 
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useProfile } from "../useProfile";
 import { useAuth } from "../useAuth";
 import { supabase } from "@/integrations/supabase/client";
 type SupabaseQueryBuilder = any;
 
-interface UseCompanyScopedQueryOptions<TData> {
+interface UseCompanyScopedQueryOptions<_TData> {
   queryKey: readonly unknown[];
   table: string;
   select?: string;
@@ -128,7 +128,7 @@ export function useUserScopedQuery<TData>({
   queryKey: readonly unknown[];
   table: string;
   select?: string;
-  userIdField?: "user_id" | "created_by" | "sender_id" | "requester_id";
+  userIdField?: "user_id" | "created_by" | "senderid" | "requesterid";
   enabled?: boolean;
   staleTime?: number;
   gcTime?: number;

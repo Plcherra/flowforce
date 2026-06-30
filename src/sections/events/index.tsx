@@ -1,5 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "@/lib/router-adapter";
+import { Card, CardContent } from "@/components/ui/card";
 import config from "./section.config";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -18,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input as UiInput } from "@/components/ui/input";
 import { logger } from "@/utils/logger";
-import { isSameDay } from "@/shared/utils";
 
 // Calendar utilities
 function startOfMonth(d: Date) {
@@ -70,7 +68,7 @@ function CalendarView({
   // build month matrix (weeks x days)
   const weeks = useMemo(() => {
     const start = startOfMonth(current);
-    const end = endOfMonth(current);
+    const _end = endOfMonth(current);
     const startWeekDay = start.getDay(); // 0..6 (Sun..Sat)
 
     const cells: Date[] = [];
@@ -168,7 +166,7 @@ function CalendarView({
                     const e =
                       parseISO(ev.end) ||
                       new Date(s.getTime() + 60 * 60 * 1000);
-                    const durationH = Math.max(
+                    const _durationH = Math.max(
                       1,
                       Math.round(
                         (e.getTime() - s.getTime()) / (60 * 60 * 1000),
@@ -256,7 +254,7 @@ function CalendarView({
                     })
                     .map((ev) => {
                       const s = parseISO(ev.start)!;
-                      const e =
+                      const _e =
                         parseISO(ev.end) ||
                         new Date(s.getTime() + 60 * 60 * 1000);
                       return (

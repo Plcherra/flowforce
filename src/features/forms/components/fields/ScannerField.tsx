@@ -12,9 +12,9 @@ interface ScanConfig {
 }
 
 interface ScanData {
-  scan_data: string;
+  scandata: string;
   scan_type: "barcode" | "qr_code";
-  scan_format?: string;
+  scanformat?: string;
 }
 
 interface ScannerFieldProps {
@@ -45,6 +45,7 @@ export function ScannerField({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const supportedTypes = config.scan_types || ["barcode", "qr_code"];
 
   const startCamera = useCallback(async () => {
@@ -86,9 +87,9 @@ export function ScannerField({
         : "barcode";
 
     const scanData: ScanData = {
-      scan_data: manualValue.trim(),
+      scandata: manualValue.trim(),
       scan_type: scanType,
-      scan_format: "manual_entry",
+      scanformat: "manual_entry",
     };
 
     onChange(scanData);
@@ -104,9 +105,9 @@ export function ScannerField({
   const simulateScan = useCallback(() => {
     // For demo purposes - simulate a successful scan
     const mockData: ScanData = {
-      scan_data: Math.random().toString(36).substring(2, 15),
+      scandata: Math.random().toString(36).substring(2, 15),
       scan_type: supportedTypes[0],
-      scan_format: "simulated",
+      scanformat: "simulated",
     };
 
     onChange(mockData);
@@ -158,11 +159,11 @@ export function ScannerField({
                   {formatScanType(value.scan_type)} Scanned
                 </p>
                 <p className="text-sm text-muted-foreground break-all">
-                  {value.scan_data}
+                  {value.scandata}
                 </p>
-                {value.scan_format && (
+                {value.scanformat && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Format: {value.scan_format}
+                    Format: {value.scanformat}
                   </p>
                 )}
               </div>

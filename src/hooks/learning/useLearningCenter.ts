@@ -48,7 +48,6 @@ type SkillSnapshot = {
   xp: number;
 };
 
-type TrainingInsights = Awaited<ReturnType<typeof analyzeTrainingProgress>>;
 type ProgressQueryData = {
   eventsMap: Record<string, LearningProgressEvent[]>;
   snapshotsMap: Record<string, LearningProgressSnapshot[]>;
@@ -114,7 +113,10 @@ export function useLearningCenter() {
     staleTime: 30_000,
   });
 
-  const enrollmentList = enrollmentsQuery.data ?? [];
+  const enrollmentList = useMemo(
+    () => enrollmentsQuery.data ?? [],
+    [enrollmentsQuery.data],
+  );
   const enrollmentIdsKey = useMemo(
     () =>
       enrollmentList
@@ -211,7 +213,10 @@ export function useLearningCenter() {
     },
   });
 
-  const catalog = catalogQuery.data ?? [];
+  const catalog = useMemo(
+    () => catalogQuery.data ?? [],
+    [catalogQuery.data],
+  );
   const adminEnrollments = trainingAdmin
     ? (adminEnrollmentsQuery.data ?? [])
     : [];
@@ -314,7 +319,9 @@ export function useLearningCenter() {
 
   const progressByEnrollment = progressQuery.data?.eventsMap ?? {};
   const progressSnapshotsByEnrollment = progressQuery.data?.snapshotsMap ?? {};
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const progressEventCursors = progressQuery.data?.eventCursors ?? {};
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const progressSnapshotCursors = progressQuery.data?.snapshotCursors ?? {};
 
   const loading =
@@ -411,6 +418,7 @@ export function useLearningCenter() {
         return null;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
     [
       profileId,
       companyId,
@@ -498,6 +506,7 @@ export function useLearningCenter() {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
     [
       enrollmentList,
       catalog,

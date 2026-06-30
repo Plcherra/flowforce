@@ -108,7 +108,7 @@ const sharedWeekendTemplate: CoverageSlotTemplate[] = [
   },
   {
     area: "BOH",
-    roleId: "boh_prep",
+    roleId: "bohprep",
     roleName: "Prep Cook",
     start: "06:00",
     end: "14:00",
@@ -116,7 +116,7 @@ const sharedWeekendTemplate: CoverageSlotTemplate[] = [
   },
   {
     area: "BOH",
-    roleId: "boh_prep",
+    roleId: "bohprep",
     roleName: "Prep Cook",
     start: "14:00",
     end: "22:00",
@@ -187,7 +187,7 @@ const inmanWeekdayTemplate: CoverageSlotTemplate[] = [
   },
   {
     area: "BOH",
-    roleId: "boh_prep",
+    roleId: "bohprep",
     roleName: "Prep Cook",
     start: "11:00",
     end: "19:00",
@@ -258,7 +258,7 @@ const oneCanalWeekdayTemplate: CoverageSlotTemplate[] = [
   },
   {
     area: "BOH",
-    roleId: "boh_prep",
+    roleId: "bohprep",
     roleName: "Prep Cook",
     start: "10:00",
     end: "18:00",
@@ -351,7 +351,7 @@ const inmanEmployees: CopilotEmployeeSeed[] = [
     locationIds: ["inman-sq"],
     area: "BOH",
     roles: ["Prep Cook"],
-    qualificationIds: ["boh_prep"],
+    qualificationIds: ["bohprep"],
     availability: [
       { weekday: 1, ranges: [{ start: "10:00", end: "20:00" }] },
       { weekday: 2, ranges: [{ start: "10:00", end: "20:00" }] },
@@ -420,7 +420,7 @@ const inmanEmployees: CopilotEmployeeSeed[] = [
 
 const oneCanalEmployees: CopilotEmployeeSeed[] = [
   {
-    id: "emp_canal_mason",
+    id: "empcanal_mason",
     name: "Mason Lee",
     locationIds: ["one-canal"],
     area: "FOH",
@@ -435,7 +435,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     preferredDaysOff: [6],
   },
   {
-    id: "emp_canal_ariana",
+    id: "empcanal_ariana",
     name: "Ariana Flores",
     locationIds: ["one-canal"],
     area: "FOH",
@@ -451,7 +451,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 35,
   },
   {
-    id: "emp_canal_zoe",
+    id: "empcanal_zoe",
     name: "Zoe Carter",
     locationIds: ["one-canal"],
     area: "FOH",
@@ -467,7 +467,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 30,
   },
   {
-    id: "emp_canal_dylan",
+    id: "empcanal_dylan",
     name: "Dylan Murphy",
     locationIds: ["one-canal", "inman-sq"],
     area: "FOH",
@@ -481,7 +481,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 34,
   },
   {
-    id: "emp_canal_isabella",
+    id: "empcanal_isabella",
     name: "Isabella Reed",
     locationIds: ["one-canal"],
     area: "BOH",
@@ -495,7 +495,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 40,
   },
   {
-    id: "emp_canal_omar",
+    id: "empcanal_omar",
     name: "Omar Hassan",
     locationIds: ["one-canal"],
     area: "BOH",
@@ -531,12 +531,12 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 32,
   },
   {
-    id: "emp_canal_rachel",
+    id: "empcanal_rachel",
     name: "Rachel Kim",
     locationIds: ["one-canal"],
     area: "BOH",
     roles: ["Prep Cook"],
-    qualificationIds: ["boh_prep"],
+    qualificationIds: ["bohprep"],
     availability: [
       { weekday: 0, ranges: [{ start: "08:00", end: "16:00" }] },
       { weekday: 2, ranges: [{ start: "08:00", end: "16:00" }] },
@@ -547,7 +547,7 @@ const oneCanalEmployees: CopilotEmployeeSeed[] = [
     maxHoursWeek: 30,
   },
   {
-    id: "emp_canal_dev",
+    id: "empcanal_dev",
     name: "Dev Shah",
     locationIds: ["one-canal"],
     area: "FOH",

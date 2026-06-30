@@ -10,7 +10,7 @@ import type { InventoryTransfer, InventoryTransferStatus } from "./types";
 
 export interface TransferItemInput {
   item_id: string;
-  unit_id: string;
+  unitid: string;
   quantity: number;
   cost_per_unit?: number | null;
 }
@@ -18,8 +18,8 @@ export interface TransferItemInput {
 export interface CreateInventoryTransferInput {
   from_location_id: string;
   to_location_id: string;
-  fulfiller_id: string;
-  recipient_id: string;
+  fulfillerid: string;
+  recipientid: string;
   delivery_date?: string | null;
   comments?: string | null;
   status_note?: string | null;
@@ -118,7 +118,7 @@ export function useUpdateInventoryTransferStatus() {
       const actorId = profile.userId ?? profile.id;
 
       return updateInventoryTransferStatus(id, {
-        actor_id: actorId,
+        actorid: actorId,
         status,
         status_note,
       });

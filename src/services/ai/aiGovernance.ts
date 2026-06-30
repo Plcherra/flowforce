@@ -10,11 +10,11 @@ export type AIGovernanceDataClass =
   | "workflow_exception_metadata"
   | "schedule_coverage_metadata"
   | "inventory_cost_metrics"
-  | "employee_profile_minimum"
+  | "employeeprofile_minimum"
   | "raw_pii"
   | "payroll_detail"
   | "secret_material"
-  | "cross_tenant_data";
+  | "cross_tenantdata";
 
 export interface AIGovernancePolicy {
   policyKey: string;
@@ -38,7 +38,7 @@ export interface AIGovernanceReadinessRow {
   has_suggested_action: boolean;
   has_approved_action: boolean;
   has_automated_action: boolean;
-  blocks_sensitive_data: boolean;
+  blocks_sensitivedata: boolean;
   has_audit_events: boolean;
   ready_for_ai_phase_two: boolean;
 }
@@ -66,7 +66,7 @@ export const aiGovernancePolicies: AIGovernancePolicy[] = [
       "schedule_coverage_metadata",
       "inventory_cost_metrics",
     ],
-    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenant_data"],
+    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenantdata"],
     requiresHumanApproval: false,
     allowsBackgroundAutomation: false,
     auditEvent: "ai.insight.generated",
@@ -85,9 +85,9 @@ export const aiGovernancePolicies: AIGovernancePolicy[] = [
       "workflow_exception_metadata",
       "schedule_coverage_metadata",
       "inventory_cost_metrics",
-      "employee_profile_minimum",
+      "employeeprofile_minimum",
     ],
-    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenant_data"],
+    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenantdata"],
     requiresHumanApproval: true,
     allowsBackgroundAutomation: false,
     auditEvent: "ai.suggestion.created",
@@ -106,9 +106,9 @@ export const aiGovernancePolicies: AIGovernancePolicy[] = [
       "workflow_exception_metadata",
       "schedule_coverage_metadata",
       "inventory_cost_metrics",
-      "employee_profile_minimum",
+      "employeeprofile_minimum",
     ],
-    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenant_data"],
+    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenantdata"],
     requiresHumanApproval: true,
     allowsBackgroundAutomation: false,
     auditEvent: "ai.action.approved",
@@ -127,7 +127,7 @@ export const aiGovernancePolicies: AIGovernancePolicy[] = [
       "workflow_exception_metadata",
       "schedule_coverage_metadata",
     ],
-    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenant_data"],
+    blockedDataClasses: ["raw_pii", "payroll_detail", "secret_material", "cross_tenantdata"],
     requiresHumanApproval: true,
     allowsBackgroundAutomation: true,
     auditEvent: "ai.automation.executed",
@@ -150,7 +150,7 @@ export function isAIGovernanceReady(row: AIGovernanceReadinessRow) {
     row.has_suggested_action &&
     row.has_approved_action &&
     row.has_automated_action &&
-    row.blocks_sensitive_data &&
+    row.blocks_sensitivedata &&
     row.has_audit_events &&
     row.ready_for_ai_phase_two
   );

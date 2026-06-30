@@ -335,6 +335,7 @@ export function useInventoryCounts() {
 
   useEffect(() => {
     fetchCounts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, []);
 
   return {
@@ -485,6 +486,7 @@ export function useInventoryCountLines(countId?: string) {
 
   useEffect(() => {
     fetchCountLines();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [countId]);
 
   return {

@@ -20,9 +20,10 @@
 import {
   useState,
   useEffect,
+  useRef,
   createContext,
   useContext,
-  ReactNode,
+  type ReactNode,
 } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const resumeSyncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -137,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           context: { source },
           tags: ["error", "auth", "mobile-app-shell"],
         });
-        if (isMounted) {
+        if (isMounted && source === "initial_hydration") {
           setSession(null);
           setUser(null);
         }
@@ -152,18 +156,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!isMounted) return;
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+      const nextUser = nextSession?.user ?? null;
+
+      setSession((previousSession) => {
+        if (
+          previousSession?.access_token === nextSession?.access_token &&
+          previousSession?.user?.id === nextSession?.user?.id
+        ) {
+          return previousSession;
+        }
+        return nextSession;
+      });
+      setUser((previousUser) => {
+        if (
+          previousUser?.id === nextUser?.id &&
+          previousUser?.updated_at === nextUser?.updated_at
+        ) {
+          return previousUser;
+        }
+        return nextUser;
+      });
       setLoading(false);
     });
 
     const unregisterResumeHandler = registerMobileAppResumeHandler(() => {
-      syncSession("app_resume").catch((error) => {
-        logger.error("Unexpected auth resume error", {
-          error,
-          tags: ["error", "auth", "mobile-app-shell"],
+      if (resumeSyncTimeoutRef.current) {
+        clearTimeout(resumeSyncTimeoutRef.current);
+      }
+
+      resumeSyncTimeoutRef.current = setTimeout(() => {
+        syncSession("app_resume").catch((error) => {
+          logger.error("Unexpected auth resume error", {
+            error,
+            tags: ["error", "auth", "mobile-app-shell"],
+          });
         });
-      });
+      }, 750);
     });
 
     syncSession("initial_hydration").catch((error) => {
@@ -178,6 +206,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false;
+      if (resumeSyncTimeoutRef.current) {
+        clearTimeout(resumeSyncTimeoutRef.current);
+      }
       unregisterResumeHandler();
       subscription.unsubscribe();
     };

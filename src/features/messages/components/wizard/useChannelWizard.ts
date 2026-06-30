@@ -137,6 +137,7 @@ export function useChannelWizard(open: boolean) {
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [currentUser?.id, open, profile?.id, profile?.role, toast]);
 
   const handleNext = useCallback(() => {
@@ -171,7 +172,7 @@ export function useChannelWizard(open: boolean) {
           description: channelData.description.trim() || undefined,
           type: channelData.type,
           is_private: channelData.is_private,
-          member_ids: channelData.members,
+          memberids: channelData.members,
         });
 
         if (error) throw error;

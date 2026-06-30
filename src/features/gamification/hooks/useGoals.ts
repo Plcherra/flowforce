@@ -53,7 +53,7 @@ const GOALS_SELECT = `
   id,
   company_id,
   created_by,
-  owner_id,
+  ownerid,
   title,
   description,
   status,
@@ -69,7 +69,7 @@ const GOALS_SELECT = `
     id,
     goal_id,
     task_id,
-    milestone_id,
+    milestoneid,
     weight,
     created_at,
     task:tasks (
@@ -96,7 +96,7 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
         id: taskLink.id,
         goal_id: taskLink.goal_id,
         task_id: taskLink.task_id,
-        milestone_id: taskLink.milestone_id ?? null,
+        milestoneid: taskLink.milestoneid ?? null,
         created_at: taskLink.created_at,
         weight: taskLink.weight,
         task: taskLink.task
@@ -122,7 +122,7 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
         )
       : fallbackProgress;
 
-  const { goal_tasks, ...goalFields } = record;
+  const { _goal_tasks, ...goalFields } = record;
   return {
     ...goalFields,
     tasks,
@@ -183,7 +183,7 @@ export function useGoals(options: UseGoalsOptions = {}) {
       }
 
       if (normalizedFilters.ownerId) {
-        query = query.eq("owner_id", normalizedFilters.ownerId);
+        query = query.eq("ownerid", normalizedFilters.ownerId);
       }
 
       if (normalizedFilters.search) {

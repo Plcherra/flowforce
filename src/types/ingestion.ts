@@ -3,7 +3,7 @@ import type { Json, Tables } from "@/integrations/supabase/public-types";
 export type IngestedFile = {
   id: string;
   company_id: string;
-  uploader_id?: string | null;
+  uploaderid?: string | null;
   filename: string;
   mime_type?: string | null;
   file_size?: number | null;
@@ -17,7 +17,7 @@ export type IngestedFile = {
 export type ExtractedDocument = {
   id: string;
   company_id: string;
-  file_id?: string | null;
+  fileid?: string | null;
   title?: string | null;
   doc_date?: string | null;
   source?: string | null;
@@ -33,7 +33,7 @@ export type ExtractedDocument = {
 export type DocumentEvent = {
   id: string;
   company_id: string;
-  document_id?: string | null;
+  documentid?: string | null;
   summary: string;
   event_type: string;
   severity: "info" | "warning" | "critical";

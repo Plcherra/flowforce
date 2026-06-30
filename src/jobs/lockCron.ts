@@ -55,15 +55,15 @@ export async function runAvailabilityLockCron(
       .from("audit_log")
       .select("id")
       .eq("entity", "availability_week")
-      .eq("entity_id", entityId)
+      .eq("entityid", entityId)
       .maybeSingle();
 
     if (!existing) {
       const insertResult = await supabaseAdmin.from("audit_log").insert({
-        actor_id: pref.id,
+        actorid: pref.id,
         action: "availability.lock.auto",
         entity: "availability_week",
-        entity_id: entityId,
+        entityid: entityId,
         meta: { weekStart: upcomingWeekStart, mode: "auto" },
       });
 

@@ -258,7 +258,7 @@ export function useAvailabilityManagement({
 
   const lockStatePreview: LockStatePreview | null = useMemo(() => {
     if (!orgPrefsQuery.data) return null;
-    const prefs = orgPrefsQuery.data;
+    const _prefs = orgPrefsQuery.data;
     const weekStart = dayjs()
       .startOf("week")
       .add(1, "day")
@@ -357,10 +357,10 @@ export function useAvailabilityManagement({
       if (updateResult.error) throw updateResult.error;
 
       const auditResult = await supabase.from("audit_log").insert({
-        actor_id: userId,
+        actorid: userId,
         action: "availability.request.approved",
         entity: "availability_request",
-        entity_id: request.id,
+        entityid: request.id,
         meta: {
           employeeId: request.employeeId,
           weekStart: request.weekStart,
@@ -410,10 +410,10 @@ export function useAvailabilityManagement({
       if (updateResult.error) throw updateResult.error;
 
       const auditResult = await supabase.from("audit_log").insert({
-        actor_id: userId,
+        actorid: userId,
         action: "availability.request.denied",
         entity: "availability_request",
-        entity_id: request.id,
+        entityid: request.id,
         meta: {
           employeeId: request.employeeId,
           note,
@@ -458,10 +458,10 @@ export function useAvailabilityManagement({
 
       if (userId) {
         const auditResult = await supabase.from("audit_log").insert({
-          actor_id: userId,
+          actorid: userId,
           action: "availability.exception.created",
           entity: "availability_exception",
-          entity_id: exceptionForm.employeeId,
+          entityid: exceptionForm.employeeId,
           meta: {
             start: exceptionForm.startDate,
             end: exceptionForm.endDate,

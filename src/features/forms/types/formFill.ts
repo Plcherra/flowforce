@@ -17,7 +17,7 @@ export type ConditionType =
 
 export interface ConditionalLogicConfig {
   enabled?: boolean;
-  field_id?: string;
+  fieldid?: string;
   condition_type?: ConditionType;
   condition_values?: unknown[];
 }

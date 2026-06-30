@@ -20,7 +20,7 @@ export interface IntegrationFormState {
 }
 
 export interface InvoiceFormState {
-  po_id: string;
+  poid: string;
   invoiceNumber: string; // camelCase to match component usage
   amount: string; // Stored as string for form input, converted to number on submit
   dueDate: string; // camelCase to match component usage
@@ -30,7 +30,7 @@ export interface InvoiceFormState {
 
 export interface VendorInvoiceRecord {
   id: string;
-  po_id?: string | null;
+  poid?: string | null;
   invoice_number?: string | null;
   reference_number?: string | null;
   amount?: number | null;

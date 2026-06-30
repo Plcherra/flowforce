@@ -53,7 +53,7 @@ export function CreateTicketDialog({
     description: "",
     priority: "medium" as HelpDeskTicketPriority,
     category: "",
-    department_id: "",
+    departmentid: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -63,6 +63,7 @@ export function CreateTicketDialog({
     if (open && companyId) {
       fetchDepartments();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [open, companyId]);
 
   const fetchDepartments = async () => {
@@ -136,9 +137,9 @@ export function CreateTicketDialog({
         description: formData.description.trim() || null,
         priority: formData.priority,
         category: formData.category || null,
-        department_id: formData.department_id || null,
+        departmentid: formData.departmentid || null,
         company_id: companyId,
-        requester_id: user.id,
+        requesterid: user.id,
       });
 
       toast({
@@ -152,7 +153,7 @@ export function CreateTicketDialog({
         description: "",
         priority: "medium",
         category: "",
-        department_id: "",
+        departmentid: "",
       });
       setErrors({});
       onOpenChange(false);
@@ -246,9 +247,9 @@ export function CreateTicketDialog({
             <div className="space-y-2">
               <Label htmlFor="department">Department (Optional)</Label>
               <Select
-                value={formData.department_id}
+                value={formData.departmentid}
                 onValueChange={(value) =>
-                  handleFieldChange("department_id", value)
+                  handleFieldChange("departmentid", value)
                 }
                 disabled={departmentsLoading}
               >

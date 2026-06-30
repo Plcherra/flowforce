@@ -206,7 +206,7 @@ export function buildComplianceWorkflowAssistantDraft(snapshot: AIContextSnapsho
     safety: {
       requires_human_approval: true as const,
       writes_allowed: false as const,
-      blocked_data_classes_observed: [],
+      blockeddata_classes_observed: [],
     },
     workflow_risks: activeSuggestions.map((suggestion) => ({
       workflow_area: suggestion.type,

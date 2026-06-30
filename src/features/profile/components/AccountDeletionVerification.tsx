@@ -143,7 +143,7 @@ export default function AccountDeletionVerification() {
         const { count: messagesCount } = await supabase
           .from("messages")
           .select("*", { count: "exact", head: true })
-          .eq("sender_id", testEmail);
+          .eq("senderid", testEmail);
         remainingRecords += messagesCount || 0;
 
         const { count: expensesCount } = await supabase
@@ -151,7 +151,7 @@ export default function AccountDeletionVerification() {
           .select("*", { count: "exact", head: true })
           .eq("created_by", testEmail);
         remainingRecords += expensesCount || 0;
-      } catch (error) {
+      } catch (_error) {
         // Could not check some tables
       }
 
@@ -279,7 +279,7 @@ export default function AccountDeletionVerification() {
             <strong>How to test:</strong>
           </p>
           <p>1. Create a test account with known credentials</p>
-          <p>2. Delete that account using the "Delete Account" feature</p>
+          <p>2. Delete that account using the &quot;Delete Account&quot; feature</p>
           <p>3. Run these verification tests with those credentials</p>
           <p>4. All tests should pass if deletion is working correctly</p>
         </div>

@@ -188,8 +188,8 @@ export function useCompanyRegistration() {
           company_phone: companyPhone,
           company_industry: normalizeText(data.companyInfo.industry),
           company_size: normalizeText(data.companyInfo.size),
-          company_description: normalizeText(data.companyInfo.description),
-          company_data: {
+          companydescription: normalizeText(data.companyInfo.description),
+          companydata: {
             name: data.companyInfo.name.trim(),
             slug: companySlug,
             website: companyWebsite,

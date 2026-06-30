@@ -23,7 +23,7 @@ export interface Payment {
   company_id?: string | null;
   payment_type: string;
   recipient_type: string;
-  recipient_id?: string;
+  recipientid?: string;
   recipient_name: string;
   amount: number;
   currency: string;

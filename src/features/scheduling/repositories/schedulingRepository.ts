@@ -365,7 +365,7 @@ export async function upsertVendorEvent(
     event_date,
     start_time,
     end_time,
-    shift_id,
+    _shift_id,
     notes,
     location_id,
     company_id,

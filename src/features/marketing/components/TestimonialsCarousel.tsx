@@ -6,7 +6,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
 import { Star, Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -307,9 +306,9 @@ export function TestimonialsCarousel() {
 
                     {/* Quote */}
                     <blockquote className="text-gray-700 mb-6 leading-relaxed flex-grow">
-                      "
+                      &quot;
                       {t(`landing.testimonials.quotes.${testimonial.quoteKey}`)}
-                      "
+                      &quot;
                     </blockquote>
 
                     {/* Rating */}

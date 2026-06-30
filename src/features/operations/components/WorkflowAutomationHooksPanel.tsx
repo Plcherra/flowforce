@@ -159,7 +159,7 @@ export function WorkflowAutomationHooksPanel() {
 
         {!loading &&
           sortedHooks.slice(0, 5).map((hook) => (
-            <div key={hook.automation_run_id} className="rounded-2xl border p-3">
+            <div key={hook.automation_runid} className="rounded-2xl border p-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold">

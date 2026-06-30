@@ -26,7 +26,7 @@ export const SUPPORT_IMPERSONATION_DECISION = {
 
 export const SUPPORT_TENANT_HEALTH_CHECKS = [
   "company",
-  "owner_profile",
+  "ownerprofile",
   "owner_membership",
   "system_settings",
   "company_roles",

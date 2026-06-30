@@ -201,7 +201,7 @@ export async function createPurchaseOrder(
   try {
     const poItems = payload.items.map((item) => ({
       company_id: companyId,
-      po_id: inserted.id,
+      poid: inserted.id,
       item_id: item.item_id ?? null,
       item_name: item.item_name,
       quantity: item.quantity,
@@ -237,7 +237,7 @@ export async function createPurchaseOrder(
       },
     );
   } catch (orderError) {
-    await client.from("purchase_order_items").delete().eq("po_id", inserted.id);
+    await client.from("purchase_order_items").delete().eq("poid", inserted.id);
     await client.from("purchase_orders").delete().eq("id", inserted.id);
     throw orderError;
   }
@@ -398,8 +398,8 @@ export async function receivePurchaseOrder(
           item_id: line.item_id,
           location_id: purchasableItem?.default_location_id ?? null,
           supplier_id: supplierId,
-          purchase_id: canonicalPurchase.id,
-          purchase_line_id: canonicalLine?.id ?? null,
+          purchaseid: canonicalPurchase.id,
+          purchase_lineid: canonicalLine?.id ?? null,
           lot_number: buildPurchaseLotNumber(purchaseOrder.po_number, line.id),
           quantity: quantityDelta,
           unit_cost: unitPrice,
@@ -424,7 +424,7 @@ export async function receivePurchaseOrder(
                 : updatedReceived > 0
                   ? "partial"
                   : "ordered",
-            stock_lot_id: stockLotId,
+            stock_lotid: stockLotId,
             line_total: line.quantity * unitPrice,
           })
           .eq("id", canonicalLine.id);
@@ -456,7 +456,7 @@ export async function receivePurchaseOrder(
     if (stockLotId) {
       const { error: legacyLineStockError } = await client
         .from("purchase_order_items")
-        .update({ stock_lot_id: stockLotId })
+        .update({ stock_lotid: stockLotId })
         .eq("id", line.id);
       if (legacyLineStockError) throw legacyLineStockError;
     }
@@ -601,7 +601,7 @@ export async function recordVendorInvoice(
     .insert({
       payment_type: "vendor",
       recipient_type: "vendor",
-      recipient_id: purchaseOrder.supplier_contact?.supplier_id ?? null,
+      recipientid: purchaseOrder.supplier_contact?.supplier_id ?? null,
       recipient_name: payload.supplierName,
       amount: payload.amount,
       currency: purchaseOrder.currency ?? "USD",
@@ -690,7 +690,7 @@ async function createCanonicalPurchaseOrder(
   const canonicalPurchaseId = canonical.id as string;
   const canonicalLines = purchaseOrder.purchase_order_items?.map((line) => ({
     company_id: context.companyId,
-    purchase_id: canonicalPurchaseId,
+    purchaseid: canonicalPurchaseId,
     legacy_purchase_order_item_id: line.id,
     item_id: line.item_id ?? null,
     quantity_ordered: line.quantity,
@@ -793,7 +793,7 @@ async function ensureCanonicalPurchaseLines(
       .insert(
         missing.map((line) => ({
           company_id: companyId,
-          purchase_id: canonicalPurchaseId,
+          purchaseid: canonicalPurchaseId,
           legacy_purchase_order_item_id: line.id,
           item_id: line.item_id ?? null,
           quantity_ordered: line.quantity,

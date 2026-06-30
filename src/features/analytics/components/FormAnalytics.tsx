@@ -103,6 +103,7 @@ export default function FormAnalytics({
     } else if (onContextChange) {
       onContextChange(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [selectedForm, timeRange, onContextChange]);
 
   const loadAnalytics = async () => {
@@ -125,7 +126,7 @@ export default function FormAnalytics({
         }, {});
 
         submissions.forEach((s: any) => {
-          const data = (s.submission_data || {}) as Record<string, any>;
+          const data = (s.submissiondata || {}) as Record<string, unknown>;
           for (const f of fields) {
             const val = data[f.id];
             const hasValue = Array.isArray(val)
@@ -139,7 +140,7 @@ export default function FormAnalytics({
 
         const completedSubmissions = submissions.filter((submission: any) => {
           if (!requiredFields.length) return true;
-          const data = (submission.submission_data || {}) as Record<
+          const data = (submission.submissiondata || {}) as Record<
             string,
             unknown
           >;

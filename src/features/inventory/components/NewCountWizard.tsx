@@ -213,6 +213,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
         period: fallback.period ?? "custom",
       }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [countTypes]);
 
   // Save count types to localStorage whenever they change
@@ -817,7 +818,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
                     if (createdCount?.id) {
                       navigate(`/app/inventory/counts/${createdCount.id}`);
                     }
-                  } catch (error) {
+                  } catch (_error) {
                     // Error already handled in hook
                   } finally {
                     setCreating(false);

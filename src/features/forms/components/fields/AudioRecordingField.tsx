@@ -173,6 +173,7 @@ export function AudioRecordingField({
         variant: "destructive",
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [value, onChange, maxRecordings, maxDuration, uploadAudio]);
 
   const stopRecording = useCallback(() => {

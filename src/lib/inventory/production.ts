@@ -11,9 +11,9 @@ type UnitLookup = Record<string, InventoryUnit>;
 type UnitMetaIndex = ReturnType<typeof buildUnitMetaIndex>;
 
 export type ProductionRecipeLine = {
-  ingredient_id: string;
+  ingredientid: string;
   quantity_needed: number;
-  unit_id: string;
+  unitid: string;
   yield_amount?: number | null;
   ingredient?: InventoryItem | null;
   unit?: InventoryUnit | null;
@@ -129,12 +129,12 @@ export function calculateProductionMaterials(
       unitMeta,
       producedQuantity,
       producedUnitId,
-      item.unit_id,
+      item.unitid,
     );
 
   if (producedFactor == null) {
     blockingIssues.push(
-      `No unit conversion path from production unit (${producedUnitId}) to item unit (${item.unit_id}).`,
+      `No unit conversion path from production unit (${producedUnitId}) to item unit (${item.unitid}).`,
     );
   }
 
@@ -144,8 +144,8 @@ export function calculateProductionMaterials(
     const { value, factor } = convertQuantityWithFallback(
       unitMeta,
       yieldQuantity,
-      yieldUnitId ?? item.unit_id,
-      item.unit_id,
+      yieldUnitId ?? item.unitid,
+      item.unitid,
     );
     if (factor == null) {
       warnings.push(
@@ -161,8 +161,8 @@ export function calculateProductionMaterials(
     const { value, factor } = convertQuantityWithFallback(
       unitMeta,
       wasteQuantity,
-      wasteUnitId ?? item.unit_id,
-      item.unit_id,
+      wasteUnitId ?? item.unitid,
+      item.unitid,
     );
     if (factor == null) {
       warnings.push("Could not convert waste quantity to item unit.");
@@ -178,12 +178,12 @@ export function calculateProductionMaterials(
   const materials: ProductionMaterialUsage[] = [];
 
   for (const line of recipeLines) {
-    if (!line.ingredient_id) continue;
+    if (!line.ingredientid) continue;
     const ingredient = line.ingredient ?? null;
-    const ingredientUnitId = ingredient?.unit_id ?? line.unit_id;
+    const ingredientUnitId = ingredient?.unitid ?? line.unitid;
     if (!ingredientUnitId) {
       warnings.push(
-        `Missing unit information for ingredient ${line.ingredient_id}`,
+        `Missing unit information for ingredient ${line.ingredientid}`,
       );
       continue;
     }
@@ -200,12 +200,12 @@ export function calculateProductionMaterials(
       convertQuantityWithFallback(
         unitMeta,
         quantityInRecipeUnit,
-        line.unit_id,
+        line.unitid,
         ingredientUnitId,
       );
 
-    if (conversionFactor == null && line.unit_id !== ingredientUnitId) {
-      const fromUnit = unitsById[line.unit_id];
+    if (conversionFactor == null && line.unitid !== ingredientUnitId) {
+      const fromUnit = unitsById[line.unitid];
       const toUnit = unitsById[ingredientUnitId];
       const warning = `Could not convert ${quantityInRecipeUnit} ${fromUnit?.abbreviation || fromUnit?.name || "units"} of ${
         ingredient?.name || "ingredient"
@@ -215,13 +215,13 @@ export function calculateProductionMaterials(
       );
 
       materials.push({
-        ingredientId: line.ingredient_id,
+        ingredientId: line.ingredientid,
         ingredient,
         quantityUsed: round(quantityInRecipeUnit, 4),
         quantityInRecipeUnit: round(quantityInRecipeUnit, 4),
-        unitId: line.unit_id,
-        unit: unitsById[line.unit_id],
-        recipeUnit: unitsById[line.unit_id],
+        unitId: line.unitid,
+        unit: unitsById[line.unitid],
+        recipeUnit: unitsById[line.unitid],
         unitCost: 0,
         totalCost: 0,
         conversionFactor,
@@ -237,13 +237,13 @@ export function calculateProductionMaterials(
     const totalCost = round(quantityUsed * unitCost, 4);
 
     materials.push({
-      ingredientId: line.ingredient_id,
+      ingredientId: line.ingredientid,
       ingredient,
       quantityUsed,
       quantityInRecipeUnit: round(quantityInRecipeUnit, 4),
       unitId: ingredientUnitId,
       unit: unitsById[ingredientUnitId],
-      recipeUnit: unitsById[line.unit_id],
+      recipeUnit: unitsById[line.unitid],
       unitCost,
       totalCost,
       conversionFactor,

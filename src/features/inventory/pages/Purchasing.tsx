@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -28,7 +27,7 @@ export default function Purchasing() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Purchasing</h1>
           <p className="text-muted-foreground">
-            Access denied. You don't have permission to manage purchasing
+            Access denied. You don&apos;t have permission to manage purchasing
             operations.
           </p>
         </div>

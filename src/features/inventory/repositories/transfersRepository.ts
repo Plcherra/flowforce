@@ -16,17 +16,17 @@ const TRANSFER_SELECT = `
   from_location:inv_locations!inv_transfers_from_location_id_fkey(id, name, location_type),
   to_location:inv_locations!inv_transfers_to_location_id_fkey(id, name, location_type),
   requester:profiles!inv_transfers_requested_by_fkey(id, first_name, last_name),
-  fulfiller:profiles!inv_transfers_fulfiller_id_fkey(id, first_name, last_name),
-  recipient:profiles!inv_transfers_recipient_id_fkey(id, first_name, last_name),
+  fulfiller:profiles!inv_transfers_fulfillerid_fkey(id, first_name, last_name),
+  recipient:profiles!inv_transfers_recipientid_fkey(id, first_name, last_name),
   items:inv_transfer_items(
     id,
     item_id,
-    unit_id,
+    unitid,
     quantity,
     cost_per_unit,
     total_cost,
     created_at,
-    item:inv_items(id, name, unit_id, cost_per_unit),
+    item:inv_items(id, name, unitid, cost_per_unit),
     unit:inv_units(id, name, abbreviation)
   ),
   audit:inv_transfer_audit(
@@ -35,15 +35,15 @@ const TRANSFER_SELECT = `
     old_status,
     new_status,
     note,
-    actor_id,
+    actorid,
     created_at,
-    actor:profiles!inv_transfer_audit_actor_id_fkey(id, first_name, last_name)
+    actor:profiles!inv_transfer_audit_actorid_fkey(id, first_name, last_name)
   )
 `;
 
 const transferItemSchema = z.object({
   item_id: z.string(),
-  unit_id: z.string(),
+  unitid: z.string(),
   quantity: z.number().min(0.01),
   cost_per_unit: z.number().nullable().optional(),
 });
@@ -51,8 +51,8 @@ const transferItemSchema = z.object({
 const createTransferPayloadSchema = z.object({
   company_id: z.string(),
   requested_by: z.string(),
-  fulfiller_id: z.string(),
-  recipient_id: z.string(),
+  fulfillerid: z.string(),
+  recipientid: z.string(),
   from_location_id: z.string(),
   to_location_id: z.string(),
   delivery_date: z.string().nullable().optional(),
@@ -62,7 +62,7 @@ const createTransferPayloadSchema = z.object({
 });
 
 const updateTransferStatusSchema = z.object({
-  actor_id: z.string(),
+  actorid: z.string(),
   status: z.custom<InventoryTransferStatus>(),
   status_note: z.string().nullable().optional(),
 });
@@ -142,9 +142,9 @@ export async function createInventoryTransfer(
 
   if (items?.length) {
     const formattedItems = items.map((item) => ({
-      transfer_id: data.id,
+      transferid: data.id,
       item_id: item.item_id,
-      unit_id: item.unit_id,
+      unitid: item.unitid,
       quantity: item.quantity,
       cost_per_unit: item.cost_per_unit ?? null,
     }));
@@ -159,10 +159,10 @@ export async function createInventoryTransfer(
   }
 
   await client.from("inv_transfer_audit").insert({
-    transfer_id: data.id,
+    transferid: data.id,
     action: "created",
     new_status: "requested",
-    actor_id: body.requested_by,
+    actorid: body.requested_by,
     note: status_note ?? null,
   });
 
@@ -176,8 +176,8 @@ export async function createInventoryTransfer(
   await notifyTransferCreated({
     transferId: transfer.id,
     requestedBy: transfer.requested_by,
-    fulfillerId: transfer.fulfiller_id,
-    recipientId: transfer.recipient_id,
+    fulfillerId: transfer.fulfillerid,
+    recipientId: transfer.recipientid,
     fromLocationName: transfer.from_location?.name,
     toLocationName: transfer.to_location?.name,
     deliveryDate: transfer.delivery_date,
@@ -201,7 +201,7 @@ export async function updateInventoryTransferStatus(
     throw new Error("Transfer not found");
   }
 
-  await assertUserBelongsToCompany(client, body.actor_id, existing.company_id);
+  await assertUserBelongsToCompany(client, body.actorid, existing.company_id);
 
   const updateData: Record<string, unknown> = {
     status: body.status,
@@ -222,12 +222,12 @@ export async function updateInventoryTransferStatus(
   if (error) throw error;
 
   await client.from("inv_transfer_audit").insert({
-    transfer_id: id,
+    transferid: id,
     action: "status_changed",
     old_status: existing.status,
     new_status: body.status,
     note: body.status_note ?? null,
-    actor_id: body.actor_id,
+    actorid: body.actorid,
   });
 
   const transfer = await getInventoryTransferById(id, {
@@ -241,10 +241,10 @@ export async function updateInventoryTransferStatus(
     transferId: transfer.id,
     status: body.status,
     statusNote: body.status_note,
-    actorId: body.actor_id,
+    actorId: body.actorid,
     requestedBy: transfer.requested_by,
-    fulfillerId: transfer.fulfiller_id,
-    recipientId: transfer.recipient_id,
+    fulfillerId: transfer.fulfillerid,
+    recipientId: transfer.recipientid,
     fromLocationName: transfer.from_location?.name,
     toLocationName: transfer.to_location?.name,
     deliveryDate: transfer.delivery_date,

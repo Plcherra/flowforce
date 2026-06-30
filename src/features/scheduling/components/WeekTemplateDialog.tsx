@@ -32,7 +32,7 @@ interface WeekTemplateDialogProps {
 }
 
 type WeekTemplateRecord = Tables<"week_templates"> & {
-  template_data?: {
+  templatedata?: {
     metadata?: {
       total_shifts?: number;
     };
@@ -40,7 +40,7 @@ type WeekTemplateRecord = Tables<"week_templates"> & {
 };
 
 const getTemplateShiftCount = (template: WeekTemplateRecord): number => {
-  const count = template.template_data?.metadata?.total_shifts;
+  const count = template.templatedata?.metadata?.total_shifts;
   return typeof count === "number" ? count : 0;
 };
 
@@ -109,7 +109,7 @@ export function WeekTemplateDialog({
     }
   };
 
-  const handleLoadTemplate = (template: WeekTemplateRecord) => {
+  const handleLoadTemplate = (_template: WeekTemplateRecord) => {
     // In a real implementation, this would apply the template to the current week
     onOpenChange(false);
   };

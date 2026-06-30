@@ -24,17 +24,11 @@ export default function AppShell({ children }: AppShellProps) {
     companyId: profileState.profile?.companyId,
   });
 
-  if (loading || profileState.loading || !user) {
+  if (loading || !user) {
     return (
       <div className="app-viewport flex flex-col overflow-hidden bg-background">
         <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center">
-          <LoadingSpinner
-            text={
-              loading || profileState.loading
-                ? "Preparing your workspace..."
-                : "Redirecting you securely..."
-            }
-          />
+          <LoadingSpinner text="Preparing your workspace..." />
         </div>
       </div>
     );

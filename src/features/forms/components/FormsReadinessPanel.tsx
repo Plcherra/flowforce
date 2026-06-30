@@ -69,8 +69,8 @@ function normalizeSubmissionReviewerRows(
     .filter((row): row is Record<string, unknown> => Boolean(row))
     .map((row) => ({
       id: typeof row.id === "string" ? row.id : "",
-      submission_id:
-        typeof row.submission_id === "string" ? row.submission_id : null,
+      submissionid:
+        typeof row.submissionid === "string" ? row.submissionid : null,
       status: typeof row.status === "string" ? row.status : null,
     }))
     .filter((row) => row.id);
@@ -103,7 +103,7 @@ export function FormsReadinessPanel({
             : Promise.resolve({ data: [], error: null }),
           supabase
             .from("form_submission_reviewers")
-            .select("id, submission_id, status"),
+            .select("id, submissionid, status"),
         ]);
 
       if (fieldsResult.error) throw fieldsResult.error;

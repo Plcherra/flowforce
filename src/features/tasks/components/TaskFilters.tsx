@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { TaskStatusFilter, TaskPriorityFilter } from "../types/filters";
-import { generatePriorityOptions } from "../utils/priorityOptions";
+import type { TaskPriorityFilter } from "../types/filters";
 
 interface TaskFiltersProps {
   searchTerm: string;

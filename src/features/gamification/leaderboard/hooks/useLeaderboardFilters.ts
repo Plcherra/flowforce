@@ -55,7 +55,7 @@ export function useLeaderboardFilters({
   entries,
   analytics,
   departments,
-  roles,
+  _roles,
   lastUpdated,
 }: UseLeaderboardFiltersArgs) {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");

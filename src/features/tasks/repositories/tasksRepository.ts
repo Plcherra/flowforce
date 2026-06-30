@@ -38,7 +38,7 @@ const taskRowSchema = z
     priority: z.string().nullable(),
     assigned_to: z.string().nullable(),
     created_by: z.string(),
-    department_id: z.string().nullable(),
+    departmentid: z.string().nullable(),
     goal_id: z.string().nullable(),
     due_date: z.string().nullable(),
     estimated_hours: z.number().nullable(),
@@ -48,19 +48,19 @@ const taskRowSchema = z
     created_at: z.string(),
     links: z.unknown(), // Custom field, can be array or object
     parent_task_id: z.string().nullable(),
-    origin_document_id: z.string().nullable(),
+    origin_documentid: z.string().nullable(),
     origin_event_id: z.string().nullable(),
     tags: z.array(z.string()).nullable(),
     source: z.string().nullable(),
     company_id: z.string().nullable(),
     updated_at: z.string(),
-    workflow_id: z.string().nullable(),
+    workflowid: z.string().nullable(),
   })
   .passthrough();
 
 const taskWithRelationsSchema = taskRowSchema.extend({
-  assigned_profile: profileSchema.nullable().optional(),
-  created_profile: profileSchema.nullable().optional(),
+  assignedprofile: profileSchema.nullable().optional(),
+  createdprofile: profileSchema.nullable().optional(),
   department: departmentSchema.nullable().optional(),
   goal: goalSchema.nullable().optional(),
 });
@@ -97,8 +97,8 @@ export async function fetchTasksByCompany(
         .select(
           `
         *,
-        assigned_profile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
-        created_profile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
+        assignedprofile:profiles!tasks_assigned_to_fkey(first_name, last_name, company_id),
+        createdprofile:profiles!tasks_created_by_fkey(first_name, last_name, company_id),
         department:departments(name),
         goal:goals(id, title, status, progress, target_completion_date)
       `,

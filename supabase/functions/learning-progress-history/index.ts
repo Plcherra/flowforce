@@ -4,7 +4,7 @@ import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, api_key, content-type",
 };
 
 const TRAINING_ADMIN_ROLES = new Set(["manager", "admin", "company_admin", "owner"]);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { useParams, Navigate, useNavigate } from "@/lib/router-adapter";
 import { useCustomSections } from "@/hooks/useCustomSections";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -456,7 +456,7 @@ function GenericSectionRenderer({
               </div>
               <CardTitle>No Content Yet</CardTitle>
               <CardDescription>
-                This section doesn't have any pages or content set up yet.
+                This section doesn&apos;t have any pages or content set up yet.
                 {can("systemSettings")
                   ? " You can add pages and configure this section to get started."
                   : " Contact your administrator to set up this section."}

@@ -33,9 +33,9 @@ const CreateTicketInputSchema = z.object({
     .optional(),
   priority: HelpDeskTicketPrioritySchema.optional(),
   category: z.string().max(100).nullable().optional(),
-  department_id: z.string().uuid().nullable().optional(),
+  departmentid: z.string().uuid().nullable().optional(),
   company_id: z.string().uuid("Invalid company_id format"),
-  requester_id: z.string().uuid("Invalid requester_id format"),
+  requesterid: z.string().uuid("Invalid requesterid format"),
 });
 
 const UpdateTicketInputSchema = z.object({
@@ -52,9 +52,9 @@ export interface CreateTicketInput {
   description?: string | null;
   priority?: HelpDeskTicketPriority;
   category?: string | null;
-  department_id?: string | null;
+  departmentid?: string | null;
   company_id: string;
-  requester_id: string;
+  requesterid: string;
 }
 
 export interface UpdateTicketInput {
@@ -92,7 +92,7 @@ export async function createTicket(
     status: DEFAULT_STATUS,
     priority: validatedInput.priority ?? DEFAULT_PRIORITY,
     category: validatedInput.category ?? null,
-    requester_id: validatedInput.requester_id,
+    requesterid: validatedInput.requesterid,
     assigned_to: null,
     company_id: validatedInput.company_id,
   };
@@ -113,7 +113,7 @@ export async function createTicket(
     description: data.description ?? null,
     status: (data.status as HelpDeskTicketStatus) ?? DEFAULT_STATUS,
     priority: (data.priority as HelpDeskTicketPriority) ?? DEFAULT_PRIORITY,
-    requesterId: data.requester_id ?? null,
+    requesterId: data.requesterid ?? null,
     assignedTo: data.assigned_to ?? null,
     category: data.category ?? null,
     createdAt: data.created_at ?? new Date().toISOString(),
@@ -168,7 +168,7 @@ export async function updateTicket(
     description: data.description ?? null,
     status: (data.status as HelpDeskTicketStatus) ?? DEFAULT_STATUS,
     priority: (data.priority as HelpDeskTicketPriority) ?? DEFAULT_PRIORITY,
-    requesterId: data.requester_id ?? null,
+    requesterId: data.requesterid ?? null,
     assignedTo: data.assigned_to ?? null,
     category: data.category ?? null,
     createdAt: data.created_at ?? new Date().toISOString(),

@@ -7,23 +7,23 @@ export type WorkflowAutomationRunStatus = "completed" | "skipped" | "failed";
 
 export type WorkflowAutomationHookRow = {
   company_id: string;
-  automation_run_id: string;
+  automation_runid: string;
   automation_key: string;
   hook_type: WorkflowAutomationHookType;
   status: WorkflowAutomationRunStatus;
-  workflow_id: string | null;
+  workflowid: string | null;
   workflow_name: string | null;
-  workflow_instance_id: string | null;
+  workflow_instanceid: string | null;
   workflow_run_status: string | null;
-  step_instance_id: string | null;
-  workflow_exception_id: string | null;
+  step_instanceid: string | null;
+  workflow_exceptionid: string | null;
   exception_title: string | null;
   exception_severity: string | null;
   task_id: string | null;
   task_title: string | null;
-  ops_issue_id: string | null;
+  ops_issueid: string | null;
   issue_title: string | null;
-  notification_id: string | null;
+  notificationid: string | null;
   notification_title: string | null;
   action_payload: Record<string, unknown> | null;
   error_message: string | null;
@@ -36,7 +36,7 @@ export type WorkflowAutomationRpcResult = {
   failed_step_task_created?: boolean;
   inventory_review_issue_created?: boolean;
   task_id?: string | null;
-  ops_issue_id?: string | null;
+  ops_issueid?: string | null;
 };
 
 export const workflowAutomationHookLabels: Record<

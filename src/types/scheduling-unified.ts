@@ -26,7 +26,7 @@ export interface Schedule extends DbSchedule {
 }
 
 export interface ScheduleAssignment extends DbScheduleAssignment {
-  user_profile?: {
+  userprofile?: {
     id: string;
     first_name: string;
     last_name: string;
@@ -35,12 +35,12 @@ export interface ScheduleAssignment extends DbScheduleAssignment {
 }
 
 export interface ShiftSwap extends DbShiftSwap {
-  requesting_user?: {
+  requestinguser?: {
     first_name: string;
     last_name: string;
     avatar_url?: string;
   };
-  target_user?: {
+  targetuser?: {
     first_name: string;
     last_name: string;
     avatar_url?: string;

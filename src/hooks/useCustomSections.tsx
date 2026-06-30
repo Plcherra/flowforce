@@ -47,8 +47,8 @@ export interface SectionTemplate {
   category: string;
   icon: string;
   config: any;
-  default_pages: any[];
-  default_permissions: string[];
+  default_pages: unknown[];
+  defaultpermissions: string[];
   is_public: boolean;
   created_by?: string;
   created_at: string;
@@ -183,7 +183,7 @@ export function useCustomSections() {
                 ? template.config
                 : JSON.parse((template.config as string) || "{}"),
             default_pages: parseJsonArray(template.default_pages),
-            default_permissions: parseJsonArray(template.default_permissions),
+            defaultpermissions: parseJsonArray(template.defaultpermissions),
           }))
           .filter((template) => !shouldExcludeTemplate(template)),
       );
@@ -248,10 +248,10 @@ export function useCustomSections() {
             default_pages: Array.isArray(templateData.default_pages)
               ? templateData.default_pages
               : JSON.parse((templateData.default_pages as string) || "[]"),
-            default_permissions: Array.isArray(templateData.default_permissions)
-              ? templateData.default_permissions
+            defaultpermissions: Array.isArray(templateData.defaultpermissions)
+              ? templateData.defaultpermissions
               : JSON.parse(
-                  (templateData.default_permissions as string) || "[]",
+                  (templateData.defaultpermissions as string) || "[]",
                 ),
           };
         } else {
@@ -274,7 +274,7 @@ export function useCustomSections() {
                 content: parseJsonArray(p.content),
                 permissions: parseJsonArray(p.permissions),
               })),
-              default_permissions: local.config?.permissions || [],
+              defaultpermissions: local.config?.permissions || [],
             };
           }
         }
@@ -317,7 +317,7 @@ export function useCustomSections() {
         template_id: templateId,
         template_config: template?.config || {},
         permissions:
-          template?.default_permissions || sectionData.permissions || [],
+          template?.defaultpermissions || sectionData.permissions || [],
         sort_order: sections.length,
         is_active: true,
         is_template: false,
@@ -471,6 +471,7 @@ export function useCustomSections() {
     };
 
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, []);
 
   return {

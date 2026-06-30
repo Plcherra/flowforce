@@ -12,7 +12,7 @@ import {
 } from "@/lib/storagePaths";
 
 interface SignatureData {
-  signature_data: string; // Base64 encoded
+  signaturedata: string; // Base64 encoded
   signature_url?: string;
   signature_bucket?: string;
   signature_path?: string;
@@ -170,7 +170,7 @@ export function SignatureField({
       }
 
       const signature: SignatureData = {
-        signature_data: signatureData,
+        signaturedata: signatureData,
         signature_bucket: "form-signatures",
         signature_path: filePath,
         signer_name: signerName,
@@ -252,7 +252,7 @@ export function SignatureField({
                 </p>
                 <div className="mt-3 border rounded-lg overflow-hidden">
                   <img
-                    src={value.signature_data}
+                    src={value.signaturedata}
                     alt="Signature"
                     className="w-full h-24 object-contain bg-white"
                   />

@@ -66,7 +66,7 @@ export function CreateRecipeDialog({
   const [saving, setSaving] = useState(false);
 
   const recipeCandidates = useMemo(() => {
-    const prepItems = inventoryItems.filter((item) => item.is_prep_item);
+    const prepItems = inventoryItems.filter((item) => item.isprep_item);
     return prepItems.length ? prepItems : inventoryItems;
   }, [inventoryItems]);
 

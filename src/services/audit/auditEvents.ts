@@ -42,9 +42,9 @@ export const AUDIT_ACTIONS = {
   aiSchedulingSuggestionCreated: "ai.scheduling_suggestion.created",
   aiSchedulingSuggestionApproved: "ai.scheduling_suggestion.approved",
   aiSchedulingSuggestionRejected: "ai.scheduling_suggestion.rejected",
-  aiInventoryWasteSuggestionCreated: "ai.inventory_waste_suggestion.created",
-  aiInventoryWasteSuggestionApproved: "ai.inventory_waste_suggestion.approved",
-  aiInventoryWasteSuggestionRejected: "ai.inventory_waste_suggestion.rejected",
+  aiInventoryWasteSuggestionCreated: "ai.inventorywaste_suggestion.created",
+  aiInventoryWasteSuggestionApproved: "ai.inventorywaste_suggestion.approved",
+  aiInventoryWasteSuggestionRejected: "ai.inventorywaste_suggestion.rejected",
   aiComplianceWorkflowSuggestionCreated:
     "ai.compliance_workflow_suggestion.created",
   aiComplianceWorkflowSuggestionApproved:

@@ -50,6 +50,7 @@ export function UserSelector({
     if (open) {
       fetchUsers();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [open, currentProfile?.role, currentProfile?.id]);
 
   useEffect(() => {

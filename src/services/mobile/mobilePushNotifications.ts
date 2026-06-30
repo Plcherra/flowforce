@@ -96,7 +96,7 @@ export const mobilePushRoutes: MobilePushRoute[] = [
   {
     eventType: "approval_requested",
     defaultRoute: "/app/operations",
-    requiredPayloadKeys: ["approval_id"],
+    requiredPayloadKeys: ["approvalid"],
   },
   {
     eventType: "low_stock",
@@ -106,7 +106,7 @@ export const mobilePushRoutes: MobilePushRoute[] = [
   {
     eventType: "workflow_overdue",
     defaultRoute: "/app/operations",
-    requiredPayloadKeys: ["workflow_instance_id"],
+    requiredPayloadKeys: ["workflow_instanceid"],
   },
 ];
 
@@ -114,9 +114,9 @@ export const mobilePushReadinessChecks = [
   "capacitor_push_notifications_plugin_configured",
   "supabase_stores_device_tokens_through_security_definer_rpc",
   "token_hash_is_stored_for_lookup_without_exposing_raw_token_reads",
-  "per_user_preferences_cover_tasks_schedule_messages_approvals_low_stock_overdue_workflows",
+  "peruser_preferences_cover_tasks_schedule_messages_approvals_low_stock_overdue_workflows",
   "notification_action_payload_opens_safe_app_route",
-  "web_pwa_runtime_does_not_request_native_push_permissions",
+  "web_pwa_runtime_does_not_request_native_pushpermissions",
 ] as const;
 
 export function getDefaultMobilePushPreferences() {

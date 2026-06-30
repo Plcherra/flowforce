@@ -26,8 +26,8 @@ const shiftSwapSchema = z
   .object({
     id: z.string(),
     schedule_id: z.string().nullable(),
-    requesting_user_id: z.string().nullable(),
-    target_user_id: z.string().nullable(),
+    requestinguser_id: z.string().nullable(),
+    targetuser_id: z.string().nullable(),
     swap_type: z.string(),
     status: z.string().nullable(),
     reason: z.string().nullable(),
@@ -35,8 +35,8 @@ const shiftSwapSchema = z
     approved_at: z.string().nullable(),
     created_at: z.string(),
     updated_at: z.string().nullable(),
-    requesting_user: profileSchema.nullable().optional(),
-    target_user: profileSchema.nullable().optional(),
+    requestinguser: profileSchema.nullable().optional(),
+    targetuser: profileSchema.nullable().optional(),
     schedule: scheduleSchema.nullable().optional(),
   })
   .passthrough();
@@ -72,8 +72,8 @@ export async function fetchShiftSwaps(params: {
     .select(
       `
         *,
-        requesting_user:profiles!shift_swaps_requesting_user_id_fkey(id, first_name, last_name, avatar_url, company_id),
-        target_user:profiles!shift_swaps_target_user_id_fkey(id, first_name, last_name, avatar_url, company_id),
+        requestinguser:profiles!shift_swaps_requestinguser_id_fkey(id, first_name, last_name, avatar_url, company_id),
+        targetuser:profiles!shift_swaps_targetuser_id_fkey(id, first_name, last_name, avatar_url, company_id),
         schedule:schedules(id, company_id, title, start_time, end_time, role)
       `,
     )

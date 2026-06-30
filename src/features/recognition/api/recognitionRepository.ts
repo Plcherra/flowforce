@@ -21,7 +21,7 @@ type TaskRow = Tables<"tasks">;
 type ProfileRow = Tables<"profiles">;
 
 type TrainingCompletionEventRow = {
-  assignment_id: string;
+  assignmentid: string;
   completed_at: string | null;
   employee_id: string;
   module_id: string | null;
@@ -67,9 +67,9 @@ const recognitionDetailsSchema = z.object({
   icon: z.string().nullable().optional(),
   source: z.enum(recognitionSources),
   goal_id: z.string().nullable().optional(),
-  milestone_id: z.string().nullable().optional(),
+  milestoneid: z.string().nullable().optional(),
   task_id: z.string().nullable().optional(),
-  training_assignment_id: z.string().nullable().optional(),
+  training_assignmentid: z.string().nullable().optional(),
   onboarding_step: z.string().nullable().optional(),
   xp_awarded: z.number().nullable().optional(),
   metadata: z.record(z.any()).nullable().optional(),
@@ -263,7 +263,7 @@ async function fetchAssignmentsByIds(ids: string[], companyId: string) {
   const { data, error } = await supabase
     .from("training_assignments")
     .select(
-      "id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward, category, level, company_id), employee:profiles(id, first_name, last_name, avatar_url, position_id)",
+      "id, module_id, employee_id, status, progress, completed_at, started_at, module:trainingmodules(id, title, xp_reward, category, level, company_id), employee:profiles(id, first_name, last_name, avatar_url, position_id)",
     )
     .in("id", ids);
   if (error) {
@@ -358,10 +358,10 @@ export async function fetchRecognitionRecords({
     recipientIds.add(reward.user_id);
     creatorIds.add(reward.created_by);
     const details = parseRecognitionDetailsValue(reward.reward_details);
-    if (details?.milestone_id) milestoneIds.add(details.milestone_id);
+    if (details?.milestoneid) milestoneIds.add(details.milestoneid);
     if (details?.task_id) taskIds.add(details.task_id);
-    if (details?.training_assignment_id)
-      assignmentIds.add(details.training_assignment_id);
+    if (details?.training_assignmentid)
+      assignmentIds.add(details.training_assignmentid);
   });
 
   const [goalMap, profileMap, milestoneMap, taskMap, assignmentMap] =
@@ -400,12 +400,12 @@ export async function fetchRecognitionRecords({
         : null,
       recipient: profileMap.get(reward.user_id) ?? null,
       creator: profileMap.get(reward.created_by) ?? null,
-      milestone: details?.milestone_id
-        ? (milestoneMap.get(details.milestone_id) ?? null)
+      milestone: details?.milestoneid
+        ? (milestoneMap.get(details.milestoneid) ?? null)
         : null,
       task: details?.task_id ? (taskMap.get(details.task_id) ?? null) : null,
-      training: details?.training_assignment_id
-        ? (assignmentMap.get(details.training_assignment_id) ?? null)
+      training: details?.training_assignmentid
+        ? (assignmentMap.get(details.training_assignmentid) ?? null)
         : null,
     };
   });
@@ -423,9 +423,9 @@ export async function createManualRecognition({
   const details: RecognitionDetails = {
     source: input.source ?? "manual",
     goal_id: input.goalId,
-    milestone_id: input.milestoneId,
+    milestoneid: input.milestoneId,
     task_id: input.taskId,
-    training_assignment_id: input.trainingAssignmentId,
+    training_assignmentid: input.trainingAssignmentId,
     message: input.message,
     icon: input.icon,
     xp_awarded: input.xpAwarded,
@@ -456,7 +456,7 @@ export async function fetchExistingRecognitionRows(companyId: string) {
 
 async function seedDefaultTrainingModules(companyId: string, actorId: string) {
   const { data: existingModules, error } = await supabase
-    .from("training_modules")
+    .from("trainingmodules")
     .select("id")
     .eq("company_id", companyId)
     .limit(1);
@@ -499,7 +499,7 @@ async function seedDefaultTrainingModules(companyId: string, actorId: string) {
   }));
 
   const { error: insertError } = await supabase
-    .from("training_modules")
+    .from("trainingmodules")
     .insert(modulesToInsert);
   if (insertError) {
     throw new Error(insertError.message ?? "Failed to seed training modules");
@@ -517,7 +517,7 @@ async function ensureNewHireAssignments(companyId: string, actorId: string) {
     { data: newHires, error: newHiresError },
   ] = await Promise.all([
     supabase
-      .from("training_modules")
+      .from("trainingmodules")
       .select("*")
       .eq("company_id", companyId)
       .eq("is_mandatory", true),
@@ -596,7 +596,7 @@ async function generateTrainingRecognitions(
   const { data: completions, error } = await supabase
     .from("v_training_completion_events")
     .select(
-      "assignment_id, completed_at, employee_id, module_id, module_title, xp_reward, company_id",
+      "assignmentid, completed_at, employee_id, module_id, module_title, xp_reward, company_id",
     )
     .eq("company_id", companyId);
 
@@ -611,15 +611,15 @@ async function generateTrainingRecognitions(
   const existingTrainingRecognitions = new Set<string>();
   existing.forEach((reward) => {
     const details = parseRecognitionDetailsValue(reward.reward_details);
-    if (details?.training_assignment_id) {
-      existingTrainingRecognitions.add(details.training_assignment_id);
+    if (details?.training_assignmentid) {
+      existingTrainingRecognitions.add(details.training_assignmentid);
     }
   });
 
   const assignmentsToFetch = new Set<string>();
   const employeesToFetch = new Set<string>();
   completionRows.forEach((completion) => {
-    assignmentsToFetch.add(completion.assignment_id);
+    assignmentsToFetch.add(completion.assignmentid);
     employeesToFetch.add(completion.employee_id);
   });
 
@@ -627,7 +627,7 @@ async function generateTrainingRecognitions(
     supabase
       .from("training_assignments")
       .select(
-        "id, module_id, employee_id, status, progress, completed_at, started_at, module:training_modules(id, title, xp_reward), employee:profiles(id, first_name, last_name, avatar_url)",
+        "id, module_id, employee_id, status, progress, completed_at, started_at, module:trainingmodules(id, title, xp_reward), employee:profiles(id, first_name, last_name, avatar_url)",
       )
       .in("id", Array.from(assignmentsToFetch)),
     supabase
@@ -647,12 +647,12 @@ async function generateTrainingRecognitions(
   const newRecognitionsPayload: TablesInsert<"goal_rewards">[] = [];
 
   for (const completion of completionRows) {
-    if (existingTrainingRecognitions.has(completion.assignment_id)) {
+    if (existingTrainingRecognitions.has(completion.assignmentid)) {
       continue;
     }
 
     const assigned = assignmentRows.find(
-      (assignment) => assignment.id === completion.assignment_id,
+      (assignment) => assignment.id === completion.assignmentid,
     );
     const employee = employeeMap.get(completion.employee_id);
 
@@ -672,7 +672,7 @@ async function generateTrainingRecognitions(
 
     const details: RecognitionDetails = {
       source: "training_completion",
-      training_assignment_id: completion.assignment_id,
+      training_assignmentid: completion.assignmentid,
       message: `${employeeName} completed ${moduleTitle}`,
       xp_awarded:
         (Array.isArray(assigned.module)
@@ -761,8 +761,8 @@ async function generateMilestoneRecognitions(
   const existingMilestoneKey = new Set<string>();
   existing.forEach((reward) => {
     const details = parseRecognitionDetailsValue(reward.reward_details);
-    if (details?.milestone_id) {
-      existingMilestoneKey.add(`${details.milestone_id}:${reward.user_id}`);
+    if (details?.milestoneid) {
+      existingMilestoneKey.add(`${details.milestoneid}:${reward.user_id}`);
     }
   });
 
@@ -783,7 +783,7 @@ async function generateMilestoneRecognitions(
       const details: RecognitionDetails = {
         source: "goal_milestone",
         goal_id: milestone.goal_id,
-        milestone_id: milestone.id,
+        milestoneid: milestone.id,
         message:
           `Completed milestone "${milestone.title}" on goal ${milestone.goal?.title ?? ""}`.trim(),
         metadata: {
@@ -822,7 +822,7 @@ async function generateTaskRecognitions(
   const { data: goalTasks, error } = await supabase
     .from("goal_tasks")
     .select(
-      "id, goal_id, task_id, milestone_id, goal:goals(id, title, company_id), task:tasks(id, title, status, completed_at, assigned_to)",
+      "id, goal_id, task_id, milestoneid, goal:goals(id, title, company_id), task:tasks(id, title, status, completed_at, assigned_to)",
     )
     .eq("task.status", "completed");
 
@@ -854,7 +854,7 @@ async function generateTaskRecognitions(
     const details: RecognitionDetails = {
       source: "task_completion",
       goal_id: goalTask.goal_id,
-      milestone_id: goalTask.milestone_id,
+      milestoneid: goalTask.milestoneid,
       task_id: goalTask.task_id,
       message:
         `Completed task "${goalTask.task?.title ?? ""}" in goal ${goalTask.goal?.title ?? ""}`.trim(),

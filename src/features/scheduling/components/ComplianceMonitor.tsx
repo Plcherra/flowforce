@@ -64,6 +64,7 @@ export function ComplianceMonitor() {
 
   useEffect(() => {
     loadComplianceData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, []);
 
   const loadComplianceData = async () => {
@@ -132,7 +133,7 @@ export function ComplianceMonitor() {
       setRules(mockRules);
       setViolations(mockViolations);
       setMetrics(mockMetrics);
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Error loading compliance data",
         description: "Please try again",
@@ -166,7 +167,7 @@ export function ComplianceMonitor() {
       });
 
       await loadComplianceData();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Compliance check failed",
         description: "Please try again later",

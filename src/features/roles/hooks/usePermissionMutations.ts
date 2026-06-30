@@ -4,11 +4,9 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import type { CompanyRole } from "@/hooks/useCompanyRoles";
 import type { Position } from "@/hooks/usePositions";
 import { logger } from "@/utils/logger";
 import type { RoleKey, ModuleId, RoleMetadata } from "../types/permissions";
-import { ROLE_ORDER } from "../constants/roles";
 import { normalizeRoleName } from "../utils/permissionHelpers";
 import { applyModulesToPermissions } from "../utils/permissionMatrix";
 import { getModuleDefaults } from "../utils/permissionHelpers";

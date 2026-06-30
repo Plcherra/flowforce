@@ -7,7 +7,7 @@ export type CompliancePackKey =
 
 export type CompliancePackDashboardRow = {
   company_id: string;
-  pack_id: string;
+  packid: string;
   pack_key: CompliancePackKey;
   pack_name: string;
   category: string;
@@ -26,10 +26,10 @@ export type CompliancePackDashboardRow = {
 };
 
 export type CompliancePackRpcResult = {
-  pack_id?: string;
+  packid?: string;
   pack_key?: CompliancePackKey;
-  workflow_id?: string;
-  export_id?: string;
+  workflowid?: string;
+  exportid?: string;
   status?: string;
 };
 

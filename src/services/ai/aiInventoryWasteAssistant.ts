@@ -232,7 +232,7 @@ export function buildInventoryAssistantDraft(snapshot: AIContextSnapshot) {
     safety: {
       requires_human_approval: true as const,
       writes_allowed: false as const,
-      blocked_data_classes_observed: [],
+      blockeddata_classes_observed: [],
     },
     stock_risks: activeSuggestions.map((suggestion) => ({
       risk: suggestion.rationale,
@@ -272,7 +272,7 @@ export function buildWasteAssistantDraft(snapshot: AIContextSnapshot) {
     safety: {
       requires_human_approval: true as const,
       writes_allowed: false as const,
-      blocked_data_classes_observed: [],
+      blockeddata_classes_observed: [],
     },
     waste_outliers: wasteSuggestions.map((suggestion) => ({
       pattern: suggestion.rationale,

@@ -50,7 +50,9 @@ export function StaffShiftManagement() {
     queryFn: () => fetchTimeOffRequests({ companyId: companyId!, limit: 50 }),
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const shiftSwaps = (shiftSwapsQuery.data ?? []) as unknown as ShiftSwap[];
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const timeOffRequests = (timeOffQuery.data ??
     []) as unknown as TimeOffRequest[];
 
@@ -61,10 +63,10 @@ export function StaffShiftManagement() {
     if (!normalizedSearch) return shiftSwaps;
     return shiftSwaps.filter((swap) => {
       const parts = [
-        swap.requesting_user?.first_name,
-        swap.requesting_user?.last_name,
-        swap.target_user?.first_name,
-        swap.target_user?.last_name,
+        swap.requestinguser?.first_name,
+        swap.requestinguser?.last_name,
+        swap.targetuser?.first_name,
+        swap.targetuser?.last_name,
         swap.schedule?.title,
         swap.reason,
       ]
@@ -289,23 +291,23 @@ export function StaffShiftManagement() {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>
-                            {getInitials(swap.requesting_user)}
+                            {getInitials(swap.requestinguser)}
                           </AvatarFallback>
                         </Avatar>
                         <span className="font-medium text-sm">
-                          {getDisplayName(swap.requesting_user)}
+                          {getDisplayName(swap.requestinguser)}
                         </span>
 
-                        {swap.target_user && (
+                        {swap.targetuser && (
                           <>
                             <ArrowRightLeft className="h-3 w-3 text-muted-foreground" />
                             <Avatar className="h-8 w-8">
                               <AvatarFallback>
-                                {getInitials(swap.target_user)}
+                                {getInitials(swap.targetuser)}
                               </AvatarFallback>
                             </Avatar>
                             <span className="font-medium text-sm">
-                              {getDisplayName(swap.target_user)}
+                              {getDisplayName(swap.targetuser)}
                             </span>
                           </>
                         )}

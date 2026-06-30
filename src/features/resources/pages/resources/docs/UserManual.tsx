@@ -132,7 +132,7 @@ export default function UserManual() {
 
               <h3>Advanced Features</h3>
               <p>
-                Once you're comfortable with the basics, explore advanced
+                Once you&apos;re comfortable with the basics, explore advanced
                 features like:
               </p>
               <ul>
@@ -144,7 +144,7 @@ export default function UserManual() {
 
               <h3>Need Help?</h3>
               <p>
-                Can't find what you're looking for? Check out our other
+                Can&apos;t find what you&apos;re looking for? Check out our other
                 resources:
               </p>
               <ul>

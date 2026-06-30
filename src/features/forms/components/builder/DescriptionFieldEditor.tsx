@@ -20,12 +20,12 @@ interface FormField {
   formula_expression?: string;
   dependent_fields?: string[];
   rating_config?: Record<string, any>;
-  scan_config?: Record<string, any>;
-  media_config?: Record<string, any>;
+  scan_config?: Record<string, unknown>;
+  media_config?: Record<string, unknown>;
   allow_multiple_selection?: boolean;
   conditional_logic?: {
     enabled: boolean;
-    field_id?: string;
+    fieldid?: string;
     condition_type?:
       | "equals"
       | "not_equals"

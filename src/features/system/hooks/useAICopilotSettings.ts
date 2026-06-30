@@ -4,13 +4,17 @@ import type { SystemSettingsHook } from "./useSystemSettings";
 
 export function useAICopilotSettings(source: SystemSettingsHook) {
   const { settings, updateSettings, loading, error, canEdit } = source;
-  const base = settings?.adminConfig.aiCopilot ?? {
-    enabled: false,
-    scopes: [],
-    restrictedModules: [],
-    automationLevel: "suggestion" as AICopilotSettings["automationLevel"],
-    lastAuditAt: null,
-  };
+  const base = useMemo(
+    () =>
+      settings?.adminConfig.aiCopilot ?? {
+        enabled: false,
+        scopes: [],
+        restrictedModules: [],
+        automationLevel: "suggestion" as AICopilotSettings["automationLevel"],
+        lastAuditAt: null,
+      },
+    [settings?.adminConfig.aiCopilot],
+  );
 
   const [state, setState] = useState<AICopilotSettings>(base);
   const [saving, setSaving] = useState(false);

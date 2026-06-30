@@ -48,7 +48,7 @@ export function RoleConfigPanel({
   const suggestions = useCopilotSuggestion("employee_management", {
     context: {
       role: employee?.role,
-      department: employee?.department_id,
+      department: employee?.departmentid,
       availableRoles: availableRoleOptions,
     },
     onAccept: (suggestion) => {

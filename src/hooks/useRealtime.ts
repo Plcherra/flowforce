@@ -1,23 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import type {
-  RealtimeChannel,
-  RealtimePostgresChangesPayload,
-} from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { logger } from "@/utils/logger";
+import {
+  subscribeSharedPostgresChannel,
+  type PostgresChangeEventConfig,
+  type PostgresEvent,
+} from "@/lib/realtime/sharedPostgresChannel";
 
-type PostgresEvent = "INSERT" | "UPDATE" | "DELETE" | "*";
-
-export interface RealtimeEventConfig {
-  event: PostgresEvent;
-  schema?: string;
-  table?: string;
-  filter?: string;
-}
+export type { PostgresEvent, PostgresChangeEventConfig as RealtimeEventConfig };
 
 export interface UseRealtimeOptions<T = Record<string, unknown>> {
   channel: string;
-  events: RealtimeEventConfig[];
+  events: PostgresChangeEventConfig[];
   enabled?: boolean;
   onPayload?: (payload: RealtimePostgresChangesPayload<T>) => void;
 }
@@ -43,60 +37,25 @@ export function useRealtime<T = Record<string, unknown>>({
       return;
     }
 
-    const realtimeChannel: RealtimeChannel = supabase.channel(channel);
+    setSubscribed(true);
 
-    try {
-      events.forEach((eventConfig) => {
-        (realtimeChannel as any).on(
-          "postgres_changes",
-          {
-            event: eventConfig.event,
-            schema: eventConfig.schema ?? "public",
-            table: eventConfig.table,
-            filter: eventConfig.filter,
-          },
-          (payload) => {
-            // Phase 5: Error handling for payload processing
-            try {
-              handlerRef.current?.(
-                payload as RealtimePostgresChangesPayload<T>,
-              );
-            } catch (error) {
-              logger.error("[useRealtime] Error processing payload", {
-                error,
-                channel,
-                table: eventConfig.table,
-                tags: ["error", "realtime"],
-              });
-            }
-          },
-        );
-      });
-    } catch (error) {
-      logger.error("[useRealtime] Failed to register event handlers", {
-        error,
-        tags: ["error"],
-      });
-    }
-
-    realtimeChannel.subscribe((status, err) => {
-      // Phase 5: Error handling for subscription failures
-      if (err) {
-        logger.error("[useRealtime] Subscription error", {
-          error: err,
-          channel,
-          tags: ["error", "realtime"],
-        });
-        setSubscribed(false);
-        return;
-      }
-      setSubscribed(status === "SUBSCRIBED");
-    });
-
-    return () => {
-      supabase.removeChannel(realtimeChannel);
-      setSubscribed(false);
-    };
+    return subscribeSharedPostgresChannel(
+      channel,
+      events,
+      eventsKey,
+      (payload) => {
+        try {
+          handlerRef.current?.(payload as RealtimePostgresChangesPayload<T>);
+        } catch (error) {
+          logger.error("[useRealtime] Error processing payload", {
+            error,
+            channel,
+            tags: ["error", "realtime"],
+          });
+        }
+      },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [channel, enabled, eventsKey]);
 
   return { subscribed };

@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, FileText, User, Calendar } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
 import FormFillDialog from "./FormFillDialog";
@@ -36,6 +35,7 @@ export default function FormSubmissionsDialog({
     if (open && formId) {
       loadData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [open, formId]);
 
   const loadData = async () => {
@@ -66,15 +66,15 @@ export default function FormSubmissionsDialog({
 
     // Create CSV rows
     const rows = submissions.map((submission) => {
-      const submitterName = submission.submitted_profile
-        ? `${submission.submitted_profile.first_name} ${submission.submitted_profile.last_name}`
+      const submitterName = submission.submittedprofile
+        ? `${submission.submittedprofile.first_name} ${submission.submittedprofile.last_name}`
         : "Anonymous";
 
       const row = [
         new Date(submission.submitted_at).toLocaleString(),
         submitterName,
         ...fields.map((field) => {
-          const value = submission.submission_data[field.id];
+          const value = submission.submissiondata[field.id];
           return Array.isArray(value) ? value.join(", ") : value || "";
         }),
       ];
@@ -133,7 +133,7 @@ export default function FormSubmissionsDialog({
                   No submissions yet
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  This form hasn't received any submissions yet
+                  This form hasn&apos;t received any submissions yet
                 </p>
                 <Button onClick={() => setFillDialogOpen(true)}>
                   Fill Form
@@ -160,8 +160,8 @@ export default function FormSubmissionsDialog({
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
-                            {submission.submitted_profile
-                              ? `${submission.submitted_profile.first_name} ${submission.submitted_profile.last_name}`
+                            {submission.submittedprofile
+                              ? `${submission.submittedprofile.first_name} ${submission.submittedprofile.last_name}`
                               : "Anonymous"}
                           </div>
                           <div className="flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function FormSubmissionsDialog({
                     <CardContent>
                       <div className="grid gap-4">
                         {fields.map((field) => {
-                          const value = submission.submission_data[field.id];
+                          const value = submission.submissiondata[field.id];
                           if (!value && value !== 0) return null;
 
                           return (

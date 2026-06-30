@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import type { RoleKey, ModuleId } from "../types/permissions";
 import { ROLE_ORDER, ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
 import { ROLE_MODULES } from "../constants/modules";
-import { getModuleDefaults } from "../utils/permissionHelpers";
 
 interface RoleMatrixTableProps {
   matrix: Record<RoleKey, Record<ModuleId, boolean>>;

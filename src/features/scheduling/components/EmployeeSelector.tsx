@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,11 +14,10 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { Check, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import type { AssignmentWithUser } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { logger } from "@/utils/logger";
 

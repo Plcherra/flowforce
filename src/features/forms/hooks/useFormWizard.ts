@@ -2,7 +2,7 @@
  * Hook for managing form wizard state and navigation
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import type { WizardStepId, WizardStepMeta } from "../types/formFill";
 import type { FormSubmissionData } from "@/types/api";
 

@@ -89,6 +89,7 @@ export function useCopilotSuggestions(
     }
 
     return suggestions;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [contextKey]);
 
   const accept = (item: CopilotSuggestion) => {

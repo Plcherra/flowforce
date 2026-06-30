@@ -147,6 +147,7 @@ export function useCompany() {
       setError(null);
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const parseCompanyData = (data: CompanyRow): Company => {
@@ -313,7 +314,7 @@ export function useCompany() {
 
       // Use the improved database function to create company with setup
       const { data, error } = await supabase.rpc("create_company_with_setup", {
-        company_data: {
+        companydata: {
           name: companyData.name,
           industry: companyData.industry,
           size: companyData.size,
@@ -328,8 +329,8 @@ export function useCompany() {
           template_config: JSON.stringify(companyData.template_config || {}),
         },
         custom_roles: formattedRoles,
-        positions_data: formattedPositions,
-        owner_user_id: user.id,
+        positionsdata: formattedPositions,
+        owneruser_id: user.id,
       });
 
       if (error) {

@@ -18,7 +18,7 @@ interface CompactStepProgressProps {
 
 export default function CompactStepProgress({
   currentStep,
-  totalSteps,
+  _totalSteps,
   steps,
 }: CompactStepProgressProps) {
   return (

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -40,7 +39,6 @@ import {
 } from "lucide-react";
 import { FormFieldType } from "@/types/forms";
 import { FormFieldValidationRules } from "@/types/api";
-import { DescriptionField } from "@/features/forms/components/fields/DescriptionField";
 import { FormulaField } from "@/features/forms/components/fields/FormulaField";
 import { DescriptionFieldEditor } from "./DescriptionFieldEditor";
 
@@ -60,12 +58,12 @@ interface FormField {
   formula_expression?: string;
   dependent_fields?: string[];
   rating_config?: Record<string, any>;
-  scan_config?: Record<string, any>;
-  media_config?: Record<string, any>;
+  scan_config?: Record<string, unknown>;
+  media_config?: Record<string, unknown>;
   allow_multiple_selection?: boolean;
   conditional_logic?: {
     enabled: boolean;
-    field_id?: string;
+    fieldid?: string;
     condition_type?:
       | "equals"
       | "not_equals"
@@ -262,7 +260,7 @@ const DropdownOptionsEditor = ({
 
           {options.length === 0 && (
             <div className="text-center py-6 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-              No items yet. Click "Add item" to get started.
+              No items yet. Click &quot;Add item&quot; to get started.
             </div>
           )}
         </div>
@@ -700,12 +698,12 @@ export default function FieldEditor({
                               Show only if
                             </label>
                             <Select
-                              value={field.conditional_logic.field_id || ""}
+                              value={field.conditional_logic.fieldid || ""}
                               onValueChange={(value) =>
                                 onUpdateField(index, {
                                   conditional_logic: {
                                     ...field.conditional_logic,
-                                    field_id: value,
+                                    fieldid: value,
                                   },
                                 })
                               }
@@ -917,7 +915,7 @@ export default function FieldEditor({
               </div>
               <p className="text-lg font-medium mb-2">No fields yet</p>
               <p className="text-sm">
-                Click "Add field" or select elements from the left to start
+                Click &quot;Add field&quot; or select elements from the left to start
                 building your form
               </p>
             </div>

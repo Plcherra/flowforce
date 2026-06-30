@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit2, Trash2, Users, Palette } from "lucide-react";
+import { Plus, Edit2, Trash2, Users } from "lucide-react";
 import { usePositions, Position } from "@/hooks/usePositions";
 import { HexColorPicker } from "react-colorful";
 import {

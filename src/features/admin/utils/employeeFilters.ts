@@ -49,10 +49,10 @@ export function filterEmployeesByDepartment(
 ): Employee[] {
   if (departmentFilter === "all") return employees;
   if (departmentFilter === "unassigned") {
-    return employees.filter((employee) => !employee.department_id);
+    return employees.filter((employee) => !employee.departmentid);
   }
   return employees.filter(
-    (employee) => employee.department_id === departmentFilter,
+    (employee) => employee.departmentid === departmentFilter,
   );
 }
 

@@ -56,9 +56,9 @@ const resolveUnitMeta = (
   }
 
   // Base units are the anchor of a conversion group
-  if (unit.is_base_unit || (!unit.base_unit_id && !unit.parent_unit_id)) {
+  if (unit.is_base_unit || (!unit.base_unitid && !unit.parent_unitid)) {
     const meta: UnitMeta = {
-      baseUnitId: unit.base_unit_id || unit.id,
+      baseUnitId: unit.base_unitid || unit.id,
       factorToBase: 1,
       status: "ready",
     };
@@ -68,11 +68,11 @@ const resolveUnitMeta = (
   }
 
   // Prefer direct conversion factor to base when present
-  if (unit.conversion_factor && unit.base_unit_id) {
-    const baseUnit = units[unit.base_unit_id];
+  if (unit.conversion_factor && unit.base_unitid) {
+    const baseUnit = units[unit.base_unitid];
     if (!baseUnit) {
       cache[unitId] = {
-        baseUnitId: unit.base_unit_id,
+        baseUnitId: unit.base_unitid,
         factorToBase: 1,
         status: "missing",
         message: "Unit base is missing from the conversion catalog.",
@@ -83,7 +83,7 @@ const resolveUnitMeta = (
 
     if (!Number.isFinite(unit.conversion_factor) || unit.conversion_factor <= 0) {
       cache[unitId] = {
-        baseUnitId: unit.base_unit_id,
+        baseUnitId: unit.base_unitid,
         factorToBase: 1,
         status: "invalid",
         message: "Unit conversion_factor must be greater than zero.",
@@ -93,7 +93,7 @@ const resolveUnitMeta = (
     }
 
     const meta: UnitMeta = {
-      baseUnitId: unit.base_unit_id,
+      baseUnitId: unit.base_unitid,
       factorToBase: unit.conversion_factor,
       status: "ready",
     };
@@ -103,13 +103,13 @@ const resolveUnitMeta = (
   }
 
   // Otherwise traverse parent chain if available
-  if (unit.parent_unit_id && unit.conversion_to_parent) {
+  if (unit.parent_unitid && unit.conversion_to_parent) {
     if (
       !Number.isFinite(unit.conversion_to_parent) ||
       unit.conversion_to_parent <= 0
     ) {
       cache[unitId] = {
-        baseUnitId: unit.parent_unit_id,
+        baseUnitId: unit.parent_unitid,
         factorToBase: 1,
         status: "invalid",
         message: "Unit conversion_to_parent must be greater than zero.",
@@ -119,7 +119,7 @@ const resolveUnitMeta = (
     }
 
     const parentMeta = resolveUnitMeta(
-      unit.parent_unit_id,
+      unit.parent_unitid,
       units,
       cache,
       resolving,
@@ -139,7 +139,7 @@ const resolveUnitMeta = (
 
   // Fallback: treat as standalone base unit
   const fallback: UnitMeta = {
-    baseUnitId: unit.base_unit_id || unit.id,
+    baseUnitId: unit.base_unitid || unit.id,
     factorToBase: 1,
     status: "invalid",
     message: "Unit has no usable base or parent conversion path.",

@@ -131,7 +131,7 @@ export function useAccountDeletion({
         try {
           // Attempt graceful sign out (will likely fail since auth record is deleted)
           await supabase.auth.signOut({ scope: "global" });
-        } catch (signOutError) {
+        } catch (_signOutError) {
           // Sign out after deletion expected to fail
         }
 
@@ -152,7 +152,7 @@ export function useAccountDeletion({
         localStorage.clear();
         sessionStorage.clear();
         await onSignOut();
-      } catch (signOutError) {
+      } catch (_signOutError) {
         // Force sign out error
       }
 

@@ -21,7 +21,7 @@ import {
   useCanMultiple,
   useAllPermissions,
 } from "@/hooks/useCan";
-import { UserPlus, Settings, Shield, Users, Eye, Edit } from "lucide-react";
+import { UserPlus, Settings, Shield, Users } from "lucide-react";
 
 /**
  * Examples showing how to use the permission system

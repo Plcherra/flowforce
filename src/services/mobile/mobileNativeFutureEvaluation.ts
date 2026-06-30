@@ -32,7 +32,7 @@ export const mobileNativeFutureDecision = {
 
 export const nativeFutureTriggers: NativeFutureTrigger[] = [
   {
-    id: "offline_data_loss",
+    id: "offlinedata_loss",
     label: "Offline field work loses data or creates repeated conflicts",
     severity: "blocker",
     threshold:
@@ -147,7 +147,7 @@ export const mobileNativeSharedContracts = [
 export const mobileNativeFutureChecks = [
   "capacitor_remains_v1_path",
   "native_rewrite_is_deferred_until_pilot_evidence",
-  "expo_native_candidates_are_limited_to_field_heavy_workflows",
+  "expo_nativecandidates_are_limited_to_field_heavy_workflows",
   "shared_contracts_are_defined_before_native_work",
   "native_rebuild_is_not_started_without_trigger",
 ] as const;
@@ -179,13 +179,13 @@ export function isMobileNativeFutureEvaluationReady() {
     candidateIds.has("inventory_counts") &&
     candidateIds.has("forms_and_evidence") &&
     candidateIds.has("tasks_and_workflows") &&
-    triggerIds.has("offline_data_loss") &&
+    triggerIds.has("offlinedata_loss") &&
     triggerIds.has("platform_policy_blocker") &&
     mobileNativeSharedContracts.includes("offline queue payloads") &&
     mobileNativeFutureChecks.includes(
       "native_rebuild_is_not_started_without_trigger",
     ) &&
-    shouldStartNativeRewrite(["offline_data_loss"]) &&
+    shouldStartNativeRewrite(["offlinedata_loss"]) &&
     !shouldStartNativeRewrite(["field_performance_pressure"])
   );
 }

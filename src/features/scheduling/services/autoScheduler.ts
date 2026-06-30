@@ -320,7 +320,7 @@ async function buildRuleSetFromDatabase(
 
 function normaliseWeekStart(
   value: Date | string,
-  timezoneHint = "America/New_York",
+  _timezoneHint = "America/New_York",
 ): Date {
   const base = value instanceof Date ? value : new Date(value);
   const normalised = startOfWeek(base, { weekStartsOn: 1 });

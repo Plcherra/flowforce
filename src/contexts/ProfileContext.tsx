@@ -21,7 +21,7 @@ type LegacyProfileFields = {
   email: string | null;
   employee_id: string | null;
   employment_status: string | null;
-  department_id: string | null;
+  departmentid: string | null;
   hire_date: string | null;
   avatar_url: string | null;
   role_id: string | null;
@@ -116,7 +116,7 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
     employeeId: null,
     employee_id: null,
     employment_status: null,
-    department_id: null,
+    departmentid: null,
     hire_date: null,
     role_id: null,
     roleId: null,
@@ -228,12 +228,12 @@ async function loadProfileState({
     const cachedProfile = profileCache.get(cacheKey);
     if (cachedProfile) {
       setProfile(cachedProfile);
-      setError(null);
+      setError(
+        cachedProfile.isPlaceholder ? "Profile setup is incomplete." : null,
+      );
       lastLoadedKeyRef.current = cacheKey;
-      if (!cachedProfile.isPlaceholder) {
-        setLoading(false);
-        return;
-      }
+      setLoading(false);
+      return;
     }
   }
 
@@ -314,7 +314,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return () => {
       signal.cancelled = true;
     };
-  }, [authLoading, user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
+  }, [authLoading, user?.id]);
 
   const refreshProfile = async () => {
     await loadProfileState({
@@ -331,7 +332,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     profile ?? (ALLOW_PROFILE_PLACEHOLDER ? buildProfilePlaceholder(user) : null);
   const contextValue: ProfileContextValue = {
     profile: safeProfile,
-    loading: authLoading || loading,
+    loading: authLoading || (loading && profile === null),
     error,
     refreshProfile,
     refetchProfile: refreshProfile,

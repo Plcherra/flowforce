@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -113,7 +113,7 @@ export function TaskActivityFeed() {
         supabase.removeChannel(channel);
       }
     };
-  }, [user?.id, queryClient]);
+  }, [user, queryClient]);
 
   const activities = activitiesQuery.data ?? [];
   const loading = activitiesQuery.isLoading;
@@ -217,7 +217,7 @@ export function TaskActivityFeed() {
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Clock className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
-                We’re trying to reconnect to your activity feed.
+                WeΓÇÖre trying to reconnect to your activity feed.
               </p>
               <p className="text-xs text-muted-foreground">
                 Updates will resume automatically.
@@ -280,9 +280,9 @@ export function TaskActivityFeed() {
                               {(activity.metadata as any).old_value &&
                                 (activity.metadata as any).new_value && (
                                   <span>
-                                    Changed from "
-                                    {(activity.metadata as any).old_value}" to "
-                                    {(activity.metadata as any).new_value}"
+                                    Changed from &quot;
+                                    {(activity.metadata as any).old_value}&quot; to &quot;
+                                    {(activity.metadata as any).new_value}&quot;
                                   </span>
                                 )}
                               {(activity.metadata as any).task_title && (

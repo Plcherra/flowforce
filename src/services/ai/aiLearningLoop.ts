@@ -11,12 +11,12 @@ export type AILearningReasonCode =
   | "not_relevant"
   | "better_manual_action"
   | "policy_blocked"
-  | "stale_data"
+  | "staledata"
   | "other";
 
 export type AILearningSourceTable =
   | "ai_scheduling_suggestions"
-  | "ai_inventory_waste_suggestions"
+  | "ai_inventorywaste_suggestions"
   | "ai_compliance_workflow_suggestions";
 
 export interface AILearningFeedbackInput {
@@ -36,7 +36,7 @@ export interface AILearningFeedbackRow {
   id: string;
   company_id: string;
   source_table: AILearningSourceTable;
-  source_id: string;
+  sourceid: string;
   prompt_key: AIPromptContractKey;
   suggestion_type: string;
   outcome: AILearningOutcome;
@@ -71,13 +71,13 @@ export const aiLearningReasonCodes: AILearningReasonCode[] = [
   "not_relevant",
   "better_manual_action",
   "policy_blocked",
-  "stale_data",
+  "staledata",
   "other",
 ];
 
 export const aiLearningSourceTables: AILearningSourceTable[] = [
   "ai_scheduling_suggestions",
-  "ai_inventory_waste_suggestions",
+  "ai_inventorywaste_suggestions",
   "ai_compliance_workflow_suggestions",
 ];
 
@@ -107,7 +107,7 @@ export function buildAILearningSignal(input: AILearningFeedbackInput) {
   return {
     company_id: input.companyId,
     source_table: input.sourceTable,
-    source_id: input.sourceId,
+    sourceid: input.sourceId,
     prompt_key: input.promptKey,
     suggestion_type: input.suggestionType,
     outcome: input.outcome,

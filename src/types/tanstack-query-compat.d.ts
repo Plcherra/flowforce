@@ -5,8 +5,8 @@ declare module "@tanstack/react-query" {
   interface UseQueryOptions<
     TQueryFnData = unknown,
     TError = DefaultError,
-    TData = TQueryFnData,
-    TQueryKey extends QueryKey = QueryKey,
+    _TData = TQueryFnData,
+    _TQueryKey extends QueryKey = QueryKey,
   > {
     onError?: (error: TError) => void;
     suspense?: boolean;

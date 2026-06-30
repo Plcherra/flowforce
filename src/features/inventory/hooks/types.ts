@@ -4,8 +4,8 @@ export interface InventoryUnit {
   abbreviation: string;
   unit_type: "weight" | "volume" | "count";
   conversion_factor?: number;
-  base_unit_id?: string;
-  parent_unit_id?: string | null;
+  base_unitid?: string;
+  parent_unitid?: string | null;
   conversion_to_parent?: number | null;
   is_base_unit?: boolean | null;
   is_active: boolean;
@@ -17,7 +17,7 @@ export interface InventoryUnit {
 export interface InventoryItemUnit {
   id: string;
   item_id: string;
-  unit_id: string;
+  unitid: string;
   unit_level: number;
   conversion_factor: number;
   is_primary?: boolean | null;
@@ -36,8 +36,8 @@ export interface InventoryItem {
   sku?: string;
   barcode?: string | null;
   category?: string | null;
-  category_id?: string | null;
-  unit_id: string;
+  categoryid?: string | null;
+  unitid: string;
   unit?: InventoryUnit;
   unit_quantity?: number;
   cost_per_unit?: number;
@@ -47,10 +47,10 @@ export interface InventoryItem {
   default_location_id?: string;
   location?: { id: string; name: string; location_type: string };
   shelf_life_days?: number;
-  is_prep_item?: boolean;
+  isprep_item?: boolean;
   is_active: boolean;
   recipe_yield_quantity?: number | null;
-  recipe_yield_unit_id?: string | null;
+  recipe_yield_unitid?: string | null;
   recipe_yield_unit?: InventoryUnit | null;
   preferred_supplier?: InventorySupplier | null;
   category_details?: InventoryCategory | null;
@@ -104,9 +104,9 @@ export interface InventoryCategory {
 export interface InventoryRecipeLine {
   id: string;
   item_id: string;
-  ingredient_id: string;
+  ingredientid: string;
   quantity_needed: number;
-  unit_id: string;
+  unitid: string;
   notes?: string | null;
   yield_amount?: number | null;
   ingredient?: InventoryItem;
@@ -122,7 +122,7 @@ export interface InventoryRecipe {
   total_cost?: number;
   cost_per_unit?: number;
   yield_quantity?: number;
-  yield_unit_id?: string | null;
+  yield_unitid?: string | null;
 }
 
 export interface InventoryTransaction {
@@ -155,7 +155,7 @@ export interface SupplierIntegrationDetails {
 
 export interface PurchaseOrderItem {
   id: string;
-  po_id: string;
+  poid: string;
   company_id?: string | null;
   item_id?: string | null;
   item_name: string;
@@ -164,7 +164,7 @@ export interface PurchaseOrderItem {
   total_price: number;
   received_quantity?: number | null;
   received_at?: string | null;
-  stock_lot_id?: string | null;
+  stock_lotid?: string | null;
   created_at: string;
   inventory_item?: InventoryItem | null;
 }
@@ -252,15 +252,15 @@ export interface InventoryCount {
 
 export interface InventoryCountLine {
   id: string;
-  count_id: string;
+  countid: string;
   item_id: string;
   expected_quantity?: number;
   counted_quantity: number;
   variance?: number;
   notes?: string;
-  lot_id?: string;
+  lotid?: string;
   counted_at?: string;
-  unit_id?: string | null;
+  unitid?: string | null;
   unit_level?: number | null;
   conversion_factor?: number | null;
   counted_in_base_units?: number | null;
@@ -299,10 +299,10 @@ export type ProductionType = "prep" | "batch" | "cooked" | "baked" | "other";
 
 export interface ProductionMaterialUsage {
   id?: string;
-  production_id?: string;
+  productionid?: string;
   ingredient_item_id: string;
   quantity_used: number;
-  unit_id: string;
+  unitid: string;
   unit_cost?: number | null;
   total_cost?: number | null;
   waste_quantity?: number | null;
@@ -320,7 +320,7 @@ export interface ProductionMaterialUsage {
 
 export interface ProductionApproval {
   id: string;
-  production_id: string;
+  productionid: string;
   action: "submitted" | "approved" | "rejected" | "resubmitted";
   action_by: string;
   action_at: string;
@@ -337,11 +337,11 @@ export interface ProductionEvent {
   item_id: string;
   production_type: ProductionType;
   produced_quantity: number;
-  produced_unit_id: string;
+  produced_unitid: string;
   yield_quantity?: number | null;
-  yield_unit_id?: string | null;
+  yield_unitid?: string | null;
   waste_quantity?: number | null;
-  waste_unit_id?: string | null;
+  waste_unitid?: string | null;
   material_cost: number;
   labor_cost: number;
   overhead_cost: number;
@@ -376,11 +376,11 @@ export interface ProductionEventInput {
   item_id: string;
   production_type: ProductionType;
   produced_quantity: number;
-  produced_unit_id: string;
+  produced_unitid: string;
   yield_quantity?: number | null;
-  yield_unit_id?: string | null;
+  yield_unitid?: string | null;
   waste_quantity?: number | null;
-  waste_unit_id?: string | null;
+  waste_unitid?: string | null;
   notes?: string | null;
   batch_reference?: string | null;
   produced_at?: string;
@@ -397,9 +397,9 @@ export type InventoryTransferStatus =
 
 export interface InventoryTransferItem {
   id: string;
-  transfer_id: string;
+  transferid: string;
   item_id: string;
-  unit_id: string;
+  unitid: string;
   quantity: number;
   cost_per_unit?: number | null;
   total_cost?: number | null;
@@ -410,12 +410,12 @@ export interface InventoryTransferItem {
 
 export interface InventoryTransferAudit {
   id: string;
-  transfer_id: string;
+  transferid: string;
   action: "created" | "updated" | "status_changed" | "deleted";
   old_status?: InventoryTransferStatus | null;
   new_status?: InventoryTransferStatus | null;
   note?: string | null;
-  actor_id?: string | null;
+  actorid?: string | null;
   created_at: string;
   actor?: {
     id: string;
@@ -428,8 +428,8 @@ export interface InventoryTransfer {
   id: string;
   company_id: string;
   requested_by: string;
-  fulfiller_id: string;
-  recipient_id: string;
+  fulfillerid: string;
+  recipientid: string;
   from_location_id: string;
   to_location_id: string;
   status: InventoryTransferStatus;

@@ -269,7 +269,7 @@ export default function CompanyOnboardingWizard({
             Company Onboarding
           </h2>
           <p className="text-gray-600 mt-2">
-            Let's set up your business operations platform
+            Let&apos;s set up your business operations platform
           </p>
           <div className="mt-4 max-w-md mx-auto">
             <Progress value={progress} className="h-2" />

@@ -95,7 +95,7 @@ export const mobileOfflineQueueChecks = [
   "mutations_are_persisted_before_network_sync",
   "retry_uses_exponential_backoff",
   "failed_and_conflict_states_are_visible_in_mobile_app_shell",
-  "offline_queue_routes_user_back_to_source_workflow",
+  "offline_queue_routesuser_back_to_source_workflow",
   "synced_items_are_pruned_after_success",
 ] as const;
 

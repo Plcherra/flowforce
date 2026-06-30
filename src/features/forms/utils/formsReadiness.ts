@@ -14,7 +14,7 @@ export type FormReviewerRuleRow = {
 
 export type FormSubmissionReviewerRow = {
   id: string;
-  submission_id: string | null;
+  submissionid: string | null;
   status: string | null;
 };
 

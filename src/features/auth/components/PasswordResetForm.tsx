@@ -52,7 +52,7 @@ export default function PasswordResetForm({
           Set New Password
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your new password below. Make sure it's at least 6 characters
+          Enter your new password below. Make sure it&apos;s at least 6 characters
           long.
         </CardDescription>
       </CardHeader>

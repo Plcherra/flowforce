@@ -226,10 +226,10 @@ async function writeInviteAudit({
 }) {
   const { error } = await supabaseAdmin.from("audit_log").insert({
     action,
-    actor_id: actorId,
+    actorid: actorId,
     company_id: companyId,
     table_name: "company_invites",
-    record_id: inviteId,
+    recordid: inviteId,
     metadata: {
       ...getAuditEventMetadata(action),
       ...metadata,

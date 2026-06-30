@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Image, Plus, X, Upload, Check } from "lucide-react";
+import { Image, Plus, X,  Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ImageSelectionData {

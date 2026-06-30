@@ -12,19 +12,18 @@
 
 import {
   useQuery,
-  type UseQueryOptions,
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { useProfile } from "./useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type QueryBuilder<T> = (
+type QueryBuilder<_T> = (
   client: SupabaseClient,
   companyId: string | null,
 ) => any;
 
-interface UseSupabaseQueryOptions<TData, TError = Error> {
+interface UseSupabaseQueryOptions<TData, _TError = Error> {
   queryKey: readonly unknown[];
   queryFn: QueryBuilder<TData>;
   enabled?: boolean;

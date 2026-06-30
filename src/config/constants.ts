@@ -6,7 +6,7 @@ export const VALIDATION_RULES = {
       UPPERCASE: /[A-Z]/,
       LOWERCASE: /[a-z]/,
       NUMBER: /\d/,
-      SPECIAL_CHAR: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+      SPECIAL_CHAR: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
     },
   },
   ONBOARDING: {
@@ -17,7 +17,7 @@ export const VALIDATION_RULES = {
   FORM: {
     DESCRIPTION_MAX_LENGTH: 500,
     NAME_MAX_LENGTH: 100,
-    PHONE_PATTERN: /^[\+]?[1-9][\d]{0,15}$/,
+    PHONE_PATTERN: /^[+]?[1-9][\d]{0,15}$/,
   },
 } as const;
 

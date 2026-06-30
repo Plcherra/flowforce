@@ -38,7 +38,7 @@ export const responsiveBaselineChecks = [
 ] as const;
 
 export const mobileResponsiveDebt = [
-  "data_dense_modules_need_workflow_specific_mobile_simplification",
+  "data_densemodules_need_workflow_specific_mobile_simplification",
   "touch_target_warnings_are_not_build_blockers_yet",
   "offline_behavior_deferred_to_08_07_and_08_08",
   "native_shell_auth_deferred_to_08_04",

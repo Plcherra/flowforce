@@ -35,10 +35,10 @@ const MessageChannelSchema = z
     created_by: z.string(),
     created_at: z.string(),
     updated_at: z.string(),
-    department_id: z.string().nullable().optional(),
+    departmentid: z.string().nullable().optional(),
     is_private: z.boolean().nullable().optional(),
     channel_members: z.array(ChannelMemberSchema).default([]),
-    created_profile: ProfileSchema.omit({ avatar_url: true }).optional(),
+    createdprofile: ProfileSchema.omit({ avatar_url: true }).optional(),
     department: DepartmentSchema.nullable().optional(),
   })
   .passthrough();
@@ -58,27 +58,27 @@ const RawMessageSchema = z
   .object({
     id: z.string(),
     channel_id: z.string(),
-    sender_id: z.string(),
+    senderid: z.string(),
     content: z.string(),
     created_at: z.string(),
     updated_at: z.string(),
-    reply_to_id: z.string().nullable().optional(),
+    reply_toid: z.string().nullable().optional(),
     message_type: z.string().nullable().optional(),
     attachments: z.array(AttachmentSchema).nullable().optional(),
-    sender_profile: ProfileSchema,
+    senderprofile: ProfileSchema,
     reply_to_message: z
       .union([
         z
           .array(
             z.object({
               content: z.string().nullable().optional(),
-              sender_profile: ReplySenderSchema.optional(),
+              senderprofile: ReplySenderSchema.optional(),
             }),
           )
           .nullable(),
         z.object({
           content: z.string().nullable().optional(),
-          sender_profile: ReplySenderSchema.optional(),
+          senderprofile: ReplySenderSchema.optional(),
         }),
         z.null(),
         z.undefined(),
@@ -92,7 +92,7 @@ const SearchResultSchema = z
     id: z.string(),
     content: z.string(),
     created_at: z.string(),
-    sender_profile: ProfileSchema,
+    senderprofile: ProfileSchema,
     channel: z.object({
       id: z.string(),
       name: z.string(),
@@ -110,7 +110,7 @@ const ChannelMemberDetailSchema = z
     role: z.string().nullable().optional(),
     joined_at: z.string().optional(),
     last_read_at: z.string().nullable().optional(),
-    user_profile: z
+    userprofile: z
       .object({
         first_name: z.string().nullable().optional(),
         last_name: z.string().nullable().optional(),
@@ -147,7 +147,7 @@ async function listChannels(
     .select(
       `
       *,
-      created_profile:profiles!created_by(first_name, last_name, company_id),
+      createdprofile:profiles!created_by(first_name, last_name, company_id),
       department:departments(name),
       channel_members!inner(user_id, role, last_read_at)
     `,
@@ -157,7 +157,7 @@ async function listChannels(
   // Filter by creator's company_id if provided for additional security
   // Note: message_channels table doesn't have company_id column, so we filter via creator's profile
   if (companyId) {
-    query = query.eq("created_profile.company_id", companyId);
+    query = query.eq("createdprofile.company_id", companyId);
   }
 
   query = query.order("updated_at", { ascending: false });
@@ -170,8 +170,8 @@ async function listChannels(
   // Additional client-side filtering as safety net
   if (companyId) {
     const filtered = parsed.filter((channel) => {
-      // Type-safe access to created_profile company_id
-      const createdProfile = channel.created_profile as
+      // Type-safe access to createdprofile company_id
+      const createdProfile = channel.createdprofile as
         | { company_id?: string }
         | undefined;
       const creatorCompanyId = createdProfile?.company_id;
@@ -195,7 +195,7 @@ async function createChannel(
       name: channelData.name,
       description: channelData.description ?? null,
       type: channelData.type ?? "team",
-      department_id: channelData.department_id ?? null,
+      departmentid: channelData.departmentid ?? null,
       created_by: creatorId,
       is_private: channelData.is_private ?? false,
     })
@@ -308,10 +308,10 @@ async function listMessages(
     .select(
       `
       *,
-      sender_profile:profiles!sender_id(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_to_id(
+      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
+      reply_to_message:messages!reply_toid(
         content,
-        sender_profile:profiles!sender_id(first_name, last_name)
+        senderprofile:profiles!senderid(first_name, last_name)
       )
     `,
     )
@@ -430,19 +430,19 @@ async function insertMessage(
     .from("messages")
     .insert({
       channel_id: channelId,
-      sender_id: senderId,
+      senderid: senderId,
       content,
-      reply_to_id: options.replyToId ?? null,
+      reply_toid: options.replyToId ?? null,
       attachments: attachmentsPayload,
       message_type: messageType,
     })
     .select(
       `
       *,
-      sender_profile:profiles!sender_id(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_to_id(
+      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
+      reply_to_message:messages!reply_toid(
         content,
-        sender_profile:profiles!sender_id(first_name, last_name)
+        senderprofile:profiles!senderid(first_name, last_name)
       )
     `,
     )
@@ -473,14 +473,14 @@ async function updateMessage(
       edited_at: new Date().toISOString(),
     })
     .eq("id", messageId)
-    .eq("sender_id", senderId)
+    .eq("senderid", senderId)
     .select(
       `
       *,
-      sender_profile:profiles!sender_id(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_to_id(
+      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
+      reply_to_message:messages!reply_toid(
         content,
-        sender_profile:profiles!sender_id(first_name, last_name)
+        senderprofile:profiles!senderid(first_name, last_name)
       )
     `,
     )
@@ -504,7 +504,7 @@ async function deleteMessage(messageId: string, senderId: string) {
     .from("messages")
     .delete()
     .eq("id", messageId)
-    .eq("sender_id", senderId);
+    .eq("senderid", senderId);
 
   if (error) throw error;
 }
@@ -523,7 +523,7 @@ async function searchMessages(
       id,
       content,
       created_at,
-      sender_profile:profiles!messages_sender_id_fkey(
+      senderprofile:profiles!messages_senderid_fkey(
         first_name,
         last_name,
         avatar_url
@@ -566,7 +566,7 @@ async function listChannelMembers(
       role,
       joined_at,
       last_read_at,
-      user_profile:profiles!channel_members_user_id_fkey(
+      userprofile:profiles!channel_membersuser_id_fkey(
         first_name,
         last_name,
         email,
@@ -608,7 +608,7 @@ async function deleteChannel(
   if (companyId) {
     const { data: channelData, error: channelError } = await supabase
       .from("message_channels")
-      .select("created_by, created_profile:profiles!created_by(company_id)")
+      .select("created_by, createdprofile:profiles!created_by(company_id)")
       .eq("id", channelId)
       .maybeSingle();
 
@@ -617,7 +617,7 @@ async function deleteChannel(
       throw new Error("Channel not found");
     }
 
-    const createdProfile = channelData.created_profile as
+    const createdProfile = channelData.createdprofile as
       | { company_id?: string }
       | undefined;
     const creatorCompanyId = createdProfile?.company_id;

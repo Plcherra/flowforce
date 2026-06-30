@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Layers, Plus } from "lucide-react";
-import { CustomSection } from "@/types/templates";
 import SectionCard from "./SectionCard";
 
 interface SectionCategoryGroupProps {

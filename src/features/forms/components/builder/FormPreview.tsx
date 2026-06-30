@@ -2,11 +2,11 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  _Select,
+  _SelectContent,
+  _SelectItem,
+  _SelectTrigger,
+  _SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,7 +41,7 @@ interface FormField {
   allow_multiple_selection?: boolean;
   conditional_logic?: {
     enabled: boolean;
-    field_id?: string;
+    fieldid?: string;
     condition_type?: string;
     condition_values?: string[];
   };
@@ -53,7 +53,7 @@ interface FormPreviewProps {
   fields: FormField[];
 }
 
-const getFieldIcon = (fieldType: string) => {
+const getFieldIcon = (_fieldType: string) => {
   return <FileText className="h-4 w-4" />;
 };
 
@@ -66,14 +66,14 @@ export default function FormPreview({
     if (!field.conditional_logic?.enabled) return true;
 
     const {
-      field_id,
+      fieldid,
       condition_type,
-      condition_values = [],
+      _condition_values = [],
     } = field.conditional_logic;
-    if (!field_id || !condition_type) return true;
+    if (!fieldid || !condition_type) return true;
 
     // Find the referenced field by its temporary ID (we'll use the field order as ID for now)
-    const referencedFieldIndex = parseInt(field_id) - 1;
+    const referencedFieldIndex = parseInt(fieldid) - 1;
     if (referencedFieldIndex < 0 || referencedFieldIndex >= fieldIndex)
       return true;
 

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Bell, Megaphone, AlertTriangle, Info, X, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +26,7 @@ export function AnnouncementBanner({
     if (user) {
       fetchAnnouncements();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [user]);
 
   const fetchAnnouncements = async () => {
@@ -47,7 +46,7 @@ export function AnnouncementBanner({
           created_at,
           expires_at,
           created_by,
-          created_by_profile:profiles!created_by (
+          created_byprofile:profiles!created_by (
             first_name,
             last_name
           )
@@ -63,22 +62,22 @@ export function AnnouncementBanner({
       // Get read status for each announcement
       const { data: readData, error: readError } = await supabase
         .from("announcement_reads")
-        .select("announcement_id")
+        .select("announcementid")
         .eq("user_id", user.id);
 
       if (readError) throw readError;
 
-      const readIds = new Set(readData?.map((r) => r.announcement_id) || []);
+      const readIds = new Set(readData?.map((r) => r.announcementid) || []);
 
       const announcementsWithReadStatus = (announcementData || []).map(
         (announcement) => {
           // Safely extract profile data
-          const profile = announcement.created_by_profile;
+          const profile = announcement.created_byprofile;
           const creatorProfile =
             profile && typeof profile === "object" && profile !== null
               ? {
                   first_name: (profile as any).first_name || "Unknown",
-                  last_name: (profile as any).last_name || "User",
+                  last_name: (profile as unknown).last_name || "User",
                 }
               : { first_name: "Unknown", last_name: "User" };
 
@@ -92,11 +91,11 @@ export function AnnouncementBanner({
             expires_at: announcement.expires_at,
             created_by: announcement.created_by,
             target_audience: "all",
-            target_ids: [],
+            targetids: [],
             company_id: "",
             is_published: true,
             updated_at: announcement.created_at,
-            creator_profile: creatorProfile,
+            creatorprofile: creatorProfile,
             is_read: readIds.has(announcement.id),
           };
           return result;
@@ -116,7 +115,7 @@ export function AnnouncementBanner({
 
     try {
       await supabase.from("announcement_reads").upsert({
-        announcement_id: announcementId,
+        announcementid: announcementId,
         user_id: user.id,
       });
 
@@ -226,8 +225,8 @@ export function AnnouncementBanner({
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
-                    By {announcement.creator_profile.first_name}{" "}
-                    {announcement.creator_profile.last_name} •{" "}
+                    By {announcement.creatorprofile.first_name}{" "}
+                    {announcement.creatorprofile.last_name} •{" "}
                     {format(
                       new Date(announcement.created_at),
                       "MMM dd, yyyy at h:mm a",

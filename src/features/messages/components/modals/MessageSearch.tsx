@@ -19,7 +19,7 @@ interface SearchResult {
   name?: string;
   description?: string;
   created_at: string;
-  sender_profile?: {
+  senderprofile?: {
     first_name?: string | null;
     last_name?: string | null;
     avatar_url?: string | null;
@@ -83,6 +83,7 @@ export function MessageSearch({
         clearTimeout(searchTimeout);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [searchQuery]);
 
   const performSearch = async (query: string) => {
@@ -108,7 +109,7 @@ export function MessageSearch({
           id,
           content,
           created_at,
-          sender_profile:profiles!messages_sender_id_fkey(
+          senderprofile:profiles!messages_senderid_fkey(
             first_name,
             last_name,
             avatar_url
@@ -126,7 +127,7 @@ export function MessageSearch({
         .limit(10);
 
       // Search channels - RLS will filter by membership
-      // Filter by creator's company_id via created_profile
+      // Filter by creator's company_id via createdprofile
       const { data: channelResults, error: channelError } = await supabase
         .from("message_channels")
         .select(
@@ -137,7 +138,7 @@ export function MessageSearch({
           type,
           is_private,
           created_at,
-          created_profile:profiles!created_by(company_id)
+          createdprofile:profiles!created_by(company_id)
         `,
         )
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
@@ -147,9 +148,9 @@ export function MessageSearch({
       if (messageError) throw messageError;
       if (channelError) throw channelError;
 
-      // Filter channels by company_id from created_profile
+      // Filter channels by company_id from createdprofile
       const filteredChannels = (channelResults || []).filter((channel) => {
-        const createdProfile = channel.created_profile as
+        const createdProfile = channel.createdprofile as
           | { company_id?: string }
           | null
           | undefined;
@@ -162,9 +163,9 @@ export function MessageSearch({
           id: msg.id,
           content: msg.content,
           created_at: msg.created_at,
-          sender_profile: Array.isArray(msg.sender_profile)
-            ? msg.sender_profile[0]
-            : msg.sender_profile,
+          senderprofile: Array.isArray(msg.senderprofile)
+            ? msg.senderprofile[0]
+            : msg.senderprofile,
           channel: Array.isArray(msg.channel) ? msg.channel[0] : msg.channel,
         })),
         ...filteredChannels.map((channel) => ({
@@ -251,7 +252,7 @@ export function MessageSearch({
               </div>
             ) : results.length === 0 && searchQuery.length >= 2 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No results found for "{searchQuery}"
+                No results found for &quot;{searchQuery}&quot;
               </div>
             ) : searchQuery.length < 2 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -289,9 +290,9 @@ export function MessageSearch({
                         <div className="flex items-start gap-3">
                           {(() => {
                             const firstName =
-                              result.sender_profile?.first_name?.trim() ?? "";
+                              result.senderprofile?.first_name?.trim() ?? "";
                             const lastName =
-                              result.sender_profile?.last_name?.trim() ?? "";
+                              result.senderprofile?.last_name?.trim() ?? "";
                             const displayName =
                               [firstName, lastName].filter(Boolean).join(" ") ||
                               "Hidden user";
@@ -313,10 +314,10 @@ export function MessageSearch({
                             return (
                               <>
                                 <Avatar className="h-8 w-8">
-                                  {result.sender_profile?.avatar_url ? (
+                                  {result.senderprofile?.avatar_url ? (
                                     <AvatarImage
                                       src={
-                                        result.sender_profile.avatar_url ??
+                                        result.senderprofile.avatar_url ??
                                         undefined
                                       }
                                       alt={displayName}

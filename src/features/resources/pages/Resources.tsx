@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { BookOpen, FileText, Video, Download, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";

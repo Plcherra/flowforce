@@ -60,7 +60,7 @@ export async function generateFinancialDemoData(): Promise<DemoSeedResult> {
               ? "bonus"
               : "expense_reimbursement",
         recipient_type: "employee",
-        recipient_id: user.id,
+        recipientid: user.id,
         recipient_name: "Demo Employee",
         amount,
         currency: "USD",

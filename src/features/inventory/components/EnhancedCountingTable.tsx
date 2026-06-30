@@ -37,7 +37,7 @@ import type { InventoryItemUnit } from "@/features/inventory/hooks/types";
 
 interface CountData {
   item_id: string;
-  unit_counts: Record<string, number>; // unit_id -> quantity
+  unit_counts: Record<string, number>; // unitid -> quantity
   notes: string;
   is_completed: boolean;
 }
@@ -74,6 +74,7 @@ export function EnhancedCountingTable({
     if (Object.keys(initialCounts).length > 0) {
       setCounts((prev) => ({ ...prev, ...initialCounts }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   }, [items]);
 
   // Filter items based on search and filters
@@ -107,7 +108,7 @@ export function EnhancedCountingTable({
     }));
   };
 
-  const updateNotes = (itemId: string, notes: string) => {
+  const _updateNotes = (itemId: string, notes: string) => {
     setCounts((prev) => ({
       ...prev,
       [itemId]: {

@@ -224,11 +224,11 @@ export function AIActionsFeed({ className }: { className?: string }) {
             created_by: user.id,
             due_date: dueDate,
             assigned_to: null,
-            department_id: null,
+            departmentid: null,
             tags: null,
             attachments: [],
             parent_task_id: null,
-            workflow_id: null,
+            workflowid: null,
             estimated_hours: null,
             actual_hours: null,
           };

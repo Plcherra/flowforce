@@ -49,7 +49,7 @@ export type SopChecklistTemplateDraft = {
 export type SopChecklistRpcPayload = {
   name: string;
   description: string;
-  template_category: SopChecklistTemplateDraft["templateCategory"];
+  templatecategory: SopChecklistTemplateDraft["templateCategory"];
   workflow_kind: SopChecklistTemplateDraft["workflowKind"];
   assignment_type: SopChecklistTemplateDraft["assignmentType"];
   review_required: boolean;
@@ -264,7 +264,7 @@ export function buildSopChecklistRpcPayload(
   return {
     name: draft.name,
     description: draft.description,
-    template_category: draft.templateCategory,
+    templatecategory: draft.templateCategory,
     workflow_kind: draft.workflowKind,
     assignment_type: draft.assignmentType,
     review_required: draft.reviewRequired,

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -120,7 +119,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
           title: "Success",
           description: "Count deleted successfully",
         });
-      } catch (error) {
+      } catch (_error) {
         toast({
           title: "Error",
           description: "Failed to delete count",

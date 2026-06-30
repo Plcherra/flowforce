@@ -55,9 +55,9 @@ export function InventoryRecipeDialog({
   const { data: units = [] } = useInventoryUnits();
 
   const [formState, setFormState] = useState({
-    ingredient_id: "",
+    ingredientid: "",
     quantity_needed: "",
-    unit_id: "",
+    unitid: "",
   });
 
   const ingredientOptions = useMemo(
@@ -73,8 +73,8 @@ export function InventoryRecipeDialog({
 
   const handleAddIngredient = async () => {
     if (
-      !formState.ingredient_id ||
-      !formState.unit_id ||
+      !formState.ingredientid ||
+      !formState.unitid ||
       !formState.quantity_needed
     )
       return;
@@ -85,14 +85,14 @@ export function InventoryRecipeDialog({
     await upsertLine.mutateAsync({
       id: crypto.randomUUID(), // Generate temporary ID for new lines
       item_id: item.id,
-      ingredient_id: formState.ingredient_id,
+      ingredientid: formState.ingredientid,
       quantity_needed: quantity,
-      unit_id: formState.unit_id,
+      unitid: formState.unitid,
       notes: null,
       yield_amount: null,
     });
 
-    setFormState({ ingredient_id: "", quantity_needed: "", unit_id: "" });
+    setFormState({ ingredientid: "", quantity_needed: "", unitid: "" });
   };
 
   const handleDelete = async (lineId: string) => {
@@ -218,9 +218,9 @@ export function InventoryRecipeDialog({
                   Ingredient Item
                 </label>
                 <Select
-                  value={formState.ingredient_id}
+                  value={formState.ingredientid}
                   onValueChange={(value) =>
-                    setFormState((prev) => ({ ...prev, ingredient_id: value }))
+                    setFormState((prev) => ({ ...prev, ingredientid: value }))
                   }
                 >
                   <SelectTrigger>
@@ -257,9 +257,9 @@ export function InventoryRecipeDialog({
                   Unit
                 </label>
                 <Select
-                  value={formState.unit_id}
+                  value={formState.unitid}
                   onValueChange={(value) =>
-                    setFormState((prev) => ({ ...prev, unit_id: value }))
+                    setFormState((prev) => ({ ...prev, unitid: value }))
                   }
                 >
                   <SelectTrigger>

@@ -59,7 +59,7 @@ export type ChecklistMigrationIssue = {
 export type SopChecklistBuilderPayload = {
   name: string;
   description: string;
-  template_category: string;
+  templatecategory: string;
   workflow_kind: "checklist" | "sop" | "inspection" | "custom";
   review_required: boolean;
   assignment_type: "role" | "location" | "user";
@@ -371,7 +371,7 @@ function buildSopChecklistPayload(
   return {
     name: String(template.name ?? "").trim(),
     description: String(template.description ?? "").trim(),
-    template_category: normalizeCategory(template.category),
+    templatecategory: normalizeCategory(template.category),
     workflow_kind: normalizeWorkflowKind(template.type),
     review_required: true,
     assignment_type: "location",

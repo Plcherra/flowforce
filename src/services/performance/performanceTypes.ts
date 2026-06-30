@@ -36,10 +36,10 @@ export interface PerformanceReview {
   date: Tables<"performance_reviews">["review_date"];
   score: Tables<"performance_reviews">["score"];
   summary: Tables<"performance_reviews">["summary"];
-  reviewerId: Tables<"performance_reviews">["reviewer_id"];
+  reviewerId: Tables<"performance_reviews">["reviewerid"];
   status: PerformanceReviewStatus;
   aiSummary: Tables<"performance_reviews">["ai_summary"];
-  aiInsightId: Tables<"performance_reviews">["ai_insight_id"];
+  aiInsightId: Tables<"performance_reviews">["ai_insightid"];
   actionItems: Tables<"performance_reviews">["action_items"];
   reviewCycle: Tables<"performance_reviews">["review_cycle"];
 }
@@ -65,17 +65,17 @@ export interface EmployeePerformance {
 }
 
 export interface PerformanceGoalReview {
-  reviewId: Tables<"performance_goal_reviews">["review_id"];
+  reviewId: Tables<"performance_goal_reviews">["reviewid"];
   companyId: Tables<"performance_goal_reviews">["company_id"];
   employeeId: Tables<"performance_goal_reviews">["employee_id"];
-  reviewerId: Tables<"performance_goal_reviews">["reviewer_id"];
+  reviewerId: Tables<"performance_goal_reviews">["reviewerid"];
   goalId: Tables<"performance_goal_reviews">["goal_id"];
   goalTitle: Tables<"performance_goal_reviews">["goal_title"];
   goalStatus: Tables<"performance_goal_reviews">["goal_status"];
   goalProgress: Tables<"performance_goal_reviews">["goal_progress"];
   targetCompletionDate: Tables<"performance_goal_reviews">["target_completion_date"];
   goalCompletedAt: Tables<"performance_goal_reviews">["goal_completed_at"];
-  goalOwnerId: Tables<"performance_goal_reviews">["goal_owner_id"];
+  goalOwnerId: Tables<"performance_goal_reviews">["goal_ownerid"];
   reviewDate: Tables<"performance_goal_reviews">["review_date"];
   reviewCycle: Tables<"performance_goal_reviews">["review_cycle"];
   score: Tables<"performance_goal_reviews">["score"];
@@ -84,9 +84,9 @@ export interface PerformanceGoalReview {
   actionItems: Tables<"performance_goal_reviews">["action_items"];
   reviewPeriodStart: Tables<"performance_goal_reviews">["review_period_start"];
   reviewPeriodEnd: Tables<"performance_goal_reviews">["review_period_end"];
-  aiInsightId: Tables<"performance_goal_reviews">["ai_insight_id"];
+  aiInsightId: Tables<"performance_goal_reviews">["ai_insightid"];
   insightType: Tables<"performance_goal_reviews">["insight_type"];
-  insightData: Tables<"performance_goal_reviews">["insight_data"];
+  insightData: Tables<"performance_goal_reviews">["insightdata"];
   insightGeneratedAt: Tables<"performance_goal_reviews">["insight_generated_at"];
   insightExpiresAt: Tables<"performance_goal_reviews">["insight_expires_at"];
   goalPriority: Tables<"performance_goal_reviews">["goal_priority"];

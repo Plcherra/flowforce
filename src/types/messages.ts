@@ -6,7 +6,7 @@ export type MessageChannel = Tables<"message_channels"> & {
     role: string;
     last_read_at: string | null;
   }[];
-  created_profile?: {
+  createdprofile?: {
     first_name: string;
     last_name: string;
   };
@@ -17,14 +17,14 @@ export type MessageChannel = Tables<"message_channels"> & {
 };
 
 export type Message = Tables<"messages"> & {
-  sender_profile: {
+  senderprofile: {
     first_name: string;
     last_name: string;
     avatar_url: string | null;
   };
   reply_to_message?: {
     content: string;
-    sender_profile: {
+    senderprofile: {
       first_name: string;
       last_name: string;
     };
@@ -41,9 +41,9 @@ export interface CreateChannelData {
   description?: string;
   type: string;
   company_id?: string | null;
-  department_id?: string;
+  departmentid?: string;
   is_private?: boolean;
-  member_ids?: string[];
+  memberids?: string[];
 }
 
 export interface MessageAttachment {
@@ -59,7 +59,7 @@ export interface SearchResult {
   id: string;
   content: string;
   created_at: string;
-  sender_profile: {
+  senderprofile: {
     first_name: string;
     last_name: string;
     avatar_url: string | null;

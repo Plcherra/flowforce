@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Json, TablesInsert } from "@/integrations/supabase/public-types";
+import type { TablesInsert } from "@/integrations/supabase/public-types";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -220,7 +220,7 @@ const syncEventParticipants = async (
       role: attendee.role ?? null,
       avatar_url: attendee.avatar_url ?? null,
       response_status: "invited",
-      metadata: { source_attendee_id: attendee.id },
+      metadata: { source_attendeeid: attendee.id },
     })) satisfies TablesInsert<"event_participants">[];
 
     await calendarEventsRepository.replaceEventParticipants(
@@ -367,7 +367,10 @@ export function useEvents() {
     retry: 1,
   });
 
-  const events = companyId ? (eventsQuery.data ?? []) : localEvents;
+  const events = useMemo(
+    () => (companyId ? (eventsQuery.data ?? []) : localEvents),
+    [companyId, eventsQuery.data, localEvents],
+  );
   const loading = companyId
     ? eventsQuery.isLoading || eventsQuery.isFetching
     : false;
@@ -513,8 +516,8 @@ export function useEvents() {
         start_time: insertPayload.start_time,
         end_time: insertPayload.end_time ?? insertPayload.start_time,
         description: insertPayload.description ?? null,
-        integration_id:
-          (vendorDetails?.integration_id as string | undefined) ?? null,
+        integrationid:
+          (vendorDetails?.integrationid as string | undefined) ?? null,
         integration_type:
           (vendorDetails?.integration_type as
             | "website"

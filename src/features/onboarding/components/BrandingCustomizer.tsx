@@ -52,7 +52,7 @@ export default function BrandingCustomizer({
   branding,
   onBrandingChange,
 }: BrandingCustomizerProps) {
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [_logoFile, setLogoFile] = useState<File | null>(null);
 
   const handleColorChange = (
     colorType: "primaryColor" | "secondaryColor" | "accentColor",
@@ -89,7 +89,7 @@ export default function BrandingCustomizer({
       <div>
         <h3 className="text-xl font-semibold mb-2">Customize Your Brand</h3>
         <p className="text-muted-foreground">
-          Create a unique look and feel for your company's workspace
+          Create a unique look and feel for your company&apos;s workspace
         </p>
       </div>
 
