@@ -17,6 +17,7 @@
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
     "lint:ci": "npm run lint && npm run typecheck",
+    "verify": "npm run typecheck && npm run build:local && npm run lint",
     "test:smoke": "node scripts/smoke-visible-modules.mjs",
     "perf:baseline": "node scripts/run-performance-load-baseline.mjs",
     "check:supabase": "node scripts/check-supabase-contract.mjs",

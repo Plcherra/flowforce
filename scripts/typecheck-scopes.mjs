@@ -10,11 +10,10 @@ let hasFailure = false;
 
 for (const [name, project] of scopes) {
   const start = Date.now();
+  const tscArgs = ["-p", project, "--pretty", "false"];
   const result = spawnSync(
-    process.platform === "win32"
-      ? "node_modules\\.bin\\tsc.cmd"
-      : "./node_modules/.bin/tsc",
-    ["-p", project, "--pretty", "false"],
+    process.execPath,
+    ["./node_modules/typescript/lib/tsc.js", ...tscArgs],
     {
       encoding: "utf8",
       maxBuffer: 1024 * 1024 * 50,
