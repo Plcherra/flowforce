@@ -1,0 +1,142 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\admin\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> flowforce-nextjs@0.0.0 verify
+> npm run typecheck && npm run build:local && npm run lint
+
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` 
+for supported config options.
+
+> flowforce-nextjs@0.0.0 typecheck
+> node scripts/typecheck-scopes.mjs
+
+[typecheck:app] passed in 15.6s (0 TypeScript errors)
+[typecheck:tests] passed in 1.4s (0 TypeScript errors)
+[typecheck:supabase] passed in 1.0s (0 TypeScript errors)
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` 
+for supported config options.
+
+> flowforce-nextjs@0.0.0 build:local
+> cross-env NODE_OPTIONS=--max-old-space-size=4096 next build
+
+Γû▓ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬╖ optimizePackageImports
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.1s
+  Running TypeScript ...
+  Finished TypeScript in 19.9s ...
+  Collecting page data using 19 workers ...
+  Generating static pages using 19 workers (0/65) ...
+  Generating static pages using 19 workers (16/65) 
+  Generating static pages using 19 workers (32/65) 
+  Generating static pages using 19 workers (48/65) 
+Γ£ô Generating static pages using 19 workers (65/65) in 570ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ ╞Æ /api/cron/auto-cleanup-drafts
+Γö£ ╞Æ /api/cron/daily-digest
+Γö£ ╞Æ /api/cron/employee-engagement-score
+Γö£ ╞Æ /api/cron/schedule-auto-publish
+Γö£ ╞Æ /api/employees/invite
+Γö£ ╞Æ /api/health
+Γö£ ╞Æ /api/internal/support/tenant
+Γö£ ╞Æ /api/logs
+Γö£ ╞Æ /api/onboarding/complete
+Γö£ ╞Æ /api/onboarding/repair
+Γö£ ╞Æ /api/ops/issues/[issueId]/suggest-automation
+Γö£ ╞Æ /api/run-detectors
+Γö£ ╞Æ /api/run-dev-detectors
+Γö£ Γùï /app
+Γö£ Γùï /app/add-section
+Γö£ Γùï /app/admin
+Γö£ Γùï /app/ai-insights
+Γö£ Γùï /app/analytics
+Γö£ Γùï /app/availability
+Γö£ Γùï /app/availability/manage
+Γö£ Γùï /app/calendar
+Γö£ Γùï /app/certifications
+Γö£ Γùï /app/company-updates
+Γö£ Γùï /app/cookbook
+Γö£ Γùï /app/dashboard
+Γö£ Γùï /app/employees
+Γö£ Γùï /app/enhanced-scheduling
+Γö£ Γùï /app/events/calendar
+Γö£ Γùï /app/expenses
+Γö£ Γùï /app/forms
+Γö£ Γùï /app/goals
+Γö£ Γùï /app/help-desk
+Γö£ Γùï /app/inventory
+Γö£ Γùï /app/inventory-actions
+Γö£ ╞Æ /app/inventory-count-execution/[[...countId]]
+Γö£ Γùï /app/inventory/actions
+Γö£ Γùï /app/inventory/cookbook
+Γö£ Γùï /app/inventory/counts
+Γö£ ╞Æ /app/inventory/counts/[countId]
+Γö£ Γùï /app/inventory/items
+Γö£ Γùï /app/inventory/prep
+Γö£ Γùï /app/inventory/purchasing
+Γö£ Γùï /app/inventory/reports
+Γö£ Γùï /app/invite-employee
+Γö£ Γùï /app/items-setup
+Γö£ Γùï /app/leaderboard
+Γö£ Γùï /app/learning-center
+Γö£ Γùï /app/meetings
+Γö£ Γùï /app/messages
+Γö£ ╞Æ /app/messages/[filter]
+Γö£ Γùï /app/operations
+Γö£ Γùï /app/performance
+Γö£ Γùï /app/permission-demo
+Γö£ Γùï /app/position-management
+Γö£ Γùï /app/profile
+Γö£ Γùï /app/purchasing
+Γö£ Γùï /app/recognition
+Γö£ Γùï /app/reports
+Γö£ Γùï /app/resources
+Γö£ ╞Æ /app/resources/blog/[id]
+Γö£ Γùï /app/resources/docs
+Γö£ ╞Æ /app/resources/docs/[id]
+Γö£ Γùï /app/resources/docs/api
+Γö£ Γùï /app/resources/docs/getting-started
+Γö£ Γùï /app/resources/docs/integrations
+Γö£ Γùï /app/resources/docs/user-manual
+Γö£ ╞Æ /app/resources/videos/[id]
+Γö£ Γùï /app/schedule-lobby
+Γö£ Γùï /app/scheduling/timeoff
+Γö£ ╞Æ /app/section/[path]/[[...wildcard]]
+Γö£ Γùï /app/sections-permissions
+Γö£ Γùï /app/settings
+Γö£ Γùï /app/tasks
+Γö£ Γùï /app/time-off
+Γö£ ╞Æ /auth
+Γö£ Γùï /company-registration
+Γö£ Γùï /features
+Γö£ Γùï /hr-development
+Γö£ Γùï /onboarding
+Γö£ Γùï /pricing
+Γö£ Γùï /register
+Γö£ Γùï /templates
+Γöö ╞Æ /templates/[templateId]
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` 
+for supported config options.
+
+> flowforce-nextjs@0.0.0 lint
+> eslint "**/*.{js,jsx,ts,tsx}"
+
+EXIT:0

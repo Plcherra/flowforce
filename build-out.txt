@@ -1,0 +1,34 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\admin\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> flowforce-nextjs@0.0.0 build:local
+> cross-env NODE_OPTIONS=--max-old-space-size=4096 next build
+
+Γû▓ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ┬╖ optimizePackageImports
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.1s
+  Running TypeScript ...
+Failed to type check.
+
+./src/features/gamification/leaderboard/hooks/useLeaderboardFilters.ts:58:3
+Type error: Property '_roles' does not exist on type 'UseLeaderboardFiltersArgs'.
+
+  [90m56 |[0m   analytics,
+  [90m57 |[0m   departments,
+[31m[1m>[0m [90m58 |[0m   _roles,
+  [90m   |[0m   [31m[1m^[0m
+  [90m59 |[0m   lastUpdated,
+  [90m60 |[0m }: [33mUseLeaderboardFiltersArgs[0m) {
+  [90m61 |[0m   [36mconst[0m [departmentFilter, setDepartmentFilter] = useState<string>([32m"all"[0m);
+Next.js build worker exited with code: 1 and signal: null
+EXIT:1

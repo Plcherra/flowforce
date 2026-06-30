@@ -1,0 +1,399 @@
+---
+alwaysApply: true
+---
+
+# 02 Platform Architecture
+
+## Goal
+
+Create a platform structure that supports web, mobile, Supabase, AI, integrations, and deployment without destabilizing the current Next.js app.
+
+## Phases
+
+### Phase 1: Architecture Decision Record
+
+- [x] Decide Capacitor-first versus Expo-first for mobile.
+- [x] Decide npm-now versus pnpm/Turbo-now.
+- [x] Decide whether API routes stay in Next.js for v1.
+- [x] Decide whether Supabase remains managed for v1.
+
+Architecture decisions:
+
+- Mobile path: Capacitor-first for v1, after the current web/PWA core is stable. Expo/native can be reconsidered only after mobile-critical workflows prove that a web wrapper is not enough.
+- Package manager and workspace path: stay on npm and the current single-app structure for now. Defer pnpm/Turbo/monorepo extraction until shared boundaries are mapped and the app remains deployable after each extraction.
+- API path: keep v1 server APIs in Next.js route handlers, backed by Supabase RLS/RPCs and server-only service-role helpers where required.
+- Database/backend path: keep managed Supabase for v1, with local Supabase used for CI/security tests and remote managed Supabase used for production readiness.
+
+Current evidence:
+
+- The repo uses `package-lock.json`, `npm ci`, and npm cache in GitHub Actions.
+- The active app is a Next.js app with App Router routes and route handlers.
+- Existing server routes already handle onboarding, cron, logs, detectors, and automation suggestions.
+- Service-role Supabase access is centralized through server-only helpers.
+- The only Capacitor config found is archived and points to an old Lovable build, so mobile shell work should restart deliberately when Phase 08 begins.
+- Release gates already use local Supabase, database reset, security tests, typechecks, production build, onboarding E2E, and visible-module smoke tests.
+
+Tradeoffs:
+
+- Capacitor-first gives the fastest path to iOS/Android using the current web product, but it requires serious mobile viewport QA and native-shell auth/routing checks.
+- Staying on npm avoids churn while shipment blockers remain, but it postpones cleaner package isolation.
+- Keeping APIs in Next.js avoids premature service sprawl, but sensitive writes must stay behind server/RPC boundaries and audit trails.
+- Managed Supabase reduces infrastructure burden, but the project still needs migration discipline, backup/restore verification, drift checks, and clear environment handling.
+
+Acceptance:
+
+- One ADR records the decisions and tradeoffs.
+
+Verification:
+
+- No large move happens without this ADR.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.01 Architecture Decision Record](./reports/02-01-architecture-decision-record-2026-05-27.md)
+
+### Phase 2: Current Architecture Map
+
+- [x] Map app routes, feature modules, hooks, services, Supabase tables, and tests.
+- [x] Mark shared code candidates.
+- [x] Mark risky legacy/demo areas.
+- [x] Mark deployment/runtime assumptions.
+
+Architecture inventory:
+
+- App Router surface: 71 page files and 10 API route handlers under `app`.
+- Primary app shell: `app/layout.tsx`, `app/providers.tsx`, `app/app/layout.tsx`, `app/app/AppLayoutClient.tsx`, and `src/app-shell`.
+- Feature surface: 31 first-level feature folders under `src/features`.
+- Largest feature areas by file count: scheduling, inventory, messages, forms, employees, analytics, company updates, tasks, onboarding, system, learning, goals, admin, operations, and gamification.
+- Shared/global hooks: 79 files under `src/hooks`, plus feature-local hooks.
+- Data access surface: feature repositories, root repositories, services, server helpers, Supabase client/admin helpers, and direct hooks.
+- Supabase surface: migrations, generated database types, edge functions, seed files, SQL tests, and remote/local CI gates.
+- Test/release surface: Supabase SQL security tests, Playwright specs, visible-module smoke script, onboarding E2E, typecheck scopes, release gates, and deploy-readiness workflow.
+
+Shared code candidates:
+
+- Tenant/auth/permission contracts currently spread across `src/hooks`, `src/app-shell`, `src/lib/auth`, `src/lib/permissions`, and role/permission features.
+- Query keys and Supabase error handling should converge around `src/lib/queryKeys.ts`, feature repositories, and shared result/error contracts.
+- App shell, navigation, route guards, loading states, and tenant setup state should become the shared shell boundary.
+- Inventory, scheduling, tasks, employees, messages, forms, analytics, and company updates are the first module candidates for normalized repository/service conventions.
+- Supabase generated types and app-level types need a clear import boundary before any package extraction.
+
+Risky legacy/demo areas:
+
+- `docs/archive` includes historical cleanup, migration, and Capacitor artifacts; these are reference-only.
+- `docs/archive/capacitor.config.ts` points to an old Lovable build and must not be reused as the v1 mobile shell.
+- Demo/internal routes such as permission demo, add section, custom section routing, dev detectors, and broad gamification/learning/performance areas should not drive pilot navigation.
+- `src/mock`, `src/devtools`, performance mocks, financial demo data, and dev detector code must stay out of production claims unless explicitly wired and tested.
+- Duplicate route aliases exist between older flat routes and newer `/app/inventory/*` style routes; navigation ownership must be clarified before mobile shell work.
+
+Deployment/runtime assumptions:
+
+- Node 22 in GitHub Actions.
+- npm and `package-lock.json` remain the install contract.
+- Next.js remains the web/server runtime.
+- Managed Supabase remains the backend, with local Supabase used by release gates.
+- CI currently expects Supabase CLI, local database reset, security tests, typechecks, production build, onboarding E2E, and visible-module smoke.
+- Deploy readiness expects remote Supabase secrets and remote migration drift/contract checks.
+
+Acceptance:
+
+- We can see what exists before restructuring.
+
+Verification:
+
+- Module map references real file paths.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.02 Current Architecture Map](./reports/02-02-current-architecture-map-2026-05-27.md)
+
+### Phase 3: Shared Type Boundary
+
+- [x] Create or normalize shared type exports.
+- [x] Define tenant, profile, permission, module, API result, and error contracts.
+- [x] Align Supabase generated types with app-level types.
+- [x] Remove duplicate type definitions where safe.
+
+Shared type boundary:
+
+- Added `src/types/platform.ts` as the first canonical platform contract file.
+- Added `src/types/index.ts` as a safe barrel for new shared platform exports.
+- Defined Supabase table/view/function helper aliases from the generated `Database` type.
+- Defined app-level tenant, company, profile, role, module visibility, API result, and error contracts.
+- Reused the existing permission registry `PermissionKey` instead of creating a competing permission type.
+
+Duplicate type decision:
+
+- No broad duplicate deletion is safe yet because profile, role, company, API result, and module-like shapes are still actively declared inside hooks, features, and legacy shared files.
+- The safe next step is to migrate imports module by module, starting with tenant/auth/permission and then high-value pilot modules.
+- Existing feature-local types remain valid until their module is normalized against `src/types/platform.ts`.
+
+Verification:
+
+- `npm run typecheck:src` passed.
+
+Acceptance:
+
+- Core modules import types from clear shared locations.
+
+Verification:
+
+- Typecheck passes and no module behavior changes.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.03 Shared Type Boundary](./reports/02-03-shared-type-boundary-2026-05-27.md)
+
+### Phase 4: Shared Data Access Boundary
+
+- [x] Define repository/service patterns per module.
+- [x] Normalize Supabase error handling.
+- [x] Normalize React Query keys.
+- [x] Create module service indexes for inventory, scheduling, tasks, employees, and analytics.
+
+Shared data access boundary:
+
+- Added `src/shared/data-access/errors.ts` for normalized data-access errors.
+- Added `src/shared/data-access/repository.ts` for repository context, result wrappers, and Supabase success/error assertions.
+- Added `src/shared/data-access/queryKeys.ts` for module-scoped React Query key helpers.
+- Added `src/shared/data-access/index.ts` as the boundary export.
+- Extended `src/lib/queryKeys.ts` with pilot-module query key helpers for inventory, employees, tasks, and analytics.
+
+Module service indexes:
+
+- Inventory: strengthened `src/features/inventory/services/index.ts` with repository namespace exports.
+- Scheduling: strengthened `src/features/scheduling/services/index.ts` with repository namespace exports.
+- Tasks: added `src/features/tasks/services/index.ts`.
+- Employees: added `src/features/employees/services/index.ts`.
+- Analytics: added `src/features/analytics/services/index.ts`.
+
+Repository/service convention:
+
+- Feature repositories own Supabase selects/mutations, Zod parsing, and table-specific query shape.
+- Feature services own workflows that compose repositories or domain calculations.
+- Hooks own React Query, UI state, optimistic updates, and toasts.
+- Shared data-access helpers own cross-module error normalization, result shape, repository context, and query key conventions.
+- Server-only writes continue to stay behind Next route handlers, Supabase RPCs, or server helpers.
+
+Verification:
+
+- `npm run typecheck:src` passed.
+- `npm run typecheck` passed.
+
+Acceptance:
+
+- High-value modules stop scattering raw query logic.
+
+Verification:
+
+- Existing module smoke tests still pass.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.04 Shared Data Access Boundary](./reports/02-04-shared-data-access-boundary-2026-05-27.md)
+
+### Phase 5: App Shell Architecture
+
+- [x] Define responsive shell rules for desktop, tablet, and mobile.
+- [x] Normalize route guards and tenant context loading.
+- [x] Normalize loading, empty, beta, and error states.
+- [x] Document route ownership and layout patterns.
+
+App shell contract:
+
+- Added `src/app-shell/architecture.ts` with typed viewport rules, route ownership, lifecycle labels, guard order, and shell state contracts.
+- Added `src/app-shell/index.ts` as the app-shell architecture barrel.
+- Added `src/shared/components/index.ts` so shared loading, empty, setup-required, and error states have a stable import path.
+
+Responsive shell rules:
+
+- Mobile: drawer sidebar, compact top nav, compact content padding.
+- Tablet: collapsible sidebar, standard top nav, comfortable content padding.
+- Desktop: collapsible sidebar, standard top nav, comfortable content padding.
+
+Guard and tenant loading order:
+
+1. Root error boundary.
+2. Suspense loading.
+3. Navigation guard.
+4. Protected route.
+5. Profile and tenant context.
+6. Tenant setup required.
+7. Sidebar provider.
+8. Route error boundary.
+
+Route ownership:
+
+- Production pilot routes map to dashboard, scheduling, tasks, messages, company updates, forms, inventory, purchasing, reports, team, and settings owners.
+- AI, operations, and analytics routes are marked beta.
+- Permission demo and add-section routes are marked internal.
+
+Verification:
+
+- `npm run typecheck:src` passed.
+- `npm run typecheck` passed.
+
+Acceptance:
+
+- Web and mobile wrapper can share predictable route behavior.
+
+Verification:
+
+- Authenticated smoke still passes across visible modules.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.05 App Shell Architecture](./reports/02-05-app-shell-architecture-2026-05-27.md)
+
+### Phase 6: Package Strategy
+
+- [x] Decide whether to create `packages/shared`, `packages/core`, or keep `src/shared` first.
+- [x] If monorepo is deferred, create migration-safe aliases.
+- [x] If monorepo starts, configure build/typecheck incrementally.
+- [x] Keep the current app deployable after every extraction.
+
+Package strategy:
+
+- Keep the current single Next.js app and npm/package-lock install contract.
+- Defer `packages/shared`, `packages/core`, pnpm, and Turbo until route/module/data boundaries are stable and pilot flows remain deployable.
+- Use `src/shared`, `src/app-shell`, `src/features`, and `src/server` as the near-term package-like boundaries.
+
+Migration-safe aliases:
+
+- Added `@app-shell/*` for `src/app-shell/*`.
+- Added `@features/*` for `src/features/*`.
+- Added `@server/*` for `src/server/*`.
+- Added `@shared/*` for `src/shared/*`.
+- Added matching Next webpack/Turbopack aliases.
+- Added `src/shared/index.ts` as the shared boundary barrel.
+
+Future extraction rule:
+
+- Only extract a folder into `packages/*` after its imports already use the boundary alias and `npm run typecheck`, `npm run build`, and Supabase contract checks pass.
+- Keep `npm` until package extraction creates enough value to justify a package-manager migration.
+
+Verification:
+
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run check:supabase` passed.
+
+Acceptance:
+
+- Package changes are evolutionary, not a flag-day rewrite.
+
+Verification:
+
+- `npm run build`, typecheck, and Supabase gates remain green.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.06 Package Strategy](./reports/02-06-package-strategy-2026-05-27.md)
+
+### Phase 7: API Strategy
+
+- [x] Classify APIs as browser-Supabase, server route, RPC, edge function, or future service.
+- [x] Move sensitive writes behind server/RPC boundaries.
+- [x] Define idempotent mutation conventions.
+- [x] Define audit logging requirements.
+
+API strategy:
+
+- Added `src/server/api-boundary.ts` with API boundary kinds, security levels, mutation policies, current boundary definitions, service-role write rules, and idempotent mutation rules.
+- Classified feature repositories as browser Supabase/RLS operations.
+- Classified onboarding, employee invites, cron jobs, and detectors as Next route handler boundaries.
+- Classified company setup/invite database helpers as Supabase RPC boundaries.
+- Classified AI/copilot/learning/schedule/vendor functions as Supabase edge-function boundaries that require auth, tenant checks, CORS tightening, idempotency, and audit/event logging before production enablement.
+- Classified external integration orchestration as a future service boundary.
+
+Sensitive write hardening:
+
+- Moved employee email invites out of the client component and behind `app/api/employees/invite/route.ts`.
+- The invite route verifies the bearer session server-side, resolves company/role server-side, writes/updates the invite record idempotently, sends the Supabase invite using service role, and writes an `audit_log` entry.
+- Updated `src/features/employees/components/InviteEmployeePanel.tsx` to call the server route instead of `supabase.auth.admin`.
+
+Verification:
+
+- Service-role leakage scan found no client-side `supabase.auth.admin` or service-role references outside server routes/server code.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run check:supabase` passed.
+
+Acceptance:
+
+- API boundaries match security needs.
+
+Verification:
+
+- Service-role operations are not exposed to clients.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.07 API Strategy](./reports/02-07-api-strategy-2026-05-27.md)
+
+### Phase 8: Environment And Config Architecture
+
+- [x] Normalize env variable naming.
+- [x] Separate public, server, test, and deploy variables.
+- [x] Add validation for required production env.
+- [x] Document local, CI, remote Supabase, and VPS env usage.
+
+Acceptance:
+
+- Missing config fails early and clearly.
+
+Verification:
+
+- CI and local checks use the documented env names.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.08 Environment And Config Architecture](./reports/02-08-environment-and-config-architecture-2026-05-27.md)
+
+### Phase 9: Build And Test Architecture
+
+- [x] Keep existing release gates.
+- [x] Add architecture-specific checks only after files exist.
+- [x] Create fast local checks and full release checks.
+- [x] Define when mobile build checks become mandatory.
+
+Acceptance:
+
+- Gates protect the new structure without slowing every tiny change unnecessarily.
+
+Verification:
+
+- GitHub workflows match the chosen architecture.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.09 Build And Test Architecture](./reports/02-09-build-and-test-architecture-2026-05-27.md)
+
+### Phase 10: Architecture Baseline Freeze
+
+- [x] Update diagrams and file tree.
+- [x] Record accepted conventions.
+- [x] Mark deferred monorepo/native work.
+- [x] Update master roadmap status.
+
+Acceptance:
+
+- Future implementation phases have a stable architecture target.
+
+Verification:
+
+- A new engineer could navigate the repo from the docs.
+
+Status:
+
+- Completed on 2026-05-27.
+- Phase report: [02.10 Architecture Baseline Freeze](./reports/02-10-architecture-baseline-freeze-2026-05-27.md)
