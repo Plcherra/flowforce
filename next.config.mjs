@@ -7,9 +7,16 @@ const migrationAliases = {
   'react-router-dom': aliasPath,
 };
 
+// Phone/tablet LAN testing: set ALLOWED_DEV_ORIGINS=192.168.0.21 (comma-separated) in .env.local
+const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? '192.168.0.21')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  allowedDevOrigins,
   // Optimize webpack for faster dev builds
   webpack: (config, { dev, isServer }) => {
     config.resolve.alias = {
