@@ -3,6 +3,7 @@ logs
 !app/api/logs/
 !app/api/logs/route.ts
 *.log
+.ci-logs*/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
