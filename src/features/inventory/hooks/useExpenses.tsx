@@ -49,23 +49,21 @@ export function useExpenses() {
     queryKey: ["expenses", companyId],
     enabled: Boolean(companyId) && !profileLoading,
     throwOnError: false,
-    retry: 1,
+    retry: false,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    placeholderData: [],
     queryFn: async () => {
       if (!companyId) {
-        throw new Error("Company context is required to fetch expenses.");
+        return [] as Expense[];
       }
 
       const { data, error } = await supabase
         .from("expenses")
-        .select(
-          `
-          *,
-          employee:profiles!employee_id(company_id, first_name, last_name),
-          approver:profiles!approved_by(first_name, last_name)
-        `,
-        )
+        .select("*")
         .eq("company_id", companyId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
 
       if (error) throw error;
       return (data ?? []) as Expense[];
@@ -148,7 +146,7 @@ export function useExpenses() {
 
   return {
     ...query,
-    isLoading: query.isLoading || profileLoading,
+    isLoading: query.isLoading && query.fetchStatus === "fetching",
     createExpense: createExpense.mutateAsync,
     updateExpense: updateExpense.mutateAsync,
   };

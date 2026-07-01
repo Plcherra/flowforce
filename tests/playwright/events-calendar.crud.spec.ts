@@ -23,17 +23,17 @@ test.describe('Calendar CRUD flow', () => {
   test('create and edit an event + vendor visit', async ({ page }) => {
     await signIn(page);
 
-    await page.goto('/app/events/calendar');
-    await expect(page.getByRole('heading', { name: 'Events & Meetings' })).toBeVisible();
+    await page.goto('/app/calendar');
+    await expect(page.getByRole('heading', { name: 'Calendar' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'New Event' }).click();
-    const dialog = page.getByRole('dialog', { name: /create event/i });
+    await page.getByRole('button', { name: /add to calendar/i }).click();
+    const dialog = page.getByRole('dialog', { name: /add to calendar/i });
     await expect(dialog).toBeVisible();
     await dialog.getByLabel('Title').fill(eventTitle);
     await dialog.getByLabel('Start').fill(nowIso);
     await dialog.getByLabel('End').fill(laterIso);
     await dialog.getByLabel('Location').fill('Playwright HQ');
-    await dialog.getByRole('button', { name: /create event/i }).click();
+    await dialog.getByRole('button', { name: /save to calendar/i }).click();
     await expect(dialog).toBeHidden({ timeout: 30_000 });
 
     await expect(page.getByText(eventTitle)).toBeVisible({ timeout: 30_000 });

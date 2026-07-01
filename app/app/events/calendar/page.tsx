@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import EventsCalendarPage from "@/features/calendar/pages/events/Calendar";
-
-export default function EventsCalendar() {
-  return <EventsCalendarPage />;
+/** Events and meetings share the unified calendar route. */
+export default function EventsCalendarRedirectPage() {
+  redirect("/app/calendar");
 }

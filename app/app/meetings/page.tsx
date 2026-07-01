@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import EventsHubPage from "@/features/calendar/pages/events/EventsHub";
-
-export default function Meetings() {
-  return <EventsHubPage />;
+/** Meetings live on the unified calendar; type is chosen when creating. */
+export default function MeetingsRedirectPage() {
+  redirect("/app/calendar");
 }

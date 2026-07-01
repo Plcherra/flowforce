@@ -4,23 +4,20 @@ import {
   CalendarDays,
   CalendarRange,
   CheckSquare,
-  ClipboardList,
+  Crown,
   DollarSign,
   FileText,
   GraduationCap,
   Megaphone,
   MessageSquare,
-  Package,
   Settings,
   Shield,
-  ShoppingCart,
   Sparkles,
   Target,
   Trophy,
-  Users,
   User,
   UserCheck,
-  Crown,
+  Users,
   Wrench,
 } from "lucide-react";
 
@@ -83,6 +80,12 @@ export const navigationSections: NavigationSection[] = [
         icon: Wrench,
         translationKey: "operationsIntelligence",
       },
+      {
+        name: "Calendar",
+        href: "/calendar",
+        icon: CalendarDays,
+        translationKey: "calendar",
+      },
     ],
   },
   {
@@ -94,42 +97,6 @@ export const navigationSections: NavigationSection[] = [
         href: "/inventory",
         icon: Calculator,
         translationKey: "inventory",
-      },
-      {
-        name: "Items Setup",
-        href: "/inventory/items",
-        icon: Package,
-        translationKey: "itemsSetup",
-      },
-      {
-        name: "Counts",
-        href: "/inventory/counts",
-        icon: ClipboardList,
-        translationKey: "inventoryCountExecution",
-      },
-      {
-        name: "Purchasing / Waste",
-        href: "/inventory/purchasing",
-        icon: ShoppingCart,
-        translationKey: "purchasing",
-      },
-      {
-        name: "Prep",
-        href: "/inventory/prep",
-        icon: Package,
-        translationKey: "inventory",
-      },
-      {
-        name: "Cookbook",
-        href: "/inventory/cookbook",
-        icon: FileText,
-        translationKey: "inventory",
-      },
-      {
-        name: "Inventory Reports",
-        href: "/inventory/reports",
-        icon: BarChart3,
-        translationKey: "reports",
       },
       {
         name: "Expenses",
@@ -206,30 +173,6 @@ export const navigationSections: NavigationSection[] = [
     ],
   },
   {
-    title: "Calendar & Events",
-    translationKey: "calendarEvents",
-    items: [
-      {
-        name: "Calendar",
-        href: "/calendar",
-        icon: CalendarDays,
-        translationKey: "calendar",
-      },
-      {
-        name: "Events",
-        href: "/events/calendar",
-        icon: CalendarDays,
-        translationKey: "events",
-      },
-      {
-        name: "Meetings",
-        href: "/meetings",
-        icon: CalendarDays,
-        translationKey: "meetings",
-      },
-    ],
-  },
-  {
     title: "Administration",
     translationKey: "adminSetup",
     items: [
@@ -243,7 +186,7 @@ export const navigationSections: NavigationSection[] = [
         name: "Admin",
         href: "/admin",
         icon: Shield,
-        translationKey: "settings",
+        translationKey: "admin",
       },
       {
         name: "Resources",

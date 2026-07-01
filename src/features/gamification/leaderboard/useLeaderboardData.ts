@@ -228,6 +228,8 @@ const leaderboardQueryKey = (
   period: LeaderboardPeriod,
 ) => ["leaderboard", companyId ?? "unknown", period] as const;
 
+const EMPTY_LEADERBOARD_ENTRIES: LeaderboardEntry[] = [];
+
 export function useLeaderboardData(
   period: LeaderboardPeriod,
 ): UseLeaderboardDataResult {
@@ -325,7 +327,9 @@ export function useLeaderboardData(
     },
   });
 
-  const rawEntries = companyId ? (leaderboardQuery.data?.entries ?? []) : [];
+  const rawEntries = companyId
+    ? (leaderboardQuery.data?.entries ?? EMPTY_LEADERBOARD_ENTRIES)
+    : EMPTY_LEADERBOARD_ENTRIES;
   const entries = rawEntries;
   const analytics = useMemo(() => computeAnalytics(entries), [entries]);
   const challenges = useMemo(

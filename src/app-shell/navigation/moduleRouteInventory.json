@@ -76,7 +76,7 @@
       "label": "Purchasing / Waste",
       "path": "/app/inventory/purchasing",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": true,
       "owner": "src/features/inventory",
       "dataDependency": "tenant purchasing and inventory tables",
@@ -136,7 +136,7 @@
       "label": "Inventory Counts",
       "path": "/app/inventory/counts",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory count tables",
@@ -156,7 +156,7 @@
       "label": "Items Setup",
       "path": "/app/inventory/items",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory item tables",
@@ -166,7 +166,7 @@
       "label": "Inventory Prep",
       "path": "/app/inventory/prep",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory prep tables",
@@ -176,7 +176,7 @@
       "label": "Inventory Reports",
       "path": "/app/inventory/reports",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant inventory reporting tables",
@@ -186,7 +186,7 @@
       "label": "Inventory Cookbook",
       "path": "/app/inventory/cookbook",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/inventory",
       "dataDependency": "tenant recipe/item tables",
@@ -280,17 +280,17 @@
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant calendar/event tables",
-      "notes": "Beta route; scheduling remains the pilot calendar surface."
+      "notes": "Unified calendar for meetings, events, and vendor visits under Daily Operations."
     },
     {
       "label": "Events Calendar",
       "path": "/app/events/calendar",
       "status": "beta",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant calendar/event tables",
-      "notes": "Event-specific calendar route."
+      "notes": "Redirects to /app/calendar."
     },
     {
       "label": "Expenses",
@@ -446,11 +446,11 @@
       "label": "Meetings",
       "path": "/app/meetings",
       "status": "beta",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": false,
       "owner": "src/features/calendar",
       "dataDependency": "tenant meetings/event tables",
-      "notes": "Hidden for v1 pilot."
+      "notes": "Redirects to /app/calendar; meeting type is selected when creating."
     },
     {
       "label": "App Redirect",

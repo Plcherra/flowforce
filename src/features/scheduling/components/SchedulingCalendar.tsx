@@ -50,6 +50,7 @@ interface SchedulingCalendarProps {
   hideShiftActions?: boolean;
   externalDetails?: boolean;
   onShiftSelect?: (shiftId: string | null) => void;
+  onOverlayEventSelect?: (eventId: string | null) => void;
 }
 
 export function SchedulingCalendar({
@@ -58,6 +59,7 @@ export function SchedulingCalendar({
   hideShiftActions = false,
   externalDetails = false,
   onShiftSelect,
+  onOverlayEventSelect,
 }: SchedulingCalendarProps = {}) {
   const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
@@ -203,6 +205,9 @@ export function SchedulingCalendar({
       onShiftSelect(null);
     }
     setSelectedEventId(id);
+    if (externalDetails) {
+      onOverlayEventSelect?.(id);
+    }
   };
 
   return (

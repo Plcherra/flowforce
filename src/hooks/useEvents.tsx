@@ -359,7 +359,7 @@ export function useEvents() {
     throwOnError: false,
     queryFn: async () => {
       if (!companyId) return [] as AppEvent[];
-      const rows = await scheduleGateway.fetchEvents({ companyId });
+      const rows = await calendarEventsRepository.listCompanyEvents(companyId);
       return rows.map(mapRowToEvent);
     },
     initialData: () => (companyId ? readStoredEvents(storageKey) : undefined),
@@ -398,21 +398,30 @@ export function useEvents() {
   }, [companyId, defaultStorageKey, localEvents]);
 
   useEffect(() => {
-    if (companyId && eventsQuery.isError && eventsQuery.error) {
-      if (!offlineToastShownRef.current) {
-        toast({
-          title: "Calendar offline",
-          description: parseError(eventsQuery.error),
-          variant: "default",
-        });
-        offlineToastShownRef.current = true;
+    if (!companyId || !eventsQuery.isError || !eventsQuery.error) {
+      if (!eventsQuery.isFetching) {
+        offlineToastShownRef.current = false;
       }
-    } else if (!eventsQuery.isFetching) {
-      offlineToastShownRef.current = false;
+      return;
+    }
+
+    const message = parseError(eventsQuery.error);
+    const isTransient =
+      /network|failed to fetch|offline|timeout/i.test(message) ||
+      eventsQuery.failureCount > 1;
+
+    if (isTransient && !offlineToastShownRef.current) {
+      toast({
+        title: "Calendar temporarily unavailable",
+        description: "Showing saved events while we reconnect.",
+        variant: "default",
+      });
+      offlineToastShownRef.current = true;
     }
   }, [
     companyId,
     eventsQuery.error,
+    eventsQuery.failureCount,
     eventsQuery.isError,
     eventsQuery.isFetching,
     toast,

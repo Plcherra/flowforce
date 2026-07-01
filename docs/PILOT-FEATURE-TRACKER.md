@@ -90,11 +90,10 @@ Source: `src/data/navigationData.tsx` + header Dashboard button in `DashboardNav
 | Section | Items |
 |---------|-------|
 | **Dashboard** (header) | Dashboard → `/app/dashboard` |
-| **Daily Operations** | Scheduling, Tasks, Messages, Company Updates, Forms, Operations |
+| **Daily Operations** | Scheduling, Tasks, Messages, Company Updates, Forms, Operations, Calendar |
 | **Inventory & Cost** | Inventory, Items Setup, Counts, Purchasing / Waste, Prep, Cookbook, Inventory Reports, Expenses |
 | **Reports & Intelligence** | Reports, Analytics, AI Insights |
 | **Team & HR** | Team Directory, Performance, Recognition, Leaderboard, Learning Center, Certifications |
-| **Calendar & Events** | Calendar, Events, Meetings |
 | **Administration** | Settings, Admin, Resources |
 
 **Removed modules (no routes, no sidebar):**

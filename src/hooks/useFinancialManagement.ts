@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import type { Tables } from "@/integrations/supabase/public-types";
+import { isMissingSchemaResourceError } from "@/shared/data-access/errors";
 import {
   endOfMonth,
   format,
@@ -18,7 +19,7 @@ type TimeEntry = Tables<"time_entries">;
 type Payment = Tables<"payments">;
 type Expense = Tables<"expenses">;
 type InventoryTransaction = Tables<"inventory_transactions">;
-type WasteEvent = Tables<"invwaste">;
+type WasteEvent = Tables<"inv_waste">;
 
 type HoursTrendPoint = {
   weekLabel: string;
@@ -440,6 +441,10 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
   const query = useQuery({
     queryKey: ["financial-management", "employee", user?.id],
     enabled: Boolean(user?.id),
+    throwOnError: false,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       if (!user?.id) {
         return {
@@ -473,9 +478,24 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
             .in("payment_type", ["wage", "bonus", "expense_reimbursement"]),
         ]);
 
-      if (timeEntriesResponse.error) throw timeEntriesResponse.error;
-      if (earningsResponse.error) throw earningsResponse.error;
-      if (pendingResponse.error) throw pendingResponse.error;
+      if (
+        timeEntriesResponse.error &&
+        !isMissingSchemaResourceError(timeEntriesResponse.error)
+      ) {
+        throw timeEntriesResponse.error;
+      }
+      if (
+        earningsResponse.error &&
+        !isMissingSchemaResourceError(earningsResponse.error)
+      ) {
+        throw earningsResponse.error;
+      }
+      if (
+        pendingResponse.error &&
+        !isMissingSchemaResourceError(pendingResponse.error)
+      ) {
+        throw pendingResponse.error;
+      }
 
       return {
         timeEntries: (timeEntriesResponse.data as TimeEntry[]) ?? [],
@@ -483,8 +503,6 @@ export function useEmployeeFinancialMetrics(): EmployeeFinancialMetrics {
         pending: (pendingResponse.data as Payment[]) ?? [],
       };
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Phase 4 optimization)
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   return useMemo(() => {
@@ -755,6 +773,10 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ["financial-management", "manager", companyId ?? "no-company"],
     enabled: Boolean(companyId),
+    throwOnError: false,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       if (!companyId) {
         return {
@@ -795,7 +817,7 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
           .eq("company_id", companyId)
           .gte("created_at", sixMonthsAgo),
         supabase
-          .from("invwaste")
+          .from("inv_waste")
           .select("*")
           .eq("company_id", companyId)
           .gte("created_at", sixMonthsAgo),
@@ -806,10 +828,21 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
         }),
       ]);
 
-      if (paymentsResponse.error) throw paymentsResponse.error;
-      if (expensesResponse.error) throw expensesResponse.error;
-      if (transactionsResponse.error) throw transactionsResponse.error;
-      if (wasteResponse.error) throw wasteResponse.error;
+      if (paymentsResponse.error && !isMissingSchemaResourceError(paymentsResponse.error)) {
+        throw paymentsResponse.error;
+      }
+      if (expensesResponse.error && !isMissingSchemaResourceError(expensesResponse.error)) {
+        throw expensesResponse.error;
+      }
+      if (
+        transactionsResponse.error &&
+        !isMissingSchemaResourceError(transactionsResponse.error)
+      ) {
+        throw transactionsResponse.error;
+      }
+      if (wasteResponse.error && !isMissingSchemaResourceError(wasteResponse.error)) {
+        throw wasteResponse.error;
+      }
       // The local fallback below keeps older preview databases usable while
       // the 05.09 migration is still being promoted.
 
@@ -822,8 +855,6 @@ export function useManagerFinancialMetrics(): ManagerFinancialMetrics {
         ownerOverview: ownerOverviewResponse.data,
       };
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (Phase 4 optimization)
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const snapshot = useMemo<ManagerFinancialSnapshot>(() => {

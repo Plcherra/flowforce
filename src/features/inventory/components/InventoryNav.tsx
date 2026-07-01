@@ -22,13 +22,6 @@ const navItems = [
     permission: "inventory.view" as const,
   },
   {
-    name: "Cookbook",
-    href: "/app/inventory/cookbook",
-    icon: ChefHat,
-    permission: "inventory.view" as const,
-    featureFlag: "inventory.cookbook",
-  },
-  {
     name: "Items & Setup",
     href: "/app/inventory/items",
     icon: Package,
@@ -59,6 +52,13 @@ const navItems = [
     permission: "inventory.waste.view" as const,
   },
   {
+    name: "Cookbook",
+    href: "/app/inventory/cookbook",
+    icon: ChefHat,
+    permission: "inventory.view" as const,
+    featureFlag: "inventory.cookbook",
+  },
+  {
     name: "Reports",
     href: "/app/inventory/reports",
     icon: FileText,
@@ -70,38 +70,37 @@ export function InventoryNav() {
   const location = useLocation();
   const featureFlags = useFeatureFlags();
 
-  return (
-    <nav className="grid gap-2">
-      {navItems.map((item) => {
-        if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag)) {
-          return null;
-        }
+  const visibleItems = navItems.filter(
+    (item) => !item.featureFlag || featureFlags.isEnabled(item.featureFlag),
+  );
 
-        const isCurrent =
+  return (
+    <nav
+      aria-label="Inventory sections"
+      className="flex w-full gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {visibleItems.map((item) => {
+        const isDashboard = item.href === "/app/inventory";
+        const isActive =
           location.pathname === item.href ||
-          (item.href === "/app/inventory" && location.pathname === "/app/inventory");
+          (!isDashboard && location.pathname.startsWith(`${item.href}/`)) ||
+          (isDashboard &&
+            location.pathname === "/app/inventory");
 
         return (
           <IfCan key={item.href} permission={item.permission}>
             <NavLink
               to={item.href}
-              end={item.href === "/app/inventory"}
-              className={({ isActive }) =>
-                cn(
-                  "group flex items-center justify-between rounded-2xl border px-3 py-3 text-sm font-medium transition-colors",
-                  isActive || isCurrent
-                    ? "border-primary/60 bg-primary/5 text-foreground shadow-sm"
-                    : "border-transparent bg-muted/40 text-muted-foreground hover:border-primary/30 hover:bg-background hover:text-foreground",
-                )
-              }
+              end={isDashboard}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                  : "border-transparent bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
             >
-              <span className="flex items-center gap-2">
-                <item.icon className="h-4 w-4" />
-                {item.name}
-              </span>
-              <span className="text-xs uppercase tracking-wide text-muted-foreground group-hover:text-foreground">
-                flow
-              </span>
+              <item.icon className="h-4 w-4" />
+              {item.name}
             </NavLink>
           </IfCan>
         );

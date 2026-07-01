@@ -4,18 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   CalendarDays,
   CloudDownload,
   CloudUpload,
   Plus,
   Search,
-  Video,
   Wrench,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,9 +42,6 @@ export function EventsCalendarContent() {
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
-  const [sessionDialogType, setSessionDialogType] = useState<
-    "meeting" | "event"
-  >("event");
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
   const { events, loading, error, errorCode } = useEvents();
   const { loading: schedulingLoading, error: schedulingError } =
@@ -78,8 +68,7 @@ export function EventsCalendarContent() {
     [],
   );
 
-  const handleOpenSessionDialog = useCallback((type: "meeting" | "event") => {
-    setSessionDialogType(type);
+  const handleOpenSessionDialog = useCallback(() => {
     setSessionDialogOpen(true);
   }, []);
 
@@ -106,10 +95,9 @@ export function EventsCalendarContent() {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Events &amp; Meetings</h1>
+                <h1 className="text-xl font-bold">Calendar</h1>
                 <p className="text-sm text-muted-foreground">
-                  Track company sessions, meetings, and vendor visits in one
-                  calendar.
+                  Schedule meetings, events, and vendor visits in one place.
                 </p>
               </div>
             </div>
@@ -125,32 +113,21 @@ export function EventsCalendarContent() {
                   className="w-64 pl-10"
                 />
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size={isMobile ? "sm" : "default"}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {isMobile ? "" : "Schedule"}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuItem
-                    onClick={() => handleOpenSessionDialog("meeting")}
-                  >
-                    <Video className="mr-2 h-4 w-4" />
-                    Meeting
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleOpenSessionDialog("event")}
-                  >
-                    <CalendarDays className="mr-2 h-4 w-4" />
-                    Event
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleOpenVendorDialog}>
-                    <Wrench className="mr-2 h-4 w-4" />
-                    Vendor visit
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                size={isMobile ? "sm" : "default"}
+                onClick={handleOpenSessionDialog}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {isMobile ? "Add" : "Add to calendar"}
+              </Button>
+              <Button
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                onClick={handleOpenVendorDialog}
+              >
+                <Wrench className="mr-2 h-4 w-4" />
+                Vendor visit
+              </Button>
             </div>
           </div>
         </div>
@@ -263,10 +240,10 @@ export function EventsCalendarContent() {
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
-                  onClick={() => handleOpenSessionDialog("event")}
+                  onClick={handleOpenSessionDialog}
                 >
                   <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  Create event
+                  Add to calendar
                 </Button>
                 <Button
                   variant="ghost"
@@ -295,7 +272,6 @@ export function EventsCalendarContent() {
       <CreateEventDialog
         open={sessionDialogOpen}
         onOpenChange={handleToggleSessionDialog}
-        defaultType={sessionDialogType}
       />
       <CreateVendorVisitDialog
         open={vendorDialogOpen}

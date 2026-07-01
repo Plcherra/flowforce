@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { isMissingSchemaResourceError } from "@/shared/data-access/errors";
 import type {
   InventoryCount,
   InventoryCountLine,
@@ -34,6 +35,102 @@ const inventoryCountLineSchema = z
 
 const inventoryCountArraySchema = z.array(inventoryCountSchema);
 const inventoryCountLineArraySchema = z.array(inventoryCountLineSchema);
+
+const COUNT_SELECT_WITH_LOCATION = `
+  *,
+  location:inv_locations (id, name, location_type)
+`;
+
+type CountLocationRow = {
+  id: string;
+  name: string;
+  location_type?: string | null;
+};
+
+function normalizeInventoryCount(
+  count: Record<string, unknown>,
+): InventoryCount {
+  const location = count.location as CountLocationRow | null | undefined;
+  const { location: _location, locations: _locations, ...rest } = count;
+
+  return {
+    ...rest,
+    locations: location ? [location] : [],
+  } as InventoryCount;
+}
+
+function normalizeInventoryCountLine(
+  line: Record<string, unknown>,
+): InventoryCountLine {
+  return {
+    ...line,
+    countid: String(line.countid ?? line.count_id ?? ""),
+    unitid: (line.unitid ?? line.unit_id ?? null) as string | null | undefined,
+  } as InventoryCountLine;
+}
+
+async function fetchInventoryCounts(
+  client: SupabaseClient,
+  countId?: string,
+): Promise<Record<string, unknown>[]> {
+  let query = client.from("inv_counts").select(COUNT_SELECT_WITH_LOCATION);
+
+  if (countId) {
+    query = query.eq("id", countId);
+  } else {
+    query = query
+      .order("count_date", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  const { data, error } = countId ? await query.maybeSingle() : await query;
+
+  if (!error) {
+    if (countId) {
+      return data ? [data as Record<string, unknown>] : [];
+    }
+    return (data ?? []) as Record<string, unknown>[];
+  }
+
+  if (!isMissingSchemaResourceError(error)) {
+    throw error;
+  }
+
+  let fallbackQuery = client.from("inv_counts").select("*");
+  if (countId) {
+    fallbackQuery = fallbackQuery.eq("id", countId);
+  } else {
+    fallbackQuery = fallbackQuery
+      .order("count_date", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  const fallback = countId
+    ? await fallbackQuery.maybeSingle()
+    : await fallbackQuery;
+
+  if (fallback.error) throw fallback.error;
+
+  if (countId) {
+    return fallback.data ? [fallback.data as Record<string, unknown>] : [];
+  }
+
+  return (fallback.data ?? []) as Record<string, unknown>[];
+}
+
+function countLineFilter(client: SupabaseClient, countId: string) {
+  return client.from("inv_count_lines").select("*").eq("count_id", countId);
+}
+
+function countLinePayload(
+  countId: string,
+  fields: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    count_id: countId,
+    ...fields,
+  };
+}
 
 export type CreateInventoryCountInput = {
   type: string;
@@ -75,28 +172,11 @@ export async function listInventoryCounts(
   options: CountRepositoryOptions = {},
 ): Promise<InventoryCount[]> {
   const client = options.supabaseClient ?? supabase;
+  const rows = await fetchInventoryCounts(client);
 
-  const { data, error } = await client
-    .from("inv_counts")
-    .select(
-      `
-        *,
-        locations:inv_count_locations (
-          location:inv_locations (id, name, location_type)
-        )
-      `,
-    )
-    .order("count_date", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  return inventoryCountArraySchema.parse(data ?? []).map((count) => ({
-    ...count,
-    locations: ((count.locations ?? []) as Array<Record<string, unknown>>)
-      .map((entry: Record<string, unknown>) => entry?.location)
-      .filter(Boolean),
-  })) as InventoryCount[];
+  return inventoryCountArraySchema
+    .parse(rows)
+    .map((count) => normalizeInventoryCount(count as Record<string, unknown>));
 }
 
 export async function getInventoryCount(
@@ -104,29 +184,11 @@ export async function getInventoryCount(
   options: CountRepositoryOptions = {},
 ) {
   const client = options.supabaseClient ?? supabase;
-  const { data, error } = await client
-    .from("inv_counts")
-    .select(
-      `
-        *,
-        locations:inv_count_locations (
-          location:inv_locations (id, name, location_type)
-        )
-      `,
-    )
-    .eq("id", countId)
-    .maybeSingle();
+  const rows = await fetchInventoryCounts(client, countId);
+  if (!rows.length) return null;
 
-  if (error) throw error;
-  if (!data) return null;
-
-  const parsed = inventoryCountSchema.parse(data);
-  return {
-    ...parsed,
-    locations: ((parsed.locations ?? []) as Array<Record<string, unknown>>)
-      .map((entry: Record<string, unknown>) => entry?.location)
-      .filter(Boolean),
-  } as InventoryCount;
+  const parsed = inventoryCountSchema.parse(rows[0]);
+  return normalizeInventoryCount(parsed as Record<string, unknown>);
 }
 
 export async function createInventoryCount(
@@ -162,13 +224,15 @@ export async function createInventoryCount(
 
   if (payload.locations.length > 0) {
     const locationPayload = payload.locations.map((locationId) => ({
-      countid: countId,
+      count_id: countId,
       location_id: locationId,
     }));
     const { error: locationError } = await client
       .from("inv_count_locations")
-      .upsert(locationPayload, { onConflict: "countid,location_id" });
-    if (locationError) throw locationError;
+      .upsert(locationPayload, { onConflict: "count_id,location_id" });
+    if (locationError && !isMissingSchemaResourceError(locationError)) {
+      throw locationError;
+    }
   }
 
   const scopedItems = await resolveCountScopeItems(client, payload, companyId);
@@ -219,7 +283,7 @@ export async function deleteInventoryCount(
   const { error: linesError } = await client
     .from("inv_count_lines")
     .delete()
-    .eq("countid", countId);
+    .eq("count_id", countId);
   if (linesError) throw linesError;
 
   const { error } = await client.from("inv_counts").delete().eq("id", countId);
@@ -398,13 +462,24 @@ export async function listInventoryCountLines(
         unit:inv_units(id, name, abbreviation)
       `,
     )
-    .eq("countid", countId)
+    .eq("count_id", countId)
     .order("item_id", { ascending: true })
     .order("unit_level", { ascending: true });
+
+  if (error && isMissingSchemaResourceError(error)) {
+    const plain = await countLineFilter(client, countId);
+    if (plain.error) throw plain.error;
+    return inventoryCountLineArraySchema
+      .parse(plain.data ?? [])
+      .map((line) =>
+        normalizeInventoryCountLine(line as Record<string, unknown>),
+      );
+  }
+
   if (error) throw error;
-  return inventoryCountLineArraySchema.parse(
-    data ?? [],
-  ) as InventoryCountLine[];
+  return inventoryCountLineArraySchema
+    .parse(data ?? [])
+    .map((line) => normalizeInventoryCountLine(line as Record<string, unknown>));
 }
 
 export async function addInventoryItemToCount(
@@ -471,14 +546,15 @@ export async function updateInventoryCountLine(
     .from("inv_count_lines")
     .update(payload)
     .eq("id", lineId)
-    .select("countid, item_id, unitid, counted_quantity")
+    .select("count_id, item_id, unit_id, counted_quantity")
     .single();
   if (error) throw error;
 
   if (updates.counted_quantity !== undefined && data) {
-    await logCountEvent(client, data.countid, "item_counted", {
+    const countId = String(data.count_id ?? "");
+    await logCountEvent(client, countId, "item_counted", {
       item_id: data.item_id,
-      unitid: data.unitid,
+      unitid: data.unit_id,
       counted_quantity: updates.counted_quantity,
       variance: payload.variance,
     });
@@ -494,15 +570,15 @@ export async function removeInventoryItemFromCount(
     .from("inv_count_lines")
     .delete()
     .eq("id", lineId)
-    .select("countid, item_id, unitid")
+    .select("count_id, item_id, unit_id")
     .single();
   if (error) throw error;
 
   if (data) {
-    await logCountEvent(client, data.countid, "note_added", {
+    await logCountEvent(client, String(data.count_id ?? ""), "note_added", {
       action: "item_removed",
       item_id: data.item_id,
-      unitid: data.unitid,
+      unitid: data.unit_id,
     });
   }
 }
@@ -691,13 +767,13 @@ async function bootstrapCountLines(
 
   const { data: existingLines, error: existingError } = await client
     .from("inv_count_lines")
-    .select("item_id, unitid")
-    .eq("countid", countId);
+    .select("item_id, unit_id")
+    .eq("count_id", countId);
   if (existingError) throw existingError;
 
   const existingKeys = new Set<string>(
     (existingLines ?? []).map(
-      (line) => `${line.item_id}-${line.unitid ?? "base"}`,
+      (line) => `${line.item_id}-${line.unit_id ?? "base"}`,
     ),
   );
 
@@ -724,18 +800,19 @@ async function bootstrapCountLines(
         return;
       }
       existingKeys.add(key);
-      payload.push({
-        countid: countId,
-        item_id: item.id,
-        expected_quantity: expectedQuantityForCountUnit(expectedQuantity, unit),
-        counted_quantity: 0,
-        variance: -expectedQuantityForCountUnit(expectedQuantity, unit),
-        unitid: resolvedUnitId,
-        unit_level: unit.unit_level ?? 1,
-        conversion_factor: unit.conversion_factor ?? 1,
-        notes: null,
-        notes_per_unit: {},
-      });
+      payload.push(
+        countLinePayload(countId, {
+          item_id: item.id,
+          expected_quantity: expectedQuantityForCountUnit(expectedQuantity, unit),
+          counted_quantity: 0,
+          variance: -expectedQuantityForCountUnit(expectedQuantity, unit),
+          unit_id: resolvedUnitId,
+          unit_level: unit.unit_level ?? 1,
+          conversion_factor: unit.conversion_factor ?? 1,
+          notes: null,
+          notes_per_unit: {},
+        }),
+      );
     });
   });
 
@@ -797,12 +874,30 @@ async function attachExpectedStockToItems(
 }
 
 async function getCountLocationIds(client: SupabaseClient, countId: string) {
+  const { data: countRow, error: countError } = await client
+    .from("inv_counts")
+    .select("location_id")
+    .eq("id", countId)
+    .maybeSingle();
+  if (countError) throw countError;
+
+  const fromCount = countRow?.location_id ? [countRow.location_id] : [];
+
   const { data, error } = await client
     .from("inv_count_locations")
     .select("location_id")
-    .eq("countid", countId);
-  if (error) throw error;
-  return (data ?? [])
+    .eq("count_id", countId);
+
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return fromCount;
+    }
+    throw error;
+  }
+
+  const junctionIds = (data ?? [])
     .map((entry) => entry.location_id)
     .filter((locationId): locationId is string => Boolean(locationId));
+
+  return [...new Set([...fromCount, ...junctionIds])];
 }

@@ -88,10 +88,12 @@ export const isMissingSchemaResourceError = (error: unknown): boolean => {
   ).toLowerCase();
 
   return (
+    code === "PGRST200" ||
     code === "PGRST205" ||
     code === "42P01" ||
     code === "42703" ||
     message.includes("could not find the table") ||
+    message.includes("could not find a relationship") ||
     message.includes("does not exist") ||
     message.includes("schema cache")
   );

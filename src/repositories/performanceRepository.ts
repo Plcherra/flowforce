@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { goalStatusSchema } from "@/services/performance/performanceTypes";
+import { logger } from "@/utils/logger";
 
 const profileRowSchema = z
   .object({
@@ -175,7 +176,13 @@ export async function fetchPerformanceReviewsSince(
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    logger.warn("[performance] performance_reviews query unavailable", {
+      error,
+      tags: ["warning"],
+    });
+    return [];
+  }
   return performanceReviewRowSchema.array().parse(data ?? []);
 }
 

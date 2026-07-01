@@ -33,7 +33,12 @@ type TaskRow = Pick<
 >;
 type GoalRow = Pick<
   Tables<"goals">,
-  "id" | "status" | "progress" | "company_id" | "target_date" | "created_at"
+  | "id"
+  | "status"
+  | "progress"
+  | "company_id"
+  | "target_completion_date"
+  | "created_at"
 >;
 type InventoryTransactionRow = Pick<
   Tables<"inventory_transactions">,
@@ -458,7 +463,9 @@ export async function fetchOperationalMetrics(
 
     const goalsPromise = client
       .from("goals")
-      .select("id, status, progress, target_date, created_at, company_id")
+      .select(
+        "id, status, progress, target_completion_date, created_at, company_id",
+      )
       .eq("company_id", companyId)
       .order("created_at", { ascending: false })
       .limit(200);

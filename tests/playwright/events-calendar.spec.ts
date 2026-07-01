@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Events Calendar Page', () => {
+test.describe('Calendar Page', () => {
   const email = process.env.E2E_EMAIL;
   const password = process.env.E2E_PASSWORD;
 
@@ -15,23 +15,25 @@ test.describe('Events Calendar Page', () => {
   });
 
   test('loads the calendar page shell', async ({ page }) => {
-    await page.goto('/app/events/calendar');
-    await expect(page.getByRole('heading', { name: 'Events & Meetings' })).toBeVisible();
-    await expect(page.getByRole('textbox', { name: /search events/i })).toBeVisible();
-    await expect(page.getByText('Quick Actions')).toBeVisible();
+    await page.goto('/app/calendar');
+    await expect(page.getByRole('heading', { name: 'Calendar' })).toBeVisible();
+    await expect(
+      page.getByPlaceholder('Search upcoming events'),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: /add to calendar/i })).toBeVisible();
   });
 
-  test('opens the create event dialog from quick actions', async ({ page }) => {
-    await page.goto('/app/events/calendar');
-    await page.getByRole('button', { name: 'Create event' }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
+  test('opens the create dialog from the primary action', async ({ page }) => {
+    await page.goto('/app/calendar');
+    await page.getByRole('button', { name: /add to calendar/i }).click();
+    await expect(page.getByRole('dialog', { name: /add to calendar/i })).toBeVisible();
+    await expect(page.getByLabel('Type')).toBeVisible();
     await page.getByRole('button', { name: /cancel/i }).click();
   });
 
-  test('shows dropdown scheduling options', async ({ page }) => {
+  test('redirects legacy events calendar route', async ({ page }) => {
     await page.goto('/app/events/calendar');
-    await page.getByRole('button', { name: 'Schedule' }).click();
-    await expect(page.getByRole('menu')).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /vendor visit/i })).toBeVisible();
+    await page.waitForURL('**/app/calendar**', { timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Calendar' })).toBeVisible();
   });
 });

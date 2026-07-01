@@ -205,10 +205,10 @@ export function useCalendarEvents(
       if (!companyId || !isoRange) {
         return [] as CalendarEvent[];
       }
-      const rows = await scheduleGateway.fetchEvents({
+      const rows = await calendarEventsRepository.listCompanyEventsByRange({
         companyId,
-        start: isoRange.start,
-        end: isoRange.end,
+        startIso: isoRange.start,
+        endIso: isoRange.end,
         storeId: normalizedStoreId,
       });
       const list = Array.isArray(rows) ? rows : [];

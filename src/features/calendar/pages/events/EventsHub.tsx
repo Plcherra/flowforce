@@ -1,14 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  addDays,
-  endOfDay,
-  endOfMonth,
-  endOfWeek,
-  startOfDay,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
-import { CalendarDays, Plus, Search, Video, Wrench } from "lucide-react";
+import { useMemo, useState } from "react";
+import { addDays, endOfDay, startOfDay, subDays } from "date-fns";
+import { CalendarDays, Plus, Search, Wrench } from "lucide-react";
 import { SchedulingProvider } from "@/contexts/SchedulingContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -17,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CreateEventDialog } from "@/features/calendar/components/CreateEventDialog";
 import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
-import { CalendarView } from "@/features/calendar/components/CalendarView";
 import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
+import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingCalendar";
 import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
 import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
 import {
@@ -26,106 +18,47 @@ import {
   mapAppEventToCalendarEvent,
 } from "@/hooks/useCalendarEvents";
 import { useEvents } from "@/hooks/useEvents";
-import { useToast } from "@/hooks/use-toast";
-import { logger } from "@/utils/logger";
 import {
   getSupabaseSetupMessage,
   isMissingTableError,
 } from "@/shared/utils/supabaseErrors";
 
-type ViewMode = "month" | "week" | "day";
-
-const computeRange = (view: ViewMode, base: Date) => {
-  switch (view) {
-    case "month":
-      return {
-        start: startOfDay(startOfMonth(base)),
-        end: endOfDay(endOfMonth(base)),
-      };
-    case "week":
-      return {
-        start: startOfDay(startOfWeek(base)),
-        end: endOfDay(endOfWeek(base)),
-      };
-    default:
-      return { start: startOfDay(base), end: endOfDay(base) };
-  }
-};
-
 export default function EventsHubPage() {
   const isMobile = useIsMobile();
-  const [view, setView] = useState<ViewMode>("week");
-  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
-  const [sessionDialogType, setSessionDialogType] = useState<
-    "meeting" | "event"
-  >("meeting");
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
 
-  const range = useMemo(
-    () => computeRange(view, currentDate),
-    [view, currentDate],
-  );
-  const { events, loading, error, refresh } = useCalendarEvents({ range });
-  const { events: cachedEvents, loading: cachedLoading } = useEvents();
-  const { toast } = useToast();
-
-  const fallbackEvents = useMemo(
-    () => cachedEvents.map(mapAppEventToCalendarEvent),
-    [cachedEvents],
+  const listRange = useMemo(
+    () => ({
+      start: startOfDay(subDays(new Date(), 30)),
+      end: endOfDay(addDays(new Date(), 90)),
+    }),
+    [],
   );
 
-  const [offline, setOffline] = useState(false);
-  const offlineToastShown = useRef(false);
-  const calendarSetupMissing = isMissingTableError(error, [
+  const { events: cachedEvents, loading: cachedLoading, error: eventsError } =
+    useEvents();
+  const { events: rangeEvents, loading: rangeLoading, error: rangeError, refresh } =
+    useCalendarEvents({ range: listRange });
+
+  const loadError = rangeError ?? eventsError;
+  const calendarSetupMissing = isMissingTableError(loadError, [
     "calendar_events_full",
     "calendar_events",
   ]);
 
-  useEffect(() => {
-    if (calendarSetupMissing) {
-      setOffline(false);
-      offlineToastShown.current = false;
-      return;
-    }
-
-    if (error) {
-      logger.error("[Calendar] load error", { error, tags: ["error"] });
-      setOffline(true);
-      if (!offlineToastShown.current) {
-        toast({
-          title: "Calendar offline",
-          description: error,
-          variant: "destructive",
-        });
-        offlineToastShown.current = true;
-      }
-    } else {
-      if (offline) {
-        setOffline(false);
-      }
-      offlineToastShown.current = false;
-    }
-  }, [calendarSetupMissing, error, offline, toast]);
-
-  const mergedEvents = useMemo(
-    () =>
-      calendarSetupMissing
-        ? []
-        : offline
-          ? fallbackEvents
-          : events,
-    [calendarSetupMissing, offline, fallbackEvents, events],
-  );
-  const mergedLoading = calendarSetupMissing
-    ? false
-    : offline
-      ? cachedLoading
-      : loading;
-  const displayError = offline || calendarSetupMissing ? null : error;
+  const mergedEvents = useMemo(() => {
+    if (calendarSetupMissing) return [];
+    const source =
+      rangeEvents.length > 0
+        ? rangeEvents
+        : cachedEvents.map(mapAppEventToCalendarEvent);
+    const unique = new Map(source.map((event) => [event.id, event]));
+    return Array.from(unique.values());
+  }, [calendarSetupMissing, cachedEvents, rangeEvents]);
 
   const selectedEvent = useMemo(
     () => mergedEvents.find((event) => event.id === selectedEventId) ?? null,
@@ -167,12 +100,12 @@ export default function EventsHubPage() {
     }
   };
 
-  const handleShiftRangeNav = (delta: number) => {
-    if (view === "month") setCurrentDate((prev) => addMonthsSafe(prev, delta));
-    else if (view === "week")
-      setCurrentDate((prev) => addDays(prev, delta * 7));
-    else setCurrentDate((prev) => addDays(prev, delta));
+  const handleOverlayEventSelect = (eventId: string | null) => {
+    setSelectedEventId(eventId);
+    setDetailsOpen(Boolean(eventId));
   };
+
+  const isLoading = cachedLoading || rangeLoading;
 
   return (
     <SchedulingProvider>
@@ -184,9 +117,9 @@ export default function EventsHubPage() {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Events & Meetings</h1>
+                <h1 className="text-xl font-bold">Calendar</h1>
                 <p className="text-sm text-muted-foreground">
-                  Coordinate team sessions and vendor visits
+                  Schedule meetings, events, and vendor visits in one place
                 </p>
               </div>
             </div>
@@ -202,25 +135,11 @@ export default function EventsHubPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
                   size={isMobile ? "sm" : "default"}
-                  onClick={() => {
-                    setSessionDialogType("meeting");
-                    setSessionDialogOpen(true);
-                  }}
-                >
-                  <Video className="mr-2 h-4 w-4" />
-                  {isMobile ? "Meeting" : "New Meeting"}
-                </Button>
-                <Button
-                  size={isMobile ? "sm" : "default"}
-                  onClick={() => {
-                    setSessionDialogType("event");
-                    setSessionDialogOpen(true);
-                  }}
+                  onClick={() => setSessionDialogOpen(true)}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  {isMobile ? "Event" : "New Event"}
+                  {isMobile ? "Add" : "Add to calendar"}
                 </Button>
                 <Button
                   variant="outline"
@@ -237,87 +156,47 @@ export default function EventsHubPage() {
 
         <main className="px-4 py-6">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <section className="lg:col-span-2 space-y-4">
-              <Card>
-                <CardHeader className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <CalendarDays className="h-4 w-4" />
-                    <h3 className="text-sm font-medium">Calendar overview</h3>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleShiftRangeNav(-1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentDate(new Date())}
-                    >
-                      Today
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleShiftRangeNav(1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {calendarSetupMissing ? (
-                    <FeatureSetupRequiredState
-                      title="Calendar module is not fully set up yet"
-                      description={getSupabaseSetupMessage(error, "Calendar")}
-                      icon={<CalendarDays className="h-5 w-5" />}
-                      setupDescription={
-                        <>
-                          Missing table: <code>calendar_events_full</code>.
-                          Restore the calendar migrations, then refresh this
-                          page.
-                        </>
-                      }
-                    />
-                  ) : displayError ? (
-                    <FeatureErrorState
-                      title="Unable to load calendar"
-                      description={displayError}
-                    />
-                  ) : (
-                    <CalendarView
-                      events={mergedEvents}
-                      date={currentDate}
-                      view={view}
-                      loading={Boolean(mergedLoading)}
-                      error={null}
-                      selectedEventId={selectedEventId}
-                      onDateChange={setCurrentDate}
-                      onViewChange={(next) => setView(next)}
-                      onSelectEvent={(event) => handleSelectEvent(event.id)}
-                    />
-                  )}
-                  {offline && (
-                    <div className="mt-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                      Showing cached events while we reconnect.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <section className="space-y-4 lg:col-span-2">
+              {calendarSetupMissing ? (
+                <FeatureSetupRequiredState
+                  title="Calendar module is not fully set up yet"
+                  description={getSupabaseSetupMessage(loadError, "Calendar")}
+                  icon={<CalendarDays className="h-5 w-5" />}
+                  setupDescription={
+                    <>
+                      Missing table: <code>calendar_events_full</code>. Restore
+                      the calendar migrations, then refresh this page.
+                    </>
+                  }
+                />
+              ) : loadError ? (
+                <FeatureErrorState
+                  title="Unable to load calendar"
+                  description={loadError}
+                />
+              ) : (
+                <SchedulingCalendar
+                  mode="events"
+                  externalDetails
+                  onOverlayEventSelect={handleOverlayEventSelect}
+                />
+              )}
             </section>
 
             <aside className="space-y-4">
               <Card>
                 <CardHeader className="px-4 py-3">
-                  <h3 className="text-sm font-medium">Upcoming in range</h3>
+                  <h3 className="text-sm font-medium">Upcoming</h3>
                 </CardHeader>
                 <CardContent className="space-y-2 p-3">
-                  {upcoming.length === 0 && (
+                  {isLoading && (
                     <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                      No upcoming items.
+                      Loading events…
+                    </div>
+                  )}
+                  {!isLoading && upcoming.length === 0 && (
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                      No upcoming items. Use Add to calendar to schedule one.
                     </div>
                   )}
                   {upcoming.map((event) => (
@@ -338,7 +217,7 @@ export default function EventsHubPage() {
                         </div>
                         <Badge
                           variant="outline"
-                          className="capitalize text-[11px]"
+                          className="text-[11px] capitalize"
                         >
                           {event.type ?? "event"}
                         </Badge>
@@ -360,7 +239,6 @@ export default function EventsHubPage() {
       <CreateEventDialog
         open={sessionDialogOpen}
         onOpenChange={setSessionDialogOpen}
-        defaultType={sessionDialogType}
         onCreated={handleEventCreated}
       />
       <CreateVendorVisitDialog
@@ -377,12 +255,6 @@ export default function EventsHubPage() {
     </SchedulingProvider>
   );
 }
-
-const addMonthsSafe = (date: Date, delta: number) => {
-  const next = new Date(date);
-  next.setMonth(next.getMonth() + delta);
-  return next;
-};
 
 const safeTime = (iso: string) => {
   const date = new Date(iso);

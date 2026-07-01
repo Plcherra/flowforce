@@ -39,7 +39,7 @@ type SelectionRecord = Record<string, boolean>;
 export function CreateEventDialog({
   open,
   onOpenChange,
-  defaultType = "meeting",
+  defaultType = "event",
   onCreated,
 }: CreateEventDialogProps) {
   const { toast } = useToast();
@@ -72,7 +72,7 @@ export function CreateEventDialog({
   useEffect(() => {
     if (open) {
       setSessionType(defaultType);
-      setTitle(defaultType === "meeting" ? "New Meeting" : "New Event");
+      setTitle("New calendar item");
       setDescription("");
       setLocation("");
       const now = new Date();
@@ -286,11 +286,9 @@ export function CreateEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>
-            {sessionType === "meeting" ? "Schedule meeting" : "Create event"}
-          </DialogTitle>
+          <DialogTitle>Add to calendar</DialogTitle>
           <DialogDescription>
-            Capture details, invite teammates from your directory, and
+            Choose meeting or event, then add details, invite teammates, and
             optionally link related shifts.
           </DialogDescription>
         </DialogHeader>
@@ -466,9 +464,7 @@ export function CreateEventDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCreate}>
-            Create {sessionType === "meeting" ? "meeting" : "event"}
-          </Button>
+          <Button onClick={handleCreate}>Save to calendar</Button>
         </div>
       </DialogContent>
     </Dialog>
