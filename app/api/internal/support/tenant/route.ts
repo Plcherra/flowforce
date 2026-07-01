@@ -165,7 +165,7 @@ const collectDiagnostics = async (
   const { data: company, error: companyError } = await supabaseAdmin
     .from("companies")
     .select(
-      "id, name, ownerid, registration_complete, lifecycle_status, deleted_at, created_at, updated_at",
+      "id, name, owner_id, registration_complete, lifecycle_status, deleted_at, created_at, updated_at",
     )
     .eq("id", companyId)
     .maybeSingle();
@@ -263,7 +263,7 @@ const repairOnboardingBaseline = async (params: {
 
   const { data: company, error: companyError } = await supabaseAdmin
     .from("companies")
-    .select("id, name, ownerid")
+    .select("id, name, owner_id")
     .eq("id", companyId)
     .maybeSingle();
 
@@ -293,7 +293,7 @@ const repairOnboardingBaseline = async (params: {
   await supabaseAdmin
     .from("companies")
     .update({
-      ownerid: company.ownerid ?? userId,
+      owner_id: company.owner_id ?? userId,
       registration_complete: true,
       updated_at: new Date().toISOString(),
     })

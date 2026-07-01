@@ -202,7 +202,7 @@ export async function POST(request: Request) {
       positions,
       registration_complete: true,
       created_by: userId,
-      ownerid: userId,
+      owner_id: userId,
       owner_profile: {
         first_name: firstName,
         last_name: lastName,

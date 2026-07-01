@@ -49,14 +49,14 @@ export const verifyOnboardingSetup = async (
 
   const { data: company, error: companyError } = await client
     .from("companies")
-    .select("id, ownerid, registration_complete")
+    .select("id, owner_id, registration_complete")
     .eq("id", companyId)
     .maybeSingle();
 
   if (companyError || !company) {
     missing.push("companies");
   } else {
-    if (company.ownerid !== userId) missing.push("companies.ownerid");
+    if (company.owner_id !== userId) missing.push("companies.owner_id");
     if (company.registration_complete !== true) {
       missing.push("companies.registration_complete");
     }
