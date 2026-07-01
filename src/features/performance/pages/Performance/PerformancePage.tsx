@@ -192,9 +192,7 @@ export function PerformancePage() {
     error: leaderboardError,
     refresh: refreshLeaderboard,
   } = useLeaderboardData(leaderboardPeriod);
-  const { lastUpdated } = useLeaderboardInsightsStore(
-    (state) => state.lastUpdated,
-  );
+  const lastUpdated = useLeaderboardInsightsStore((state) => state.lastUpdated);
 
   const kpis = buildKpis({
     employees,
