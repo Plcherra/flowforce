@@ -301,7 +301,7 @@ export function useSystemSettings(
         const { data: created, error: createError } = await supabase.rpc(
           "create_company_with_setup",
           {
-            companydata: {
+            company_data: {
               name: "Demo Workspace",
               industry: null,
               size: null,
@@ -316,8 +316,8 @@ export function useSystemSettings(
               template_config: JSON.stringify({}),
             },
             custom_roles: [],
-            positionsdata: [],
-            owneruser_id: user.id,
+            positions_data: [],
+            owner_user_id: user.id,
           },
         );
 

@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       template_name: readMetadataValue(metadata, "onboarding_template_name"),
       enabled_sections: [],
       template_config: {},
-      ownerprofile: {
+      owner_profile: {
         first_name: firstName,
         last_name: lastName,
         email: user.email ?? null,
@@ -133,10 +133,10 @@ export async function POST(request: Request) {
     const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
       "create_company_with_setup",
       {
-        companydata: companyPayload,
+        company_data: companyPayload,
         custom_roles: [],
-        positionsdata: [],
-        owneruser_id: user.id,
+        positions_data: [],
+        owner_user_id: user.id,
       },
     );
 

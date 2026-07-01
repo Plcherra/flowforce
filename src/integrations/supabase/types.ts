@@ -6604,7 +6604,7 @@ export type Database = {
         Args: {
           company_data: Json
           custom_roles?: Json
-          owneruser_id?: string
+          owner_user_id?: string
           positions_data?: Json
         }
         Returns: string

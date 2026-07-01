@@ -314,7 +314,7 @@ export function useCompany() {
 
       // Use the improved database function to create company with setup
       const { data, error } = await supabase.rpc("create_company_with_setup", {
-        companydata: {
+        company_data: {
           name: companyData.name,
           industry: companyData.industry,
           size: companyData.size,
@@ -329,8 +329,8 @@ export function useCompany() {
           template_config: JSON.stringify(companyData.template_config || {}),
         },
         custom_roles: formattedRoles,
-        positionsdata: formattedPositions,
-        owneruser_id: user.id,
+        positions_data: formattedPositions,
+        owner_user_id: user.id,
       });
 
       if (error) {
