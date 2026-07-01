@@ -258,7 +258,7 @@ export class InventoryService {
 
     // Get waste this week
     const { data: wasteData } = await supabase
-      .from("invwaste")
+      .from("inv_waste")
       .select("cost_impact")
       .gte("created_at", sevenDaysAgo.toISOString());
 
@@ -429,15 +429,17 @@ export class InventoryService {
     );
 
     const { data, error } = await supabase
-      .from("invwaste")
+      .from("inv_waste")
       .insert({
-        ...wasteEvent,
+        item_id: wasteEvent.item_id,
         company_id: item.company_id,
         quantity,
         location_id: locationId,
-        unitid: wasteEvent.unitid ?? item.unitid ?? null,
+        unit_id: wasteEvent.unitid ?? item.unitid ?? null,
         cost_impact: costImpact,
-        reasoncategory: reasonCategory,
+        reason_category: reasonCategory,
+        reason: wasteEvent.reason ?? reasonCategory,
+        waste_type: wasteEvent.waste_type,
         metadata: {
           source: "waste_log",
           unit_cost: item.cost_per_unit ?? null,
@@ -473,7 +475,7 @@ export class InventoryService {
       });
 
     if (adjustmentError) {
-      await supabase.from("invwaste").delete().eq("id", data.id);
+      await supabase.from("inv_waste").delete().eq("id", data.id);
       throw adjustmentError;
     }
 
@@ -482,7 +484,7 @@ export class InventoryService {
 
   static async getWasteEvents() {
     const { data, error } = await supabase
-      .from("invwaste")
+      .from("inv_waste")
       .select(
         `
         *,
@@ -504,7 +506,7 @@ export class InventoryService {
 
   static async updateWaste(id: string, updates: Record<string, unknown>) {
     const { data, error } = await supabase
-      .from("invwaste")
+      .from("inv_waste")
       .update(updates)
       .eq("id", id)
       .select()
@@ -515,7 +517,7 @@ export class InventoryService {
   }
 
   static async deleteWaste(id: string) {
-    const { error } = await supabase.from("invwaste").delete().eq("id", id);
+    const { error } = await supabase.from("inv_waste").delete().eq("id", id);
 
     if (error) throw error;
   }
@@ -791,12 +793,13 @@ export class InventoryService {
       }
 
       if (calculation.wasteQuantityInItemUnit > 0) {
-        const { error: wasteError } = await supabase.from("invwaste").insert({
+        const { error: wasteError } = await supabase.from("inv_waste").insert({
           company_id: item.company_id,
           item_id: input.item_id,
           location_id: item.default_location_id ?? null,
           quantity: calculation.wasteQuantityInItemUnit,
           reason: `productionwaste:${event.id}`,
+          reason_category: "production",
           cost_impact: calculation.wasteCostEstimate,
           waste_type: "production",
           waste_date: adjustmentDate,
@@ -814,7 +817,7 @@ export class InventoryService {
           .delete()
           .eq("reference_number", eventId);
         await supabase
-          .from("invwaste")
+          .from("inv_waste")
           .delete()
           .eq("reason", `productionwaste:${eventId}`);
         await supabase
