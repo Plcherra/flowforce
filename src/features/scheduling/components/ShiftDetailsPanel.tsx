@@ -59,6 +59,7 @@ export function ShiftDetailsPanel({
     shifts,
     timeOff,
     unavailability,
+    staffAvailability,
     vendorEvents,
     mutations: { updateSchedule, deleteSchedule },
   } = useScheduling();
@@ -192,9 +193,10 @@ export function ShiftDetailsPanel({
             shifts,
             timeOff,
             unavailability,
+            staffAvailability,
           })
         : [],
-    [shift, shifts, timeOff, unavailability],
+    [shift, shifts, timeOff, unavailability, staffAvailability],
   );
 
   useEffect(() => {

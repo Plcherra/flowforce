@@ -39,7 +39,7 @@ export function SmartFillSidebar({
   expandTrigger = 0,
 }: SmartFillSidebarProps) {
   const isMobile = useIsMobile();
-  const { shifts, timeOff, unavailability, weekRange, refetchAll } =
+  const { shifts, timeOff, unavailability, staffAvailability, weekRange, refetchAll } =
     useScheduling();
   const [expanded, setExpanded] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
@@ -52,8 +52,9 @@ export function SmartFillSidebar({
         shifts: shifts ?? [],
         timeOff: timeOff ?? [],
         unavailability: unavailability ?? [],
+        staffAvailability: staffAvailability ?? [],
       }),
-    [shifts, timeOff, unavailability],
+    [shifts, timeOff, unavailability, staffAvailability],
   );
 
   const existingShifts = useMemo(
@@ -76,6 +77,9 @@ export function SmartFillSidebar({
     weekEnd: weekRange.end,
     location: locationFilter,
     existingShifts,
+    staffAvailability: staffAvailability ?? [],
+    timeOff: timeOff ?? [],
+    unavailability: unavailability ?? [],
     autoGenerate: false,
     onPublished: refetchAll,
   });

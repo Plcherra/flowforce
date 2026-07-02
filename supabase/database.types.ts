@@ -214,21 +214,36 @@ export type Database = {
       }
       availability_exception: {
         Row: {
+          approved_by: string | null
           company_id: string | null
           created_at: string | null
+          employee_id: string | null
+          end_date: string | null
           id: string
+          reason: string | null
+          start_date: string | null
           updated_at: string | null
         }
         Insert: {
+          approved_by?: string | null
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
+          end_date?: string | null
           id?: string
+          reason?: string | null
+          start_date?: string | null
           updated_at?: string | null
         }
         Update: {
+          approved_by?: string | null
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
+          end_date?: string | null
           id?: string
+          reason?: string | null
+          start_date?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -237,20 +252,38 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string | null
+          decision_note: string | null
+          employee_id: string | null
           id: string
+          manager_id: string | null
+          payload: Json | null
+          status: string | null
           updated_at: string | null
+          week_start: string | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
+          decision_note?: string | null
+          employee_id?: string | null
           id?: string
+          manager_id?: string | null
+          payload?: Json | null
+          status?: string | null
           updated_at?: string | null
+          week_start?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
+          decision_note?: string | null
+          employee_id?: string | null
           id?: string
+          manager_id?: string | null
+          payload?: Json | null
+          status?: string | null
           updated_at?: string | null
+          week_start?: string | null
         }
         Relationships: []
       }
@@ -6602,6 +6635,24 @@ export type Database = {
       assert_company_membership: {
         Args: { p_company_id: string }
         Returns: undefined
+      }
+      assign_schedule_with_validation: {
+        Args: {
+          p_assigned_by?: string
+          p_schedule_id: string
+          p_status?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      publish_schedules_week_with_validation: {
+        Args: {
+          p_company_id: string
+          p_is_published: boolean
+          p_week_end: string
+          p_week_start: string
+        }
+        Returns: Json
       }
       create_company_invite: {
         Args: {

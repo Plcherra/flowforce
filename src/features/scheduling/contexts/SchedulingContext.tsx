@@ -26,12 +26,14 @@ import { useWeekMutations } from "@/features/scheduling/hooks/useWeekMutations";
 import { calculateWeekRange } from "@/features/scheduling/utils/weekHelpers";
 import { extractAvailableLocations } from "@/features/scheduling/utils/locationHelpers";
 import type { SchedulingMutations } from "@/features/scheduling/types/mutations";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
 
 interface SchedulingContextType {
   shifts: ShiftWithAssignments[];
   assignments: AssignmentWithUser[];
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability: StaffAvailabilityRow[];
   vendorEvents: VendorEventWithMetadata[];
   teamMembers: ProfileSummary[];
   availableLocations: string[];
@@ -89,6 +91,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     assignments,
     timeOffRequests,
     unavailability,
+    staffAvailability,
     vendorEvents,
     teamMembers,
     loading,
@@ -216,6 +219,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     assignments,
     timeOff: timeOffRequests,
     unavailability,
+    staffAvailability,
     vendorEvents,
     teamMembers,
     availableLocations,

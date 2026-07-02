@@ -19,6 +19,8 @@ type CalendarToolbarProps = {
   setMinimizedView: (v: boolean) => void;
   showDailyInfo: boolean;
   setShowDailyInfo: (v: boolean) => void;
+  showAvailabilityLayer?: boolean;
+  setShowAvailabilityLayer?: (v: boolean) => void;
   onToggleTemplates: () => void;
   onOpenWeekTemplates: () => void;
   onCopyPreviousWeek: () => void;
@@ -43,6 +45,8 @@ export function CalendarToolbar({
   setMinimizedView,
   showDailyInfo,
   setShowDailyInfo,
+  showAvailabilityLayer = true,
+  setShowAvailabilityLayer,
   onToggleTemplates,
   onOpenWeekTemplates,
   onCopyPreviousWeek,
@@ -107,6 +111,14 @@ export function CalendarToolbar({
               >
                 Daily info
               </DropdownMenuCheckboxItem>
+              {setShowAvailabilityLayer ? (
+                <DropdownMenuCheckboxItem
+                  checked={showAvailabilityLayer}
+                  onCheckedChange={setShowAvailabilityLayer}
+                >
+                  Show availability layer
+                </DropdownMenuCheckboxItem>
+              ) : null}
               {!readOnly && (
                 <>
                   <DropdownMenuSeparator />

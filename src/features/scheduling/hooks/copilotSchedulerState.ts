@@ -1,3 +1,8 @@
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import type {
+  TimeOffWithUser,
+  UnavailabilityWithUser,
+} from "@/features/scheduling/hooks/types";
 import type { CopilotActionPayload } from "@/server/copilot/CopilotDTO";
 import type {
   CoverageGap,
@@ -18,6 +23,9 @@ export interface UseCopilotSchedulerOptions {
     end_time: string;
     location?: string | null;
   }>;
+  staffAvailability?: StaffAvailabilityRow[];
+  timeOff?: TimeOffWithUser[];
+  unavailability?: UnavailabilityWithUser[];
   /** When false, suggestions run only on explicit user action. */
   autoGenerate?: boolean;
   onPublished?: () => void | Promise<void>;

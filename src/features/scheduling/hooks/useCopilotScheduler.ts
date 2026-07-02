@@ -34,7 +34,8 @@ import {
 } from "@/features/scheduling/repositories/copilotRepository";
 import {
   insertSchedules,
-  insertScheduleAssignments,
+  assignUserToShift,
+  fetchStaffAvailabilityForWeek,
 } from "@/features/scheduling/repositories/schedulingRepository";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,6 +44,9 @@ export function useCopilotScheduler({
   weekEnd,
   location,
   existingShifts = [],
+  staffAvailability: staffAvailabilityInput,
+  timeOff: timeOffInput,
+  unavailability: unavailabilityInput,
   autoGenerate = false,
   onPublished,
 }: UseCopilotSchedulerOptions) {
@@ -70,6 +74,45 @@ export function useCopilotScheduler({
       ]);
 
       const employees = employeeRows.map(mapEmployeeRow);
+      const memberIds = employees.map((employee) => employee.profileId);
+      const weekStartIso = weekStart.toISOString();
+      const weekEndIso = weekEnd.toISOString();
+
+      let staffAvailability = staffAvailabilityInput ?? [];
+      let timeOff = timeOffInput ?? [];
+      let unavailability = unavailabilityInput ?? [];
+
+      if (!staffAvailabilityInput && memberIds.length > 0) {
+        staffAvailability = await fetchStaffAvailabilityForWeek({
+          memberIds,
+          startIso: weekStartIso,
+          endIso: weekEndIso,
+        });
+      }
+
+      if (!timeOffInput && memberIds.length > 0) {
+        const { data: timeOffRows, error: timeOffError } = await supabase
+          .from("time_off_requests")
+          .select("*")
+          .in("user_id", memberIds)
+          .lte("start_date", weekEndIso.split("T")[0])
+          .gte("end_date", weekStartIso.split("T")[0]);
+        if (timeOffError) throw timeOffError;
+        timeOff = (timeOffRows ?? []) as typeof timeOff;
+      }
+
+      if (!unavailabilityInput && memberIds.length > 0) {
+        const { data: unavailabilityRows, error: unavailabilityError } =
+          await supabase
+            .from("user_unavailability")
+            .select("*")
+            .in("user_id", memberIds)
+            .lte("start_time", weekEndIso)
+            .or(`end_time.gte.${weekStartIso},end_time.is.null`);
+        if (unavailabilityError) throw unavailabilityError;
+        unavailability = (unavailabilityRows ?? []) as typeof unavailability;
+      }
+
       const templates = templateRows
         .sort((a, b) => {
           if (a.day_of_week !== b.day_of_week)
@@ -93,6 +136,9 @@ export function useCopilotScheduler({
         forecastMap,
         existingHours: existing.totals,
         existingHoursByStore: existing.perStore,
+        staffAvailability,
+        timeOff,
+        unavailability,
       });
 
       const coverageGapActions = buildCoverageGapActions(
@@ -142,6 +188,9 @@ export function useCopilotScheduler({
     toast,
     weekEnd,
     weekStart,
+    staffAvailabilityInput,
+    timeOffInput,
+    unavailabilityInput,
   ]);
 
   useEffect(() => {
@@ -256,7 +305,15 @@ export function useCopilotScheduler({
       }) ?? [];
 
     if (assignmentRows.length > 0) {
-      await insertScheduleAssignments(assignmentRows);
+      for (const row of assignmentRows) {
+        if (!row.schedule_id || !row.user_id) continue;
+        await assignUserToShift(
+          row.schedule_id,
+          row.user_id,
+          row.status ?? "draft",
+          row.assigned_by ?? actorUserId,
+        );
+      }
     }
 
     toast({

@@ -48,7 +48,7 @@ export function useUserPermissionOverrides(userId: string | null) {
       if (!userId) return [];
 
       const { data, error } = await supabase
-        .from("userpermissions")
+        .from("user_permissions")
         .select("*")
         .eq("user_id", userId);
 
@@ -80,7 +80,7 @@ export function useUserEffectivePermissions(
           .select("permissions")
           .eq("id", roleId)
           .single(),
-        supabase.from("userpermissions").select("*").eq("user_id", userId),
+        supabase.from("user_permissions").select("*").eq("user_id", userId),
       ]);
 
       if (roleError) throw roleError;
@@ -137,7 +137,7 @@ export function useSaveUserPermissions() {
       permissions: Record<PermissionKey, PermissionValue>;
     }) => {
       const { data: existingData, error: existingError } = await supabase
-        .from("userpermissions")
+        .from("user_permissions")
         .select("permission_key, permission_value")
         .eq("user_id", userId);
 
@@ -171,7 +171,7 @@ export function useSaveUserPermissions() {
 
       if (overridesToPersist.length > 0) {
         const { error: upsertError } = await supabase
-          .from("userpermissions")
+          .from("user_permissions")
           .upsert(overridesToPersist, { onConflict: "user_id,permission_key" });
 
         if (upsertError) throw upsertError;
@@ -191,7 +191,7 @@ export function useSaveUserPermissions() {
 
       if (keysToDelete.length > 0) {
         const { error: deleteError } = await supabase
-          .from("userpermissions")
+          .from("user_permissions")
           .delete()
           .eq("user_id", userId)
           .in("permission_key", keysToDelete);
@@ -219,7 +219,7 @@ export function useSaveUserPermissions() {
         await logAuditEvent({
           targetUserId: userId,
           action: AUDIT_ACTIONS.permissionOverridesUpdated,
-          tableName: "userpermissions",
+          tableName: "user_permissions",
           recordId: userId,
           oldValues: Object.keys(previousNormalized).length
             ? previousNormalized

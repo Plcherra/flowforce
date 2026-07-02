@@ -3,11 +3,20 @@ import type {
   TimeOffWithUser,
   UnavailabilityWithUser,
 } from "@/features/scheduling/hooks/types";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import { evaluateShiftAssignment } from "@/features/scheduling/services/availability/evaluateShiftAssignment";
+import {
+  dateValue,
+  rangesOverlap,
+  TERMINAL_TIME_OFF_STATUSES,
+  dateOnlyEnd,
+  dateOnlyStart,
+} from "@/features/scheduling/utils/timeWindows";
 
 export type ScheduleConflict = {
   id: string;
   shiftId: string;
-  type: "time_off" | "unavailability" | "overlap";
+  type: "time_off" | "unavailability" | "overlap" | "availability";
   severity: "warning" | "blocking";
   message: string;
 };
@@ -24,36 +33,6 @@ export type ScheduleReadinessSummary = {
   missingRateCount: number;
   conflicts: ScheduleConflict[];
 };
-
-const terminalTimeOffStatuses = new Set(["rejected", "denied", "cancelled"]);
-
-function dateValue(value: string | null | undefined) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function dateOnlyStart(value: string | null | undefined) {
-  if (!value) return null;
-  const date = new Date(`${value.slice(0, 10)}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function dateOnlyEnd(value: string | null | undefined) {
-  if (!value) return null;
-  const date = new Date(`${value.slice(0, 10)}T23:59:59`);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function rangesOverlap(
-  leftStart: Date | null,
-  leftEnd: Date | null,
-  rightStart: Date | null,
-  rightEnd: Date | null,
-) {
-  if (!leftStart || !leftEnd || !rightStart || !rightEnd) return false;
-  return leftStart < rightEnd && leftEnd > rightStart;
-}
 
 function getShiftWindow(shift: ShiftWithAssignments) {
   return {
@@ -85,9 +64,11 @@ export function buildShiftConflictWarnings(params: {
   shifts: ShiftWithAssignments[];
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability?: StaffAvailabilityRow[];
   assignedUserIds?: string[];
 }): ScheduleConflict[] {
-  const { shift, shifts, timeOff, unavailability } = params;
+  const { shift, shifts, timeOff, unavailability, staffAvailability = [] } =
+    params;
   const assignedUserIds = params.assignedUserIds ?? getAssignedUserIds(shift);
   const assignedUserIdSet = new Set(assignedUserIds);
   const { start, end } = getShiftWindow(shift);
@@ -97,38 +78,64 @@ export function buildShiftConflictWarnings(params: {
     return conflicts;
   }
 
-  for (const request of timeOff) {
-    if (!request.user_id || !assignedUserIdSet.has(request.user_id)) continue;
-    const status = (request.status ?? "").toLowerCase();
-    if (terminalTimeOffStatuses.has(status)) continue;
-    const requestStart = dateOnlyStart(request.start_date);
-    const requestEnd = dateOnlyEnd(
-      request.end_date ?? request.start_date,
-    );
-    if (!rangesOverlap(start, end, requestStart, requestEnd)) continue;
+  if (staffAvailability.length > 0) {
+    for (const userId of assignedUserIds) {
+      const validation = evaluateShiftAssignment({
+        userId,
+        shiftStart: start,
+        shiftEnd: end,
+        staffAvailability,
+        timeOff,
+        unavailability,
+      });
 
-    conflicts.push({
-      id: `${shift.id}:time_off:${request.id}`,
-      shiftId: shift.id,
-      type: "time_off",
-      severity: status === "approved" ? "blocking" : "warning",
-      message: `Assigned teammate has ${status || "pending"} time off during this shift.`,
-    });
-  }
+      if (validation.severity === "ok") continue;
 
-  for (const entry of unavailability) {
-    if (!entry.user_id || !assignedUserIdSet.has(entry.user_id)) continue;
-    const unavailableStart = dateValue(entry.start_time);
-    const unavailableEnd = dateValue(entry.end_time);
-    if (!rangesOverlap(start, end, unavailableStart, unavailableEnd)) continue;
+      conflicts.push({
+        id: `${shift.id}:availability:${userId}`,
+        shiftId: shift.id,
+        type: "availability",
+        severity:
+          validation.severity === "blocking" ? "blocking" : "warning",
+        message:
+          validation.reasons.join(" ") ||
+          "Assigned teammate is unavailable for this shift.",
+      });
+    }
+  } else {
+    for (const request of timeOff) {
+      if (!request.user_id || !assignedUserIdSet.has(request.user_id)) continue;
+      const status = (request.status ?? "").toLowerCase();
+      if (TERMINAL_TIME_OFF_STATUSES.has(status)) continue;
+      const requestStart = dateOnlyStart(request.start_date);
+      const requestEnd = dateOnlyEnd(
+        request.end_date ?? request.start_date,
+      );
+      if (!rangesOverlap(start, end, requestStart, requestEnd)) continue;
 
-    conflicts.push({
-      id: `${shift.id}:unavailability:${entry.id}`,
-      shiftId: shift.id,
-      type: "unavailability",
-      severity: "blocking",
-      message: "Assigned teammate is unavailable during this shift.",
-    });
+      conflicts.push({
+        id: `${shift.id}:time_off:${request.id}`,
+        shiftId: shift.id,
+        type: "time_off",
+        severity: status === "approved" ? "blocking" : "warning",
+        message: `Assigned teammate has ${status || "pending"} time off during this shift.`,
+      });
+    }
+
+    for (const entry of unavailability) {
+      if (!entry.user_id || !assignedUserIdSet.has(entry.user_id)) continue;
+      const unavailableStart = dateValue(entry.start_time);
+      const unavailableEnd = dateValue(entry.end_time);
+      if (!rangesOverlap(start, end, unavailableStart, unavailableEnd)) continue;
+
+      conflicts.push({
+        id: `${shift.id}:unavailability:${entry.id}`,
+        shiftId: shift.id,
+        type: "unavailability",
+        severity: "blocking",
+        message: "Assigned teammate is unavailable during this shift.",
+      });
+    }
   }
 
   for (const otherShift of shifts) {
@@ -158,10 +165,17 @@ export function buildScheduleReadinessSummary(params: {
   shifts: ShiftWithAssignments[];
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability?: StaffAvailabilityRow[];
 }): ScheduleReadinessSummary {
-  const { shifts, timeOff, unavailability } = params;
+  const { shifts, timeOff, unavailability, staffAvailability = [] } = params;
   const conflicts = shifts.flatMap((shift) =>
-    buildShiftConflictWarnings({ shift, shifts, timeOff, unavailability }),
+    buildShiftConflictWarnings({
+      shift,
+      shifts,
+      timeOff,
+      unavailability,
+      staffAvailability,
+    }),
   );
   const uniqueConflictIds = new Set(conflicts.map((conflict) => conflict.id));
   const uniqueConflicts = conflicts.filter((conflict) => {

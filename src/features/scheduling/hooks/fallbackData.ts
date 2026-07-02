@@ -7,6 +7,7 @@ import type {
   UnavailabilityWithUser,
   VendorEventWithMetadata,
 } from "./types";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
 
 interface BuildFallbackParams {
   start?: string;
@@ -134,6 +135,7 @@ export interface SchedulingFallbackData {
   assignments: AssignmentWithUser[];
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability: StaffAvailabilityRow[];
   vendorEvents: VendorEventWithMetadata[];
 }
 
@@ -262,6 +264,7 @@ export function buildSchedulingFallbackData(
     assignments,
     timeOff,
     unavailability,
+    staffAvailability: [],
     vendorEvents,
   };
 }

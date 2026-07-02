@@ -490,8 +490,9 @@ export function AvailabilityRequestForm({
               Availability
             </CardTitle>
             <CardDescription>
-              Manage your weekly availability. Locked weeks require a manager
-              review.
+              Filled cells are hours you can work. Empty cells mean you are not
+              available unless a manager overrides. Locked weeks require a
+              manager review.
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">

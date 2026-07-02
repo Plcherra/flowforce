@@ -17,6 +17,7 @@ import type {
   VendorEventRow,
   ProfileSummary,
 } from "./types";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
 import {
   fetchSchedulingWeek,
   buildSchedulesWeekQueryKey,
@@ -32,6 +33,7 @@ interface SchedulingConsolidatedResult {
   assignments: AssignmentWithUser[];
   timeOffRequests: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability: StaffAvailabilityRow[];
   vendorEvents: VendorEventRow[];
   teamMembers: ProfileSummary[];
   loading: boolean;
@@ -58,6 +60,7 @@ const SCHEDULING_RESOURCE_NAMES = [
   "schedule_assignments",
   "time_off_requests",
   "user_unavailability",
+  "staff_availability",
   "vendor_event",
   "vendor_visits",
 ];
@@ -74,6 +77,9 @@ export function useSchedulingConsolidated(
   const [timeOffRequests, setTimeOffRequests] = useState<TimeOffWithUser[]>([]);
   const [unavailability, setUnavailability] = useState<
     UnavailabilityWithUser[]
+  >([]);
+  const [staffAvailability, setStaffAvailability] = useState<
+    StaffAvailabilityRow[]
   >([]);
   const [vendorEvents, setVendorEvents] = useState<VendorEventRow[]>([]);
   const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
@@ -142,6 +148,7 @@ export function useSchedulingConsolidated(
       setAssignments(payload.assignments);
       setTimeOffRequests(payload.timeOff);
       setUnavailability(payload.unavailability);
+      setStaffAvailability(payload.staffAvailability);
       setVendorEvents(payload.vendorEvents);
       setTeamMembers(payload.teamMembers);
       setIsUsingFallback(false);
@@ -187,6 +194,7 @@ export function useSchedulingConsolidated(
     setAssignments(fallback.assignments);
     setTimeOffRequests(fallback.timeOff);
     setUnavailability(fallback.unavailability);
+    setStaffAvailability(fallback.staffAvailability);
     setVendorEvents(fallback.vendorEvents);
     setTeamMembers(fallback.profiles);
     setIsUsingFallback(true);
@@ -211,8 +219,19 @@ export function useSchedulingConsolidated(
       try {
         ensureCompanyContext();
 
-        await assignUserToShift(shiftId, userId, status, user?.id ?? null);
+        const result = await assignUserToShift(
+          shiftId,
+          userId,
+          status,
+          user?.id ?? null,
+        );
         await refetchAll();
+        if (result.severity === "warning" && result.reasons?.length) {
+          toast({
+            title: "Assigned with warning",
+            description: result.reasons.join(" "),
+          });
+        }
         return true;
       } catch (err) {
         const message =
@@ -318,6 +337,7 @@ export function useSchedulingConsolidated(
     assignments,
     timeOffRequests,
     unavailability,
+    staffAvailability,
     vendorEvents,
     teamMembers,
     loading,

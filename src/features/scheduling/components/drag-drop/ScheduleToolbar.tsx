@@ -21,6 +21,8 @@ interface ScheduleToolbarProps {
   onPrintWeek: () => void;
   setMinimizedView: (value: boolean) => void;
   setShowDailyInfo: (value: boolean) => void;
+  showAvailabilityLayer?: boolean;
+  setShowAvailabilityLayer?: (value: boolean) => void;
   readOnly?: boolean;
   onOpenTimeOffPanel?: () => void;
 }
@@ -45,6 +47,8 @@ export function ScheduleToolbar({
   onPrintWeek,
   setMinimizedView,
   setShowDailyInfo,
+  showAvailabilityLayer = true,
+  setShowAvailabilityLayer,
   readOnly = false,
   onOpenTimeOffPanel,
 }: ScheduleToolbarProps) {
@@ -55,6 +59,8 @@ export function ScheduleToolbar({
       setMinimizedView={setMinimizedView}
       showDailyInfo={showDailyInfo}
       setShowDailyInfo={setShowDailyInfo}
+      showAvailabilityLayer={showAvailabilityLayer}
+      setShowAvailabilityLayer={setShowAvailabilityLayer}
       onToggleTemplates={onToggleTemplates}
       onOpenWeekTemplates={onOpenWeekTemplates}
       onCopyPreviousWeek={onCopyPreviousWeek}

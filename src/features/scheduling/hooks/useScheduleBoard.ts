@@ -8,7 +8,17 @@ import type {
   VendorEventWithMetadata,
   ProfileSummary,
 } from "./useSchedulingConsolidated";
+import { buildCellAvailabilityMap } from "@/features/scheduling/services/availability/scheduleAvailabilityEngine";
+import type { GridCellAvailability } from "@/types/platform";
 import { logger } from "@/utils/logger";
+import {
+  buildConflictByShiftId,
+  buildShiftsByDay,
+  buildShiftsByEmployeeDay,
+} from "@/features/scheduling/utils/gridIndexes";
+import {
+  calculateDailyGridStats,
+} from "@/features/scheduling/utils/hoursCalculation";
 
 interface LocationOption {
   id: string;
@@ -52,6 +62,7 @@ export function useScheduleBoard({
     assignments,
     timeOff: timeOffRequests,
     unavailability,
+    staffAvailability,
     vendorEvents,
     loading,
     refetchAll,
@@ -77,6 +88,7 @@ export function useScheduleBoard({
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [isLocationsLoading, setIsLocationsLoading] = useState(false);
+  const [showAvailabilityLayer, setShowAvailabilityLayer] = useState(true);
 
   const weekStart = useMemo(() => startOfWeek(selectedDate), [selectedDate]);
   const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart]);
@@ -276,48 +288,54 @@ export function useScheduleBoard({
     [formattedWeekEnd, formattedWeekStart, publishWeek],
   );
 
-  const disabledDates = useMemo(() => {
-    const map = new Map<string, Set<string>>();
+  const cellAvailability = useMemo(
+    () =>
+      buildCellAvailabilityMap({
+        employeeIds: employees.map((employee) => employee.id),
+        weekDays,
+        staffAvailability,
+        timeOff: timeOffRequests,
+        unavailability,
+      }),
+    [
+      employees,
+      weekDays,
+      staffAvailability,
+      timeOffRequests,
+      unavailability,
+    ],
+  );
 
-    weekDays.forEach((day) => {
-      const iso = day.toISOString().slice(0, 10);
+  const getCellAvailability = useCallback(
+    (employeeId: string, day: Date): GridCellAvailability | undefined =>
+      cellAvailability.get(employeeId)?.get(day.toISOString().slice(0, 10)),
+    [cellAvailability],
+  );
 
-      timeOffRequests.forEach((request) => {
-        if (!request.user_id) return;
-        const startSource =
-          request.start_date ?? request.start_time ?? request.created_at;
-        const endSource =
-          request.end_date ??
-          request.end_time ??
-          request.start_date ??
-          request.created_at;
-        if (!startSource || !endSource) return;
-        const start = new Date(startSource);
-        const end = new Date(endSource);
-        const within = day >= start && day <= end;
-        if (within) {
-          const set = map.get(request.user_id) ?? new Set<string>();
-          set.add(iso);
-          map.set(request.user_id, set);
-        }
-      });
+  const employeeIds = useMemo(
+    () => employees.map((employee) => employee.id),
+    [employees],
+  );
 
-      unavailability.forEach((entry) => {
-        if (!entry.user_id) return;
-        const start = entry.start_time ? new Date(entry.start_time) : null;
-        const end = entry.end_time ? new Date(entry.end_time) : null;
-        if (!start || !end) return;
-        const within = day >= start && day <= end;
-        if (within) {
-          const set = map.get(entry.user_id) ?? new Set<string>();
-          set.add(iso);
-          map.set(entry.user_id, set);
-        }
-      });
-    });
+  const shiftsByEmployeeDay = useMemo(
+    () => buildShiftsByEmployeeDay(weekSchedules, weekDays, employeeIds),
+    [weekSchedules, weekDays, employeeIds],
+  );
 
-    return map;
-  }, [timeOffRequests, unavailability, weekDays]);
+  const shiftsByDay = useMemo(
+    () => buildShiftsByDay(weekSchedules, weekDays),
+    [weekSchedules, weekDays],
+  );
+
+  const conflictByShiftId = useMemo(
+    () => buildConflictByShiftId(weekSchedules, cellAvailability),
+    [weekSchedules, cellAvailability],
+  );
+
+  const dailyGridStats = useMemo(
+    () => calculateDailyGridStats(weekSchedules, weekDays),
+    [weekSchedules, weekDays],
+  );
 
   const candidateVendorShifts = useMemo<ShiftWithAssignments[]>(() => {
     if (!pendingVendorEvent) return [];
@@ -378,7 +396,14 @@ export function useScheduleBoard({
     refreshLocations: fetchLocations,
     candidateVendorShifts,
     vendorEventsByShift,
-    disabledDates,
+    cellAvailability,
+    getCellAvailability,
+    shiftsByEmployeeDay,
+    shiftsByDay,
+    conflictByShiftId,
+    dailyGridStats,
+    showAvailabilityLayer,
+    setShowAvailabilityLayer,
     loading,
     actions: {
       createSchedule,

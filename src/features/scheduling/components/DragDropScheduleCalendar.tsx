@@ -1,6 +1,7 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
 import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
@@ -29,6 +30,7 @@ import {
   getVendorColor,
 } from "@/features/scheduling/constants/templates";
 import { useDragDropHandlers } from "@/features/scheduling/hooks/useDragDropHandlers";
+import { useShiftDragDrop } from "@/features/scheduling/hooks/useShiftDragDrop";
 import { useVendorForm } from "@/features/scheduling/hooks/useVendorForm";
 import {
   AddUnavailabilityDialog,
@@ -117,17 +119,25 @@ export function DragDropScheduleCalendar({
   const [toReason, setToReason] = useState("");
   const [minimizedView, setMinimizedView] = useState(false);
   const [showDailyInfo, setShowDailyInfo] = useState(true);
+  const gridScrollRef = useRef<HTMLDivElement>(null);
 
   const {
     employees,
     vendorEventsThisWeek,
     weekSchedules: boardWeekSchedules,
     weekDays,
+    weekStart,
     locations,
     candidateVendorShifts,
     unassignedShifts: boardUnassignedShifts,
     vendorEventsByShift,
-    disabledDates,
+    cellAvailability,
+    getCellAvailability,
+    shiftsByEmployeeDay: boardShiftsByEmployeeDay,
+    conflictByShiftId: boardConflictByShiftId,
+    dailyGridStats: boardDailyGridStats,
+    showAvailabilityLayer,
+    setShowAvailabilityLayer,
     weekCsvContent,
     weekCsvFilename,
     loading,
@@ -151,6 +161,8 @@ export function DragDropScheduleCalendar({
   const {
     createSchedule,
     assign,
+    updateSchedule,
+    unassign,
     createVendorEvent,
     addUnavailability: addUnavailabilityAction,
     requestTimeOff: requestTimeOffAction,
@@ -183,7 +195,23 @@ export function DragDropScheduleCalendar({
     setVendorModalOpen,
     setDraggedTemplate,
     setDraggedVendor,
+    getCellAvailability,
     locationFilter,
+  });
+
+  const {
+    sensors,
+    handleDragStart,
+    handleDragEnd,
+    dragOverlay,
+  } = useShiftDragDrop({
+    enabled: !readOnly,
+    updateSchedule,
+    assign,
+    unassign,
+    refetchAll,
+    getCellAvailability,
+    conflictByShiftId: boardConflictByShiftId,
   });
 
   const openShiftDetails = (scheduleId: string) => {
@@ -269,6 +297,8 @@ export function DragDropScheduleCalendar({
             onPrintWeek={() => window.print()}
             setMinimizedView={setMinimizedView}
             setShowDailyInfo={setShowDailyInfo}
+            showAvailabilityLayer={showAvailabilityLayer}
+            setShowAvailabilityLayer={setShowAvailabilityLayer}
             readOnly={readOnly}
             onOpenTimeOffPanel={
               onOpenPanel ? () => onOpenPanel("timeoff") : undefined
@@ -290,25 +320,41 @@ export function DragDropScheduleCalendar({
             />
           ) : null}
 
-          <div className="min-h-[60vh] flex-1 overflow-auto lg:min-h-[calc(100dvh-220px)]">
-            <WeekGrid
-              weekDays={weekDays}
-              employees={
-                readOnly && profileId
-                  ? employees.filter((e) => e.id === profileId)
-                  : employees
-              }
-              weekSchedules={weekSchedules}
-              unassignedShifts={unassignedShifts}
-              vendorEvents={readOnly ? [] : vendorEventsThisWeek}
-              vendorEventsByShift={readOnly ? new Map() : vendorEventsByShift}
-              disabledDates={disabledDates}
-              onShiftClick={openShiftDetails}
-              onDrop={readOnly ? undefined : handleBoardDrop}
-              onDragOver={readOnly ? undefined : handleDragOver}
-              getVendorLabel={getVendorLabel}
-              getVendorColor={getVendorColor}
-            />
+          <div
+            ref={gridScrollRef}
+            className="min-h-[60vh] flex-1 overflow-auto lg:min-h-[calc(100dvh-220px)]"
+          >
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <WeekGrid
+                weekDays={weekDays}
+                employees={
+                  readOnly && profileId
+                    ? employees.filter((e) => e.id === profileId)
+                    : employees
+                }
+                unassignedShifts={unassignedShifts}
+                vendorEvents={readOnly ? [] : vendorEventsThisWeek}
+                vendorEventsByShift={readOnly ? new Map() : vendorEventsByShift}
+                cellAvailability={cellAvailability}
+                shiftsByEmployeeDay={boardShiftsByEmployeeDay}
+                conflictByShiftId={boardConflictByShiftId}
+                dailyGridStats={boardDailyGridStats}
+                showAvailabilityLayer={showAvailabilityLayer}
+                showGridFooter={showDailyInfo}
+                enableShiftDrag={!readOnly}
+                scrollContainerRef={gridScrollRef}
+                onShiftClick={openShiftDetails}
+                onDrop={readOnly ? undefined : handleBoardDrop}
+                onDragOver={readOnly ? undefined : handleDragOver}
+                getVendorLabel={getVendorLabel}
+                getVendorColor={getVendorColor}
+              />
+              {dragOverlay}
+            </DndContext>
           </div>
         </div>
       </div>
@@ -318,6 +364,13 @@ export function DragDropScheduleCalendar({
         open={showWeekTemplates}
         onOpenChange={setShowWeekTemplates}
         selectedDate={selectedDate}
+        weekSchedules={boardWeekSchedules}
+        weekStart={weekStart}
+        bulkCreateShifts={bulkCreateShiftsAction}
+        assign={assign}
+        refetchAll={refetchAll}
+        clearWeek={clearCurrentWeekAction}
+        onApplied={refetchAll}
       />
 
       {/* Shift Details Sheet */}
@@ -524,8 +577,6 @@ export function DragDropScheduleCalendar({
         onFormChange={setVendorForm}
         onCreateVendorEvent={createVendorEvent}
       />
-
-      {/* Weekly summary footer removed; summary now in header */}
     </div>
   );
 }

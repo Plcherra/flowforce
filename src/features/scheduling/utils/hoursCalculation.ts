@@ -97,3 +97,79 @@ export function calculateCoveragePercentages(
     openPct,
   };
 }
+
+export interface DailyGridStats {
+  laborHours: number;
+  shiftCount: number;
+  filled: number;
+  partial: number;
+  open: number;
+  coverageRatio: number;
+}
+
+function shiftHours(shift: ShiftWithAssignments): number {
+  const start = shift.start_time ? new Date(shift.start_time) : null;
+  const end = shift.end_time ? new Date(shift.end_time) : null;
+  if (!start || !end) return 0;
+  const diffMs = end.getTime() - start.getTime();
+  if (Number.isNaN(diffMs) || diffMs <= 0) return 0;
+  return diffMs / 36e5;
+}
+
+function assignedCount(shift: ShiftWithAssignments): number {
+  return Array.isArray(shift.assignments) ? shift.assignments.length : 0;
+}
+
+/**
+ * Per-day labor hours and coverage stats for grid footer rows.
+ */
+export function calculateDailyGridStats(
+  shifts: ShiftWithAssignments[],
+  weekDays: Date[],
+): Map<string, DailyGridStats> {
+  const dayIso = (day: Date) => day.toISOString().slice(0, 10);
+  const stats = new Map<string, DailyGridStats>();
+
+  for (const day of weekDays) {
+    stats.set(dayIso(day), {
+      laborHours: 0,
+      shiftCount: 0,
+      filled: 0,
+      partial: 0,
+      open: 0,
+      coverageRatio: 1,
+    });
+  }
+
+  for (const shift of shifts) {
+    const start = shift.start_time ? new Date(shift.start_time) : null;
+    if (!start) continue;
+    const key = start.toISOString().slice(0, 10);
+    const entry = stats.get(key);
+    if (!entry) continue;
+
+    const hours = shiftHours(shift);
+    const headcount = shift.required_headcount ?? 1;
+    entry.laborHours += hours * headcount;
+    entry.shiftCount += 1;
+
+    const assigned = assignedCount(shift);
+    if (assigned >= headcount) {
+      entry.filled += 1;
+    } else if (assigned > 0) {
+      entry.partial += 1;
+    } else {
+      entry.open += 1;
+    }
+  }
+
+  for (const entry of stats.values()) {
+    const total = entry.filled + entry.partial + entry.open;
+    const weighted =
+      entry.filled + entry.partial * 0.5;
+    entry.coverageRatio = total > 0 ? weighted / total : 1;
+    entry.laborHours = Math.round(entry.laborHours * 10) / 10;
+  }
+
+  return stats;
+}

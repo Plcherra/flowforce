@@ -14,7 +14,65 @@ type SeedHandles = {
   shiftId: string;
   timeOffId: string;
   eventDate: string;
+  availabilityId?: string;
 };
+
+function isoWeekStart(date: dayjs.Dayjs) {
+  const day = date.day();
+  const diff = day === 0 ? -6 : 1 - day;
+  return date.add(diff, 'day').format('YYYY-MM-DD');
+}
+
+function dayOfWeekIndex(date: dayjs.Dayjs) {
+  const day = date.day();
+  return day === 0 ? 6 : day - 1;
+}
+
+async function seedStaffPartialAvailability(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+) {
+  const today = dayjs().startOf('day');
+  const availabilityId = `pw-avail-${today.valueOf()}`;
+  const weekStart = isoWeekStart(today);
+
+  await client.from('staff_availability').upsert({
+    id: availabilityId,
+    user_id: userId,
+    company_id: companyId,
+    day_of_week: dayOfWeekIndex(today),
+    start_time: '06:00',
+    end_time: '13:30',
+    week_start_date: weekStart,
+    is_preferred: true,
+  });
+
+  return { availabilityId, weekStart, dayIso: today.format('YYYY-MM-DD') };
+}
+
+async function seedStaffFullDayAvailability(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+) {
+  const today = dayjs().startOf('day');
+  const availabilityId = `pw-avail-full-${today.valueOf()}`;
+  const weekStart = isoWeekStart(today);
+
+  await client.from('staff_availability').upsert({
+    id: availabilityId,
+    user_id: userId,
+    company_id: companyId,
+    day_of_week: dayOfWeekIndex(today),
+    start_time: '06:00',
+    end_time: '21:00',
+    week_start_date: weekStart,
+    is_preferred: true,
+  });
+
+  return { availabilityId, weekStart, dayIso: today.format('YYYY-MM-DD') };
+}
 
 async function createSupabaseAdmin(): Promise<SupabaseClient> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -85,6 +143,9 @@ async function clearSchedulingFixtures(client: SupabaseClient, handles: SeedHand
     .eq('event_date', handles.eventDate);
   await client.from('time_off_requests').delete().eq('id', handles.timeOffId);
   await client.from('schedules').delete().eq('id', handles.shiftId);
+  if (handles.availabilityId) {
+    await client.from('staff_availability').delete().eq('id', handles.availabilityId);
+  }
 }
 
 async function login(page: Page, email: string, password: string) {
@@ -169,8 +230,16 @@ test.describe('Scheduling smoke (Playwright)', () => {
   });
 
   test('assigning an employee via shift details shows assignment chip', async ({ page }) => {
-    if (!seedHandles) return;
+    if (!adminClient || !seedHandles) return;
 
+    const availabilitySeed = await seedStaffFullDayAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+
+    await page.reload();
     await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
     await expect(page.getByTestId('shift-details-panel')).toBeVisible();
 
@@ -183,6 +252,69 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(
       page.getByTestId(`employee-assignment-${SCHEDULING_PW_TENANT.staffId}`),
     ).toBeVisible();
+  });
+
+  test('grid shows partial availability and blocks invalid template drop', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffPartialAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+
+    await page.reload();
+    await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
+    await expect(
+      page.getByTestId(
+        `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${availabilitySeed.dayIso}`,
+      ),
+    ).toBeVisible();
+    await expect(page.getByTestId('schedule-cell-availability-hint')).toContainText(
+      /1:30/i,
+    );
+
+    await toggleRoleTemplates(page);
+    const template = page.getByText('Barista Evening');
+    const targetCell = page.getByTestId(
+      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${availabilitySeed.dayIso}`,
+    );
+    await template.dragTo(targetCell);
+    await expect(page.getByText('Cannot assign shift')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('server blocks assign when staff has no availability for shift day', async ({
+    page,
+  }) => {
+    if (!seedHandles) return;
+
+    await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
+    await expect(page.getByTestId('shift-details-panel')).toBeVisible();
+
+    await page.getByTestId('employee-selector-add').click();
+    const staffOption = page.getByRole('option', { name: /Scheduling Staff/i });
+    await expect(staffOption).toBeVisible();
+    await staffOption.click();
+
+    await expect(page.getByText('Assignment error')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.getByTestId(`employee-assignment-${SCHEDULING_PW_TENANT.staffId}`),
+    ).not.toBeVisible();
+  });
+
+  test('grid footer shows labor hours and coverage per day', async ({ page }) => {
+    if (!seedHandles) return;
+
+    await expect(page.getByTestId('schedule-grid-footer')).toBeVisible();
+    const footerCell = page.getByTestId(
+      `schedule-grid-footer-${seedHandles.eventDate}`,
+    );
+    await expect(footerCell).toBeVisible();
+    await expect(footerCell).toContainText('h');
+    await expect(footerCell).toContainText('%');
   });
 
   test('linking vendor visit to shift surfaces vendor chip', async ({ page }) => {

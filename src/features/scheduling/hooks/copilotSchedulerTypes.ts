@@ -1,4 +1,9 @@
 import type { CoverageForecast } from "@/services/analytics/ForecastAPI";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import type {
+  TimeOffWithUser,
+  UnavailabilityWithUser,
+} from "@/features/scheduling/hooks/types";
 
 export type AvailabilityWindow = { start: string; end: string };
 export type AvailabilityMap = Record<string, AvailabilityWindow[]>;
@@ -83,6 +88,9 @@ export interface GeneratePlanInput {
   forecastMap: Map<string, CoverageForecast>;
   existingHours?: Map<string, number>;
   existingHoursByStore?: Map<string, Record<string, number>>;
+  staffAvailability: StaffAvailabilityRow[];
+  timeOff: TimeOffWithUser[];
+  unavailability: UnavailabilityWithUser[];
 }
 
 export interface GeneratePlanOutput {

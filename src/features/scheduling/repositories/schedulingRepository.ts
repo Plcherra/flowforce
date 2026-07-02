@@ -14,6 +14,12 @@ import type {
   VendorEventUpsertInput,
   VendorEventRow,
 } from "@/features/scheduling/hooks/types";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import type {
+  AssignScheduleValidationResult,
+  PublishWeekValidationResult,
+} from "@/features/scheduling/services/availability/evaluateShiftAssignment";
+import { isoWeekStartForDate } from "@/features/scheduling/utils/timeWindows";
 
 const jsonSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
@@ -110,6 +116,18 @@ const unavailabilityRowSchema = z
   })
   .passthrough();
 
+const staffAvailabilityRowSchema = z
+  .object({
+    id: z.string(),
+    user_id: z.string().nullable(),
+    day_of_week: z.number().nullable(),
+    start_time: z.string(),
+    end_time: z.string(),
+    week_start_date: z.string().nullable(),
+    is_preferred: z.boolean().nullable(),
+  })
+  .passthrough();
+
 // vendor_event is now a view based on vendor_visits
 // Schema: id, vendor_name, service_type, location, start_time, end_time, description, company_id
 const vendorEventRowSchema = z
@@ -130,8 +148,20 @@ export interface SchedulingWeekResult {
   assignments: AssignmentWithUser[];
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
+  staffAvailability: StaffAvailabilityRow[];
   vendorEvents: VendorEventRow[];
   teamMembers: ProfileSummary[];
+}
+
+function collectIsoWeekStarts(startIso: string, endIso: string) {
+  const weekStarts = new Set<string>();
+  const cursor = new Date(startIso);
+  const end = new Date(endIso);
+  while (cursor < end) {
+    weekStarts.add(isoWeekStartForDate(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return Array.from(weekStarts);
 }
 
 export function buildSchedulesWeekQueryKey(params: {
@@ -188,11 +218,13 @@ export async function fetchSchedulingWeek(params: {
     .eq("company_id", companyId)
     .gte("start_time", startIso)
     .lt("start_time", endIso);
+  const weekStartDates = collectIsoWeekStarts(startIso, endIso);
   const [
     { data: vendorEventRows, error: vendorError },
     assignmentsResponse,
     timeOffResponse,
     unavailabilityResponse,
+    staffAvailabilityResponse,
   ] = await Promise.all([
     vendorEventsQuery,
     schedules.length
@@ -227,12 +259,22 @@ export async function fetchSchedulingWeek(params: {
           .or(`end_time.gte.${startIso},end_time.is.null`) // Ending during/after the week, or no end time
           .order("start_time", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
+    memberIds.length && weekStartDates.length
+      ? supabase
+          .from("staff_availability")
+          .select(
+            "id, user_id, day_of_week, start_time, end_time, week_start_date, is_preferred",
+          )
+          .in("user_id", memberIds)
+          .in("week_start_date", weekStartDates)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
   if (vendorError) throw vendorError;
   if (assignmentsResponse.error) throw assignmentsResponse.error;
   if (timeOffResponse.error) throw timeOffResponse.error;
   if (unavailabilityResponse.error) throw unavailabilityResponse.error;
+  if (staffAvailabilityResponse.error) throw staffAvailabilityResponse.error;
 
   const assignmentRows = z
     .array(assignmentRowSchema)
@@ -279,11 +321,16 @@ export async function fetchSchedulingWeek(params: {
     .array(vendorEventRowSchema)
     .parse(vendorEventRows ?? []);
 
+  const staffAvailability = z
+    .array(staffAvailabilityRowSchema)
+    .parse(staffAvailabilityResponse.data ?? []) as StaffAvailabilityRow[];
+
   return {
     shifts: shiftWithAssignments,
     assignments: assignmentsWithUsers,
     timeOff: timeOffWithUsers,
     unavailability: unavailabilityWithUsers,
+    staffAvailability,
     vendorEvents,
     teamMembers: profiles.map(
       ({ id, first_name, last_name, email, avatar_url }) => ({
@@ -329,17 +376,63 @@ export async function assignUserToShift(
   userId: string,
   status: string = "assigned",
   assignedBy?: string | null,
-): Promise<boolean> {
-  const { error } = await supabase
-    .from("schedule_assignments")
-    .insert({
-      schedule_id: shiftId,
-      user_id: userId,
-      status,
-      assigned_by: assignedBy ?? null,
-    });
+): Promise<AssignScheduleValidationResult> {
+  const { data, error } = await supabase.rpc("assign_schedule_with_validation", {
+    p_schedule_id: shiftId,
+    p_user_id: userId,
+    p_status: status,
+    p_assigned_by: assignedBy ?? null,
+  });
   if (error) throw error;
-  return true;
+
+  const result = (data ?? {}) as AssignScheduleValidationResult;
+  if (!result.success) {
+    const reasons = Array.isArray(result.reasons)
+      ? result.reasons.join(" ")
+      : "Assignment blocked by availability rules.";
+    throw new Error(reasons);
+  }
+
+  return result;
+}
+
+export async function publishSchedulesWeekWithValidation(params: {
+  companyId: string;
+  weekStart: string;
+  weekEnd: string;
+  isPublished: boolean;
+}): Promise<PublishWeekValidationResult> {
+  const { data, error } = await supabase.rpc(
+    "publish_schedules_week_with_validation",
+    {
+      p_company_id: params.companyId,
+      p_week_start: params.weekStart,
+      p_week_end: params.weekEnd,
+      p_is_published: params.isPublished,
+    },
+  );
+  if (error) throw error;
+  return (data ?? { success: false }) as PublishWeekValidationResult;
+}
+
+export async function fetchStaffAvailabilityForWeek(params: {
+  memberIds: string[];
+  startIso: string;
+  endIso: string;
+}): Promise<StaffAvailabilityRow[]> {
+  const weekStartDates = collectIsoWeekStarts(params.startIso, params.endIso);
+  if (!params.memberIds.length || !weekStartDates.length) return [];
+
+  const { data, error } = await supabase
+    .from("staff_availability")
+    .select(
+      "id, user_id, day_of_week, start_time, end_time, week_start_date, is_preferred",
+    )
+    .in("user_id", params.memberIds)
+    .in("week_start_date", weekStartDates);
+
+  if (error) throw error;
+  return z.array(staffAvailabilityRowSchema).parse(data ?? []) as StaffAvailabilityRow[];
 }
 
 export async function unassignUserFromShift(

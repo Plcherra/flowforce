@@ -37,17 +37,19 @@ const initialiseEmployees = (
   };
 
   employees.forEach((employee) => {
-    const baselineHours = existingHours?.get(employee.id) ?? 0;
+    const baselineHours = existingHours?.get(employee.profileId) ?? 0;
     const baselineStoreHours = cloneHoursByStore(
-      existingHoursByStore?.get(employee.id),
+      existingHoursByStore?.get(employee.profileId),
     );
-    map.set(employee.id, {
+    map.set(employee.profileId, {
       employee,
       hours: baselineHours,
       hoursByStore: baselineStoreHours,
     });
-    summary.hoursByEmployee[employee.id] = baselineHours;
-    summary.hoursByStore[employee.id] = cloneHoursByStore(baselineStoreHours);
+    summary.hoursByEmployee[employee.profileId] = baselineHours;
+    summary.hoursByStore[employee.profileId] = cloneHoursByStore(
+      baselineStoreHours,
+    );
   });
 
   return { map, summary };
@@ -68,7 +70,11 @@ export function generateDraftSchedulePlan({
   forecastMap,
   existingHours,
   existingHoursByStore,
+  staffAvailability,
+  timeOff,
+  unavailability,
 }: GeneratePlanInput): GeneratePlanOutput {
+  const availabilityContext = { staffAvailability, timeOff, unavailability };
   const { map: employeeStateMap, summary } = initialiseEmployees(
     employees,
     existingHours,
@@ -104,11 +110,17 @@ export function generateDraftSchedulePlan({
 
     while (assignedCount < requiredSlots) {
       const eligible = Array.from(employeeStateMap.values()).filter((state) => {
-        if (usedIds.has(state.employee.id)) return false;
+        if (usedIds.has(state.employee.profileId)) return false;
         if (!employeeMatchesRole(state.employee, template.role)) return false;
         if (!hasCapacity(state, template.location, shiftHours)) return false;
         if (
-          !isEmployeeAvailable(state.employee, scheduleDate, startDate, endDate)
+          !isEmployeeAvailable(
+            state.employee.profileId,
+            scheduleDate,
+            startDate,
+            endDate,
+            availabilityContext,
+          )
         )
           return false;
         return true;
@@ -140,22 +152,22 @@ export function generateDraftSchedulePlan({
       const chosen = ordered[0];
       if (!chosen) break;
 
-      usedIds.add(chosen.employee.id);
+      usedIds.add(chosen.employee.profileId);
       chosen.hours += shiftHours;
       chosen.hoursByStore[template.location] =
         (chosen.hoursByStore[template.location] ?? 0) + shiftHours;
-      employeeStateMap.set(chosen.employee.id, chosen);
+      employeeStateMap.set(chosen.employee.profileId, chosen);
 
       summary.totalHours += shiftHours;
-      summary.hoursByEmployee[chosen.employee.id] = chosen.hours;
-      summary.hoursByStore[chosen.employee.id] = cloneHoursByStore(
+      summary.hoursByEmployee[chosen.employee.profileId] = chosen.hours;
+      summary.hoursByStore[chosen.employee.profileId] = cloneHoursByStore(
         chosen.hoursByStore,
       );
 
       if (isSupervisorRole(template.role))
         recordSupervisorAssignment(
           supervisorLedger,
-          chosen.employee.id,
+          chosen.employee.profileId,
           template.location,
         );
 
@@ -164,7 +176,7 @@ export function generateDraftSchedulePlan({
         dedupeKey: buildDedupeKey(
           template.id,
           scheduleDateIso,
-          chosen.employee.id,
+          chosen.employee.profileId,
           assignedCount,
         ),
         templateId: template.id,
@@ -173,7 +185,7 @@ export function generateDraftSchedulePlan({
         end: endDate.toISOString(),
         location: template.location,
         role: template.role,
-        employeeId: chosen.employee.id,
+        employeeId: chosen.employee.profileId,
         employeeName: chosen.employee.displayName ?? null,
         hours: shiftHours,
         status: "draft",
@@ -216,25 +228,26 @@ export function generateDraftSchedulePlan({
             return false;
           if (
             !isEmployeeAvailable(
-              state.employee,
+              state.employee.profileId,
               scheduleDate,
               startDate,
               endDate,
+              availabilityContext,
             )
           )
             return false;
-          return state.employee.id !== donor?.employeeId;
+          return state.employee.profileId !== donor?.employeeId;
         },
       );
 
       if (donor && crossStoreCandidate) {
         swapSuggestions.push({
-          id: `swap::${template.id}::${scheduleDateIso}::${donor.employeeId}:${crossStoreCandidate.employee.id}`,
+          id: `swap::${template.id}::${scheduleDateIso}::${donor.employeeId}:${crossStoreCandidate.employee.profileId}`,
           templateId: template.id,
           scheduleDate: scheduleDateIso,
           role: template.role,
           fromEmployeeId: donor.employeeId!,
-          toEmployeeId: crossStoreCandidate.employee.id,
+          toEmployeeId: crossStoreCandidate.employee.profileId,
           fromLocation: donor.location,
           toLocation: template.location,
           reason: `Swap ${crossStoreCandidate.employee.displayName ?? "employee"} from ${donor.location} to ${

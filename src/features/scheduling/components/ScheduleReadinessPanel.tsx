@@ -369,6 +369,7 @@ function ManagerReadinessPanel({
     shifts,
     timeOff,
     unavailability,
+    staffAvailability,
     loading,
     isFallbackData,
     error,
@@ -382,6 +383,7 @@ function ManagerReadinessPanel({
     shifts: filteredShifts,
     timeOff,
     unavailability,
+    staffAvailability,
   });
 
   const openItems =

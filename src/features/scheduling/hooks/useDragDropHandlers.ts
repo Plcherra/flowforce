@@ -8,12 +8,18 @@ import { useToast } from "@/hooks/use-toast";
 import type { ShiftTemplate } from "@/features/scheduling/components/drag-drop/types";
 import type { VendorPaletteItem } from "@/features/scheduling/components/drag-drop/types";
 import type { PendingVendorEvent } from "@/features/scheduling/components/drag-drop/types";
+import type { GridCellAvailability } from "@/types/platform";
+import { evaluateAssignment } from "@/features/scheduling/services/availability/scheduleAvailabilityEngine";
 
 interface UseDragDropHandlersProps {
   draggedTemplate: ShiftTemplate | null;
   draggedVendor: VendorPaletteItem | null;
   setDraggedTemplate: (template: ShiftTemplate | null) => void;
   setDraggedVendor: (vendor: VendorPaletteItem | null) => void;
+  getCellAvailability?: (
+    employeeId: string,
+    day: Date,
+  ) => GridCellAvailability | undefined;
   createSchedule: (payload: {
     title: string;
     role: string | null;
@@ -56,6 +62,7 @@ export function useDragDropHandlers({
   setVendorModalOpen,
   setDraggedTemplate,
   setDraggedVendor,
+  getCellAvailability,
   locationFilter,
 }: UseDragDropHandlersProps) {
   const { toast } = useToast();
@@ -100,6 +107,32 @@ export function useDragDropHandlers({
         startTime.setHours(startHour, 0, 0, 0);
         const endTime = new Date(day);
         endTime.setHours(endHour, 0, 0, 0);
+
+        const cell = getCellAvailability?.(userId, day);
+        if (cell) {
+          const validation = evaluateAssignment({
+            shiftStart: startTime,
+            shiftEnd: endTime,
+            cell,
+          });
+          if (validation.severity === "blocking") {
+            toast({
+              title: "Cannot assign shift",
+              description:
+                validation.reasons[0] ?? "Employee is unavailable for this shift.",
+              variant: "destructive",
+            });
+            setDraggedTemplate(null);
+            return;
+          }
+          if (validation.severity === "warning") {
+            toast({
+              title: "Assigned with warning",
+              description:
+                validation.reasons[0] ?? "Employee has a scheduling conflict.",
+            });
+          }
+        }
 
         try {
           const newSchedule = await createSchedule({
@@ -173,6 +206,7 @@ export function useDragDropHandlers({
       createSchedule,
       draggedTemplate,
       draggedVendor,
+      getCellAvailability,
       locationFilter,
       refetchAll,
       setDraggedTemplate,

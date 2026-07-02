@@ -4,6 +4,7 @@
 
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { publishSchedulesWeekWithValidation } from "@/features/scheduling/repositories/schedulingRepository";
 import { useToast } from "@/hooks/use-toast";
 import { prepareShiftCopies } from "../utils/weekHelpers";
 import type { ShiftInsertPayload } from "../types/mutations";
@@ -143,13 +144,24 @@ export function useWeekMutations({
 
       try {
         ensureCompanyContext();
-        const { error: updateError } = await supabase
-          .from("schedules")
-          .update({ is_published: params.isPublished })
-          .eq("company_id", companyId)
-          .gte("start_time", params.weekStart)
-          .lt("start_time", params.weekEnd);
-        if (updateError) throw updateError;
+        const result = await publishSchedulesWeekWithValidation({
+          companyId: companyId!,
+          weekStart: params.weekStart,
+          weekEnd: params.weekEnd,
+          isPublished: params.isPublished,
+        });
+        if (!result.success) {
+          const blockingCount = result.blocking_count ?? 0;
+          toast({
+            title: "Publish blocked",
+            description:
+              blockingCount > 0
+                ? `${blockingCount} assignment${blockingCount === 1 ? "" : "s"} conflict with staff availability. Fix conflicts in the readiness panel.`
+                : "Unable to publish this week.",
+            variant: "destructive",
+          });
+          return false;
+        }
         await refetchAll();
         toast({
           title: params.isPublished ? "Week published" : "Week unpublished",

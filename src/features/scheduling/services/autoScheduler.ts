@@ -10,9 +10,16 @@ import {
 import type { Tables } from "@/integrations/supabase/public-types";
 import {
   insertSchedules,
-  insertScheduleAssignments,
+  assignUserToShift,
   deleteCopilotDrafts,
+  fetchStaffAvailabilityForWeek,
 } from "@/features/scheduling/repositories/schedulingRepository";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import {
+  minutesToHHmm,
+  parseTimeToMinutes,
+  isoWeekStartForDate,
+} from "@/features/scheduling/utils/timeWindows";
 import {
   listCompanyEmployees,
   listCoverageTemplates,
@@ -185,6 +192,40 @@ const parseWeekdayKey = (value: string): number | null => {
   return null;
 };
 
+const buildAvailabilityFromStaffRows = (
+  profileId: string,
+  weekStartDate: string,
+  rows: StaffAvailabilityRow[],
+): CopilotEmployeeSeed["availability"] => {
+  const entries: CopilotEmployeeSeed["availability"] = [];
+  const byDay = new Map<number, { start: string; end: string }[]>();
+
+  rows
+    .filter(
+      (row) =>
+        row.user_id === profileId && row.week_start_date === weekStartDate,
+    )
+    .forEach((row) => {
+      if (row.day_of_week == null) return;
+      const engineWeekday = (row.day_of_week + 1) % 7;
+      const ranges = byDay.get(engineWeekday) ?? [];
+      const start = minutesToHHmm(parseTimeToMinutes(row.start_time));
+      const end = minutesToHHmm(parseTimeToMinutes(row.end_time));
+      if (parseTimeToMinutes(end) > parseTimeToMinutes(start)) {
+        ranges.push({ start, end });
+        byDay.set(engineWeekday, ranges);
+      }
+    });
+
+  byDay.forEach((ranges, weekday) => {
+    if (ranges.length > 0) {
+      entries.push({ weekday, ranges });
+    }
+  });
+
+  return entries;
+};
+
 const buildAvailability = (
   raw: unknown,
 ): CopilotEmployeeSeed["availability"] => {
@@ -220,6 +261,7 @@ const buildAvailability = (
 async function buildRuleSetFromDatabase(
   companyId: string,
   locationId: string,
+  weekStart: Date | string,
 ): Promise<LocationRuleSet> {
   const templateRows = await listCoverageTemplates(companyId, locationId);
   if (templateRows.length === 0) {
@@ -232,6 +274,19 @@ async function buildRuleSetFromDatabase(
       "Add employees to Copilot before running the auto-scheduler.",
     );
   }
+
+  const weekStartDate = isoWeekStartForDate(
+    typeof weekStart === "string" ? new Date(weekStart) : weekStart,
+  );
+  const weekEndDate = formatISO(addDays(new Date(`${weekStartDate}T00:00:00`), 7), {
+    representation: "complete",
+  });
+  const memberIds = employeeRows.map((row) => row.profile_id);
+  const staffAvailabilityRows = await fetchStaffAvailabilityForWeek({
+    memberIds,
+    startIso: `${weekStartDate}T00:00:00.000Z`,
+    endIso: weekEndDate,
+  });
 
   const coverageTemplates: Record<Weekday, CoverageSlotTemplate[]> = {
     Mon: [],
@@ -299,7 +354,11 @@ async function buildRuleSetFromDatabase(
       area: resolveArea(metadata, row.role),
       roles: [row.role, ...secondaryRoles],
       qualificationIds: [row.role, ...secondaryRoles],
-      availability: buildAvailability(row.availability),
+      availability: buildAvailabilityFromStaffRows(
+        row.profile_id,
+        weekStartDate,
+        staffAvailabilityRows,
+      ),
       maxHoursWeek: row.weekly_max_hours ?? DEFAULT_COMPLIANCE.maxHoursPerWeek,
       preferredDaysOff: Array.isArray(preferredDays)
         ? preferredDays
@@ -647,7 +706,11 @@ export async function runCopilotAutoSchedule(
   companyId: string,
   params: AutoScheduleParams,
 ): Promise<AutoScheduleResult> {
-  const ruleset = await buildRuleSetFromDatabase(companyId, params.locationId);
+  const ruleset = await buildRuleSetFromDatabase(
+    companyId,
+    params.locationId,
+    params.weekStart,
+  );
 
   const weekStart = normaliseWeekStart(params.weekStart, ruleset.timezone);
   const weekStartIso = formatISO(weekStart, { representation: "complete" });
@@ -758,7 +821,15 @@ export async function runCopilotAutoSchedule(
   });
 
   if (assignmentRows.length > 0) {
-    await insertScheduleAssignments(assignmentRows);
+    for (const row of assignmentRows) {
+      if (!row.schedule_id || !row.user_id) continue;
+      await assignUserToShift(
+        row.schedule_id,
+        row.user_id,
+        row.status ?? "draft",
+        row.assigned_by ?? userId,
+      );
+    }
   }
 
   return {

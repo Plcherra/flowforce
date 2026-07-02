@@ -152,3 +152,26 @@ export type ApiResult<TData = unknown, TError extends AppError = AppError> =
   | ApiSuccess<TData>
   | ApiFailure<TError>;
 
+export type AvailabilityBlockerKind =
+  | "pto"
+  | "unavailability"
+  | "outside_preference";
+
+export type GridCellAvailability = {
+  status: "available" | "partial" | "blocked";
+  windows: { start: string; end: string }[];
+  blockers: {
+    kind: AvailabilityBlockerKind;
+    label: string;
+    severity: "warning" | "blocking";
+  }[];
+  canAssign: boolean;
+  hint?: string;
+};
+
+export type AssignmentValidationResult = {
+  allowed: boolean;
+  severity: "ok" | "warning" | "blocking";
+  reasons: string[];
+};
+

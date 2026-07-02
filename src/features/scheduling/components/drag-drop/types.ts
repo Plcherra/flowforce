@@ -1,4 +1,6 @@
 import type { Tables } from "@/integrations/supabase/public-types";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import type { GridCellAvailability } from "@/types/platform";
 import type {
   AssignmentWithUser,
   ShiftWithAssignments,
@@ -62,7 +64,9 @@ export interface DragDropDerivedData {
   schedules: ShiftWithAssignments[];
   assignments: AssignmentWithUser[];
   timeOffRequests: TimeOffWithUser[];
-  staffAvailability: UnavailabilityWithUser[];
+  staffPreferenceRows: StaffAvailabilityRow[];
+  unavailability: UnavailabilityWithUser[];
+  cellAvailability: Map<string, Map<string, GridCellAvailability>>;
   vendorEvents: VendorEventWithMetadata[];
 }
 

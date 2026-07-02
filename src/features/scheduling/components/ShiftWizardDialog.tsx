@@ -125,6 +125,7 @@ export function ShiftWizardDialog({
     weekRange,
     timeOff,
     unavailability,
+    staffAvailability,
     isFallbackData,
     refetchAll,
     mutations: { createSchedule, assign },
@@ -237,6 +238,7 @@ export function ShiftWizardDialog({
         shifts,
         timeOff,
         unavailability,
+        staffAvailability,
         assignedUserIds: formData.assignedusers,
       }),
     [
@@ -245,6 +247,7 @@ export function ShiftWizardDialog({
       shifts,
       timeOff,
       unavailability,
+      staffAvailability,
     ],
   );
 

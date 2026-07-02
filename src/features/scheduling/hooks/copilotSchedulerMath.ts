@@ -1,5 +1,11 @@
 import { differenceInMinutes } from "date-fns";
+import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import type {
+  TimeOffWithUser,
+  UnavailabilityWithUser,
+} from "@/features/scheduling/hooks/types";
 import type { SchedulerEmployee } from "@/features/scheduling/hooks/copilotSchedulerTypes";
+import { evaluateShiftAssignment } from "@/features/scheduling/services/availability/evaluateShiftAssignment";
 
 export const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 export const MAX_STORE_WEEKLY_HOURS = 38;
@@ -70,24 +76,24 @@ export const getShiftHours = (start: Date, end: Date) => {
 };
 
 export const isEmployeeAvailable = (
-  employee: SchedulerEmployee,
+  employeeId: string,
   scheduleDate: Date,
   start: Date,
   end: Date,
-) => {
-  const dayKey = DAY_KEYS[scheduleDate.getDay()];
-  const windows = employee.availability?.[dayKey] ?? [];
-  if (windows.length === 0) return true;
-
-  const startMinutes = start.getHours() * 60 + start.getMinutes();
-  const endMinutes = end.getHours() * 60 + end.getMinutes();
-
-  return windows.some((window) => {
-    const windowStart = timeStringToMinutes(window.start);
-    const windowEnd = timeStringToMinutes(window.end);
-    return startMinutes >= windowStart && endMinutes <= windowEnd;
-  });
-};
+  context: {
+    staffAvailability: StaffAvailabilityRow[];
+    timeOff: TimeOffWithUser[];
+    unavailability: UnavailabilityWithUser[];
+  },
+) =>
+  evaluateShiftAssignment({
+    userId: employeeId,
+    shiftStart: start,
+    shiftEnd: end,
+    staffAvailability: context.staffAvailability,
+    timeOff: context.timeOff,
+    unavailability: context.unavailability,
+  }).allowed;
 
 export const hasCapacity = (
   state: EmployeeState,
