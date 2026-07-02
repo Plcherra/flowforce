@@ -1,6 +1,7 @@
 # FlowForce Scheduling - Remaining Gaps & Follow-up Plan
 
 **Status**: Cleanup Phases 1–4 complete. Beta hardening Phases A–D implemented 2026-07-02.  
+**Audit**: 88 / 100 — [scheduling-connectteam-audit-2026-07.md](./scheduling-connectteam-audit-2026-07.md) (2026-07-02)  
 **Goal**: Close remaining gaps before wider beta launch.
 
 ## Remaining Items
@@ -62,8 +63,10 @@ Use this before wider beta. Check each item in order.
 - [ ] `npx playwright install chromium` if browsers missing
 
 ### Automated gates
-- [ ] `npm run check:scheduling-workflow` passes
-- [ ] `PLAYWRIGHT_SMOKE=1 npm run test:playwright -- tests/playwright/scheduling-smoke.spec.ts` passes
+- [x] `npm run check:scheduling-workflow` passes
+- [x] `PLAYWRIGHT_SMOKE=1 npm run test:playwright -- tests/playwright/scheduling-smoke.spec.ts` passes (CI release-gates)
+- [x] `npm run test:scheduling-availability` passes (CI release-gates)
+- [x] `npm run test:scheduling-grid` passes (CI release-gates)
 - [ ] `npm run test:playwright` passes (or only expected skips without unrelated suite creds)
 
 ### Cleanup Phases 1–4 (product)
@@ -96,21 +99,24 @@ Use this before wider beta. Check each item in order.
 - [ ] **Week templates** menu opens dialog; save/load round-trip works (Phase 3 + Phase 4 E2E)
 
 ### Playwright test coverage (scheduling-smoke.spec.ts)
-- [ ] Seeded shift visible on manager board
-- [ ] Time off panel opens via `?panel=timeoff`
-- [ ] Employee assignment via shift details
-- [ ] Partial availability + blocked template drop
-- [ ] Server blocks assign on off-day
-- [ ] Pending PTO assign warning + assignment chip
-- [ ] Publish week blocked on availability violation
-- [ ] Readiness panel availability conflicts
-- [ ] Shift drag happy path + blocked off-day drag
-- [ ] Week template save/clear/load round-trip
-- [ ] Virtualized grid (55 employees) scroll smoke
-- [ ] Grid footer labor/coverage
-- [ ] Vendor visit linked to shift shows chip
-- [ ] Staff **My Schedule** view without Actions/Smart Fill
-- [ ] Legacy redirect routes (3 tests)
+- [x] Seeded shift visible on manager board
+- [x] Time off panel opens via `?panel=timeoff`
+- [x] Employee assignment via shift details
+- [x] Partial availability + blocked template drop
+- [x] Server blocks assign on off-day
+- [x] Pending PTO assign warning + assignment chip
+- [x] Approved PTO blocked cell overlay + server assign block
+- [x] Publish week blocked on availability violation
+- [x] Readiness panel availability conflicts
+- [x] Shift drag happy path + blocked off-day drag
+- [x] Week template save/clear/load round-trip
+- [x] Virtualized grid (55 employees) scroll smoke
+- [x] Grid footer labor/coverage
+- [x] Vendor visit linked to shift shows chip
+- [x] Staff **My Schedule** view without Actions/Smart Fill
+- [x] Staff availability hour grid copy + cell toggle
+- [x] Availability layer toggle hides/restores overlay
+- [x] Legacy redirect routes (3 tests)
 
 ### Credentials (defaults after self-seed)
 - Manager: `scheduling-pw-manager@example.test` / `Password123!`

@@ -157,6 +157,8 @@
 
 **Status**: Completed (2026-07-02)
 
+**Audit score**: **88 / 100** — see [scheduling-connectteam-audit-2026-07.md](./scheduling-connectteam-audit-2026-07.md) (2026-07-02)
+
 - [x] Phase 2 verification closed (SQL + unit + Playwright)
 - [x] Shift drag E2E (`dndKitDrag` helper, happy + blocked paths)
 - [x] Week template save → clear → load round-trip E2E
@@ -216,24 +218,24 @@
 
 ### Engine (Phase 0)
 
-- [ ] `npm run test -- scheduleAvailabilityEngine` passes
-- [ ] Monday with no preference rows → `status: blocked`
-- [ ] Tuesday preference 06:00–13:30 → `hint: "Until 1:30p"`, partial status
-- [ ] Approved PTO → full-day block; pending PTO → warning, assign allowed
+- [x] `npm run test -- scheduleAvailabilityEngine` passes (via `test:scheduling-availability`)
+- [x] Monday with no preference rows → `status: blocked` (engine unit tests)
+- [x] Tuesday preference 06:00–13:30 → `hint: "Until 1:30p"`, partial status (engine + Playwright)
+- [x] Approved PTO → full-day block; pending PTO → warning, assign allowed (engine + Playwright)
 
 ### Grid (Phase 1)
 
-- [ ] Open Schedule as manager; availability legend visible above grid
-- [ ] Employee with Mon off shows red hatch + "Off"
-- [ ] Employee with partial day shows "Until X" label
-- [ ] Pending PTO shows amber border + "PTO pending"
-- [ ] Dropping a shift template past availability window shows toast and blocks drop
-- [ ] Staff availability panel save refreshes manager grid
+- [x] Open Schedule as manager; availability legend visible above grid (Playwright)
+- [x] Employee with Mon off shows red hatch + "Off" (engine; grid blocked overlay)
+- [x] Employee with partial day shows "Until X" label (Playwright)
+- [x] Pending PTO shows amber border + "PTO pending" (Playwright pending PTO test)
+- [x] Dropping a shift template past availability window shows toast and blocks drop (Playwright)
+- [ ] Staff availability panel save refreshes manager grid (manual cross-session check)
 
 ### Staff (unchanged)
 
-- [ ] Staff hour grid still works (Mon–Sun × 6am–9pm toggles)
-- [ ] Copy: filled = can work; empty = not available unless manager overrides
+- [x] Staff hour grid still works (Mon–Sun × 6am–9pm toggles) (Playwright staff panel)
+- [x] Copy: filled = can work; empty = not available unless manager overrides (Playwright)
 
 ---
 

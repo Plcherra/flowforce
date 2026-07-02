@@ -49,6 +49,7 @@ jobs:
           java-version: "21"
 
       - name: Install dependencies
+        # Pin npm 10.x locally: npx npm@10.9.8 ci — prevents lockfile drift (e.g. yaml@2.9.0)
         run: npm ci
 
       - name: Architecture contract

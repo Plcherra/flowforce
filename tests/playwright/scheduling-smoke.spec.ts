@@ -17,6 +17,7 @@ type SeedHandles = {
   eventDate: string;
   availabilityId?: string;
   pendingTimeOffId?: string;
+  approvedStaffPtoId?: string;
   weekTemplateId?: string;
   virtualEmployeeIds?: string[];
 };
@@ -120,6 +121,26 @@ async function seedStaffPendingPto(
     reason: 'Playwright pending PTO seed',
   });
   return pendingTimeOffId;
+}
+
+async function seedStaffApprovedPto(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+  eventDate: string,
+) {
+  const approvedStaffPtoId = `pw-approved-pto-${Date.now()}`;
+  await client.from('time_off_requests').upsert({
+    id: approvedStaffPtoId,
+    user_id: userId,
+    company_id: companyId,
+    start_date: eventDate,
+    end_date: eventDate,
+    status: 'approved',
+    type: 'pto',
+    reason: 'Playwright approved PTO seed',
+  });
+  return approvedStaffPtoId;
 }
 
 async function seedViolatingAssignment(
@@ -249,6 +270,9 @@ async function clearSchedulingFixtures(client: SupabaseClient, handles: SeedHand
   }
   if (handles.pendingTimeOffId) {
     await client.from('time_off_requests').delete().eq('id', handles.pendingTimeOffId);
+  }
+  if (handles.approvedStaffPtoId) {
+    await client.from('time_off_requests').delete().eq('id', handles.approvedStaffPtoId);
   }
   if (handles.weekTemplateId) {
     await client.from('week_templates').delete().eq('id', handles.weekTemplateId);
@@ -477,6 +501,108 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByTestId(`schedule-shift-${staffSeed.shiftId}`)).toBeVisible();
 
     await clearSchedulingFixtures(adminClient, staffSeed);
+  });
+
+  test('staff availability panel shows hour grid copy and toggles a cell', async ({
+    page,
+  }) => {
+    if (!adminClient) return;
+
+    await page.context().clearCookies();
+    await login(page, SCHEDULING_PW_TENANT.staffEmail, SCHEDULING_PW_TENANT.password);
+    await page.goto('/app/enhanced-scheduling?panel=availability');
+    await expect(page.getByRole('heading', { name: /Availability/i })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.getByText(/Filled cells are hours you can work/i),
+    ).toBeVisible();
+    await expect(page.getByRole('table')).toBeVisible();
+
+    const firstHourCell = page.locator('tbody button:not([disabled])').first();
+    await expect(firstHourCell).toBeVisible();
+    await firstHourCell.click();
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+  });
+
+  test('approved PTO shows blocked cell overlay on manager grid', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffFullDayAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+    seedHandles.approvedStaffPtoId = await seedStaffApprovedPto(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+      seedHandles.eventDate,
+    );
+
+    await page.reload();
+    const staffCell = page.getByTestId(
+      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${seedHandles.eventDate}`,
+    );
+    await expect(staffCell.getByTestId('schedule-cell-blocked')).toBeVisible();
+    await expect(staffCell.getByTestId('schedule-cell-blocked')).toContainText('PTO');
+  });
+
+  test('server blocks assign when staff has approved PTO', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffFullDayAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+    seedHandles.approvedStaffPtoId = await seedStaffApprovedPto(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+      seedHandles.eventDate,
+    );
+
+    await page.reload();
+    await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
+    await expect(page.getByTestId('shift-details-panel')).toBeVisible();
+
+    await page.getByTestId('employee-selector-add').click();
+    await page.getByRole('option', { name: /Scheduling Staff/i }).click();
+
+    await expect(page.getByText('Assignment error')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.getByTestId(`employee-assignment-${SCHEDULING_PW_TENANT.staffId}`),
+    ).not.toBeVisible();
+  });
+
+  test('availability layer toggle hides and restores grid overlay', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffPartialAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+
+    await page.reload();
+    await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
+
+    await page.getByRole('button', { name: 'View options' }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Show availability layer' }).click();
+    await expect(page.getByTestId('schedule-availability-legend')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'View options' }).click();
+    await page.getByRole('menuitemcheckbox', { name: 'Show availability layer' }).click();
+    await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
+    await expect(page.getByTestId('schedule-cell-availability-hint')).toContainText(
+      /1:30/i,
+    );
   });
 
   test('pending PTO assign returns warning and still inserts assignment', async ({
