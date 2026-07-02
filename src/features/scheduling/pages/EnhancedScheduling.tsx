@@ -14,7 +14,7 @@ export default function EnhancedScheduling() {
     <ErrorBoundary fallbackRender={SchedulingErrorFallback}>
       <SchedulingProvider>
         <div>
-          <div className={isMobile ? "p-2" : "p-6"}>
+          <div className={isMobile ? "p-2" : "p-0"}>
             <NextGenSchedulingSystem locationFilter={locationFilter} />
           </div>
         </div>

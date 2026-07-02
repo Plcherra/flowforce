@@ -2,12 +2,9 @@ import { CalendarToolbar } from "../calendar/CalendarToolbar";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 interface ScheduleToolbarProps {
-  weekStart: Date;
-  selectedDate: Date;
   weekSchedules: ShiftWithAssignments[];
   minimizedView: boolean;
   showDailyInfo: boolean;
-  onDateChange: (date: Date) => void;
   onToggleTemplates: () => void;
   onOpenWeekTemplates: () => void;
   onCopyPreviousWeek: () => void;
@@ -29,12 +26,9 @@ interface ScheduleToolbarProps {
 }
 
 export function ScheduleToolbar({
-  weekStart,
-  selectedDate,
   weekSchedules,
   minimizedView,
   showDailyInfo,
-  onDateChange,
   onToggleTemplates,
   onOpenWeekTemplates,
   onCopyPreviousWeek,
@@ -56,9 +50,6 @@ export function ScheduleToolbar({
 }: ScheduleToolbarProps) {
   return (
     <CalendarToolbar
-      weekStart={weekStart}
-      selectedDate={selectedDate}
-      onDateChange={onDateChange}
       weekSchedules={weekSchedules}
       minimizedView={minimizedView}
       setMinimizedView={setMinimizedView}

@@ -160,7 +160,7 @@ export function WeekGrid({
           {employees.map((employee) => (
             <div
               key={employee.id}
-              className="grid grid-cols-8 border-b min-h-[64px]"
+              className="grid grid-cols-8 border-b min-h-[52px]"
             >
               <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center gap-2">
                 <Avatar className="h-6 w-6">
@@ -190,7 +190,7 @@ export function WeekGrid({
                 return (
                   <div
                     key={`${employee.id}-${day.toISOString()}`}
-                    className="border-l border-r relative min-h-[64px] hover:bg-muted/20 transition-colors p-1"
+                    className="border-l border-r relative min-h-[52px] hover:bg-muted/20 transition-colors p-1"
                     onDragOver={onDragOver}
                     onDrop={
                       onDrop

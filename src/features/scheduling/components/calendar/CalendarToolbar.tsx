@@ -1,10 +1,4 @@
-import {
-  addDays,
-  differenceInMinutes,
-  format,
-  startOfMonth,
-  differenceInWeeks,
-} from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { CardHeader } from "@/components/ui/card";
+import { Users } from "lucide-react";
 
 type CalendarToolbarProps = {
-  weekStart: Date;
-  selectedDate: Date;
-  onDateChange: (d: Date) => void;
   weekSchedules: any[];
   minimizedView: boolean;
   setMinimizedView: (v: boolean) => void;
@@ -47,9 +38,6 @@ type CalendarToolbarProps = {
 };
 
 export function CalendarToolbar({
-  weekStart,
-  selectedDate,
-  onDateChange,
   weekSchedules,
   minimizedView,
   setMinimizedView,
@@ -82,45 +70,26 @@ export function CalendarToolbar({
   });
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
 
-  // Calculate which week of the month we're in
-  const monthStart = startOfMonth(weekStart);
-  const weekNumber = Math.floor(differenceInWeeks(weekStart, monthStart)) + 1;
-  const monthName = format(weekStart, "MMM");
-
   return (
-    <CardHeader className="pb-4">
-      <CardTitle className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDateChange(addDays(selectedDate, -7))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span>
-            Week {weekNumber} of {monthName}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDateChange(addDays(selectedDate, 7))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline">{weekSchedules.length} shifts</Badge>
-          <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Hours {totalHours}</span>
+    <CardHeader className="shrink-0 border-b py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="h-7">
+            {weekSchedules.length} shifts
+          </Badge>
+          <div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
+            <span>{totalHours} hrs</span>
             <span className="inline-flex items-center gap-1">
               <Users className="h-3 w-3" />
               {uniqueUsers.size}
             </span>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="h-8">
                 View options
               </Button>
             </DropdownMenuTrigger>
@@ -155,7 +124,12 @@ export function CalendarToolbar({
 
           {readOnly ? (
             onOpenTimeOffPanel ? (
-              <Button variant="outline" size="sm" onClick={onOpenTimeOffPanel}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8"
+                onClick={onOpenTimeOffPanel}
+              >
                 Request time off
               </Button>
             ) : null
@@ -163,7 +137,7 @@ export function CalendarToolbar({
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="h-8">
                     Actions
                   </Button>
                 </DropdownMenuTrigger>
@@ -206,7 +180,9 @@ export function CalendarToolbar({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm">Add</Button>
+                  <Button size="sm" className="h-8">
+                    Add
+                  </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-60">
                   <DropdownMenuItem onClick={onOpenAddShift}>
@@ -231,7 +207,7 @@ export function CalendarToolbar({
             </>
           )}
         </div>
-      </CardTitle>
+      </div>
     </CardHeader>
   );
 }

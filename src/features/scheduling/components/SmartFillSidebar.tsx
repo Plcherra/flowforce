@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useCopilotScheduler } from "@/features/scheduling/hooks/useCopilotScheduler";
 import type { ScheduleSummary } from "@/features/scheduling/hooks/copilotSchedulerTypes";
@@ -29,13 +31,20 @@ import {
 
 interface SmartFillSidebarProps {
   locationFilter?: string;
+  expandTrigger?: number;
 }
 
-export function SmartFillSidebar({ locationFilter }: SmartFillSidebarProps) {
+export function SmartFillSidebar({
+  locationFilter,
+  expandTrigger = 0,
+}: SmartFillSidebarProps) {
+  const isMobile = useIsMobile();
   const { shifts, timeOff, unavailability, weekRange, refetchAll } =
     useScheduling();
   const [expanded, setExpanded] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const readiness = useMemo(
     () =>
@@ -80,21 +89,25 @@ export function SmartFillSidebar({ locationFilter }: SmartFillSidebarProps) {
   const showProminent = needsAttention > 0 || hasGenerated;
   const isExpanded = expanded || (hasGenerated && coverageCount > 0);
 
-  const handleSuggestFills = async () => {
+  const handleSuggestFills = useCallback(async () => {
     setExpanded(true);
     setHasGenerated(true);
+    if (isMobile) {
+      setMobileSheetOpen(true);
+    } else {
+      sidebarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
     await scheduler.regenerate();
-  };
+  }, [isMobile, scheduler]);
 
-  return (
-    <Card
-      className={cn(
-        "h-full transition-colors",
-        showProminent && needsAttention > 0
-          ? "border-amber-300 shadow-sm dark:border-amber-800"
-          : undefined,
-      )}
-    >
+  useEffect(() => {
+    if (expandTrigger > 0) {
+      void handleSuggestFills();
+    }
+  }, [expandTrigger, handleSuggestFills]);
+
+  const sidebarBody = (
+    <>
       <CardHeader className="flex flex-col gap-2 border-b border-border/60 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -254,15 +267,17 @@ export function SmartFillSidebar({ locationFilter }: SmartFillSidebarProps) {
               Adds draft shifts to the week board. Publish the full week from
               the board Actions menu when ready.
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-muted-foreground"
-              onClick={() => setExpanded(false)}
-            >
-              <ChevronUp className="mr-2 h-4 w-4" />
-              Collapse
-            </Button>
+            {!isMobile && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground"
+                onClick={() => setExpanded(false)}
+              >
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Collapse
+              </Button>
+            )}
           </CardFooter>
         </>
       ) : (
@@ -278,6 +293,59 @@ export function SmartFillSidebar({ locationFilter }: SmartFillSidebarProps) {
           </Button>
         </CardFooter>
       )}
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <div className="fixed bottom-4 right-4 z-40 lg:hidden">
+          <Button
+            size="sm"
+            className="shadow-lg"
+            onClick={() => {
+              setMobileSheetOpen(true);
+              if (!hasGenerated) {
+                void handleSuggestFills();
+              }
+            }}
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Smart Fill
+            {needsAttention > 0 ? (
+              <Badge variant="secondary" className="ml-2 h-5 px-1.5">
+                {needsAttention}
+              </Badge>
+            ) : null}
+          </Button>
+        </div>
+
+        <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto p-0">
+            <SheetHeader className="border-b px-4 py-3 text-left">
+              <SheetTitle className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Smart Fill
+              </SheetTitle>
+            </SheetHeader>
+            <Card className="border-0 shadow-none">{sidebarBody}</Card>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
+  return (
+    <Card
+      ref={sidebarRef}
+      className={cn(
+        "sticky top-20 self-start max-h-[calc(100dvh-12rem)] overflow-hidden transition-colors",
+        showProminent && needsAttention > 0
+          ? "border-amber-300 shadow-sm dark:border-amber-800"
+          : undefined,
+      )}
+    >
+      {sidebarBody}
     </Card>
   );
 }
@@ -301,7 +369,7 @@ function CompactStatus({
       : "Week looks covered — run Smart Fill to optimize";
 
   return (
-    <div className="space-y-3 rounded-lg border border-dashed border-border/70 p-3">
+    <div className="space-y-2 rounded-lg border border-dashed border-border/70 p-2.5">
       <p
         className={cn(
           "text-sm",

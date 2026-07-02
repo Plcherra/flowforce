@@ -152,6 +152,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
   test('calendar reflects seeded shift', async ({ page }) => {
     if (!seedHandles) return;
     await page.setViewportSize({ width: 1366, height: 900 });
+    await expect(page.getByTestId('schedule-readiness-bar')).toBeVisible();
     await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
   });

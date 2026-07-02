@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Calendar,
   Grid3X3,
   LayoutGrid,
   Users,
@@ -35,6 +34,7 @@ interface EnhancedCalendarViewProps {
   locationFilter?: string;
   onOpenPanel?: (panel: SchedulingPanelId) => void;
   onAutoScheduleClick?: () => void;
+  onSuggestFills?: () => void;
   actionsDisabled?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
@@ -44,6 +44,7 @@ export function EnhancedCalendarView({
   locationFilter,
   onOpenPanel,
   onAutoScheduleClick,
+  onSuggestFills,
   actionsDisabled = false,
   readOnly = false,
   profileId = null,
@@ -52,9 +53,7 @@ export function EnhancedCalendarView({
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<CalendarViewMode>(
-    readOnly ? "week" : "week",
-  );
+  const [currentView, setCurrentView] = useState<CalendarViewMode>("week");
 
   const availableViews = readOnly
     ? (["week"] as CalendarViewMode[])
@@ -135,23 +134,23 @@ export function EnhancedCalendarView({
   const noShiftsAvailable = !loading && filteredShifts.length === 0;
 
   return (
-    <div id="schedule-board" className="space-y-6">
-      {/* Header with navigation and view selector */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+    <div id="schedule-board" className="flex min-h-0 flex-1 flex-col">
+      <Card className="flex min-h-0 flex-1 flex-col">
+        <CardHeader className="shrink-0 space-y-2 py-2">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-8 w-8 p-0"
                   onClick={() => navigateDate("prev")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
-                <div className="min-w-[200px] text-center">
-                  <h2 className="text-lg font-semibold">
+                <div className="min-w-[180px] px-1 text-center">
+                  <h2 className="text-base font-semibold">
                     {getDateRangeText()}
                   </h2>
                 </div>
@@ -159,6 +158,7 @@ export function EnhancedCalendarView({
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-8 w-8 p-0"
                   onClick={() => navigateDate("next")}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -168,14 +168,20 @@ export function EnhancedCalendarView({
               <Button
                 variant="outline"
                 size="sm"
+                className="h-8"
                 onClick={() => setSelectedDate(new Date())}
               >
                 Today
               </Button>
+
+              <Badge variant="outline" className="h-7">
+                {loading
+                  ? "Loading…"
+                  : `${filteredShifts.length} shift${filteredShifts.length === 1 ? "" : "s"}`}
+              </Badge>
             </div>
 
-            {/* View Selector */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {availableViews.map((view) => {
                 const config = viewConfig[view];
                 const Icon = config.icon;
@@ -184,60 +190,47 @@ export function EnhancedCalendarView({
                     key={view}
                     variant={currentView === view ? "default" : "outline"}
                     size="sm"
+                    className="h-8 gap-1.5"
                     onClick={() => setCurrentView(view)}
-                    className="flex items-center gap-2"
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5" />
                     {!isMobile && config.label}
                   </Button>
                 );
               })}
 
               {!readOnly && (
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <Settings className="h-4 w-4" />
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Stats bar */}
-          <div className="flex items-center gap-4 border-t pt-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">
-                {loading
-                  ? "Loading shifts…"
-                  : `${filteredShifts.length} shift${filteredShifts.length === 1 ? "" : "s"}`}
-              </Badge>
-            </div>
-            {!readOnly && (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded bg-green-500" />
-                  <span>Published</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded bg-yellow-500" />
-                  <span>Draft</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded bg-red-500" />
-                  <span>Understaffed</span>
-                </div>
+          {!readOnly && (
+            <div className="flex flex-wrap items-center gap-3 border-t pt-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className="h-2.5 w-2.5 rounded bg-green-500" />
+                <span>Published</span>
               </div>
-            )}
-          </div>
+              <div className="flex items-center gap-1">
+                <div className="h-2.5 w-2.5 rounded bg-yellow-500" />
+                <span>Draft</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="h-2.5 w-2.5 rounded bg-red-500" />
+                <span>Understaffed</span>
+              </div>
+            </div>
+          )}
         </CardHeader>
-      </Card>
 
-      {/* Calendar Views */}
-      <Card>
-        <CardContent className="p-0">
+        <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {loading ? (
-            <div className="flex items-center justify-center h-96">
+            <div className="flex min-h-[60vh] items-center justify-center">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-sm text-muted-foreground mt-2">
+                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+                <p className="mt-2 text-sm text-muted-foreground">
                   Loading schedule...
                 </p>
               </div>
@@ -262,30 +255,16 @@ export function EnhancedCalendarView({
                 ))}
 
               {currentView === "week" && (
-                <div className="p-4">
-                  {noShiftsAvailable ? (
-                    <ScheduleEmptyState
-                      view="week"
-                      hasLocationFilter={Boolean(locationFilter)}
-                      readOnly={readOnly}
-                      onOpenAvailability={
-                        onOpenPanel
-                          ? () => onOpenPanel("availability")
-                          : undefined
-                      }
-                    />
-                  ) : null}
-                  <DragDropScheduleCalendar
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    locationFilter={locationFilter}
-                    onAutoScheduleClick={onAutoScheduleClick}
-                    autoScheduleDisabled={actionsDisabled}
-                    readOnly={readOnly}
-                    profileId={profileId}
-                    onOpenPanel={onOpenPanel}
-                  />
-                </div>
+                <DragDropScheduleCalendar
+                  selectedDate={selectedDate}
+                  locationFilter={locationFilter}
+                  onAutoScheduleClick={onAutoScheduleClick}
+                  autoScheduleDisabled={actionsDisabled}
+                  readOnly={readOnly}
+                  profileId={profileId}
+                  onOpenPanel={onOpenPanel}
+                  onSuggestFills={onSuggestFills}
+                />
               )}
 
               {currentView === "staff" &&
@@ -312,13 +291,12 @@ export function EnhancedCalendarView({
         </CardContent>
       </Card>
 
-      {/* Shift Details Panel */}
       {selectedShift && (
         <Sheet
           open={!!selectedShift}
           onOpenChange={() => setSelectedShift(null)}
         >
-          <SheetContent side="right" className="sm:max-w-xl w-full p-0">
+          <SheetContent side="right" className="w-full p-0 sm:max-w-xl">
             <ShiftDetailsPanel
               shiftId={selectedShift}
               onClose={() => setSelectedShift(null)}

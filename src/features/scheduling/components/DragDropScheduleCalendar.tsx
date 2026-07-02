@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
@@ -9,7 +8,7 @@ import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetails
 import { ShiftWizardDialog } from "@/features/scheduling/components/ShiftWizardDialog";
 import { WeekTemplateDialog } from "@/features/scheduling/components/WeekTemplateDialog";
 import { ImportShiftsDialog } from "@/features/scheduling/components/ImportShiftsDialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScheduleEmptyState } from "@/features/scheduling/components/ScheduleEmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
@@ -39,13 +38,13 @@ import {
 
 interface DragDropScheduleCalendarProps {
   selectedDate: Date;
-  onDateChange: (date: Date) => void;
   locationFilter?: string;
   onAutoScheduleClick?: () => void;
   autoScheduleDisabled?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
   onOpenPanel?: (panel: import("../types/panels").SchedulingPanelId) => void;
+  onSuggestFills?: () => void;
 }
 
 type VendorShiftOption = {
@@ -70,13 +69,13 @@ const toVendorShiftOption = (shift: unknown): VendorShiftOption => {
 
 export function DragDropScheduleCalendar({
   selectedDate,
-  onDateChange,
   locationFilter,
   onAutoScheduleClick,
   autoScheduleDisabled = false,
   readOnly = false,
   profileId = null,
   onOpenPanel,
+  onSuggestFills,
 }: DragDropScheduleCalendarProps) {
   const { toast } = useToast();
   const [draggedVendor, setDraggedVendor] = useState<
@@ -123,7 +122,6 @@ export function DragDropScheduleCalendar({
     employees,
     vendorEventsThisWeek,
     weekSchedules: boardWeekSchedules,
-    weekStart,
     weekDays,
     locations,
     candidateVendorShifts,
@@ -210,104 +208,110 @@ export function DragDropScheduleCalendar({
 
   if (loading) {
     return (
-      <div className="flex flex-col lg:flex-row gap-6 h-full">
-        <Card className="flex-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              Loading schedule...
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-72 w-full" />
-            <div className="grid grid-cols-2 gap-4">
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-[60vh] flex-col lg:min-h-[calc(100dvh-220px)]">
+        <div className="space-y-4 p-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-72 w-full" />
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
-      {!readOnly && (
-        <AssignmentPanel
-          showTemplates={showTemplates}
-          templates={ROLE_TEMPLATES}
-          vendors={VENDOR_PALETTE}
-          onTemplateDragStart={handleTemplateDragStart}
-          onVendorDragStart={handleVendorDragStart}
-          onQuickVendorVisit={async () => {
-            try {
-              await createVendorEvent({
-                vendor_type: "general",
-                event_date: selectedDate.toISOString().split("T")[0],
-                start_time: "09:00",
-                end_time: "10:00",
-                notes: "Quick vendor visit",
-              });
-            } catch {
-              toast({
-                title: "Failed to log vendor visit",
-                variant: "destructive",
-              });
-            }
-          }}
-        />
-      )}
+  const isWeekEmpty = weekSchedules.length === 0;
 
-      {/* Calendar Grid */}
-      <Card className="flex-1">
-        <ScheduleToolbar
-          weekStart={weekStart}
-          selectedDate={selectedDate}
-          weekSchedules={weekSchedules}
-          minimizedView={minimizedView}
-          showDailyInfo={showDailyInfo}
-          onDateChange={onDateChange}
-          onToggleTemplates={() => setShowTemplates((value) => !value)}
-          onOpenWeekTemplates={() => setShowWeekTemplates(true)}
-          onCopyPreviousWeek={copyPreviousWeekAction}
-          onAutoScheduleWeek={onAutoScheduleClick}
-          autoScheduleDisabled={autoScheduleDisabled}
-          onClearWeek={clearCurrentWeekAction}
-          onPublishWeek={publishWeekStatusAction}
-          onExportWeekCsv={exportWeekCsv}
-          onOpenAddShift={() => setShowAddShift(true)}
-          onOpenMultiAdd={() => setShowMultiAdd(true)}
-          onOpenImportShifts={() => setShowImportShifts(true)}
-          onOpenAddUnavailability={() => setShowAddUnavailability(true)}
-          onOpenAddTimeOff={() => setShowAddTimeOff(true)}
-          onPrintWeek={() => window.print()}
-          setMinimizedView={setMinimizedView}
-          setShowDailyInfo={setShowDailyInfo}
-          readOnly={readOnly}
-          onOpenTimeOffPanel={
-            onOpenPanel ? () => onOpenPanel("timeoff") : undefined
-          }
-        />
-        <CardContent className="p-0">
-          <WeekGrid
-            weekDays={weekDays}
-            employees={readOnly && profileId ? employees.filter((e) => e.id === profileId) : employees}
-            weekSchedules={weekSchedules}
-            unassignedShifts={unassignedShifts}
-            vendorEvents={readOnly ? [] : vendorEventsThisWeek}
-            vendorEventsByShift={
-              readOnly ? new Map() : vendorEventsByShift
-            }
-            disabledDates={disabledDates}
-            onShiftClick={openShiftDetails}
-            onDrop={readOnly ? undefined : handleBoardDrop}
-            onDragOver={readOnly ? undefined : handleDragOver}
-            getVendorLabel={getVendorLabel}
-            getVendorColor={getVendorColor}
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {!readOnly && (
+          <AssignmentPanel
+            showTemplates={showTemplates}
+            templates={ROLE_TEMPLATES}
+            vendors={VENDOR_PALETTE}
+            onTemplateDragStart={handleTemplateDragStart}
+            onVendorDragStart={handleVendorDragStart}
+            onQuickVendorVisit={async () => {
+              try {
+                await createVendorEvent({
+                  vendor_type: "general",
+                  event_date: selectedDate.toISOString().split("T")[0],
+                  start_time: "09:00",
+                  end_time: "10:00",
+                  notes: "Quick vendor visit",
+                });
+              } catch {
+                toast({
+                  title: "Failed to log vendor visit",
+                  variant: "destructive",
+                });
+              }
+            }}
           />
-        </CardContent>
-      </Card>
+        )}
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <ScheduleToolbar
+            weekSchedules={weekSchedules}
+            minimizedView={minimizedView}
+            showDailyInfo={showDailyInfo}
+            onToggleTemplates={() => setShowTemplates((value) => !value)}
+            onOpenWeekTemplates={() => setShowWeekTemplates(true)}
+            onCopyPreviousWeek={copyPreviousWeekAction}
+            onAutoScheduleWeek={onAutoScheduleClick}
+            autoScheduleDisabled={autoScheduleDisabled}
+            onClearWeek={clearCurrentWeekAction}
+            onPublishWeek={publishWeekStatusAction}
+            onExportWeekCsv={exportWeekCsv}
+            onOpenAddShift={() => setShowAddShift(true)}
+            onOpenMultiAdd={() => setShowMultiAdd(true)}
+            onOpenImportShifts={() => setShowImportShifts(true)}
+            onOpenAddUnavailability={() => setShowAddUnavailability(true)}
+            onOpenAddTimeOff={() => setShowAddTimeOff(true)}
+            onPrintWeek={() => window.print()}
+            setMinimizedView={setMinimizedView}
+            setShowDailyInfo={setShowDailyInfo}
+            readOnly={readOnly}
+            onOpenTimeOffPanel={
+              onOpenPanel ? () => onOpenPanel("timeoff") : undefined
+            }
+          />
+
+          {isWeekEmpty ? (
+            <ScheduleEmptyState
+              variant="banner"
+              view="week"
+              hasLocationFilter={Boolean(locationFilter)}
+              readOnly={readOnly}
+              onCopyPreviousWeek={readOnly ? undefined : copyPreviousWeekAction}
+              onAddShift={readOnly ? undefined : () => setShowAddShift(true)}
+              onSuggestFills={readOnly ? undefined : onSuggestFills}
+              onOpenAvailability={
+                onOpenPanel ? () => onOpenPanel("availability") : undefined
+              }
+            />
+          ) : null}
+
+          <div className="min-h-[60vh] flex-1 overflow-auto lg:min-h-[calc(100dvh-220px)]">
+            <WeekGrid
+              weekDays={weekDays}
+              employees={
+                readOnly && profileId
+                  ? employees.filter((e) => e.id === profileId)
+                  : employees
+              }
+              weekSchedules={weekSchedules}
+              unassignedShifts={unassignedShifts}
+              vendorEvents={readOnly ? [] : vendorEventsThisWeek}
+              vendorEventsByShift={readOnly ? new Map() : vendorEventsByShift}
+              disabledDates={disabledDates}
+              onShiftClick={openShiftDetails}
+              onDrop={readOnly ? undefined : handleBoardDrop}
+              onDragOver={readOnly ? undefined : handleDragOver}
+              getVendorLabel={getVendorLabel}
+              getVendorColor={getVendorColor}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Week Template Dialog */}
       <WeekTemplateDialog
