@@ -14,7 +14,7 @@ export * from "./hooks";
 
 // Types
 export * from "./types/mutations";
-export * from "./types/tabs";
+export * from "./types/panels";
 
 // Constants
 export * from "./constants/templates";
@@ -27,5 +27,3 @@ export * from "./services";
 
 // Pages
 export { default as EnhancedSchedulingPage } from "./pages/EnhancedScheduling";
-export { default as ScheduleLobbyPage } from "./pages/ScheduleLobby";
-export { default as TimeOffPage } from "./pages/TimeOff";

@@ -18,6 +18,7 @@ export interface UseCopilotSchedulerOptions {
     end_time: string;
     location?: string | null;
   }>;
+  /** When false, suggestions run only on explicit user action. */
   autoGenerate?: boolean;
   onPublished?: () => void | Promise<void>;
 }

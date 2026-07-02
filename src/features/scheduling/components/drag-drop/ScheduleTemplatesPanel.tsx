@@ -1,4 +1,4 @@
-import { Calendar, Clock, Users, Plus, Zap, BarChart3 } from "lucide-react";
+import { Calendar, Clock, Users, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ interface ScheduleTemplatesPanelProps {
     event: React.DragEvent,
     vendor: VendorPaletteItem,
   ) => void;
-  onAutoFillWeek: () => void;
   onQuickVendorVisit: () => Promise<void>;
 }
 
@@ -24,7 +23,6 @@ export function ScheduleTemplatesPanel({
   vendors,
   onTemplateDragStart,
   onVendorDragStart,
-  onAutoFillWeek,
   onQuickVendorVisit,
 }: ScheduleTemplatesPanelProps) {
   return (
@@ -35,13 +33,6 @@ export function ScheduleTemplatesPanel({
           Role Templates
         </CardTitle>
         <div className="flex gap-2">
-          <Button onClick={onAutoFillWeek} className="flex-1 text-xs">
-            <Zap className="h-3 w-3 mr-1" />
-            AI Fill Week
-          </Button>
-          <Button variant="outline" size="sm">
-            <BarChart3 className="h-3 w-3" />
-          </Button>
           <Button variant="outline" size="sm" onClick={onQuickVendorVisit}>
             <Plus className="h-3 w-3 mr-1" />
             Vendor Visit
@@ -80,6 +71,7 @@ export function ScheduleTemplatesPanel({
           {vendors.map((vendor) => (
             <div
               key={vendor.id}
+              data-testid={`vendor-palette-${vendor.id}`}
               draggable
               onDragStart={(event) => onVendorDragStart(event, vendor)}
               className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/40 transition-colors"

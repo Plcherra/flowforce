@@ -223,7 +223,7 @@ function buildManagerActions(
     actions.push({
       label: "Review time-off queue",
       detail: `${stats.pendingTimeOff} pending requests can affect upcoming coverage.`,
-      href: "/app/scheduling/timeoff",
+      href: "/app/enhanced-scheduling?panel=timeoff",
       severity: "watch",
     });
   }

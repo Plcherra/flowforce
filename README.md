@@ -57,7 +57,9 @@ Best pages to show:
 - `/app/dashboard` — Main dashboard (after login)
 - `/app/messages` — Messaging interface
 - `/app/tasks` — Task management
-- `/app/enhanced-scheduling` — Scheduling view
+- `/app/enhanced-scheduling` — Schedule (managers build/publish; staff see **My Schedule**)
+
+See [docs/scheduling-workflow.md](docs/scheduling-workflow.md) for the simplified scheduling workflow.
 
 ### Known Issues
 

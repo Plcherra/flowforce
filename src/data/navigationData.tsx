@@ -46,7 +46,7 @@ export const navigationSections: NavigationSection[] = [
     items: [
       {
         name: "Scheduling",
-        href: "/enhanced-scheduling",
+        href: "/app/enhanced-scheduling",
         icon: CalendarRange,
         translationKey: "scheduling",
       },

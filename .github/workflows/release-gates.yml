@@ -161,6 +161,15 @@ jobs:
       - name: Authenticated visible-module smoke
         run: npm run test:smoke
 
+      - name: Scheduling workflow contract
+        run: npm run check:scheduling-workflow
+
+      - name: Scheduling Playwright smoke
+        env:
+          PLAYWRIGHT_SMOKE: "1"
+          PLAYWRIGHT_BASE_URL: ${{ env.TEST_URL }}
+        run: npm run test:playwright -- tests/playwright/scheduling-smoke.spec.ts
+
       - name: Upload smoke report and server log
         if: always()
         uses: actions/upload-artifact@v4

@@ -60,7 +60,7 @@ export function TileDetailPanel({
             onClose();
           }}
           onNavigateToTimeOff={() => {
-            onNavigate("/app/scheduling/timeoff");
+            onNavigate("/app/enhanced-scheduling?panel=timeoff");
             onClose();
           }}
         />

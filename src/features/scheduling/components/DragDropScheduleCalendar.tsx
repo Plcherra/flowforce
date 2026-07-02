@@ -41,6 +41,11 @@ interface DragDropScheduleCalendarProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
   locationFilter?: string;
+  onAutoScheduleClick?: () => void;
+  autoScheduleDisabled?: boolean;
+  readOnly?: boolean;
+  profileId?: string | null;
+  onOpenPanel?: (panel: import("../types/panels").SchedulingPanelId) => void;
 }
 
 type VendorShiftOption = {
@@ -67,6 +72,11 @@ export function DragDropScheduleCalendar({
   selectedDate,
   onDateChange,
   locationFilter,
+  onAutoScheduleClick,
+  autoScheduleDisabled = false,
+  readOnly = false,
+  profileId = null,
+  onOpenPanel,
 }: DragDropScheduleCalendarProps) {
   const { toast } = useToast();
   const [draggedVendor, setDraggedVendor] = useState<
@@ -78,8 +88,6 @@ export function DragDropScheduleCalendar({
   const [draggedTemplate, setDraggedTemplate] = useState<
     (typeof ROLE_TEMPLATES)[number] | null
   >(null);
-  const showAIRecommendations = false;
-  const aiRecommendations = [];
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [showShiftSheet, setShowShiftSheet] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -114,12 +122,12 @@ export function DragDropScheduleCalendar({
   const {
     employees,
     vendorEventsThisWeek,
-    weekSchedules,
+    weekSchedules: boardWeekSchedules,
     weekStart,
     weekDays,
     locations,
     candidateVendorShifts,
-    unassignedShifts,
+    unassignedShifts: boardUnassignedShifts,
     vendorEventsByShift,
     disabledDates,
     weekCsvContent,
@@ -127,6 +135,15 @@ export function DragDropScheduleCalendar({
     loading,
     actions,
   } = useScheduleBoard({ selectedDate, locationFilter, pendingVendorEvent });
+
+  const weekSchedules = useMemo(() => {
+    if (!readOnly || !profileId) return boardWeekSchedules;
+    return boardWeekSchedules.filter((shift) =>
+      shift.assignments?.some((assignment) => assignment.user_id === profileId),
+    );
+  }, [boardWeekSchedules, profileId, readOnly]);
+
+  const unassignedShifts = readOnly ? [] : boardUnassignedShifts;
 
   const vendorShiftOptions = useMemo(
     () => candidateVendorShifts.map(toVendorShiftOption),
@@ -141,7 +158,6 @@ export function DragDropScheduleCalendar({
     requestTimeOff: requestTimeOffAction,
     bulkCreateShifts: bulkCreateShiftsAction,
     refetchAll,
-    autoFillWeek: autoFillWeekAction,
     copyPreviousWeek: copyPreviousWeekAction,
     clearCurrentWeek: clearCurrentWeekAction,
     publishWeekStatus: publishWeekStatusAction,
@@ -217,38 +233,31 @@ export function DragDropScheduleCalendar({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full">
-      <AssignmentPanel
-        showTemplates={showTemplates}
-        templates={ROLE_TEMPLATES}
-        vendors={VENDOR_PALETTE}
-        onTemplateDragStart={handleTemplateDragStart}
-        onVendorDragStart={handleVendorDragStart}
-        onAutoFillWeek={autoFillWeekAction}
-        onQuickVendorVisit={async () => {
-          try {
-            await createVendorEvent({
-              vendor_type: "general",
-              event_date: selectedDate.toISOString().split("T")[0],
-              start_time: "09:00",
-              end_time: "10:00",
-              notes: "Quick vendor visit",
-            });
-          } catch {
-            toast({
-              title: "Failed to log vendor visit",
-              variant: "destructive",
-            });
-          }
-        }}
-        showAIRecommendations={showAIRecommendations}
-        aiRecommendations={aiRecommendations}
-        onAssignFromAI={(recommendation) =>
-          toast({
-            title: "Staff assigned!",
-            description: `${recommendation.name} has been assigned to this shift`,
-          })
-        }
-      />
+      {!readOnly && (
+        <AssignmentPanel
+          showTemplates={showTemplates}
+          templates={ROLE_TEMPLATES}
+          vendors={VENDOR_PALETTE}
+          onTemplateDragStart={handleTemplateDragStart}
+          onVendorDragStart={handleVendorDragStart}
+          onQuickVendorVisit={async () => {
+            try {
+              await createVendorEvent({
+                vendor_type: "general",
+                event_date: selectedDate.toISOString().split("T")[0],
+                start_time: "09:00",
+                end_time: "10:00",
+                notes: "Quick vendor visit",
+              });
+            } catch {
+              toast({
+                title: "Failed to log vendor visit",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+      )}
 
       {/* Calendar Grid */}
       <Card className="flex-1">
@@ -262,7 +271,8 @@ export function DragDropScheduleCalendar({
           onToggleTemplates={() => setShowTemplates((value) => !value)}
           onOpenWeekTemplates={() => setShowWeekTemplates(true)}
           onCopyPreviousWeek={copyPreviousWeekAction}
-          onAutoFillWeek={autoFillWeekAction}
+          onAutoScheduleWeek={onAutoScheduleClick}
+          autoScheduleDisabled={autoScheduleDisabled}
           onClearWeek={clearCurrentWeekAction}
           onPublishWeek={publishWeekStatusAction}
           onExportWeekCsv={exportWeekCsv}
@@ -274,19 +284,25 @@ export function DragDropScheduleCalendar({
           onPrintWeek={() => window.print()}
           setMinimizedView={setMinimizedView}
           setShowDailyInfo={setShowDailyInfo}
+          readOnly={readOnly}
+          onOpenTimeOffPanel={
+            onOpenPanel ? () => onOpenPanel("timeoff") : undefined
+          }
         />
         <CardContent className="p-0">
           <WeekGrid
             weekDays={weekDays}
-            employees={employees}
+            employees={readOnly && profileId ? employees.filter((e) => e.id === profileId) : employees}
             weekSchedules={weekSchedules}
             unassignedShifts={unassignedShifts}
-            vendorEvents={vendorEventsThisWeek}
-            vendorEventsByShift={vendorEventsByShift}
+            vendorEvents={readOnly ? [] : vendorEventsThisWeek}
+            vendorEventsByShift={
+              readOnly ? new Map() : vendorEventsByShift
+            }
             disabledDates={disabledDates}
             onShiftClick={openShiftDetails}
-            onDrop={handleBoardDrop}
-            onDragOver={handleDragOver}
+            onDrop={readOnly ? undefined : handleBoardDrop}
+            onDragOver={readOnly ? undefined : handleDragOver}
             getVendorLabel={getVendorLabel}
             getVendorColor={getVendorColor}
           />

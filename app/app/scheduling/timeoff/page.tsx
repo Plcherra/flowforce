@@ -1,7 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import TimeOffPage from "@/features/scheduling/pages/TimeOff";
-
-export default function TimeOff() {
-  return <TimeOffPage />;
+export default function SchedulingTimeOffRedirectPage() {
+  redirect("/app/enhanced-scheduling?panel=timeoff");
 }

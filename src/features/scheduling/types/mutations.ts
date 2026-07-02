@@ -36,10 +36,6 @@ export interface SchedulingMutations {
     payload: VendorEventUpsertInput,
   ) => Promise<VendorEventWithMetadata | null>;
   deleteVendorEvent: (id: string) => Promise<boolean>;
-  autoGenerateWeek: (params: {
-    weekStart: string;
-    preferences?: Record<string, unknown>;
-  }) => Promise<boolean>;
   clearWeek: (params: {
     weekStart: string;
     weekEnd: string;
@@ -67,15 +63,8 @@ export interface SchedulingMutations {
     weekEnd: string;
     isPublished: boolean;
   }) => Promise<boolean>;
-  generateRecommendations: (scheduleId: string) => Promise<AIRecommendation[]>;
   approveTimeOff: (requestId: string, notes?: string) => Promise<boolean>;
   upsertVendorEvent: (
     payload: VendorEventUpsertInput,
   ) => Promise<VendorEventWithMetadata | null>;
-}
-
-export interface AIRecommendation {
-  name: string;
-  score: number;
-  reasons?: string[];
 }

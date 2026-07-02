@@ -2,7 +2,6 @@
  * Barrel export for scheduling dialogs
  */
 
-export { MultiAddShiftDialog } from "./MultiAddShiftDialog";
 export { AddUnavailabilityDialog } from "./AddUnavailabilityDialog";
 export { AddTimeOffDialog } from "./AddTimeOffDialog";
 export { VendorEventDialog } from "./VendorEventDialog";

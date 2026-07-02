@@ -43,7 +43,7 @@ export function useCopilotScheduler({
   weekEnd,
   location,
   existingShifts = [],
-  autoGenerate = true,
+  autoGenerate = false,
   onPublished,
 }: UseCopilotSchedulerOptions) {
   const { profile } = useProfile();
@@ -127,7 +127,7 @@ export function useCopilotScheduler({
         (error instanceof Error ? error.message : "Failed to build schedule");
       setState((prev) => ({ ...prev, loading: false, error: message }));
       toast({
-        title: "Copilot scheduling failed",
+        title: "Smart Fill failed",
         description: message,
         variant: "destructive",
       });
@@ -155,7 +155,7 @@ export function useCopilotScheduler({
       if (actions.length === 0) {
         toast({
           title: `No ${label}`,
-          description: "There are no Copilot actions to queue.",
+          description: "There are no actions to queue.",
         });
         return { success: true };
       }
@@ -175,7 +175,7 @@ export function useCopilotScheduler({
         toast({
           title: `Failed to queue ${label}`,
           description:
-            error.message ?? "Unknown error while invoking Copilot service.",
+            error.message ?? "Unknown error while queueing actions.",
           variant: "destructive",
         });
         return { success: false, error };
@@ -183,7 +183,7 @@ export function useCopilotScheduler({
 
       toast({
         title: `Queued ${label}`,
-        description: `${actions.length} action${actions.length === 1 ? "" : "s"} sent to Copilot dispatcher.`,
+        description: `${actions.length} action${actions.length === 1 ? "" : "s"} queued.`,
       });
       return { success: true };
     },
@@ -260,9 +260,9 @@ export function useCopilotScheduler({
     }
 
     toast({
-      title: "Draft schedule saved",
+      title: "Draft shifts added",
       description:
-        "All Copilot-generated shifts have been stored as draft entries.",
+        "Suggested shifts were saved as drafts on the schedule board.",
     });
 
     if (typeof onPublished === "function") {

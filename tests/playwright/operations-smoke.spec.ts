@@ -31,7 +31,7 @@ test.describe('Operations smoke navigation', () => {
       },
       {
         link: 'Scheduling',
-        assert: () => expect(page.locator('text=Weekly Hour Summary')).toBeVisible({ timeout: 30_000 }),
+        assert: () => expect(page.getByRole('heading', { name: /^Schedule$/i })).toBeVisible({ timeout: 30_000 }),
       },
       {
         link: 'My Availability',

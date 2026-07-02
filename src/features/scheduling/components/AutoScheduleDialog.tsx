@@ -116,10 +116,11 @@ export function AutoScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Auto-schedule next week</DialogTitle>
+          <DialogTitle>Auto-schedule week</DialogTitle>
           <DialogDescription>
-            Copilot drafts a manager-only schedule using the location rule set
-            and compliance guardrails.
+            Generate a full draft week from location coverage templates and
+            compliance guardrails. For gap-by-gap suggestions, use Smart Fill on
+            the schedule board.
           </DialogDescription>
         </DialogHeader>
 
@@ -197,7 +198,7 @@ export function AutoScheduleDialog({
               {(loading || rulesLoading) && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              {loading ? "Generating…" : "Run Copilot"}
+              {loading ? "Generating…" : "Generate draft week"}
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>

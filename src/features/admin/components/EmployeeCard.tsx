@@ -213,7 +213,7 @@ export function EmployeeCard({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(`/enhanced-scheduling?focus=${employee.id}`)}
+          onClick={() => navigate(`/app/enhanced-scheduling?focus=${employee.id}`)}
         >
           <Clock className="mr-2 h-4 w-4" />
           Scheduling

@@ -161,14 +161,14 @@ export const QUICK_TEMPLATES: QuickTemplate[] = [
     icon: "Plane",
     category: "hr",
     config: {
-      path: "/scheduling/timeoff",
+      path: "/app/enhanced-scheduling?panel=timeoff",
       permissions: ["viewOwnProfile"],
       pages: [
         {
           name: "requests",
           title: "Time Off Requests",
           icon: "CalendarX",
-          route: "/scheduling/timeoff",
+          route: "/app/enhanced-scheduling?panel=timeoff",
           content: [],
           permissions: ["viewOwnProfile"],
         },

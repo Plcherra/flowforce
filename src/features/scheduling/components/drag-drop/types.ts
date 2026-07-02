@@ -7,11 +7,6 @@ import type {
   VendorEventWithMetadata,
 } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
-export interface AIRecommendation {
-  name: string;
-  score: number;
-  reasons?: string[];
-}
 
 export interface VendorFormState {
   locationId: string;

@@ -413,24 +413,24 @@
       "notes": "Redirects to enhanced scheduling team availability tab."
     },
     {
-      "label": "Schedule Lobby",
+      "label": "Schedule Lobby Redirect",
       "path": "/app/schedule-lobby",
-      "status": "hidden",
+      "status": "deprecated",
       "sidebar": false,
       "smoke": false,
       "owner": "src/features/scheduling",
-      "dataDependency": "tenant scheduling tables",
-      "notes": "Legacy scheduling entry."
+      "dataDependency": "none",
+      "notes": "Redirects to /app/enhanced-scheduling."
     },
     {
-      "label": "Scheduling Time Off",
+      "label": "Scheduling Time Off Redirect",
       "path": "/app/scheduling/timeoff",
-      "status": "hidden",
+      "status": "deprecated",
       "sidebar": false,
       "smoke": false,
       "owner": "src/features/scheduling",
-      "dataDependency": "tenant scheduling tables",
-      "notes": "Child scheduling route."
+      "dataDependency": "none",
+      "notes": "Redirects to /app/enhanced-scheduling?panel=timeoff."
     },
     {
       "label": "Time Off",

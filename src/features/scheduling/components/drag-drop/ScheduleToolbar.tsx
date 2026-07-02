@@ -11,7 +11,8 @@ interface ScheduleToolbarProps {
   onToggleTemplates: () => void;
   onOpenWeekTemplates: () => void;
   onCopyPreviousWeek: () => void;
-  onAutoFillWeek: () => void;
+  onAutoScheduleWeek?: () => void;
+  autoScheduleDisabled?: boolean;
   onClearWeek: () => void;
   onPublishWeek: (publish: boolean) => void;
   onExportWeekCsv: () => void;
@@ -23,6 +24,8 @@ interface ScheduleToolbarProps {
   onPrintWeek: () => void;
   setMinimizedView: (value: boolean) => void;
   setShowDailyInfo: (value: boolean) => void;
+  readOnly?: boolean;
+  onOpenTimeOffPanel?: () => void;
 }
 
 export function ScheduleToolbar({
@@ -35,7 +38,8 @@ export function ScheduleToolbar({
   onToggleTemplates,
   onOpenWeekTemplates,
   onCopyPreviousWeek,
-  onAutoFillWeek,
+  onAutoScheduleWeek,
+  autoScheduleDisabled,
   onClearWeek,
   onPublishWeek,
   onExportWeekCsv,
@@ -47,6 +51,8 @@ export function ScheduleToolbar({
   onPrintWeek,
   setMinimizedView,
   setShowDailyInfo,
+  readOnly = false,
+  onOpenTimeOffPanel,
 }: ScheduleToolbarProps) {
   return (
     <CalendarToolbar
@@ -61,7 +67,8 @@ export function ScheduleToolbar({
       onToggleTemplates={onToggleTemplates}
       onOpenWeekTemplates={onOpenWeekTemplates}
       onCopyPreviousWeek={onCopyPreviousWeek}
-      onAutoFillWeek={onAutoFillWeek}
+      onAutoScheduleWeek={onAutoScheduleWeek}
+      autoScheduleDisabled={autoScheduleDisabled}
       onClearWeek={onClearWeek}
       onPublishWeek={onPublishWeek}
       onExportWeekCsv={onExportWeekCsv}
@@ -71,6 +78,8 @@ export function ScheduleToolbar({
       onOpenImportShifts={onOpenImportShifts}
       onOpenAddUnavailability={onOpenAddUnavailability}
       onOpenAddTimeOff={onOpenAddTimeOff}
+      readOnly={readOnly}
+      onOpenTimeOffPanel={onOpenTimeOffPanel}
     />
   );
 }

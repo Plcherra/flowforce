@@ -100,7 +100,10 @@ export function VendorEventDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] z-50 bg-background">
+      <DialogContent
+        data-testid="vendor-event-dialog"
+        className="sm:max-w-[520px] z-50 bg-background"
+      >
         <DialogHeader>
           <DialogTitle>Schedule Vendor Visit</DialogTitle>
         </DialogHeader>
@@ -184,7 +187,7 @@ export function VendorEventDialog({
                   onFormChange({ ...vendorForm, shiftId: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="vendor-event-shift-select">
                   <SelectValue placeholder="Select shift" />
                 </SelectTrigger>
                 <SelectContent className="z-50 bg-background border shadow-lg max-h-60 overflow-y-auto">
@@ -229,6 +232,7 @@ export function VendorEventDialog({
                 Cancel
               </Button>
               <Button
+                data-testid="vendor-event-save"
                 onClick={handleSubmit}
                 disabled={!vendorForm.startTime || !vendorForm.endTime}
               >

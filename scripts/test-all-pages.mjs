@@ -39,11 +39,9 @@ const PAGE_ROUTES = [
   // Calendar & Scheduling
   '/app/calendar',
   '/app/enhanced-scheduling',
-  '/app/scheduling/timeoff',
-  '/app/schedule-lobby',
+  '/app/enhanced-scheduling?panel=timeoff',
+  '/app/enhanced-scheduling?panel=availability',
   '/app/time-off',
-  '/app/enhanced-scheduling?tab=availability', // availability redirects here
-  '/app/availability/manage',
   
   // Operations
   '/app/operations',

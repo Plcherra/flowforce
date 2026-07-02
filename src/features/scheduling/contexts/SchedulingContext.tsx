@@ -23,7 +23,6 @@ import { useShiftMutations } from "@/features/scheduling/hooks/useShiftMutations
 import { useVendorMutations } from "@/features/scheduling/hooks/useVendorMutations";
 import { useTimeOffMutations } from "@/features/scheduling/hooks/useTimeOffMutations";
 import { useWeekMutations } from "@/features/scheduling/hooks/useWeekMutations";
-import { useAIMutations } from "@/features/scheduling/hooks/useAIMutations";
 import { calculateWeekRange } from "@/features/scheduling/utils/weekHelpers";
 import { extractAvailableLocations } from "@/features/scheduling/utils/locationHelpers";
 import type { SchedulingMutations } from "@/features/scheduling/types/mutations";
@@ -179,13 +178,6 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
     teamMembers,
   });
 
-  const aiMutations = useAIMutations({
-    companyId,
-    isUsingFallbackData,
-    showReadOnlyNotice,
-    refetchAll,
-  });
-
   const mutations = useMemo<SchedulingMutations>(
     () => ({
       createSchedule: shiftMutations.createSchedule,
@@ -195,19 +187,16 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
       unassign,
       createVendorEvent: vendorMutations.createVendorEvent,
       deleteVendorEvent: vendorMutations.deleteVendorEvent,
-      autoGenerateWeek: aiMutations.autoGenerateWeek,
       clearWeek: weekMutations.clearWeek,
       addUnavailability: timeOffMutations.addUnavailability,
       requestTimeOff: timeOffMutations.requestTimeOff,
       bulkCreateShifts: shiftMutations.bulkCreateShifts,
       copyWeek: weekMutations.copyWeek,
       publishWeek: weekMutations.publishWeek,
-      generateRecommendations: aiMutations.generateRecommendations,
       approveTimeOff: timeOffMutations.approveTimeOff,
       upsertVendorEvent: vendorMutations.upsertVendorEvent,
     }),
     [
-      aiMutations,
       assign,
       shiftMutations,
       timeOffMutations,

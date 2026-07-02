@@ -64,14 +64,12 @@ export function useScheduleBoard({
     assign,
     unassign,
     createVendorEvent,
-    autoGenerateWeek,
     clearWeek,
     addUnavailability,
     requestTimeOff,
     bulkCreateShifts,
     copyWeek,
     publishWeek,
-    generateRecommendations,
   } = mutations;
   const { profile } = useProfile();
 
@@ -253,13 +251,6 @@ export function useScheduleBoard({
     [formattedWeekStart],
   );
 
-  const autoFillWeek = useCallback(async () => {
-    await autoGenerateWeek({
-      weekStart: formattedWeekStart,
-      preferences: { balance: true, fairness: true },
-    });
-  }, [autoGenerateWeek, formattedWeekStart]);
-
   const copyPreviousWeek = useCallback(async () => {
     await copyWeek({
       sourceWeekStart: formattedPreviousWeekStart,
@@ -395,16 +386,13 @@ export function useScheduleBoard({
       assign,
       unassign,
       createVendorEvent,
-      autoGenerateWeek,
       clearWeek,
       addUnavailability,
       requestTimeOff,
       bulkCreateShifts,
       copyWeek,
       publishWeek,
-      generateRecommendations,
       refetchAll,
-      autoFillWeek,
       copyPreviousWeek,
       clearCurrentWeek,
       publishWeekStatus,

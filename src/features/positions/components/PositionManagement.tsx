@@ -592,7 +592,7 @@ export default function PositionManagement() {
                   </CardContent>
                   <CardFooter className="flex justify-end">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to="/enhanced-scheduling">
+                      <Link to="/app/enhanced-scheduling">
                         Open Enhanced Scheduling
                       </Link>
                     </Button>

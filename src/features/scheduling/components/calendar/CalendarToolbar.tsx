@@ -31,7 +31,8 @@ type CalendarToolbarProps = {
   onToggleTemplates: () => void;
   onOpenWeekTemplates: () => void;
   onCopyPreviousWeek: () => void;
-  onAutoFillWeek: () => void;
+  onAutoScheduleWeek?: () => void;
+  autoScheduleDisabled?: boolean;
   onClearWeek: () => void;
   onPublishWeek: (published: boolean) => void;
   onExportWeekCsv: () => void;
@@ -41,6 +42,8 @@ type CalendarToolbarProps = {
   onOpenImportShifts: () => void;
   onOpenAddUnavailability: () => void;
   onOpenAddTimeOff: () => void;
+  readOnly?: boolean;
+  onOpenTimeOffPanel?: () => void;
 };
 
 export function CalendarToolbar({
@@ -55,7 +58,8 @@ export function CalendarToolbar({
   onToggleTemplates,
   onOpenWeekTemplates,
   onCopyPreviousWeek,
-  onAutoFillWeek,
+  onAutoScheduleWeek,
+  autoScheduleDisabled = false,
   onClearWeek,
   onPublishWeek,
   onExportWeekCsv,
@@ -65,6 +69,8 @@ export function CalendarToolbar({
   onOpenImportShifts,
   onOpenAddUnavailability,
   onOpenAddTimeOff,
+  readOnly = false,
+  onOpenTimeOffPanel,
 }: CalendarToolbarProps) {
   const uniqueUsers = new Set<string>();
   let totalMinutes = 0;
@@ -132,81 +138,98 @@ export function CalendarToolbar({
               >
                 Daily info
               </DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Templates</DropdownMenuLabel>
-              <DropdownMenuItem onClick={onToggleTemplates}>
-                Toggle role templates
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenWeekTemplates}>
-                Open week templates
-              </DropdownMenuItem>
+              {!readOnly && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Templates</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={onToggleTemplates}>
+                    Toggle role templates
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOpenWeekTemplates}>
+                    Open week templates
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Actions
+          {readOnly ? (
+            onOpenTimeOffPanel ? (
+              <Button variant="outline" size="sm" onClick={onOpenTimeOffPanel}>
+                Request time off
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuItem onClick={onCopyPreviousWeek}>
-                Copy previous week
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onAutoFillWeek}>
-                Auto assign week
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onClearWeek}>
-                Clear week
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onPublishWeek(true)}>
-                Publish week
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onPublishWeek(false)}>
-                Unpublish week
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onExportWeekCsv}>
-                Export CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onPrintWeek}>
-                Print week
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenWeekTemplates}>
-                Save week as template
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenWeekTemplates}>
-                Load week template
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            ) : null
+          ) : (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Actions
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuItem onClick={onCopyPreviousWeek}>
+                    Copy previous week
+                  </DropdownMenuItem>
+                  {onAutoScheduleWeek ? (
+                    <DropdownMenuItem
+                      onClick={onAutoScheduleWeek}
+                      disabled={autoScheduleDisabled}
+                      className="text-muted-foreground"
+                    >
+                      Auto-schedule week
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onClick={onClearWeek}>
+                    Clear week
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onPublishWeek(true)}>
+                    Publish week
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onPublishWeek(false)}>
+                    Unpublish week
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onExportWeekCsv}>
+                    Export CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onPrintWeek}>
+                    Print week
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onOpenWeekTemplates}>
+                    Week templates
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm">Add</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
-              <DropdownMenuItem onClick={onOpenAddShift}>
-                Add single shift
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenMultiAdd}>
-                Add multiple shifts
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenImportShifts}>
-                Import shifts from Excel
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenAddUnavailability}>
-                Add unavailability
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onOpenAddTimeOff}>
-                Add time off
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm">Add</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuItem onClick={onOpenAddShift}>
+                    Add single shift
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOpenMultiAdd}>
+                    Add multiple shifts
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onOpenImportShifts}>
+                    Import shifts from Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onOpenAddUnavailability}>
+                    Add unavailability
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOpenAddTimeOff}>
+                    Add time off
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
         </div>
       </CardTitle>
     </CardHeader>

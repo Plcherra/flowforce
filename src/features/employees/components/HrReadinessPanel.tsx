@@ -86,7 +86,7 @@ function buildReadinessItems(readiness: HrReadiness): ReadinessItem[] {
       label: "Availability",
       value: readiness.missingAvailability,
       detail: "Active teammates without availability on file.",
-      href: "/app/availability/manage",
+      href: "/app/enhanced-scheduling?panel=availability&availability=team",
       action: "Collect availability",
       icon: CalendarCheck,
       tone: countTone(readiness.missingAvailability),
@@ -291,7 +291,9 @@ export function HrReadinessPanel({
             </Button>
           )}
           <Button type="button" variant="outline" asChild>
-            <Link to="/app/availability/manage">Availability</Link>
+            <Link to="/app/enhanced-scheduling?panel=availability&availability=team">
+              Availability
+            </Link>
           </Button>
           <Button type="button" variant="outline" asChild>
             <Link to="/app/certifications">Certifications</Link>

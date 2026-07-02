@@ -233,7 +233,7 @@ export function ShiftDetailsPanel({
   }
 
   return (
-    <Card className="h-full">
+    <Card className="h-full" data-testid="shift-details-panel">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -639,7 +639,7 @@ export function ShiftDetailsPanel({
               disabled={loading}
             >
               <Eye className="mr-2 h-4 w-4" />
-              Publish Shift
+              Publish this shift only
             </Button>
           )}
 

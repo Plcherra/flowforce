@@ -1,7 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import ScheduleLobbyPage from "@/features/scheduling/pages/ScheduleLobby";
-
-export default function ScheduleLobby() {
-  return <ScheduleLobbyPage />;
+export default function ScheduleLobbyRedirectPage() {
+  redirect("/app/enhanced-scheduling");
 }

@@ -26,8 +26,8 @@ interface WeekGridProps {
   vendorEventsByShift: Map<string, VendorEventWithMetadata[]>;
   disabledDates: Map<string, Set<string>>;
   onShiftClick: (shiftId: string) => void;
-  onDrop: (event: React.DragEvent, day: Date, employeeId?: string) => void;
-  onDragOver: (event: React.DragEvent) => void;
+  onDrop?: (event: React.DragEvent, day: Date, employeeId?: string) => void;
+  onDragOver?: (event: React.DragEvent) => void;
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
 }
@@ -107,15 +107,17 @@ export function WeekGrid({
             return (
               <div
                 key={`unassigned-${day.toISOString()}`}
+                data-testid={`schedule-unassigned-day-${dayIso(day)}`}
                 className="border-l border-r relative min-h-[48px] p-1"
                 onDragOver={onDragOver}
-                onDrop={(event) => onDrop(event, day)}
+                onDrop={onDrop ? (event) => onDrop(event, day) : undefined}
               >
                 <div className="flex flex-wrap gap-1">
                   {shifts.map((schedule) => (
                     <button
                       type="button"
                       key={schedule.id}
+                      data-testid={`schedule-shift-${schedule.id}`}
                       className="relative z-10 rounded px-2 py-1 text-[11px] bg-background border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                       title={formatShiftWindow(schedule)}
                       onClick={() => onShiftClick(schedule.id)}
@@ -190,7 +192,11 @@ export function WeekGrid({
                     key={`${employee.id}-${day.toISOString()}`}
                     className="border-l border-r relative min-h-[64px] hover:bg-muted/20 transition-colors p-1"
                     onDragOver={onDragOver}
-                    onDrop={(event) => onDrop(event, day, employee.id)}
+                    onDrop={
+                      onDrop
+                        ? (event) => onDrop(event, day, employee.id)
+                        : undefined
+                    }
                   >
                     {isDisabled && (
                       <div className="absolute inset-0 bg-destructive/10 text-destructive text-[10px] flex items-start p-1 pointer-events-none z-5 border border-destructive/30">
@@ -202,6 +208,7 @@ export function WeekGrid({
                         <button
                           type="button"
                           key={schedule.id}
+                          data-testid={`schedule-shift-${schedule.id}`}
                           className="relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 bg-background border"
                           style={{
                             backgroundColor: `${schedule.color ?? "#3b82f6"}15`,
@@ -228,6 +235,7 @@ export function WeekGrid({
                             (event) => (
                               <div
                                 key={`${event.id}-chip`}
+                                data-testid={`schedule-vendor-chip-${event.id}`}
                                 className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
                                 style={{
                                   backgroundColor: `${getVendorColor(event.vendor_type)}15`,

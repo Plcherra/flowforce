@@ -97,7 +97,7 @@ export function OperationsHealthCard({
       description: t("dashboard.operationsSummary.viewScheduleDesc"),
     },
     {
-      to: "/app/scheduling/timeoff",
+      to: "/app/enhanced-scheduling?panel=timeoff",
       label: t("dashboard.operationsSummary.reviewTimeOff"),
       description: t("dashboard.operationsSummary.reviewTimeOffDesc"),
     },

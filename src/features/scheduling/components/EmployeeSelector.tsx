@@ -109,6 +109,7 @@ export function EmployeeSelector({
           {selectedEmployees.map((assignment) => (
             <div
               key={assignment.id}
+              data-testid={`employee-assignment-${assignment.user_id}`}
               className="flex items-center justify-between p-2 border rounded"
             >
               <div className="flex items-center gap-2">
@@ -145,7 +146,12 @@ export function EmployeeSelector({
       {/* Add employee button */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            data-testid="employee-selector-add"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Employee
           </Button>
