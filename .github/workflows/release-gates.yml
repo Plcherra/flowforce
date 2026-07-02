@@ -110,6 +110,11 @@ jobs:
       - name: Database tenant-isolation and storage tests
         run: npm run test:db:security
 
+      - name: Scheduling availability and grid unit tests
+        run: |
+          npm run test:scheduling-availability
+          npm run test:scheduling-grid
+
       - name: Typecheck source
         run: npm run typecheck:src
 

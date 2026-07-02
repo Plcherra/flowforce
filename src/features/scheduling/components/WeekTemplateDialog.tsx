@@ -205,7 +205,7 @@ export function WeekTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px]" data-testid="week-template-dialog">
         <DialogHeader>
           <DialogTitle>Week Templates</DialogTitle>
           <DialogDescription>
@@ -296,6 +296,7 @@ export function WeekTemplateDialog({
                             <Button
                               size="sm"
                               disabled={loading}
+                              data-testid={`week-template-load-${template.id}`}
                               onClick={() => handleLoadTemplate(template)}
                             >
                               Load Template
@@ -316,6 +317,7 @@ export function WeekTemplateDialog({
                 <Label htmlFor="template-name">Template Name</Label>
                 <Input
                   id="template-name"
+                  data-testid="week-template-name"
                   value={newTemplate.name}
                   onChange={(e) =>
                     setNewTemplate({ ...newTemplate, name: e.target.value })
@@ -372,6 +374,7 @@ export function WeekTemplateDialog({
                 onClick={handleSaveTemplate}
                 disabled={!newTemplate.name || loading}
                 className="w-full"
+                data-testid="week-template-save"
               >
                 <Save className="mr-2 h-4 w-4" />
                 {loading ? "Saving..." : "Save as Template"}

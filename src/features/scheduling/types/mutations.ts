@@ -17,6 +17,11 @@ export type ShiftInsertPayload = Omit<
   "company_id" | "created_by"
 >;
 
+export type SchedulingMutationOptions = {
+  refresh?: boolean;
+  silent?: boolean;
+};
+
 export interface SchedulingMutations {
   createSchedule: (
     payload: ShiftInsertPayload,
@@ -24,14 +29,20 @@ export interface SchedulingMutations {
   updateSchedule: (
     id: string,
     updates: TablesUpdate<"schedules">,
+    options?: SchedulingMutationOptions,
   ) => Promise<Tables<"schedules"> | null>;
   deleteSchedule: (id: string) => Promise<boolean>;
   assign: (
     shiftId: string,
     userId: string,
     status?: string,
+    options?: SchedulingMutationOptions,
   ) => Promise<boolean>;
-  unassign: (shiftId: string, userId: string) => Promise<boolean>;
+  unassign: (
+    shiftId: string,
+    userId: string,
+    options?: SchedulingMutationOptions,
+  ) => Promise<boolean>;
   createVendorEvent: (
     payload: VendorEventUpsertInput,
   ) => Promise<VendorEventWithMetadata | null>;

@@ -12,6 +12,16 @@ const importTs = jiti(import.meta.url, {
 const { runScheduleAvailabilityEngineTests } = importTs(
   "../src/features/scheduling/services/availability/scheduleAvailabilityEngine.test.ts",
 );
+const { runCopilotSchedulerPlanTests } = importTs(
+  "../src/features/scheduling/hooks/copilotSchedulerPlan.test.ts",
+);
+const { runScheduleReadinessTests } = importTs(
+  "../src/features/scheduling/utils/scheduleReadiness.test.ts",
+);
 
 runScheduleAvailabilityEngineTests();
 console.log("scheduleAvailabilityEngine tests passed");
+runCopilotSchedulerPlanTests();
+console.log("copilotSchedulerPlan tests passed");
+runScheduleReadinessTests();
+console.log("scheduleReadiness tests passed");

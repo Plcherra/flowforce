@@ -66,6 +66,18 @@ if (schedulingIndex.includes("types/tabs")) {
   fail("scheduling/index.ts should export types/panels instead of deprecated types/tabs");
 }
 
+mustExist("supabase/tests/schedule_availability_validation.test.sql");
+
+const packageJson = readText("package.json");
+if (
+  !packageJson.includes("schedule_availability_validation.test.sql") ||
+  !packageJson.includes("test:scheduling-availability")
+) {
+  fail(
+    "package.json test:scheduling-availability should run supabase/tests/schedule_availability_validation.test.sql",
+  );
+}
+
 if (errors.length > 0) {
   console.error("Scheduling workflow contract check failed:\n");
   for (const error of errors) {

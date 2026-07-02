@@ -5,6 +5,7 @@ import {
   ensureSchedulingPlaywrightTenant,
   SCHEDULING_PW_TENANT,
 } from './helpers/schedulingPlaywrightTenant';
+import { dragDndKit } from './helpers/dndKitDrag';
 
 const SHOULD_RUN = process.env.PLAYWRIGHT_SMOKE === '1';
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -15,6 +16,9 @@ type SeedHandles = {
   timeOffId: string;
   eventDate: string;
   availabilityId?: string;
+  pendingTimeOffId?: string;
+  weekTemplateId?: string;
+  virtualEmployeeIds?: string[];
 };
 
 function isoWeekStart(date: dayjs.Dayjs) {
@@ -72,6 +76,103 @@ async function seedStaffFullDayAvailability(
   });
 
   return { availabilityId, weekStart, dayIso: today.format('YYYY-MM-DD') };
+}
+
+async function seedStaffAvailabilityForDay(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+  day: dayjs.Dayjs,
+  suffix: string,
+) {
+  const availabilityId = `pw-avail-${suffix}-${day.valueOf()}`;
+  const weekStart = isoWeekStart(day);
+
+  await client.from('staff_availability').upsert({
+    id: availabilityId,
+    user_id: userId,
+    company_id: companyId,
+    day_of_week: dayOfWeekIndex(day),
+    start_time: '06:00',
+    end_time: '21:00',
+    week_start_date: weekStart,
+    is_preferred: true,
+  });
+
+  return { availabilityId, dayIso: day.format('YYYY-MM-DD') };
+}
+
+async function seedStaffPendingPto(
+  client: SupabaseClient,
+  userId: string,
+  companyId: string,
+  eventDate: string,
+) {
+  const pendingTimeOffId = `pw-pending-pto-${Date.now()}`;
+  await client.from('time_off_requests').upsert({
+    id: pendingTimeOffId,
+    user_id: userId,
+    company_id: companyId,
+    start_date: eventDate,
+    end_date: eventDate,
+    status: 'pending',
+    type: 'pto',
+    reason: 'Playwright pending PTO seed',
+  });
+  return pendingTimeOffId;
+}
+
+async function seedViolatingAssignment(
+  client: SupabaseClient,
+  shiftId: string,
+  userId: string,
+) {
+  await client
+    .from('schedule_assignments')
+    .delete()
+    .eq('schedule_id', shiftId)
+    .eq('user_id', userId);
+  const { error } = await client.from('schedule_assignments').insert({
+    schedule_id: shiftId,
+    user_id: userId,
+    company_id: SCHEDULING_PW_TENANT.companyId,
+    status: 'assigned',
+  });
+  if (error) throw error;
+}
+
+async function seedVirtualEmployees(client: SupabaseClient, count: number) {
+  const ids: string[] = [];
+  const now = new Date().toISOString();
+
+  for (let index = 0; index < count; index += 1) {
+    const id = `c1000000-0000-4000-8000-${String(200 + index).padStart(12, '0')}`;
+    ids.push(id);
+    await client.from('profiles').upsert({
+      id,
+      company_id: SCHEDULING_PW_TENANT.companyId,
+      first_name: 'Virtual',
+      last_name: `Emp${index}`,
+      email: `virtual-emp-${index}@example.test`,
+      role: 'staff',
+      employment_status: 'active',
+      updated_at: now,
+    });
+    await client.from('company_members').upsert({
+      company_id: SCHEDULING_PW_TENANT.companyId,
+      user_id: id,
+      role: 'staff',
+      added_at: now,
+    });
+  }
+
+  return ids;
+}
+
+async function clearVirtualEmployees(client: SupabaseClient, ids: string[]) {
+  if (ids.length === 0) return;
+  await client.from('company_members').delete().in('user_id', ids);
+  await client.from('profiles').delete().in('id', ids);
 }
 
 async function createSupabaseAdmin(): Promise<SupabaseClient> {
@@ -146,6 +247,15 @@ async function clearSchedulingFixtures(client: SupabaseClient, handles: SeedHand
   if (handles.availabilityId) {
     await client.from('staff_availability').delete().eq('id', handles.availabilityId);
   }
+  if (handles.pendingTimeOffId) {
+    await client.from('time_off_requests').delete().eq('id', handles.pendingTimeOffId);
+  }
+  if (handles.weekTemplateId) {
+    await client.from('week_templates').delete().eq('id', handles.weekTemplateId);
+  }
+  if (handles.virtualEmployeeIds?.length) {
+    await clearVirtualEmployees(client, handles.virtualEmployeeIds);
+  }
 }
 
 async function login(page: Page, email: string, password: string) {
@@ -165,6 +275,16 @@ async function toggleRoleTemplates(page: Page) {
   await page.getByRole('button', { name: 'View options' }).click();
   await page.getByRole('menuitem', { name: 'Toggle role templates' }).click();
   await expect(page.getByText('Role Templates')).toBeVisible();
+}
+
+async function openActionsMenu(page: Page) {
+  await page.getByRole('button', { name: 'Actions' }).click();
+}
+
+async function openWeekTemplatesDialog(page: Page) {
+  await openActionsMenu(page);
+  await page.getByRole('menuitem', { name: 'Week templates' }).click();
+  await expect(page.getByTestId('week-template-dialog')).toBeVisible();
 }
 
 const HAS_SUPABASE_CREDS = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -357,6 +477,208 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByTestId(`schedule-shift-${staffSeed.shiftId}`)).toBeVisible();
 
     await clearSchedulingFixtures(adminClient, staffSeed);
+  });
+
+  test('pending PTO assign returns warning and still inserts assignment', async ({
+    page,
+  }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffFullDayAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+    seedHandles.pendingTimeOffId = await seedStaffPendingPto(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+      seedHandles.eventDate,
+    );
+
+    await page.reload();
+    await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
+    await page.getByTestId('employee-selector-add').click();
+    await page.getByRole('option', { name: /Scheduling Staff/i }).click();
+
+    await expect(page.getByText('Assigned with warning')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.getByTestId(`employee-assignment-${SCHEDULING_PW_TENANT.staffId}`),
+    ).toBeVisible();
+  });
+
+  test('publish week blocked when assignment violates availability window', async ({
+    page,
+  }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffPartialAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+    await seedViolatingAssignment(
+      adminClient,
+      seedHandles.shiftId,
+      SCHEDULING_PW_TENANT.staffId,
+    );
+
+    await page.reload();
+    await openActionsMenu(page);
+    await page.getByRole('menuitem', { name: 'Publish week' }).click();
+    await expect(page.getByText('Publish blocked')).toBeVisible({ timeout: 15_000 });
+  });
+
+  test('readiness panel shows availability conflicts from engine rules', async ({
+    page,
+  }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const availabilitySeed = await seedStaffPartialAvailability(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+    );
+    seedHandles.availabilityId = availabilitySeed.availabilityId;
+    await seedViolatingAssignment(
+      adminClient,
+      seedHandles.shiftId,
+      SCHEDULING_PW_TENANT.staffId,
+    );
+
+    await page.reload();
+    const conflictsPill = page.getByTestId('schedule-readiness-pill-conflicts');
+    await expect(conflictsPill).toBeVisible();
+    await expect(conflictsPill).not.toContainText(/^0\s*conflicts/i);
+    await page.getByRole('button', { name: 'Details' }).click();
+    await expect(
+      page.locator('[data-testid^="schedule-readiness-conflict-"]').first(),
+    ).toContainText(/availability/i);
+  });
+
+  test('shift drag moves assigned shift to another employee', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    await seedViolatingAssignment(
+      adminClient,
+      seedHandles.shiftId,
+      SCHEDULING_PW_TENANT.staffId,
+    );
+    const staffAvail = await seedStaffAvailabilityForDay(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+      dayjs(seedHandles.eventDate),
+      'staff',
+    );
+    const managerAvail = await seedStaffAvailabilityForDay(
+      adminClient,
+      SCHEDULING_PW_TENANT.managerId,
+      SCHEDULING_PW_TENANT.companyId,
+      dayjs(seedHandles.eventDate),
+      'manager',
+    );
+    seedHandles.availabilityId = staffAvail.availabilityId;
+
+    await page.reload();
+    const sourceChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).first();
+    const targetCell = page.getByTestId(
+      `schedule-cell-${SCHEDULING_PW_TENANT.managerId}-${managerAvail.dayIso}`,
+    );
+    await dragDndKit(page, sourceChip, targetCell);
+    await expect(page.getByText('Shift moved')).toBeVisible({ timeout: 15_000 });
+
+    await adminClient.from('staff_availability').delete().eq('id', managerAvail.availabilityId);
+  });
+
+  test('shift drag blocked when target day is off for employee', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    await seedViolatingAssignment(
+      adminClient,
+      seedHandles.shiftId,
+      SCHEDULING_PW_TENANT.staffId,
+    );
+    const staffAvail = await seedStaffAvailabilityForDay(
+      adminClient,
+      SCHEDULING_PW_TENANT.staffId,
+      SCHEDULING_PW_TENANT.companyId,
+      dayjs(seedHandles.eventDate),
+      'staff-today',
+    );
+    seedHandles.availabilityId = staffAvail.availabilityId;
+
+    const tomorrow = dayjs(seedHandles.eventDate).add(1, 'day');
+    await page.reload();
+
+    const sourceChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).first();
+    const offDayCell = page.getByTestId(
+      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${tomorrow.format('YYYY-MM-DD')}`,
+    );
+    await dragDndKit(page, sourceChip, offDayCell);
+    await expect(page.getByText('Cannot move shift')).toBeVisible({ timeout: 15_000 });
+    await expect(sourceChip).toBeVisible();
+  });
+
+  test('week template save clear and load round-trip restores shifts', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    const templateName = `PW Template ${Date.now()}`;
+
+    await openWeekTemplatesDialog(page);
+    await page.getByRole('tab', { name: 'Save Template' }).click();
+    await page.getByTestId('week-template-name').fill(templateName);
+    await page.getByTestId('week-template-save').click();
+    await expect(page.getByText('Template saved')).toBeVisible({ timeout: 15_000 });
+
+    const { data: templateRow } = await adminClient
+      .from('week_templates')
+      .select('id')
+      .eq('company_id', SCHEDULING_PW_TENANT.companyId)
+      .eq('name', templateName)
+      .maybeSingle();
+    if (templateRow?.id) {
+      seedHandles.weekTemplateId = templateRow.id;
+    }
+
+    page.once('dialog', (dialog) => dialog.accept());
+    await openActionsMenu(page);
+    await page.getByRole('menuitem', { name: 'Clear week' }).click();
+
+    await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toHaveCount(0, {
+      timeout: 15_000,
+    });
+
+    await openWeekTemplatesDialog(page);
+    if (templateRow?.id) {
+      await page.getByTestId(`week-template-load-${templateRow.id}`).click();
+    } else {
+      await page.getByRole('button', { name: 'Load Template' }).first().click();
+    }
+
+    await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+
+  test('virtualized grid renders and scrolls for 55 employees', async ({ page }) => {
+    if (!adminClient || !seedHandles) return;
+
+    seedHandles.virtualEmployeeIds = await seedVirtualEmployees(adminClient, 55);
+
+    await page.reload();
+    await expect(page.getByTestId('schedule-grid-scroll')).toBeVisible();
+    await expect(page.getByTestId('schedule-grid-virtual-body')).toBeVisible();
+
+    await page.getByTestId('schedule-grid-scroll').evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+
+    await expect(page.locator('[data-index]').first()).toBeVisible();
   });
 });
 

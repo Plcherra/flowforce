@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
@@ -138,7 +138,7 @@ function AvailabilityCellOverlay({
   );
 }
 
-function GridCell({
+function GridCellComponent({
   employeeId,
   day,
   cell,
@@ -233,7 +233,7 @@ function GridCell({
   );
 }
 
-function EmployeeRow({
+function EmployeeRowComponent({
   employee,
   weekDays,
   shiftsByEmployeeDay,
@@ -308,6 +308,9 @@ function EmployeeRow({
   );
 }
 
+const GridCell = memo(GridCellComponent);
+const EmployeeRow = memo(EmployeeRowComponent);
+
 export function WeekGrid({
   weekDays,
   employees,
@@ -366,27 +369,45 @@ export function WeekGrid({
     enabled: employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD,
   });
 
-  const html5DropForCell = (day: Date, employeeId?: string) => ({
-    onDragOver,
-    onDrop: onDrop ? (event: React.DragEvent) => onDrop(event, day, employeeId) : undefined,
-  });
+  const html5DropForCell = useCallback(
+    (day: Date, employeeId?: string) => ({
+      onDragOver,
+      onDrop: onDrop ? (event: React.DragEvent) => onDrop(event, day, employeeId) : undefined,
+    }),
+    [onDragOver, onDrop],
+  );
 
-  const renderEmployeeRow = (employee: EmployeeSummary) => (
-    <EmployeeRow
-      key={employee.id}
-      employee={employee}
-      weekDays={weekDays}
-      shiftsByEmployeeDay={shiftsByEmployeeDay}
-      cellAvailability={cellAvailability}
-      conflictByShiftId={conflictByShiftId}
-      vendorEventsByShift={vendorEventsByShift}
-      showAvailabilityLayer={showAvailabilityLayer}
-      enableShiftDrag={enableShiftDrag}
-      html5DropForCell={html5DropForCell}
-      onShiftClick={onShiftClick}
-      getVendorLabel={getVendorLabel}
-      getVendorColor={getVendorColor}
-    />
+  const renderEmployeeRow = useCallback(
+    (employee: EmployeeSummary) => (
+      <EmployeeRow
+        key={employee.id}
+        employee={employee}
+        weekDays={weekDays}
+        shiftsByEmployeeDay={shiftsByEmployeeDay}
+        cellAvailability={cellAvailability}
+        conflictByShiftId={conflictByShiftId}
+        vendorEventsByShift={vendorEventsByShift}
+        showAvailabilityLayer={showAvailabilityLayer}
+        enableShiftDrag={enableShiftDrag}
+        html5DropForCell={html5DropForCell}
+        onShiftClick={onShiftClick}
+        getVendorLabel={getVendorLabel}
+        getVendorColor={getVendorColor}
+      />
+    ),
+    [
+      cellAvailability,
+      conflictByShiftId,
+      enableShiftDrag,
+      getVendorColor,
+      getVendorLabel,
+      html5DropForCell,
+      onShiftClick,
+      shiftsByEmployeeDay,
+      showAvailabilityLayer,
+      vendorEventsByShift,
+      weekDays,
+    ],
   );
 
   return (
@@ -437,6 +458,7 @@ export function WeekGrid({
         <div className="relative">
           {employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD ? (
             <div
+              data-testid="schedule-grid-virtual-body"
               style={{
                 height: virtualizer.getTotalSize(),
                 position: "relative",

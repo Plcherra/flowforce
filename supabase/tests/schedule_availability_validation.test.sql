@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(7);
+select plan(9);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -199,6 +199,51 @@ select is(
   'warning',
   'Pending PTO allows assign with warning severity'
 );
+
+select set_config('request.jwt.claim.role', 'service_role', true);
+reset role;
+
+insert into public.schedule_assignments (
+  schedule_id,
+  user_id,
+  status,
+  assigned_by,
+  assigned_at
+)
+values (
+  '3d000000-0000-4000-8000-000000000002',
+  '2d000000-0000-4000-8000-000000000002',
+  'assigned',
+  '2d000000-0000-4000-8000-000000000001',
+  now()
+);
+
+select set_config('request.jwt.claim.sub', '2d000000-0000-4000-8000-000000000001', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+
+select is(
+  (public.publish_schedules_week_with_validation(
+    '1d000000-0000-4000-8000-000000000001',
+    '2026-07-06T00:00:00+00'::timestamptz,
+    '2026-07-13T00:00:00+00'::timestamptz,
+    true
+  ) ->> 'success')::boolean,
+  false,
+  'Publish week blocked when assignment violates availability window'
+);
+
+select ok(
+  (public.publish_schedules_week_with_validation(
+    '1d000000-0000-4000-8000-000000000001',
+    '2026-07-06T00:00:00+00'::timestamptz,
+    '2026-07-13T00:00:00+00'::timestamptz,
+    true
+  ) ->> 'blocking_count')::integer >= 1,
+  'Publish week reports blocking_count when availability conflicts exist'
+);
+
+delete from public.schedule_assignments
+where schedule_id = '3d000000-0000-4000-8000-000000000002';
 
 select is(
   (public.publish_schedules_week_with_validation(

@@ -322,6 +322,7 @@ export function DragDropScheduleCalendar({
 
           <div
             ref={gridScrollRef}
+            data-testid="schedule-grid-scroll"
             className="min-h-[60vh] flex-1 overflow-auto lg:min-h-[calc(100dvh-220px)]"
           >
             <DndContext

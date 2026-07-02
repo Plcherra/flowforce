@@ -94,11 +94,16 @@
 
 ### Phase 2 verification
 
-- [ ] `assign_schedule_with_validation` blocks off-day assign (SQL + Playwright)
-- [ ] Pending PTO assign returns warning severity, still inserts
-- [ ] Publish week blocked when assigned shift violates availability window
-- [ ] Smart Fill skips employees with no `staff_availability` for slot day
-- [ ] Readiness panel shows availability conflicts using engine rules
+- [x] `assign_schedule_with_validation` blocks off-day assign (SQL + Playwright)
+- [x] Pending PTO assign returns warning severity, still inserts
+- [x] Publish week blocked when assigned shift violates availability window
+- [x] Smart Fill skips employees with no `staff_availability` for slot day
+- [x] Readiness panel shows availability conflicts using engine rules
+
+**Proof**:
+- SQL: `supabase/tests/schedule_availability_validation.test.sql`
+- Unit: `copilotSchedulerPlan.test.ts`, `scheduleReadiness.test.ts`
+- Playwright: `tests/playwright/scheduling-smoke.spec.ts`
 
 ---
 
@@ -143,6 +148,47 @@
 | Modify | `src/features/scheduling/components/WeekTemplateDialog.tsx` |
 | Modify | `tests/playwright/scheduling-smoke.spec.ts` |
 | Modify | `package.json` — `@dnd-kit/core`, `@dnd-kit/utilities`, `@tanstack/react-virtual` |
+
+---
+
+### Phase 4 — Grid trust, coverage & CI parity
+
+**Target audit**: 85–92 / 100 (ConnectTeam-competitive scheduling)
+
+**Status**: Completed (2026-07-02)
+
+- [x] Phase 2 verification closed (SQL + unit + Playwright)
+- [x] Shift drag E2E (`dndKitDrag` helper, happy + blocked paths)
+- [x] Week template save → clear → load round-trip E2E
+- [x] Virtualization smoke (55 employees)
+- [x] Targeted cache invalidation after shift move (`refresh: false` on drag mutations)
+- [x] Memoized `EmployeeRow` / `GridCell`
+- [x] `test:scheduling-availability` + `test:scheduling-grid` in release gates
+- [ ] HTML5 palette → unified `DndContext` (deferred post-Phase 4)
+
+**Verification**:
+- `npm run test:scheduling-availability` (engine + plan + readiness + SQL RPC tests)
+- `npm run test:scheduling-grid`
+- `PLAYWRIGHT_SMOKE=1 npm run test:playwright -- tests/playwright/scheduling-smoke.spec.ts`
+
+**Phase 4 file map**
+
+| Action | Path |
+|--------|------|
+| Modify | `supabase/tests/schedule_availability_validation.test.sql` |
+| Create | `src/features/scheduling/hooks/copilotSchedulerPlan.test.ts` |
+| Create | `src/features/scheduling/utils/scheduleReadiness.test.ts` |
+| Create | `tests/playwright/helpers/dndKitDrag.ts` |
+| Modify | `tests/playwright/scheduling-smoke.spec.ts` |
+| Modify | `src/features/scheduling/hooks/useSchedulingConsolidated.ts` |
+| Modify | `src/features/scheduling/hooks/useShiftMutations.ts` |
+| Modify | `src/features/scheduling/hooks/useShiftDragDrop.tsx` |
+| Modify | `src/features/scheduling/components/drag-drop/WeekGrid.tsx` |
+| Modify | `src/features/scheduling/components/ScheduleReadinessPanel.tsx` |
+| Modify | `src/features/scheduling/components/WeekTemplateDialog.tsx` |
+| Modify | `scripts/test-schedule-availability-engine.mjs` |
+| Modify | `scripts/check-scheduling-workflow-contract.mjs` |
+| Modify | `package.json`, `.github/workflows/release-gates.yml` |
 
 ---
 

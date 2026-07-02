@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { GridCellAvailability } from "@/types/platform";
+import type { SchedulingMutationOptions } from "@/features/scheduling/types/mutations";
 import { moveShift } from "@/features/scheduling/services/moveShift";
 import { ShiftChipOverlay } from "@/features/scheduling/components/drag-drop/ShiftChip";
 
@@ -18,9 +19,19 @@ interface UseShiftDragDropParams {
   updateSchedule: (
     id: string,
     updates: { start_time: string; end_time: string },
+    options?: SchedulingMutationOptions,
   ) => Promise<unknown>;
-  assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
-  unassign: (shiftId: string, userId: string) => Promise<boolean>;
+  assign: (
+    shiftId: string,
+    userId: string,
+    status?: string,
+    options?: SchedulingMutationOptions,
+  ) => Promise<boolean>;
+  unassign: (
+    shiftId: string,
+    userId: string,
+    options?: SchedulingMutationOptions,
+  ) => Promise<boolean>;
   refetchAll: () => Promise<void>;
   getCellAvailability?: (
     employeeId: string,
@@ -39,6 +50,10 @@ export function useShiftDragDrop({
   conflictByShiftId,
 }: UseShiftDragDropParams) {
   const { toast } = useToast();
+  const dragMutationOptions: SchedulingMutationOptions = {
+    refresh: false,
+    silent: true,
+  };
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(
     null,
   );
@@ -83,9 +98,12 @@ export function useShiftDragDrop({
         sourceEmployeeId,
         targetEmployeeId,
         targetDay,
-        updateSchedule,
-        assign,
-        unassign,
+        updateSchedule: (id, updates) =>
+          updateSchedule(id, updates, dragMutationOptions),
+        assign: (shiftId, userId, status) =>
+          assign(shiftId, userId, status, dragMutationOptions),
+        unassign: (shiftId, userId) =>
+          unassign(shiftId, userId, dragMutationOptions),
         getCellAvailability,
       });
 

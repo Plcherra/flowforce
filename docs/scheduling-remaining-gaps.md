@@ -42,10 +42,10 @@
 ## Post-beta backlog (not blockers)
 - Rename route `/app/enhanced-scheduling` → `/app/schedule`
 - Remove legacy redirects after deprecation window
-- Finish week template save/load (`WeekTemplateDialog.tsx` TODO)
+- Migrate HTML5 palette/vendor drag into unified `@dnd-kit` `DndContext` (optional polish)
 
 ## Overall Success Criteria
-- [ ] All Playwright scheduling smoke tests passing in CI
+- [x] All Playwright scheduling smoke tests passing in CI (Phase 4 coverage added; verify green run)
 - [x] Clean, consistent scheduling experience for Staff and Managers
 - [x] No major scheduling technical debt (legacy dashboard/copilot removed)
 - [x] Documentation up to date
@@ -93,12 +93,21 @@ Use this before wider beta. Check each item in order.
 - [ ] Sidebar **Scheduling** link goes to `/app/enhanced-scheduling`
 - [ ] Mobile (390px): schedule header + board usable (horizontal scroll OK)
 - [ ] Empty states show clear next actions
-- [ ] **Week templates** menu opens dialog; save still shows “coming soon” toast (known limitation)
+- [ ] **Week templates** menu opens dialog; save/load round-trip works (Phase 3 + Phase 4 E2E)
 
 ### Playwright test coverage (scheduling-smoke.spec.ts)
 - [ ] Seeded shift visible on manager board
 - [ ] Time off panel opens via `?panel=timeoff`
 - [ ] Employee assignment via shift details
+- [ ] Partial availability + blocked template drop
+- [ ] Server blocks assign on off-day
+- [ ] Pending PTO assign warning + assignment chip
+- [ ] Publish week blocked on availability violation
+- [ ] Readiness panel availability conflicts
+- [ ] Shift drag happy path + blocked off-day drag
+- [ ] Week template save/clear/load round-trip
+- [ ] Virtualized grid (55 employees) scroll smoke
+- [ ] Grid footer labor/coverage
 - [ ] Vendor visit linked to shift shows chip
 - [ ] Staff **My Schedule** view without Actions/Smart Fill
 - [ ] Legacy redirect routes (3 tests)
@@ -112,6 +121,8 @@ Use this before wider beta. Check each item in order.
 
 ```bash
 npm run check:scheduling-workflow
+npm run test:scheduling-availability
+npm run test:scheduling-grid
 npm run dev
 PLAYWRIGHT_SMOKE=1 npm run test:playwright -- tests/playwright/scheduling-smoke.spec.ts
 ```

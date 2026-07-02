@@ -113,6 +113,7 @@ function ReadinessPill({
       type="button"
       onClick={() => onAction?.(item.actionTarget)}
       className={className}
+      data-testid={`schedule-readiness-pill-${item.label}`}
     >
       {content}
     </button>
@@ -148,6 +149,7 @@ function ReadinessDetails({
             {conflicts.slice(0, 4).map((conflict) => (
               <div
                 key={conflict.id}
+                data-testid={`schedule-readiness-conflict-${conflict.id}`}
                 className="rounded-md border bg-background p-2 text-xs"
               >
                 <Badge

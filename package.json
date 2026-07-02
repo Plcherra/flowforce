@@ -20,7 +20,7 @@
     "verify": "npm run typecheck && npm run build:local && npm run lint",
     "test:smoke": "node scripts/smoke-visible-modules.mjs",
     "test:playwright": "playwright test",
-    "test:scheduling-availability": "node scripts/test-schedule-availability-engine.mjs",
+    "test:scheduling-availability": "node scripts/test-schedule-availability-engine.mjs && supabase test db --local supabase/tests/schedule_availability_validation.test.sql",
     "test:scheduling-grid": "node scripts/test-week-template-serializer.mjs && node scripts/test-move-shift.mjs",
     "perf:baseline": "node scripts/run-performance-load-baseline.mjs",
     "check:supabase": "node scripts/check-supabase-contract.mjs",

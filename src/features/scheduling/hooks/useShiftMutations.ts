@@ -23,7 +23,7 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { ShiftInsertPayload } from "../types/mutations";
+import type { ShiftInsertPayload, SchedulingMutationOptions } from "../types/mutations";
 import type { ShiftUpsertInput } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
   Tables,
@@ -45,7 +45,10 @@ interface UseShiftMutationsProps {
   /** Function to refetch all scheduling data after mutations */
   refetchAll: () => Promise<void>;
   /** Function to upsert a shift in the database */
-  upsertShift: (input: ShiftUpsertInput) => Promise<Tables<"schedules"> | null>;
+  upsertShift: (
+    input: ShiftUpsertInput,
+    options?: SchedulingMutationOptions,
+  ) => Promise<Tables<"schedules"> | null>;
   /** Function to ensure company context is available (throws if not) */
   ensureCompanyContext: () => void;
 }
@@ -103,18 +106,25 @@ export function useShiftMutations({
    * @returns Updated shift record or null if failed/fallback mode
    */
   const updateSchedule = useCallback(
-    async (id: string, updates: TablesUpdate<"schedules">) => {
+    async (
+      id: string,
+      updates: TablesUpdate<"schedules">,
+      options?: SchedulingMutationOptions,
+    ) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
         return null;
       }
 
       try {
-        const result = await upsertShift({
-          id,
-          ...updates,
-        } as ShiftUpsertInput);
-        if (result) {
+        const result = await upsertShift(
+          {
+            id,
+            ...updates,
+          } as ShiftUpsertInput,
+          options,
+        );
+        if (result && !options?.silent) {
           toast({
             title: "Shift updated",
             description: "Shift details saved successfully.",

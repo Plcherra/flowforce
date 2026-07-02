@@ -27,6 +27,7 @@ import {
   upsertVendorEvent as upsertVendorEventRecord,
 } from "@/features/scheduling/repositories/schedulingRepository";
 import type { Tables } from "@/integrations/supabase/public-types";
+import type { SchedulingMutationOptions } from "@/features/scheduling/types/mutations";
 
 interface SchedulingConsolidatedResult {
   shifts: ShiftWithAssignments[];
@@ -43,10 +44,16 @@ interface SchedulingConsolidatedResult {
     shiftId: string,
     userId: string,
     status?: string,
+    options?: SchedulingMutationOptions,
   ) => Promise<boolean>;
-  unassign: (shiftId: string, userId: string) => Promise<boolean>;
+  unassign: (
+    shiftId: string,
+    userId: string,
+    options?: SchedulingMutationOptions,
+  ) => Promise<boolean>;
   upsertShift: (
     payload: ShiftUpsertInput,
+    options?: SchedulingMutationOptions,
   ) => Promise<Tables<"schedules"> | null>;
   upsertVendorEvent: (
     payload: VendorEventUpsertInput,
@@ -215,7 +222,12 @@ export function useSchedulingConsolidated(
   }, [queryClient, schedulesQueryKey]);
 
   const assign = useCallback(
-    async (shiftId: string, userId: string, status: string = "assigned") => {
+    async (
+      shiftId: string,
+      userId: string,
+      status: string = "assigned",
+      options?: SchedulingMutationOptions,
+    ) => {
       try {
         ensureCompanyContext();
 
@@ -225,8 +237,14 @@ export function useSchedulingConsolidated(
           status,
           user?.id ?? null,
         );
-        await refetchAll();
-        if (result.severity === "warning" && result.reasons?.length) {
+        if (options?.refresh !== false) {
+          await refetchAll();
+        }
+        if (
+          !options?.silent &&
+          result.severity === "warning" &&
+          result.reasons?.length
+        ) {
           toast({
             title: "Assigned with warning",
             description: result.reasons.join(" "),
@@ -250,12 +268,18 @@ export function useSchedulingConsolidated(
   );
 
   const unassign = useCallback(
-    async (shiftId: string, userId: string) => {
+    async (
+      shiftId: string,
+      userId: string,
+      options?: SchedulingMutationOptions,
+    ) => {
       try {
         ensureCompanyContext();
 
         await unassignUserFromShift(shiftId, userId);
-        await refetchAll();
+        if (options?.refresh !== false) {
+          await refetchAll();
+        }
         return true;
       } catch (err) {
         const message =
@@ -274,7 +298,7 @@ export function useSchedulingConsolidated(
   );
 
   const upsertShift = useCallback(
-    async (payload: ShiftUpsertInput) => {
+    async (payload: ShiftUpsertInput, options?: SchedulingMutationOptions) => {
       try {
         ensureCompanyContext();
 
@@ -289,7 +313,9 @@ export function useSchedulingConsolidated(
           company_id: payload.company_id ?? companyId ?? null,
           created_by: payload.created_by ?? user?.id ?? null,
         });
-        await refetchAll();
+        if (options?.refresh !== false) {
+          await refetchAll();
+        }
         return record;
       } catch (err) {
         const message =
