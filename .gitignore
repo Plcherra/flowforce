@@ -31,7 +31,14 @@ dist-ssr
 *.sw?
 .next/
 
-# Reports
+# Test and CI artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# Local log extraction scratch (do not commit)
+.tmp-deploy-logs/
+.tmp-gates-logs/
 reports/*
 !reports/refactor-backlog.md
 !reports/cleanup-phase3-summary.md
