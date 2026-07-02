@@ -174,14 +174,7 @@ export interface TenantManagementSettings {
   activeSeats: number;
   maxSeats: number;
   plan: string;
-  accountStatus: "trialing" | "active" | "past_due" | "suspended" | "disabled";
-  subscriptionStatus:
-    | "none"
-    | "trialing"
-    | "active"
-    | "past_due"
-    | "canceled"
-    | "unpaid";
+  billingStatus: "trial" | "active" | "deactivated";
   billingEmail?: string | null;
   currentPeriodEndsAt?: string | null;
   trialEndsAt?: string | null;

@@ -31,6 +31,7 @@ export const AUDIT_ACTIONS = {
   userStatusUpdated: "user.status_updated",
   permissionOverridesUpdated: "permission.overrides_updated",
   settingsUpdated: "system_settings.updated",
+  billingTrialExpired: "billing.trial_expired",
   supportTenantDiagnosticsViewed: "support.tenant_diagnostics_viewed",
   supportTenantRepairExecuted: "support.tenant_repair_executed",
   aiInsightGenerated: "ai.insight.generated",
@@ -145,6 +146,14 @@ export const AUDIT_EVENT_DEFINITIONS: AuditEventDefinition[] = [
     severity: "warning",
     description:
       "System settings were changed, including billing, integration, AI, security, or company configuration.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.billingTrialExpired,
+    category: "billing",
+    severity: "warning",
+    description:
+      "A workspace trial ended and billing status was set to deactivated.",
     retention: "extended",
   },
   {

@@ -24,6 +24,7 @@ test.describe('System settings workflow', () => {
       { label: 'Notifications', locator: /Notification Center/i },
       { label: 'AI Co-Pilot', locator: /AI Co-Pilot/i },
       { label: 'Integrations', locator: /Integrations/i },
+      { label: 'Billing', locator: /Workspace billing/i },
       { label: 'Admin', locator: /Tenant management/i },
     ];
 
@@ -49,6 +50,33 @@ test.describe('System settings workflow', () => {
     await page.getByLabel('Company Description').fill(originalDescription);
     await page.getByRole('button', { name: /save changes/i }).click();
     await expect(page.getByText(/General settings saved/i)).toBeVisible({ timeout: 30_000 });
+  });
+
+  test('shows billing summary and pricing action when workspace is not active', async ({
+    page,
+  }) => {
+    await page.goto('/auth');
+
+    await page.getByLabel(/email/i).fill(email!);
+    await page.getByLabel(/password/i).fill(password!);
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    await page.waitForURL('**/app/dashboard**', { timeout: 30_000 });
+
+    await page.goto('/app/settings');
+    await page.getByRole('tab', { name: 'Billing' }).click();
+
+    await expect(
+      page.getByRole('heading', { name: /Workspace billing/i }),
+    ).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/Trial|Active|Deactivated/i).first()).toBeVisible();
+
+    const pricingAction = page.getByRole('link', {
+      name: /View plans and upgrade|Reactivate on pricing/i,
+    });
+    if ((await pricingAction.count()) > 0) {
+      await expect(pricingAction.first()).toHaveAttribute('href', /\/pricing\?intent=/);
+    }
   });
 
   test('surfaces actionable error when company context is missing', async ({ page }) => {

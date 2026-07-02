@@ -122,23 +122,17 @@ const normalizeTenantManagement = (
   const source = isRecord(value) ? value : {};
   const plan = normalizeBillingPlan(asString(source.plan));
   const planDefinition = getBillingPlanDefinition(plan);
-  const subscriptionCandidate = asString(source.subscriptionStatus);
-  const subscriptionStatus: TenantManagementSettings["subscriptionStatus"] =
-    subscriptionCandidate === "trialing" ||
-    subscriptionCandidate === "active" ||
-    subscriptionCandidate === "past_due" ||
-    subscriptionCandidate === "canceled" ||
-    subscriptionCandidate === "unpaid"
-      ? subscriptionCandidate
-      : "none";
+  const legacyStatus =
+    asString(source.billingStatus) ??
+    asString(source.accountStatus) ??
+    asString(source.subscriptionStatus);
 
   return {
     primaryOwnerEmail: asString(source.primaryOwnerEmail),
     activeSeats: asNumber(source.activeSeats, 0),
     maxSeats: asNumber(source.maxSeats, planDefinition.seatLimit),
     plan,
-    accountStatus: normalizeBillingStatus(asString(source.accountStatus)),
-    subscriptionStatus,
+    billingStatus: normalizeBillingStatus(legacyStatus),
     billingEmail: asString(source.billingEmail),
     currentPeriodEndsAt: asString(source.currentPeriodEndsAt),
     trialEndsAt: asString(source.trialEndsAt),

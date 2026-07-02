@@ -3,14 +3,14 @@ import type { TenantManagementSettings } from "@/types/system-settings";
 export const BILLING_PLAN_KEYS = ["starter", "growth", "enterprise"] as const;
 export type BillingPlanKey = (typeof BILLING_PLAN_KEYS)[number];
 
-export const BILLING_ACCOUNT_STATUSES = [
-  "trialing",
-  "active",
-  "past_due",
-  "suspended",
-  "disabled",
-] as const;
-export type BillingAccountStatus = (typeof BILLING_ACCOUNT_STATUSES)[number];
+export const BILLING_STATUSES = ["trial", "active", "deactivated"] as const;
+export type BillingStatus = (typeof BILLING_STATUSES)[number];
+
+// TODO(2026-08): Remove deprecated aliases after one release cycle post Phase 1 billing.
+/** @deprecated Use BILLING_STATUSES */
+export const BILLING_ACCOUNT_STATUSES = BILLING_STATUSES;
+/** @deprecated Use BillingStatus */
+export type BillingAccountStatus = BillingStatus;
 
 export type BillingPlanDefinition = {
   key: BillingPlanKey;
@@ -160,8 +160,22 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
   },
 ];
 
-export const DEFAULT_BILLING_STATUS: BillingAccountStatus = "trialing";
+export const DEFAULT_BILLING_STATUS: BillingStatus = "trial";
 export const DEFAULT_BILLING_PLAN: BillingPlanKey = "starter";
+
+const LEGACY_ACTIVE_STATUSES = new Set(["active"]);
+const LEGACY_TRIAL_STATUSES = new Set(["trial", "trialing"]);
+
+export function mapLegacyBillingStatus(value?: string | null): BillingStatus {
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized) return DEFAULT_BILLING_STATUS;
+  if (BILLING_STATUSES.includes(normalized as BillingStatus)) {
+    return normalized as BillingStatus;
+  }
+  if (LEGACY_TRIAL_STATUSES.has(normalized)) return "trial";
+  if (LEGACY_ACTIVE_STATUSES.has(normalized)) return "active";
+  return "deactivated";
+}
 
 export function normalizeBillingPlan(value?: string | null): BillingPlanKey {
   return BILLING_PLAN_KEYS.includes(value as BillingPlanKey)
@@ -169,12 +183,21 @@ export function normalizeBillingPlan(value?: string | null): BillingPlanKey {
     : DEFAULT_BILLING_PLAN;
 }
 
-export function normalizeBillingStatus(
-  value?: string | null,
-): BillingAccountStatus {
-  return BILLING_ACCOUNT_STATUSES.includes(value as BillingAccountStatus)
-    ? (value as BillingAccountStatus)
-    : DEFAULT_BILLING_STATUS;
+export function normalizeBillingStatus(value?: string | null): BillingStatus {
+  return mapLegacyBillingStatus(value);
+}
+
+export function getBillingStatusLabel(status: BillingStatus): string {
+  switch (status) {
+    case "trial":
+      return "Trial";
+    case "active":
+      return "Active";
+    case "deactivated":
+      return "Deactivated";
+    default:
+      return status;
+  }
 }
 
 export function getBillingPlanDefinition(plan?: string | null) {
@@ -196,23 +219,27 @@ export function isTrialExpired(
   );
 }
 
-export function resolveBillingAccountStatus(
+export function resolveBillingStatus(
   tenant?: Partial<TenantManagementSettings> | null,
   now = new Date(),
-): BillingAccountStatus {
-  const explicitStatus = normalizeBillingStatus(tenant?.accountStatus);
-  if (explicitStatus === "trialing" && tenant && isTrialExpired(tenant, now)) {
-    return "past_due";
+): BillingStatus {
+  const explicitStatus = normalizeBillingStatus(tenant?.billingStatus);
+  if (explicitStatus === "trial" && tenant && isTrialExpired(tenant, now)) {
+    return "deactivated";
   }
   return explicitStatus;
 }
+
+// TODO(2026-08): Remove deprecated alias after one release cycle post Phase 1 billing.
+/** @deprecated Use resolveBillingStatus */
+export const resolveBillingAccountStatus = resolveBillingStatus;
 
 export function applyBillingToFeatureFlags<T extends BillingFeatureFlags>(
   baseFlags: T,
   tenant?: Partial<TenantManagementSettings> | null,
 ): T {
   const plan = getBillingPlanDefinition(tenant?.plan);
-  const status = resolveBillingAccountStatus(tenant);
+  const status = resolveBillingStatus(tenant);
 
   const planFlags: T = {
     ...baseFlags,
@@ -242,7 +269,7 @@ export function applyBillingToFeatureFlags<T extends BillingFeatureFlags>(
     },
   };
 
-  if (status === "suspended" || status === "disabled") {
+  if (status === "deactivated") {
     return {
       ...planFlags,
       inventory: {
@@ -264,6 +291,7 @@ export function applyBillingToFeatureFlags<T extends BillingFeatureFlags>(
       reports: {
         ...planFlags.reports,
         customReports: false,
+        dataExport: false,
         automatedReports: false,
       },
       operations: {
@@ -277,32 +305,6 @@ export function applyBillingToFeatureFlags<T extends BillingFeatureFlags>(
         ...planFlags.admin,
         permissionOverrides: false,
         auditLogs: true,
-      },
-    };
-  }
-
-  if (status === "past_due") {
-    return {
-      ...planFlags,
-      inventory: {
-        ...planFlags.inventory,
-        purchaseOrders: false,
-        advancedReporting: false,
-        barcodeScanning: false,
-        lotTracking: false,
-      },
-      scheduling: {
-        ...planFlags.scheduling,
-        aiOptimization: false,
-        timeClockIntegration: false,
-      },
-      reports: {
-        ...planFlags.reports,
-        automatedReports: false,
-      },
-      intelligence: {
-        ...planFlags.intelligence,
-        workforceFormsSync: false,
       },
     };
   }

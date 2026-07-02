@@ -26,30 +26,28 @@ const adminNormalizer = readText(
 const adminPanel = readText(
   "src/features/system/components/AdminSettingsPanel.tsx",
 );
+const billingPanel = readText(
+  "src/features/system/components/BillingSettingsPanel.tsx",
+);
 
 for (const plan of ["starter", "growth", "enterprise"]) {
   assertIncludes(billingPlans, `"${plan}"`, `billing plan ${plan} is required`);
 }
 
-for (const status of [
-  "trialing",
-  "active",
-  "past_due",
-  "suspended",
-  "disabled",
-]) {
+for (const status of ["trial", "active", "deactivated"]) {
   assertIncludes(
     billingPlans,
     `"${status}"`,
-    `account status ${status} is required`,
+    `billing status ${status} is required`,
   );
 }
 
 for (const helper of [
   "normalizeBillingPlan",
   "normalizeBillingStatus",
-  "resolveBillingAccountStatus",
+  "resolveBillingStatus",
   "applyBillingToFeatureFlags",
+  "mapLegacyBillingStatus",
 ]) {
   assertIncludes(
     billingPlans,
@@ -59,8 +57,7 @@ for (const helper of [
 }
 
 for (const field of [
-  "accountStatus",
-  "subscriptionStatus",
+  "billingStatus",
   "billingEmail",
   "currentPeriodEndsAt",
   "trialEndsAt",
@@ -80,8 +77,30 @@ for (const field of [
     field,
     `tenant management normalizer must include ${field}`,
   );
-  assertIncludes(adminPanel, field, `admin settings UI must expose ${field}`);
 }
+
+assertIncludes(
+  adminPanel,
+  "billingStatus",
+  "admin settings UI must expose billingStatus",
+);
+assertIncludes(
+  billingPanel,
+  "BillingStatusBadge",
+  "billing settings UI must show billing status badge",
+);
+assertIncludes(
+  billingPanel,
+  "BillingStatusActions",
+  "billing settings UI must expose upgrade/reactivate actions",
+);
+
+const trialExpiryCron = readText("app/api/cron/billing-trial-expiry/route.ts");
+assertIncludes(
+  trialExpiryCron,
+  "expireExpiredTrials",
+  "billing trial expiry cron must persist expired trials",
+);
 
 assertIncludes(
   featureFlags,
@@ -91,7 +110,7 @@ assertIncludes(
 assertIncludes(
   featureFlags,
   "applyBillingToFeatureFlags",
-  "feature flags must apply plan and account status gates",
+  "feature flags must apply plan and billing status gates",
 );
 assertIncludes(
   featureFlags,
@@ -105,8 +124,8 @@ assertIncludes(
 );
 assertIncludes(
   adminPanel,
-  "BILLING_ACCOUNT_STATUSES",
-  "admin settings UI must use canonical account statuses",
+  "BILLING_STATUSES",
+  "admin settings UI must use canonical billing statuses",
 );
 
-console.log("OK billing readiness contract: plans, statuses, gates, UI");
+console.log("Billing readiness contract check passed.");

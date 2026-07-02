@@ -96,7 +96,7 @@ export function buildSettingsReadinessSummary(
     {
       id: "billing-admin",
       label: "Billing admin",
-      value: tenant?.accountStatus ?? "unset",
+      value: tenant?.billingStatus ?? "unset",
       detail: `${tenant?.activeSeats ?? 0}/${tenant?.maxSeats ?? 0} seats`,
       status: statusFromBoolean(
         Boolean(tenant?.primaryOwnerEmail) &&

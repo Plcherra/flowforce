@@ -32,7 +32,7 @@ The Admin tab now includes a high-risk action area:
 
 - Export current settings backup as JSON.
 - Require workspace-name confirmation before dangerous actions unlock.
-- Stage tenant suspension for admin/billing review.
+- Stage workspace deactivation for admin/billing review.
 - Stage AI automation pause and return automation to suggestion mode.
 - Keep staged changes unsaved until the admin explicitly saves admin settings.
 

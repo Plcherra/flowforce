@@ -34,6 +34,11 @@ const IntegrationSettingsPanel = lazy(async () => {
   return { default: mod.IntegrationSettingsPanel };
 });
 
+const BillingSettingsPanel = lazy(async () => {
+  const mod = await import("../components/BillingSettingsPanel");
+  return { default: mod.BillingSettingsPanel };
+});
+
 const AdminSettingsPanel = lazy(async () => {
   const mod = await import("../components/AdminSettingsPanel");
   return { default: mod.AdminSettingsPanel };
@@ -138,6 +143,21 @@ export default function SettingsPage() {
             >
               <Suspense fallback={<PanelFallback />}>
                 <IntegrationSettingsPanel />
+              </Suspense>
+            </ErrorBoundary>
+          ),
+        },
+        {
+          key: "billing",
+          label: "Billing",
+          content: (
+            <ErrorBoundary
+              FallbackComponent={({ error }) => (
+                <ErrorState message={error.message} />
+              )}
+            >
+              <Suspense fallback={<PanelFallback />}>
+                <BillingSettingsPanel />
               </Suspense>
             </ErrorBoundary>
           ),

@@ -26,24 +26,15 @@ import { useAdminSettings } from "../hooks/useAdminSettings";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { DEFAULT_ADMIN_CONFIG } from "../hooks/systemSettingsDefaults";
 import {
-  BILLING_ACCOUNT_STATUSES,
   BILLING_PLANS,
-  type BillingAccountStatus,
+  BILLING_STATUSES,
   type BillingPlanKey,
+  type BillingStatus,
   getBillingPlanDefinition,
 } from "@/services/billing/billingPlans";
-import type { TenantManagementSettings } from "@/types/system-settings";
-
-const SUBSCRIPTION_STATUS_OPTIONS = [
-  "none",
-  "trialing",
-  "active",
-  "past_due",
-  "canceled",
-  "unpaid",
-] as const;
-
-type SubscriptionStatus = TenantManagementSettings["subscriptionStatus"];
+import {
+  BillingStatusBadge,
+} from "./BillingStatusBadge";
 
 const toBillingIsoDate = (value: string) =>
   value ? new Date(`${value}T23:59:59.000Z`).toISOString() : null;
@@ -104,12 +95,12 @@ export function AdminSettingsPanel() {
     URL.revokeObjectURL(url);
   };
 
-  const stageTenantSuspension = () => {
+  const stageTenantDeactivation = () => {
     setState((prev) => ({
       ...prev,
       tenantManagement: {
         ...(prev.tenantManagement ?? DEFAULT_ADMIN_CONFIG.tenantManagement),
-        accountStatus: "suspended",
+        billingStatus: "deactivated",
       },
     }));
   };
@@ -129,12 +120,15 @@ export function AdminSettingsPanel() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Tenant management</CardTitle>
-          <CardDescription>
-            Update ownership, seat allocation, and billing configuration for
-            this workspace.
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle>Tenant management</CardTitle>
+            <CardDescription>
+              Internal billing controls for ownership, seats, and workspace
+              access. Use the Billing tab for the owner-facing summary.
+            </CardDescription>
+          </div>
+          <BillingStatusBadge tenant={tenant} />
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
@@ -185,54 +179,26 @@ export function AdminSettingsPanel() {
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-account-status">Account status</Label>
+            <Label htmlFor="tenant-billing-status">Workspace access</Label>
             <select
-              id="tenant-account-status"
+              id="tenant-billing-status"
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={tenant?.accountStatus ?? "trialing"}
+              value={tenant?.billingStatus ?? "trial"}
               onChange={(event) =>
                 setState((prev) => ({
                   ...prev,
                   tenantManagement: {
                     ...(prev.tenantManagement ??
                       DEFAULT_ADMIN_CONFIG.tenantManagement),
-                    accountStatus: event.target.value as BillingAccountStatus,
+                    billingStatus: event.target.value as BillingStatus,
                   },
                 }))
               }
               disabled={!canEdit || loading}
             >
-              {BILLING_ACCOUNT_STATUSES.map((option) => (
+              {BILLING_STATUSES.map((option) => (
                 <option key={option} value={option}>
-                  {option.replace("_", " ")}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tenant-subscription-status">
-              Subscription status
-            </Label>
-            <select
-              id="tenant-subscription-status"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              value={tenant?.subscriptionStatus ?? "none"}
-              onChange={(event) =>
-                setState((prev) => ({
-                  ...prev,
-                  tenantManagement: {
-                    ...(prev.tenantManagement ??
-                      DEFAULT_ADMIN_CONFIG.tenantManagement),
-                    subscriptionStatus: event.target
-                      .value as SubscriptionStatus,
-                  },
-                }))
-              }
-              disabled={!canEdit || loading}
-            >
-              {SUBSCRIPTION_STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option.replace("_", " ")}
+                  {option}
                 </option>
               ))}
             </select>
@@ -433,10 +399,11 @@ export function AdminSettingsPanel() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">
-                    Stage tenant suspension
+                    Stage workspace deactivation
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Marks the account as suspended for billing/admin review.
+                    Marks the workspace as deactivated for billing and support
+                    review.
                   </p>
                 </div>
                 <ShieldOff className="h-5 w-5 text-destructive" />
@@ -446,10 +413,10 @@ export function AdminSettingsPanel() {
                 variant="destructive"
                 size="sm"
                 className="mt-4"
-                onClick={stageTenantSuspension}
+                onClick={stageTenantDeactivation}
                 disabled={!canEdit || !dangerousActionsUnlocked || loading}
               >
-                Stage suspension
+                Stage deactivation
               </Button>
             </div>
 
