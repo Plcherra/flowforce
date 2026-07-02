@@ -3,6 +3,9 @@
 import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { loadDotenv } from "./load-dotenv.mjs";
+
+loadDotenv();
 
 const cwd = process.cwd();
 const migrationsDir = resolve(cwd, "supabase", "migrations");

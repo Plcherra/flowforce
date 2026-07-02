@@ -71,11 +71,11 @@ test.describe('System settings workflow', () => {
     ).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/Trial|Active|Deactivated/i).first()).toBeVisible();
 
-    const pricingAction = page.getByRole('link', {
-      name: /View plans and upgrade|Reactivate on pricing/i,
+    const pricingAction = page.getByRole('button', {
+      name: /Upgrade to|Reactivate with|Manage billing/i,
     });
     if ((await pricingAction.count()) > 0) {
-      await expect(pricingAction.first()).toHaveAttribute('href', /\/pricing\?intent=/);
+      await expect(pricingAction.first()).toBeVisible();
     }
   });
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -18,6 +21,7 @@ import {
   BillingStatusActions,
   BillingStatusBadge,
 } from "./BillingStatusBadge";
+import { getPaymentGraceEndsAt } from "@/services/billing/billingGracePeriod";
 
 const formatDate = (value?: string | null) => {
   if (!value) return "Not set";
@@ -31,6 +35,8 @@ const formatDate = (value?: string | null) => {
 };
 
 export function BillingSettingsPanel() {
+  const searchParams = useSearchParams();
+  const checkoutState = searchParams.get("checkout");
   const { settings, loading, error } = useSystemSettingsContext();
   const tenant =
     settings?.adminConfig.tenantManagement ??
@@ -40,6 +46,7 @@ export function BillingSettingsPanel() {
   const trialEnded =
     tenant?.billingStatus === "trial" && isTrialExpired(tenant);
   const adminDeactivated = tenant?.billingStatus === "deactivated";
+  const paymentGraceEndsAt = getPaymentGraceEndsAt(tenant?.paymentFailedAt);
 
   if (error) {
     return <ErrorState message={error.message} />;
@@ -58,6 +65,27 @@ export function BillingSettingsPanel() {
           <BillingStatusBadge tenant={tenant} />
         </CardHeader>
         <CardContent className="space-y-6">
+          {checkoutState === "success" ? (
+            <Alert>
+              <AlertTitle>Payment received</AlertTitle>
+              <AlertDescription>
+                Stripe checkout completed. Your workspace billing status will
+                update within a few seconds.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
+          {tenant?.paymentFailedAt && status === "active" ? (
+            <Alert variant="destructive">
+              <AlertTitle>Payment failed</AlertTitle>
+              <AlertDescription>
+                {paymentGraceEndsAt
+                  ? `We could not charge your card. Update your payment method in Manage billing before ${formatDate(paymentGraceEndsAt)} to avoid interruption.`
+                  : "We could not charge your card. Update your payment method in Manage billing to avoid interruption."}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
           {status === "deactivated" ? (
             <Alert variant="destructive">
               <AlertTitle>
@@ -71,11 +99,13 @@ export function BillingSettingsPanel() {
                 <p>
                   {trialEnded && tenant?.trialEndsAt
                     ? `Your trial ended on ${formatDate(tenant.trialEndsAt)}. Choose a plan to restore full access for managers and staff.`
-                    : adminDeactivated
-                      ? "This workspace was deactivated. Choose a plan to restore scheduling, inventory, tasks, messaging, and reporting."
-                      : "Operational features are currently limited. Reactivating restores full access for managers and staff."}
+                    : tenant?.paymentFailedAt
+                      ? "Your subscription payment failed and the grace period ended. Update billing to restore access."
+                      : adminDeactivated
+                        ? "This workspace was deactivated. Choose a plan to restore scheduling, inventory, tasks, messaging, and reporting."
+                        : "Operational features are currently limited. Reactivating restores full access for managers and staff."}
                 </p>
-                {!trialEnded && !adminDeactivated ? (
+                {!trialEnded && !adminDeactivated && !tenant?.paymentFailedAt ? (
                   <ul className="list-disc space-y-1 pl-5 text-sm">
                     <li>Scheduling, tasks, and daily execution workflows</li>
                     <li>Inventory, purchasing, and waste tracking</li>
@@ -129,6 +159,14 @@ export function BillingSettingsPanel() {
                 {formatDate(tenant?.currentPeriodEndsAt)}
               </dd>
             </div>
+            {tenant?.cancelAt ? (
+              <div>
+                <dt className="text-sm text-muted-foreground">Scheduled cancel</dt>
+                <dd className="text-base font-medium">
+                  {formatDate(tenant.cancelAt)}
+                </dd>
+              </div>
+            ) : null}
           </dl>
 
           <BillingStatusActions tenant={tenant} showHelperText />

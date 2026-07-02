@@ -146,6 +146,10 @@ const DEFAULT_TENANT_MANAGEMENT: TenantManagementSettings = {
   billingEmail: null,
   currentPeriodEndsAt: null,
   trialEndsAt: null,
+  cancelAt: null,
+  stripeCustomerId: null,
+  stripeSubscriptionId: null,
+  paymentFailedAt: null,
 };
 
 export const DEFAULT_ADMIN_CONFIG: AdminConfigurationSettings = {

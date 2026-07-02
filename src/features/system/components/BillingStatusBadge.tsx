@@ -1,13 +1,23 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
+  getBillingPlanDefinition,
   getBillingStatusLabel,
   isTrialExpired,
   resolveBillingStatus,
+  type BillingPlanKey,
   type BillingStatus,
 } from "@/services/billing/billingPlans";
 import type { TenantManagementSettings } from "@/types/system-settings";
 import { cn } from "@/lib/utils";
+import {
+  openStripeBillingPortal,
+  startStripeCheckout,
+} from "@/services/billing/stripeBillingClient";
+import { useToast } from "@/hooks/use-toast";
 
 const STATUS_VARIANT: Record<
   BillingStatus,
@@ -33,7 +43,7 @@ export function BillingStatusBadge({
       {getBillingStatusLabel(status)}
     </Badge>
   );
-};
+}
 
 type BillingStatusActionsProps = {
   tenant?: Partial<TenantManagementSettings> | null;
@@ -46,33 +56,97 @@ export function BillingStatusActions({
   className,
   showHelperText = false,
 }: BillingStatusActionsProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<
+    "checkout" | "portal" | BillingPlanKey | null
+  >(null);
   const status = resolveBillingStatus(tenant);
   const trialEndedWithoutUpgrade =
     tenant?.billingStatus === "trial" && isTrialExpired(tenant);
+  const currentPlan = getBillingPlanDefinition(tenant?.plan);
+
+  const handleCheckout = async (
+    plan: BillingPlanKey,
+    intent: "upgrade" | "reactivate",
+  ) => {
+    setLoading(plan);
+    try {
+      await startStripeCheckout({ plan, intent });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Checkout unavailable",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to start Stripe checkout.",
+      });
+      setLoading(null);
+    }
+  };
+
+  const handlePortal = async () => {
+    setLoading("portal");
+    try {
+      await openStripeBillingPortal();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Billing portal unavailable",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to open Stripe billing portal.",
+      });
+      setLoading(null);
+    }
+  };
 
   if (status === "active") {
-    return null;
+    return (
+      <div className={cn("space-y-2", className)}>
+        <Button
+          type="button"
+          onClick={() => void handlePortal()}
+          disabled={loading !== null}
+        >
+          {loading === "portal" ? "Opening Stripe…" : "Manage billing"}
+        </Button>
+        {showHelperText ? (
+          <p className="text-sm text-muted-foreground">
+            Update payment method, invoices, or cancel through the Stripe
+            customer portal.
+          </p>
+        ) : null}
+      </div>
+    );
   }
 
   const isDeactivated = status === "deactivated";
-  const label = isDeactivated ? "Reactivate on pricing" : "View plans and upgrade";
-  const href = isDeactivated ? "/pricing?intent=reactivate" : "/pricing?intent=upgrade";
+  const intent = isDeactivated ? "reactivate" : "upgrade";
+  const label = isDeactivated
+    ? `Reactivate with ${currentPlan.label}`
+    : `Upgrade to ${currentPlan.label}`;
 
   return (
     <div className={cn("space-y-2", className)}>
-      <Link
-        href={href}
-        className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+      <Button
+        type="button"
+        onClick={() => void handleCheckout(currentPlan.key, intent)}
+        disabled={loading !== null}
       >
-        {label}
-      </Link>
+        {loading === currentPlan.key ? "Redirecting to Stripe…" : label}
+      </Button>
       {showHelperText ? (
         <p className="text-sm text-muted-foreground">
           {isDeactivated
             ? "Choose a plan to restore scheduling, inventory, tasks, messaging, and reporting for your team."
             : trialEndedWithoutUpgrade
               ? "Your trial period has ended. Pick a plan to keep your workspace active."
-              : "Compare Starter, Growth, and Enterprise plans for your restaurant workspace."}
+              : "Compare Starter, Growth, and Enterprise plans for your restaurant workspace."}{" "}
+          <a href="/pricing" className="underline">
+            View all plans
+          </a>
         </p>
       ) : null}
     </div>

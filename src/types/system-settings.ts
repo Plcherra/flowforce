@@ -178,6 +178,10 @@ export interface TenantManagementSettings {
   billingEmail?: string | null;
   currentPeriodEndsAt?: string | null;
   trialEndsAt?: string | null;
+  cancelAt?: string | null;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  paymentFailedAt?: string | null;
 }
 
 export type AutomationScopeLevel = "suggestion" | "assist" | "autopilot";

@@ -163,6 +163,13 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
 export const DEFAULT_BILLING_STATUS: BillingStatus = "trial";
 export const DEFAULT_BILLING_PLAN: BillingPlanKey = "starter";
 
+/** Env var names for Stripe price IDs (resolved server-side in stripePrices.ts). */
+export const STRIPE_PLAN_PRICE_ENV_KEYS: Record<BillingPlanKey, string> = {
+  starter: "STRIPE_PRICE_STARTER",
+  growth: "STRIPE_PRICE_GROWTH",
+  enterprise: "STRIPE_PRICE_ENTERPRISE",
+};
+
 const LEGACY_ACTIVE_STATUSES = new Set(["active"]);
 const LEGACY_TRIAL_STATUSES = new Set(["trial", "trialing"]);
 

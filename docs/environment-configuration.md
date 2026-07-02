@@ -112,10 +112,15 @@ npm run check:supabase
 Without Docker, link to the remote project and avoid local reset commands:
 
 ```bash
-supabase link --project-ref vncapxfubgqaibhjwtoy
-supabase db push
+npm run supabase:doctor
+npm run supabase:link
+npm run db:push
 npm run check:supabase
 ```
+
+Windows setup guide: [`docs/supabase-cli-setup-windows.md`](./supabase-cli-setup-windows.md)
+
+Use npm scripts instead of bare `supabase db push` so `.env.local` credentials load automatically.
 
 ## CI And VPS Setup
 

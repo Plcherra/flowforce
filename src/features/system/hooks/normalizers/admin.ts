@@ -136,6 +136,10 @@ const normalizeTenantManagement = (
     billingEmail: asString(source.billingEmail),
     currentPeriodEndsAt: asString(source.currentPeriodEndsAt),
     trialEndsAt: asString(source.trialEndsAt),
+    cancelAt: asString(source.cancelAt),
+    stripeCustomerId: asString(source.stripeCustomerId),
+    stripeSubscriptionId: asString(source.stripeSubscriptionId),
+    paymentFailedAt: asString(source.paymentFailedAt),
   };
 };
 

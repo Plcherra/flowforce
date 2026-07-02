@@ -568,9 +568,11 @@ export type Database = {
       }
       companies: {
         Row: {
+          cancel_at: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
+          current_period_ends_at: string | null
           custom_roles: Json | null
           description: string | null
           enabled_sections: Json | null
@@ -586,18 +588,23 @@ export type Database = {
           secondary_color: string | null
           size: string | null
           slug: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           template_config: Json | null
           template_id: string | null
           template_name: string | null
           timezone: string | null
+          trial_ends_at: string | null
           updated_at: string | null
           website: string | null
           working_hours: Json | null
         }
         Insert: {
+          cancel_at?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
+          current_period_ends_at?: string | null
           custom_roles?: Json | null
           description?: string | null
           enabled_sections?: Json | null
@@ -613,18 +620,23 @@ export type Database = {
           secondary_color?: string | null
           size?: string | null
           slug: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           template_config?: Json | null
           template_id?: string | null
           template_name?: string | null
           timezone?: string | null
+          trial_ends_at?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null
         }
         Update: {
+          cancel_at?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
+          current_period_ends_at?: string | null
           custom_roles?: Json | null
           description?: string | null
           enabled_sections?: Json | null
@@ -640,10 +652,13 @@ export type Database = {
           secondary_color?: string | null
           size?: string | null
           slug?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           template_config?: Json | null
           template_id?: string | null
           template_name?: string | null
           timezone?: string | null
+          trial_ends_at?: string | null
           updated_at?: string | null
           website?: string | null
           working_hours?: Json | null

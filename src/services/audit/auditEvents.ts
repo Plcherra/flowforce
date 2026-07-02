@@ -32,6 +32,10 @@ export const AUDIT_ACTIONS = {
   permissionOverridesUpdated: "permission.overrides_updated",
   settingsUpdated: "system_settings.updated",
   billingTrialExpired: "billing.trial_expired",
+  billingCheckoutCompleted: "billing.checkout_completed",
+  billingSubscriptionUpdated: "billing.subscription_updated",
+  billingSubscriptionCanceled: "billing.subscription_canceled",
+  billingPaymentFailed: "billing.payment_failed",
   supportTenantDiagnosticsViewed: "support.tenant_diagnostics_viewed",
   supportTenantRepairExecuted: "support.tenant_repair_executed",
   aiInsightGenerated: "ai.insight.generated",
@@ -154,6 +158,38 @@ export const AUDIT_EVENT_DEFINITIONS: AuditEventDefinition[] = [
     severity: "warning",
     description:
       "A workspace trial ended and billing status was set to deactivated.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.billingCheckoutCompleted,
+    category: "billing",
+    severity: "info",
+    description:
+      "A Stripe checkout session completed and workspace billing was activated.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.billingSubscriptionUpdated,
+    category: "billing",
+    severity: "info",
+    description:
+      "A Stripe subscription changed and workspace billing was synchronized.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.billingSubscriptionCanceled,
+    category: "billing",
+    severity: "warning",
+    description:
+      "A Stripe subscription was canceled and workspace access was updated.",
+    retention: "extended",
+  },
+  {
+    action: AUDIT_ACTIONS.billingPaymentFailed,
+    category: "billing",
+    severity: "warning",
+    description:
+      "A Stripe invoice payment failed and workspace billing status was updated.",
     retention: "extended",
   },
   {

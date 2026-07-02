@@ -124,11 +124,13 @@ This seed is still intentionally core-focused. The feature schema now exists aga
 Current safe setup for the remote-linked project:
 
 ```bash
-supabase link --project-ref vncapxfubgqaibhjwtoy
-supabase migration list
-supabase db push
+npm run supabase:doctor
+npm run supabase:link
+npm run db:push
 npm run check:supabase
 ```
+
+See [`docs/supabase-cli-setup-windows.md`](./supabase-cli-setup-windows.md) for permanent Windows auth setup.
 
 For local reset, Docker must be running first:
 
