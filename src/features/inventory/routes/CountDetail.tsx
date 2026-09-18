@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "@/lib/router-adapter";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -30,8 +31,14 @@ import { MarketManCountingInterface } from "@/features/inventory/components/Mark
 import { ItemSelector } from "@/features/inventory/components/ItemSelector";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
-import { listInventoryCountEvents } from "@/features/inventory/repositories/countsRepository";
-import { summarizeCountLines } from "@/features/inventory/utils/stockPosition";
+import {
+  listInventoryCountEvents,
+  saveInventoryCountLineQuantities,
+} from "@/features/inventory/repositories/countsRepository";
+import {
+  clampCountedQuantity,
+  summarizeCountLines,
+} from "@/features/inventory/utils/stockPosition";
 import { logger } from "@/utils/logger";
 
 const getStatusColor = (status: string) => {
@@ -88,17 +95,15 @@ const getPeriodLabel = (period?: string | null) => {
   }
 };
 
-const REVIEW_STATUS_CONFIG: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "outline" | "destructive";
+const formatCountStatus = (status?: string | null) => {
+  switch (status) {
+    case "approved":
+    case "completed":
+    case "awaiting_review":
+      return "Done";
+    default:
+      return "Open";
   }
-> = {
-  pending: { label: "Pending Review", variant: "outline" },
-  under_review: { label: "Under Review", variant: "secondary" },
-  approved: { label: "Approved", variant: "default" },
-  rejected: { label: "Needs Revision", variant: "destructive" },
 };
 
 const EVENT_ICON_MAP: Record<string, LucideIcon> = {
@@ -107,6 +112,7 @@ const EVENT_ICON_MAP: Record<string, LucideIcon> = {
   item_counted: CheckCircle,
   note_added: AlertCircle,
   submitted: FileCheck,
+  updated: FileCheck,
   approved: CheckCircle,
   rejected: AlertCircle,
   reopened: AlertCircle,
@@ -133,19 +139,15 @@ export default function CountDetailPage({
   const { countId: paramCountId } = useParams<{ countId: string }>();
   const countId = propCountId || paramCountId;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const {
     counts,
-    updateCount,
-    completeCount,
-    approveCount: approveInventoryCount,
-    rejectCount: rejectInventoryCount,
     refetch: refetchCounts,
   } = useInventoryCounts();
   const {
     countLines,
     addItemsToCount,
-    updateCountLine,
     removeItemFromCount,
     refetch: refetchCountLines,
   } = useInventoryCountLines(countId);
@@ -153,6 +155,7 @@ export default function CountDetailPage({
   const [showItemSelector, setShowItemSelector] = useState(false);
   const [events, setEvents] = useState<CountEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const count = counts.find((c) => c.id === countId);
 
@@ -185,80 +188,47 @@ export default function CountDetailPage({
   }, [loadEvents]);
 
   const handleQuantityChange = (lineId: string, value: number) => {
-    setQuantities((prev) => ({ ...prev, [lineId]: value }));
+    setQuantities((prev) => ({
+      ...prev,
+      [lineId]: clampCountedQuantity(value),
+    }));
   };
 
-  const handleSaveProgress = async () => {
+  const handleSaveAndDone = async () => {
+    if (!countId || saving) return;
+    setSaving(true);
     try {
-      // Update all count lines with current quantities
-      const updates = Object.entries(quantities).map(([lineId, quantity]) =>
-        updateCountLine(lineId, { counted_quantity: quantity }),
-      );
-
-      await Promise.all(updates);
-
-      // Update count status to in_progress if it was planned
-      if (count?.status === "planned") {
-        await updateCount(countId!, { status: "in_progress" });
-      }
+      await saveInventoryCountLineQuantities(countId, quantities);
+      await queryClient.invalidateQueries({
+        queryKey: ["inventory-stock-positions"],
+      });
+      await queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       await refetchCountLines();
       await refetchCounts();
-      await loadEvents();
 
       toast({
-        title: "Progress Saved",
-        description: "Count progress has been saved successfully",
+        title: "Count done",
+        description: "Saved and registered. Open it anytime to edit again.",
       });
+      navigate("/app/inventory/counts");
     } catch {
       toast({
         title: "Error",
-        description: "Failed to save progress",
+        description: "Failed to save the count",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleCompleteCount = async () => {
-    try {
-      // Update all count lines with quantities only (variance is auto-calculated)
-      const updates = Object.entries(quantities).map(([lineId, quantity]) => {
-        return updateCountLine(lineId, {
-          counted_quantity: quantity,
-          counted_at: new Date().toISOString(),
-        });
-      });
-
-      await Promise.all(updates);
-      await completeCount(countId!);
-      await refetchCountLines();
-      await refetchCounts();
-      await loadEvents();
-
-      toast({
-        title: "Count Submitted",
-        description: "Inventory count has been submitted for supervisor review",
-      });
-
-      // Navigate back to counts list
-      navigate("/app/inventory/counts");
-    } catch (error) {
-      logger.error("Error completing count", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description: "Failed to complete count",
-        variant: "destructive",
-      });
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleItemsSelected = async (
-    items: Array<{ id: string; name: string; expectedQuantity: number }>,
+    items: Array<{ id: string; name: string }>,
   ) => {
     try {
       await addItemsToCount(
         items.map((item) => ({
           id: item.id,
-          expectedQuantity: item.expectedQuantity,
         })),
       );
       await refetchCountLines();
@@ -282,54 +252,6 @@ export default function CountDetailPage({
     }
   };
 
-  const handleApproveCount = async () => {
-    if (!countId) return;
-    try {
-      const notes = window.prompt("Approval notes (optional):") || undefined;
-      await approveInventoryCount(countId, notes);
-      await refetchCounts();
-      await loadEvents();
-      toast({
-        title: "Count Approved",
-        description: "Inventory count has been approved and finalized.",
-      });
-    } catch (error) {
-      logger.error("Error approving count", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description: "Failed to approve count",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRejectCount = async () => {
-    if (!countId) return;
-    const notes = window.prompt(
-      "Please provide revision notes for this count:",
-    );
-    if (notes === null) {
-      return;
-    }
-
-    try {
-      await rejectInventoryCount(countId, notes || undefined);
-      await refetchCounts();
-      await loadEvents();
-      toast({
-        title: "Revision Requested",
-        description: "The count has been sent back for additional work.",
-      });
-    } catch (error) {
-      logger.error("Error rejecting count", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description: "Failed to send count back for revisions",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!count) {
     return (
       <InventoryLayout>
@@ -349,9 +271,6 @@ export default function CountDetailPage({
 
   const StatusIcon = getStatusIcon(count.status);
   const countSummary = summarizeCountLines(countLines, quantities);
-  const completion = countSummary.completionPercent;
-  const reviewBadge =
-    REVIEW_STATUS_CONFIG[count.review_status] ?? REVIEW_STATUS_CONFIG.pending;
 
   return (
     <InventoryLayout>
@@ -381,62 +300,20 @@ export default function CountDetailPage({
                     </span>
                     <Badge
                       variant={getStatusColor(count.status)}
-                      className="flex items-center gap-1 capitalize"
+                      className="flex items-center gap-1"
                     >
                       <StatusIcon className="h-3 w-3" />
-                      {count.status.replace(/_/g, " ")}
+                      {formatCountStatus(count.status)}
                     </Badge>
-                    <Badge variant={reviewBadge.variant} className="capitalize">
-                      {reviewBadge.label}
-                    </Badge>
-                    <span>{completion}% Complete</span>
-                    {count.submitted_at && (
-                      <span>
-                        Submitted{" "}
-                        {new Date(count.submitted_at).toLocaleString()}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
               <div className="flex flex-wrap justify-end gap-2">
                 <IfCan permission="inventory.counts.edit">
-                  <Button
-                    variant="outline"
-                    onClick={handleSaveProgress}
-                    disabled={
-                      count.status === "awaiting_review" ||
-                      count.status === "approved"
-                    }
-                  >
+                  <Button onClick={handleSaveAndDone} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Progress
+                    {saving ? "Saving..." : "Save & Done"}
                   </Button>
-                  <Button
-                    onClick={handleCompleteCount}
-                    disabled={
-                      countLines.length === 0 ||
-                      count.status === "awaiting_review" ||
-                      count.status === "approved"
-                    }
-                  >
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    Submit for Review
-                  </Button>
-                </IfCan>
-                <IfCan permission="inventory.counts.approve">
-                  {count.status === "awaiting_review" && (
-                    <>
-                      <Button variant="outline" onClick={handleRejectCount}>
-                        <AlertCircle className="h-4 w-4 mr-2" />
-                        Request Changes
-                      </Button>
-                      <Button onClick={handleApproveCount}>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Approve
-                      </Button>
-                    </>
-                  )}
                 </IfCan>
               </div>
             </div>
@@ -454,6 +331,17 @@ export default function CountDetailPage({
             {count.description && (
               <p className="text-sm text-muted-foreground">
                 {count.description}
+              </p>
+            )}
+
+            <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+              Save & Done updates on-hand and keeps this count on the list. Open
+              it anytime, edit, and Save & Done again.
+            </p>
+            {countSummary.missingLines > 0 && (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                {countSummary.missingLines} line
+                {countSummary.missingLines === 1 ? "" : "s"} still missing.
               </p>
             )}
 
@@ -526,16 +414,7 @@ export default function CountDetailPage({
                 lines={countLines}
                 quantities={quantities}
                 onQuantityChange={handleQuantityChange}
-                onRemoveLine={
-                  count.status === "awaiting_review" ||
-                  count.status === "approved"
-                    ? undefined
-                    : (lineId) => handleRemoveItem(lineId)
-                }
-                readOnly={
-                  count.status === "awaiting_review" ||
-                  count.status === "approved"
-                }
+                onRemoveLine={(lineId) => handleRemoveItem(lineId)}
               />
               <ItemSelector
                 open={showItemSelector}
@@ -640,34 +519,18 @@ export default function CountDetailPage({
                     </div>
                     <div>
                       <span className="font-medium">Status</span>
-                      <p className="capitalize">
-                        {count.status.replace(/_/g, " ")}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Review Status</span>
-                      <p className="capitalize">
-                        {count.review_status.replace(/_/g, " ")}
-                      </p>
+                      <p>{formatCountStatus(count.status)}</p>
                     </div>
                     <div>
                       <span className="font-medium">Created</span>
                       <p>{new Date(count.created_at).toLocaleString()}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Submitted</span>
-                      <p>
-                        {count.submitted_at
-                          ? new Date(count.submitted_at).toLocaleString()
-                          : "Not submitted"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Completed</span>
+                      <span className="font-medium">Done</span>
                       <p>
                         {count.completed_at
                           ? new Date(count.completed_at).toLocaleString()
-                          : "Not completed"}
+                          : "Not done yet"}
                       </p>
                     </div>
                   </div>

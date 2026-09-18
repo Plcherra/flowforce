@@ -4,6 +4,16 @@ import { useAuth } from "./useAuth";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 import { logger } from "@/utils/logger";
+import {
+  canDeactivateClass,
+  clampPermissionsToProductLevel,
+  inferProductLevel,
+  isCloneableProductLevel,
+  isOwnerClass,
+  resolveProductLevel,
+  type ProductLevel,
+} from "@/features/roles/constants/productLevels";
+import { allowKeysToClearOnClassSave } from "@/features/roles/constants/personAccessDiffs";
 
 export interface CompanyRole {
   id: string;
@@ -12,6 +22,7 @@ export interface CompanyRole {
   color: string;
   icon: string;
   hierarchy_level: number;
+  product_level: ProductLevel;
   permissions: Record<string, boolean>;
   is_system_role: boolean;
   is_active: boolean;
@@ -23,6 +34,7 @@ export interface CreateRoleData {
   color: string;
   icon: string;
   hierarchy_level: number;
+  product_level: ProductLevel;
   permissions: Record<string, boolean>;
 }
 
@@ -44,6 +56,7 @@ const MINIMAL_ONBOARDING_ROLES: CompanyRole[] = [
     color: "#6b7280",
     icon: "Users",
     hierarchy_level: 1,
+    product_level: "staff",
     permissions: {
       viewOwnProfile: true,
       editOwnProfile: true,
@@ -148,13 +161,23 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         throw rpcError;
       }
 
-      const parsedRoles = (data || []).map((role: any) => ({
-        ...role,
-        permissions:
+      const parsedRoles = (data || []).map((role: any) => {
+        const productLevel = resolveProductLevel({
+          product_level: role.product_level,
+          name: role.name,
+          hierarchy_level: role.hierarchy_level,
+        });
+        const permissions =
           typeof role.permissions === "string"
             ? JSON.parse(role.permissions)
-            : role.permissions || {},
-      }));
+            : role.permissions || {};
+
+        return {
+          ...role,
+          product_level: productLevel,
+          permissions: clampPermissionsToProductLevel(productLevel, permissions),
+        };
+      });
 
       setRoles(parsedRoles);
     } catch (err: unknown) {
@@ -215,12 +238,24 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         throw new Error("No company found for user");
       }
 
+      const productLevel = isCloneableProductLevel(roleData.product_level)
+        ? roleData.product_level
+        : inferProductLevel(roleData.name, roleData.hierarchy_level);
+
+      if (productLevel === "owner" || isOwnerClass(roleData)) {
+        throw new Error("Owner class cannot be created from the class editor");
+      }
+
       const { data, error } = await supabase
         .from("company_roles")
         .insert({
           ...roleData,
+          product_level: productLevel,
           company_id: profile.company_id,
-          permissions: roleData.permissions,
+          permissions: clampPermissionsToProductLevel(
+            productLevel,
+            roleData.permissions,
+          ),
           created_by: user.id,
         })
         .select()
@@ -258,11 +293,22 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     }: Partial<CompanyRole> & { id: string }) => {
       // Updating role...
 
+      const current = roles.find((role) => role.id === id);
+      const productLevel = resolveProductLevel({
+        product_level: current?.product_level ?? updates.product_level,
+        name: updates.name ?? current?.name,
+        hierarchy_level: updates.hierarchy_level ?? current?.hierarchy_level,
+      });
+      const { product_level: _lockedLevel, ...safeUpdates } = updates;
+      const nextPermissions = updates.permissions
+        ? clampPermissionsToProductLevel(productLevel, updates.permissions)
+        : undefined;
+
       const { data, error } = await supabase
         .from("company_roles")
         .update({
-          ...updates,
-          permissions: updates.permissions || undefined,
+          ...safeUpdates,
+          permissions: nextPermissions,
         })
         .eq("id", id)
         .select()
@@ -273,7 +319,38 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         throw error;
       }
 
-      // Role updated successfully
+      if (nextPermissions && current?.permissions) {
+        const keysToClear = allowKeysToClearOnClassSave(
+          current.permissions,
+          nextPermissions,
+        );
+        if (keysToClear.length > 0) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("company_id")
+            .eq("id", user?.id ?? "")
+            .maybeSingle();
+          if (profile?.company_id) {
+            const { data: members } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("company_id", profile.company_id)
+              .eq("role_id", id);
+            const memberIds = (members ?? [])
+              .map((member) => member.id)
+              .filter(Boolean);
+            if (memberIds.length > 0) {
+              await supabase
+                .from("user_permissions")
+                .delete()
+                .in("user_id", memberIds)
+                .in("permission_key", keysToClear)
+                .eq("permission_value", "allow");
+            }
+          }
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -295,7 +372,10 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
   const deleteRole = useMutation({
     mutationFn: async (roleId: string) => {
-      // Deactivating role...
+      const current = roles.find((role) => role.id === roleId);
+      if (current && !canDeactivateClass(current)) {
+        throw new Error("Owner class cannot be deactivated");
+      }
 
       const { error } = await supabase
         .from("company_roles")
@@ -311,8 +391,8 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Role deactivated successfully",
+        title: "Class archived",
+        description: "It is hidden from invite and the Roles list.",
       });
       fetchRoles();
     },
@@ -320,7 +400,36 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       logger.error("Delete role mutation error", { error, tags: ["error"] });
       toast({
         title: "Error",
-        description: getErrorMessage(error, "Failed to deactivate role"),
+        description: getErrorMessage(error, "Failed to archive class"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const restoreRole = useMutation({
+    mutationFn: async (roleId: string) => {
+      const { error } = await supabase
+        .from("company_roles")
+        .update({ is_active: true })
+        .eq("id", roleId);
+
+      if (error) {
+        logger.error("Error restoring role", { error, tags: ["error"] });
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Class restored",
+        description: "It is available for invite and Roles again.",
+      });
+      fetchRoles();
+    },
+    onError: (error: unknown) => {
+      logger.error("Restore role mutation error", { error, tags: ["error"] });
+      toast({
+        title: "Error",
+        description: getErrorMessage(error, "Failed to restore class"),
         variant: "destructive",
       });
     },
@@ -334,6 +443,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     createRole,
     updateRole,
     deleteRole,
+    restoreRole,
     refetchRoles: fetchRoles,
   };
 }

@@ -299,8 +299,10 @@ export function useCompany() {
         color: role.color || "#3b82f6",
         icon: role.icon || "Users",
         hierarchy_level: role.hierarchy_level || 1,
+        product_level: role.product_level,
         permissions: role.permissions || {},
         is_system_role: role.is_system_role || false,
+        is_active: role.is_active !== false,
       }));
 
       // Format positions to match expected structure

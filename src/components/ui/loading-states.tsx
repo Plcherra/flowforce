@@ -26,7 +26,11 @@ export function LoadingSpinner({
         <Loader2
           className={cn("animate-spin text-primary", sizeClasses[size])}
         />
-        {text && <p className="text-sm text-muted-foreground">{text}</p>}
+        {text && (
+          <p className="text-sm text-muted-foreground" suppressHydrationWarning>
+            {text}
+          </p>
+        )}
       </div>
     </div>
   );

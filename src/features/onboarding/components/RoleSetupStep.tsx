@@ -13,6 +13,7 @@ interface OnboardingRole {
   hierarchy_level: number;
   permissions: Record<string, boolean>;
   is_system_role: boolean;
+  is_active?: boolean;
 }
 
 interface RoleSetupStepProps {

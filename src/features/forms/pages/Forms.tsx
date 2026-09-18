@@ -184,7 +184,7 @@ export default function Forms() {
       loadingTitle="Loading Forms"
       loadingDescription="Preparing your workspace forms…"
     >
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Forms</h1>

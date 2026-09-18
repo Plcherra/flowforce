@@ -6,12 +6,17 @@ import { InventoryCategory } from "./types";
 import { logger } from "@/utils/logger";
 
 export function useInventoryCategories() {
+  const { profile, loading } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
+
   return useQuery({
-    queryKey: ["inventory-categories"],
+    queryKey: ["inventory-categories", companyId ?? "unknown"],
+    enabled: Boolean(companyId) && !loading,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("inventory_categories")
         .select("*")
+        .eq("company_id", companyId)
         .order("name");
 
       if (error) throw error;
@@ -63,6 +68,47 @@ export function useCreateInventoryCategory() {
         variant: "destructive",
       });
       logger.error("Create category error", { error, tags: ["error"] });
+    },
+  });
+}
+
+export function useUpdateInventoryCategory() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      id: string;
+      name: string;
+      description?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("inventory_categories")
+        .update({
+          name: payload.name,
+          description: payload.description,
+        })
+        .eq("id", payload.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-categories"] });
+      toast({
+        title: "Success",
+        description: "Category updated",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to update category",
+        variant: "destructive",
+      });
+      logger.error("Update category error", { error, tags: ["error"] });
     },
   });
 }

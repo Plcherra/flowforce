@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
+import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAccess";
 import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
+import { isInviteableClass } from "../constants/productLevels";
 import {
   normalizeProductRoleKey,
-  PRODUCT_ROLE_KEYS,
   PRODUCT_ROLE_LABELS,
 } from "../constants/productRoles";
 import { Shield, Crown, Users, UserCheck, Star } from "lucide-react";
@@ -35,81 +35,45 @@ export default function RoleManager({
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   const { roles, loading: rolesLoading } = useCompanyRoles();
+  const classOptions = (Array.isArray(roles) ? roles : []).filter(
+    (role) => role.is_active && (isInviteableClass(role) || role.name === currentRole),
+  );
+  const currentClass =
+    classOptions.find(
+      (role) => role.name.toLowerCase() === currentRole.toLowerCase(),
+    ) ??
+    classOptions.find(
+      (role) => normalizeProductRoleKey(role.name) === normalizeProductRoleKey(currentRole),
+    );
   const normalizedCurrentRole =
     normalizeProductRoleKey(currentRole) ?? currentRole.toLowerCase();
-  const roleOptions = PRODUCT_ROLE_KEYS.map((roleKey) => ({
-    key: roleKey,
-    label: PRODUCT_ROLE_LABELS[roleKey],
-    dbRole: Array.isArray(roles)
-      ? roles.find((role) => normalizeProductRoleKey(role.name) === roleKey)
-      : undefined,
-  }));
 
-  const handleRoleChange = async (newRole: string) => {
-    const normalizedRole = normalizeProductRoleKey(newRole);
-    if (!normalizedRole || normalizedRole === normalizedCurrentRole) return;
-    const selectedRole = roleOptions.find(
-      (role) => role.key === normalizedRole,
-    );
-    if (!selectedRole?.dbRole) {
-      toast({
-        title: "Role not available",
-        description: "The selected role preset is still loading.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleRoleChange = async (roleId: string) => {
+    const selectedRole = classOptions.find((role) => role.id === roleId);
+    if (!selectedRole || selectedRole.id === currentClass?.id) return;
 
     setIsUpdating(true);
     try {
-      const { data: targetProfile, error: targetProfileError } = await supabase
-        .from("profiles")
-        .select("company_id")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (targetProfileError) throw targetProfileError;
-
-      const previousRole = normalizedCurrentRole;
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          role: normalizedRole,
-          role_id: selectedRole.dbRole.id,
-        })
-        .eq("id", userId);
-
-      if (profileError) throw profileError;
-
-      if (targetProfile?.company_id) {
-        const { error: membershipError } = await supabase
-          .from("company_members")
-          .update({ role: normalizedRole })
-          .eq("company_id", targetProfile.company_id)
-          .eq("user_id", userId);
-
-        if (membershipError) throw membershipError;
-      }
+      await saveEmployeeAccess({ userId, roleId: selectedRole.id });
 
       await logAuditEvent({
         targetUserId: userId,
         action: AUDIT_ACTIONS.userRoleUpdated,
         tableName: "profiles",
         recordId: userId,
-        oldValues: { role: previousRole },
+        oldValues: { role: currentRole, role_id: currentClass?.id ?? null },
         newValues: {
-          role: normalizedRole,
-          role_id: selectedRole.dbRole.id,
+          role: selectedRole.name,
+          role_id: selectedRole.id,
         },
       });
 
       toast({
         title: "Success",
-        description: `${userName}'s role updated to ${PRODUCT_ROLE_LABELS[normalizedRole]}`,
+        description: `${userName}'s class is now ${selectedRole.name}`,
       });
 
-      onRoleChange?.(normalizedRole);
+      onRoleChange?.(selectedRole.name);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -189,7 +153,7 @@ export default function RoleManager({
       </div>
 
       <Select
-        value={normalizedCurrentRole}
+        value={currentClass?.id ?? ""}
         onValueChange={handleRoleChange}
         disabled={isUpdating || rolesLoading}
       >
@@ -197,18 +161,16 @@ export default function RoleManager({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {roleOptions.map((role) => {
-            const IconComponent = getIconComponent(
-              role.dbRole?.icon ?? "Users",
-            );
+          {classOptions.map((role) => {
+            const IconComponent = getIconComponent(role.icon ?? "Users");
             return (
-              <SelectItem key={role.key} value={role.key}>
+              <SelectItem key={role.id} value={role.id}>
                 <div className="flex items-center space-x-2">
                   <IconComponent
                     className="h-3 w-3"
-                    style={{ color: role.dbRole?.color }}
+                    style={{ color: role.color }}
                   />
-                  <span>{role.label}</span>
+                  <span>{role.name}</span>
                 </div>
               </SelectItem>
             );

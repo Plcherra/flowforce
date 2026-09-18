@@ -1,4 +1,14 @@
 import { lazy, Suspense } from "react";
+import {
+  Bell,
+  Building2,
+  CreditCard,
+  Globe,
+  Plug,
+  Shield,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { SystemSettingsLayout } from "../components/SystemSettingsLayout";
@@ -60,6 +70,7 @@ export default function SettingsPage() {
         {
           key: "general",
           label: "General",
+          icon: Building2,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -75,6 +86,7 @@ export default function SettingsPage() {
         {
           key: "security",
           label: "Security",
+          icon: Shield,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -89,7 +101,8 @@ export default function SettingsPage() {
         },
         {
           key: "localization",
-          label: "Localization",
+          label: "Region",
+          icon: Globe,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -105,6 +118,7 @@ export default function SettingsPage() {
         {
           key: "notifications",
           label: "Notifications",
+          icon: Bell,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -119,7 +133,8 @@ export default function SettingsPage() {
         },
         {
           key: "copilot",
-          label: "AI Co-Pilot",
+          label: "AI",
+          icon: Sparkles,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -135,6 +150,7 @@ export default function SettingsPage() {
         {
           key: "integrations",
           label: "Integrations",
+          icon: Plug,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -150,6 +166,7 @@ export default function SettingsPage() {
         {
           key: "billing",
           label: "Billing",
+          icon: CreditCard,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (
@@ -165,6 +182,7 @@ export default function SettingsPage() {
         {
           key: "admin",
           label: "Admin",
+          icon: SlidersHorizontal,
           content: (
             <ErrorBoundary
               FallbackComponent={({ error }) => (

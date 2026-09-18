@@ -35,11 +35,12 @@ import {
 import { cn } from "@/lib/utils";
 import type { Employee } from "@/hooks/useEmployees";
 import { buildInitials, formatRoleLabel } from "@/shared/utils";
+import { resolveProductLevel } from "@/features/roles/constants/productLevels";
 
 interface EmployeeCardProps {
   employee: Employee;
-  roleOptions: string[];
-  onRoleChange: (userId: string, newRole: string, currentRole: string) => void;
+  roleOptions: Array<{ id: string; name: string; product_level?: string }>;
+  onRoleChange: (userId: string, roleId: string, currentRoleId: string) => void;
   onStatusToggle: (employee: Employee) => void;
   onResetPassword: (email: string) => void;
   onNavigateToEmployee: (employeeId: string) => void;
@@ -63,6 +64,17 @@ export function EmployeeCard({
     employee.employment_status === "active" ? "Active" : "Inactive";
   const showReactivate = employee.employment_status === "inactive";
   const badgeCount = employee.badges?.length ?? 0;
+  const currentClass =
+    roleOptions.find((role) => role.id === employee.role_id) ??
+    roleOptions.find(
+      (role) =>
+        resolveProductLevel({
+          product_level: role.product_level,
+          name: role.name,
+        }) === resolveProductLevel({ name: employee.role }),
+    );
+  const currentClassId = currentClass?.id ?? "";
+  const classLabel = currentClass?.name ?? formatRoleLabel(employee.role);
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border p-4 shadow-sm transition hover:shadow-md">
@@ -90,7 +102,7 @@ export function EmployeeCard({
                   color: employee.department?.color ?? undefined,
                 }}
               >
-                {formatRoleLabel(employee.role)}
+                {classLabel}
               </Badge>
               <Badge
                 variant={showReactivate ? "outline" : "secondary"}
@@ -185,20 +197,25 @@ export function EmployeeCard({
 
       <div className="flex flex-wrap gap-2">
         <Select
-          value={employee.role}
+          value={currentClassId}
           onValueChange={(value) =>
-            onRoleChange(employee.id, value, employee.role)
+            onRoleChange(employee.id, value, currentClassId)
           }
         >
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Update role" />
+            <SelectValue placeholder="Update class" />
           </SelectTrigger>
           <SelectContent>
-            {roleOptions.map((role) => (
-              <SelectItem key={role} value={role}>
-                {formatRoleLabel(role)}
-              </SelectItem>
-            ))}
+            {roleOptions
+              .filter(
+                (role) =>
+                  role.product_level !== "owner" || role.id === currentClassId,
+              )
+              .map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
 

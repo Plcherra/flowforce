@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +22,23 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type CompanyRole, type CreateRoleData } from "@/hooks/useCompanyRoles";
 import {
+  applyOperatorVerbsToPermissions,
+  getVisibleOperatorAreas,
+  isVerbAvailable,
+  isVerbLockedOn,
+  permissionsToOperatorVerbs,
+  verbSelectionKey,
+  type OperatorVerb,
+} from "@/features/roles/constants/operatorBoxes";
+import { OperatorAccessGrid } from "./OperatorAccessGrid";
+import {
+  CLONEABLE_PRODUCT_LEVELS,
+  cloneClassFromProductLevel,
+  isCloneableProductLevel,
+  resolveProductLevel,
+} from "@/features/roles/constants/productLevels";
+import { PRODUCT_ROLE_LABELS } from "@/features/roles/constants/productRoles";
+import {
   Shield,
   Users,
   Crown,
@@ -30,13 +46,7 @@ import {
   Star,
   Settings,
   Eye,
-  Users as UsersIcon,
 } from "lucide-react";
-import {
-  PERMISSIONS_BY_CATEGORY,
-  type PermissionDefinition,
-  type PermissionKey,
-} from "@/lib/permissions/registry";
 
 const AVAILABLE_ICONS = [
   { value: "Users", label: "Users", icon: Users },
@@ -63,30 +73,115 @@ export default function RoleManagementDialog({
   onSave,
   isLoading = false,
 }: RoleManagementDialogProps) {
-  const [formData, setFormData] = useState<CreateRoleData>({
-    name: role?.name || "",
-    description: role?.description || "",
-    color: role?.color || "#3b82f6",
-    icon: role?.icon || "Users",
-    hierarchy_level: role?.hierarchy_level || 1,
-    permissions: role?.permissions || {},
+  const [startFrom, setStartFrom] = useState("level:manager");
+  const [formData, setFormData] = useState<CreateRoleData>(() => {
+    if (role) {
+      const productLevel = resolveProductLevel(role);
+      return {
+        name: role.name,
+        description: role.description || "",
+        color: role.color,
+        icon: role.icon,
+        hierarchy_level: role.hierarchy_level,
+        product_level: productLevel,
+        permissions: applyOperatorVerbsToPermissions(
+          productLevel,
+          permissionsToOperatorVerbs(productLevel, role.permissions || {}),
+          role.permissions || {},
+        ),
+      };
+    }
+
+    const cloned = cloneClassFromProductLevel("manager");
+    return {
+      ...cloned,
+      name: "",
+    };
   });
+
+  useEffect(() => {
+    if (!open) return;
+    if (role) {
+      const productLevel = resolveProductLevel(role);
+      setFormData({
+        name: role.name,
+        description: role.description || "",
+        color: role.color,
+        icon: role.icon,
+        hierarchy_level: role.hierarchy_level,
+        product_level: productLevel,
+        permissions: applyOperatorVerbsToPermissions(
+          productLevel,
+          permissionsToOperatorVerbs(productLevel, role.permissions || {}),
+          role.permissions || {},
+        ),
+      });
+      setStartFrom(`level:${productLevel}`);
+      return;
+    }
+
+    const cloned = cloneClassFromProductLevel("manager");
+    setStartFrom("level:manager");
+    setFormData({
+      ...cloned,
+      name: "",
+    });
+  }, [open, role]);
+
+  const productLevel = resolveProductLevel(formData);
+
+  const applyStartFrom = (value: string) => {
+    setStartFrom(value);
+    const level = value.replace("level:", "");
+    if (!isCloneableProductLevel(level)) return;
+    const cloned = cloneClassFromProductLevel(level, formData.name);
+    setFormData((prev) => ({
+      ...cloned,
+      name: prev.name,
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      product_level: productLevel,
+      permissions: applyOperatorVerbsToPermissions(
+        productLevel,
+        permissionsToOperatorVerbs(productLevel, formData.permissions),
+        formData.permissions,
+      ),
+    });
   };
 
-  const handlePermissionChange = (
-    permissionKey: PermissionKey,
+  const handleVerbChange = (
+    areaKey: string,
+    verb: OperatorVerb,
     enabled: boolean,
   ) => {
+    const area = getVisibleOperatorAreas(productLevel).find(
+      (item) => item.key === areaKey,
+    );
+    if (!area || isVerbLockedOn(area, verb, productLevel)) {
+      return;
+    }
+    if (!isVerbAvailable(area, verb, productLevel)) {
+      return;
+    }
+
+    const selection = verbSelectionKey(area.key, verb);
+    const current = permissionsToOperatorVerbs(productLevel, formData.permissions);
+    const next = enabled
+      ? Array.from(new Set([...current, selection]))
+      : current.filter((key) => key !== selection);
+
     setFormData((prev) => ({
       ...prev,
-      permissions: {
-        ...prev.permissions,
-        [permissionKey]: enabled,
-      },
+      permissions: applyOperatorVerbsToPermissions(
+        productLevel,
+        next,
+        prev.permissions,
+      ),
     }));
   };
 
@@ -95,24 +190,15 @@ export default function RoleManagementDialog({
     return iconConfig?.icon || Users;
   };
 
-  const permissionGroups = useMemo(
-    () =>
-      Object.entries(PERMISSIONS_BY_CATEGORY).map(
-        ([category, permissions]) => ({
-          category,
-          permissions: [...permissions],
-        }),
-      ),
-    [],
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{role ? "Edit Role" : "Create New Role"}</DialogTitle>
+          <DialogTitle>{role ? "Edit class" : "Create class"}</DialogTitle>
           <DialogDescription>
-            Configure the role settings and permissions
+            {role
+              ? `This class sits on the locked ${PRODUCT_ROLE_LABELS[productLevel]} level.`
+              : "Start from a system role. The class can use that level’s access, never more."}
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +206,7 @@ export default function RoleManagementDialog({
           <Tabs defaultValue="basic" className="w-full">
             <TabsList>
               <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              <TabsTrigger value="permissions">Permissions</TabsTrigger>
+              <TabsTrigger value="permissions">Access</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
@@ -139,20 +225,34 @@ export default function RoleManagementDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="hierarchy">Hierarchy Level</Label>
-                  <Input
-                    id="hierarchy"
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={formData.hierarchy_level}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        hierarchy_level: parseInt(e.target.value) || 1,
-                      }))
-                    }
-                  />
+                  <Label htmlFor="start-from">
+                    {role ? "Locked level" : "Start from"}
+                  </Label>
+                  {role ? (
+                    <div className="flex h-10 items-center rounded-md border bg-muted px-3 text-sm">
+                      {PRODUCT_ROLE_LABELS[productLevel]}
+                    </div>
+                  ) : (
+                    <Select value={startFrom} onValueChange={applyStartFrom}>
+                      <SelectTrigger id="start-from">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CLONEABLE_PRODUCT_LEVELS.map((level) => (
+                          <SelectItem key={level} value={`level:${level}`}>
+                            Start from {PRODUCT_ROLE_LABELS[level]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {productLevel === "owner"
+                      ? "Owner always keeps team, roles, settings, and billing."
+                      : productLevel === "staff"
+                        ? "You can grant See on team schedule, run lists, and team. Edit, create/delete, settings, and billing stay off."
+                        : "Settings and billing stay off unless this class sits on Admin."}
+                  </p>
                 </div>
               </div>
 
@@ -242,47 +342,16 @@ export default function RoleManagementDialog({
             </TabsContent>
 
             <TabsContent value="permissions" className="space-y-4">
-              <div className="space-y-6">
-                {permissionGroups.map(({ category, permissions }) => (
-                  <div key={category} className="space-y-3">
-                    <h4 className="font-medium text-gray-900">{category}</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {permissions.map((permission: PermissionDefinition) => (
-                        <div
-                          key={permission.key}
-                          className="flex items-start justify-between gap-3 rounded-lg border p-3"
-                        >
-                          <div className="space-y-1">
-                            <Label
-                              htmlFor={permission.key}
-                              className="text-sm font-medium"
-                            >
-                              {permission.label}
-                            </Label>
-                            {permission.description && (
-                              <p className="text-xs text-muted-foreground">
-                                {permission.description}
-                              </p>
-                            )}
-                          </div>
-                          <Switch
-                            id={permission.key}
-                            checked={Boolean(
-                              formData.permissions?.[permission.key],
-                            )}
-                            onCheckedChange={(checked) =>
-                              handlePermissionChange(
-                                permission.key as any,
-                                Boolean(checked),
-                              )
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Each class starts from its level. Give or take See, Edit, and
+                Create / delete. The same grid will apply to one person later.
+              </p>
+              <OperatorAccessGrid
+                level={productLevel}
+                permissions={formData.permissions}
+                idPrefix={role?.id ?? "new-class"}
+                onVerbChange={handleVerbChange}
+              />
             </TabsContent>
           </Tabs>
 
@@ -295,7 +364,7 @@ export default function RoleManagementDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : role ? "Update Role" : "Create Role"}
+              {isLoading ? "Saving..." : role ? "Update class" : "Create class"}
             </Button>
           </DialogFooter>
         </form>

@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AccessControlPanel } from "./AccessControlPanel";
 import { InviteEmployeePanel } from "./InviteEmployeePanel";
+import { UserPermissionsTab } from "./users/UserPermissionsTab";
 import { RoleConfigPanel } from "./RoleConfigPanel";
 import { UserOverviewTab } from "@/features/employees/components/users/UserOverviewTab";
 import { usePermission } from "@/hooks/usePermission";
@@ -130,10 +130,7 @@ export function EmployeeDrawer({
                   value="access"
                   className="mt-0 flex-1 overflow-y-auto"
                 >
-                  <AccessControlPanel
-                    employeeId={employee.id}
-                    employee={employee}
-                  />
+                  <UserPermissionsTab user={employee} />
                 </TabsContent>
               )}
 

@@ -2,7 +2,6 @@ import React from "react";
 import { Outlet } from "@/lib/router-adapter";
 import { Package } from "lucide-react";
 import { InventoryNav } from "./InventoryNav";
-import { InventorySummaryBoard } from "./InventorySummaryBoard";
 
 interface InventoryLayoutProps {
   children?: React.ReactNode;
@@ -29,10 +28,6 @@ export function InventoryLayout({ children }: InventoryLayoutProps) {
 
           <InventoryNav />
         </div>
-      </div>
-
-      <div className="border-b bg-muted/30 px-4 py-3 md:px-6 lg:px-8">
-        <InventorySummaryBoard variant="compact" />
       </div>
 
       <div className="w-full flex-1 px-4 py-6 md:px-6 lg:px-8">

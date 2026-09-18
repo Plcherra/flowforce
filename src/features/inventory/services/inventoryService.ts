@@ -24,10 +24,18 @@ import {
 import {
   listInventoryLocations,
   createInventoryLocation,
+  updateInventoryLocation,
   deleteInventoryLocation,
   type CreateInventoryLocationInput,
+  type UpdateInventoryLocationInput,
 } from "../repositories/locationsRepository";
 import { listInventoryCounts } from "../repositories/countsRepository";
+import { listStockPositions } from "../repositories/stockPositionsRepository";
+import {
+  countLowStockItems,
+  summarizeItemStock,
+  totalStockValue,
+} from "../utils/stockPosition";
 
 type CreateLocationPayload = Omit<CreateInventoryLocationInput, "companyId"> & {
   companyId?: string;
@@ -220,34 +228,44 @@ export class InventoryService {
     return deleteInventoryLocation(id);
   }
 
+  static updateLocation(payload: UpdateInventoryLocationInput) {
+    return updateInventoryLocation(payload);
+  }
+
+  static async listStockPositions(
+    options: { companyId?: string; supabaseClient?: SupabaseClient } = {},
+  ) {
+    const client = options.supabaseClient ?? supabase;
+    return listStockPositions({
+      companyId: options.companyId,
+      supabaseClient: client,
+      resolveCompanyId: () => resolveActiveCompanyId(client),
+    });
+  }
+
   // Dashboard & Analytics
   static async getDashboardStats() {
-    // Get total items count
-    const { count: totalItems } = await supabase
-      .from("inv_items")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true);
+    const companyId = await resolveActiveCompanyId();
+    if (!companyId) {
+      return {
+        totalItems: 0,
+        lowStockItems: 0,
+        totalValue: 0,
+        recentTransactions: 0,
+        wasteThisWeek: 0,
+        prepCompletion: 0,
+      };
+    }
 
-    // Get low stock items count
-    const { data: lowStockData } = await supabase
+    const { data: items } = await supabase
       .from("inv_items")
       .select("id, min_stock_level")
       .eq("is_active", true)
-      .not("min_stock_level", "is", null);
+      .eq("company_id", companyId);
 
-    const lowStockCount = Math.ceil((lowStockData?.length || 0) * 0.2);
+    const positions = await this.listStockPositions({ companyId });
+    const stockByItem = summarizeItemStock(positions);
 
-    // Get total inventory value
-    const { data: valueData } = await supabase
-      .from("inv_items")
-      .select("cost_per_unit")
-      .eq("is_active", true)
-      .not("cost_per_unit", "is", null);
-
-    const totalValue =
-      valueData?.reduce((sum, item) => sum + (item.cost_per_unit || 0), 0) || 0;
-
-    // Get recent transactions count
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -256,7 +274,6 @@ export class InventoryService {
       .select("*", { count: "exact", head: true })
       .gte("created_at", sevenDaysAgo.toISOString());
 
-    // Get waste this week
     const { data: wasteData } = await supabase
       .from("inv_waste")
       .select("cost_impact")
@@ -265,7 +282,6 @@ export class InventoryService {
     const wasteThisWeek =
       wasteData?.reduce((sum, item) => sum + (item.cost_impact || 0), 0) || 0;
 
-    // Calculate prep completion
     const { data: prepData } = await supabase
       .from("invprep_batches")
       .select("status")
@@ -273,20 +289,25 @@ export class InventoryService {
 
     const completedPrep =
       prepData?.filter((batch) => batch.status === "completed").length || 0;
-    const totalPrep = prepData?.length || 1;
-    const prepCompletion = Math.round((completedPrep / totalPrep) * 100);
+    const totalPrep = prepData?.length || 0;
+    const prepCompletion = totalPrep
+      ? Math.round((completedPrep / totalPrep) * 100)
+      : 0;
 
     return {
-      totalItems: totalItems || 0,
-      lowStockItems: lowStockCount,
-      totalValue,
+      totalItems: items?.length || 0,
+      lowStockItems: countLowStockItems(items ?? [], stockByItem),
+      totalValue: totalStockValue(stockByItem),
       recentTransactions: recentTransactions || 0,
       wasteThisWeek,
-      prepCompletion: isNaN(prepCompletion) ? 0 : prepCompletion,
+      prepCompletion,
     };
   }
 
   static async lowStock() {
+    const companyId = await resolveActiveCompanyId();
+    if (!companyId) return [];
+
     const { data } = await supabase
       .from("inv_items")
       .select(
@@ -298,24 +319,24 @@ export class InventoryService {
       `,
       )
       .eq("is_active", true)
+      .eq("company_id", companyId)
       .not("min_stock_level", "is", null);
+
+    const positions = await this.listStockPositions({ companyId });
+    const stockByItem = summarizeItemStock(positions);
 
     return (
       data
         ?.map((item) => {
           return {
             name: item.name,
-            current: Math.max(
-              0,
-              (item.min_stock_level || 10) - Math.floor(Math.random() * 15),
-            ),
+            current: stockByItem[item.id]?.onHand ?? 0,
             min: item.min_stock_level || 0,
             unit: relationName(item.inv_units as NamedRelation, "units"),
             item_id: item.id,
           };
         })
-        .filter((item) => item.current < item.min)
-        .slice(0, 5) || []
+        .filter((item) => item.min > 0 && item.current < item.min) || []
     );
   }
 
@@ -608,10 +629,10 @@ export class InventoryService {
         .select(
           `
             *,
-            unit:inv_units(*),
-            ingredient:inv_items(
+            unit:inv_units!unit_id(*),
+            ingredient:inv_items!inv_recipes_ingredient_id_fkey(
               *,
-              unit:inv_units(*)
+              unit:inv_units!unit_id(*)
             )
           `,
         )

@@ -42,15 +42,15 @@ insert into public.companies (id, name, slug, created_by, owner_id, registration
 values
   ('1d000000-0000-4000-8000-000000000001', 'Phase 2 Availability Tenant', 'phase-2-availability', '2d000000-0000-4000-8000-000000000001', '2d000000-0000-4000-8000-000000000001', true);
 
-insert into public.profiles (id, company_id, first_name, last_name, email, role, status, is_active)
+insert into public.profiles (id, company_id, first_name, last_name, email, role, employment_status, is_company_admin)
 values
   ('2d000000-0000-4000-8000-000000000001', '1d000000-0000-4000-8000-000000000001', 'Phase2', 'Manager', 'phase2-avail-manager@example.test', 'manager', 'active', true),
-  ('2d000000-0000-4000-8000-000000000002', '1d000000-0000-4000-8000-000000000001', 'Phase2', 'Staff', 'phase2-avail-staff@example.test', 'staff', 'active', true);
+  ('2d000000-0000-4000-8000-000000000002', '1d000000-0000-4000-8000-000000000001', 'Phase2', 'Staff', 'phase2-avail-staff@example.test', 'staff', 'active', false);
 
-insert into public.company_members (company_id, user_id, role, status)
+insert into public.company_members (company_id, user_id, role, added_at)
 values
-  ('1d000000-0000-4000-8000-000000000001', '2d000000-0000-4000-8000-000000000001', 'manager', 'active'),
-  ('1d000000-0000-4000-8000-000000000001', '2d000000-0000-4000-8000-000000000002', 'staff', 'active');
+  ('1d000000-0000-4000-8000-000000000001', '2d000000-0000-4000-8000-000000000001', 'manager', now()),
+  ('1d000000-0000-4000-8000-000000000001', '2d000000-0000-4000-8000-000000000002', 'staff', now());
 
 insert into public.staff_availability (
   company_id,
@@ -65,8 +65,8 @@ values (
   '1d000000-0000-4000-8000-000000000001',
   '2d000000-0000-4000-8000-000000000002',
   1,
-  '06:00',
-  '13:30',
+  '2026-07-07T06:00:00+00',
+  '2026-07-07T13:30:00+00',
   '2026-07-06',
   true
 );
@@ -118,6 +118,7 @@ values
   );
 
 insert into public.time_off_requests (
+  company_id,
   user_id,
   start_date,
   end_date,
@@ -126,6 +127,7 @@ insert into public.time_off_requests (
   reason
 )
 values (
+  '1d000000-0000-4000-8000-000000000001',
   '2d000000-0000-4000-8000-000000000002',
   '2026-07-07',
   '2026-07-07',

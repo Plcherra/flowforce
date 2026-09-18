@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useSearchParams } from "@/lib/router-adapter";
 import RoleGuard from "@/app-shell/guards/RoleGuard";
 import UserManagement from "@/features/admin/components/UserManagement";
@@ -13,37 +12,19 @@ export default function Admin() {
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
   const auditEnabled = useFeatureFlag("admin.auditLogs");
-  const initialTab = searchParams.get("tab") ?? "users";
-  const safeInitialTab =
-    !auditEnabled && initialTab === "audit" ? "users" : initialTab;
-  const [activeTab, setActiveTab] = useState(safeInitialTab);
+  const tabFromUrl = searchParams.get("tab") ?? "users";
+  const activeTab =
+    !auditEnabled && tabFromUrl === "audit" ? "users" : tabFromUrl;
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const paramTab = searchParams.get("tab");
-    if (!paramTab) return;
-
-    if (!auditEnabled && paramTab === "audit") {
-      setActiveTab("users");
-      return;
-    }
-
-    if (paramTab !== activeTab) {
-      setActiveTab(paramTab);
-    }
-  }, [searchParams, activeTab, auditEnabled]);
-
-  useEffect(() => {
+  const setActiveTab = (tab: string) => {
+    if (tab === activeTab) return;
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (!auditEnabled && activeTab === "audit") {
-        next.set("tab", "users");
-      } else {
-        next.set("tab", activeTab);
-      }
+      next.set("tab", tab);
       return next;
     });
-  }, [activeTab, auditEnabled, setSearchParams]);
+  };
 
   return (
     <RoleGuard

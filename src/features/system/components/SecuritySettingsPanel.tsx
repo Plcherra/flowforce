@@ -30,8 +30,6 @@ export function SecuritySettingsPanel() {
     save,
     reset,
     updatePasswordPolicy,
-    updateTokenAccess,
-    updateRowLevelSecurity,
   } = useSecuritySettings(system);
 
   if (globalError) {
@@ -43,8 +41,8 @@ export function SecuritySettingsPanel() {
       <CardHeader>
         <CardTitle>Security & Access Controls</CardTitle>
         <CardDescription>
-          Define authentication requirements, password resilience, and secure
-          data access policies.
+          Control how the team signs in and how long a shared tablet can stay
+          unlocked.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -148,135 +146,67 @@ export function SecuritySettingsPanel() {
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2 rounded-lg border p-4">
-            <Label htmlFor="session-timeout">
-              Idle session timeout (minutes)
-            </Label>
-            <Input
-              id="session-timeout"
-              type="number"
-              min={5}
-              max={480}
-              value={state.sessionTimeout}
-              onChange={(event) =>
-                setState((prev) => ({
-                  ...prev,
-                  sessionTimeout:
-                    Number(event.target.value) || prev.sessionTimeout,
-                }))
-              }
-              disabled={!canEdit || loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Users will be logged out after inactivity to protect sensitive
-              data.
-            </p>
-          </div>
-          <div className="space-y-2 rounded-lg border p-4">
-            <Label htmlFor="trusted-devices">
-              Trusted device window (days)
-            </Label>
-            <Input
-              id="trusted-devices"
-              type="number"
-              min={1}
-              max={60}
-              value={state.trustedDeviceWindow}
-              onChange={(event) =>
-                setState((prev) => ({
-                  ...prev,
-                  trustedDeviceWindow:
-                    Number(event.target.value) || prev.trustedDeviceWindow,
-                }))
-              }
-              disabled={!canEdit || loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              After this window, users must complete MFA again on trusted
-              devices.
-            </p>
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                API token access
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Manage service tokens for automation and data ingestion.
-              </p>
-            </div>
-            <Switch
-              checked={state.apiTokenAccess.enabled}
-              onCheckedChange={(value) => updateTokenAccess("enabled", value)}
-              disabled={!canEdit || loading}
-            />
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="token-rotation">Rotate tokens every (days)</Label>
-              <Input
-                id="token-rotation"
-                type="number"
-                min={7}
-                max={365}
-                value={state.apiTokenAccess.rotateEveryDays}
-                onChange={(event) =>
-                  updateTokenAccess(
-                    "rotateEveryDays",
-                    Number(event.target.value) ||
-                      state.apiTokenAccess.rotateEveryDays,
-                  )
-                }
-                disabled={!canEdit || loading || !state.apiTokenAccess.enabled}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Last rotation</Label>
-              <p className="rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                {state.apiTokenAccess.lastRotatedAt
-                  ? new Date(
-                      state.apiTokenAccess.lastRotatedAt,
-                    ).toLocaleString()
-                  : "No rotation recorded"}
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section className="space-y-3 rounded-lg border p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Row-level security
-              </p>
+              <Label htmlFor="idle-sign-out">Sign out idle staff</Label>
               <p className="text-xs text-muted-foreground">
-                Restrict data access by tenant across analytics and exports.
+                After this time on a shared tablet or computer, FlowForce signs
+                the person out. Turn it off, or set 0, to leave people signed
+                in.
               </p>
             </div>
             <Switch
-              checked={state.rowLevelSecurity.enforced}
-              onCheckedChange={(value) =>
-                updateRowLevelSecurity("enforced", value)
+              id="idle-sign-out"
+              checked={state.sessionTimeout > 0}
+              onCheckedChange={(checked) =>
+                setState((prev) => ({
+                  ...prev,
+                  sessionTimeout: checked
+                    ? prev.sessionTimeout > 0
+                      ? prev.sessionTimeout
+                      : 30
+                    : 0,
+                }))
               }
               disabled={!canEdit || loading}
             />
           </div>
-          <div className="flex items-center justify-between rounded-md border px-3 py-2">
-            <span className="text-xs text-muted-foreground">
-              Allow external analytics access
-            </span>
-            <Switch
-              checked={state.rowLevelSecurity.allowExternalAnalytics}
-              onCheckedChange={(value) =>
-                updateRowLevelSecurity("allowExternalAnalytics", value)
-              }
-              disabled={!canEdit || loading || !state.rowLevelSecurity.enforced}
-            />
-          </div>
+          {state.sessionTimeout > 0 ? (
+            <div className="flex max-w-xs items-center gap-2">
+              <Input
+                id="session-timeout"
+                type="number"
+                min={0}
+                max={480}
+                value={state.sessionTimeout}
+                onChange={(event) => {
+                  const next = Number(event.target.value);
+                  setState((prev) => ({
+                    ...prev,
+                    sessionTimeout: Number.isFinite(next)
+                      ? Math.min(480, Math.max(0, Math.trunc(next)))
+                      : prev.sessionTimeout,
+                  }));
+                }}
+                onBlur={() =>
+                  setState((prev) => ({
+                    ...prev,
+                    sessionTimeout:
+                      prev.sessionTimeout <= 0
+                        ? 0
+                        : Math.min(480, Math.max(5, prev.sessionTimeout)),
+                  }))
+                }
+                disabled={!canEdit || loading}
+              />
+              <span className="text-sm text-muted-foreground">minutes</span>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Idle sign-out is off.
+            </p>
+          )}
         </section>
 
         {saveError && <ErrorState message={saveError.message} />}

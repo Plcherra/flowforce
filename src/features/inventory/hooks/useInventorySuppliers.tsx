@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { InventorySupplier } from "./types";
 import { logger } from "@/utils/logger";
 
+const EMPTY_SUPPLIERS: InventorySupplier[] = [];
+
 export function useInventorySuppliers(companyId?: string | null) {
   const query = useQuery({
     queryKey: ["inventory-suppliers", companyId],
@@ -26,7 +28,7 @@ export function useInventorySuppliers(companyId?: string | null) {
   });
 
   return {
-    data: query.data ?? [],
+    data: query.data ?? EMPTY_SUPPLIERS,
     isLoading: query.isLoading,
     error: query.error ?? null,
   };
@@ -85,6 +87,69 @@ export function useCreateSupplier() {
       toast({
         title: "Error",
         description: error.message || "Failed to create supplier",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateSupplier() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: string; name: string }) => {
+      const { data, error } = await supabase
+        .from("inv_suppliers")
+        .update({ name: payload.name })
+        .eq("id", payload.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] });
+      toast({
+        title: "Success",
+        description: "Supplier updated",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update supplier",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteSupplier() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (supplierId: string) => {
+      const { error } = await supabase
+        .from("inv_suppliers")
+        .update({ is_active: false })
+        .eq("id", supplierId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] });
+      toast({
+        title: "Success",
+        description: "Supplier removed",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete supplier",
         variant: "destructive",
       });
     },

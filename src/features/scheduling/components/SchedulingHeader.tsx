@@ -32,7 +32,7 @@ export function SchedulingHeader({ role, onPanelOpen }: SchedulingHeaderProps) {
 
   return (
     <div className="sticky top-0 z-50 border-b bg-card/50 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-3">
+      <div className="w-full px-4 py-3 sm:px-6">
         <div className="flex items-center justify-between gap-4">
           <h1 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
             {role.isStaff ? (

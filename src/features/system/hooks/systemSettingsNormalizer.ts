@@ -33,6 +33,9 @@ export const normalizeSystemSettingsRow = (
       company?.secondary_color ??
       (row.appearance as SystemSettingsModel["appearance"])?.secondaryColor ??
       DEFAULT_APPEARANCE.secondaryColor,
+    logoBackgroundColor:
+      (row.appearance as SystemSettingsModel["appearance"])
+        ?.logoBackgroundColor ?? DEFAULT_APPEARANCE.logoBackgroundColor,
   },
   adminConfig: normalizeAdminConfig(row.admin_config, company),
   createdAt: row.created_at,

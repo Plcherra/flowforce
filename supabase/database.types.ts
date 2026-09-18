@@ -704,6 +704,7 @@ export type Database = {
           birth_date: string | null
           company_id: string | null
           created_at: string | null
+          department_id: string | null
           email: string | null
           expires_at: string | null
           first_name: string | null
@@ -711,8 +712,11 @@ export type Database = {
           invite_token: string | null
           invited_by: string | null
           last_name: string | null
+          location_id: string | null
+          permission_overrides: Json
           phone: string | null
           role: string | null
+          role_id: string | null
           status: string | null
         }
         Insert: {
@@ -720,6 +724,7 @@ export type Database = {
           birth_date?: string | null
           company_id?: string | null
           created_at?: string | null
+          department_id?: string | null
           email?: string | null
           expires_at?: string | null
           first_name?: string | null
@@ -727,8 +732,11 @@ export type Database = {
           invite_token?: string | null
           invited_by?: string | null
           last_name?: string | null
+          location_id?: string | null
+          permission_overrides?: Json
           phone?: string | null
           role?: string | null
+          role_id?: string | null
           status?: string | null
         }
         Update: {
@@ -736,6 +744,7 @@ export type Database = {
           birth_date?: string | null
           company_id?: string | null
           created_at?: string | null
+          department_id?: string | null
           email?: string | null
           expires_at?: string | null
           first_name?: string | null
@@ -743,8 +752,11 @@ export type Database = {
           invite_token?: string | null
           invited_by?: string | null
           last_name?: string | null
+          location_id?: string | null
+          permission_overrides?: Json
           phone?: string | null
           role?: string | null
+          role_id?: string | null
           status?: string | null
         }
         Relationships: []
@@ -787,6 +799,7 @@ export type Database = {
           is_system_role: boolean | null
           name: string | null
           permissions: Json | null
+          product_level: "owner" | "admin" | "manager" | "staff"
           updated_at: string | null
         }
         Insert: {
@@ -802,6 +815,7 @@ export type Database = {
           is_system_role?: boolean | null
           name?: string | null
           permissions?: Json | null
+          product_level?: "owner" | "admin" | "manager" | "staff"
           updated_at?: string | null
         }
         Update: {
@@ -817,6 +831,7 @@ export type Database = {
           is_system_role?: boolean | null
           name?: string | null
           permissions?: Json | null
+          product_level?: "owner" | "admin" | "manager" | "staff"
           updated_at?: string | null
         }
         Relationships: []
@@ -4691,6 +4706,7 @@ export type Database = {
           invitation_token: string | null
           is_company_admin: boolean | null
           last_name: string
+          location_id: string | null
           phone: string | null
           position_id: string | null
           role: string
@@ -4714,6 +4730,7 @@ export type Database = {
           invitation_token?: string | null
           is_company_admin?: boolean | null
           last_name: string
+          location_id?: string | null
           phone?: string | null
           position_id?: string | null
           role?: string
@@ -4737,6 +4754,7 @@ export type Database = {
           invitation_token?: string | null
           is_company_admin?: boolean | null
           last_name?: string
+          location_id?: string | null
           phone?: string | null
           position_id?: string | null
           role?: string
@@ -4749,6 +4767,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "inv_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -6696,6 +6721,7 @@ export type Database = {
           is_system_role: boolean
           name: string
           permissions: Json
+          product_level: string
         }[]
       }
       get_dashboard_stats: {

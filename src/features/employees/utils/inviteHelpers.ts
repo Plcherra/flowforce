@@ -43,8 +43,12 @@ export async function triggerOnboardingChecklist(
   }
 }
 
+function headerIndex(header: string[], aliases: string[]) {
+  return header.findIndex((column) => aliases.includes(column));
+}
+
 /**
- * Parse CSV file for bulk invites
+ * Parse CSV or pasted rows for bulk invites
  */
 export function parseCsvForBulkInvites(text: string): {
   rows: BulkInviteRow[];
@@ -59,26 +63,32 @@ export function parseCsvForBulkInvites(text: string): {
   if (lines.length <= 1) {
     return {
       rows: [],
-      error: "CSV must include a header row and at least one data row.",
+      error: "Include a header row and at least one person.",
     };
   }
 
   const header = lines[0]
     .split(",")
     .map((column) => column.trim().toLowerCase());
-  const emailIndex = header.findIndex((column) => column === "email");
-  const firstNameIndex = header.findIndex((column) =>
-    ["first_name", "first_name", "first"].includes(column),
-  );
-  const lastNameIndex = header.findIndex((column) =>
-    ["last_name", "last_name", "last"].includes(column),
-  );
-  const roleIndex = header.findIndex((column) => column === "role");
+  const emailIndex = headerIndex(header, ["email"]);
+  const firstNameIndex = headerIndex(header, ["first_name", "first", "firstname"]);
+  const lastNameIndex = headerIndex(header, ["last_name", "last", "lastname"]);
+  const phoneIndex = headerIndex(header, ["phone", "mobile"]);
+  const classIndex = headerIndex(header, ["class", "role"]);
+  const locationIndex = headerIndex(header, ["location"]);
+  const departmentIndex = headerIndex(header, ["department"]);
 
-  if (emailIndex === -1 || firstNameIndex === -1 || lastNameIndex === -1) {
+  if (firstNameIndex === -1 || lastNameIndex === -1) {
     return {
       rows: [],
-      error: "Header must include email, first_name, and last_name columns.",
+      error: "Header must include first_name and last_name.",
+    };
+  }
+
+  if (emailIndex === -1 && phoneIndex === -1) {
+    return {
+      rows: [],
+      error: "Header must include email or phone.",
     };
   }
 
@@ -89,27 +99,27 @@ export function parseCsvForBulkInvites(text: string): {
     if (!raw.trim()) continue;
 
     const columns = raw.split(",").map((value) => value.trim());
-    const email = columns[emailIndex];
+    const email = emailIndex === -1 ? "" : columns[emailIndex] ?? "";
+    const phone = phoneIndex === -1 ? "" : columns[phoneIndex] ?? "";
     const firstName = columns[firstNameIndex];
     const lastName = columns[lastNameIndex];
-    const roleValue =
-      roleIndex !== -1 ? columns[roleIndex].toLowerCase() : "employee";
 
-    if (!email || !firstName || !lastName) {
+    if (!firstName || !lastName || (!email && !phone)) {
       return {
         rows: [],
-        error: `Row ${i + 1} is missing required values.`,
+        error: `Row ${i + 1} needs a name and an email or phone.`,
       };
     }
-
-    const role =
-      roleValue === "manager" || roleValue === "admin" ? roleValue : "employee";
 
     rows.push({
       email,
       firstName,
       lastName,
-      role,
+      phone,
+      className: classIndex === -1 ? "" : columns[classIndex] ?? "",
+      locationName: locationIndex === -1 ? "" : columns[locationIndex] ?? "",
+      departmentName:
+        departmentIndex === -1 ? "" : columns[departmentIndex] ?? "",
     });
   }
 

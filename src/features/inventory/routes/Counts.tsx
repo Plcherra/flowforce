@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "@/lib/router-adapter";
 import { Button } from "@/components/ui/button";
 import { Calculator, Plus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { NewCountWizard } from "@/features/inventory/components/NewCountWizard";
 import { CountManagement } from "@/features/inventory/components/CountManagement";
 import { InventoryLayout } from "../components/InventoryLayout";
@@ -10,7 +9,6 @@ import { IfCan } from "@/components/permissions/IfCan";
 
 export default function InventoryCountsPage() {
   const [showWizard, setShowWizard] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleViewCount = (countId: string) => {
@@ -29,12 +27,12 @@ export default function InventoryCountsPage() {
                 Inventory Counts
               </h1>
               <p className="text-muted-foreground">
-                Physical inventory counts and reconciliation
+                Counts stay here after Save & Done. Open one to edit and save
+                again.
               </p>
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline">Import Count</Button>
               <Button onClick={() => setShowWizard(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Count

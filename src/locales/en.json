@@ -513,8 +513,8 @@
         "description": "Customize your workspace sections"
       },
       "roles": {
-        "title": "Roles",
-        "description": "Setup roles and positions"
+        "title": "Classes",
+        "description": "Planted system roles. Continue or open roles."
       },
       "review": {
         "title": "Review",
@@ -685,8 +685,8 @@
       "hideBuilder": "Hide Builder"
     },
     "roles": {
-      "title": "Setup Company Roles & Positions",
-      "description": "Define the roles in your organization and add specific positions within each role. You can customize the default roles or create new ones. Minimum 4 roles required."
+      "title": "Classes",
+      "description": "Owner, Admin, Manager, and Staff are planted. Continue, or open roles to give or take access. Positions are not required here."
     },
     "review": {
       "title": "Review Your Setup",
@@ -696,7 +696,7 @@
         "template": "Selected Template",
         "branding": "Branding",
         "workspaceSections": "Workspace Sections",
-        "roles": "Roles & Positions"
+        "roles": "Classes"
       }
     },
     "validation": {

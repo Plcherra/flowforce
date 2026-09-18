@@ -32,7 +32,11 @@ The count detail screen surfaces:
 - Lines with nonzero variance.
 - Net variance across visible count lines.
 
-These signals are shown before approval so a supervisor can decide whether to approve or request changes.
+These signals are shown on the count sheet so the person counting can check missing lines and net variance before they leave.
+
+## Approval Writes Stock
+
+Save & Done is the moment counted quantities become on-hand. The count stays registered on the list and can be opened, edited, and saved again. A restaurant opening or closing count does not wait for a second approver. FlowForce writes `inv_adjustments` rows (`increase` or `decrease`) from counted minus expected, converted to base units. Later edits write corrections. `inv_stock_positions` then drives the next count's expected quantity and dashboard value.
 
 ## Remaining Follow-Up
 

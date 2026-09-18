@@ -12,6 +12,7 @@ import { sortEmployeesByName } from "./userHelpers";
 export function groupEmployees(
   employees: Employee[],
   viewMode: ViewMode,
+  roles: Array<{ id: string; name: string }> = [],
 ): GroupedEmployees {
   const grouped = new Map<string, Employee[]>();
 
@@ -21,9 +22,11 @@ export function groupEmployees(
     if (viewMode === "department") {
       groupName = employee.department?.name ?? "Unassigned";
     } else {
-      groupName = employee.role
-        ? employee.role.charAt(0).toUpperCase() + employee.role.slice(1)
-        : "Unassigned";
+      groupName =
+        roles.find((role) => role.id === employee.role_id)?.name ??
+        (employee.role
+          ? employee.role.charAt(0).toUpperCase() + employee.role.slice(1)
+          : "Unassigned");
     }
 
     if (!grouped.has(groupName)) {

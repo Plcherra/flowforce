@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   const devDiagnostics =
     appEnv.DEV && profileError ? (
-      <div className="mx-auto w-full max-w-7xl px-6 pb-6">
+      <div className="w-full px-6 pb-6">
         <div className="rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
           <p className="font-semibold">Supabase profile error</p>
           <pre className="mt-2 whitespace-pre-wrap break-words">
@@ -51,7 +51,7 @@ export default function Dashboard() {
         loadingDescription="Setting up your workspace..."
       >
         <div
-          className={`${isMobile ? "px-3 py-4 space-y-4" : "px-6 py-6 space-y-6"} max-w-7xl mx-auto`}
+          className={`${isMobile ? "px-3 py-4 space-y-4" : "px-6 py-6 space-y-6"} w-full`}
         >
           <ErrorBoundary>
             <DashboardHeader />

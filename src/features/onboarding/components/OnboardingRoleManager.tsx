@@ -1,33 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
-import { getDefaultProductRoleDefinitions } from "@/features/roles/constants/productRoles";
+import { getPlantedSystemRoles } from "@/features/roles/constants/productRoles";
+import {
+  canDeactivateClass,
+  clampPermissionsToProductLevel,
+  cloneClassFromProductLevel,
+  isCloneableProductLevel,
+  resolveProductLevel,
+} from "@/features/roles/constants/productLevels";
+import { PRODUCT_ROLE_LABELS } from "@/features/roles/constants/productRoles";
 import {
   Plus,
   Edit,
@@ -39,9 +23,10 @@ import {
   Star,
   Settings,
   Eye,
-  Briefcase,
 } from "lucide-react";
-import PositionManager from "./PositionManager";
+import RoleManagementDialog from "@/features/roles/components/RoleManagementDialog";
+import { ClassJobBoxList } from "@/features/roles/components/ClassJobBoxList";
+import type { CompanyRole } from "@/hooks/useCompanyRoles";
 
 interface OnboardingRole {
   id: string;
@@ -50,8 +35,25 @@ interface OnboardingRole {
   color: string;
   icon: string;
   hierarchy_level: number;
+  product_level?: "owner" | "admin" | "manager" | "staff";
   permissions: Record<string, boolean>;
   is_system_role: boolean;
+  is_active?: boolean;
+}
+
+function toCompanyRole(role: OnboardingRole): CompanyRole {
+  return {
+    id: role.id,
+    name: role.name,
+    description: role.description,
+    color: role.color,
+    icon: role.icon,
+    hierarchy_level: role.hierarchy_level,
+    product_level: resolveProductLevel(role),
+    permissions: role.permissions,
+    is_system_role: role.is_system_role,
+    is_active: role.is_active !== false,
+  };
 }
 
 interface OnboardingRoleManagerProps {
@@ -61,19 +63,6 @@ interface OnboardingRoleManagerProps {
   onRolesChange: (roles: OnboardingRole[]) => void;
   onPositionsChange: (positions: OnboardingPosition[]) => void;
 }
-
-const DEFAULT_ROLES: OnboardingRole[] = getDefaultProductRoleDefinitions().map(
-  (role) => ({
-    id: role.key,
-    name: role.label,
-    description: role.description,
-    color: role.color,
-    icon: role.icon,
-    hierarchy_level: role.hierarchy_level,
-    permissions: role.permissions,
-    is_system_role: true,
-  }),
-);
 
 const AVAILABLE_ICONS = [
   { value: "Users", label: "Users", icon: Users },
@@ -86,23 +75,20 @@ const AVAILABLE_ICONS = [
 ];
 
 export default function OnboardingRoleManager({
-  selectedTemplate,
   roles,
-  positions,
   onRolesChange,
-  onPositionsChange,
 }: OnboardingRoleManagerProps) {
   const [editingRole, setEditingRole] = useState<OnboardingRole | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [positionManagerOpen, setPositionManagerOpen] = useState(false);
-  const [selectedRoleForPositions, setSelectedRoleForPositions] =
-    useState<OnboardingRole | null>(null);
+  const [rolesOpen, setRolesOpen] = useState(false);
 
   useEffect(() => {
     if (roles.length === 0) {
-      onRolesChange(DEFAULT_ROLES);
+      onRolesChange(getPlantedSystemRoles());
     }
   }, [roles.length, onRolesChange]);
+
+  const planted = roles.length > 0 ? roles : getPlantedSystemRoles();
 
   const handleAddRole = () => {
     setEditingRole(null);
@@ -115,53 +101,77 @@ export default function OnboardingRoleManager({
   };
 
   const handleDeleteRole = (roleId: string) => {
-    if (roles.length <= 4) {
-      alert("You must have at least 4 roles");
+    const target = planted.find((role) => role.id === roleId);
+    if (target && !canDeactivateClass(target)) {
       return;
     }
-    onRolesChange(roles.filter((role) => role.id !== roleId));
-    // Also remove positions for this role
-    onPositionsChange(
-      positions.filter((position) => position.roleId !== roleId),
+    if (target?.is_system_role) {
+      onRolesChange(
+        planted.map((role) =>
+          role.id === roleId ? { ...role, is_active: false } : role,
+        ),
+      );
+      return;
+    }
+    onRolesChange(planted.filter((role) => role.id !== roleId));
+  };
+
+  const handleRestoreRole = (roleId: string) => {
+    onRolesChange(
+      planted.map((role) =>
+        role.id === roleId ? { ...role, is_active: true } : role,
+      ),
     );
   };
 
   const handleSaveRole = (roleData: Partial<OnboardingRole>) => {
     if (editingRole) {
-      // Update existing role
+      const productLevel = resolveProductLevel({
+        ...editingRole,
+        ...roleData,
+      });
       onRolesChange(
-        roles.map((role) =>
-          role.id === editingRole.id ? { ...role, ...roleData } : role,
+        planted.map((role) =>
+          role.id === editingRole.id
+            ? {
+                ...role,
+                ...roleData,
+                product_level: productLevel,
+                permissions: clampPermissionsToProductLevel(
+                  productLevel,
+                  roleData.permissions ?? role.permissions,
+                ),
+              }
+            : role,
         ),
       );
     } else {
-      // Add new role
+      const productLevel = isCloneableProductLevel(roleData.product_level)
+        ? roleData.product_level
+        : "manager";
+      const cloned = cloneClassFromProductLevel(
+        productLevel,
+        roleData.name || "New class",
+      );
       const newRole: OnboardingRole = {
         id: `custom-${Date.now()}`,
-        name: roleData.name || "New Role",
-        description: roleData.description || "",
-        color: roleData.color || "#3b82f6",
-        icon: roleData.icon || "Users",
-        hierarchy_level: roleData.hierarchy_level || 1,
-        permissions: roleData.permissions || {},
-        is_system_role: false,
-      };
-      onRolesChange([...roles, newRole]);
+        name: roleData.name || cloned.name || "New class",
+        description: roleData.description || cloned.description,
+        color: roleData.color || cloned.color,
+        icon: roleData.icon || cloned.icon,
+        hierarchy_level: cloned.hierarchy_level,
+        product_level: productLevel,
+        permissions: clampPermissionsToProductLevel(
+          productLevel,
+          roleData.permissions || cloned.permissions,
+        ),
+                        is_system_role: false,
+                        is_active: true,
+                      };
+      onRolesChange([...planted, newRole]);
     }
     setDialogOpen(false);
     setEditingRole(null);
-  };
-
-  const handleManagePositions = (role: OnboardingRole) => {
-    setSelectedRoleForPositions(role);
-    setPositionManagerOpen(true);
-  };
-
-  const handlePositionsChange = (
-    roleId: string,
-    updatedPositions: OnboardingPosition[],
-  ) => {
-    onPositionsChange(updatedPositions);
   };
 
   const getIconComponent = (iconName: string) => {
@@ -169,33 +179,36 @@ export default function OnboardingRoleManager({
     return iconConfig?.icon || Users;
   };
 
-  const getRolePositionCount = (roleId: string) => {
-    return positions.filter((p) => p.roleId === roleId).length;
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold">Company Roles & Positions</h3>
-          <p className="text-gray-600 mt-1">
-            Define the roles for your organization and add specific positions
-            within each role. You need at least 4 roles.
+          <h3 className="text-lg font-semibold">Classes</h3>
+          <p className="mt-1 text-gray-600">
+            These four system roles are ready. Continue, or open roles to give
+            or take access.
           </p>
         </div>
-        <Button onClick={handleAddRole}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Role
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant={rolesOpen ? "secondary" : "default"}
+            onClick={() => setRolesOpen((open) => !open)}
+          >
+            {rolesOpen ? "Done editing" : "Open roles"}
+          </Button>
+          {rolesOpen && (
+            <Button onClick={handleAddRole}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create class
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4">
-        {roles.map((role) => {
+        {planted.map((role) => {
           const IconComponent = getIconComponent(role.icon);
-          const permissionCount = Object.values(role.permissions).filter(
-            Boolean,
-          ).length;
-          const positionCount = getRolePositionCount(role.id);
+          const productLevel = resolveProductLevel(role);
 
           return (
             <Card key={role.id}>
@@ -203,7 +216,7 @@ export default function OnboardingRoleManager({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div
-                      className="p-2 rounded-lg"
+                      className="rounded-lg p-2"
                       style={{ backgroundColor: role.color + "20" }}
                     >
                       <IconComponent
@@ -223,55 +236,56 @@ export default function OnboardingRoleManager({
                             border: `1px solid ${role.color}40`,
                           }}
                         >
-                          Level {role.hierarchy_level}
+                          {PRODUCT_ROLE_LABELS[productLevel]} level
                         </Badge>
                         {role.is_system_role && (
                           <Badge variant="secondary">System</Badge>
                         )}
+                        {role.is_active === false && (
+                          <Badge variant="outline">Archived</Badge>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="mt-1 text-sm text-gray-600">
                         {role.description || "No description provided"}
                       </p>
-                      <div className="flex items-center space-x-4 mt-1">
-                        <p className="text-xs text-gray-500">
-                          {permissionCount} permissions
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {positionCount} positions
-                        </p>
-                      </div>
+                      <ClassJobBoxList
+                        level={productLevel}
+                        permissions={role.permissions}
+                      />
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleManagePositions(role)}
-                    >
-                      <Briefcase className="h-4 w-4 mr-1" />
-                      Positions
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditRole(role)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    {!role.is_system_role && roles.length > 4 && (
+                  {rolesOpen && (
+                    <div className="flex items-center space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeleteRole(role.id)}
-                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleEditRole(role)}
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                        <Edit className="mr-1 h-4 w-4" />
+                        Edit
                       </Button>
-                    )}
-                  </div>
+                      {role.is_active === false ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRestoreRole(role.id)}
+                        >
+                          Restore
+                        </Button>
+                      ) : canDeactivateClass(role) ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteRole(role.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="mr-1 h-4 w-4" />
+                          {role.is_system_role ? "Archive" : "Delete"}
+                        </Button>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -279,209 +293,15 @@ export default function OnboardingRoleManager({
         })}
       </div>
 
-      <RoleEditDialog
+      <RoleManagementDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        role={editingRole}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditingRole(null);
+        }}
+        role={editingRole ? toCompanyRole(editingRole) : undefined}
         onSave={handleSaveRole}
       />
-
-      {selectedRoleForPositions && (
-        <PositionManager
-          role={selectedRoleForPositions}
-          positions={positions}
-          selectedTemplate={selectedTemplate}
-          onPositionsChange={handlePositionsChange}
-          open={positionManagerOpen}
-          onOpenChange={setPositionManagerOpen}
-        />
-      )}
     </div>
-  );
-}
-
-interface RoleEditDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  role: OnboardingRole | null;
-  onSave: (data: Partial<OnboardingRole>) => void;
-}
-
-function RoleEditDialog({
-  open,
-  onOpenChange,
-  role,
-  onSave,
-}: RoleEditDialogProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    color: "#3b82f6",
-    icon: "Users",
-    hierarchy_level: 1,
-  });
-
-  useEffect(() => {
-    if (role) {
-      setFormData({
-        name: role.name,
-        description: role.description,
-        color: role.color,
-        icon: role.icon,
-        hierarchy_level: role.hierarchy_level,
-      });
-    } else {
-      setFormData({
-        name: "",
-        description: "",
-        color: "#3b82f6",
-        icon: "Users",
-        hierarchy_level: 1,
-      });
-    }
-  }, [role]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
-  const getIconComponent = (iconName: string) => {
-    const iconConfig = AVAILABLE_ICONS.find((i) => i.value === iconName);
-    return iconConfig?.icon || Users;
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{role ? "Edit Role" : "Create New Role"}</DialogTitle>
-          <DialogDescription>Configure the role settings</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Role Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                placeholder="Enter role name"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="hierarchy">Hierarchy Level</Label>
-              <Input
-                id="hierarchy"
-                type="number"
-                min="1"
-                max="10"
-                value={formData.hierarchy_level}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    hierarchy_level: parseInt(e.target.value) || 1,
-                  }))
-                }
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              placeholder="Describe this role's responsibilities"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="color">Color</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="color"
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, color: e.target.value }))
-                  }
-                  className="w-16 h-10"
-                />
-                <Badge
-                  style={{ backgroundColor: formData.color, color: "white" }}
-                >
-                  Preview
-                </Badge>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="icon">Icon</Label>
-              <Select
-                value={formData.icon}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, icon: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue>
-                    <div className="flex items-center space-x-2">
-                      {(() => {
-                        const IconComponent = getIconComponent(formData.icon);
-                        return <IconComponent className="h-4 w-4" />;
-                      })()}
-                      <span>{formData.icon}</span>
-                    </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {AVAILABLE_ICONS.map((iconOption) => {
-                    const IconComponent = iconOption.icon;
-                    return (
-                      <SelectItem
-                        key={iconOption.value}
-                        value={iconOption.value}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <IconComponent className="h-4 w-4" />
-                          <span>{iconOption.label}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">
-              {role ? "Update Role" : "Create Role"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

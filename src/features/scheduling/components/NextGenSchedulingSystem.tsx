@@ -125,7 +125,7 @@ export function NextGenSchedulingSystem({
     <div className="flex min-h-screen flex-col bg-background">
       <SchedulingHeader role={schedulingRole} onPanelOpen={openPanel} />
 
-      <div className="container mx-auto flex min-h-0 flex-1 flex-col px-3 py-3 sm:px-4 sm:py-4">
+      <div className="flex min-h-0 w-full flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4">
         {schedulingSetupMissing ? (
           <FeatureSetupRequiredState
             title="Scheduling module is not fully set up yet"

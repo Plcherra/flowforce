@@ -1,23 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useInvites } from "@/hooks/useInvites";
-import { useTeamManagement } from "@/hooks/useTeamManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useInviteAccessOptions } from "../hooks/useInviteAccessOptions";
+import { useInviteMutations } from "../hooks/useInviteMutations";
+import { InvitePersonStack } from "./invites/InvitePersonStack";
+import { BulkInviteForm } from "./invites/BulkInviteForm";
+import type { BulkInviteRow } from "../types/invites";
 
 type InviteEmployeeDialogProps = {
   open: boolean;
@@ -25,182 +19,100 @@ type InviteEmployeeDialogProps = {
   onSuccess?: () => void;
 };
 
-type InviteFormState = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-};
-
-const DEFAULT_FORM: InviteFormState = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  role: "staff",
-};
-
 export function InviteEmployeeDialog({
   open,
   onOpenChange,
   onSuccess,
 }: InviteEmployeeDialogProps) {
-  const [form, setForm] = useState<InviteFormState>(DEFAULT_FORM);
-  const { sendInvite, isSending } = useInvites();
-  const { roles, isLoading } = useTeamManagement();
   const { toast } = useToast();
-
-  const roleOptions = useMemo(() => {
-    if (!roles.length) {
-      return [
-        { id: "staff", name: "Staff" },
-        { id: "manager", name: "Manager" },
-        { id: "supervisor", name: "Supervisor" },
-      ];
-    }
-    return roles.map((role) => ({ id: role.id, name: role.name }));
-  }, [roles]);
+  const { classes, locations, departments } = useInviteAccessOptions();
+  const { bulkInviteMutation } = useInviteMutations({
+    onInvitesCreated: onSuccess,
+  });
+  const [bulkPreview, setBulkPreview] = useState<BulkInviteRow[]>([]);
+  const [bulkErrorText, setBulkErrorText] = useState<string | null>(null);
+  const [bulkResults, setBulkResults] = useState<
+    Array<{
+      email: string;
+      status: "success" | "error";
+      message?: string;
+      inviteLink?: string;
+    }>
+  >([]);
 
   useEffect(() => {
     if (!open) {
-      setForm(DEFAULT_FORM);
+      setBulkPreview([]);
+      setBulkErrorText(null);
+      setBulkResults([]);
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!roleOptions.length) return;
-    const firstRole = roleOptions[0];
-    setForm((prev) => {
-      const roleStillExists = roleOptions.some((role) => role.id === prev.role);
-      const nextRole = roleStillExists ? prev.role : firstRole.id;
-      if (prev.role === nextRole) {
-        return prev;
-      }
-      return {
-        ...prev,
-        role: nextRole,
-      };
-    });
-  }, [roleOptions]);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!form.email) {
+  const handleCopyLink = async (link: string | null) => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
       toast({
+        title: "Link copied",
+        description: "Share this invite link with the teammate.",
+      });
+    } catch {
+      toast({
+        title: "Unable to copy link",
+        description: "Copy the link manually if needed.",
         variant: "destructive",
-        title: "Email required",
-        description: "Add an email address before sending an invitation.",
       });
-      return;
     }
-    const result = await sendInvite({
-      email: form.email,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      role: form.role,
-    });
-
-    if (result.success) {
-      toast({
-        title: "Invitation sent",
-        description: "We emailed the invite and let the teammate know.",
-      });
-      onOpenChange(false);
-      onSuccess?.();
-      setForm(DEFAULT_FORM);
-      return;
-    }
-
-    toast({
-      variant: "destructive",
-      title: "Unable to send invite",
-      description: result.success === false && 'message' in result ? result.message : "Failed to send invitation. Please try again.",
-    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Invite a teammate</DialogTitle>
+          <DialogTitle>Invite teammates</DialogTitle>
         </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="invite-first-name">First name</Label>
-              <Input
-                id="invite-first-name"
-                value={form.firstName}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    firstName: event.target.value,
-                  }))
-                }
-                placeholder="Taylor"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="invite-last-name">Last name</Label>
-              <Input
-                id="invite-last-name"
-                value={form.lastName}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, lastName: event.target.value }))
-                }
-                placeholder="Rivera"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="invite-email">Email</Label>
-            <Input
-              id="invite-email"
-              type="email"
-              required
-              value={form.email}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, email: event.target.value }))
-              }
-              placeholder="taylor@example.com"
+        <Tabs defaultValue="cards">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="cards">People</TabsTrigger>
+            <TabsTrigger value="many">Add many</TabsTrigger>
+          </TabsList>
+          <TabsContent value="cards" className="mt-4">
+            <InvitePersonStack
+              onSuccess={() => {
+                onSuccess?.();
+              }}
             />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Role</Label>
-            <Select
-              value={form.role}
-              onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, role: value }))
-              }
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roleOptions.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSending}>
-              {isSending ? "Sending…" : "Send invite"}
-            </Button>
-          </div>
-        </form>
+          </TabsContent>
+          <TabsContent value="many" className="mt-4">
+            <BulkInviteForm
+              onFileSelect={(rows) => {
+                setBulkErrorText(null);
+                setBulkResults([]);
+                setBulkPreview(rows);
+              }}
+              preview={bulkPreview}
+              results={bulkResults}
+              errorText={bulkErrorText}
+              onProcess={() => {
+                if (bulkPreview.length === 0) return;
+                bulkInviteMutation.mutate(
+                  {
+                    rows: bulkPreview,
+                    classes,
+                    locations,
+                    departments,
+                  },
+                  {
+                    onSuccess: (results) => setBulkResults(results),
+                  },
+                );
+              }}
+              isPending={bulkInviteMutation.isPending}
+              onCopyLink={handleCopyLink}
+              onError={setBulkErrorText}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

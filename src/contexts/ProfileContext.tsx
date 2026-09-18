@@ -136,7 +136,7 @@ async function fetchProfileFromSupabase(
     let query = supabase
       .from("profiles")
       .select(
-        "id, company_id, role, first_name, last_name, avatar_url, employee_id, phone",
+        "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone",
       )
       .eq("id", userId);
 
@@ -171,8 +171,8 @@ async function fetchProfileFromSupabase(
       avatar_url: data.avatar_url ?? null,
       employeeId: data.employee_id ?? null,
       employee_id: data.employee_id ?? null,
-      role_id: null,
-      roleId: null,
+      role_id: data.role_id ?? null,
+      roleId: data.role_id ?? null,
       locationIds: [],
       position: null,
       isPlaceholder: false,

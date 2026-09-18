@@ -2,6 +2,8 @@
  * Types for employee invites
  */
 
+import type { PermissionDiffMap } from "@/features/roles/constants/personAccessDiffs";
+
 export type InviteRecord = {
   id: string;
   email: string;
@@ -14,20 +16,37 @@ export type InviteRecord = {
   lastName: string | null;
 };
 
+export type InvitePersonCard = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  roleId: string;
+  locationId: string;
+  departmentId: string;
+  permissionOverrides: PermissionDiffMap;
+};
+
 export type SingleInviteForm = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  birthDate: string;
-  role: "employee" | "manager" | "admin";
+  roleId: string;
+  locationId: string;
+  departmentId: string;
+  permissionOverrides: PermissionDiffMap;
 };
 
 export type BulkInviteRow = {
   email: string;
   firstName: string;
   lastName: string;
-  role: "employee" | "manager" | "admin";
+  phone: string;
+  className: string;
+  locationName: string;
+  departmentName: string;
 };
 
 export type BulkInviteResult = {
@@ -38,11 +57,27 @@ export type BulkInviteResult = {
   onboardingTriggered?: boolean;
 };
 
+export const createInvitePersonCard = (
+  roleId = "",
+): InvitePersonCard => ({
+  id: `invite-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  roleId,
+  locationId: "",
+  departmentId: "",
+  permissionOverrides: {},
+});
+
 export const DEFAULT_SINGLE_INVITE: SingleInviteForm = {
   firstName: "",
   lastName: "",
   email: "",
   phone: "",
-  birthDate: "",
-  role: "employee",
+  roleId: "",
+  locationId: "",
+  departmentId: "",
+  permissionOverrides: {},
 };

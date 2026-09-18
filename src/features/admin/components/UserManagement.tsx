@@ -1,21 +1,13 @@
 import { useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@/lib/router-adapter";
 import { Users, UserPlus, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useCan } from "@/hooks/useCan";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 import { usePositions } from "@/hooks/usePositions";
 import { useEmployees, type Employee } from "@/hooks/useEmployees";
-import type {
-  ViewMode,
-  StatusFilter,
-  InviteFormState,
-} from "../types/userManagement";
-import { DEFAULT_ROLES } from "../utils/userHelpers";
+import type { ViewMode, StatusFilter } from "../types/userManagement";
 import { isInviteExpired } from "../utils/userHelpers";
 import { calculateRoleSummaries } from "../utils/roleSummaries";
 import { calculatePositionCoverage } from "../utils/positionCoverage";
@@ -39,10 +31,7 @@ import {
 
 export default function UserManagement() {
   const navigate = useNavigate();
-  const _queryClient = useQueryClient();
   const { toast } = useToast();
-  const { can } = useCan();
-  const { resetPassword } = useAuth();
   const {
     employees: activeEmployees = [],
     loading: activeLoading,
@@ -56,12 +45,6 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [inviteForm, setInviteForm] = useState<InviteFormState>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "staff",
-  });
   const [generatedInviteLink, setGeneratedInviteLink] = useState<string | null>(
     null,
   );
@@ -92,27 +75,18 @@ export default function UserManagement() {
   const {
     updateRoleMutation,
     deactivateMutation,
-    createInviteMutation,
     resetPassword: resetPasswordMutation,
   } = useUserManagementMutations({
     onEmployeesRefetch: refetchEmployees,
-    onInviteCreated: (link) => setGeneratedInviteLink(link),
-    onInviteFormReset: () =>
-      setInviteForm((prev) => ({
-        firstName: "",
-        lastName: "",
-        email: "",
-        role: prev.role,
-      })),
   });
 
   const handleRoleChange = (
     userId: string,
-    newRole: string,
-    currentRole: string,
+    roleId: string,
+    currentRoleId: string,
   ) => {
-    if (newRole === currentRole) return;
-    updateRoleMutation.mutate({ userId, newRole });
+    if (roleId === currentRoleId) return;
+    updateRoleMutation.mutate({ userId, roleId });
   };
 
   const handleResetPassword = async (email: string) => {
@@ -127,19 +101,6 @@ export default function UserManagement() {
 
   const handleReactivate = (userId: string) => {
     deactivateMutation.mutate({ userId, status: "active" });
-  };
-
-  const handleCreateInvite = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!inviteForm.email || !inviteForm.firstName || !inviteForm.lastName) {
-      toast({
-        title: "Missing information",
-        description: "Email, first name, and last name are required.",
-        variant: "destructive",
-      });
-      return;
-    }
-    createInviteMutation.mutate(inviteForm);
   };
 
   const handleCopyLink = async () => {
@@ -178,6 +139,7 @@ export default function UserManagement() {
     roleFilter,
     departmentFilter,
     viewMode,
+    roles: Array.isArray(roles) ? roles : [],
   });
 
   const pendingInvites = useMemo(
@@ -188,13 +150,17 @@ export default function UserManagement() {
     [invitesQuery.data],
   );
 
-  const roleOptions = useMemo(() => {
-    const availableRoles = Array.isArray(roles)
-      ? roles.map((role) => role.name.toLowerCase())
-      : [];
-    const combined = new Set([...DEFAULT_ROLES, ...availableRoles]);
-    return Array.from(combined.values());
-  }, [roles]);
+  const roleOptions = useMemo(
+    () =>
+      (Array.isArray(roles) ? roles : [])
+        .filter((role) => role.is_active)
+        .map((role) => ({
+          id: role.id,
+          name: role.name,
+          product_level: role.product_level,
+        })),
+    [roles],
+  );
 
   const positionCoverage = useMemo(
     () => calculatePositionCoverage(positions, assignments ?? []),
@@ -327,15 +293,13 @@ export default function UserManagement() {
 
         <div className="space-y-6">
           <InviteFormSidebar
-            inviteForm={inviteForm}
-            onInviteFormChange={setInviteForm}
-            onSubmit={handleCreateInvite}
             generatedInviteLink={generatedInviteLink}
-            isPending={createInviteMutation.isPending}
             pendingInvites={pendingInvites}
             isLoading={invitesQuery.isLoading}
-            roleOptions={roleOptions}
             onCopyLink={handleCopyLink}
+            onInviteSent={(link) => {
+              if (link) setGeneratedInviteLink(link);
+            }}
           />
 
           <RoleSummarySidebar

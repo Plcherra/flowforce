@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
+import { LogoEditorDialog } from "./LogoEditorDialog";
+import { setCompanyBrand } from "@/lib/theme/companyTheme";
+import { useState } from "react";
 import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 
@@ -34,19 +37,32 @@ export function GeneralSettingsPanel() {
     save,
     reset,
   } = useGeneralSettings(system);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorSource, setEditorSource] = useState<string | null>(null);
 
   if (globalError) {
     return <ErrorState message={globalError.message} />;
   }
 
   const handleFileChange = (file: File | null) => {
-    setLogoFile(file);
-    if (file) {
-      const preview = URL.createObjectURL(file);
-      setLogoUrl(preview);
-    } else {
+    if (!file) {
+      setLogoFile(null);
       setLogoUrl(null);
+      setEditorSource(null);
+      return;
     }
+    setEditorSource(URL.createObjectURL(file));
+    setEditorOpen(true);
+  };
+
+  const handleEditorConfirm = (file: File, previewUrl: string) => {
+    setLogoFile(file);
+    setLogoUrl(previewUrl);
+  };
+
+  const handleLogoBackgroundChange = (logoBackgroundColor: string) => {
+    setState((prev) => ({ ...prev, logoBackgroundColor }));
+    setCompanyBrand({ logoBackground: logoBackgroundColor });
   };
 
   return (
@@ -150,6 +166,9 @@ export function GeneralSettingsPanel() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="primaryColor">Primary color</Label>
+              <p className="text-xs text-muted-foreground">
+                Save button, links, and sidebar highlights.
+              </p>
               <div className="flex gap-2">
                 <Input
                   id="primaryColor"
@@ -178,6 +197,9 @@ export function GeneralSettingsPanel() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="secondaryColor">Secondary color</Label>
+              <p className="text-xs text-muted-foreground">
+                Discard button and secondary actions.
+              </p>
               <div className="flex gap-2">
                 <Input
                   id="secondaryColor"
@@ -216,13 +238,16 @@ export function GeneralSettingsPanel() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border bg-muted">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start">
+          <div
+            className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border"
+            style={{ backgroundColor: state.logoBackgroundColor }}
+          >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt="Logo preview"
-                className="h-full w-full object-contain"
+                className="h-[88px] w-[88px] object-contain"
               />
             ) : (
               <div className="text-center text-xs text-muted-foreground">
@@ -233,9 +258,31 @@ export function GeneralSettingsPanel() {
           <div className="flex-1 space-y-2">
             <Label>Company logo</Label>
             <p className="text-sm text-muted-foreground">
-              Upload a transparent PNG or SVG (max 2MB). Logo appears across
-              dashboards and emails.
+              Upload a PNG, JPEG, or SVG (max 2MB). Crop, center, and set a
+              logo plate color that stays separate from the app theme.
             </p>
+            <div className="space-y-2">
+              <Label htmlFor="logoBackgroundColor">Logo background</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="logoBackgroundColor"
+                  type="color"
+                  value={state.logoBackgroundColor}
+                  onChange={(event) =>
+                    handleLogoBackgroundChange(event.target.value)
+                  }
+                  disabled={!canEdit || loading}
+                  className="h-10 w-14 p-1"
+                />
+                <Input
+                  value={state.logoBackgroundColor}
+                  onChange={(event) =>
+                    handleLogoBackgroundChange(event.target.value)
+                  }
+                  disabled={!canEdit || loading}
+                />
+              </div>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <label
                 className={cn(
@@ -250,14 +297,17 @@ export function GeneralSettingsPanel() {
                   className="hidden"
                   accept="image/png,image/jpeg,image/svg+xml"
                   disabled={!canEdit || loading}
-                  onChange={(event) =>
-                    handleFileChange(event.target.files?.[0] ?? null)
-                  }
+                  onChange={(event) => {
+                    event.preventDefault();
+                    handleFileChange(event.target.files?.[0] ?? null);
+                    event.target.value = "";
+                  }}
                 />
               </label>
               {logoFile && <Badge variant="outline">{logoFile.name}</Badge>}
               {logoUrl && canEdit && (
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => handleFileChange(null)}
@@ -270,17 +320,27 @@ export function GeneralSettingsPanel() {
           </div>
         </div>
 
+        <LogoEditorDialog
+          open={editorOpen}
+          sourceUrl={editorSource}
+          backgroundColor={state.logoBackgroundColor}
+          onOpenChange={setEditorOpen}
+          onConfirm={handleEditorConfirm}
+        />
+
         {saveError && <ErrorState message={saveError.message} />}
 
         <div className="flex justify-end gap-2">
           <Button
-            variant="outline"
+            type="button"
+            variant="secondary"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
           >
             Discard
           </Button>
           <Button
+            type="button"
             onClick={save}
             disabled={!canEdit || !dirty || saving || loading}
           >

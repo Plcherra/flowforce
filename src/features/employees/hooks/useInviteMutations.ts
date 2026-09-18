@@ -3,22 +3,40 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  buildInviteLink,
-  triggerOnboardingChecklist,
-} from "../utils/inviteHelpers";
+import { sendCompanyInvites } from "../utils/sendCompanyInvites";
 import type {
-  SingleInviteForm,
+  InvitePersonCard,
   BulkInviteRow,
   BulkInviteResult,
 } from "../types/invites";
+import type { CompanyRole } from "@/hooks/useCompanyRoles";
+import type { OrganizationLocation } from "@/hooks/useLocations";
+import type { Department } from "../types/directory";
 
 const COMPANY_INVITES_QUERY_KEY = ["employees", "company-invites"];
 
 interface UseInviteMutationsProps {
   onInvitesCreated?: () => void;
+}
+
+function matchClassId(classes: CompanyRole[], className: string) {
+  const needle = className.trim().toLowerCase();
+  if (!needle) return classes.find((role) => role.product_level === "staff")?.id;
+  return (
+    classes.find((role) => role.name.trim().toLowerCase() === needle)?.id ??
+    classes.find((role) => role.product_level === needle)?.id ??
+    classes.find((role) => role.product_level === "staff")?.id
+  );
+}
+
+function matchNamedId<T extends { id: string; name: string }>(
+  items: T[],
+  name: string,
+) {
+  const needle = name.trim().toLowerCase();
+  if (!needle) return "";
+  return items.find((item) => item.name.trim().toLowerCase() === needle)?.id ?? "";
 }
 
 export function useInviteMutations({
@@ -28,137 +46,106 @@ export function useInviteMutations({
   const queryClient = useQueryClient();
 
   const createInviteMutation = useMutation({
-    mutationFn: async (payload: SingleInviteForm) => {
-      const { data: inviteId, error } = await supabase.rpc(
-        "create_company_invite",
+    mutationFn: async (payload: InvitePersonCard) => {
+      const result = await sendCompanyInvites([
         {
-          company_uuid: null as unknown as string,
-          invite_email: payload.email,
-          invite_role: payload.role,
-          employee_first_name: payload.firstName,
-          employee_last_name: payload.lastName,
-          employee_birth_date: payload.birthDate || null,
-          employee_phone: payload.phone || null,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          email: payload.email,
+          phone: payload.phone,
+          roleId: payload.roleId,
+          permissionOverrides: payload.permissionOverrides,
+          departmentId: payload.departmentId,
         },
-      );
-
-      if (error) throw error;
-
-      const { data: inviteRecord, error: fetchError } = await supabase
-        .from("company_invites")
-        .select("invite_token")
-        .eq("id", inviteId)
-        .maybeSingle();
-
-      if (fetchError) throw fetchError;
-      if (!inviteRecord?.invite_token) {
-        throw new Error("Invite token was not generated.");
+      ]);
+      const first = result.results[0];
+      if (!first?.ok) {
+        throw new Error(first?.message ?? "Unable to create invite.");
       }
-
-      const onboardingTriggered = await triggerOnboardingChecklist(
-        inviteId as string,
-      );
-
       return {
-        inviteId: inviteId as string,
-        inviteToken: inviteRecord.invite_token as string,
-        onboardingTriggered,
+        inviteId: first.inviteId,
+        inviteToken: first.inviteToken,
+        inviteLink: first.inviteLink,
+        onboardingTriggered: true,
       };
     },
-    onSuccess: ({ onboardingTriggered }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COMPANY_INVITES_QUERY_KEY });
       onInvitesCreated?.();
       toast({
         title: "Invite ready",
-        description: onboardingTriggered
-          ? "Invitation link generated and onboarding checklist triggered."
-          : "Invitation link generated. Configure onboarding tasks manually if automation is disabled.",
-        variant: onboardingTriggered ? undefined : "destructive",
+        description: "The class is painted. Share the invite if email is off.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Unable to create invite",
         description:
-          error?.message ?? "Please verify the details and try again.",
+          error instanceof Error
+            ? error.message
+            : "Please verify the details and try again.",
         variant: "destructive",
       });
     },
   });
 
   const bulkInviteMutation = useMutation({
-    mutationFn: async (rows: BulkInviteRow[]) => {
+    mutationFn: async ({
+      rows,
+      classes,
+      locations,
+      departments,
+    }: {
+      rows: BulkInviteRow[];
+      classes: CompanyRole[];
+      locations: OrganizationLocation[];
+      departments: Department[];
+    }) => {
       const results: BulkInviteResult[] = [];
+      const payloads = rows.map((row) => ({
+        firstName: row.firstName,
+        lastName: row.lastName,
+        email: row.email,
+        phone: row.phone,
+        roleId: matchClassId(classes, row.className) ?? "",
+        departmentId: matchNamedId(departments, row.departmentName),
+      }));
 
-      for (const row of rows) {
-        try {
-          const { data: inviteId, error } = await supabase.rpc(
-            "create_company_invite",
-            {
-              company_uuid: null as unknown as string,
-              invite_email: row.email,
-              invite_role: row.role,
-              employee_first_name: row.firstName,
-              employee_last_name: row.lastName,
-              employee_birth_date: null,
-              employee_phone: null,
-            },
-          );
-
-          if (error) throw error;
-
-          const { data: inviteRecord, error: fetchError } = await supabase
-            .from("company_invites")
-            .select("invite_token")
-            .eq("id", inviteId)
-            .maybeSingle();
-
-          if (fetchError) throw fetchError;
-          if (!inviteRecord?.invite_token) {
-            throw new Error("Invite token missing for bulk invite.");
-          }
-
-          const onboardingTriggered = await triggerOnboardingChecklist(
-            inviteId as string,
-          );
-
-          results.push({
-            email: row.email,
-            status: "success",
-            inviteLink: buildInviteLink(inviteRecord.invite_token),
-            onboardingTriggered,
-          });
-        } catch (error: any) {
-          results.push({
-            email: row.email,
-            status: "error",
-            message: error?.message ?? "Unknown error",
-          });
-        }
+      const missingClass = payloads.find((row) => !row.roleId);
+      if (missingClass) {
+        throw new Error("Every row needs a matching class.");
       }
 
+      const sent = await sendCompanyInvites(payloads);
+      for (const [index, result] of sent.results.entries()) {
+        results.push({
+          email: rows[index]?.email || rows[index]?.phone || "unknown",
+          status: result.ok ? "success" : "error",
+          message: result.message,
+          inviteLink: result.inviteLink,
+          onboardingTriggered: result.ok,
+        });
+      }
       return results;
     },
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: COMPANY_INVITES_QUERY_KEY });
       onInvitesCreated?.();
-      const failedOnboarding = results.filter(
-        (result) =>
-          result.status === "success" && result.onboardingTriggered === false,
-      ).length;
+      const failed = results.filter((result) => result.status === "error").length;
       toast({
         title: "Bulk invites processed",
         description:
-          failedOnboarding > 0
-            ? `${results.length - failedOnboarding} invites ready. ${failedOnboarding} onboarding checklists need manual review.`
+          failed > 0
+            ? `${results.length - failed} invites ready. ${failed} need a review.`
             : "Invitation links generated. Review any rows with issues below.",
-        variant: failedOnboarding > 0 ? "destructive" : undefined,
+        variant: failed > 0 ? "destructive" : undefined,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Bulk invite failed",
-        description: error?.message ?? "Check the CSV format and try again.",
+        description:
+          error instanceof Error ? error.message : "Check the CSV format and try again.",
         variant: "destructive",
       });
     },

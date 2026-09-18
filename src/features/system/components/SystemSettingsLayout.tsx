@@ -1,20 +1,21 @@
+"use client";
+
 import { Profiler, ReactNode, useState } from "react";
 import RoleGuard from "@/app-shell/guards/RoleGuard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Settings as SettingsIcon } from "lucide-react";
+import { Loader2, RefreshCw, type LucideIcon } from "lucide-react";
 import { ErrorState } from "./ErrorState";
 import { EmptyState } from "./EmptyState";
 import { SystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useSystemSettings } from "../hooks/useSystemSettings";
-import { SettingsReadinessPanel } from "./SettingsReadinessPanel";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 type TabConfig = {
   key: string;
   label: string;
+  icon?: LucideIcon;
   content: ReactNode;
 };
 
@@ -30,9 +31,6 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
     loading,
     error,
     refresh,
-    canEdit,
-    role,
-    isCompanyAdmin,
     missingCompany,
   } = system;
 
@@ -165,50 +163,41 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
     >
       <SystemSettingsContext.Provider value={system}>
         <div className="space-y-6 p-6 md:p-10">
-          <header className="flex flex-col gap-4 rounded-xl bg-muted/40 p-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <SettingsIcon className="h-8 w-8 text-primary" />
-                <div>
-                  <h1 className="text-3xl font-semibold text-foreground">
-                    System Settings
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Configure company profile, governance, and automation
-                    controls.
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline">{company.name}</Badge>
-                <Badge variant={canEdit ? "default" : "secondary"}>
-                  {canEdit ? "Admin access" : "Read-only"}
-                </Badge>
-                {role && <Badge variant="ghost">Role: {role}</Badge>}
-                {isCompanyAdmin && <Badge variant="ghost">Company Admin</Badge>}
-              </div>
-            </div>
-            <Button variant="outline" onClick={refresh}>
-              Refresh data
+          <header className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Settings
+            </h1>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              onClick={refresh}
+              aria-label="Refresh settings"
+            >
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </header>
-
-          <SettingsReadinessPanel
-            onOpenAdmin={() => setActiveTab("admin")}
-            onOpenIntegrations={() => setActiveTab("integrations")}
-          />
 
           {hasTabs ? (
             <Tabs
               value={activeTab}
               onValueChange={(value) => setActiveTab(value)}
             >
-              <TabsList className="flex w-full flex-wrap gap-2">
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.key} value={tab.key}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
+              <TabsList className="flex h-auto w-full flex-wrap items-center justify-start gap-1.5 rounded-2xl border border-primary/15 bg-background/80 p-1.5 text-muted-foreground shadow-sm">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <TabsTrigger
+                      key={tab.key}
+                      value={tab.key}
+                      className="rounded-xl border border-transparent px-3.5 py-2 text-sm font-medium shadow-none transition-all hover:bg-primary/10 hover:text-primary data-[state=active]:border-primary/25 data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-none"
+                    >
+                      {Icon ? <Icon className="mr-2 h-4 w-4" /> : null}
+                      {tab.label}
+                    </TabsTrigger>
+                  );
+                })}
               </TabsList>
               {tabs.map((tab) => (
                 <Profiler

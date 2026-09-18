@@ -118,7 +118,7 @@ export default function Tasks() {
       className={
         isMobile
           ? "space-y-4 px-4 pb-6"
-          : "space-y-6 max-w-7xl mx-auto px-6 pb-10"
+          : "w-full space-y-6 px-6 pb-10"
       }
     >
       <div

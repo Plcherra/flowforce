@@ -1,4 +1,5 @@
 import type { SecuritySettings } from "@/types/system-settings";
+import { parseIdleSessionTimeout } from "@/lib/auth/idleSession";
 import { DEFAULT_SECURITY } from "../systemSettingsDefaults";
 import { asBoolean, asNumber, asString, isRecord } from "./helpers";
 
@@ -23,7 +24,7 @@ export const normalizeSecurity = (value: unknown): SecuritySettings => {
       source.enforceForAdmins,
       DEFAULT_SECURITY.enforceForAdmins,
     ),
-    sessionTimeout: asNumber(
+    sessionTimeout: parseIdleSessionTimeout(
       source.sessionTimeout,
       DEFAULT_SECURITY.sessionTimeout,
     ),

@@ -21,6 +21,7 @@ interface UseUserManagementFiltersProps {
   roleFilter: string;
   departmentFilter: string;
   viewMode: ViewMode;
+  roles?: Array<{ id: string; name: string }>;
 }
 
 export function useUserManagementFilters({
@@ -31,6 +32,7 @@ export function useUserManagementFilters({
   roleFilter,
   departmentFilter,
   viewMode,
+  roles = [],
 }: UseUserManagementFiltersProps) {
   const allEmployeesForFilters = useMemo(
     () =>
@@ -46,8 +48,8 @@ export function useUserManagementFilters({
   }, [allEmployeesForFilters, searchTerm, roleFilter, departmentFilter]);
 
   const groupedEmployees = useMemo(
-    () => groupEmployees(filteredEmployees, viewMode),
-    [filteredEmployees, viewMode],
+    () => groupEmployees(filteredEmployees, viewMode, roles),
+    [filteredEmployees, viewMode, roles],
   );
 
   return {

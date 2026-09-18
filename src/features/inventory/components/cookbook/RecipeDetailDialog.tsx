@@ -205,7 +205,7 @@ export function RecipeDetailDialog({
                     </span>
                   </div>
                   <Button asChild variant="outline" size="sm" className="gap-2">
-                    <a href="/items-setup" target="_blank" rel="noreferrer">
+                    <a href="/app/inventory/items" target="_blank" rel="noreferrer">
                       <LinkIcon className="h-4 w-4" />
                       Open in Items &amp; Setup
                     </a>

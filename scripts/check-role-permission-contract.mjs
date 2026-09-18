@@ -137,10 +137,149 @@ for (const permission of [
 ]) {
   assert(
     !staffPermissions.has(permission),
-    `staff must not include elevated permission ${permission}`,
+    `staff default pack must not include elevated permission ${permission}`,
   );
 }
 
+const grantableExtras = contract.levelGrantableExtras ?? {};
+const staffGrantable = new Set([
+  ...staffPermissions,
+  ...(grantableExtras.staff ?? []),
+]);
+for (const permission of grantableExtras.staff ?? []) {
+  assert(
+    permissionKeys.has(permission),
+    `staff grantable extra references unknown permission ${permission}`,
+  );
+}
+for (const permission of [
+  "viewTeamSchedules",
+  "schedule.view",
+  "viewTeamProfiles",
+]) {
+  assert(
+    staffGrantable.has(permission),
+    `staff ceiling must allow owner to grant ${permission}`,
+  );
+}
+for (const permission of [
+  "editSchedules",
+  "schedule.edit",
+  "approveTimeOff",
+  "billing.manage",
+  "admin.settings",
+]) {
+  assert(
+    !staffGrantable.has(permission),
+    `staff ceiling must not allow ${permission}`,
+  );
+}
+
+assert(
+  !contract.starterClasses || contract.starterClasses.length === 0,
+  "extra starter packs are removed; create only from system roles",
+);
+assert(
+  !contract.operatorBoxHiddenKeys || contract.operatorBoxHiddenKeys.length === 0,
+  "hidden permission keys are not allowed",
+);
+assert(
+  !contract.operatorBoxBaselineKeys || contract.operatorBoxBaselineKeys.length === 0,
+  "baseline keys must sit on a visible area",
+);
+
+const operatorVerbs = ["see", "edit", "create_delete"];
+const operatorAreas = contract.operatorAreas ?? [];
+const expectedAreaKeys = [
+  "profile",
+  "my_schedule",
+  "team_schedule",
+  "my_tasks",
+  "run_lists",
+  "expenses",
+  "time_off",
+  "inventory",
+  "reports",
+  "ai",
+  "team",
+  "settings",
+];
+assert(
+  JSON.stringify(operatorAreas.map((area) => area.key)) ===
+    JSON.stringify(expectedAreaKeys),
+  `operator areas must be exactly ${expectedAreaKeys.join(", ")}`,
+);
+
+const areaKeyOwners = new Map();
+for (const area of operatorAreas) {
+  assert(area.label, `${area.key} must have a restaurant-facing label`);
+  assert(area.verbs && typeof area.verbs === "object", `${area.key} needs verbs`);
+  const lockedVerbs = area.owner_locked_verbs ?? [];
+  for (const verb of lockedVerbs) {
+    assert(
+      operatorVerbs.includes(verb),
+      `${area.key} locks unknown verb ${verb}`,
+    );
+  }
+  for (const verb of operatorVerbs) {
+    const keys = area.verbs[verb] ?? [];
+    assert(Array.isArray(keys), `${area.key}.${verb} must be an array`);
+    for (const permission of keys) {
+      assert(
+        permissionKeys.has(permission),
+        `${area.key}.${verb} references unknown permission ${permission}`,
+      );
+      assert(
+        !areaKeyOwners.has(permission),
+        `${permission} cannot belong to both ${areaKeyOwners.get(permission)} and ${area.key}.${verb}`,
+      );
+      areaKeyOwners.set(permission, `${area.key}.${verb}`);
+    }
+  }
+  assert(
+    operatorVerbs.some((verb) => (area.verbs[verb] ?? []).length > 0),
+    `${area.key} must map at least one permission`,
+  );
+}
+
+const classified = new Set(areaKeyOwners.keys());
+for (const permission of permissionKeys) {
+  assert(
+    classified.has(permission),
+    `permission ${permission} is missing from the operator area map`,
+  );
+}
+
+const teamSchedule = operatorAreas.find((area) => area.key === "team_schedule");
+assert(
+  teamSchedule.verbs.see.some((permission) => staffGrantable.has(permission)),
+  "Staff ceiling must allow See on team schedule",
+);
+assert(
+  ![...teamSchedule.verbs.edit, ...teamSchedule.verbs.create_delete].some(
+    (permission) => staffGrantable.has(permission),
+  ),
+  "Staff ceiling must not allow Edit or Create / delete on team schedule",
+);
+const settingsArea = operatorAreas.find((area) => area.key === "settings");
+assert(
+  operatorVerbs
+    .flatMap((verb) => settingsArea.verbs[verb] ?? [])
+    .every((permission) => !staffGrantable.has(permission)),
+  "Staff ceiling must not allow Settings",
+);
+assert(
+  JSON.stringify(settingsArea.owner_locked_verbs ?? []) ===
+    JSON.stringify(["see", "edit", "create_delete"]),
+  "Settings stays on for Owner",
+);
+const teamArea = operatorAreas.find((area) => area.key === "team");
+assert(
+  JSON.stringify(teamArea.owner_locked_verbs ?? []) ===
+    JSON.stringify(["edit", "create_delete"]),
+  "Team edit and create/delete stay on for Owner",
+);
+
 console.log(
-  `OK role permission contract: ${contract.roles.length} roles, ${permissionKeys.size} registered permissions`,
+  `OK role permission contract: ${contract.roles.length} roles, ${operatorAreas.length} operator areas, ${permissionKeys.size} registered permissions`,
 );

@@ -184,8 +184,10 @@ export default function InventoryItemForm({
     });
   };
 
-  // Update form data when editItem changes
+  // Update form data when the dialog opens or the edit target changes.
   useEffect(() => {
+    if (!open) return;
+
     if (editItem) {
       setFormData({
         name: editItem.name || "",
@@ -280,7 +282,7 @@ export default function InventoryItemForm({
       ]);
       setRemovedUnitIds([]);
     }
-  }, [editItem, locations, suppliers, existingItemUnits]);
+  }, [open, editItem, locations, suppliers, existingItemUnits]);
 
   // Filter categories based on input
   const filteredCategories =
@@ -471,8 +473,18 @@ export default function InventoryItemForm({
       parsedYieldQuantity && parsedYieldQuantity > 0
         ? parsedYieldQuantity
         : undefined;
+    const selectedUnitId = formData.unitid || unitLevels[0]?.unitid;
+    if (!selectedUnitId) {
+      toast({
+        title: "Unit required",
+        description: "Select a catalog unit such as Pound (lb) before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const recipeYieldUnitId = recipeYieldQuantity
-      ? formData.recipe_yield_unitid || formData.unitid || units?.[0]?.id
+      ? formData.recipe_yield_unitid || selectedUnitId
       : undefined;
 
     const itemData = {
@@ -483,7 +495,7 @@ export default function InventoryItemForm({
       barcode: formData.barcode || undefined,
       category: formData.category || undefined,
       categoryid: formData.categoryid || undefined,
-      unitid: formData.unitid || units?.[0]?.id,
+      unitid: selectedUnitId,
       unit_quantity: formData.unit_quantity
         ? parseFloat(formData.unit_quantity)
         : 1,
@@ -534,6 +546,7 @@ export default function InventoryItemForm({
 
           const payload = {
             item_id: savedItem.id,
+            company_id: profile.company_id,
             unitid: unitLevel.unitid,
             unit_level: unitLevel.unit_level,
             conversion_factor: conversionFactor,
@@ -617,14 +630,16 @@ export default function InventoryItemForm({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Item
-          </Button>
-        )}
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          {children || (
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>

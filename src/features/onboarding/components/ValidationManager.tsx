@@ -3,7 +3,6 @@ import i18n from "@/i18n/config";
 import { validatePassword } from "@/utils/passwordValidation";
 import { UserInfo, CompanyInfo, OnboardingRole } from "@/types/onboarding";
 import { BusinessTemplate } from "@/types/templates";
-import { VALIDATION_RULES } from "@/config/constants";
 
 export class ValidationManager {
   static validateUserInfo(
@@ -88,9 +87,7 @@ export class ValidationManager {
         case 4:
           return enabledSections.length > 0;
         case 5:
-          return (
-            customRoles.length >= VALIDATION_RULES.ONBOARDING.MIN_ROLES_REQUIRED
-          );
+          return true;
         case 6:
           return true;
         default:
@@ -122,9 +119,7 @@ export class ValidationManager {
         case 3:
           return enabledSections.length > 0;
         case 4:
-          return (
-            customRoles.length >= VALIDATION_RULES.ONBOARDING.MIN_ROLES_REQUIRED
-          );
+          return true;
         case 5:
           return true;
         default:

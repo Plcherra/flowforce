@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { InventoryItemUnit } from "./types";
+import {
+  fromInventoryItemUnitRow,
+  toInventoryItemUnitWrite,
+} from "@/features/inventory/utils/inventoryItemColumns";
 
 export interface EnhancedInventoryItem {
   id: string;
@@ -33,6 +37,8 @@ export interface EnhancedInventoryItem {
   };
 }
 
+const EMPTY_ITEM_UNITS: InventoryItemUnit[] = [];
+
 export function useItemUnits(itemId?: string) {
   const { data, isLoading } = useQuery({
     queryKey: ["item-units", itemId],
@@ -53,12 +59,17 @@ export function useItemUnits(itemId?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as InventoryItemUnit[];
+      return (data ?? []).map(
+        (row) =>
+          fromInventoryItemUnitRow(
+            row as Record<string, unknown>,
+          ) as unknown as InventoryItemUnit,
+      );
     },
     enabled: !!itemId,
   });
 
-  return { units: data || [], isLoading };
+  return { units: data ?? EMPTY_ITEM_UNITS, isLoading };
 }
 
 export function useEnhancedInventoryItems() {
@@ -129,7 +140,7 @@ export function useCreateItemUnit() {
     ) => {
       const { data, error } = await supabase
         .from("inv_item_units")
-        .insert(unitData)
+        .insert(toInventoryItemUnitWrite(unitData as Record<string, unknown>))
         .select(
           `
           *,
@@ -170,7 +181,7 @@ export function useUpdateItemUnit() {
     }: Partial<InventoryItemUnit> & { id: string }) => {
       const { data, error } = await supabase
         .from("inv_item_units")
-        .update(updates)
+        .update(toInventoryItemUnitWrite(updates as Record<string, unknown>))
         .eq("id", id)
         .select(
           `

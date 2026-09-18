@@ -57,6 +57,7 @@ requireIncludes(
     "missingLines",
     "varianceLines",
     "netVariance",
+    "buildCountApprovalAdjustments",
   ],
   "stock position utility",
 );
@@ -69,6 +70,7 @@ requireIncludes(
     "expectedQuantityForCountUnit",
     "variance",
     "getCountLocationIds",
+    "applyApprovedCountToStock",
   ],
   "counts repository",
 );

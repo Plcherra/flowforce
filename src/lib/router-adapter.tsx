@@ -133,6 +133,9 @@ export function useSearchParams(): [
   const pathname = usePathname() ?? "";
   const searchParams = useNextSearchParams();
 
+  const searchKey = searchParams?.toString() ?? "";
+  const params = useMemo(() => new URLSearchParams(searchKey), [searchKey]);
+
   const setSearchParams = useCallback(
     (
       nextInit:
@@ -146,24 +149,23 @@ export function useSearchParams(): [
       if (typeof nextInit === "string") {
         next = nextInit.startsWith("?") ? nextInit : `?${nextInit}`;
       } else if (typeof nextInit === "function") {
-        next = `?${nextInit(new URLSearchParams(searchParams?.toString() ?? "")).toString()}`;
+        next = `?${nextInit(new URLSearchParams(searchKey)).toString()}`;
       } else if (nextInit instanceof URLSearchParams) {
         next = `?${nextInit.toString()}`;
       } else {
         next = `?${new URLSearchParams(nextInit).toString()}`;
       }
 
-      router.push(`${pathname}${next}`);
+      const href = `${pathname}${next === "?" ? "" : next}`;
+      const current = `${pathname}${searchKey ? `?${searchKey}` : ""}`;
+      if (href === current) return;
+
+      router.push(href);
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchKey],
   );
 
-  return [
-    searchParams
-      ? new URLSearchParams(searchParams.toString())
-      : new URLSearchParams(),
-    setSearchParams,
-  ];
+  return [params, setSearchParams];
 }
 
 export function useLocation() {

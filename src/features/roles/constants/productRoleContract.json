@@ -143,10 +143,194 @@
       ]
     }
   ],
+  "operatorAreas": [
+    {
+      "key": "profile",
+      "label": "Profile",
+      "description": "Their own profile.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewOwnProfile"],
+        "edit": ["editOwnProfile"],
+        "create_delete": []
+      }
+    },
+    {
+      "key": "my_schedule",
+      "label": "My schedule",
+      "description": "Their own shifts.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewOwnSchedules"],
+        "edit": [],
+        "create_delete": []
+      }
+    },
+    {
+      "key": "team_schedule",
+      "label": "Team schedule",
+      "description": "The whole team’s shifts.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewTeamSchedules", "schedule.view"],
+        "edit": ["schedule.edit", "editSchedules"],
+        "create_delete": ["schedule.create", "schedule.delete"]
+      }
+    },
+    {
+      "key": "my_tasks",
+      "label": "My tasks",
+      "description": "Their own tasks and assigned lists.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewOwnTasks"],
+        "edit": [],
+        "create_delete": []
+      }
+    },
+    {
+      "key": "run_lists",
+      "label": "Run lists",
+      "description": "Team tasks and checklists.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewTeamTasks"],
+        "edit": ["editTasks", "approveFormSubmissions"],
+        "create_delete": ["createForms", "manageForms"]
+      }
+    },
+    {
+      "key": "expenses",
+      "label": "Expenses",
+      "description": "Own expenses, team expenses, and approvals.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewOwnExpenses", "viewTeamExpenses"],
+        "edit": ["approveExpenses"],
+        "create_delete": []
+      }
+    },
+    {
+      "key": "time_off",
+      "label": "Time off",
+      "description": "Time-off requests. Edit means approve.",
+      "min_product_level": "manager",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": [],
+        "edit": ["approveTimeOff"],
+        "create_delete": []
+      }
+    },
+    {
+      "key": "inventory",
+      "label": "Inventory",
+      "description": "Counts, waste, prep, and purchasing.",
+      "min_product_level": "manager",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": [
+          "inventory.view",
+          "inventory.purchasing.view",
+          "inventory.counts.view",
+          "inventory.waste.view",
+          "inventory.prep.view"
+        ],
+        "edit": [
+          "inventory.edit",
+          "inventory.adjust",
+          "inventory.counts.edit",
+          "inventory.counts.approve",
+          "inventory.prep.edit",
+          "manageInventory"
+        ],
+        "create_delete": [
+          "inventory.create",
+          "inventory.delete",
+          "inventory.import",
+          "inventory.export",
+          "inventory.purchasing.manage",
+          "inventory.counts.create",
+          "inventory.waste.create"
+        ]
+      }
+    },
+    {
+      "key": "reports",
+      "label": "Reports",
+      "description": "Operational reports.",
+      "min_product_level": "manager",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["reports.view"],
+        "edit": [],
+        "create_delete": ["reports.export"]
+      }
+    },
+    {
+      "key": "ai",
+      "label": "AI",
+      "description": "Insights, suggestions, and automation.",
+      "min_product_level": "manager",
+      "owner_locked_verbs": [],
+      "verbs": {
+        "see": ["viewAIInsights", "ai.insights.view"],
+        "edit": ["ai.actions.suggest", "ai.actions.approve", "ai.audit.view"],
+        "create_delete": ["ai.actions.automate", "ai.governance.manage"]
+      }
+    },
+    {
+      "key": "team",
+      "label": "Team",
+      "description": "Directory, invites, and classes.",
+      "min_product_level": "staff",
+      "owner_locked_verbs": ["edit", "create_delete"],
+      "verbs": {
+        "see": ["viewTeamProfiles", "directory.view"],
+        "edit": [
+          "editTeamProfiles",
+          "admin.roles",
+          "admin.permissions",
+          "managePositions",
+          "directory.manage"
+        ],
+        "create_delete": ["manageUsers"]
+      }
+    },
+    {
+      "key": "settings",
+      "label": "Settings",
+      "description": "Company settings, billing, and payments.",
+      "min_product_level": "admin",
+      "owner_locked_verbs": ["see", "edit", "create_delete"],
+      "verbs": {
+        "see": ["billing.view"],
+        "edit": ["systemSettings", "admin.settings", "managePayments"],
+        "create_delete": ["billing.manage"]
+      }
+    }
+  ],
+  "levelGrantableExtras": {
+    "staff": [
+      "viewTeamProfiles",
+      "viewTeamSchedules",
+      "schedule.view",
+      "viewTeamTasks",
+      "directory.view"
+    ]
+  },
   "legacyAliases": {
     "administrator": "admin",
+    "company_administrator": "admin",
     "company_admin": "admin",
     "employee": "staff",
+    "team_member": "staff",
     "supervisor": "manager"
   },
   "routePermissionMap": [

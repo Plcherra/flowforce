@@ -42,9 +42,9 @@ immutable
 as $$
   select exists (
     select 1
-    from jsonb_array_elements(coalesce(p_windows, '[]'::jsonb)) as window(value)
-    where p_shift_start_minutes >= (window.value ->> 'start')::integer
-      and p_shift_end_minutes <= (window.value ->> 'end')::integer
+    from jsonb_array_elements(coalesce(p_windows, '[]'::jsonb)) as avail_window(value)
+    where p_shift_start_minutes >= (avail_window.value ->> 'start')::integer
+      and p_shift_end_minutes <= (avail_window.value ->> 'end')::integer
   );
 $$;
 
@@ -59,19 +59,19 @@ immutable
 as $$
 declare
   result jsonb := '[]'::jsonb;
-  window jsonb;
+  avail_window jsonb;
   win_start integer;
   win_end integer;
 begin
-  for window in
+  for avail_window in
     select value
     from jsonb_array_elements(coalesce(p_windows, '[]'::jsonb))
   loop
-    win_start := (window ->> 'start')::integer;
-    win_end := (window ->> 'end')::integer;
+    win_start := (avail_window ->> 'start')::integer;
+    win_end := (avail_window ->> 'end')::integer;
 
     if p_block_end <= win_start or p_block_start >= win_end then
-      result := result || window;
+      result := result || avail_window;
     else
       if p_block_start > win_start then
         result := result || jsonb_build_object('start', win_start, 'end', p_block_start);
@@ -84,9 +84,9 @@ begin
 
   return coalesce(
     (
-      select jsonb_agg(window.value)
-      from jsonb_array_elements(result) as window(value)
-      where (window.value ->> 'end')::integer > (window.value ->> 'start')::integer
+      select jsonb_agg(avail_window.value)
+      from jsonb_array_elements(result) as avail_window(value)
+      where (avail_window.value ->> 'end')::integer > (avail_window.value ->> 'start')::integer
     ),
     '[]'::jsonb
   );

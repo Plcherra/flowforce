@@ -24,38 +24,95 @@ import {
   Filter,
   Edit,
   Trash2,
-  History,
   ShieldCheck,
 } from "lucide-react";
 import {
   useInventoryItems,
   useDeleteInventoryItem,
+  useInventoryLocations,
+  useInventorySuppliers,
 } from "@/hooks/useInventory";
 import { asArray, safeArrayFilter } from "@/utils/reactQueryTypes";
-import { useInventoryCategories } from "@/features/inventory/hooks/useInventoryCategories";
+import {
+  useInventoryCategories,
+  useCreateInventoryCategory,
+  useUpdateInventoryCategory,
+  useDeleteInventoryCategory,
+} from "@/features/inventory/hooks/useInventoryCategories";
+import {
+  useCreateInventoryLocation,
+  useUpdateInventoryLocation,
+  useDeleteInventoryLocation,
+} from "@/features/inventory/hooks/useInventoryLocations";
+import {
+  useCreateSupplier,
+  useUpdateSupplier,
+  useDeleteSupplier,
+} from "@/features/inventory/hooks/useInventorySuppliers";
+import { useInventoryStockPositions } from "@/features/inventory/hooks/useInventoryStockPositions";
+import { useInventoryUnits } from "@/features/inventory/hooks/useInventoryUnits";
+import { useProfile } from "@/hooks/useProfile";
 import InventoryItemForm from "@/features/inventory/components/InventoryItemForm";
 import { InventoryRecipeDialog } from "@/features/inventory/components/InventoryRecipeDialog";
+import { CatalogCrudPanel } from "@/features/inventory/components/CatalogCrudPanel";
 import { getUnitHierarchyDisplay } from "@/features/inventory/hooks/useItemUnits";
-import { summarizeSetupHealth } from "@/features/inventory/utils/itemSetupHealth";
+import {
+  isCatalogReadyForCounts,
+  summarizeSetupHealth,
+} from "@/features/inventory/utils/itemSetupHealth";
+import { isLowStock } from "@/features/inventory/utils/stockPosition";
 import type { InventoryItem } from "@/features/inventory/hooks/types";
-import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ItemsSetup() {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | undefined>();
   const [recipeItem, setRecipeItem] = useState<InventoryItem | undefined>();
   const [isRecipeDialogOpen, setRecipeDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
+  const { profile } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const { data: itemsData, isLoading } = useInventoryItems();
   const { data: categoriesData } = useInventoryCategories();
+  const { data: locationsData, isLoading: locationsLoading } =
+    useInventoryLocations();
+  const { data: suppliersData, isLoading: suppliersLoading } =
+    useInventorySuppliers(companyId);
+  const { data: stockByItem = {} } = useInventoryStockPositions();
+  const { data: unitsData, isLoading: unitsLoading } = useInventoryUnits();
   const items = asArray(itemsData);
   const categories = asArray(categoriesData);
+  const locations = asArray(locationsData);
+  const suppliers = asArray(suppliersData);
+  const units = asArray(unitsData);
   const deleteItem = useDeleteInventoryItem();
+  const createCategory = useCreateInventoryCategory();
+  const updateCategory = useUpdateInventoryCategory();
+  const deleteCategory = useDeleteInventoryCategory();
+  const createLocation = useCreateInventoryLocation();
+  const updateLocation = useUpdateInventoryLocation();
+  const deleteLocation = useDeleteInventoryLocation();
+  const createSupplier = useCreateSupplier();
+  const updateSupplier = useUpdateSupplier();
+  const deleteSupplier = useDeleteSupplier();
   const setupSummary = summarizeSetupHealth(items);
+  const readyForCounts = isCatalogReadyForCounts({
+    locationCount: locations.length,
+    items,
+  });
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -86,13 +143,13 @@ export default function ItemsSetup() {
     setShowItemForm(true);
   };
 
-  const handleDeleteItem = async (item: InventoryItem) => {
-    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
-      try {
-        await deleteItem.mutateAsync(item.id);
-      } catch (error) {
-        logger.error("Failed to delete item:", { error, tags: ["error"] });
-      }
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteItem.mutateAsync(itemToDelete.id);
+      setItemToDelete(null);
+    } catch (error) {
+      logger.error("Failed to delete item:", { error, tags: ["error"] });
     }
   };
 
@@ -101,20 +158,16 @@ export default function ItemsSetup() {
     setRecipeDialogOpen(true);
   };
 
-  const handleViewHistory = (_item: InventoryItem) => {
-    // Feature not yet implemented - could open history dialog
-    toast({
-      title: "Coming Soon",
-      description: "Item history tracking will be available in a future update",
-    });
-  };
-
   const getStockStatus = (item: InventoryItem) => {
-    if (!item.min_stock_level) return "unknown";
-    const currentStock = item.min_stock_level || 0; // Use min level as proxy for current stock
-    if (currentStock < item.min_stock_level) return "low";
-    if (item.max_stock_level && currentStock > item.max_stock_level)
+    const onHand = stockByItem[item.id]?.onHand ?? 0;
+    if (isLowStock(onHand, item.min_stock_level)) return "low";
+    if (
+      item.max_stock_level &&
+      Number(item.max_stock_level) > 0 &&
+      onHand > item.max_stock_level
+    ) {
       return "high";
+    }
     return "normal";
   };
 
@@ -141,7 +194,7 @@ export default function ItemsSetup() {
     if (!health) return <Badge variant="outline">Setup unknown</Badge>;
 
     if (health.status === "ready") {
-      return <Badge className="bg-emerald-600 text-white">Cost ready</Badge>;
+      return <Badge className="bg-emerald-600 text-white">Ready for counts</Badge>;
     }
 
     if (health.status === "warning") {
@@ -152,10 +205,9 @@ export default function ItemsSetup() {
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
               <Package className="h-8 w-8" />
@@ -167,13 +219,25 @@ export default function ItemsSetup() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline">Import Items</Button>
             <Button onClick={handleNewItem}>
               <Plus className="h-4 w-4 mr-2" />
               Add Item
             </Button>
           </div>
         </div>
+
+        <Card className={readyForCounts ? "border-emerald-200" : "border-amber-200"}>
+          <CardContent className="p-4">
+            <p className="text-xs font-medium uppercase text-muted-foreground">
+              Ready for counts
+            </p>
+            <p className="mt-2 text-lg font-semibold">
+              {readyForCounts
+                ? "Catalog has a unit and at least one room"
+                : "Add a storage room and an item unit before starting a count"}
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-3 md:grid-cols-4 mb-6">
           <Card>
@@ -189,7 +253,7 @@ export default function ItemsSetup() {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Cost-ready items
+                Count-ready items
               </p>
               <p className="mt-2 text-2xl font-semibold">
                 {setupSummary.ready}
@@ -224,6 +288,7 @@ export default function ItemsSetup() {
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
             <TabsTrigger value="locations">Locations</TabsTrigger>
+            <TabsTrigger value="units">Units</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -298,6 +363,8 @@ export default function ItemsSetup() {
               <div className="space-y-4">
                 {filteredItems.map((item) => {
                   const stockStatus = getStockStatus(item);
+                  const onHand = stockByItem[item.id]?.onHand ?? 0;
+                  const stockValue = stockByItem[item.id]?.value ?? 0;
                   const baseCost = item.cost_per_unit ?? null;
                   const recipeCost =
                     item.recipe_cost_per_unit ??
@@ -361,9 +428,7 @@ export default function ItemsSetup() {
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">
-                                  Stock Targets:
-                                </span>
+                                <span className="font-medium">On hand:</span>
                                 <p
                                   className={`font-medium ${
                                     stockStatus === "low"
@@ -373,14 +438,20 @@ export default function ItemsSetup() {
                                         : ""
                                   }`}
                                 >
-                                  Min {item.min_stock_level || 0} / Max{" "}
+                                  {onHand} {item.unit?.abbreviation || ""}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Min {item.min_stock_level || 0} / PAR max{" "}
                                   {item.max_stock_level || "∞"}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">Cost:</span>
+                                <span className="font-medium">Value:</span>
                                 <p className="text-muted-foreground">
-                                  Base {formatCurrency(baseCost)}
+                                  {formatCurrency(stockValue)}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  Fallback {formatCurrency(baseCost)}
                                 </p>
                                 {recipeCost && baseCost !== recipeCost && (
                                   <p className="text-muted-foreground">
@@ -446,14 +517,7 @@ export default function ItemsSetup() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleViewHistory(item)}
-                            >
-                              <History className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteItem(item)}
+                              onClick={() => setItemToDelete(item)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -468,64 +532,108 @@ export default function ItemsSetup() {
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Categories</CardTitle>
-                <CardDescription>
-                  Organize items into categories
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {categories.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    No categories defined yet
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {categories.map((category) => (
-                      <Card key={category.id}>
-                        <CardContent className="p-4">
-                          <h3 className="font-medium">{category.name}</h3>
-                          {category.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {category.description}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <CatalogCrudPanel
+              title="Categories"
+              description="Organize items into categories"
+              emptyLabel="No categories yet"
+              items={categories.map((category) => ({
+                id: category.id,
+                name: category.name,
+                detail: category.description,
+              }))}
+              onCreate={(name) => createCategory.mutateAsync({ name })}
+              onRename={(id, name) => updateCategory.mutateAsync({ id, name })}
+              onDelete={(id) => deleteCategory.mutateAsync(id)}
+              isPending={
+                createCategory.isPending ||
+                updateCategory.isPending ||
+                deleteCategory.isPending
+              }
+            />
           </TabsContent>
 
           <TabsContent value="suppliers" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Suppliers</CardTitle>
-                <CardDescription>Manage supplier information</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-4">
-                  Supplier management coming soon
-                </p>
-              </CardContent>
-            </Card>
+            <CatalogCrudPanel
+              title="Suppliers"
+              description="Preferred vendors for purchasing"
+              emptyLabel="No suppliers yet"
+              items={suppliers.map((supplier) => ({
+                id: supplier.id,
+                name: supplier.name,
+              }))}
+              isLoading={suppliersLoading}
+              onCreate={(name) => createSupplier.mutateAsync({ name })}
+              onRename={(id, name) => updateSupplier.mutateAsync({ id, name })}
+              onDelete={(id) => deleteSupplier.mutateAsync(id)}
+              isPending={
+                createSupplier.isPending ||
+                updateSupplier.isPending ||
+                deleteSupplier.isPending
+              }
+            />
           </TabsContent>
 
           <TabsContent value="locations" className="space-y-4">
+            <CatalogCrudPanel
+              title="Storage rooms"
+              description="Walk-in, freezer, dry storage, and other count rooms"
+              emptyLabel="No storage rooms yet. Add one before counts."
+              createLabel="Add room"
+              items={locations.map((location) => ({
+                id: location.id,
+                name: location.name,
+                detail: location.location_type,
+              }))}
+              isLoading={locationsLoading}
+              onCreate={(name) =>
+                createLocation.mutateAsync({
+                  name,
+                  location_type: "storage",
+                })
+              }
+              onRename={(id, name) =>
+                updateLocation.mutateAsync({ id, name })
+              }
+              onDelete={(id) => deleteLocation.mutateAsync(id)}
+              isPending={
+                createLocation.isPending ||
+                updateLocation.isPending ||
+                deleteLocation.isPending
+              }
+            />
+          </TabsContent>
+
+          <TabsContent value="units" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Storage Locations</CardTitle>
+                <CardTitle>Catalog units</CardTitle>
                 <CardDescription>
-                  Configure storage areas and locations
+                  Shared count, weight, and volume units. Pick one as the item
+                  base unit, such as Pound (lb).
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center py-4">
-                  Location management coming soon
-                </p>
+                {unitsLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading units…</p>
+                ) : units.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No catalog units are available yet.
+                  </p>
+                ) : (
+                  <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {units.map((unit) => (
+                      <li
+                        key={unit.id}
+                        className="rounded-md border px-3 py-2 text-sm"
+                      >
+                        <p className="font-medium">
+                          {unit.name} ({unit.abbreviation})
+                        </p>
+                        <p className="text-muted-foreground">{unit.unit_type}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -533,14 +641,19 @@ export default function ItemsSetup() {
           <TabsContent value="settings" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Inventory Settings</CardTitle>
+                <CardTitle>Count readiness</CardTitle>
                 <CardDescription>
-                  Configure system preferences and defaults
+                  A count needs a catalog unit and at least one storage room
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-4">
-                  Settings coming soon
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <p>Rooms: {locations.length}</p>
+                <p>Catalog units: {units.length}</p>
+                <p>Items with a unit: {items.filter((item) => item.unitid).length}</p>
+                <p>
+                  {readyForCounts
+                    ? "This catalog can stand a count."
+                    : "Not ready for counts yet."}
                 </p>
               </CardContent>
             </Card>
@@ -552,7 +665,33 @@ export default function ItemsSetup() {
           editItem={editingItem}
           open={showItemForm}
           onOpenChange={setShowItemForm}
-        />
+        >
+          <span className="sr-only">Add item</span>
+        </InventoryItemForm>
+        <AlertDialog
+          open={Boolean(itemToDelete)}
+          onOpenChange={(open) => {
+            if (!open) setItemToDelete(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete {itemToDelete?.name}?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes the item from the catalog. You can add it again
+                later.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => void handleDeleteItem()}>
+                Delete item
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {recipeItem && (
           <InventoryRecipeDialog
             item={recipeItem}
@@ -565,7 +704,6 @@ export default function ItemsSetup() {
             }}
           />
         )}
-      </div>
     </div>
   );
 }

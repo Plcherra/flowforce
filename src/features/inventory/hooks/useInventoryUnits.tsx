@@ -9,7 +9,7 @@ export function useInventoryUnits() {
       const { data, error } = await supabase
         .from("inv_units")
         .select("*")
-        .eq("is_active", true)
+        .or("is_active.eq.true,is_active.is.null")
         .order("unit_type, name");
 
       if (error) throw error;

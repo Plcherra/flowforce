@@ -7,8 +7,6 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Plus,
-  Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useInventoryItems } from "@/features/inventory/hooks/useInventoryItems";
@@ -58,33 +56,8 @@ export default function PrepParPage() {
   const { data: _inventoryItems = [] } = useInventoryItems();
   const { toast } = useToast();
 
-  // Mock prep items since the real structure doesn't match the old interface
-  const mockPrepItems: PrepItem[] = [
-    {
-      id: "1",
-      name: "Burger Patties",
-      currentStock: 20,
-      parMin: 15,
-      parMax: 50,
-      unit: "pieces",
-      batchSize: 10,
-      batchYield: "1 batch = ~10 pieces",
-      status: "planned",
-      lastPrepped: new Date().toISOString().split("T")[0],
-    },
-    {
-      id: "2",
-      name: "Chopped Lettuce",
-      currentStock: 8,
-      parMin: 10,
-      parMax: 30,
-      unit: "cups",
-      batchSize: 5,
-      batchYield: "1 batch = ~5 cups",
-      status: "planned",
-      lastPrepped: new Date().toISOString().split("T")[0],
-    },
-  ];
+  // Live PAR list is Phase 6. Do not show demo burgers as this company's stock.
+  const mockPrepItems: PrepItem[] = [];
 
   const [prepStatuses, setPrepStatuses] = useState<Record<string, string>>({});
 
@@ -147,17 +120,6 @@ export default function PrepParPage() {
                 {new Date().toLocaleDateString()}
               </p>
             </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Load Template
-              </Button>
-              <Button variant="outline" size="sm">
-                Export Plan
-              </Button>
-              <Button size="sm">Save Plan</Button>
-            </div>
           </div>
 
           {/* Summary Stats */}
@@ -208,13 +170,9 @@ export default function PrepParPage() {
               <CardContent className="p-8 text-center">
                 <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-semibold mb-2">No Prep Items Found</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground">
                   Items marked for daily preparation will appear here
                 </p>
-                <Button variant="outline">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Prep Item
-                </Button>
               </CardContent>
             </Card>
           ) : (

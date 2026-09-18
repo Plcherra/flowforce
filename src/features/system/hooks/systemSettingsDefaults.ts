@@ -99,6 +99,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   theme: "light",
   primaryColor: "#3b82f6",
   secondaryColor: "#1e40af",
+  logoBackgroundColor: "#ffffff",
   accentColor: "#0ea5e9",
   logoPlacement: "sidebar",
   sidebarBranding: {
@@ -182,6 +183,7 @@ export function seedSystemSettings(company: Company | null) {
       primaryColor: company?.primary_color ?? DEFAULT_APPEARANCE.primaryColor,
       secondaryColor:
         company?.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
+      logoBackgroundColor: DEFAULT_APPEARANCE.logoBackgroundColor,
     },
     admin_config: DEFAULT_ADMIN_CONFIG,
   };

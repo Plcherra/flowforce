@@ -61,6 +61,35 @@ export function useCreateInventoryLocation() {
   });
 }
 
+export function useUpdateInventoryLocation() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: {
+      id: string;
+      name?: string;
+      location_type?: string;
+      temperature_controlled?: boolean | null;
+    }) => InventoryService.updateLocation(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
+      toast({
+        title: "Success",
+        description: "Location updated",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to update location",
+        variant: "destructive",
+      });
+      logger.error("Update location error", { error, tags: ["error"] });
+    },
+  });
+}
+
 export function useDeleteInventoryLocation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();

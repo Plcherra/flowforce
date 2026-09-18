@@ -158,8 +158,10 @@ export interface CompanyRole {
   color?: string;
   icon?: string;
   hierarchy_level?: number;
+  product_level?: "owner" | "admin" | "manager" | "staff";
   permissions: Record<string, boolean>;
   is_system_role?: boolean;
+  is_active?: boolean;
 }
 
 export interface Position {

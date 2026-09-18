@@ -32,7 +32,7 @@ export function NavigationSection({
       : section.title || translationKey;
 
   return (
-    <SidebarGroup className="animate-fade-in">
+    <SidebarGroup className="animate-fade-in group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:!p-0">
       <SidebarGroupLabel
         className={`text-xs font-semibold text-primary/80 uppercase tracking-wider px-3 py-2 mb-2 border border-primary/20 rounded-full bg-primary/5 transition-all duration-300 hover:bg-primary/10 hover:border-primary/30 ${
           isCollapsed ? "hidden" : ""
@@ -42,11 +42,15 @@ export function NavigationSection({
       </SidebarGroupLabel>
 
       <SidebarGroupContent>
-        <SidebarMenu className="space-y-1">
+        <SidebarMenu className={isCollapsed ? "items-center space-y-1" : "space-y-1"}>
           {items.map((item, index) => (
             <div
               key={item.id}
-              className="animate-fade-in"
+              className={
+                isCollapsed
+                  ? "flex w-full justify-center animate-fade-in"
+                  : "animate-fade-in"
+              }
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <NavigationItem item={item} />

@@ -57,7 +57,7 @@ export function MessagesShell({
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/40 py-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 lg:px-0">
+      <div className="flex w-full flex-col gap-6 px-4 lg:px-6">
         <MessagesWorkspaceHeader vm={vm} />
         <CommunicationReadinessPanel
           channels={vm.channels}

@@ -9,11 +9,17 @@ import type {
   InventoryItemUnit,
 } from "@/features/inventory/hooks/types";
 import {
+  buildCountApprovalAdjustments,
   buildStockPositionMap,
+  clampCountedQuantity,
   expectedQuantityForCountUnit,
   stockPositionKey,
   type StockPositionRow,
 } from "@/features/inventory/utils/stockPosition";
+import {
+  fromInventoryItemRow,
+  fromInventoryItemUnitRow,
+} from "@/features/inventory/utils/inventoryItemColumns";
 
 const inventoryCountSchema = z
   .object({
@@ -27,9 +33,7 @@ const inventoryCountSchema = z
 const inventoryCountLineSchema = z
   .object({
     id: z.string(),
-    countid: z.string(),
     item_id: z.string(),
-    counted_quantity: z.number(),
   })
   .passthrough();
 
@@ -59,6 +63,11 @@ function normalizeInventoryCount(
   } as InventoryCount;
 }
 
+function asQuantity(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function normalizeInventoryCountLine(
   line: Record<string, unknown>,
 ): InventoryCountLine {
@@ -66,6 +75,10 @@ function normalizeInventoryCountLine(
     ...line,
     countid: String(line.countid ?? line.count_id ?? ""),
     unitid: (line.unitid ?? line.unit_id ?? null) as string | null | undefined,
+    expected_quantity: asQuantity(line.expected_quantity),
+    counted_quantity: asQuantity(line.counted_quantity),
+    variance: asQuantity(line.variance),
+    conversion_factor: asQuantity(line.conversion_factor ?? 1) || 1,
   } as InventoryCountLine;
 }
 
@@ -203,9 +216,14 @@ export async function createInventoryCount(
     ? new Date(payload.scheduleDate).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
 
+  if (payload.locations.length === 0) {
+    throw new Error("Choose at least one storage room that already exists.");
+  }
+
   const { data: createdCount, error } = await client
     .from("inv_counts")
     .insert({
+      company_id: companyId,
       count_type: payload.type,
       count_period: payload.period,
       count_date: countDate,
@@ -312,6 +330,91 @@ export async function submitInventoryCount(
   });
 }
 
+export async function saveInventoryCountLineQuantities(
+  countId: string,
+  quantities: Record<string, number>,
+  options: CountRepositoryOptions = {},
+) {
+  const client = options.supabaseClient ?? supabase;
+  const count = await getInventoryCount(countId, { supabaseClient: client });
+  if (!count) throw new Error("Count not found");
+
+  const lines = await listInventoryCountLines(countId, {
+    supabaseClient: client,
+  });
+  const previousById = new Map(
+    lines.map((line) => [line.id, Number(line.counted_quantity ?? 0)]),
+  );
+  const alreadyPosted = await hasCountStockPost(client, countId);
+
+  await Promise.all(
+    Object.entries(quantities).map(([lineId, quantity]) =>
+      updateInventoryCountLine(
+        lineId,
+        { counted_quantity: clampCountedQuantity(quantity) },
+        { supabaseClient: client },
+      ),
+    ),
+  );
+
+  const userId = await getCurrentUserId(client);
+  const locationIds = await getCountLocationIds(client, countId);
+  const companyId =
+    options.companyId ||
+    (count as InventoryCount & { company_id?: string | null }).company_id ||
+    (await resolveActiveCompanyId(client));
+  const itemCosts = await loadCountItemCosts(
+    client,
+    companyId,
+    lines.map((line) => line.item_id),
+  );
+
+  const adjustments = buildCountApprovalAdjustments({
+    countId,
+    companyId,
+    userId,
+    adjustmentDate: new Date().toISOString().split("T")[0],
+    locationId: locationIds[0] ?? count.location_id ?? null,
+    reasonPrefix: alreadyPosted ? "count_correction" : "count_approval",
+    itemCosts,
+    lines: lines
+      .filter((line) => line.id in quantities)
+      .map((line) => ({
+        id: line.id,
+        item_id: line.item_id,
+        counted_quantity: clampCountedQuantity(quantities[line.id]),
+        expected_quantity: alreadyPosted
+          ? (previousById.get(line.id) ?? 0)
+          : Number(line.expected_quantity ?? 0),
+        conversion_factor: line.conversion_factor,
+      })),
+  });
+
+  if (adjustments.length) {
+    const { error } = await client.from("inv_adjustments").insert(adjustments);
+    if (error) throw error;
+  }
+
+  const timestamp = new Date().toISOString();
+  const finishing =
+    count.status === "planned" ||
+    count.status === "in_progress" ||
+    count.status === "awaiting_review";
+  const { error: statusError } = await client
+    .from("inv_counts")
+    .update({
+      status: "approved",
+      review_status: "approved",
+      completed_at: timestamp,
+    })
+    .eq("id", countId);
+  if (statusError) throw statusError;
+  await logCountEvent(client, countId, finishing ? "submitted" : "updated", {
+    completed_at: timestamp,
+    posted_to_stock: true,
+  });
+}
+
 export async function approveInventoryCount(
   countId: string,
   input: ReviewActionInput = {},
@@ -320,6 +423,8 @@ export async function approveInventoryCount(
   const client = options.supabaseClient ?? supabase;
   const reviewerId = await getCurrentUserId(client);
   const timestamp = new Date().toISOString();
+
+  await applyApprovedCountToStock(client, countId, reviewerId, options.companyId);
 
   const { error } = await client
     .from("inv_counts")
@@ -400,7 +505,12 @@ export async function listInventoryCountEvents(
     .eq("countid", countId)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return [];
+    }
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -529,6 +639,7 @@ export async function updateInventoryCountLine(
     ...updates,
   };
   if (updates.counted_quantity !== undefined) {
+    payload.counted_quantity = Math.max(0, Number(updates.counted_quantity) || 0);
     payload.counted_at = new Date().toISOString();
     if (payload.variance === undefined) {
       const { data: currentLine, error: currentLineError } = await client
@@ -538,7 +649,7 @@ export async function updateInventoryCountLine(
         .maybeSingle();
       if (currentLineError) throw currentLineError;
       payload.variance =
-        updates.counted_quantity - Number(currentLine?.expected_quantity ?? 0);
+        payload.counted_quantity - Number(currentLine?.expected_quantity ?? 0);
     }
   }
 
@@ -619,13 +730,27 @@ async function logCountEvent(
   payload: Record<string, unknown> = {},
 ) {
   const actorId = await getCurrentUserId(client);
+  let companyId: string | null = null;
+  try {
+    companyId = await resolveActiveCompanyId(client);
+  } catch {
+    companyId = null;
+  }
+
   const { error } = await client.from("inv_count_events").insert({
+    company_id: companyId,
     countid: countId,
     event_type: eventType,
     actorid: actorId,
     payload,
   });
-  if (error) throw error;
+  if (
+    error &&
+    !isMissingSchemaResourceError(error) &&
+    error.code !== "42501"
+  ) {
+    throw error;
+  }
 }
 
 async function resolveCountScopeItems(
@@ -648,7 +773,7 @@ async function resolveCountScopeItems(
   let itemQuery = client
     .from("inv_items")
     .select(
-      `id, name, category, sku, default_location_id, unitid, unit:inv_units(*)`,
+      `id, name, category, sku, default_location_id, unit_id, unit:inv_units!unit_id(*)`,
     )
     .eq("company_id", companyId)
     .eq("is_active", true);
@@ -664,7 +789,9 @@ async function resolveCountScopeItems(
   const { data, error } = await itemQuery;
   if (error) throw error;
 
-  const items = (data ?? []) as unknown as InventoryItem[];
+  const items = ((data ?? []) as Record<string, unknown>[]).map((row) =>
+    fromInventoryItemRow(row),
+  ) as unknown as InventoryItem[];
   const scoped = items.map((item) => ({
     item,
     expectedQuantity: undefined,
@@ -690,7 +817,7 @@ async function buildScopedItemsForIds(
   const { data, error } = await client
     .from("inv_items")
     .select(
-      `id, name, category, sku, default_location_id, unitid, unit:inv_units(*)`,
+      `id, name, category, sku, default_location_id, unit_id, unit:inv_units!unit_id(*)`,
     )
     .in(
       "id",
@@ -701,14 +828,19 @@ async function buildScopedItemsForIds(
   if (error) throw error;
 
   const expectedMap = new Map(
-    items.map((entry) => [entry.id, entry.expectedQuantity ?? 0]),
+    items
+      .filter((entry) => entry.expectedQuantity !== undefined)
+      .map((entry) => [entry.id, entry.expectedQuantity]),
   );
-  const scoped = ((data ?? []) as unknown as InventoryItem[]).map<ScopedCountItem>(
-    (item) => ({
-      item,
-      expectedQuantity: expectedMap.get(item.id),
-      units: [],
-    }),
+  const scoped = ((data ?? []) as Record<string, unknown>[]).map<ScopedCountItem>(
+    (row) => {
+      const item = fromInventoryItemRow(row) as unknown as InventoryItem;
+      return {
+        item,
+        expectedQuantity: expectedMap.get(item.id),
+        units: [],
+      };
+    },
   );
 
   const scopedWithUnits = await attachUnitsToItems(client, scoped);
@@ -743,7 +875,9 @@ async function attachUnitsToItems(
   );
 
   (unitsData ?? []).forEach((unit) => {
-    const typed = unit as unknown as InventoryItemUnit;
+    const typed = fromInventoryItemUnitRow(
+      unit as Record<string, unknown>,
+    ) as unknown as InventoryItemUnit;
     if (typed.is_countable === false) return;
     const bucket = unitsByItem[typed.item_id] || [];
     bucket.push(typed);
@@ -871,6 +1005,107 @@ async function attachExpectedStockToItems(
       expectedQuantity,
     };
   });
+}
+
+async function hasCountStockPost(client: SupabaseClient, countId: string) {
+  const { data, error } = await client
+    .from("inv_adjustments")
+    .select("id, reason")
+    .eq("reference_number", countId)
+    .limit(20);
+  if (error && !isMissingSchemaResourceError(error)) {
+    throw error;
+  }
+
+  return (data ?? []).some((row) => {
+    const reason = String(row.reason ?? "");
+    return (
+      reason.startsWith(`count_approval:${countId}`) ||
+      reason.startsWith(`count_correction:${countId}`)
+    );
+  });
+}
+
+async function loadCountItemCosts(
+  client: SupabaseClient,
+  companyId: string,
+  itemIds: string[],
+) {
+  const uniqueIds = [...new Set(itemIds)];
+  const itemCosts: Record<
+    string,
+    { cost_per_unit?: number | null; default_location_id?: string | null }
+  > = {};
+  if (!uniqueIds.length) return itemCosts;
+
+  const { data: items, error: itemsError } = await client
+    .from("inv_items")
+    .select("id, cost_per_unit, default_location_id")
+    .in("id", uniqueIds)
+    .eq("company_id", companyId);
+  if (itemsError) throw itemsError;
+  (items ?? []).forEach((item) => {
+    itemCosts[item.id] = {
+      cost_per_unit: Number(item.cost_per_unit ?? 0),
+      default_location_id: item.default_location_id ?? null,
+    };
+  });
+  return itemCosts;
+}
+
+async function applyApprovedCountToStock(
+  client: SupabaseClient,
+  countId: string,
+  userId: string,
+  explicitCompanyId?: string,
+) {
+  const { data: existingAdjustments, error: existingError } = await client
+    .from("inv_adjustments")
+    .select("id")
+    .eq("reference_number", countId)
+    .eq("reason", `count_approval:${countId}`)
+    .limit(1);
+  if (existingError && !isMissingSchemaResourceError(existingError)) {
+    throw existingError;
+  }
+  if ((existingAdjustments ?? []).length > 0) {
+    return;
+  }
+
+  const count = await getInventoryCount(countId, { supabaseClient: client });
+  if (!count) {
+    throw new Error("Count not found");
+  }
+  if (count.status === "approved") {
+    return;
+  }
+
+  const lines = await listInventoryCountLines(countId, { supabaseClient: client });
+  const locationIds = await getCountLocationIds(client, countId);
+  const companyId =
+    explicitCompanyId ||
+    (count as InventoryCount & { company_id?: string | null }).company_id ||
+    (await resolveActiveCompanyId(client));
+  const itemCosts = await loadCountItemCosts(
+    client,
+    companyId,
+    lines.map((line) => line.item_id),
+  );
+
+  const adjustments = buildCountApprovalAdjustments({
+    countId,
+    companyId,
+    userId,
+    adjustmentDate: new Date().toISOString().split("T")[0],
+    locationId: locationIds[0] ?? count.location_id ?? null,
+    lines,
+    itemCosts,
+  });
+
+  if (!adjustments.length) return;
+
+  const { error } = await client.from("inv_adjustments").insert(adjustments);
+  if (error) throw error;
 }
 
 async function getCountLocationIds(client: SupabaseClient, countId: string) {

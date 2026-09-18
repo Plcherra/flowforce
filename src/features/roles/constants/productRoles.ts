@@ -133,6 +133,21 @@ export function getDefaultProductRoleDefinitions(): ProductRoleDefinition[] {
   }));
 }
 
+export function getPlantedSystemRoles() {
+  return getDefaultProductRoleDefinitions().map((role) => ({
+    id: role.key,
+    name: role.label,
+    description: role.description,
+    color: role.color,
+    icon: role.icon,
+    hierarchy_level: role.hierarchy_level,
+    product_level: role.key,
+    permissions: { ...role.permissions },
+    is_system_role: true,
+    is_active: true,
+  }));
+}
+
 export function getProductRoleDefinition(
   roleKey: ProductRoleKey,
 ): ProductRoleDefinition {

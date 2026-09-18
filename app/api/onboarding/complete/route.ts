@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { verifyOnboardingSetup } from "../../_server/onboardingSetup";
-import { ensureProductCompanyRoles } from "../../_server/productRolesSetup";
+import {
+  applyOnboardingCompanyRoles,
+  ensureProductCompanyRoles,
+} from "../../_server/productRolesSetup";
+import {
+  clampPermissionsToProductLevel,
+  resolveProductLevel,
+} from "@/features/roles/constants/productLevels";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
 
@@ -14,8 +21,10 @@ type OnboardingRolePayload = {
   color?: string;
   icon?: string;
   hierarchy_level?: number;
+  product_level?: "owner" | "admin" | "manager" | "staff";
   permissions?: Record<string, boolean>;
   is_system_role?: boolean;
+  is_active?: boolean;
 };
 
 type OnboardingPositionPayload = {
@@ -53,16 +62,28 @@ const readString = (source: JsonRecord, key: string) => {
 const transformRolesForDatabase = (roles: unknown) => {
   if (!Array.isArray(roles)) return [];
 
-  return roles.map((role: OnboardingRolePayload) => ({
-    id: role.id,
-    name: role.name,
-    description: role.description || "",
-    color: role.color,
-    icon: role.icon,
-    hierarchy_level: role.hierarchy_level,
-    permissions: role.permissions || {},
-    is_system_role: role.is_system_role || false,
-  }));
+  return roles.map((role: OnboardingRolePayload) => {
+    const productLevel = resolveProductLevel({
+      product_level: role.product_level,
+      name: role.name,
+      hierarchy_level: role.hierarchy_level,
+    });
+    return {
+      id: role.id,
+      name: role.name,
+      description: role.description || "",
+      color: role.color,
+      icon: role.icon,
+      hierarchy_level: role.hierarchy_level,
+      product_level: productLevel,
+      permissions: clampPermissionsToProductLevel(
+        productLevel,
+        role.permissions || {},
+      ),
+      is_system_role: role.is_system_role || false,
+      is_active: role.is_active !== false,
+    };
+  });
 };
 
 const transformPositionsForDatabase = (positions: unknown) => {
@@ -237,6 +258,12 @@ export async function POST(request: Request) {
         requestId,
       );
     }
+
+    await applyOnboardingCompanyRoles(supabaseAdmin, {
+      companyId,
+      userId,
+      roles: customRoles,
+    });
 
     await ensureProductCompanyRoles(supabaseAdmin, {
       companyId,

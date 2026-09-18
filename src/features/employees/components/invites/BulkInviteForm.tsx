@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { FileSpreadsheet, Copy, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -40,23 +41,24 @@ export function BulkInviteForm({
   onError,
 }: BulkInviteFormProps) {
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [pasteText, setPasteText] = useState("");
+
+  const applyText = (text: string) => {
+    const { rows, error } = parseCsvForBulkInvites(text);
+    if (error) {
+      onError?.(error);
+      onFileSelect([]);
+      return;
+    }
+    onFileSelect(rows);
+  };
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    const text = await file.text();
-    const { rows, error } = parseCsvForBulkInvites(text);
-    if (error) {
-      if (onError) {
-        onError(error);
-      }
-      onFileSelect([]);
-      return;
-    }
-    onFileSelect(rows);
+    applyText(await file.text());
     setFileInputKey((prev) => prev + 1);
   };
 
@@ -71,14 +73,20 @@ export function BulkInviteForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Bulk Upload</CardTitle>
+        <CardTitle>Add many</CardTitle>
         <CardDescription>
-          Upload a CSV file with columns: email, first_name, last_name, role
-          (optional). Maximum 200 rows per upload.
+          Paste or upload a list with first_name, last_name, email or phone,
+          class, and department. Use this when you already have a roster.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-3">
+        <Textarea
+          value={pasteText}
+          onChange={(event) => setPasteText(event.target.value)}
+          placeholder="first_name,last_name,email,phone,class,department"
+          rows={5}
+        />
+        <div className="flex flex-wrap items-center gap-3">
           <Input
             key={fileInputKey}
             type="file"
@@ -87,10 +95,18 @@ export function BulkInviteForm({
             className="flex-1"
           />
           <Button
+            type="button"
+            variant="outline"
+            onClick={() => applyText(pasteText)}
+            disabled={!pasteText.trim()}
+          >
+            Review paste
+          </Button>
+          <Button
             onClick={onProcess}
             disabled={preview.length === 0 || isPending}
           >
-            {isPending ? "Processing..." : "Process Invites"}
+            {isPending ? "Processing..." : "Send list"}
           </Button>
         </div>
 
@@ -113,13 +129,17 @@ export function BulkInviteForm({
               <div className="divide-y text-sm">
                 {preview.map((row, index) => (
                   <div
-                    key={index}
+                    key={`${row.email}-${row.phone}-${index}`}
                     className="flex items-center justify-between px-3 py-2"
                   >
                     <div>
-                      <p className="font-medium">{row.email}</p>
+                      <p className="font-medium">
+                        {row.firstName} {row.lastName}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {row.firstName} {row.lastName} • {row.role}
+                        {[row.email || row.phone, row.className]
+                          .filter(Boolean)
+                          .join(" • ")}
                       </p>
                     </div>
                   </div>
@@ -156,24 +176,14 @@ export function BulkInviteForm({
                       )}
                     </div>
                     {result.status === "success" ? (
-                      <div className="flex items-center gap-2">
-                        {result.onboardingTriggered === false && (
-                          <Badge
-                            variant="outline"
-                            className="border-yellow-400 bg-yellow-50 text-yellow-700"
-                          >
-                            Onboarding pending
-                          </Badge>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onCopyLink(result.inviteLink ?? null)}
-                        >
-                          <Copy className="mr-2 h-4 w-4" />
-                          Copy link
-                        </Button>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onCopyLink(result.inviteLink ?? null)}
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy link
+                      </Button>
                     ) : (
                       <Badge variant="destructive">Error</Badge>
                     )}

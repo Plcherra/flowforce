@@ -11,42 +11,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { InviteFormState, CompanyInvite } from "../types/userManagement";
+import { InvitePersonStack } from "@/features/employees/components/invites/InvitePersonStack";
+import type { CompanyInvite } from "../types/userManagement";
 import { formatRoleLabel, formatDateTimeLocale } from "@/shared/utils";
 
 interface InviteFormSidebarProps {
-  inviteForm: InviteFormState;
-  onInviteFormChange: (form: InviteFormState) => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   generatedInviteLink: string | null;
-  isPending: boolean;
   pendingInvites: CompanyInvite[];
   isLoading: boolean;
-  roleOptions: string[];
   onCopyLink: () => void;
+  onInviteSent?: (inviteLink: string | null) => void;
 }
 
 export function InviteFormSidebar({
-  inviteForm,
-  onInviteFormChange,
-  onSubmit,
   generatedInviteLink,
-  isPending,
   pendingInvites,
   isLoading,
-  roleOptions,
   onCopyLink,
+  onInviteSent,
 }: InviteFormSidebarProps) {
   return (
     <Card>
@@ -56,65 +41,12 @@ export function InviteFormSidebar({
           Invite team member
         </CardTitle>
         <CardDescription>
-          Generate a pre-account invite link for new employees.
+          Pick a class. The boxes paint. Give or take only what you can
+          grant.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              placeholder="First name"
-              value={inviteForm.firstName}
-              onChange={(event) =>
-                onInviteFormChange({
-                  ...inviteForm,
-                  firstName: event.target.value,
-                })
-              }
-            />
-            <Input
-              placeholder="Last name"
-              value={inviteForm.lastName}
-              onChange={(event) =>
-                onInviteFormChange({
-                  ...inviteForm,
-                  lastName: event.target.value,
-                })
-              }
-            />
-          </div>
-          <Input
-            type="email"
-            placeholder="Work email"
-            value={inviteForm.email}
-            onChange={(event) =>
-              onInviteFormChange({
-                ...inviteForm,
-                email: event.target.value,
-              })
-            }
-          />
-          <Select
-            value={inviteForm.role}
-            onValueChange={(value) =>
-              onInviteFormChange({ ...inviteForm, role: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Assign starting role" />
-            </SelectTrigger>
-            <SelectContent>
-              {roleOptions.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {formatRoleLabel(role)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Creating invite…" : "Create invite"}
-          </Button>
-        </form>
+        <InvitePersonStack hideIntro onSuccess={onInviteSent} />
 
         {generatedInviteLink && (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">

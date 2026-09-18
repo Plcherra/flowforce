@@ -355,7 +355,8 @@ export function useSystemSettings(
     }
   }, [user, fetchSettings, refetchCompany]);
 
-  const loading = companyLoading || fetching || !permissionsReady;
+  const loading =
+    !settings && (companyLoading || fetching || !permissionsReady);
 
   return {
     company: company ?? null,

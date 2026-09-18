@@ -36,7 +36,9 @@ export function filterEmployeesByRole(
 ): Employee[] {
   if (roleFilter === "all") return employees;
   return employees.filter(
-    (employee) => employee.role?.toLowerCase() === roleFilter.toLowerCase(),
+    (employee) =>
+      employee.role_id === roleFilter ||
+      employee.role?.toLowerCase() === roleFilter.toLowerCase(),
   );
 }
 

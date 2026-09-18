@@ -17,8 +17,8 @@ import { EmployeeCard } from "./EmployeeCard";
 interface EmployeeGroupCardProps {
   groupName: string;
   members: Employee[];
-  roleOptions: string[];
-  onRoleChange: (userId: string, newRole: string, currentRole: string) => void;
+  roleOptions: Array<{ id: string; name: string; product_level?: string }>;
+  onRoleChange: (userId: string, roleId: string, currentRoleId: string) => void;
   onStatusToggle: (employee: Employee) => void;
   onResetPassword: (email: string) => void;
   onNavigateToEmployee: (employeeId: string) => void;

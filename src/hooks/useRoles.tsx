@@ -17,6 +17,7 @@ export interface Profile {
 export interface DirectoryRole {
   id: string;
   name: string;
+  product_level?: "owner" | "admin" | "manager" | "staff";
   permissions: string[];
 }
 
@@ -87,7 +88,7 @@ export function useRoles() {
 
         const { data, error } = await supabase
           .from("company_roles")
-          .select("id, name, permissions")
+          .select("id, name, product_level, permissions")
           .eq("company_id", companyId)
           .eq("is_active", true)
           .order("hierarchy_level", { ascending: true });
@@ -99,7 +100,8 @@ export function useRoles() {
 
         return (data ?? []).map((role) => ({
           id: role.id,
-          name: role.name,
+          name: role.name ?? "",
+          product_level: role.product_level,
           permissions: parsePermissions(role.permissions),
         }));
       } catch (error) {

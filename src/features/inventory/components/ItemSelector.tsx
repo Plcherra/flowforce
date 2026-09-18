@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Package, Plus } from "lucide-react";
@@ -18,7 +17,7 @@ interface ItemSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onItemsSelected: (
-    items: Array<{ id: string; name: string; expectedQuantity: number }>,
+    items: Array<{ id: string; name: string }>,
   ) => void;
   excludeIds?: string[];
 }
@@ -31,9 +30,6 @@ export function ItemSelector({
 }: ItemSelectorProps) {
   const [search, setSearch] = useState("");
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [expectedQuantities, setExpectedQuantities] = useState<
-    Record<string, number>
-  >({});
   const { data: items, isLoading } = useInventoryItems();
 
   const filteredItems =
@@ -49,16 +45,8 @@ export function ItemSelector({
       newSelected.delete(itemId);
     } else {
       newSelected.add(itemId);
-      // Set default expected quantity
-      if (!expectedQuantities[itemId]) {
-        setExpectedQuantities((prev) => ({ ...prev, [itemId]: 0 }));
-      }
     }
     setSelectedItems(newSelected);
-  };
-
-  const handleQuantityChange = (itemId: string, quantity: number) => {
-    setExpectedQuantities((prev) => ({ ...prev, [itemId]: quantity }));
   };
 
   const handleConfirm = () => {
@@ -67,22 +55,18 @@ export function ItemSelector({
       return {
         id: itemId,
         name: item?.name || "",
-        expectedQuantity: expectedQuantities[itemId] || 0,
       };
     });
 
     onItemsSelected(selectedItemsData);
     onOpenChange(false);
 
-    // Reset state
     setSelectedItems(new Set());
-    setExpectedQuantities({});
     setSearch("");
   };
 
   const handleCancel = () => {
     setSelectedItems(new Set());
-    setExpectedQuantities({});
     setSearch("");
     onOpenChange(false);
   };
@@ -96,8 +80,8 @@ export function ItemSelector({
             Select Items for Count
           </DialogTitle>
           <DialogDescription>
-            Choose items to include in the inventory count and set expected
-            quantities
+            Choose catalog items to include. Expected quantity comes from
+            current on-hand, not a typed guess.
           </DialogDescription>
         </DialogHeader>
 
@@ -161,27 +145,6 @@ export function ItemSelector({
                           )}
                         </div>
                       </div>
-                      {selectedItems.has(item.id) && (
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor={`qty-${item.id}`} className="text-sm">
-                            Expected:
-                          </Label>
-                          <Input
-                            id={`qty-${item.id}`}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={expectedQuantities[item.id] || 0}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                item.id,
-                                Number(e.target.value),
-                              )
-                            }
-                            className="w-24"
-                          />
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>

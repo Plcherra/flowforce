@@ -136,7 +136,7 @@ const RoleAnimation = () => (
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
     >
-      Setup Roles & Positions
+      Classes
     </motion.p>
     {/* Animated user avatars */}
     <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">

@@ -34,7 +34,7 @@ export async function logAuditEvent({
   }
 
   const { error } = await supabase.rpc("log_audit_event" as any, {
-    targetuser_id: targetUserId,
+    target_user_id: targetUserId,
     event_action: action,
     target_table: tableName,
     target_record_id: recordId,

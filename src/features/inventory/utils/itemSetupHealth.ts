@@ -73,8 +73,8 @@ export function buildInventoryItemSetupHealth(
   if (!item.default_location_id && !item.location) {
     addIssue(issues, {
       code: "missing_location",
-      severity: "warning",
-      message: "Item should have a default location for counts and stock value.",
+      severity: "blocking",
+      message: "Item needs a default storage room before counts can start.",
     });
   }
 
@@ -199,4 +199,13 @@ export function summarizeSetupHealth(items: InventoryItem[]) {
     incomplete,
     readyPercent: items.length ? Math.round((ready / items.length) * 100) : 0,
   };
+}
+
+export function isCatalogReadyForCounts(input: {
+  locationCount: number;
+  items: Array<{ unitid?: string | null; unit?: unknown }>;
+}) {
+  const hasRoom = input.locationCount > 0;
+  const hasUnit = input.items.some((item) => Boolean(item.unitid || item.unit));
+  return hasRoom && hasUnit;
 }

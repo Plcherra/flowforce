@@ -67,9 +67,16 @@ export default function Auth() {
     const metadata: UserMetadata = {
       first_name: firstName,
       last_name: lastName,
+      ...(inviteCode ? { invite_token: inviteCode } : {}),
     };
 
     await signUp(email, password, firstName, lastName, metadata);
+    if (inviteCode) {
+      const { acceptCompanyInvite } = await import(
+        "@/features/employees/utils/acceptCompanyInvite"
+      );
+      await acceptCompanyInvite(inviteCode);
+    }
 
     setIsLoading(false);
   };

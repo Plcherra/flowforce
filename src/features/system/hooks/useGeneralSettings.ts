@@ -5,6 +5,7 @@ import type {
   GeneralSettings,
 } from "@/types/system-settings";
 import { showErrorToast, showSuccessToast } from "@/utils/errorHandler";
+import { setCompanyBrand } from "@/lib/theme/companyTheme";
 import type { SystemSettingsHook } from "./useSystemSettings";
 
 type GeneralFormState = {
@@ -16,6 +17,7 @@ type GeneralFormState = {
   address: string;
   primaryColor: string;
   secondaryColor: string;
+  logoBackgroundColor: string;
 };
 
 const toFormState = (
@@ -30,6 +32,7 @@ const toFormState = (
   address: general.address ?? "",
   primaryColor: appearance?.primaryColor ?? "#3b82f6",
   secondaryColor: appearance?.secondaryColor ?? "#1e40af",
+  logoBackgroundColor: appearance?.logoBackgroundColor ?? "#ffffff",
 });
 
 export function useGeneralSettings(source: SystemSettingsHook) {
@@ -66,12 +69,12 @@ export function useGeneralSettings(source: SystemSettingsHook) {
   const [saveError, setSaveError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (general) {
-      setState(toFormState(general, appearance));
+    if (!general) return;
+    setState(toFormState(general, appearance));
+    if (!logoFile) {
       setLogoUrl(general.logoUrl);
-      setLogoFile(null);
     }
-  }, [general, appearance]);
+  }, [general, appearance, logoFile]);
 
   const dirty = useMemo(() => {
     if (!general) return false;
@@ -91,9 +94,13 @@ export function useGeneralSettings(source: SystemSettingsHook) {
       const fileName = `logo-${Date.now()}.${extension}`;
       const filePath = `${company.id}/${fileName}`;
 
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error("Logo must be 2MB or smaller.");
+      }
+
       const { error: uploadError } = await bucket.upload(filePath, file, {
         upsert: true,
-        contentType: file.type,
+        contentType: file.type || "image/png",
       });
       if (uploadError) throw uploadError;
 
@@ -156,11 +163,18 @@ export function useGeneralSettings(source: SystemSettingsHook) {
           ...settings?.appearance,
           primaryColor: state.primaryColor,
           secondaryColor: state.secondaryColor,
+          logoBackgroundColor: state.logoBackgroundColor,
         },
       });
-      await refresh();
-
+      setCompanyBrand({
+        primary: state.primaryColor,
+        secondary: state.secondaryColor,
+        logoBackground: state.logoBackgroundColor,
+        logoUrl: payload.logoUrl,
+      });
+      setLogoUrl(payload.logoUrl);
       setLogoFile(null);
+      await refresh();
       showSuccessToast("General settings saved");
     } catch (err) {
       setSaveError(err as Error);
@@ -184,10 +198,17 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
   const reset = useCallback(() => {
     if (!general) return;
-    setState(toFormState(general, appearance));
+    const next = toFormState(general, appearance);
+    setState(next);
     setLogoUrl(general.logoUrl);
     setLogoFile(null);
     setSaveError(null);
+    setCompanyBrand({
+      primary: next.primaryColor,
+      secondary: next.secondaryColor,
+      logoBackground: next.logoBackgroundColor,
+      logoUrl: general.logoUrl,
+    });
   }, [general, appearance]);
 
   return {

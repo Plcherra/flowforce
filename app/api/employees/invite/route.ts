@@ -3,16 +3,33 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
 import {
+  applyInviteAccessToUser,
+  clampInviteOverrides,
+  loadInviteableClass,
+  loadInviterGrantContext,
+  type InviterGrantContext,
+} from "../../_server/inviteAccess";
+import { maxInvitableProductLevel } from "@/features/roles/constants/grantCeiling";
+import {
   AUDIT_ACTIONS,
   getAuditEventMetadata,
 } from "@/services/audit/auditEvents";
+import { profileRoleFromClass } from "@/features/roles/constants/productLevels";
 
-type InviteRequestBody = {
+type InvitePersonBody = {
   email?: unknown;
   firstName?: unknown;
   lastName?: unknown;
+  phone?: unknown;
   role?: unknown;
   roleId?: unknown;
+  permissionOverrides?: unknown;
+  locationId?: unknown;
+  departmentId?: unknown;
+};
+
+type InviteRequestBody = InvitePersonBody & {
+  invites?: InvitePersonBody[];
 };
 
 const logger = createServerLogger("employees-invite");
@@ -29,25 +46,16 @@ const getBearerToken = (request: NextRequest) => {
   return authHeader.match(/^Bearer\s+(.+)$/i)?.[1] ?? null;
 };
 
-const normalizeRole = (value: string) => {
-  const normalized = value.trim().toLowerCase();
-  return [
-    "admin",
-    "manager",
-    "employee",
-    "staff",
-    "supervisor",
-    "owner",
-  ].includes(normalized)
-    ? normalized
-    : "staff";
-};
-
 const getRequestOrigin = (request: NextRequest) => {
   const origin = request.headers.get("origin");
   if (origin) return origin;
   return request.nextUrl.origin;
 };
+
+const readOverrides = (value: unknown) =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 export const dynamic = "force-dynamic";
 
@@ -70,14 +78,10 @@ export async function POST(request: NextRequest) {
 
     const actor = userResult.user;
     const body = (await request.json().catch(() => ({}))) as InviteRequestBody;
-    const email = readString(body.email).toLowerCase();
-    const firstName = readString(body.firstName);
-    const lastName = readString(body.lastName);
-    const role = normalizeRole(readString(body.role) || "staff");
-    const roleId = readString(body.roleId) || null;
+    const people = Array.isArray(body.invites) ? body.invites : [body];
 
-    if (!email) {
-      return jsonError("Email is required.");
+    if (people.length === 0) {
+      return jsonError("Add at least one person to invite.");
     }
 
     const { data: profile, error: profileError } = await supabaseAdmin
@@ -107,68 +111,176 @@ export async function POST(request: NextRequest) {
       return jsonError("You do not have permission to invite teammates.", 403);
     }
 
-    const { data: existingInvite } = await supabaseAdmin
-      .from("company_invites")
-      .select("id, invite_token")
-      .eq("company_id", companyId)
-      .eq("email", email)
-      .is("accepted_at", null)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const inviteToken =
-      typeof existingInvite?.invite_token === "string" &&
-      existingInvite.invite_token.length > 0
-        ? existingInvite.invite_token
-        : randomBytes(24).toString("hex");
-
-    const invitePayload = {
-      company_id: companyId,
-      email,
-      first_name: firstName || null,
-      last_name: lastName || null,
-      role,
-      invite_token: inviteToken,
-      invited_by: actor.id,
-      status: "pending",
-      expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    const inviteMutation = existingInvite?.id
-      ? await supabaseAdmin
-          .from("company_invites")
-          .update(invitePayload)
-          .eq("id", existingInvite.id)
-          .select("id")
-          .single()
-      : await supabaseAdmin
-          .from("company_invites")
-          .insert(invitePayload)
-          .select("id")
-          .single();
-
-    if (inviteMutation.error || !inviteMutation.data?.id) {
-      scopedLogger.error("Unable to record company invite", {
-        error: inviteMutation.error,
-        context: { companyId, email },
-      });
-      return jsonError("Unable to record company invite.", 500);
+    const inviter = await loadInviterGrantContext({
+      companyId,
+      actorId: actor.id,
+    });
+    if (!maxInvitableProductLevel(inviter.level, inviter.policy)) {
+      return jsonError("You do not have permission to invite teammates.", 403);
     }
 
-    const inviteId = inviteMutation.data.id as string;
-    const { error: inviteError } =
+    const origin = getRequestOrigin(request);
+    const results = [];
+
+    for (const person of people) {
+      const result = await sendPersonInvite({
+        person,
+        companyId,
+        actorId: actor.id,
+        inviter,
+        origin,
+        requestId,
+      });
+      results.push(result);
+    }
+
+    const first = results[0];
+    return NextResponse.json({
+      ok: results.every((result) => result.ok),
+      inviteId: first?.inviteId ?? null,
+      inviteToken: first?.inviteToken ?? null,
+      inviteLink: first?.inviteLink ?? null,
+      results,
+    });
+  } catch (error) {
+    scopedLogger.error("Unexpected employee invite error", { error });
+    return jsonError("Unexpected employee invite error.", 500);
+  }
+}
+
+async function sendPersonInvite({
+  person,
+  companyId,
+  actorId,
+  inviter,
+  origin,
+  requestId,
+}: {
+  person: InvitePersonBody;
+  companyId: string;
+  actorId: string;
+  inviter: InviterGrantContext;
+  origin: string;
+  requestId: string;
+}) {
+  const email = readString(person.email).toLowerCase();
+  const firstName = readString(person.firstName);
+  const lastName = readString(person.lastName);
+  const phone = readString(person.phone) || null;
+  const requestedRoleId = readString(person.roleId) || null;
+  const requestedRoleKey = readString(person.role);
+  const departmentId = readString(person.departmentId) || null;
+
+  if (!email && !phone) {
+    return {
+      ok: false,
+      email: email || null,
+      message: "Add an email or phone number.",
+    };
+  }
+
+  const role = await loadInviteableClass({
+    companyId,
+    roleId: requestedRoleId,
+    roleKey: requestedRoleKey || "staff",
+    inviterLevel: inviter.level,
+    policy: inviter.policy,
+  });
+
+  if (!role) {
+    return {
+      ok: false,
+      email: email || null,
+      message: "Choose a class you can grant.",
+    };
+  }
+
+  const permissionOverrides = clampInviteOverrides(
+    role,
+    readOverrides(person.permissionOverrides),
+    inviter,
+  );
+  const roleKey = profileRoleFromClass(role);
+
+  let existingQuery = supabaseAdmin
+    .from("company_invites")
+    .select("id, invite_token")
+    .eq("company_id", companyId)
+    .is("accepted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  existingQuery = email
+    ? existingQuery.eq("email", email)
+    : existingQuery.eq("phone", phone);
+
+  const { data: existingInvite } = await existingQuery.maybeSingle();
+
+  const inviteToken =
+    typeof existingInvite?.invite_token === "string" &&
+    existingInvite.invite_token.length > 0
+      ? existingInvite.invite_token
+      : randomBytes(24).toString("hex");
+
+  const invitePayload = {
+    company_id: companyId,
+    email: email || null,
+    first_name: firstName || null,
+    last_name: lastName || null,
+    phone,
+    role: roleKey,
+    role_id: role.id,
+    permission_overrides: permissionOverrides,
+    department_id: departmentId,
+    invite_token: inviteToken,
+    invited_by: actorId,
+    status: "pending",
+    expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+  };
+
+  const inviteMutation = existingInvite?.id
+    ? await supabaseAdmin
+        .from("company_invites")
+        .update(invitePayload)
+        .eq("id", existingInvite.id)
+        .select("id")
+        .single()
+    : await supabaseAdmin
+        .from("company_invites")
+        .insert(invitePayload)
+        .select("id")
+        .single();
+
+  if (inviteMutation.error || !inviteMutation.data?.id) {
+    logger.error("Unable to record company invite", {
+      error: inviteMutation.error,
+      context: { companyId, email },
+    });
+    return {
+      ok: false,
+      email: email || null,
+      message: "Unable to record company invite.",
+    };
+  }
+
+  const inviteId = inviteMutation.data.id as string;
+  const inviteLink = `${origin}/auth?invite=${inviteToken}`;
+  let emailed = false;
+  let invitedUserId: string | null = null;
+
+  if (email) {
+    const { data: inviteUser, error: inviteError } =
       await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
         data: {
           first_name: firstName,
           last_name: lastName,
-          role,
-          role_id: roleId,
+          role: roleKey,
+          role_id: role.id,
           company_id: companyId,
           invite_id: inviteId,
           invite_token: inviteToken,
         },
-        redirectTo: `${getRequestOrigin(request)}/auth?invite=${inviteToken}`,
+        redirectTo: inviteLink,
       });
 
     if (inviteError) {
@@ -178,35 +290,77 @@ export async function POST(request: NextRequest) {
         .eq("id", inviteId);
 
       await writeInviteAudit({
-        actorId: actor.id,
+        actorId,
         companyId,
         inviteId,
         email,
         action: AUDIT_ACTIONS.employeeInviteEmailFailed,
-        metadata: { requestId, role, roleId, message: inviteError.message },
+        metadata: {
+          requestId,
+          role: roleKey,
+          roleId: role.id,
+          message: inviteError.message,
+        },
       });
 
-      scopedLogger.error("Unable to send Supabase invite email", {
-        error: inviteError,
-        context: { companyId, inviteId, email },
-      });
-      return jsonError("Unable to send invite email.", 502, inviteError);
+      return {
+        ok: false,
+        email,
+        inviteId,
+        inviteToken,
+        inviteLink,
+        message: "Unable to send invite email.",
+      };
     }
 
-    await writeInviteAudit({
-      actorId: actor.id,
-      companyId,
-      inviteId,
-      email,
-      action: AUDIT_ACTIONS.employeeInviteCreated,
-      metadata: { requestId, role, roleId },
-    });
-
-    return NextResponse.json({ ok: true, inviteId });
-  } catch (error) {
-    scopedLogger.error("Unexpected employee invite error", { error });
-    return jsonError("Unexpected employee invite error.", 500);
+    emailed = true;
+    invitedUserId = inviteUser.user?.id ?? null;
   }
+
+  if (invitedUserId) {
+    try {
+      await applyInviteAccessToUser({
+        userId: invitedUserId,
+        companyId,
+        actorId,
+        email: email || null,
+        firstName,
+        lastName,
+        phone,
+        role,
+        permissionOverrides,
+        departmentId,
+      });
+    } catch (error) {
+      logger.warn("Invite recorded, but access diffs were not applied yet", {
+        error,
+        context: { companyId, inviteId, invitedUserId },
+      });
+    }
+  }
+
+  await writeInviteAudit({
+    actorId,
+    companyId,
+    inviteId,
+    email: email || phone || "",
+    action: AUDIT_ACTIONS.employeeInviteCreated,
+    metadata: {
+      requestId,
+      role: roleKey,
+      roleId: role.id,
+      emailed,
+    },
+  });
+
+  return {
+    ok: true,
+    email: email || null,
+    inviteId,
+    inviteToken,
+    inviteLink,
+    emailed,
+  };
 }
 
 async function writeInviteAudit({

@@ -30,25 +30,19 @@ export function useOnboardingPerformance({
   }, [enabledSections.length]);
 
   const hasRequiredRoles = useMemo(() => {
-    return customRoles.length >= 4;
+    return customRoles.length > 0;
   }, [customRoles.length]);
 
   const completionProgress = useMemo(() => {
-    const totalItems = 4; // template, sections, roles, positions
+    const totalItems = 3; // template, sections, roles
     let completed = 0;
 
     if (selectedTemplate) completed++;
     if (enabledSections.length > 0) completed++;
-    if (customRoles.length >= 4) completed++;
-    if (positions.length > 0) completed++;
+    if (customRoles.length > 0) completed++;
 
     return Math.round((completed / totalItems) * 100);
-  }, [
-    selectedTemplate,
-    enabledSections.length,
-    customRoles.length,
-    positions.length,
-  ]);
+  }, [selectedTemplate, enabledSections.length, customRoles.length]);
 
   // Memoize validation functions
   const isStepValid = useCallback(
@@ -73,7 +67,7 @@ export function useOnboardingPerformance({
         case 3:
           return enabledSections.length > 0;
         case 4:
-          return customRoles.length >= 4;
+          return true;
         case 5:
           return true;
         default:

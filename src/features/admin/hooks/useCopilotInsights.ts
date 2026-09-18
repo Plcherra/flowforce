@@ -24,20 +24,45 @@ export function useCopilotInsights({
     queryKey: ["team-management", "copilot-insights", employeeSampleKey],
     enabled: can("manageUsers") && employeeSample.length > 0,
     staleTime: 1000 * 60 * 10,
+    retry: false,
     queryFn: async () => {
-      const evaluations = await Promise.all(
-        employeeSample.map(async (employee) => {
-          try {
-            const decision = await evaluateEmployee(employee.id);
-            return { employee, decision };
-          } catch (error) {
-            logger.error("Failed to evaluate employee for Copilot insights", {
-              error,
-              tags: ["error"],
-            });
-            return null;
+      const isEdgeFunctionUnavailable = (error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        return (
+          message.includes("Failed to send a request to the Edge Function") ||
+          message.includes("Function not found") ||
+          /\b404\b/.test(message)
+        );
+      };
+
+      const evaluateOne = async (employee: Employee) => {
+        try {
+          return {
+            employee,
+            decision: await evaluateEmployee(employee.id),
+          };
+        } catch (error) {
+          if (isEdgeFunctionUnavailable(error)) {
+            return "unavailable" as const;
           }
-        }),
+          logger.warn("Failed to evaluate employee for Copilot insights", {
+            error,
+          });
+          return null;
+        }
+      };
+
+      const first = await evaluateOne(employeeSample[0]);
+      if (first === "unavailable") {
+        return [] as CopilotInsight[];
+      }
+
+      const rest = await Promise.all(
+        employeeSample.slice(1).map((employee) => evaluateOne(employee)),
+      );
+      const evaluations = [first, ...rest].filter(
+        (entry): entry is { employee: Employee; decision: Awaited<ReturnType<typeof evaluateEmployee>> } =>
+          Boolean(entry) && entry !== "unavailable",
       );
 
       const insights: CopilotInsight[] = [];

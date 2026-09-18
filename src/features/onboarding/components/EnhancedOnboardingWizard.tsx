@@ -12,24 +12,14 @@ import StepSidebar from "./StepSidebar";
 import WizardHeader from "./WizardHeader";
 import WizardNavigation from "./WizardNavigation";
 import { ValidationManager } from "./ValidationManager";
-import { UserInfo, CompanyInfo } from "@/types/onboarding";
+import { UserInfo, CompanyInfo, OnboardingRole } from "@/types/onboarding";
+import { getPlantedSystemRoles } from "@/features/roles/constants/productRoles";
 import StepRenderer from "./StepRenderer";
 
 interface Branding {
   logo: File | null;
   primaryColor: string;
   secondaryColor: string;
-}
-
-interface OnboardingRole {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  icon: string;
-  hierarchy_level: number;
-  permissions: Record<string, boolean>;
-  is_system_role: boolean;
 }
 
 interface EnhancedOnboardingWizardProps {
@@ -69,7 +59,9 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
     useState<BusinessTemplate | null>(null);
   const [enabledSections, setEnabledSections] = useState<string[]>([]);
   const [customSections, setCustomSections] = useState<CustomSection[]>([]);
-  const [customRoles, setCustomRoles] = useState<OnboardingRole[]>([]);
+  const [customRoles, setCustomRoles] = useState<OnboardingRole[]>(
+    getPlantedSystemRoles,
+  );
   const [positions, setPositions] = useState<OnboardingPosition[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);

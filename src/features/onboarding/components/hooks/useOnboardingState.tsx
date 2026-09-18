@@ -7,6 +7,7 @@ import {
   Branding,
   OnboardingRole,
 } from "@/types/onboarding";
+import { getPlantedSystemRoles } from "@/features/roles/constants/productRoles";
 
 export function useOnboardingState() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -15,7 +16,9 @@ export function useOnboardingState() {
     useState<BusinessTemplate | null>(null);
   const [enabledSections, setEnabledSections] = useState<string[]>([]);
   const [customSections, setCustomSections] = useState<CustomSection[]>([]);
-  const [customRoles, setCustomRoles] = useState<OnboardingRole[]>([]);
+  const [customRoles, setCustomRoles] = useState<OnboardingRole[]>(
+    getPlantedSystemRoles,
+  );
   const [positions, setPositions] = useState<OnboardingPosition[]>([]);
 
   const [userInfo, setUserInfo] = useState<UserInfo>({

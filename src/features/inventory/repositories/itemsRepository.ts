@@ -16,6 +16,11 @@ import {
   tryGetConversionFactor,
 } from "@/utils/inventoryUnits";
 import { buildInventoryItemSetupHealth } from "@/features/inventory/utils/itemSetupHealth";
+import {
+  fromInventoryItemRow,
+  fromInventoryItemUnitRow,
+  toInventoryItemWrite,
+} from "@/features/inventory/utils/inventoryItemColumns";
 import { logger } from "@/utils/logger";
 
 // Note: Using passthrough() as InventoryItem has complex nested types
@@ -51,11 +56,11 @@ export async function listInventoryItems({
     .select(
       `
       *,
-      unit:inv_units!unitid(*),
-      recipe_yield_unit:inv_units!recipe_yield_unitid(*),
+      unit:inv_units!unit_id(*),
+      recipe_yield_unit:inv_units!recipe_yield_unit_id(*),
       location:inv_locations!default_location_id(*),
       preferred_supplier:inv_suppliers!preferred_supplier_id(*),
-      category_details:inventory_categories!categoryid(*)
+      category_details:inventory_categories!category_id(*)
     `,
     )
     .eq("is_active", true)
@@ -65,7 +70,9 @@ export async function listInventoryItems({
   if (error) throw error;
 
   const items = (baseItems ?? []).map((item) =>
-    inventoryItemSchema.parse(item),
+    inventoryItemSchema.parse(
+      fromInventoryItemRow(item as Record<string, unknown>),
+    ),
   );
   if (!items.length) return [];
 
@@ -87,10 +94,10 @@ export async function listInventoryItems({
       .select(
         `
           *,
-          unit:inv_units(*),
-          ingredient:inv_items(
+          unit:inv_units!unit_id(*),
+          ingredient:inv_items!inv_recipes_ingredient_id_fkey(
             *,
-            unit:inv_units(*)
+            unit:inv_units!unit_id(*)
           )
         `,
       )
@@ -99,22 +106,41 @@ export async function listInventoryItems({
   ]);
 
   if (unitsResult.error) throw unitsResult.error;
-  if (recipeResult.error) throw recipeResult.error;
   if (unitsCatalogResult.error) throw unitsCatalogResult.error;
+  if (recipeResult.error) {
+    logger.warn("[inventory] recipe lines unavailable for catalog list", {
+      error: recipeResult.error,
+      tags: ["warning"],
+    });
+  }
 
   const unitsByItem = (unitsResult.data ?? []).reduce<
     Record<string, InventoryItemUnit[]>
   >((acc, unit) => {
     if (!acc[unit.item_id]) acc[unit.item_id] = [];
-    acc[unit.item_id].push(unit as unknown as InventoryItemUnit);
+    acc[unit.item_id].push(
+      fromInventoryItemUnitRow(unit as Record<string, unknown>) as unknown as InventoryItemUnit,
+    );
     return acc;
   }, {});
 
-  const recipesByItem = (recipeResult.data ?? []).reduce<
+  const recipeRows = recipeResult.error ? [] : (recipeResult.data ?? []);
+  const recipesByItem = recipeRows.reduce<
     Record<string, InventoryRecipeLine[]>
   >((acc, recipe) => {
     if (!acc[recipe.item_id]) acc[recipe.item_id] = [];
-    acc[recipe.item_id].push(recipe as unknown as InventoryRecipeLine);
+    const row = recipe as Record<string, unknown> & {
+      item_id: string;
+      ingredient?: Record<string, unknown> | null;
+    };
+    acc[recipe.item_id].push({
+      ...row,
+      ingredientid: (row.ingredientid ?? row.ingredient_id ?? "") as string,
+      unitid: (row.unitid ?? row.unit_id ?? "") as string,
+      ingredient: row.ingredient
+        ? (fromInventoryItemRow(row.ingredient) as unknown as InventoryItem)
+        : undefined,
+    } as unknown as InventoryRecipeLine);
     return acc;
   }, {});
 
@@ -123,8 +149,8 @@ export async function listInventoryItems({
     items.map((item) => item.unit),
     items.map((item) => item.recipe_yield_unit),
     (unitsResult.data ?? []).map((u) => u.unit as InventoryUnit),
-    (recipeResult.data ?? []).map((line) => line.unit as InventoryUnit),
-    (recipeResult.data ?? []).map(
+    recipeRows.map((line) => line.unit as InventoryUnit),
+    recipeRows.map(
       (line) => line.ingredient?.unit as InventoryUnit | undefined,
     ),
   ]);
@@ -170,11 +196,13 @@ export async function listInventoryItems({
 export async function createInventoryItem(payload: InventoryItemInsert) {
   const { data, error } = await supabase
     .from("inv_items")
-    .insert(payload)
+    .insert(toInventoryItemWrite(payload as unknown as Record<string, unknown>))
     .select()
     .single();
   if (error) throw error;
-  return data as InventoryItem;
+  return fromInventoryItemRow(
+    data as Record<string, unknown>,
+  ) as unknown as InventoryItem;
 }
 
 export async function updateInventoryItem(
@@ -183,12 +211,14 @@ export async function updateInventoryItem(
 ) {
   const { data, error } = await supabase
     .from("inv_items")
-    .update(updates)
+    .update(toInventoryItemWrite(updates as unknown as Record<string, unknown>))
     .eq("id", id)
     .select()
     .single();
   if (error) throw error;
-  return data as InventoryItem;
+  return fromInventoryItemRow(
+    data as Record<string, unknown>,
+  ) as unknown as InventoryItem;
 }
 
 export async function deleteInventoryItem(id: string) {

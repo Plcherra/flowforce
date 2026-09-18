@@ -6,23 +6,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAccess";
 import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
-import {
-  CREATE_COMPANY_INVITE_FN,
-  type CreateInviteArgs,
-} from "../types/userManagement";
 
 interface UseUserManagementMutationsProps {
   onEmployeesRefetch: () => void;
-  onInviteCreated?: (inviteLink: string) => void;
-  onInviteFormReset?: () => void;
 }
 
 export function useUserManagementMutations({
   onEmployeesRefetch,
-  onInviteCreated,
-  onInviteFormReset,
 }: UseUserManagementMutationsProps) {
   const { toast } = useToast();
   const { resetPassword } = useAuth();
@@ -35,32 +28,34 @@ export function useUserManagementMutations({
   const updateRoleMutation = useMutation({
     mutationFn: async ({
       userId,
-      newRole,
+      roleId,
     }: {
       userId: string;
-      newRole: string;
+      roleId: string;
     }) => {
       const { data: previousProfile, error: previousError } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, role_id")
         .eq("id", userId)
         .maybeSingle();
 
       if (previousError) throw previousError;
 
-      const { error } = await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", userId);
-      if (error) throw error;
+      const result = await saveEmployeeAccess({ userId, roleId });
 
       await logAuditEvent({
         targetUserId: userId,
         action: AUDIT_ACTIONS.userRoleUpdated,
         tableName: "profiles",
         recordId: userId,
-        oldValues: { role: previousProfile?.role ?? null },
-        newValues: { role: newRole },
+        oldValues: {
+          role: previousProfile?.role ?? null,
+          role_id: previousProfile?.role_id ?? null,
+        },
+        newValues: {
+          role: result.role ?? null,
+          role_id: result.roleId ?? roleId,
+        },
       });
     },
     onSuccess: () => {
@@ -140,82 +135,9 @@ export function useUserManagementMutations({
     },
   });
 
-  const createInviteMutation = useMutation({
-    mutationFn: async (inviteForm: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      role: string;
-    }) => {
-      const auditMetadata = {
-        email: inviteForm.email,
-        firstName: inviteForm.firstName,
-        lastName: inviteForm.lastName,
-        role: inviteForm.role,
-      };
-
-      const payload: CreateInviteArgs = {
-        company_uuid: null as unknown as string,
-        invite_email: inviteForm.email,
-        invite_role: inviteForm.role,
-        employee_first_name: inviteForm.firstName,
-        employee_last_name: inviteForm.lastName,
-        employee_birth_date: undefined,
-        employee_phone: undefined,
-      };
-
-      const { data, error } = await supabase.rpc(
-        CREATE_COMPANY_INVITE_FN,
-        payload,
-      );
-
-      if (error) throw error;
-      return {
-        inviteCode: data as string,
-        auditMetadata,
-      };
-    },
-    onSuccess: ({ inviteCode, auditMetadata }) => {
-      const link =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth?invite=${inviteCode}`
-          : `/auth?invite=${inviteCode}`;
-      onInviteCreated?.(link);
-      onInviteFormReset?.();
-      queryClientInvalidate("invites");
-      toast({
-        title: "Invite created",
-        description: "The pre-account invite link has been generated.",
-      });
-
-      void logAuditEvent({
-        targetUserId: null,
-        action: AUDIT_ACTIONS.inviteCreated,
-        tableName: "company_invites",
-        recordId: null,
-        newValues: {
-          ...auditMetadata,
-          inviteCode,
-        },
-      });
-    },
-    onError: (error: unknown) => {
-      const description =
-        error instanceof Error
-          ? error.message
-          : "Please verify the details and try again.";
-      toast({
-        title: "Unable to create invite",
-        description,
-        variant: "destructive",
-      });
-    },
-  });
-
   return {
     updateRoleMutation,
     deactivateMutation,
-    createInviteMutation,
     resetPassword,
   };
 }

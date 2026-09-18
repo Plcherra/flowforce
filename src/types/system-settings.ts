@@ -115,6 +115,7 @@ export interface AppearanceSettings {
   theme: ThemeMode;
   primaryColor: string;
   secondaryColor: string;
+  logoBackgroundColor: string;
   accentColor: string;
   logoPlacement: LogoPlacement;
   sidebarBranding: {

@@ -14,7 +14,6 @@ import {
   AlertCircle,
   Edit,
   Trash,
-  Play,
 } from "lucide-react";
 import { useInventoryCounts } from "@/features/inventory/hooks/useInventoryCounts";
 import { useToast } from "@/hooks/use-toast";
@@ -92,17 +91,15 @@ const getPeriodLabel = (period?: string | null) => {
   }
 };
 
-const REVIEW_STATUS_CONFIG: Record<
-  string,
-  {
-    label: string;
-    variant: "default" | "secondary" | "outline" | "destructive";
+const formatCountStatus = (status?: string | null) => {
+  switch (status) {
+    case "approved":
+    case "completed":
+    case "awaiting_review":
+      return "Done";
+    default:
+      return "Open";
   }
-> = {
-  pending: { label: "Pending Review", variant: "outline" },
-  under_review: { label: "Under Review", variant: "secondary" },
-  approved: { label: "Approved", variant: "default" },
-  rejected: { label: "Needs Revision", variant: "destructive" },
 };
 
 export function CountManagement({ onViewCount }: CountManagementProps) {
@@ -223,9 +220,6 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
 
                     {section.counts.map((count) => {
                       const StatusIcon = getStatusIcon(count.status);
-                      const reviewConfig =
-                        REVIEW_STATUS_CONFIG[count.review_status] ||
-                        REVIEW_STATUS_CONFIG.pending;
 
                       return (
                         <Card
@@ -241,16 +235,10 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   </h3>
                                   <Badge
                                     variant={getStatusColor(count.status)}
-                                    className="flex items-center gap-1 capitalize"
+                                    className="flex items-center gap-1"
                                   >
                                     <StatusIcon className="h-3 w-3" />
-                                    {count.status.replace(/_/g, " ")}
-                                  </Badge>
-                                  <Badge
-                                    variant={reviewConfig.variant}
-                                    className="capitalize"
-                                  >
-                                    {reviewConfig.label}
+                                    {formatCountStatus(count.status)}
                                   </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
@@ -264,8 +252,8 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   onClick={() => onViewCount(count.id)}
                                   className="flex items-center gap-2"
                                 >
-                                  <Play className="h-3 w-3" />
-                                  Details
+                                  <Edit className="h-3 w-3" />
+                                  Open
                                 </Button>
                                 <Button
                                   size="sm"
@@ -284,10 +272,10 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 bg-muted/30 rounded-lg p-3 text-xs">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 bg-muted/30 rounded-lg p-3 text-xs">
                               <div>
                                 <div className="text-muted-foreground">
-                                  Scheduled
+                                  Count date
                                 </div>
                                 <div className="font-medium">
                                   {new Date(
@@ -298,26 +286,14 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                               </div>
                               <div>
                                 <div className="text-muted-foreground">
-                                  Submitted
-                                </div>
-                                <div>
-                                  {count.submitted_at
-                                    ? new Date(
-                                        count.submitted_at,
-                                      ).toLocaleString()
-                                    : "Not submitted"}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-muted-foreground">
-                                  Completed
+                                  Done
                                 </div>
                                 <div>
                                   {count.completed_at
                                     ? new Date(
                                         count.completed_at,
                                       ).toLocaleString()
-                                    : "Not completed"}
+                                    : "Not done yet"}
                                 </div>
                               </div>
                             </div>

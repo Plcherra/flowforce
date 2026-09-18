@@ -2,10 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import {
+  clampPermissionsToProductLevel,
+  resolveProductLevel,
+} from "@/features/roles/constants/productLevels";
 
 export type TeamRole = {
   id: string;
   name: string;
+  product_level?: "owner" | "admin" | "manager" | "staff";
   permissions: Record<string, boolean>;
 };
 
@@ -23,17 +28,27 @@ export function useTeamManagement() {
 
       const { data, error } = await supabase
         .from("company_roles")
-        .select("id, name, permissions")
+        .select("id, name, product_level, permissions")
         .eq("company_id", companyId)
         .order("hierarchy_level", { ascending: true });
 
       if (error) throw error;
 
-      return (data ?? []).map((role) => ({
-        id: role.id,
-        name: role.name,
-        permissions: normalizePermissions(role.permissions),
-      }));
+      return (data ?? []).map((role) => {
+        const productLevel = resolveProductLevel({
+          product_level: role.product_level,
+          name: role.name,
+        });
+        return {
+          id: role.id,
+          name: role.name ?? "",
+          product_level: productLevel,
+          permissions: clampPermissionsToProductLevel(
+            productLevel,
+            normalizePermissions(role.permissions),
+          ),
+        };
+      });
     },
   });
 
@@ -95,9 +110,16 @@ export function useTeamManagement() {
       roleId: string;
       permissions: Record<string, boolean>;
     }) => {
+      const current = rolesQuery.data?.find((role) => role.id === roleId);
+      const productLevel = resolveProductLevel({
+        product_level: current?.product_level,
+        name: current?.name,
+      });
       const { error } = await supabase
         .from("company_roles")
-        .update({ permissions })
+        .update({
+          permissions: clampPermissionsToProductLevel(productLevel, permissions),
+        })
         .eq("id", roleId);
 
       if (error) throw error;

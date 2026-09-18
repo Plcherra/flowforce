@@ -15,6 +15,8 @@ import { appEnv } from "@/lib/env";
 import { TenantSetupRequired } from "@/app-shell/tenant/TenantSetupRequired";
 import { useMobilePushNotifications } from "@/hooks/useMobilePushNotifications";
 import { MobileOfflineQueueStatus } from "@/app-shell/mobile/MobileOfflineQueueStatus";
+import { CompanyThemeSync } from "@/app-shell/theme/CompanyThemeSync";
+import { IdleSessionGuard } from "@/app-shell/auth/IdleSessionGuard";
 
 interface AppShellProps {
   children?: ReactNode;
@@ -56,6 +58,8 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <SidebarProvider className="app-viewport min-h-0 w-full overflow-hidden">
+      <CompanyThemeSync />
+      <IdleSessionGuard />
       <AppSidebar />
 
       <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden">

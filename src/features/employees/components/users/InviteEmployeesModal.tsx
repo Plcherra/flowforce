@@ -11,16 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type {
-  SingleInviteForm,
-  BulkInviteRow,
-} from "@/features/employees/types/invites";
-import { DEFAULT_SINGLE_INVITE } from "@/features/employees/types/invites";
+import type { BulkInviteRow } from "@/features/employees/types/invites";
 import { useInviteMutations } from "@/features/employees/hooks/useInviteMutations";
 import { useCompanyInvites } from "@/features/employees/hooks/useCompanyInvites";
-import { buildInviteLink } from "@/features/employees/utils/inviteHelpers";
+import { useInviteAccessOptions } from "@/features/employees/hooks/useInviteAccessOptions";
+import { InvitePersonStack } from "@/features/employees/components/invites/InvitePersonStack";
 import {
-  SingleInviteFormComponent,
   BulkInviteForm,
   RecentInvitesList,
 } from "@/features/employees/components/invites";
@@ -40,14 +36,7 @@ export function InviteEmployeesModal({
 }: InviteEmployeesModalProps) {
   const { toast } = useToast();
   const [internalOpen, setInternalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"single" | "bulk">("single");
-
-  const [singleForm, setSingleForm] = useState<SingleInviteForm>(
-    DEFAULT_SINGLE_INVITE,
-  );
-  const [generatedInviteLink, setGeneratedInviteLink] = useState<string | null>(
-    null,
-  );
+  const [activeTab, setActiveTab] = useState<"cards" | "many">("cards");
   const [bulkPreview, setBulkPreview] = useState<BulkInviteRow[]>([]);
   const [bulkResults, setBulkResults] = useState<
     Array<{
@@ -59,6 +48,7 @@ export function InviteEmployeesModal({
     }>
   >([]);
   const [bulkErrorText, setBulkErrorText] = useState<string | null>(null);
+  const { classes, locations, departments } = useInviteAccessOptions();
 
   const open = controlledOpen ?? internalOpen;
 
@@ -69,7 +59,7 @@ export function InviteEmployeesModal({
     }
   };
 
-  const { createInviteMutation, bulkInviteMutation } = useInviteMutations({
+  const { bulkInviteMutation } = useInviteMutations({
     onInvitesCreated,
   });
 
@@ -77,36 +67,12 @@ export function InviteEmployeesModal({
 
   useEffect(() => {
     if (!open) {
-      setSingleForm(DEFAULT_SINGLE_INVITE);
-      setGeneratedInviteLink(null);
       setBulkPreview([]);
       setBulkResults([]);
       setBulkErrorText(null);
-      setActiveTab("single");
+      setActiveTab("cards");
     }
   }, [open]);
-
-  const handleSingleSubmit = (form: SingleInviteForm) => {
-    if (!form.email || !form.firstName || !form.lastName) {
-      toast({
-        title: "Missing details",
-        description: "First name, last name, and email are required.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createInviteMutation.mutate(form, {
-      onSuccess: ({ inviteToken }) => {
-        const link = buildInviteLink(inviteToken);
-        setGeneratedInviteLink(link);
-        setSingleForm((prev) => ({
-          ...DEFAULT_SINGLE_INVITE,
-          role: prev.role,
-        }));
-      },
-    });
-  };
 
   const handleCopyLink = async (link: string | null) => {
     if (!link) return;
@@ -125,25 +91,6 @@ export function InviteEmployeesModal({
     }
   };
 
-  const handleBulkFileSelect = (rows: BulkInviteRow[]) => {
-    setBulkErrorText(null);
-    setBulkResults([]);
-    setBulkPreview(rows);
-  };
-
-  const handleBulkError = (error: string) => {
-    setBulkErrorText(error);
-  };
-
-  const handleBulkProcess = () => {
-    if (bulkPreview.length === 0) return;
-    bulkInviteMutation.mutate(bulkPreview, {
-      onSuccess: (results) => {
-        setBulkResults(results);
-      },
-    });
-  };
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -154,45 +101,55 @@ export function InviteEmployeesModal({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Invite Team Members</DialogTitle>
+          <DialogTitle>Invite teammates</DialogTitle>
           <DialogDescription>
-            Generate pre-account invites with default employee permissions or
-            upload a CSV to invite in bulk.
+            Pick a class, give or take a few boxes, then send. Add many only
+            when you already have a list.
           </DialogDescription>
         </DialogHeader>
 
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "single" | "bulk")}
+          onValueChange={(value) => setActiveTab(value as "cards" | "many")}
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="single">Single Invite</TabsTrigger>
-            <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
+            <TabsTrigger value="cards">People</TabsTrigger>
+            <TabsTrigger value="many">Add many</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="single" className="mt-4 space-y-4">
-            <SingleInviteFormComponent
-              form={singleForm}
-              onFormChange={setSingleForm}
-              onSubmit={handleSingleSubmit}
-              generatedInviteLink={generatedInviteLink}
-              isPending={createInviteMutation.isPending}
-              onCopyLink={handleCopyLink}
-            />
+          <TabsContent value="cards" className="mt-4 space-y-4">
+            <InvitePersonStack onSuccess={() => onInvitesCreated?.()} />
           </TabsContent>
 
-          <TabsContent value="bulk" className="mt-4 space-y-4">
+          <TabsContent value="many" className="mt-4 space-y-4">
             <BulkInviteForm
-              onFileSelect={handleBulkFileSelect}
+              onFileSelect={(rows) => {
+                setBulkErrorText(null);
+                setBulkResults([]);
+                setBulkPreview(rows);
+              }}
               preview={bulkPreview}
               results={bulkResults}
               errorText={bulkErrorText}
-              onProcess={handleBulkProcess}
+              onProcess={() => {
+                if (bulkPreview.length === 0) return;
+                bulkInviteMutation.mutate(
+                  {
+                    rows: bulkPreview,
+                    classes,
+                    locations,
+                    departments,
+                  },
+                  {
+                    onSuccess: (results) => setBulkResults(results),
+                  },
+                );
+              }}
               isPending={bulkInviteMutation.isPending}
               onCopyLink={handleCopyLink}
-              onError={handleBulkError}
+              onError={setBulkErrorText}
             />
           </TabsContent>
         </Tabs>

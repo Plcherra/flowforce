@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SecuritySettings } from "@/types/system-settings";
+import { setIdleSessionTimeout } from "@/lib/auth/idleSession";
 import { DEFAULT_SECURITY } from "./systemSettingsDefaults";
 import type { SystemSettingsHook } from "./useSystemSettings";
 
@@ -26,6 +27,7 @@ export function useSecuritySettings(source: SystemSettingsHook) {
     setSaveError(null);
     try {
       await updateSettings({ security: state });
+      setIdleSessionTimeout(state.sessionTimeout);
     } catch (err) {
       setSaveError(err as Error);
       throw err;

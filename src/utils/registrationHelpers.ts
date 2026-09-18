@@ -122,8 +122,10 @@ export const formatRoleForDatabase = (role: OnboardingRole) => ({
   color: role.color,
   icon: role.icon,
   hierarchy_level: role.hierarchy_level,
+  product_level: role.product_level,
   permissions: role.permissions || {},
   is_system_role: role.is_system_role || false,
+  is_active: role.is_active !== false,
 });
 
 export const formatPositionForDatabase = (position: OnboardingPosition) => ({

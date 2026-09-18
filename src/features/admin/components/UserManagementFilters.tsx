@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import type { ViewMode, StatusFilter } from "../types/userManagement";
-import { formatRoleLabel } from "@/shared/utils";
 
 interface UserManagementFiltersProps {
   searchTerm: string;
@@ -21,7 +20,7 @@ interface UserManagementFiltersProps {
   roleFilter: string;
   departmentFilter: string;
   viewMode: ViewMode;
-  roleOptions: string[];
+  roleOptions: Array<{ id: string; name: string }>;
   departments: Array<{ id: string; name: string }>;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: StatusFilter) => void;
@@ -78,8 +77,8 @@ export function UserManagementFilters({
           <SelectContent>
             <SelectItem value="all">All roles</SelectItem>
             {roleOptions.map((role) => (
-              <SelectItem key={role} value={role}>
-                {formatRoleLabel(role)}
+              <SelectItem key={role.id} value={role.id}>
+                {role.name}
               </SelectItem>
             ))}
           </SelectContent>

@@ -12,6 +12,7 @@ interface OnboardingRole {
   hierarchy_level: number;
   permissions: Record<string, boolean>;
   is_system_role: boolean;
+  is_active?: boolean;
 }
 
 interface ReviewStepProps {
@@ -73,23 +74,26 @@ export default function ReviewStep({
             {customRoles.map((role) => (
               <Badge key={role.id} variant="secondary" className="text-xs">
                 {role.name}
+                {role.is_active === false ? " (archived)" : ""}
               </Badge>
             ))}
           </div>
         </div>
 
-        <div className="p-4 border rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-3">
-            Total Positions ({positions.length})
-          </h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {positions.map((position) => (
-              <Badge key={position.id} variant="outline" className="text-xs">
-                {position.name}
-              </Badge>
-            ))}
+        {positions.length > 0 && (
+          <div className="p-4 border rounded-lg">
+            <h4 className="font-medium text-gray-900 mb-3">
+              Positions ({positions.length})
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {positions.map((position) => (
+                <Badge key={position.id} variant="outline" className="text-xs">
+                  {position.name}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

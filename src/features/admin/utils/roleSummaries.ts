@@ -23,7 +23,9 @@ export function calculateRoleSummaries(
     .map((role) => {
       const normalized = role.name.toLowerCase();
       const members = employees.filter(
-        (employee) => employee.role?.toLowerCase() === normalized,
+        (employee) =>
+          employee.role_id === role.id ||
+          employee.role?.toLowerCase() === normalized,
       ).length;
       const permissionCount = Object.values(role.permissions ?? {}).filter(
         Boolean,
