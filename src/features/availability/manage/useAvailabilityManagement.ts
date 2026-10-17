@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 
 import { computeAutoLockThreshold } from "@/features/availability/utils/lockEngine";
 import {
+  availabilityTimestamp,
   cloneGrid,
   computeImpactScore,
   gridFromAvailabilityRows,
@@ -323,8 +324,16 @@ export function useAvailabilityManagement({
         const insertRows = ranges.map((range) => ({
           user_id: request.employeeId,
           day_of_week: range.dayOfWeek,
-          start_time: range.startTime,
-          end_time: range.endTime,
+          start_time: availabilityTimestamp(
+            request.weekStart,
+            range.dayOfWeek,
+            range.startTime,
+          ),
+          end_time: availabilityTimestamp(
+            request.weekStart,
+            range.dayOfWeek,
+            range.endTime,
+          ),
           week_start_date: request.weekStart,
           is_preferred: true,
         }));

@@ -151,15 +151,25 @@ test.describe('Scheduling owner flow', () => {
       await row.locator('button').nth(dayIndex).click();
     }
     await staffPage.getByRole('button', { name: 'Save changes' }).click();
-    await expect(staffPage.getByText('Availability saved')).toBeVisible({ timeout: 15_000 });
+    await expect(staffPage.getByText('Availability saved', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(staffPage.getByText('Unable to save')).toHaveCount(0);
+    await shot(staffPage, 'scheduling_staff_availability');
 
     await page.reload();
     await page.getByText(editedTitle).first().click();
     await page.getByTestId('employee-selector-add').click();
     await page.getByRole('option', { name: /Riley Quinn/i }).click();
-    await expect(page.getByText(/Employee assigned|Assigned with warning/)).toBeVisible({
-      timeout: 15_000,
-    });
+    const assignedToast = page.getByText(/Employee assigned|Assigned with warning/);
+    try {
+      await expect(assignedToast).toBeVisible({ timeout: 15_000 });
+    } catch (error) {
+      const notices = await page.locator('[role="status"]').allTextContents();
+      throw new Error(`Assign did not succeed. Notices: ${notices.join(' | ')}`, {
+        cause: error,
+      });
+    }
     await shot(page, 'scheduling_staff_assigned');
 
     await details.getByRole('button', { name: 'Close shift details' }).click();
