@@ -404,7 +404,7 @@ export function DetailsTab({
             <Card key={breakItem.id}>
               <CardContent className="pt-3">
                 <div className="flex items-center justify-between">
-                  <div className="grid flex-1 grid-cols-3 gap-2">
+                  <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
                     <Input
                       placeholder="Break title"
                       value={breakItem.title}

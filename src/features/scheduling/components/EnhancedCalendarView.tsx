@@ -144,6 +144,7 @@ export function EnhancedCalendarView({
                   variant="outline"
                   size="sm"
                   className="h-8 w-8 p-0"
+                  aria-label="Previous period"
                   onClick={() => navigateDate("prev")}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -159,6 +160,7 @@ export function EnhancedCalendarView({
                   variant="outline"
                   size="sm"
                   className="h-8 w-8 p-0"
+                  aria-label="Next period"
                   onClick={() => navigateDate("next")}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -191,6 +193,7 @@ export function EnhancedCalendarView({
                     variant={currentView === view ? "default" : "outline"}
                     size="sm"
                     className="h-8 gap-1.5"
+                    aria-label={config.label}
                     onClick={() => setCurrentView(view)}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -298,6 +301,7 @@ export function EnhancedCalendarView({
         >
           <SheetContent
             side="right"
+            hideClose
             className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl"
           >
             <ShiftDetailsPanel

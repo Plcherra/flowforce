@@ -11,6 +11,7 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { CalendarError } from "@/features/calendar/types";
 import { normalizeCalendarError } from "@/features/calendar/hooks/useCalendarMutationError";
+import { supabase } from "@/integrations/supabase/client";
 import { scheduleGateway } from "@/lib/api/scheduleGateway";
 import { logger } from "@/utils/logger";
 
@@ -525,8 +526,10 @@ export function useEvents() {
         start_time: insertPayload.start_time,
         end_time: insertPayload.end_time ?? insertPayload.start_time,
         description: insertPayload.description ?? null,
-        integrationid:
-          (vendorDetails?.integrationid as string | undefined) ?? null,
+        integration_id:
+          (vendorDetails?.integration_id as string | undefined) ??
+          (vendorDetails?.integrationid as string | undefined) ??
+          null,
         integration_type:
           (vendorDetails?.integration_type as
             | "website"
@@ -555,6 +558,7 @@ export function useEvents() {
     },
     onSuccess: () => {
       invalidateCompanyEvents();
+      void queryClient.invalidateQueries({ queryKey: ["vendor-events"] });
     },
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);
@@ -613,6 +617,17 @@ export function useEvents() {
   const deleteEventMutation = useMutation<void, CalendarError, string>({
     mutationFn: async (id) => {
       if (!companyId) throw new Error("Company context is not available");
+      const { error: visitError } = await supabase
+        .from("vendor_visits")
+        .delete()
+        .eq("linked_event_id", id)
+        .eq("company_id", companyId);
+      if (visitError) {
+        logger.warn("Failed to delete linked vendor visit", {
+          error: visitError,
+          tags: ["warning"],
+        });
+      }
       await calendarEventsRepository.deleteEvent(id).catch((error) => {
         const normalizedError = normalizeCalendarError(error);
         throw new CalendarError(normalizedError.message, {
@@ -622,6 +637,7 @@ export function useEvents() {
     },
     onSuccess: () => {
       invalidateCompanyEvents();
+      void queryClient.invalidateQueries({ queryKey: ["vendor-events"] });
     },
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);

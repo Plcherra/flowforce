@@ -118,7 +118,8 @@ const VENDOR_PALETTE_MAP = new Map(
 /**
  * Get vendor label by type
  */
-export function getVendorLabel(vendorType: string): string {
+export function getVendorLabel(vendorType: string | null | undefined): string {
+  if (!vendorType) return "Vendor";
   return (
     VENDOR_PALETTE_MAP.get(vendorType)?.label ?? vendorType.replace(/_/g, " ")
   );

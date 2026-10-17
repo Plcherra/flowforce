@@ -2,7 +2,7 @@ import type {
   Tables,
   TablesInsert,
 } from "@/integrations/supabase/public-types";
-import { FUNCTIONS_BASE, REST_BASE, SUPABASE_ANON_KEY } from "@/lib/config";
+import { REST_BASE, SUPABASE_ANON_KEY } from "@/lib/config";
 import type {
   CalendarEventRow,
   CalendarEventRowWithRelations,
@@ -37,10 +37,6 @@ export interface ScheduleGateway {
   ): Promise<{ event: CalendarEventRow; visit: VendorVisitRow | null }>;
 }
 
-type ScheduleEventResponse =
-  | { event: CalendarEventRow; visit?: VendorVisitRow | null }
-  | { error: string };
-
 type CalendarEventsViewRow = CalendarEventRow & {
   participants?: Tables<"event_participants">[] | null;
 };
@@ -55,11 +51,6 @@ const getAuthHeaders = async () => {
     Authorization: `Bearer ${token}`,
   };
 };
-
-const getJsonHeaders = async () => ({
-  ...(await getAuthHeaders()),
-  "Content-Type": "application/json",
-});
 
 const isNetworkError = (error: unknown) => {
   if (error instanceof TypeError) return true;
@@ -213,21 +204,6 @@ const fetchShiftLinks = async (
   }, new Map<string, EventShiftLinkRow[]>());
 };
 
-const invokeScheduleEvent = async (
-  body: Record<string, unknown>,
-): Promise<ScheduleEventResponse> => {
-  const url = `${FUNCTIONS_BASE}/schedule-event`;
-  return request<ScheduleEventResponse>(
-    url,
-    {
-      method: "POST",
-      headers: await getJsonHeaders(),
-      body: JSON.stringify(body),
-    },
-    "scheduleEvent",
-  );
-};
-
 const toEventWithRelations = (
   rows: CalendarEventsViewRow[],
   shiftLinks: Map<string, EventShiftLinkRow[]>,
@@ -246,27 +222,49 @@ export const scheduleGateway: ScheduleGateway = {
     return toEventWithRelations(rows, shiftLinks);
   },
   async createEvent(payload) {
-    const response = await invokeScheduleEvent({
-      type: "meeting",
-      payload: { calendar: payload },
-    });
-
-    if ("error" in response) {
-      throw new Error(response.error);
+    const { data, error } = await supabase
+      .from("calendar_events")
+      .insert(payload)
+      .select("*")
+      .single();
+    if (error || !data) {
+      throw new Error(error?.message ?? "Could not save the event");
     }
-
-    return response.event;
+    return data;
   },
   async createVendorVisit(payload) {
-    const response = await invokeScheduleEvent({
-      type: "vendor_visit",
-      payload,
-    });
-
-    if ("error" in response) {
-      throw new Error(response.error);
+    const { data: event, error: eventError } = await supabase
+      .from("calendar_events")
+      .insert(payload.calendar)
+      .select("*")
+      .single();
+    if (eventError || !event) {
+      throw new Error(eventError?.message ?? "Could not save the vendor visit");
     }
 
-    return { event: response.event, visit: response.visit ?? null };
+    const { data: visit, error: visitError } = await supabase
+      .from("vendor_visits")
+      .insert({
+        company_id: payload.vendor.company_id ?? event.company_id,
+        vendor_name: payload.vendor.vendor_name ?? event.title ?? "Vendor Visit",
+        service_type: payload.vendor.service_type ?? null,
+        contact_email: payload.vendor.contact_email ?? null,
+        contact_phone: payload.vendor.contact_phone ?? null,
+        location: payload.vendor.location ?? event.location ?? null,
+        start_time: payload.vendor.start_time ?? event.start_time,
+        end_time: payload.vendor.end_time ?? event.end_time ?? event.start_time,
+        description: payload.vendor.description ?? event.description ?? null,
+        integration_id: payload.vendor.integration_id ?? null,
+        integration_type: payload.vendor.integration_type ?? null,
+        linked_event_id: event.id,
+      })
+      .select("*")
+      .single();
+    if (visitError || !visit) {
+      await supabase.from("calendar_events").delete().eq("id", event.id);
+      throw new Error(visitError?.message ?? "Could not save the vendor visit");
+    }
+
+    return { event, visit };
   },
 };

@@ -30,7 +30,7 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
     estimated_minutes: 30,
   });
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTask.title.trim()) return;
     const task: ShiftTask = {
       id: Date.now().toString(),
@@ -39,7 +39,11 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
       priority: newTask.priority,
       estimated_minutes: newTask.estimated_minutes,
     };
-    onAddTask(task);
+    try {
+      await onAddTask(task);
+    } catch {
+      return;
+    }
     setNewTask({
       title: "",
       description: "",
@@ -140,6 +144,7 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
                   type="button"
                   size="sm"
                   variant="ghost"
+                  aria-label={`Remove ${task.title}`}
                   onClick={() => onRemoveTask(task.id)}
                 >
                   <X className="h-4 w-4" />

@@ -85,7 +85,7 @@ export function AddTimeOffDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] z-50 bg-background">
+      <DialogContent className="z-50 max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto bg-background sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>Add Time Off</DialogTitle>
         </DialogHeader>
@@ -105,7 +105,7 @@ export function AddTimeOffDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label>Start date</Label>
               <Input
