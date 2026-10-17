@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Users, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { InviteData } from "@/types/auth";
 import { showErrorToast } from "@/utils/errorHandler";
@@ -41,25 +40,32 @@ export default function InviteSignUpForm({
   useEffect(() => {
     const fetchInviteDetails = async () => {
       const inviteCode = searchParams.get("invite");
-      if (!inviteCode) return;
+      if (!inviteCode) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const { data, error } = await supabase
-          .from("company_invites")
-          .select("email, first_name, last_name, phone, birth_date, role")
-          .eq("invite_token", inviteCode)
-          .eq("status", "pending")
-          .maybeSingle();
+        const response = await fetch("/api/employees/invite/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inviteToken: inviteCode }),
+        });
+        const data = (await response.json().catch(() => ({}))) as {
+          email?: string;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          birth_date?: string | null;
+          role?: string | null;
+          message?: string;
+        };
 
-        if (error) {
-          showErrorToast(error, "fetching invite details");
-          return;
-        }
-
-        if (!data) {
+        if (!response.ok || !data.email) {
           toast({
             title: "Invalid Invitation",
-            description: "This invitation link is invalid or has expired.",
+            description:
+              data.message || "This invitation link is invalid or has expired.",
             variant: "destructive",
           });
           return;
@@ -71,7 +77,7 @@ export default function InviteSignUpForm({
           lastName: data.last_name || "",
           phone: data.phone || "",
           birthDate: data.birth_date || "",
-          role: data.role,
+          role: data.role || "",
         });
       } catch (error) {
         showErrorToast(error, "fetching invite details");
@@ -177,10 +183,10 @@ export default function InviteSignUpForm({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter a secure password"
               required
-              minLength={6}
+              minLength={8}
             />
             <p className="text-xs text-muted-foreground">
-              Password must be at least 6 characters long
+              Password must be at least 8 characters long
             </p>
           </div>
 

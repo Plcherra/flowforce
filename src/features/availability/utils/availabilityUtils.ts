@@ -17,6 +17,29 @@ export const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {
   return next;
 };
 
+const hourFromStoredTime = (value: string) => {
+  const isoMatch = value.match(/T(\d{2}):/);
+  if (isoMatch) return Number(isoMatch[1]);
+  const clockMatch = value.match(/^(\d{1,2}):/);
+  if (clockMatch) return Number(clockMatch[1]);
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? Number.NaN : parsed.getUTCHours();
+};
+
+/** staff_availability times are timestamptz, so clock hours need a real date. */
+export const availabilityTimestamp = (
+  weekStart: string,
+  dayOfWeek: number,
+  time: string,
+) => {
+  const [year, month, day] = weekStart.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const date = new Date(Date.UTC(year, (month ?? 1) - 1, day ?? 1, 0, 0, 0, 0));
+  date.setUTCDate(date.getUTCDate() + dayOfWeek);
+  date.setUTCHours(hour ?? 0, minute ?? 0, 0, 0);
+  return date.toISOString();
+};
+
 export const gridFromAvailabilityRows = (
   rows: StaffAvailabilityRow[],
 ): AvailabilityGrid => {
@@ -24,8 +47,9 @@ export const gridFromAvailabilityRows = (
   rows.forEach((row) => {
     if (row.day_of_week == null) return;
     const dayIndex = row.day_of_week;
-    const startHour = Number(row.start_time.split(":")[0]);
-    const endHour = Number(row.end_time.split(":")[0]);
+    const startHour = hourFromStoredTime(row.start_time);
+    const endHour = hourFromStoredTime(row.end_time);
+    if (!Number.isFinite(startHour) || !Number.isFinite(endHour)) return;
     const hours: number[] = [];
     for (let hour = startHour; hour < endHour; hour += 1) {
       hours.push(hour);

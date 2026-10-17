@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
-import { buildSchedulingFallbackData } from "./fallbackData";
 import { logger } from "@/utils/logger";
 import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
 import type {
@@ -189,32 +188,35 @@ export function useSchedulingConsolidated(
     if (missingSchema) {
       logger.warn("Scheduling database resources are missing", logContext);
     } else {
-      logger.error("Failed to load scheduling data, using fallback data", {
+      logger.error("Failed to load scheduling data", {
         ...logContext,
         tags: ["error"],
       });
     }
 
     setError(errorMessage);
-    const fallback = buildSchedulingFallbackData({ start: range.start });
-    setShifts(fallback.shifts);
-    setAssignments(fallback.assignments);
-    setTimeOffRequests(fallback.timeOff);
-    setUnavailability(fallback.unavailability);
-    setStaffAvailability(fallback.staffAvailability);
-    setVendorEvents(fallback.vendorEvents);
-    setTeamMembers(fallback.profiles);
-    setIsUsingFallback(true);
+    setIsUsingFallback(false);
+    if (!schedulesQuery.data) {
+      setShifts([]);
+      setAssignments([]);
+      setTimeOffRequests([]);
+      setUnavailability([]);
+      setStaffAvailability([]);
+      setVendorEvents([]);
+      setTeamMembers([]);
+    }
 
-    if (!missingSchema && !fallbackNoticeShownRef.current) {
+    if (!fallbackNoticeShownRef.current) {
       toast({
-        title: "Scheduling in preview mode",
-        description:
-          "Live scheduling data is unavailable. Showing demo data so you can continue exploring the schedule experience.",
+        title: "Couldn't load the schedule",
+        description: missingSchema
+          ? "Scheduling data is missing for this workspace. Demo shifts were not added."
+          : errorMessage || DEFAULT_ERROR,
+        variant: "destructive",
       });
       fallbackNoticeShownRef.current = true;
     }
-  }, [range.start, schedulesQuery.error, toast]);
+  }, [range.start, schedulesQuery.data, schedulesQuery.error, toast]);
 
   const refetchAll = useCallback(async () => {
     if (!schedulesQueryKey) return;

@@ -235,20 +235,28 @@ export function ShiftDetailsPanel({
   }
 
   return (
-    <Card className="h-full" data-testid="shift-details-panel">
-      <CardHeader>
+    <Card
+      className="flex h-full min-h-0 flex-col overflow-hidden"
+      data-testid="shift-details-panel"
+    >
+      <CardHeader className="shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             Shift Details
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close shift details"
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="min-h-0 flex-1 space-y-6 overflow-y-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Details</TabsTrigger>
@@ -626,35 +634,34 @@ export function ShiftDetailsPanel({
             </div>
           </TabsContent>
         </Tabs>
+      </CardContent>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-2 pt-4 border-t">
-          <Button onClick={handleSave} disabled={loading}>
-            <Save className="mr-2 h-4 w-4" />
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
+      <div className="flex shrink-0 flex-col gap-2 border-t p-6">
+        <Button onClick={handleSave} disabled={loading}>
+          <Save className="mr-2 h-4 w-4" />
+          {loading ? "Saving..." : "Save Changes"}
+        </Button>
 
-          {!shift.is_published && (
-            <Button
-              variant="outline"
-              onClick={handlePublish}
-              disabled={loading}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Publish this shift only
-            </Button>
-          )}
-
+        {!shift.is_published && (
           <Button
-            variant="destructive"
-            onClick={handleDelete}
+            variant="outline"
+            onClick={handlePublish}
             disabled={loading}
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Shift
+            <Eye className="mr-2 h-4 w-4" />
+            Publish this shift only
           </Button>
-        </div>
-      </CardContent>
+        )}
+
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={loading}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Shift
+        </Button>
+      </div>
     </Card>
   );
 }

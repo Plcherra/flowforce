@@ -20,6 +20,7 @@ import { DEFAULT_ORG_ID, startOfIsoWeek } from "@/features/availability/utils/lo
 import {
   cloneGrid,
   gridFromAvailabilityRows,
+  availabilityTimestamp,
   rangesFromGrid,
   type StaffAvailabilityRow,
 } from "@/features/availability/utils/availabilityUtils";
@@ -103,8 +104,16 @@ export function PersonalAvailabilityPanel({
         const insertRows = ranges.map((range) => ({
           user_id: employeeId,
           day_of_week: range.dayOfWeek,
-          start_time: range.startTime,
-          end_time: range.endTime,
+          start_time: availabilityTimestamp(
+            weekStart,
+            range.dayOfWeek,
+            range.startTime,
+          ),
+          end_time: availabilityTimestamp(
+            weekStart,
+            range.dayOfWeek,
+            range.endTime,
+          ),
           week_start_date: weekStart,
           is_preferred: true,
         }));

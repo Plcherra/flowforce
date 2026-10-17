@@ -29,7 +29,7 @@ const goalSchema = z.object({
   target_completion_date: z.string().nullable(),
 });
 
-const taskRowSchema = z
+const taskRowObjectSchema = z
   .object({
     id: z.string(),
     title: z.string(),
@@ -38,7 +38,6 @@ const taskRowSchema = z
     priority: z.string().nullable(),
     assigned_to: z.string().nullable(),
     created_by: z.string(),
-    departmentid: z.string().nullable(),
     goal_id: z.string().nullable(),
     due_date: z.string().nullable(),
     estimated_hours: z.number().nullable(),
@@ -48,22 +47,54 @@ const taskRowSchema = z
     created_at: z.string(),
     links: z.unknown(), // Custom field, can be array or object
     parent_task_id: z.string().nullable(),
-    origin_documentid: z.string().nullable(),
+    department_id: z.string().nullable().optional(),
+    departmentid: z.string().nullable().optional(),
+    origin_document_id: z.string().nullable().optional(),
+    origin_documentid: z.string().nullable().optional(),
     origin_event_id: z.string().nullable(),
     tags: z.array(z.string()).nullable(),
     source: z.string().nullable(),
     company_id: z.string().nullable(),
     updated_at: z.string(),
-    workflowid: z.string().nullable(),
+    workflow_id: z.string().nullable().optional(),
+    workflowid: z.string().nullable().optional(),
   })
   .passthrough();
 
-const taskWithRelationsSchema = taskRowSchema.extend({
-  assignedprofile: profileSchema.nullable().optional(),
-  createdprofile: profileSchema.nullable().optional(),
-  department: departmentSchema.nullable().optional(),
-  goal: goalSchema.nullable().optional(),
-});
+function withTaskColumnAliases<Schema extends z.ZodTypeAny>(schema: Schema) {
+  return schema.transform((row) => {
+    const record = row as z.output<Schema> & {
+      department_id?: string | null;
+      departmentid?: string | null;
+      origin_document_id?: string | null;
+      origin_documentid?: string | null;
+      workflow_id?: string | null;
+      workflowid?: string | null;
+    };
+    return {
+      ...record,
+      department_id: record.department_id ?? record.departmentid ?? null,
+      departmentid: record.departmentid ?? record.department_id ?? null,
+      origin_document_id:
+        record.origin_document_id ?? record.origin_documentid ?? null,
+      origin_documentid:
+        record.origin_documentid ?? record.origin_document_id ?? null,
+      workflow_id: record.workflow_id ?? record.workflowid ?? null,
+      workflowid: record.workflowid ?? record.workflow_id ?? null,
+    };
+  });
+}
+
+const taskRowSchema = withTaskColumnAliases(taskRowObjectSchema);
+
+const taskWithRelationsSchema = withTaskColumnAliases(
+  taskRowObjectSchema.extend({
+    assignedprofile: profileSchema.nullable().optional(),
+    createdprofile: profileSchema.nullable().optional(),
+    department: departmentSchema.nullable().optional(),
+    goal: goalSchema.nullable().optional(),
+  }),
+);
 
 const taskCommentSchema = z
   .object({
@@ -115,7 +146,29 @@ export async function fetchTasksByCompany(
   return taskWithRelationsSchema.array().parse(data ?? []);
 }
 
-export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
+type TaskWriteInput = TaskInsert & {
+  departmentid?: string | null;
+  origin_documentid?: string | null;
+  workflowid?: string | null;
+};
+
+function toTaskInsert(taskData: TaskWriteInput): TaskInsert {
+  const {
+    departmentid,
+    origin_documentid,
+    workflowid,
+    ...columns
+  } = taskData;
+
+  return {
+    ...columns,
+    department_id: columns.department_id ?? departmentid ?? null,
+    origin_document_id: columns.origin_document_id ?? origin_documentid ?? null,
+    workflow_id: columns.workflow_id ?? workflowid ?? null,
+  };
+}
+
+export async function insertTask(taskData: TaskWriteInput): Promise<TaskRow> {
   // Ensure company_id is set for security
   if (!taskData.company_id) {
     throw new Error("company_id is required when creating a task");
@@ -123,7 +176,7 @@ export async function insertTask(taskData: TaskInsert): Promise<TaskRow> {
 
   const { data, error } = await supabase
     .from("tasks")
-    .insert(taskData)
+    .insert(toTaskInsert(taskData))
     .select()
     .single();
 

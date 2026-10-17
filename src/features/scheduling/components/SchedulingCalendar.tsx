@@ -289,7 +289,7 @@ export function SchedulingCalendar({
             selectedSchedule &&
             !isMobile &&
             !externalDetails && (
-              <div className="w-96">
+              <div className="h-[calc(100vh-8rem)] w-96">
                 <ShiftDetailsPanel
                   shiftId={selectedShift}
                   onClose={() => handleSelectShift(null)}

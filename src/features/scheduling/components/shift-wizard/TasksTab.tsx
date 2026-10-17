@@ -100,7 +100,7 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
                 })
               }
             />
-            <Button type="button" onClick={addTask}>
+            <Button type="button" aria-label="Add shift task" onClick={addTask}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
