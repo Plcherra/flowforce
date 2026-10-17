@@ -176,7 +176,7 @@ test.describe('Scheduling owner flow', () => {
     await expect(details).toBeHidden();
 
     await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Publish week' }).click();
+    await page.getByRole('menuitem', { name: 'Publish week', exact: true }).click();
     await expect(page.getByText('Week published')).toBeVisible({ timeout: 20_000 });
     await shot(page, 'scheduling_published_week');
 
