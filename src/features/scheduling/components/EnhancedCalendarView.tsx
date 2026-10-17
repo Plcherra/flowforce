@@ -296,7 +296,10 @@ export function EnhancedCalendarView({
           open={!!selectedShift}
           onOpenChange={() => setSelectedShift(null)}
         >
-          <SheetContent side="right" className="w-full p-0 sm:max-w-xl">
+          <SheetContent
+            side="right"
+            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl"
+          >
             <ShiftDetailsPanel
               shiftId={selectedShift}
               onClose={() => setSelectedShift(null)}

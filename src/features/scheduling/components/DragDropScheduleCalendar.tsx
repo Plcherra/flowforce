@@ -377,7 +377,10 @@ export function DragDropScheduleCalendar({
       {/* Shift Details Sheet */}
       {selectedShift && (
         <Sheet open={showShiftSheet} onOpenChange={setShowShiftSheet}>
-          <SheetContent side="right" className="sm:max-w-xl w-full p-0">
+          <SheetContent
+            side="right"
+            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl"
+          >
             <ShiftDetailsPanel
               shiftId={selectedShift}
               onClose={() => setShowShiftSheet(false)}

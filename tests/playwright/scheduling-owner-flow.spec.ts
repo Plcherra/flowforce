@@ -131,9 +131,10 @@ test.describe('Scheduling owner flow', () => {
     await shot(page, 'scheduling_draft_shift');
 
     await shiftChip.click();
-    await expect(page.getByTestId('shift-details-panel')).toBeVisible();
-    await page.getByTestId('shift-details-panel').getByLabel('Title').fill(editedTitle);
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    const details = page.getByTestId('shift-details-panel');
+    await expect(details).toBeVisible();
+    await details.getByLabel('Title').fill(editedTitle);
+    await details.getByRole('button', { name: 'Save Changes' }).click();
     await expect(page.getByText('Shift updated')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(editedTitle).first()).toBeVisible();
 
@@ -161,9 +162,12 @@ test.describe('Scheduling owner flow', () => {
     });
     await shot(page, 'scheduling_staff_assigned');
 
+    await details.getByRole('button', { name: 'Close shift details' }).click();
+    await expect(details).toBeHidden();
+
     await page.getByRole('button', { name: 'Actions' }).click();
     await page.getByRole('menuitem', { name: 'Publish week' }).click();
-    await expect(page.getByText(/published|Publish/i).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('Week published')).toBeVisible({ timeout: 20_000 });
     await shot(page, 'scheduling_published_week');
 
     await staffPage.goto('/app/enhanced-scheduling');
