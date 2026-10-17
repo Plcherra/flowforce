@@ -223,6 +223,11 @@ async function resetPlaywrightSchedulingData(client: SupabaseClient) {
   const companyId = SCHEDULING_PW_TENANT.companyId;
   const steps = [
     client.from('schedule_assignments').delete().eq('company_id', companyId),
+    client.from('event_shift_links').delete().eq('company_id', companyId),
+    client.from('calendar_events').delete().eq('company_id', companyId),
+    client.from('vendor_visits').delete().eq('company_id', companyId),
+    client.from('tasks').delete().eq('company_id', companyId),
+    client.from('shift_templates').delete().eq('company_id', companyId),
     client.from('vendor_event').delete().eq('company_id', companyId),
     client.from('time_off_requests').delete().eq('company_id', companyId),
     client.from('staff_availability').delete().eq('company_id', companyId),
@@ -464,6 +469,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       await shiftChip.click();
       const details = page.getByTestId('shift-details-panel');
       await expect(details).toBeVisible();
+      await expect(page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
       await expect(details.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
       const close = details.getByRole('button', { name: 'Close shift details' });
       await expect(close).toBeVisible();
@@ -990,6 +996,39 @@ test.describe('Scheduling smoke (Playwright)', () => {
     });
 
     await expect(page.locator('[data-index]').first()).toBeVisible();
+  });
+
+  test('shift details links a visit, adds a task, and saves a template', async ({ page }) => {
+    if (!seedHandles) return;
+
+    await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
+    const details = page.getByTestId('shift-details-panel');
+    await expect(details).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
+    await expect(details.getByRole('button', { name: 'Close shift details' })).toHaveCount(1);
+
+    await details.getByRole('button', { name: 'Add vendor visit' }).click();
+    await expect(details.getByPlaceholder('Event title')).toHaveValue('Vendor Visit', { timeout: 15_000 });
+    await expect(page.getByText('Vendor visit not saved')).toHaveCount(0);
+
+    await details.getByRole('tab', { name: 'Tasks' }).click();
+    await details.getByPlaceholder('Task title').fill('Count the till');
+    await details.getByRole('button', { name: 'Add shift task' }).click();
+    await expect(details.getByText('Count the till')).toBeVisible();
+    await expect(page.getByText('Task added', { exact: true })).toBeVisible();
+
+    await details.getByRole('tab', { name: 'Templates' }).click();
+    await details.getByRole('button', { name: 'Save as Shift Template' }).click();
+    await expect(page.getByText('Template saved', { exact: true })).toBeVisible();
+
+    await details.getByRole('tab', { name: 'Details' }).click();
+    await details.getByLabel('Title').fill('Renamed shift');
+    await details.getByRole('tab', { name: 'Templates' }).click();
+    await details.getByLabel('Shift template').click();
+    await page.getByRole('option', { name: 'Playwright Smoke Shift', exact: true }).click();
+    await details.getByRole('button', { name: 'Load from Template' }).click();
+    await expect(details.getByLabel('Title')).toHaveValue('Playwright Smoke Shift');
+    await expect(page.getByText('Template loaded', { exact: true })).toBeVisible();
   });
 });
 

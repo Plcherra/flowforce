@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,10 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EmployeeSelector } from "./EmployeeSelector";
+import { TasksTab } from "./shift-wizard/TasksTab";
+import type { ShiftTask } from "./shift-wizard/types";
 import {
   X,
-  FileText,
   Save,
   Eye,
   Trash2,
@@ -22,6 +31,16 @@ import {
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { format } from "date-fns";
 import { useEvents } from "@/hooks/useEvents";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/public-types";
+import {
+  deleteTaskRow,
+  insertTask,
+} from "@/features/tasks/repositories/tasksRepository";
 import type {
   CopilotDraftWarning,
   CopilotScheduleMetadata,
@@ -46,6 +65,44 @@ const parseHourlyRate = (value: string) => {
   if (value.trim().length === 0) return null;
   const rate = Number(value);
   return Number.isFinite(rate) && rate >= 0 ? rate : null;
+};
+
+const shiftTaskPriorities = ["low", "medium", "high"] as const;
+
+type StoredShiftTask = {
+  title?: string;
+  description?: string;
+  priority?: string;
+  estimated_minutes?: number;
+};
+
+const toShiftTask = (row: {
+  id: string;
+  title: string | null;
+  description: string | null;
+  priority: string | null;
+  estimated_hours: number | null;
+}): ShiftTask => {
+  const priority = shiftTaskPriorities.includes(
+    row.priority as (typeof shiftTaskPriorities)[number],
+  )
+    ? (row.priority as ShiftTask["priority"])
+    : "medium";
+  return {
+    id: row.id,
+    title: row.title ?? "Untitled task",
+    description: row.description ?? "",
+    priority,
+    estimated_minutes: Math.max(0, Math.round((row.estimated_hours ?? 0) * 60)),
+  };
+};
+
+const readTemplateTasks = (value: Json | null): StoredShiftTask[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is StoredShiftTask =>
+      Boolean(item) && typeof item === "object" && !Array.isArray(item),
+  );
 };
 
 interface ShiftDetailsPanelProps {
@@ -73,7 +130,16 @@ export function ShiftDetailsPanel({
     updateEvent,
     deleteEvent,
   } = useEvents();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const { templates, createTemplate } = useShiftTemplates();
   const [loading, setLoading] = useState(false);
+  const [addingVisit, setAddingVisit] = useState(false);
+  const [templateSaving, setTemplateSaving] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [eventEdits, setEventEdits] = useState<
     Record<string, { title: string; location?: string | null }>
@@ -161,6 +227,247 @@ export function ShiftDetailsPanel({
     } finally {
       setLoading(false);
     }
+  };
+
+  const shiftTasksQuery = useQuery({
+    queryKey: ["shift-tasks", companyId, shiftId],
+    enabled: Boolean(companyId),
+    queryFn: async () => {
+      if (!companyId) return [] as ShiftTask[];
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("id, title, description, priority, estimated_hours")
+        .eq("company_id", companyId)
+        .eq("source", "schedule")
+        .contains("tags", JSON.stringify([shiftId]))
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map(toShiftTask);
+    },
+  });
+  const shiftTasks = shiftTasksQuery.data ?? [];
+
+  const handleAddVendorVisit = async () => {
+    if (!shift || addingVisit) return;
+    setAddingVisit(true);
+    try {
+      const start = new Date(shift.start_time);
+      const end = new Date(shift.end_time);
+      const ev = await createVendorVisit({
+        title: "Vendor Visit",
+        description: "Vendor visit linked to this shift",
+        start: start.toISOString(),
+        end: end.toISOString(),
+        location: shift.location || "Site",
+        vendor: { name: "Vendor", service_type: "general" },
+        related_shift_ids: [shift.id],
+        checklist: [
+          {
+            id: "sv1",
+            text: "Supervisor greet vendor",
+            done: false,
+            who: "supervisor",
+          },
+          {
+            id: "vd1",
+            text: "Perform service tasks",
+            done: false,
+            who: "vendor",
+          },
+        ],
+      });
+      try {
+        await linkVisitToShifts(ev.id, [shift.id]);
+      } catch (linkError) {
+        logger.warn("Vendor visit saved without a shift link refresh", {
+          error: linkError,
+          tags: ["warning"],
+        });
+      }
+      toast({
+        title: "Vendor visit linked",
+        description: "The visit is saved on this shift.",
+      });
+    } catch (error) {
+      logger.error("Error linking vendor visit", { error, tags: ["error"] });
+    } finally {
+      setAddingVisit(false);
+    }
+  };
+
+  const handleAddTask = async (task: ShiftTask) => {
+    if (!companyId || !user?.id || !shift) {
+      toast({
+        title: "Task not saved",
+        description: "Company context is required to add a task.",
+        variant: "destructive",
+      });
+      throw new Error("Company context is required to add a task.");
+    }
+    const title = task.title.trim();
+    try {
+      await insertTask({
+        title,
+        description: task.description.trim() || null,
+        priority: task.priority,
+        estimated_hours: task.estimated_minutes / 60,
+        company_id: companyId,
+        created_by: user.id,
+        assigned_to: shift.assignments?.[0]?.user_id ?? null,
+        due_date: new Date(shift.end_time).toISOString().slice(0, 10),
+        status: "todo",
+        source: "schedule",
+        tags: ["schedule", shift.id],
+        links: {
+          schedule_id: shift.id,
+          shift_title: shift.title || "Untitled shift",
+        },
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["shift-tasks", companyId, shift.id],
+      });
+      toast({ title: "Task added", description: title });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to save shift task";
+      logger.error("Failed to save shift task", { error, tags: ["error"] });
+      toast({
+        title: "Task not saved",
+        description: message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handleRemoveTask = async (taskId: string) => {
+    if (!companyId) return;
+    try {
+      await deleteTaskRow(taskId, companyId);
+      await queryClient.invalidateQueries({
+        queryKey: ["shift-tasks", companyId, shiftId],
+      });
+      toast({ title: "Task removed" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to remove task";
+      logger.error("Failed to remove shift task", { error, tags: ["error"] });
+      toast({
+        title: "Task not removed",
+        description: message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!shift || !companyId || templateSaving) return;
+    setTemplateSaving(true);
+    try {
+      const start = new Date(formData.start_time);
+      const end = new Date(formData.end_time);
+      const durationMs = end.getTime() - start.getTime();
+      const durationHours =
+        Number.isFinite(durationMs) && durationMs > 0
+          ? Math.round((durationMs / 3_600_000) * 100) / 100
+          : null;
+      const result = await createTemplate({
+        name: formData.title.trim() || "Shift template",
+        description: formData.location.trim() || null,
+        default_notes: formData.notes.trim() || null,
+        color: formData.color || null,
+        duration_hours: durationHours,
+        is_all_day: formData.is_all_day,
+        job_position_id: shift.position_id ?? null,
+        required_headcount: null,
+        tasks: shiftTasks.map((task) => ({
+          title: task.title,
+          description: task.description,
+          priority: task.priority,
+          estimated_minutes: task.estimated_minutes,
+        })) as Json,
+        company_id: companyId,
+        created_by: user?.id ?? null,
+      });
+      if (result.error || !result.data) {
+        const message =
+          result.error instanceof Error
+            ? result.error.message
+            : "Could not save this shift as a template.";
+        throw new Error(message);
+      }
+      setSelectedTemplateId(result.data.id);
+      toast({
+        title: "Template saved",
+        description: result.data.name || "Shift template",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not save this shift as a template.";
+      logger.error("Failed to save shift template", { error, tags: ["error"] });
+      toast({
+        title: "Template not saved",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setTemplateSaving(false);
+    }
+  };
+
+  const handleLoadTemplate = async () => {
+    const template = templates.find((item) => item.id === selectedTemplateId);
+    if (!template || !shift) return;
+    const start = new Date(formData.start_time);
+    let endTime = formData.end_time;
+    if (
+      !template.is_all_day &&
+      template.duration_hours &&
+      !Number.isNaN(start.getTime())
+    ) {
+      const end = new Date(start.getTime() + template.duration_hours * 3_600_000);
+      endTime = format(end, "yyyy-MM-dd'T'HH:mm");
+    }
+    setFormData((current) => ({
+      ...current,
+      title: template.name || current.title,
+      notes: template.default_notes || current.notes,
+      location: template.description || current.location,
+      color: template.color || current.color,
+      is_all_day: template.is_all_day ?? current.is_all_day,
+      end_time: endTime,
+    }));
+
+    const templateTasks = readTemplateTasks(template.tasks);
+    const existingTitles = new Set(
+      shiftTasks.map((task) => task.title.trim().toLowerCase()),
+    );
+    const missingTasks = templateTasks.filter((task) => {
+      const title = task.title?.trim();
+      return Boolean(title) && !existingTitles.has(title!.toLowerCase());
+    });
+    for (const task of missingTasks) {
+      const priority = shiftTaskPriorities.includes(
+        task.priority as (typeof shiftTaskPriorities)[number],
+      )
+        ? (task.priority as ShiftTask["priority"])
+        : "medium";
+      try {
+        await handleAddTask({
+          id: `${template.id}-${task.title}`,
+          title: task.title?.trim() || "Template task",
+          description: task.description ?? "",
+          priority,
+          estimated_minutes: task.estimated_minutes ?? 30,
+        });
+      } catch {
+        break;
+      }
+    }
+
+    setActiveTab("details");
+    toast({
+      title: "Template loaded",
+      description: "Save changes to keep these shift details.",
+    });
   };
 
   const handleDelete = async () => {
@@ -474,34 +781,8 @@ export function ShiftDetailsPanel({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={async () => {
-                    const start = new Date(shift.start_time);
-                    const end = new Date(shift.end_time);
-                    const ev = await createVendorVisit({
-                      title: "Vendor Visit",
-                      description: "Vendor visit linked to this shift",
-                      start: start.toISOString(),
-                      end: end.toISOString(),
-                      location: shift.location || "Site",
-                      vendor: { name: "Vendor" },
-                      related_shift_ids: [shift.id],
-                      checklist: [
-                        {
-                          id: "sv1",
-                          text: "Supervisor greet vendor",
-                          done: false,
-                          who: "supervisor",
-                        },
-                        {
-                          id: "vd1",
-                          text: "Perform service tasks",
-                          done: false,
-                          who: "vendor",
-                        },
-                      ],
-                    });
-                    await linkVisitToShifts(ev.id, [shift.id]);
-                  }}
+                  onClick={handleAddVendorVisit}
+                  disabled={addingVisit}
                   title="Add vendor visit"
                   aria-label="Add vendor visit"
                 >
@@ -610,27 +891,57 @@ export function ShiftDetailsPanel({
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-4">
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Shift Tasks
-              </h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Create task checklists for this shift
+            <TasksTab
+              tasks={shiftTasks}
+              onAddTask={handleAddTask}
+              onRemoveTask={handleRemoveTask}
+            />
+            {shiftTasksQuery.isError && (
+              <p className="text-sm text-destructive">
+                Shift tasks could not be loaded.
               </p>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Task
-              </Button>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
-            <div className="space-y-4">
-              <Button variant="outline" className="w-full">
-                Save as Shift Template
-              </Button>
-              <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleSaveTemplate}
+              disabled={templateSaving || !companyId}
+            >
+              {templateSaving ? "Saving template..." : "Save as Shift Template"}
+            </Button>
+            <div className="space-y-2">
+              <Label htmlFor="shift-template">Load from Template</Label>
+              <Select
+                value={selectedTemplateId || undefined}
+                onValueChange={setSelectedTemplateId}
+                disabled={templates.length === 0}
+              >
+                <SelectTrigger id="shift-template" aria-label="Shift template">
+                  <SelectValue
+                    placeholder={
+                      templates.length === 0
+                        ? "No templates yet"
+                        : "Choose a template"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name || "Untitled template"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleLoadTemplate}
+                disabled={!selectedTemplateId}
+              >
                 Load from Template
               </Button>
             </div>

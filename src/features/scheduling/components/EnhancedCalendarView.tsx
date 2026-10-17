@@ -301,7 +301,8 @@ export function EnhancedCalendarView({
         >
           <SheetContent
             side="right"
-            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl [&>button]:hidden"
+            hideClose
+            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl"
           >
             <ShiftDetailsPanel
               shiftId={selectedShift}
