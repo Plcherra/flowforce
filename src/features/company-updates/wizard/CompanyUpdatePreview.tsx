@@ -11,6 +11,7 @@ import { SignedUpdateMediaImage } from "./SignedUpdateMediaImage";
 interface CompanyUpdatePreviewProps {
   data: WizardFormData;
   device?: "desktop" | "mobile";
+  frame?: "default" | "compact";
   className?: string;
   showMeta?: boolean;
 }
@@ -18,6 +19,7 @@ interface CompanyUpdatePreviewProps {
 export function CompanyUpdatePreview({
   data,
   device = "desktop",
+  frame = "default",
   className,
   showMeta = true,
 }: CompanyUpdatePreviewProps) {
@@ -25,41 +27,42 @@ export function CompanyUpdatePreview({
   const backgroundConfig = getBackgroundConfig(backgroundStyle);
 
   const isMobile = device === "mobile";
+  const isCompact = !isMobile && frame === "compact";
   const mediaItems = data.updateMedia ?? [];
 
-  const frameClasses = cn(
-    "relative overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow",
-    isMobile ? "mx-auto max-w-[320px]" : "w-full",
-    className,
-  );
-
-  return (
-    <div className={frameClasses}>
-      {isMobile && (
-        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-center gap-2 py-2">
-          <div className="h-1 w-12 rounded-full bg-muted" />
-        </div>
-      )}
+  const article = (
+    <>
       <div
         className={cn(
-          "relative px-5 py-6 text-white",
-          isMobile ? "min-h-[140px] pt-10" : "min-h-[160px]",
+          "relative text-white",
+          isMobile ? "px-5 py-6" : isCompact ? "px-3 py-3" : "px-6 py-6",
           backgroundConfig.patternClass,
         )}
         style={backgroundConfig.style}
       >
         <div className="absolute inset-0 bg-black/15" />
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 space-y-2">
           <Badge variant="secondary" className="bg-white/20 text-white">
             {data.type}
           </Badge>
-          <h2 className="text-xl font-semibold line-clamp-2">
+          <h2
+            className={cn(
+              "font-semibold line-clamp-2",
+              isMobile ? "text-xl" : isCompact ? "text-base" : "text-2xl",
+            )}
+          >
             {data.title || "Untitled update"}
           </h2>
         </div>
       </div>
       <CardContent
-        className={cn("space-y-4", isMobile ? "px-4 py-4" : "px-6 py-5")}
+        className={cn(
+          isMobile
+            ? "space-y-4 px-5 py-5 text-base"
+            : isCompact
+              ? "flex flex-1 flex-col space-y-2 px-3 py-3 text-sm"
+              : "space-y-4 px-6 py-5",
+        )}
       >
         {data.body ? (
           <div
@@ -68,7 +71,7 @@ export function CompanyUpdatePreview({
           />
         ) : (
           <p className="text-sm text-muted-foreground">
-            Use the fields on the left to start writing your announcement.
+            The update text shows up here.
           </p>
         )}
 
@@ -77,7 +80,7 @@ export function CompanyUpdatePreview({
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Attachments
             </p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "sm:grid-cols-2")}>
               {mediaItems.map((media) => (
                 <div
                   key={media.id}
@@ -116,26 +119,61 @@ export function CompanyUpdatePreview({
                 ? `By ${data.publishingSettings.authorName || "You"}`
                 : "Sent anonymously"}
             </span>
-            <div className="flex flex-wrap gap-2">
-              {data.publishingSettings.engagement.allowLikes && (
-                <Badge variant="outline">Likes</Badge>
-              )}
-              {data.publishingSettings.engagement.allowComments && (
-                <Badge variant="outline">Comments</Badge>
-              )}
-              {data.publishingSettings.engagement.allowSharing && (
-                <Badge variant="outline">Sharing</Badge>
-              )}
-              {data.publishingSettings.engagement.requireConfirmation && (
-                <Badge variant="outline">Read receipt</Badge>
-              )}
-              {data.publishingSettings.engagement.showAsPopup && (
-                <Badge variant="outline">Popup</Badge>
-              )}
-            </div>
           </div>
         )}
       </CardContent>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div className={cn("mx-auto flex h-full w-full max-w-[20rem] flex-col", className)}>
+        <div className="flex h-full min-h-[22rem] flex-col rounded-[2rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-xl">
+          <div className="flex h-6 shrink-0 items-end justify-center pb-1">
+            <div className="h-1.5 w-16 rounded-full bg-neutral-700" />
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto rounded-[1.15rem] bg-background">
+            {article}
+          </div>
+          <div className="flex h-5 shrink-0 items-center justify-center">
+            <div className="h-1 w-20 rounded-full bg-neutral-700" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex h-full min-h-0 flex-col overflow-hidden border bg-muted/40 shadow-sm",
+        isCompact ? "rounded-lg" : "rounded-xl",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "flex shrink-0 items-center border-b bg-background",
+          isCompact ? "gap-1.5 px-2 py-1.5" : "gap-2 px-3 py-2",
+        )}
+      >
+        <span className={cn("rounded-full bg-red-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span className={cn("rounded-full bg-amber-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span className={cn("rounded-full bg-emerald-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span
+          className={cn(
+            "ml-1.5 flex-1 truncate rounded-md bg-muted text-muted-foreground",
+            isCompact ? "px-2 py-0.5 text-[11px]" : "px-2 py-1 text-xs",
+          )}
+        >
+          Updates
+        </span>
+      </div>
+      <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", isCompact ? "p-2" : "p-3 sm:p-4")}>
+        <div className="flex min-h-full flex-1 flex-col overflow-hidden rounded-md border bg-card shadow-sm">
+          {article}
+        </div>
+      </div>
     </div>
   );
 }

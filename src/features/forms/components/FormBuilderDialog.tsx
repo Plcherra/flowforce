@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -78,66 +78,78 @@ export default function FormBuilderDialog({
     setFormDescription(initialDescription);
   }, [initialTitle, initialDescription]);
 
-  const initialise = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await getFormFields(formId);
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Unable to load form fields",
-        variant: "destructive",
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+
+    const run = async () => {
+      setLoading(true);
+      const { data, error } = await getFormFields(formId);
+      if (cancelled) return;
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Unable to load form fields",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const rows = ((data ?? []) as FormFieldRow[]).sort(
+        (a, b) => (a.field_order ?? 0) - (b.field_order ?? 0),
+      );
+
+      loadSchema({
+        id: formId,
+        title: initialTitle ?? "Untitled form",
+        sections: [
+          {
+            id: randomId(),
+            title: "Main section",
+            fields: rows.map((row) => ({
+              id: row.id ?? randomId(),
+              type: (row.field_type ?? "text") as FormField["type"],
+              label: row.label ?? "Untitled field",
+              placeholder: row.placeholder ?? undefined,
+              required: Boolean(row.is_required),
+              options: Array.isArray(row.options)
+                ? row.options.map((option) => String(option))
+                : [],
+              validation:
+                (row.validation_rules as FormField["validation"]) ?? undefined,
+              min_value: row.min_value ?? undefined,
+              max_value: row.max_value ?? undefined,
+              step_value: row.step_value ?? undefined,
+              formula_expression: row.formula_expression ?? undefined,
+              dependent_fields: Array.isArray(row.dependent_fields)
+                ? (row.dependent_fields as string[])
+                : undefined,
+              rating_config:
+                (row.rating_config as FormField["rating_config"]) ?? undefined,
+              scan_config:
+                (row.scan_config as FormField["scan_config"]) ?? undefined,
+              media_config:
+                (row.media_config as FormField["media_config"]) ?? undefined,
+              content: undefined,
+            })),
+          },
+        ],
+        formulas: [],
+        validations: undefined,
+        metadata: {},
       });
+      setFormTitle(initialTitle ?? "Untitled form");
+      setFormDescription(initialDescription ?? "");
       setLoading(false);
-      return;
-    }
+    };
 
-    const rows = ((data ?? []) as FormFieldRow[]).sort(
-      (a, b) => (a.field_order ?? 0) - (b.field_order ?? 0),
-    );
-
-    loadSchema({
-      id: formId,
-      title: initialTitle ?? "Untitled form",
-      sections: [
-        {
-          id: randomId(),
-          title: "Main section",
-          fields: rows.map((row) => ({
-            id: row.id ?? randomId(),
-            type: row.field_type as FormField["type"],
-            label: row.label ?? "Untitled field",
-            placeholder: row.placeholder ?? undefined,
-            required: Boolean(row.is_required),
-            options: Array.isArray(row.options)
-              ? row.options.map((option) => String(option))
-              : [],
-            validation:
-              (row.validation_rules as FormField["validation"]) ?? undefined,
-            min_value: row.min_value ?? undefined,
-            max_value: row.max_value ?? undefined,
-            step_value: row.step_value ?? undefined,
-            formula_expression: row.formula_expression ?? undefined,
-            dependent_fields: Array.isArray(row.dependent_fields)
-              ? (row.dependent_fields as string[])
-              : undefined,
-            rating_config:
-              (row.rating_config as FormField["rating_config"]) ?? undefined,
-            scan_config:
-              (row.scan_config as FormField["scan_config"]) ?? undefined,
-            media_config:
-              (row.media_config as FormField["media_config"]) ?? undefined,
-            content: undefined,
-          })),
-        },
-      ],
-      formulas: [],
-      validations: undefined,
-      metadata: {},
-    });
-    setFormTitle(initialTitle ?? "Untitled form");
-    setFormDescription(initialDescription ?? "");
-    setLoading(false);
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [
+    open,
     formId,
     getFormFields,
     initialTitle,
@@ -145,11 +157,6 @@ export default function FormBuilderDialog({
     loadSchema,
     toast,
   ]);
-
-  useEffect(() => {
-    if (!open) return;
-    void initialise();
-  }, [open, initialise]);
 
   const handleAddTemplate = (template: FieldTemplate) => {
     if (!schema || !schema.sections.length) return;
@@ -256,8 +263,8 @@ export default function FormBuilderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[85vh] max-h-[calc(100vh-3rem)] w-full max-w-[1200px] flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="flex-shrink-0 space-y-1 border-b px-6 py-4">
+      <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none">
+        <DialogHeader className="flex-shrink-0 space-y-1 border-b px-6 py-4 pr-14">
           <DialogTitle className="text-2xl font-semibold">
             Form editor
           </DialogTitle>
@@ -297,7 +304,7 @@ export default function FormBuilderDialog({
         </DialogHeader>
 
         <ErrorBoundary fallbackRender={FormsErrorFallback}>
-          <div className="relative flex flex-1 flex-col">
+          <div className="relative flex min-h-0 flex-1 flex-col">
             <ResizablePanelGroup
               direction="horizontal"
               className="flex-1 min-h-0 overflow-hidden"

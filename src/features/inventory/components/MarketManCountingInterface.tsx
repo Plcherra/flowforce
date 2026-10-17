@@ -39,6 +39,9 @@ export function MarketManCountingInterface({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showUnsavedOnly, setShowUnsavedOnly] = useState(false);
   const [focusIndex, setFocusIndex] = useState(0);
+  const [customPackByLine, setCustomPackByLine] = useState<
+    Record<string, { packs: string; size: string }>
+  >({});
 
   const categories = useMemo(() => {
     return Array.from(
@@ -105,6 +108,30 @@ export function MarketManCountingInterface({
     onQuantityChange(lineId, clampCountedQuantity(value));
   };
 
+  const handleCustomPackChange = (
+    lineId: string,
+    next: { packs?: string; size?: string },
+  ) => {
+    const previous = customPackByLine[lineId] ?? { packs: "", size: "" };
+    const packs = next.packs ?? previous.packs;
+    const size = next.size ?? previous.size;
+    const packCount = Number(packs);
+    const packSize = Number(size);
+    setCustomPackByLine((current) => ({
+      ...current,
+      [lineId]: { packs, size },
+    }));
+    if (
+      packs !== "" &&
+      size !== "" &&
+      Number.isFinite(packCount) &&
+      Number.isFinite(packSize) &&
+      packSize > 0
+    ) {
+      onQuantityChange(lineId, clampCountedQuantity(packCount * packSize));
+    }
+  };
+
   const handleBarcodeLog = async (line: InventoryCountLine) => {
     const scannedCode = window.prompt(
       "Scan or enter the barcode to log for this item:",
@@ -152,6 +179,8 @@ export function MarketManCountingInterface({
       quantities[line.id] !== undefined &&
       currentQuantity !== (line.counted_quantity ?? 0);
     const unitLabel = line.unit?.abbreviation || line.unit?.name || "Unit";
+    const customPack = customPackByLine[line.id];
+    const usingCustomPack = Boolean(customPack);
 
     return (
       <Card key={line.id} className={compact ? "" : "border-primary/30"}>
@@ -191,7 +220,7 @@ export function MarketManCountingInterface({
                 step="0.01"
                 inputMode="decimal"
                 value={currentQuantity}
-                disabled={readOnly}
+                disabled={readOnly || usingCustomPack}
                 onChange={(event) =>
                   handleQuantityInput(line.id, event.target.value)
                 }
@@ -209,6 +238,76 @@ export function MarketManCountingInterface({
               </p>
             </div>
           </div>
+
+          {!readOnly && (
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={usingCustomPack}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setCustomPackByLine((current) => ({
+                      ...current,
+                      [line.id]: current[line.id] ?? { packs: "1", size: "" },
+                    }));
+                    return;
+                  }
+                  setCustomPackByLine((current) => {
+                    const next = { ...current };
+                    delete next[line.id];
+                    return next;
+                  });
+                }}
+              />
+              This delivery is a different pack
+            </label>
+          )}
+
+          {usingCustomPack && !readOnly && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-xs uppercase text-muted-foreground">
+                  Packs on hand
+                </p>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  inputMode="decimal"
+                  value={customPack?.packs ?? ""}
+                  onChange={(event) =>
+                    handleCustomPackChange(line.id, {
+                      packs: event.target.value,
+                    })
+                  }
+                  className="h-11"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase text-muted-foreground">
+                  Each pack is ({unitLabel})
+                </p>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  inputMode="decimal"
+                  value={customPack?.size ?? ""}
+                  placeholder="80, 5, 1.01…"
+                  onChange={(event) =>
+                    handleCustomPackChange(line.id, {
+                      size: event.target.value,
+                    })
+                  }
+                  className="h-11"
+                />
+              </div>
+              <p className="col-span-2 text-xs text-muted-foreground">
+                Counted as {currentQuantity} {unitLabel}. The item name stays
+                the same; update brand or pack on the item later if this
+                delivery should become the new standard.
+              </p>
+            </div>
+          )}
 
           {!readOnly && (
             <div className="flex justify-end gap-2">

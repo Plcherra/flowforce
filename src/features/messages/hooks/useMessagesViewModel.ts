@@ -68,6 +68,16 @@ interface MessagesViewModelState {
   handleChannelUpdated: () => Promise<void>;
   handleUpdateMessage: (messageId: string, content: string) => Promise<void>;
   handleDeleteMessage: (messageId: string) => Promise<void>;
+  startDirectChat: (user: {
+    id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  }) => Promise<void>;
+  startGroupChat: (input: {
+    name: string;
+    memberIds: string[];
+  }) => Promise<void>;
   sidebarWidth: number;
   setSidebarWidth: Dispatch<SetStateAction<number>>;
   activeFilter: FilterType;
@@ -87,6 +97,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
     loading,
     currentChannelId,
     setCurrentChannelId,
+    createChannel,
     refetchChannels,
     refetchMessages,
     error: messagesError,
@@ -174,12 +185,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
       }
     }
   }, [location.pathname, navigate, params.filter, routeFilter, queryFilter]);
-
-  useEffect(() => {
-    if (Array.isArray(channels) && channels.length > 0 && !currentChannelId) {
-      setCurrentChannelId(channels[0].id);
-    }
-  }, [channels, currentChannelId, setCurrentChannelId]);
 
   useEffect(() => {
     if (currentChannelId && isMobile) {
@@ -334,6 +339,80 @@ export function useMessagesViewModel(): MessagesViewModelState {
     [updateMessageAction, refetchMessages],
   );
 
+  const startDirectChat = useCallback(
+    async (user: {
+      id: string;
+      first_name?: string | null;
+      last_name?: string | null;
+      email?: string | null;
+    }) => {
+      const existing = channels.find(
+        (channel) =>
+          (channel.type ?? "").toLowerCase() === "direct" &&
+          channel.channel_members?.some((member) => member.user_id === user.id),
+      );
+      if (existing) {
+        setCurrentChannelId(existing.id);
+        setShowDirectMessageDialog(false);
+        setShowMobileSidebar(false);
+        return;
+      }
+
+      const channelName =
+        `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
+        user.email ||
+        "Direct message";
+      const { data, error } = await createChannel({
+        name: channelName,
+        description: `Direct message with ${channelName}`,
+        type: "direct",
+        is_private: true,
+        memberids: [user.id],
+      });
+      if (error) {
+        toast({
+          title: "Could not start chat",
+          description: error.message || "Try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (data?.id) {
+        setCurrentChannelId(data.id);
+      }
+      setShowDirectMessageDialog(false);
+      setShowMobileSidebar(false);
+    },
+    [channels, createChannel, setCurrentChannelId, toast],
+  );
+
+  const startGroupChat = useCallback(
+    async (input: { name: string; memberIds: string[] }) => {
+      const name = input.name.trim();
+      if (!name || input.memberIds.length === 0) return;
+      const { data, error } = await createChannel({
+        name,
+        type: "group",
+        is_private: true,
+        memberids: input.memberIds,
+      });
+      if (error) {
+        toast({
+          title: "Could not start group",
+          description: error.message || "Try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (data?.id) {
+        setCurrentChannelId(data.id);
+      }
+      setShowDirectMessageDialog(false);
+      setShowMobileSidebar(false);
+    },
+    [createChannel, setCurrentChannelId, toast],
+  );
+
   const handleDeleteMessage = useCallback(
     async (messageId: string): Promise<void> => {
       try {
@@ -404,6 +483,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
     handleChannelUpdated,
     handleUpdateMessage,
     handleDeleteMessage,
+    startDirectChat,
+    startGroupChat,
   };
 }
 

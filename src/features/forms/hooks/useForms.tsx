@@ -210,8 +210,11 @@ export function useForms() {
     }
 
     try {
+      const { departmentid, ...formFields } = formData;
       const created = await insertFormRow(companyId, {
-        ...formData,
+        ...formFields,
+        department_id: departmentid ?? null,
+        status: "draft",
         created_by: user.id,
       });
 
@@ -335,7 +338,7 @@ export function useForms() {
     }
   };
 
-  const getFormFields = async (formId: string) => {
+  const getFormFields = useCallback(async (formId: string) => {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       return { data: [], error };
@@ -370,7 +373,7 @@ export function useForms() {
       }
       return { data: [], error };
     }
-  };
+  }, [companyId]);
 
   const saveFormFields = async (
     formId: string,
@@ -448,7 +451,7 @@ export function useForms() {
       const submission = await insertFormSubmission(companyId, {
         form_id: formId,
         submitted_by: user?.id || null,
-        submissiondata: submissionData,
+        submission_data: submissionData,
         ip_address: null,
         user_agent: userAgent,
       });

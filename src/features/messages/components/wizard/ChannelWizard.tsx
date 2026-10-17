@@ -102,11 +102,11 @@ export function ChannelWizard({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
-        <DialogTitle className="sr-only">Create Channel</DialogTitle>
+        <DialogTitle className="sr-only">New group</DialogTitle>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-foreground">
-              Create Channel
+              New group
             </h2>
             <Button variant="ghost" size="sm" onClick={handleClose}>
               <X className="w-4 h-4" />
@@ -207,7 +207,7 @@ export function ChannelWizard({
                 className="flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
-                <span>{loading ? "Creating…" : "Create Channel"}</span>
+                <span>{loading ? "Creating…" : "Create group"}</span>
               </Button>
             )}
           </div>

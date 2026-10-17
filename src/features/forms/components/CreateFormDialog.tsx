@@ -557,7 +557,7 @@ export default function CreateFormDialog({
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-3">
           {methods.map((method) => {
             const Icon = method.icon;
             const handleActivate = () => {
@@ -790,7 +790,7 @@ export default function CreateFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="relative flex max-h-[85vh] flex-col overflow-hidden p-0 sm:max-w-[900px]">
+      <DialogContent className="top-4 flex max-h-[calc(100dvh-2rem)] w-[min(56rem,calc(100vw-2rem))] translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]">
         <div className="flex max-h-full flex-1 flex-col">
           <DialogHeader className="space-y-2 border-b px-6 py-6">
             <DialogTitle>Create New Form</DialogTitle>

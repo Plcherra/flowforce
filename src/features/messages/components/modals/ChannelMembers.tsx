@@ -135,7 +135,7 @@ export function ChannelMembers({
 
       toast({
         title: "Success",
-        description: `${memberPendingRemoval.name} has been removed from the channel`,
+        description: `${memberPendingRemoval.name} has been removed from the group`,
       });
 
       setMemberPendingRemoval(null);
@@ -182,10 +182,10 @@ export function ChannelMembers({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Channel Members
+            People
           </DialogTitle>
           <DialogDescription>
-            Manage members in #{channelName}
+            People in {channelName}
           </DialogDescription>
         </DialogHeader>
 
@@ -338,7 +338,7 @@ export function ChannelMembers({
           <AlertDialogHeader>
             <AlertDialogTitle>Remove member</AlertDialogTitle>
             <AlertDialogDescription>
-              {`This will remove ${memberPendingRemoval?.name ?? "this member"} from #${channelName}. They will lose access to the channel history.`}
+              {`This will remove ${memberPendingRemoval?.name ?? "this person"} from ${channelName}. They will lose access to the group.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

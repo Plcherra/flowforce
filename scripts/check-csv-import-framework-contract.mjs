@@ -189,6 +189,31 @@ if (invalidPreview.canImport || invalidPreview.summary.invalidRows !== 1) {
   throw new Error("Invalid schedule CSV should produce blocking errors");
 }
 
+const inventoryCsv = readText(
+  "docs/fixtures/inventory-items-import.example.csv",
+);
+const inventoryPreview = csvFramework.buildCsvImportPreview({
+  templateKey: "inventory_items",
+  filename: "inventory-items-import.example.csv",
+  csvText: inventoryCsv,
+});
+
+if (!inventoryPreview.canImport || inventoryPreview.summary.validRows < 4) {
+  throw new Error(
+    "Inventory CSV should import named rows even when pack, SKU, or unit are missing",
+  );
+}
+
+if (
+  !inventoryPreview.issues.some(
+    (issue) => issue.code === "incomplete_item_can_update_later",
+  )
+) {
+  throw new Error(
+    "Incomplete inventory rows should warn and stay updateable later",
+  );
+}
+
 const result = csvFramework.buildCsvImportResult({
   batchId: "batch-1",
   preview: validPreview,

@@ -26,13 +26,23 @@ export type FormSubmissionRow = Tables<"form_submissions">;
 const formRowSchema = z.object({
   id: z.string(),
   company_id: z.string().nullable().optional(),
-  title: z.string(),
+  title: z
+    .string()
+    .nullable()
+    .transform((value) => value ?? "Untitled form"),
   description: z.string().nullable(),
-  status: z.string() as z.ZodType<FormRow["status"]>,
-  created_at: z.string(),
-  updated_at: z.string(),
-  created_by: z.string(),
-  departmentid: z.string().nullable(),
+  status: z
+    .string()
+    .nullable()
+    .transform((value) => value ?? "draft"),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
+  created_by: z.string().nullable(),
+  department_id: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => value ?? null),
   is_anonymous: z.boolean().nullable(),
   max_submissions: z.number().nullable(),
   settings: jsonSchema.nullable(),
@@ -43,10 +53,10 @@ const formRowSchema = z.object({
 const formFieldRowSchema = z.object({
   id: z.string(),
   company_id: z.string().nullable().optional(),
-  form_id: z.string(),
-  field_order: z.number(),
-  field_type: z.string() as z.ZodType<FormFieldRow["field_type"]>,
-  label: z.string(),
+  form_id: z.string().nullable(),
+  field_order: z.number().nullable(),
+  field_type: z.string().nullable() as z.ZodType<FormFieldRow["field_type"]>,
+  label: z.string().nullable(),
   description: z.string().nullable(),
   placeholder: z.string().nullable(),
   is_required: z.boolean().nullable(),
@@ -60,20 +70,32 @@ const formFieldRowSchema = z.object({
   rating_config: jsonSchema.nullable(),
   scan_config: jsonSchema.nullable(),
   media_config: jsonSchema.nullable(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 });
 
-const formSubmissionRowSchema = z.object({
+const formSubmissionRowObjectSchema = z.object({
   id: z.string(),
   company_id: z.string().nullable().optional(),
-  form_id: z.string(),
-  submissiondata: jsonSchema,
-  submitted_at: z.string(),
+  form_id: z.string().nullable(),
+  submission_data: jsonSchema.nullable().optional(),
+  submitted_at: z.string().nullable(),
   submitted_by: z.string().nullable(),
   ip_address: z.string().nullable(),
   user_agent: z.string().nullable(),
 });
+
+const withSubmissionData = <T extends { submission_data?: Json | null }>(
+  row: T,
+) => ({
+  ...row,
+  submission_data: row.submission_data ?? null,
+  submissiondata: row.submission_data ?? {},
+});
+
+const formSubmissionRowSchema = formSubmissionRowObjectSchema.transform(
+  withSubmissionData,
+);
 
 const profileSummarySchema = z
   .object({
@@ -119,19 +141,23 @@ const formQueryRowSchema = formRowSchema.extend({
 
 export type FormQueryRow = z.infer<typeof formQueryRowSchema>;
 
-const formSubmissionWithProfileSchema = formSubmissionRowSchema.extend({
-  submittedprofile: z
-    .object({
-      first_name: z.string().nullable().optional(),
-      last_name: z.string().nullable().optional(),
-    })
-    .nullable()
-    .optional(),
-});
+const formSubmissionWithProfileSchema = formSubmissionRowObjectSchema
+  .extend({
+    submittedprofile: z
+      .object({
+        first_name: z.string().nullable().optional(),
+        last_name: z.string().nullable().optional(),
+      })
+      .nullable()
+      .optional(),
+  })
+  .transform(withSubmissionData);
 
 export type FormSubmissionWithProfile = z.infer<
   typeof formSubmissionWithProfileSchema
 >;
+
+let missingCompanyGuardWarned = false;
 
 async function ensureCompanyScope(companyId: string): Promise<void> {
   if (!companyId) {
@@ -148,10 +174,13 @@ async function ensureCompanyScope(companyId: string): Promise<void> {
     if (!isMissingGuard) {
       throw error;
     }
-    logger.warn(
-      "[formsRepository] Skipping company guard RPC because function is unavailable.",
-      { tags: ["warning"] },
-    );
+    if (!missingCompanyGuardWarned) {
+      missingCompanyGuardWarned = true;
+      logger.warn(
+        "[formsRepository] Skipping company guard RPC because function is unavailable.",
+        { tags: ["warning"] },
+      );
+    }
   }
 }
 

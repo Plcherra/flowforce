@@ -22,10 +22,10 @@ export function ChannelWizardMembers({
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold text-foreground">
-          Who should join this channel?
+          Who is in this group?
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Select team members to add to your new channel
+          Pick the people who should be in the conversation
         </p>
       </div>
 

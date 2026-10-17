@@ -1,26 +1,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Hash,
-  Users,
-  Lock,
-  MoreVertical,
-  Settings,
-  Phone,
-  Video,
-  Clock,
-  Menu,
-  X,
-} from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { ArrowLeft, MoreVertical, Settings, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MessageScheduler } from "@/features/messages/components/MessageScheduler";
 import type { MessageChannel } from "@/types/messages";
 
 interface MessagesHeaderProps {
@@ -28,14 +14,8 @@ interface MessagesHeaderProps {
   isChannelAdmin: boolean;
   onShowChannelMembers: () => void;
   onShowChannelSettings: () => void;
-  onStartVideoCall: (type: "video" | "audio") => void;
-  onScheduleMessage: (content: string, scheduledFor: Date) => void;
   isMobile?: boolean;
-  showMobileSidebar?: boolean;
-  onToggleMobileSidebar?: () => void;
-  canShowAvailability?: boolean;
-  available?: boolean;
-  onToggleAvailable?: (v: boolean) => Promise<void> | void;
+  onBack?: () => void;
 }
 
 export function MessagesHeader({
@@ -43,146 +23,72 @@ export function MessagesHeader({
   isChannelAdmin,
   onShowChannelMembers,
   onShowChannelSettings,
-  onStartVideoCall,
-  onScheduleMessage,
   isMobile = false,
-  showMobileSidebar = false,
-  onToggleMobileSidebar,
-  canShowAvailability,
-  available,
-  onToggleAvailable,
+  onBack,
 }: MessagesHeaderProps) {
-  const getChannelIcon = (type: string, isPrivate: boolean) => {
-    if (isPrivate) return <Lock className="h-4 w-4" />;
-    if (type === "direct") return <Users className="h-4 w-4" />;
-    return <Hash className="h-4 w-4" />;
-  };
+  const isDirect = (channel.type ?? "").toLowerCase() === "direct";
+  const memberCount = channel.channel_members?.length ?? 0;
 
   return (
-    <div className="p-4 border-b border-gray-200">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {isMobile && onToggleMobileSidebar && (
+    <div className="border-b px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {isMobile && onBack && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={onToggleMobileSidebar}
-              className="mr-2 lg:hidden"
+              onClick={onBack}
+              aria-label="Back to chats"
             >
-              {showMobileSidebar ? (
-                <X className="h-4 w-4" />
-              ) : (
-                <Menu className="h-4 w-4" />
-              )}
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
-
-          <div className="text-gray-500">
-            {getChannelIcon(channel.type, channel.is_private || false)}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3
-              className={`font-semibold truncate ${isMobile ? "text-base" : "text-lg"}`}
-            >
-              {channel.name}
-            </h3>
-            {channel.description && !isMobile && (
-              <p className="text-sm text-gray-500 truncate">
-                {channel.description}
-              </p>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
+            {isDirect ? (
+              (channel.name || "?").trim().charAt(0).toUpperCase()
+            ) : (
+              <Users className="h-4 w-4 text-muted-foreground" />
             )}
           </div>
+          <div className="min-w-0">
+            <h3 className="truncate text-base font-semibold">{channel.name}</h3>
+            <p className="truncate text-xs text-muted-foreground">
+              {isDirect
+                ? "Chat"
+                : memberCount > 0
+                  ? `${memberCount} people`
+                  : "Group"}
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          {!isMobile && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onStartVideoCall("audio")}
-              >
-                <Phone className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onStartVideoCall("video")}
-              >
-                <Video className="h-4 w-4" />
-              </Button>
-
-              <MessageScheduler
-                channelId={channel.id}
-                channelName={channel.name}
-                onScheduleMessage={onScheduleMessage}
-              >
-                <Button variant="outline" size="sm">
-                  <Clock className="h-4 w-4" />
-                </Button>
-              </MessageScheduler>
-            </>
-          )}
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onShowChannelMembers}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Users className="h-4 w-4" />
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {isMobile && (
-                <>
-                  <DropdownMenuItem onClick={() => onStartVideoCall("audio")}>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Audio Call
+        {!isDirect && (
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onShowChannelMembers}
+              aria-label="Group members"
+            >
+              <Users className="h-4 w-4" />
+            </Button>
+            {isChannelAdmin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost" aria-label="Group options">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onShowChannelSettings}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Group settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onStartVideoCall("video")}>
-                    <Video className="h-4 w-4 mr-2" />
-                    Video Call
-                  </DropdownMenuItem>
-                </>
-              )}
-              {isChannelAdmin && (
-                <DropdownMenuItem onClick={onShowChannelSettings}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Channel Settings
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {canShowAvailability && onToggleAvailable && (
-            <div className="hidden md:flex items-center gap-1 ml-2">
-              <Label
-                htmlFor="avail-header"
-                className="text-xs text-muted-foreground"
-              >
-                Available
-              </Label>
-              <Switch
-                id="avail-header"
-                checked={!!available}
-                onCheckedChange={(value) => {
-                  void onToggleAvailable(value);
-                }}
-              />
-            </div>
-          )}
-        </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

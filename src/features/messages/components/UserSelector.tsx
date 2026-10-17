@@ -33,11 +33,7 @@ interface UserSelectorProps {
   onUserSelect: (user: User) => void;
 }
 
-export function UserSelector({
-  open,
-  onClose,
-  onUserSelect,
-}: UserSelectorProps) {
+export function useCompanyPeople(enabled: boolean) {
   const { user: currentUser } = useAuth();
   const { profile: currentProfile } = useProfile();
   const { toast } = useToast();
@@ -47,11 +43,84 @@ export function UserSelector({
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (open) {
-      fetchUsers();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [open, currentProfile?.role, currentProfile?.id]);
+    if (!enabled) return;
+
+    const fetchUsers = async () => {
+      if (!currentUser) return;
+
+      setLoading(true);
+      const includeSelf = currentProfile?.role === "admin";
+      const currentProfileId =
+        currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
+      const companyId =
+        currentProfile?.companyId ?? currentProfile?.company_id ?? null;
+      const selectFields =
+        "id, first_name, last_name, email, avatar_url, employment_status, role";
+
+      const applySelfVisibility = (list: User[] | null | undefined) => {
+        const entries = list ?? [];
+        if (includeSelf || !currentProfileId) {
+          return entries;
+        }
+        return entries.filter((user) => user.id !== currentProfileId);
+      };
+
+      try {
+        if (!companyId) {
+          throw new Error("Company context required to load users");
+        }
+
+        const { data: activeData, error: activeError } = await supabase
+          .from("profiles")
+          .select(selectFields)
+          .eq("company_id", companyId)
+          .eq("employment_status", "active")
+          .order("first_name");
+
+        if (activeError) throw activeError;
+
+        let visibleUsers = applySelfVisibility(activeData);
+
+        if (visibleUsers.length === 0) {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from("profiles")
+            .select(selectFields)
+            .eq("company_id", companyId)
+            .order("first_name");
+
+          if (fallbackError) throw fallbackError;
+          visibleUsers = applySelfVisibility(fallbackData);
+        }
+
+        const deduped = Array.from(
+          new Map(visibleUsers.map((entry) => [entry.id, entry])).values(),
+        );
+
+        setUsers(deduped);
+      } catch (error) {
+        logger.error("Error fetching users:", { error, tags: ["error"] });
+        toast({
+          title: "Error",
+          description: "Failed to load users",
+          variant: "destructive",
+        });
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void fetchUsers();
+  }, [
+    enabled,
+    currentUser?.id,
+    currentProfile?.role,
+    currentProfile?.id,
+    currentProfile?.userId,
+    currentProfile?.companyId,
+    currentProfile?.company_id,
+    toast,
+  ]);
 
   useEffect(() => {
     const loweredQuery = searchQuery.toLowerCase();
@@ -67,73 +136,16 @@ export function UserSelector({
     setFilteredUsers(filtered);
   }, [users, searchQuery]);
 
-  const fetchUsers = async () => {
-    if (!currentUser) return;
+  return { users, searchQuery, setSearchQuery, loading, filteredUsers };
+}
 
-    setLoading(true);
-    const includeSelf = currentProfile?.role === "admin";
-    const currentProfileId =
-      currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
-    const companyId =
-      currentProfile?.companyId ?? currentProfile?.company_id ?? null;
-    const selectFields =
-      "id, first_name, last_name, email, avatar_url, employment_status, role";
-
-    const applySelfVisibility = (list: User[] | null | undefined) => {
-      const entries = list ?? [];
-      if (includeSelf || !currentProfileId) {
-        return entries;
-      }
-      return entries.filter((user) => user.id !== currentProfileId);
-    };
-
-    try {
-      if (!companyId) {
-        throw new Error("Company context required to load users");
-      }
-
-      const query = supabase
-        .from("profiles")
-        .select(selectFields)
-        .eq("company_id", companyId)
-        .eq("employment_status", "active")
-        .order("first_name");
-
-      const { data: activeData, error: activeError } = await query;
-
-      if (activeError) throw activeError;
-
-      let visibleUsers = applySelfVisibility(activeData);
-
-      if (visibleUsers.length === 0) {
-        // Fallback: still filter by company_id
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from("profiles")
-          .select(selectFields)
-          .eq("company_id", companyId)
-          .order("first_name");
-
-        if (fallbackError) throw fallbackError;
-        visibleUsers = applySelfVisibility(fallbackData);
-      }
-
-      const deduped = Array.from(
-        new Map(visibleUsers.map((entry) => [entry.id, entry])).values(),
-      );
-
-      setUsers(deduped);
-    } catch (error) {
-      logger.error("Error fetching users:", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description: "Failed to load users",
-        variant: "destructive",
-      });
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+export function UserSelector({
+  open,
+  onClose,
+  onUserSelect,
+}: UserSelectorProps) {
+  const { searchQuery, setSearchQuery, loading, filteredUsers } =
+    useCompanyPeople(open);
 
   const handleUserSelect = (user: User) => {
     onUserSelect({
@@ -152,10 +164,10 @@ export function UserSelector({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            Start Direct Message
+            Message someone
           </DialogTitle>
           <DialogDescription>
-            Select a user to start a private conversation.
+            Pick a teammate to message.
           </DialogDescription>
         </DialogHeader>
 

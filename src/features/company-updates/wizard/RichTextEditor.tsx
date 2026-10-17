@@ -3,8 +3,6 @@ import { HexColorPicker } from "react-colorful";
 import DOMPurify from "dompurify";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import Link from "@tiptap/extension-link";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -38,28 +36,30 @@ interface RichTextEditorProps {
   value: string;
   onChange: (html: string, plainText: string) => void;
   placeholder?: string;
+  className?: string;
 }
 
 export function RichTextEditor({
   value,
   onChange,
   placeholder = "Write your update...",
+  className,
 }: RichTextEditorProps) {
   const [color, setColor] = useState("#111827");
   const [colorOpen, setColorOpen] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       Color.configure({ types: ["textStyle"] }),
       TextStyle,
-      Underline,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
-      }),
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
+        },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
         },
       }),
       Placeholder.configure({ placeholder }),
@@ -123,9 +123,9 @@ export function RichTextEditor({
     editor.isActive(name, attrs);
 
   return (
-    <div className="space-y-3">
+    <div className={cn("flex min-h-0 flex-1 flex-col gap-2", className)}>
       <TooltipProvider>
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/30 p-2">
+        <div className="flex shrink-0 flex-nowrap items-center gap-1 overflow-x-auto rounded-xl border bg-muted/30 p-1.5">
           <ToolbarButton
             icon={Bold}
             label="Bold"
@@ -220,8 +220,11 @@ export function RichTextEditor({
         </div>
       </TooltipProvider>
 
-      <div className="rounded-2xl border bg-background p-4 shadow-sm">
-        <EditorContent editor={editor} />
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border bg-background shadow-sm">
+        <EditorContent
+          editor={editor}
+          className="h-full min-h-[8rem] flex-1 overflow-y-auto p-4 [&_.ProseMirror]:min-h-full"
+        />
       </div>
     </div>
   );

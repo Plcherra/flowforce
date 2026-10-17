@@ -1,13 +1,9 @@
 import React from "react";
 import { MessagesShell } from "@/features/messages/components/layout";
 import { useMessagesViewModel } from "@/features/messages/hooks/useMessagesViewModel";
-import { safeArrayLength } from "@/utils/reactQueryTypes";
 import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
 import { PageLoader } from "@/components/common/PageLoader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { EmptyStateCard } from "@/components/common/EmptyStateCard";
-import { MessageCircle, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { MessagesErrorFallback } from "@/components/ui/feature-error-fallbacks";
 
@@ -37,33 +33,6 @@ export default function Messages() {
 
   if (viewModel.loading) {
     return <PageLoader text="Preparing conversations..." />;
-  }
-
-  if (safeArrayLength(viewModel.channels) === 0) {
-    return (
-      <div className="p-6">
-        <EmptyStateCard
-          title="No channels found"
-          description="Create your first channel to start collaborating with the team."
-          icon={<MessageCircle className="h-5 w-5" />}
-          action={
-            <Button onClick={() => viewModel.setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Channel
-            </Button>
-          }
-        />
-        {/* Render dialogs even in empty state so create channel works */}
-        <ErrorBoundary fallbackRender={MessagesErrorFallback}>
-          <MessagesShell
-            viewModel={viewModel}
-            organizationId={organizationId}
-            organizationName={organizationName ?? undefined}
-            hideContent={true}
-          />
-        </ErrorBoundary>
-      </div>
-    );
   }
 
   return (

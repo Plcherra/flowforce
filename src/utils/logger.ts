@@ -125,20 +125,23 @@ function sanitizeContext(context?: Record<string, unknown>) {
   }
 }
 
+let remoteLoggingStopped = false;
+let remoteFailureLogged = false;
+
 async function sendRemote(
   level: LogLevel,
   scope: string,
   message: string,
   meta: LogMeta,
 ) {
-  if (!shouldSend(level)) return;
+  if (remoteLoggingStopped || !shouldSend(level)) return;
   if (typeof fetch === "undefined") return;
 
   const serializedError = serializeError(meta.error);
   const tags = Array.from(new Set([...(meta.tags || [])]));
 
   try {
-    await fetch(remoteEndpoint, {
+    const response = await fetch(remoteEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -159,9 +162,22 @@ async function sendRemote(
         tags,
       }),
     });
+
+    if (response.status === 401 || response.status === 403) {
+      remoteLoggingStopped = true;
+      if (!remoteFailureLogged) {
+        remoteFailureLogged = true;
+        console.warn(
+          "[logger] remote logging stopped because the log endpoint rejected the request",
+        );
+      }
+    }
   } catch (error) {
-    // Avoid throwing from logger; fallback to console
-    console.warn("[logger] failed to send remote log", error);
+    remoteLoggingStopped = true;
+    if (!remoteFailureLogged) {
+      remoteFailureLogged = true;
+      console.warn("[logger] failed to send remote log", error);
+    }
   }
 }
 

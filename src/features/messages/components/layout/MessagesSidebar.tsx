@@ -2,15 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import {
-  Plus,
-  Hash,
-  Users,
-  Lock,
-  MessageSquare,
-  Search,
-  Megaphone,
-} from "lucide-react";
+import { Plus, Users, MessageSquare } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { MessageChannel } from "@/types/messages";
 import { Input } from "@/components/ui/input";
-import { MessageFilterBar } from "@/features/messages/components/legacy/MessageFilterBar";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -29,18 +20,12 @@ interface MessagesSidebarProps {
   onChannelSelect: (channelId: string) => void;
   onShowCreateDialog: () => void;
   onShowDirectMessageDialog: () => void;
-  onShowMessageSearch: () => void;
-  onShowCreateAnnouncement: () => void;
-  // Optional: search input wiring
   query?: string;
   onQueryChange?: (v: string) => void;
-  // Filters
-  activeFilter?: "all" | "unread" | "teams";
-  onFilterChange?: (v: "all" | "unread" | "teams") => void;
-  // Availability toggle (optional)
-  canShowAvailability?: boolean;
-  available?: boolean;
-  onToggleAvailable?: (v: boolean) => Promise<void> | void;
+}
+
+function isDirectChat(channel: MessageChannel) {
+  return (channel.type ?? "").toLowerCase() === "direct";
 }
 
 export function MessagesSidebar({
@@ -49,143 +34,148 @@ export function MessagesSidebar({
   onChannelSelect,
   onShowCreateDialog,
   onShowDirectMessageDialog,
-  onShowMessageSearch,
-  onShowCreateAnnouncement,
   query,
   onQueryChange,
-  activeFilter,
-  onFilterChange,
-  canShowAvailability,
-  available,
-  onToggleAvailable,
 }: MessagesSidebarProps) {
-  const getChannelIcon = (type: string, isPrivate: boolean) => {
-    if (isPrivate) return <Lock className="h-4 w-4" />;
-    if (type === "direct") return <Users className="h-4 w-4" />;
-    return <Hash className="h-4 w-4" />;
-  };
+  const people = channels.filter(isDirectChat);
+  const groups = channels.filter((channel) => !isDirectChat(channel));
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="space-y-3 border-b border-border/70 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Communication
-            </p>
-            <h2 className="text-lg font-semibold">Channels</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            {canShowAvailability && typeof onToggleAvailable === "function" && (
-              <Button
-                size="sm"
-                variant={available ? "default" : "outline"}
-                onClick={() => {
-                  void onToggleAvailable(!available);
-                }}
-              >
-                {available ? "Available" : "Set as Away"}
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="space-y-3 border-b p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">Chats</h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" aria-label="Start a chat">
+                <Plus className="h-4 w-4" />
               </Button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onShowDirectMessageDialog}>
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Direct Message
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onShowCreateDialog}>
-                  <Hash className="mr-2 h-4 w-4" />
-                  Create Channel
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onShowCreateAnnouncement}>
-                  <Megaphone className="mr-2 h-4 w-4" />
-                  Create Announcement
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onShowDirectMessageDialog}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Message someone
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onShowCreateDialog}>
+                <Users className="mr-2 h-4 w-4" />
+                New group
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {typeof onQueryChange === "function" && typeof query === "string" && (
+          <div>
+            <Label htmlFor="messages-sidebar-search" className="sr-only">
+              Search chats
+            </Label>
+            <Input
+              id="messages-sidebar-search"
+              placeholder="Search chats"
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+            />
           </div>
-        </div>
-
-        {typeof onFilterChange === "function" && activeFilter && (
-          <MessageFilterBar active={activeFilter} onChange={onFilterChange} />
         )}
-
-        <div className="flex flex-wrap items-center gap-2">
-          {typeof onQueryChange === "function" && typeof query === "string" && (
-            <div className="flex-1">
-              <Label htmlFor="messages-sidebar-search" className="sr-only">
-                Search channels
-              </Label>
-              <Input
-                id="messages-sidebar-search"
-                className="min-w-[160px] flex-1"
-                placeholder="Search channels"
-                value={query}
-                onChange={(event) => onQueryChange(event.target.value)}
-              />
-            </div>
-          )}
-          <Button size="sm" variant="outline" onClick={onShowMessageSearch}>
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="space-y-1.5 p-3">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-4 p-3">
           {channels.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="mb-4 text-muted-foreground">No channels yet</p>
-              <Button onClick={onShowCreateDialog}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Channel
-              </Button>
+            <div className="px-2 py-10 text-center">
+              <p className="mb-4 text-sm text-muted-foreground">No chats yet</p>
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" onClick={onShowDirectMessageDialog}>
+                  Message someone
+                </Button>
+                <Button onClick={onShowCreateDialog}>New group</Button>
+              </div>
             </div>
           ) : (
-            <div className="space-y-1">
-              {channels.map((channel) => (
-                <button
-                  key={channel.id}
-                  type="button"
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                    currentChannelId === channel.id
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "hover:border-primary/40 hover:bg-primary/5",
-                  )}
-                  onClick={() => onChannelSelect(channel.id)}
-                  aria-pressed={currentChannelId === channel.id}
-                  aria-label={`Open ${channel.name} channel`}
-                >
-                  <div className="text-muted-foreground">
-                    {getChannelIcon(channel.type, channel.is_private || false)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {channel.name}
-                    </p>
-                    {channel.description && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {channel.description}
-                      </p>
-                    )}
-                  </div>
-                  {channel.unread_count && channel.unread_count > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {channel.unread_count}
-                    </Badge>
-                  )}
-                </button>
-              ))}
-            </div>
+            <>
+              <ChatSection
+                title="People"
+                channels={people}
+                currentChannelId={currentChannelId}
+                onChannelSelect={onChannelSelect}
+                emptyLabel="No direct messages yet"
+              />
+              <ChatSection
+                title="Groups"
+                channels={groups}
+                currentChannelId={currentChannelId}
+                onChannelSelect={onChannelSelect}
+                emptyLabel="No groups yet"
+              />
+            </>
           )}
         </div>
       </ScrollArea>
     </div>
+  );
+}
+
+function ChatSection({
+  title,
+  channels,
+  currentChannelId,
+  onChannelSelect,
+  emptyLabel,
+}: {
+  title: string;
+  channels: MessageChannel[];
+  currentChannelId: string | null;
+  onChannelSelect: (channelId: string) => void;
+  emptyLabel: string;
+}) {
+  return (
+    <section className="space-y-1">
+      <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {title}
+      </p>
+      {channels.length === 0 ? (
+        <p className="px-2 py-2 text-sm text-muted-foreground">{emptyLabel}</p>
+      ) : (
+        channels.map((channel) => {
+          const direct = isDirectChat(channel);
+          return (
+            <button
+              key={channel.id}
+              type="button"
+              className={cn(
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                currentChannelId === channel.id
+                  ? "bg-primary/10"
+                  : "hover:bg-muted",
+              )}
+              onClick={() => onChannelSelect(channel.id)}
+              aria-pressed={currentChannelId === channel.id}
+              aria-label={`Open chat with ${channel.name}`}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                {direct ? (
+                  <span className="text-sm font-medium text-foreground">
+                    {(channel.name || "?").trim().charAt(0).toUpperCase()}
+                  </span>
+                ) : (
+                  <Users className="h-4 w-4" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{channel.name}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {direct ? "Direct message" : "Group"}
+                </p>
+              </div>
+              {channel.unread_count && channel.unread_count > 0 ? (
+                <Badge variant="secondary" className="text-xs">
+                  {channel.unread_count}
+                </Badge>
+              ) : null}
+            </button>
+          );
+        })
+      )}
+    </section>
   );
 }

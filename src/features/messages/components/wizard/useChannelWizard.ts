@@ -38,7 +38,7 @@ export function useChannelWizard(open: boolean) {
     name: "",
     description: "",
     type: "group",
-    is_private: false,
+    is_private: true,
     members: [],
   });
 
@@ -178,8 +178,8 @@ export function useChannelWizard(open: boolean) {
         if (error) throw error;
 
         toast({
-          title: "Success",
-          description: "Channel created successfully",
+          title: "Group created",
+          description: "You can start messaging this group.",
         });
 
         if (onChannelCreated && data?.id) {
@@ -190,7 +190,7 @@ export function useChannelWizard(open: boolean) {
           name: "",
           description: "",
           type: "group",
-          is_private: false,
+          is_private: true,
           members: [],
         });
         setCurrentStep(1);
@@ -252,7 +252,7 @@ export function useChannelWizard(open: boolean) {
       name: "",
       description: "",
       type: "group",
-      is_private: false,
+      is_private: true,
       members: [],
     });
     setCurrentStep(1);

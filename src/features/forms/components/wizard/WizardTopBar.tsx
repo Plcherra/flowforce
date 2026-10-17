@@ -27,27 +27,29 @@ export function WizardTopBar({
   onClose,
 }: WizardTopBarProps) {
   return (
-    <header className="border-b border-border/80 bg-background/95 px-8 py-4 backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <DialogTitle className="text-2xl font-semibold">{title}</DialogTitle>
+    <header className="shrink-0 border-b border-border/80 bg-background/95 px-4 py-3 pr-12 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            <DialogDescription className="mt-0.5 text-sm text-muted-foreground">
               {description}
             </DialogDescription>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
-          <Badge variant="outline" className="border-dashed">
-            Step {currentStepIndex + 1} of {totalSteps}
-          </Badge>
-          <span>{statusLabel}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+            <Badge variant="outline" className="border-dashed">
+              Step {currentStepIndex + 1} of {totalSteps}
+            </Badge>
+            <span>{statusLabel}</span>
+          </div>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Close
+          </Button>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          Close
-        </Button>
       </div>
-      <Progress value={progress} className="mt-4 h-1.5" />
+      <Progress value={progress} className="mt-3 h-1" />
     </header>
   );
 }

@@ -12,19 +12,19 @@ export const WIZARD_STEPS: WizardStep[] = [
     id: 1,
     title: "Add People",
     icon: Users,
-    description: "Choose who can join this channel",
+    description: "Choose who is in this group",
   },
   {
     id: 2,
-    title: "Channel Details",
+    title: "Group details",
     icon: MessageSquare,
-    description: "Set name and description",
+    description: "Name the group",
   },
   {
     id: 3,
-    title: "Channel Settings",
+    title: "Privacy",
     icon: Settings,
-    description: "Configure privacy and options",
+    description: "Choose who can see it",
   },
 ];
 

@@ -1,9 +1,6 @@
 import React from "react";
-import { MessagesMobileLayout } from "./MessagesMobileLayout";
-import { MessagesDesktopLayout } from "./MessagesDesktopLayout";
+import { MessagesBoard } from "./MessagesBoard";
 import { MessagesPortalContent } from "./MessagesPortalContent";
-import { MessagesWorkspaceHeader } from "./MessagesWorkspaceHeader";
-import { CommunicationReadinessPanel } from "@/features/messages/components/CommunicationReadinessPanel";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesShellProps {
@@ -34,42 +31,9 @@ export function MessagesShell({
     );
   }
 
-  if (vm.isMobile) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-6">
-        <div className="space-y-4">
-          <MessagesWorkspaceHeader vm={vm} />
-          <CommunicationReadinessPanel
-            channels={vm.channels}
-            messages={vm.messages}
-            userId={vm.profile?.id ?? null}
-            onCreateChannel={() => vm.setShowCreateDialog(true)}
-            onCreateAnnouncement={() => vm.setShowCreateAnnouncement(true)}
-          />
-          <div className="rounded-3xl border bg-background/95 shadow-sm">
-            <MessagesMobileLayout vm={vm} />
-          </div>
-        </div>
-        <MessagesPortalContent vm={vm} />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-muted/40 py-6">
-      <div className="flex w-full flex-col gap-6 px-4 lg:px-6">
-        <MessagesWorkspaceHeader vm={vm} />
-        <CommunicationReadinessPanel
-          channels={vm.channels}
-          messages={vm.messages}
-          userId={vm.profile?.id ?? null}
-          onCreateChannel={() => vm.setShowCreateDialog(true)}
-          onCreateAnnouncement={() => vm.setShowCreateAnnouncement(true)}
-        />
-
-        <MessagesDesktopLayout vm={vm} />
-      </div>
-
+    <div className="flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden">
+      <MessagesBoard vm={vm} />
       <MessagesPortalContent vm={vm} />
     </div>
   );

@@ -27,6 +27,7 @@ export type CsvImportField = {
   key: string;
   label: string;
   required: boolean;
+  recommended?: boolean;
   valueType: CsvImportValueType;
   aliases: string[];
   example: string;
@@ -169,17 +170,83 @@ export const csvImportTemplates: Record<
     targetTable: "inv_items",
     rollbackStrategy: "delete_inserted_records",
     fields: [
-      field("name", "Item name", true, "text", ["item", "product"], "Tomatoes"),
-      field("sku", "SKU", false, "text", ["item code", "code"], "PROD-001"),
-      field("unit", "Unit", true, "text", ["base unit", "uom"], "lb"),
-      field("category", "Category", false, "text", ["group"], "Produce"),
+      field("name", "Item name", true, "text", ["item", "product"], "Doce de leite"),
+      field(
+        "sku",
+        "SKU",
+        false,
+        "text",
+        ["item code", "code", "our sku"],
+        "DDL-001",
+        undefined,
+        true,
+      ),
+      field(
+        "distributor_sku",
+        "Distributor SKU",
+        false,
+        "text",
+        ["vendor sku", "usf item", "sysco item", "product code"],
+        "USF-10001",
+      ),
+      field(
+        "barcode",
+        "Barcode",
+        false,
+        "text",
+        ["upc", "ean", "gtin"],
+        "00012345678905",
+      ),
+      field(
+        "brand",
+        "Brand",
+        false,
+        "text",
+        ["manufacturer", "label"],
+        "House",
+      ),
+      field(
+        "unit",
+        "Base unit",
+        false,
+        "text",
+        ["unit", "uom", "inventory unit"],
+        "kg",
+        undefined,
+        true,
+      ),
+      field(
+        "pack_label",
+        "Pack label",
+        false,
+        "text",
+        ["pack", "pack size", "case pack"],
+        "12 x 1.01 kg",
+      ),
+      field(
+        "units_per_pack",
+        "Units per pack",
+        false,
+        "number",
+        ["case qty", "pack qty", "conversion"],
+        "12.12",
+      ),
+      field("category", "Category", false, "text", ["group"], "Dairy"),
+      field(
+        "supplier",
+        "Supplier",
+        false,
+        "text",
+        ["vendor", "preferred supplier"],
+        "Triunfo Foods",
+      ),
       field(
         "par_level",
         "Par level",
         false,
         "number",
-        ["par", "target stock"],
-        "25",
+        ["par", "target stock", "min"],
+        "10",
       ),
       field(
         "unit_cost",
@@ -187,7 +254,15 @@ export const csvImportTemplates: Record<
         false,
         "number",
         ["cost", "price"],
-        "2.45",
+        "4.20",
+      ),
+      field(
+        "default_room",
+        "Default room",
+        false,
+        "text",
+        ["location", "storage", "room"],
+        "Dry storage",
       ),
     ],
   },
@@ -444,10 +519,37 @@ export function buildCsvImportPreview(params: {
       warningRows,
     },
     issues,
-    canImport:
-      previewRows.length > 0 &&
-      issues.every((issue) => issue.severity !== "error"),
+    canImport: canImportPreview(template.key, previewRows, issues, mapping),
   };
+}
+
+function canImportPreview(
+  templateKey: CsvImportTemplateKey,
+  previewRows: CsvImportPreviewRow[],
+  issues: CsvImportIssue[],
+  mapping: CsvImportMapping,
+) {
+  if (!previewRows.length) {
+    return false;
+  }
+
+  const mappingBlocksImport = issues.some(
+    (issue) =>
+      issue.severity === "error" && issue.code === "missing_required_mapping",
+  );
+  if (mappingBlocksImport) {
+    return false;
+  }
+
+  const validRows = previewRows.filter(
+    (row) => !row.issues.some((issue) => issue.severity === "error"),
+  ).length;
+
+  if (templateKey === "inventory_items") {
+    return validRows > 0 && Boolean(mapping.name);
+  }
+
+  return issues.every((issue) => issue.severity !== "error");
 }
 
 export function buildCsvImportResult(params: {
@@ -543,8 +645,18 @@ function field(
   aliases: string[],
   example: string,
   enumValues?: string[],
+  recommended?: boolean,
 ): CsvImportField {
-  return { key, label, required, valueType, aliases, example, enumValues };
+  return {
+    key,
+    label,
+    required,
+    recommended,
+    valueType,
+    aliases,
+    example,
+    enumValues,
+  };
 }
 
 function normalizeHeader(header: string) {
@@ -580,6 +692,17 @@ function validateMappedRow(
         severity: "error",
         code: "required_value_missing",
         message: `${templateField.label} is required.`,
+      });
+      return issues;
+    }
+
+    if (!value && templateField.recommended) {
+      issues.push({
+        rowNumber,
+        fieldKey: templateField.key,
+        severity: "warning",
+        code: "incomplete_item_can_update_later",
+        message: `${templateField.label} is missing. Import this row and fill it later.`,
       });
       return issues;
     }

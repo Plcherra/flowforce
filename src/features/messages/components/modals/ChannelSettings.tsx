@@ -11,14 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Settings, Hash, Users, Lock, Globe } from "lucide-react";
+import { Settings, Lock, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useChannelActions } from "@/features/messages/hooks/useChannelActions";
 import { logger } from "@/utils/logger";
@@ -93,7 +86,7 @@ export function ChannelSettings({
 
       toast({
         title: "Success",
-        description: "Channel settings updated successfully",
+        description: "Group updated",
       });
 
       await onChannelUpdated?.();
@@ -141,23 +134,23 @@ export function ChannelSettings({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Channel Settings
+            Group settings
           </DialogTitle>
           <DialogDescription>
-            Manage settings for #{channel.name}
+            Rename the group, change privacy, or delete it.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Channel Name *</Label>
+            <Label htmlFor="name">Group name *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              placeholder="e.g. general, project-updates"
+              placeholder="e.g. Closing crew"
               required
               className="rounded-xl"
             />
@@ -171,44 +164,10 @@ export function ChannelSettings({
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="What's this channel about?"
+              placeholder="What is this group for?"
               rows={3}
               className="rounded-xl"
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Channel Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value) =>
-                setFormData({ ...formData, type: value })
-              }
-            >
-              <SelectTrigger className="rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="group">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4" />
-                    Group Channel
-                  </div>
-                </SelectItem>
-                <SelectItem value="department">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Department Channel
-                  </div>
-                </SelectItem>
-                <SelectItem value="direct">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Direct Message
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex items-center justify-between">
@@ -219,12 +178,12 @@ export function ChannelSettings({
                 ) : (
                   <Globe className="h-4 w-4 text-muted-foreground" />
                 )}
-                Private Channel
+                Private group
               </Label>
               <p className="text-xs text-muted-foreground">
                 {formData.is_private
-                  ? "Only invited members can see this channel"
-                  : "Everyone in the workspace can see this channel"}
+                  ? "Only people in the group can see it"
+                  : "Everyone in the workspace can see this group"}
               </p>
             </div>
             <Switch
@@ -244,7 +203,7 @@ export function ChannelSettings({
               disabled={loading || !onDeleteChannel}
               size="sm"
             >
-              Delete Channel
+              Delete group
             </Button>
 
             <div className="space-x-2">
@@ -261,10 +220,10 @@ export function ChannelSettings({
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete channel</AlertDialogTitle>
+            <AlertDialogTitle>Delete group</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete #{channel?.name}. All messages in
-              this channel will be removed and this action cannot be undone.
+              This will permanently delete {channel?.name}. Messages in this
+              group will be removed and this cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

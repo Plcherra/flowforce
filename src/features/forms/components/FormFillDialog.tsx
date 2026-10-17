@@ -192,7 +192,15 @@ export default function FormFillDialog({
       }
     });
 
-    setVisibleFields(visible);
+    setVisibleFields((current) => {
+      if (
+        current.size === visible.size &&
+        [...visible].every((id) => current.has(id))
+      ) {
+        return current;
+      }
+      return visible;
+    });
   }, [orderedFields, formValues]);
 
   useEffect(() => {
@@ -391,10 +399,7 @@ export default function FormFillDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent
-        style={{ transform: "none" }}
-        className="h-screen w-screen max-w-none overflow-hidden rounded-none border-none bg-background p-0 shadow-none"
-      >
+      <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none bg-background p-0 shadow-none sm:rounded-none">
         <div className="flex h-full flex-col">
           <WizardTopBar
             title={hydratedForm?.title ?? "Fill form"}
@@ -406,8 +411,8 @@ export default function FormFillDialog({
             onClose={() => handleDialogChange(false)}
           />
 
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <StepNavigation
                 currentIndex={wizard.currentStepIndex}
                 steps={steps}
@@ -418,10 +423,10 @@ export default function FormFillDialog({
                 }}
               />
 
-              <div className="flex flex-1 overflow-hidden">
+              <div className="flex min-h-0 flex-1 overflow-hidden">
                 <Form {...form}>
                   <form
-                    className="flex-1 overflow-y-auto px-8 py-6"
+                    className="min-h-0 w-full flex-1 overflow-y-auto px-4 py-4 sm:px-6"
                     onSubmit={handleSubmit}
                   >
                     <AnimatePresence mode="wait">

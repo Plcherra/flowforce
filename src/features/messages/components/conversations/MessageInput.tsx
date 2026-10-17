@@ -115,7 +115,7 @@ export function MessageInput({
             setMessageInput(event.target.value);
             resizeTextarea();
           }}
-          placeholder={`Message #${channelName}`}
+          placeholder={`Message ${channelName}`}
           aria-label={`Message ${channelName}`}
           aria-invalid={Boolean(errorMessage)}
           className="flex-1 resize-none"

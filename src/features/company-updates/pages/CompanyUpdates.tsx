@@ -10,14 +10,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { PageLoader } from "@/components/common/PageLoader";
 import { CompanyUpdatesFeedSection } from "@/features/company-updates/components/CompanyUpdatesFeedSection";
-import { CompanyUpdatesGridSection } from "@/features/company-updates/components/CompanyUpdatesGridSection";
 import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
-import { CompanyUpdatesListSection } from "@/features/company-updates/components/CompanyUpdatesListSection";
 import {
   CompanyUpdatesPagination,
   PAGE_SIZE_OPTIONS,
 } from "@/features/company-updates/components/CompanyUpdatesPagination";
-import { CompanyUpdatesReadinessPanel } from "@/features/company-updates/components/CompanyUpdatesReadinessPanel";
 import { CompanyUpdatesSetupState } from "@/features/company-updates/components/CompanyUpdatesSetupState";
 import { WizardFallback } from "@/features/company-updates/components/CompanyUpdatesSkeletons";
 import { useCommentForm } from "@/features/company-updates/hooks/useCommentForm";
@@ -27,7 +24,6 @@ import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useC
 import { useCan } from "@/hooks/useCan";
 import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useProfile } from "@/hooks/useProfile";
 import { useRecognitions } from "@/hooks/useRecognitions";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +42,6 @@ export default function CompanyUpdates() {
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
-  const isMobile = useIsMobile();
   const { can } = useCan();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -58,7 +53,6 @@ export default function CompanyUpdates() {
     pageSize,
     setPageSize,
     viewMode,
-    setViewMode,
   } = useCompanyUpdateFilters();
   const {
     values: commentInputs,
@@ -77,15 +71,6 @@ export default function CompanyUpdates() {
     pageSize,
     status: "published",
     searchTerm,
-  });
-  const {
-    updates: readinessUpdates,
-    loading: readinessLoading,
-    error: readinessError,
-  } = useCompanyUpdates({
-    page: 1,
-    pageSize: 100,
-    status: ["published", "draft", "scheduled"],
   });
   const {
     recognitions: recognitionFeed,
@@ -129,10 +114,6 @@ export default function CompanyUpdates() {
   const recognitionErrorMessage = recognitionsSchemaMissing
     ? null
     : recognitionError;
-  const readinessSchemaMissing = isMissingBackendResourceError(
-    readinessError,
-    ["company_updates", "company_update"],
-  );
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = !moduleSchemaMissing && totalPages > 1;
@@ -285,107 +266,76 @@ export default function CompanyUpdates() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-[calc(100dvh-3rem)] flex-col bg-muted/40">
       <CompanyUpdatesHeader
-        isMobile={isMobile}
         canCreateUpdate={canCreateUpdate}
         onCreate={openCreateWizard}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         wizardOpen={createWizardOpen}
       />
 
-      {moduleSchemaMissing && (
-        <CompanyUpdatesSetupState
-          canCreate={canCreateUpdate}
-          onCreate={openCreateWizard}
-          wizardOpen={createWizardOpen}
-        />
-      )}
+      <div className="mx-4 mb-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm sm:mx-6">
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {moduleSchemaMissing && (
+            <CompanyUpdatesSetupState
+              canCreate={canCreateUpdate}
+              onCreate={openCreateWizard}
+              wizardOpen={createWizardOpen}
+            />
+          )}
 
-      {errorMessage && (
-        <div className="px-4 pt-4">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Unable to load updates</AlertTitle>
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
+          {errorMessage && (
+            <div className="px-4 pt-4">
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Unable to load updates</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {!moduleSchemaMissing && (
+            <CompanyUpdatesFeedSection
+              updates={safeUpdates}
+              loading={isInitialLoading}
+              recognitionLoading={recognitionLoading}
+              recognitionHighlights={recognitionHighlights}
+              recognitionError={recognitionErrorMessage}
+              visibleComments={visibleComments}
+              commentInputs={commentInputs}
+              commentErrors={commentErrors}
+              canCreateUpdate={canCreateUpdate}
+              hasSearch={hasSearch}
+              searchTerm={searchTerm}
+              wizardOpen={createWizardOpen}
+              getUpdateComments={getUpdateComments}
+              onCreate={openCreateWizard}
+              onCommentChange={handleCommentInputChange}
+              onSubmitComment={handleCommentSubmit}
+              onToggleComments={handleToggleComments}
+              onLike={handleLike}
+              onArchive={handleArchive}
+              onDelete={handleDelete}
+              onView={(updateId) => markAsViewed({ updateId })}
+            />
+          )}
+
+          {showPagination && !isInitialLoading && (
+            <div className="px-4 pb-6">
+              <CompanyUpdatesPagination
+                page={page}
+                totalPages={totalPages}
+                total={pagination.total ?? 0}
+                pageSize={pageSize}
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
+                onPageChange={handlePageChange}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
         </div>
-      )}
-
-      {!moduleSchemaMissing && !readinessSchemaMissing && !readinessLoading && (
-        <CompanyUpdatesReadinessPanel
-          updates={readinessUpdates}
-          canCreateUpdate={canCreateUpdate}
-          onCreate={openCreateWizard}
-        />
-      )}
-
-      {!moduleSchemaMissing && viewMode === "feed" && (
-        <CompanyUpdatesFeedSection
-          updates={safeUpdates}
-          loading={isInitialLoading}
-          recognitionLoading={recognitionLoading}
-          recognitionHighlights={recognitionHighlights}
-          recognitionError={recognitionErrorMessage}
-          visibleComments={visibleComments}
-          commentInputs={commentInputs}
-          commentErrors={commentErrors}
-          canCreateUpdate={canCreateUpdate}
-          hasSearch={hasSearch}
-          searchTerm={searchTerm}
-          wizardOpen={createWizardOpen}
-          getUpdateComments={getUpdateComments}
-          onCreate={openCreateWizard}
-          onCommentChange={handleCommentInputChange}
-          onSubmitComment={handleCommentSubmit}
-          onToggleComments={handleToggleComments}
-          onLike={handleLike}
-          onArchive={handleArchive}
-          onDelete={handleDelete}
-          onView={(updateId) => markAsViewed({ updateId })}
-        />
-      )}
-
-      {!moduleSchemaMissing && viewMode === "grid" && (
-        <CompanyUpdatesGridSection
-          updates={safeUpdates}
-          loading={isInitialLoading}
-          hasSearch={hasSearch}
-          searchTerm={searchTerm}
-          canCreateUpdate={canCreateUpdate}
-          wizardOpen={createWizardOpen}
-          onCreate={openCreateWizard}
-        />
-      )}
-
-      {!moduleSchemaMissing && viewMode === "list" && (
-        <CompanyUpdatesListSection
-          updates={safeUpdates}
-          loading={isInitialLoading}
-          hasSearch={hasSearch}
-          searchTerm={searchTerm}
-          canCreateUpdate={canCreateUpdate}
-          wizardOpen={createWizardOpen}
-          onCreate={openCreateWizard}
-        />
-      )}
-
-      {showPagination && !isInitialLoading && (
-        <div className="px-4 pb-6">
-          <CompanyUpdatesPagination
-            page={page}
-            totalPages={totalPages}
-            total={pagination.total ?? 0}
-            pageSize={pageSize}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-            onPageChange={handlePageChange}
-            onPageSizeChange={setPageSize}
-          />
-        </div>
-      )}
+      </div>
 
       <div id="company-updates-wizard">
         <Suspense fallback={<WizardFallback />}>

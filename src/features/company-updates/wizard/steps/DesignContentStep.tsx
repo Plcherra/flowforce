@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,8 +45,6 @@ import { useUploadMedia } from "@/features/company-updates/wizard/useUploadMedia
 interface DesignContentStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
-  previewDevice?: "desktop" | "mobile";
-  onPreviewDeviceChange?: (device: "desktop" | "mobile") => void;
 }
 
 const MAX_BODY_CHARACTERS = 1000;
@@ -68,8 +66,6 @@ const limitTitleLines = (value: string) => {
 export function DesignContentStep({
   formData,
   updateFormData,
-  previewDevice = "desktop",
-  onPreviewDeviceChange,
 }: DesignContentStepProps) {
   const [previewMedia, setPreviewMedia] = useState<UpdateMediaItem | null>(
     null,
@@ -133,66 +129,30 @@ export function DesignContentStep({
   const mediaItems = formData.updateMedia ?? [];
   const previewMediaUrl = useSignedUpdateMediaUrl(previewMedia);
   const bodyPlainText = formData.bodyPlainText ?? stripHtml(formData.body);
-  const charactersRemaining = Math.max(
-    0,
-    MAX_BODY_CHARACTERS - bodyPlainText.length,
-  );
-
-  const deviceToggle = useMemo(
-    () => (
-      <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 text-xs shadow-sm">
-        <Button
-          type="button"
-          variant={previewDevice === "desktop" ? "default" : "ghost"}
-          size="sm"
-          className="h-7 px-3"
-          onClick={() => onPreviewDeviceChange?.("desktop")}
-        >
-          Desktop
-        </Button>
-        <Button
-          type="button"
-          variant={previewDevice === "mobile" ? "default" : "ghost"}
-          size="sm"
-          className="h-7 px-3"
-          onClick={() => onPreviewDeviceChange?.("mobile")}
-        >
-          Mobile
-        </Button>
-      </div>
-    ),
-    [previewDevice, onPreviewDeviceChange],
-  );
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="mb-2 text-lg font-semibold">Design & Content</h3>
-        <p className="text-muted-foreground">
-          Craft the message and see how it renders in real time.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <div className="space-y-6">
+    <>
+    <div className="flex w-full min-w-0 flex-col gap-6">
+      <div className="grid w-full min-w-0 grid-cols-1 items-stretch gap-4 min-[880px]:h-[min(36rem,calc(100dvh-13rem))] min-[880px]:grid-cols-[minmax(0,5fr)_minmax(0,3fr)_minmax(0,4fr)]">
+          <div className="flex h-[min(32rem,calc(100dvh-13rem))] min-h-0 flex-col gap-2 min-[880px]:h-full">
+            <div className="flex h-5 shrink-0 items-center gap-2 text-muted-foreground">
+              <TypeIcon className="h-4 w-4" />
+              <span className="text-xs font-medium uppercase tracking-wide">
+                Content
+              </span>
+            </div>
           <section
             id="wizard-section-content"
-            className="rounded-2xl border bg-card p-6 shadow-sm"
+            className="flex min-h-0 flex-1 flex-col rounded-2xl border bg-card p-4 shadow-sm"
           >
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <TypeIcon className="h-4 w-4" />
-                <span className="text-sm font-medium uppercase tracking-wide">
-                  Content
-                </span>
-              </div>
+            <div className="mb-3 flex shrink-0 justify-end">
               <Badge variant="outline" className="border-dashed">
                 Required
               </Badge>
             </div>
 
-            <div className="mt-6 space-y-5">
-              <div className="space-y-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-3">
+              <div className="shrink-0 space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Textarea
                   id="title"
@@ -211,7 +171,7 @@ export function DesignContentStep({
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid shrink-0 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <Select
@@ -254,7 +214,7 @@ export function DesignContentStep({
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="flex min-h-0 flex-1 flex-col gap-2">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Body</span>
                   <span>
@@ -268,6 +228,30 @@ export function DesignContentStep({
               </div>
             </div>
           </section>
+          </div>
+
+          <div className="flex h-full min-h-0 flex-col gap-2">
+            <p className="flex h-5 items-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Desktop
+            </p>
+            <CompanyUpdatePreview
+              data={formData}
+              device="desktop"
+              frame="compact"
+              className="min-h-[16rem] flex-1"
+            />
+          </div>
+          <div className="flex h-full min-h-0 flex-col gap-2">
+            <p className="flex h-5 items-center justify-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Mobile
+            </p>
+            <CompanyUpdatePreview
+              data={formData}
+              device="mobile"
+              className="min-h-0 flex-1"
+            />
+          </div>
+      </div>
 
           <section
             id="wizard-section-media"
@@ -529,51 +513,6 @@ export function DesignContentStep({
               </div>
             </div>
           </section>
-        </div>
-
-        <div className="space-y-4 xl:sticky xl:top-6" id="wizard-preview">
-          <Card className="rounded-2xl border shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium">
-                Live preview
-              </CardTitle>
-              {deviceToggle}
-            </CardHeader>
-            <CardContent>
-              <CompanyUpdatePreview data={formData} device={previewDevice} />
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">
-                Quick Highlights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Characters remaining</span>
-                <span>{charactersRemaining}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Priority</span>
-                <Badge variant="outline" className="capitalize">
-                  {formData.priority}
-                </Badge>
-              </div>
-              <div className="flex justify-between">
-                <span>Template</span>
-                <span>
-                  {formData.template ? formData.template.name : "Custom"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Media attachments</span>
-                <span>{mediaItems.length}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <Dialog
@@ -616,6 +555,6 @@ export function DesignContentStep({
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -14,7 +14,7 @@ FlowForce needs a repeatable migration path that lets a customer load basic oper
 The first templates are:
 
 - Employees: first name, last name, email, role, department, phone.
-- Inventory items: item name, SKU, unit, category, par level, unit cost.
+- Inventory items: item name required. SKU, distributor SKU, barcode, brand, base unit, pack label, units per pack, category, supplier, par, unit cost, and default room are optional. Incomplete rows import with warnings and can be updated later. Preview must be confirmed before write. A public-shape example lives in `docs/fixtures/inventory-items-import.example.csv`.
 - Suppliers: supplier name, contact name, email, phone, payment terms.
 - Schedules: employee email, shift date, start time, end time, role, location.
 - Tasks: title, description, assignee email, due date, priority.

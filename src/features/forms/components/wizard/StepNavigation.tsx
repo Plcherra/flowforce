@@ -18,10 +18,14 @@ export function StepNavigation({
   onStepChange,
 }: StepNavigationProps) {
   return (
-    <div className="border-b border-border/60 px-8 py-3">
-      <nav className="flex items-center gap-2 overflow-x-auto pb-1">
+    <div className="shrink-0 border-b border-border/60 px-4 py-2 sm:px-6">
+      <nav
+        className="grid items-stretch gap-1.5 sm:gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(steps.length, 1)}, minmax(0, 1fr))`,
+        }}
+      >
         {steps.map((step, index) => {
-          const Icon = step.icon;
           const isCurrent = index === currentIndex;
           const isComplete = index < currentIndex;
 
@@ -35,32 +39,28 @@ export function StepNavigation({
                 }
               }}
               className={cn(
-                "group flex min-w-[140px] items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
-                isCurrent &&
-                  "border-primary bg-primary/10 text-primary shadow-sm",
+                "flex min-w-0 items-center justify-center gap-1.5 rounded-full border px-2 py-1 text-xs transition-colors",
+                isCurrent && "border-primary bg-primary/10 text-primary",
                 isComplete &&
                   !isCurrent &&
-                  "border-primary/60 bg-primary/5 text-primary",
+                  "border-primary/40 bg-primary/5 text-primary",
                 index > currentIndex && "border-border text-muted-foreground",
               )}
               aria-current={isCurrent ? "step" : undefined}
             >
               <span
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
                   isComplete
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : isCurrent
-                      ? "border-primary bg-primary/20 text-primary"
-                      : "border-border text-muted-foreground",
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground",
                 )}
               >
                 {isComplete ? <CheckCircle className="h-3 w-3" /> : index + 1}
               </span>
-              <span className="truncate text-left font-semibold">
-                {step.name}
-              </span>
-              <Icon className="hidden h-4 w-4 text-muted-foreground/70 lg:block" />
+              <span className="truncate font-medium">{step.name}</span>
             </button>
           );
         })}

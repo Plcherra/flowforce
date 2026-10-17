@@ -1,0 +1,6 @@
+Item name,SKU,Distributor SKU,Barcode,Brand,Base unit,Pack label,Units per pack,Category,Supplier,Par level,Unit cost,Default room
+Atlantic salmon,SAL-001,USF-88021,00012345678905,House,lb,1 lb,1,Seafood,US Foods,10,12.00,Walk-in
+Doce de leite,DDL-001,,,Itacolomy,kg,12 x 1.01 kg,12.12,Dairy,Triunfo Foods,8,4.20,Dry storage
+Polvilho azedo,POL-001,,,Yoki,kg,5 kg bag,5,Grocery,Triunfo Foods,6,2.10,Dry storage
+Nitrile gloves L,GLV-L,USF-44110,,Medline,ea,10 x 100,1000,Janitorial,US Foods,2,41.00,Dry storage
+Paper towels,,,,,,,,Janitorial,,1,,

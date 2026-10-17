@@ -4,7 +4,6 @@
 
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 
 interface WizardFooterProps {
   progress: number;
@@ -18,7 +17,6 @@ interface WizardFooterProps {
 }
 
 export function WizardFooter({
-  progress,
   isSubmitting,
   currentIndex,
   isLastStep,
@@ -28,45 +26,37 @@ export function WizardFooter({
   canProceedNext,
 }: WizardFooterProps) {
   return (
-    <footer className="flex flex-col gap-4 border-t border-border bg-muted/20 px-8 py-4 md:flex-row md:items-center md:justify-between">
-      <div className="flex flex-1 items-center gap-3">
-        <span className="min-w-[120px] text-xs font-semibold text-muted-foreground">
-          Completion {Math.round(progress)}%
-        </span>
-        <Progress value={progress} className="h-2 flex-1" />
-      </div>
+    <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-2.5 sm:px-6">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onBack}
+        disabled={currentIndex === 0 || isSubmitting}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
 
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          disabled={currentIndex === 0 || isSubmitting}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+      {!isLastStep ? (
+        <Button size="sm" onClick={onNext} disabled={!canProceedNext || isSubmitting}>
+          Next step
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-
-        {!isLastStep ? (
-          <Button onClick={onNext} disabled={!canProceedNext || isSubmitting}>
-            Next step
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button onClick={onSubmit} disabled={isSubmitting || !canProceedNext}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting…
-              </>
-            ) : (
-              <>
-                Submit form
-                <CheckCircle className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
-        )}
-      </div>
+      ) : (
+        <Button size="sm" onClick={onSubmit} disabled={isSubmitting || !canProceedNext}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting…
+            </>
+          ) : (
+            <>
+              Submit form
+              <CheckCircle className="ml-2 h-4 w-4" />
+            </>
+          )}
+        </Button>
+      )}
     </footer>
   );
 }

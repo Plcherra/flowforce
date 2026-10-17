@@ -55,11 +55,13 @@ export function CompanyUpdatesFeedSection({
 }: CompanyUpdatesFeedSectionProps) {
   return (
     <div className="px-4 py-6 space-y-4">
-      <RecognitionHighlights
-        loading={recognitionLoading}
-        highlights={recognitionHighlights}
-        error={recognitionError}
-      />
+      {recognitionHighlights.length > 0 && (
+        <RecognitionHighlights
+          loading={recognitionLoading}
+          highlights={recognitionHighlights}
+          error={recognitionError}
+        />
+      )}
 
       {loading ? (
         <FeedSkeleton />
