@@ -63,7 +63,7 @@ const taskRowObjectSchema = z
 
 function withTaskColumnAliases<Schema extends z.ZodTypeAny>(schema: Schema) {
   return schema.transform((row) => {
-    const record = row as {
+    const record = row as z.output<Schema> & {
       department_id?: string | null;
       departmentid?: string | null;
       origin_document_id?: string | null;
