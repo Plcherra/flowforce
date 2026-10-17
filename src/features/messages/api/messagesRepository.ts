@@ -179,16 +179,11 @@ async function listChannels(
   if (error) throw error;
   const parsed = MessageChannelSchema.array().parse(data ?? []);
 
-  // Additional client-side filtering as safety net
+  // The nested profile schema does not keep company_id, so match the channel row.
   if (companyId) {
-    const filtered = parsed.filter((channel) => {
-      // Type-safe access to createdprofile company_id
-      const createdProfile = channel.createdprofile as
-        | { company_id?: string }
-        | undefined;
-      const creatorCompanyId = createdProfile?.company_id;
-      return creatorCompanyId === companyId;
-    });
+    const filtered = parsed.filter(
+      (channel) => channel.company_id === companyId,
+    );
     return filtered as MessageChannel[];
   }
 
