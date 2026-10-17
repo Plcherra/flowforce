@@ -113,11 +113,11 @@ export function ShiftChip({
           data-testid={`schedule-vendor-chip-${event.id}`}
           className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
           style={{
-            backgroundColor: `${getVendorColor(event.vendor_type)}15`,
-            color: getVendorColor(event.vendor_type),
+            backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}15`,
+            color: getVendorColor(event.service_type || event.vendor_name || ""),
           }}
         >
-          Vendor · {getVendorLabel(event.vendor_type)}
+          Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
         </div>
       ))}
     </button>

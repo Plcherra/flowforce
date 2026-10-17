@@ -158,25 +158,31 @@ export async function ensureSchedulingPlaywrightTenant(admin: SupabaseClient) {
   ]);
   if (profilesError) throw profilesError;
 
-  const { error: membersError } = await admin.from('company_members').upsert([
-    {
-      company_id: tenant.companyId,
-      user_id: tenant.managerId,
-      role: 'manager',
-      added_at: now,
-    },
-    {
-      company_id: tenant.companyId,
-      user_id: tenant.staffId,
-      role: 'staff',
-      added_at: now,
-    },
-  ]);
+  const { error: membersError } = await admin.from('company_members').upsert(
+    [
+      {
+        company_id: tenant.companyId,
+        user_id: tenant.managerId,
+        role: 'manager',
+        added_at: now,
+      },
+      {
+        company_id: tenant.companyId,
+        user_id: tenant.staffId,
+        role: 'staff',
+        added_at: now,
+      },
+    ],
+    { onConflict: 'company_id,user_id' },
+  );
   if (membersError) throw membersError;
 
-  const { error: settingsError } = await admin.from('system_settings').upsert({
-    company_id: tenant.companyId,
-  });
+  const { error: settingsError } = await admin.from('system_settings').upsert(
+    {
+      company_id: tenant.companyId,
+    },
+    { onConflict: 'company_id' },
+  );
   if (settingsError) throw settingsError;
 }
 

@@ -74,7 +74,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Import Shifts</DialogTitle>
           <DialogDescription>

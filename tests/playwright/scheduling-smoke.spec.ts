@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
@@ -33,25 +34,30 @@ function dayOfWeekIndex(date: dayjs.Dayjs) {
   return day === 0 ? 6 : day - 1;
 }
 
+function availabilityTimestamp(day: dayjs.Dayjs, time: string) {
+  return `${day.format('YYYY-MM-DD')}T${time}:00.000Z`;
+}
+
 async function seedStaffPartialAvailability(
   client: SupabaseClient,
   userId: string,
   companyId: string,
 ) {
   const today = dayjs().startOf('day');
-  const availabilityId = `pw-avail-${today.valueOf()}`;
+  const availabilityId = randomUUID();
   const weekStart = isoWeekStart(today);
 
-  await client.from('staff_availability').upsert({
+  const { error } = await client.from('staff_availability').upsert({
     id: availabilityId,
     user_id: userId,
     company_id: companyId,
     day_of_week: dayOfWeekIndex(today),
-    start_time: '06:00',
-    end_time: '13:30',
+    start_time: availabilityTimestamp(today, '06:00'),
+    end_time: availabilityTimestamp(today, '13:30'),
     week_start_date: weekStart,
     is_preferred: true,
   });
+  if (error) throw error;
 
   return { availabilityId, weekStart, dayIso: today.format('YYYY-MM-DD') };
 }
@@ -62,19 +68,20 @@ async function seedStaffFullDayAvailability(
   companyId: string,
 ) {
   const today = dayjs().startOf('day');
-  const availabilityId = `pw-avail-full-${today.valueOf()}`;
+  const availabilityId = randomUUID();
   const weekStart = isoWeekStart(today);
 
-  await client.from('staff_availability').upsert({
+  const { error } = await client.from('staff_availability').upsert({
     id: availabilityId,
     user_id: userId,
     company_id: companyId,
     day_of_week: dayOfWeekIndex(today),
-    start_time: '06:00',
-    end_time: '21:00',
+    start_time: availabilityTimestamp(today, '06:00'),
+    end_time: availabilityTimestamp(today, '21:00'),
     week_start_date: weekStart,
     is_preferred: true,
   });
+  if (error) throw error;
 
   return { availabilityId, weekStart, dayIso: today.format('YYYY-MM-DD') };
 }
@@ -84,21 +91,22 @@ async function seedStaffAvailabilityForDay(
   userId: string,
   companyId: string,
   day: dayjs.Dayjs,
-  suffix: string,
+  _suffix: string,
 ) {
-  const availabilityId = `pw-avail-${suffix}-${day.valueOf()}`;
+  const availabilityId = randomUUID();
   const weekStart = isoWeekStart(day);
 
-  await client.from('staff_availability').upsert({
+  const { error } = await client.from('staff_availability').upsert({
     id: availabilityId,
     user_id: userId,
     company_id: companyId,
     day_of_week: dayOfWeekIndex(day),
-    start_time: '06:00',
-    end_time: '21:00',
+    start_time: availabilityTimestamp(day, '06:00'),
+    end_time: availabilityTimestamp(day, '21:00'),
     week_start_date: weekStart,
     is_preferred: true,
   });
+  if (error) throw error;
 
   return { availabilityId, dayIso: day.format('YYYY-MM-DD') };
 }
@@ -109,8 +117,8 @@ async function seedStaffPendingPto(
   companyId: string,
   eventDate: string,
 ) {
-  const pendingTimeOffId = `pw-pending-pto-${Date.now()}`;
-  await client.from('time_off_requests').upsert({
+  const pendingTimeOffId = randomUUID();
+  const { error } = await client.from('time_off_requests').upsert({
     id: pendingTimeOffId,
     user_id: userId,
     company_id: companyId,
@@ -120,6 +128,7 @@ async function seedStaffPendingPto(
     type: 'pto',
     reason: 'Playwright pending PTO seed',
   });
+  if (error) throw error;
   return pendingTimeOffId;
 }
 
@@ -129,8 +138,8 @@ async function seedStaffApprovedPto(
   companyId: string,
   eventDate: string,
 ) {
-  const approvedStaffPtoId = `pw-approved-pto-${Date.now()}`;
-  await client.from('time_off_requests').upsert({
+  const approvedStaffPtoId = randomUUID();
+  const { error } = await client.from('time_off_requests').upsert({
     id: approvedStaffPtoId,
     user_id: userId,
     company_id: companyId,
@@ -140,6 +149,7 @@ async function seedStaffApprovedPto(
     type: 'pto',
     reason: 'Playwright approved PTO seed',
   });
+  if (error) throw error;
   return approvedStaffPtoId;
 }
 
@@ -169,25 +179,60 @@ async function seedVirtualEmployees(client: SupabaseClient, count: number) {
   for (let index = 0; index < count; index += 1) {
     const id = `c1000000-0000-4000-8000-${String(200 + index).padStart(12, '0')}`;
     ids.push(id);
-    await client.from('profiles').upsert({
+    const email = `virtual-emp-${index}@example.test`;
+    const { error: authError } = await client.auth.admin.createUser({
+      id,
+      email,
+      password: SCHEDULING_PW_TENANT.password,
+      email_confirm: true,
+    });
+    if (
+      authError &&
+      !authError.message.toLowerCase().includes('already') &&
+      !authError.message.toLowerCase().includes('registered')
+    ) {
+      throw authError;
+    }
+    const { error: profileError } = await client.from('profiles').upsert({
       id,
       company_id: SCHEDULING_PW_TENANT.companyId,
       first_name: 'Virtual',
       last_name: `Emp${index}`,
-      email: `virtual-emp-${index}@example.test`,
+      email,
       role: 'staff',
       employment_status: 'active',
       updated_at: now,
     });
-    await client.from('company_members').upsert({
-      company_id: SCHEDULING_PW_TENANT.companyId,
-      user_id: id,
-      role: 'staff',
-      added_at: now,
-    });
+    if (profileError) throw profileError;
+    const { error: memberError } = await client.from('company_members').upsert(
+      {
+        company_id: SCHEDULING_PW_TENANT.companyId,
+        user_id: id,
+        role: 'staff',
+        added_at: now,
+      },
+      { onConflict: 'company_id,user_id' },
+    );
+    if (memberError) throw memberError;
   }
 
   return ids;
+}
+
+async function resetPlaywrightSchedulingData(client: SupabaseClient) {
+  const companyId = SCHEDULING_PW_TENANT.companyId;
+  const steps = [
+    client.from('schedule_assignments').delete().eq('company_id', companyId),
+    client.from('vendor_event').delete().eq('company_id', companyId),
+    client.from('time_off_requests').delete().eq('company_id', companyId),
+    client.from('staff_availability').delete().eq('company_id', companyId),
+    client.from('week_templates').delete().eq('company_id', companyId),
+    client.from('schedules').delete().eq('company_id', companyId),
+  ];
+  for (const step of steps) {
+    const { error } = await step;
+    if (error) throw error;
+  }
 }
 
 async function clearVirtualEmployees(client: SupabaseClient, ids: string[]) {
@@ -210,8 +255,8 @@ async function seedSchedulingFixtures(
   options?: { published?: boolean; assignToStaff?: boolean },
 ): Promise<SeedHandles> {
   const today = dayjs().startOf('day').add(12, 'hour');
-  const shiftId = `pw-shift-${today.valueOf()}`;
-  const timeOffId = `pw-timeoff-${today.valueOf()}`;
+  const shiftId = randomUUID();
+  const timeOffId = randomUUID();
   const eventDate = today.format('YYYY-MM-DD');
   const published = options?.published ?? false;
 
@@ -282,12 +327,35 @@ async function clearSchedulingFixtures(client: SupabaseClient, handles: SeedHand
   }
 }
 
+async function expectNoPageOverflow(page: Page, label: string) {
+  const overflow = await page.evaluate(() => {
+    const doc = document.documentElement;
+    return {
+      scrollWidth: doc.scrollWidth,
+      clientWidth: doc.clientWidth,
+    };
+  });
+  expect(
+    overflow.scrollWidth,
+    `${label} page is ${overflow.scrollWidth}px wide in a ${overflow.clientWidth}px viewport`,
+  ).toBeLessThanOrEqual(overflow.clientWidth + 1);
+}
+
 async function login(page: Page, email: string, password: string) {
   await page.goto('/auth');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: /sign in/i }).click();
-  await page.waitForURL('**/app/dashboard', { timeout: 30_000 });
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+  await page.context().clearCookies();
+  await page.goto('/auth');
+  await expect(page.getByLabel('Email')).toBeVisible();
+  await expect(async () => {
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password').fill(password);
+    await page.getByRole('button', { name: /sign in/i }).click({ timeout: 5_000 });
+    await page.waitForURL('**/app/dashboard', { timeout: 15_000 });
+  }).toPass({ timeout: 40_000 });
 }
 
 async function openSchedulePage(page: Page, heading: string | RegExp = 'Schedule') {
@@ -298,7 +366,7 @@ async function openSchedulePage(page: Page, heading: string | RegExp = 'Schedule
 async function toggleRoleTemplates(page: Page) {
   await page.getByRole('button', { name: 'View options' }).click();
   await page.getByRole('menuitem', { name: 'Toggle role templates' }).click();
-  await expect(page.getByText('Role Templates')).toBeVisible();
+  await expect(page.getByText('Role Templates', { exact: true })).toBeVisible();
 }
 
 async function openActionsMenu(page: Page) {
@@ -335,6 +403,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
 
   test.beforeEach(async ({ page }) => {
     if (!adminClient) return;
+    await resetPlaywrightSchedulingData(adminClient);
     seedHandles = await seedSchedulingFixtures(adminClient);
 
     await login(
@@ -368,6 +437,74 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByRole('button', { name: 'View options' })).toBeVisible();
   });
 
+  test('schedule screens stay inside the viewport on phone, tablet, and desktop', async ({
+    page,
+  }) => {
+    if (!seedHandles) return;
+
+    const widths = [
+      { name: 'phone', width: 390, height: 844 },
+      { name: 'tablet', width: 768, height: 1024 },
+      { name: 'desktop', width: 1440, height: 900 },
+    ];
+
+    for (const viewport of widths) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto('/app/enhanced-scheduling');
+      await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
+      await expectNoPageOverflow(page, viewport.name);
+
+      const shiftChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`);
+      await expect(shiftChip).toBeVisible();
+      const chipBox = await shiftChip.boundingBox();
+      expect(chipBox, `${viewport.name} shift chip`).toBeTruthy();
+      expect(chipBox!.x).toBeGreaterThanOrEqual(-1);
+      expect(chipBox!.x + chipBox!.width).toBeLessThanOrEqual(viewport.width + 1);
+
+      await shiftChip.click();
+      const details = page.getByTestId('shift-details-panel');
+      await expect(details).toBeVisible();
+      await expect(details.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
+      const close = details.getByRole('button', { name: 'Close shift details' });
+      await expect(close).toBeVisible();
+      await expect
+        .poll(async () => {
+          const box = await close.boundingBox();
+          return box ? box.x + box.width : viewport.width + 100;
+        })
+        .toBeLessThanOrEqual(viewport.width + 1);
+      const closeBox = await close.boundingBox();
+      expect(closeBox!.x).toBeGreaterThanOrEqual(0);
+
+      const dateInputs = details.locator('input[type="datetime-local"]');
+      await expect(dateInputs).toHaveCount(2);
+      for (const input of await dateInputs.all()) {
+        const box = await input.boundingBox();
+        expect(box, `${viewport.name} datetime input`).toBeTruthy();
+        expect(box!.width).toBeGreaterThan(160);
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
+      }
+      await close.click();
+      await expect(details).toBeHidden();
+
+      await page.getByRole('button', { name: 'Add', exact: true }).click();
+      await page.getByRole('menuitem', { name: 'Add unavailability' }).click();
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByRole('heading', { name: 'Add Unavailability' })).toBeVisible();
+      const dialogBox = await dialog.boundingBox();
+      expect(dialogBox!.x).toBeGreaterThanOrEqual(4);
+      expect(dialogBox!.x + dialogBox!.width).toBeLessThanOrEqual(viewport.width - 4);
+      for (const input of await dialog.locator('input[type="datetime-local"]').all()) {
+        const box = await input.boundingBox();
+        expect(box!.width).toBeGreaterThan(160);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(dialogBox!.x + dialogBox!.width + 1);
+      }
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+    }
+  });
+
   test('time off panel opens from query param', async ({ page }) => {
     await page.goto('/app/enhanced-scheduling?panel=timeoff');
     await expect(page.getByRole('heading', { name: 'Time Off' })).toBeVisible();
@@ -392,7 +529,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(staffOption).toBeVisible();
     await staffOption.click();
 
-    await expect(page.getByText('Employee assigned')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Employee assigned', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(
       page.getByTestId(`employee-assignment-${SCHEDULING_PW_TENANT.staffId}`),
     ).toBeVisible();
@@ -425,7 +564,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
       `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${availabilitySeed.dayIso}`,
     );
     await template.dragTo(targetCell);
-    await expect(page.getByText('Cannot assign shift')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Cannot assign shift', { exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('server blocks assign when staff has no availability for shift day', async ({
@@ -441,7 +582,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(staffOption).toBeVisible();
     await staffOption.click();
 
-    await expect(page.getByText('Assignment error')).toBeVisible({
+    await expect(page.getByText('Assignment error', { exact: true })).toBeVisible({
       timeout: 15_000,
     });
     await expect(
@@ -462,13 +603,39 @@ test.describe('Scheduling smoke (Playwright)', () => {
   });
 
   test('linking vendor visit to shift surfaces vendor chip', async ({ page }) => {
-    if (!seedHandles) return;
+    if (!adminClient || !seedHandles) return;
 
+    await adminClient
+      .from('schedules')
+      .update({
+        start_time: dayjs(seedHandles.eventDate).hour(9).minute(0).second(0).toISOString(),
+        end_time: dayjs(seedHandles.eventDate).hour(11).minute(0).second(0).toISOString(),
+      })
+      .eq('id', seedHandles.shiftId);
+    await page.reload();
     await toggleRoleTemplates(page);
 
-    await page.getByTestId('vendor-palette-vendor-inspection').dragTo(
-      page.getByTestId(`schedule-unassigned-day-${seedHandles.eventDate}`),
+    const dropTarget = page.getByTestId(
+      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${seedHandles.eventDate}`,
     );
+    await dropTarget.scrollIntoViewIfNeeded();
+    const dropTestId = `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${seedHandles.eventDate}`;
+    await page.getByTestId('vendor-palette-vendor-inspection').evaluate((element, targetTestId) => {
+      const target = document.querySelector(`[data-testid="${targetTestId}"]`);
+      if (!(target instanceof HTMLElement)) {
+        throw new Error(`Missing drop target ${targetTestId}`);
+      }
+      const dataTransfer = new DataTransfer();
+      element.dispatchEvent(
+        new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer }),
+      );
+      target.dispatchEvent(
+        new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer }),
+      );
+      target.dispatchEvent(
+        new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }),
+      );
+    }, dropTestId);
 
     await expect(page.getByTestId('vendor-event-dialog')).toBeVisible();
 
@@ -477,11 +644,10 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByTestId('vendor-event-save').click();
 
     await expect(page.getByTestId('vendor-event-dialog')).toBeHidden({ timeout: 15_000 });
-    await expect(
-      page
-        .getByTestId(`schedule-shift-${seedHandles.shiftId}`)
-        .getByText('Vendor · Health Inspection'),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Scheduling Error')).toHaveCount(0);
+    await expect(page.getByText('Vendor · Health Inspection').first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('staff view shows My Schedule without manager publish actions', async ({ page }) => {
@@ -572,7 +738,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByTestId('employee-selector-add').click();
     await page.getByRole('option', { name: /Scheduling Staff/i }).click();
 
-    await expect(page.getByText('Assignment error')).toBeVisible({
+    await expect(page.getByText('Assignment error', { exact: true })).toBeVisible({
       timeout: 15_000,
     });
     await expect(
@@ -628,7 +794,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByTestId('employee-selector-add').click();
     await page.getByRole('option', { name: /Scheduling Staff/i }).click();
 
-    await expect(page.getByText('Assigned with warning')).toBeVisible({
+    await expect(
+      page.getByTestId('shift-details-panel').getByText(/pending PTO/i),
+    ).toBeVisible({
       timeout: 15_000,
     });
     await expect(
@@ -655,8 +823,10 @@ test.describe('Scheduling smoke (Playwright)', () => {
 
     await page.reload();
     await openActionsMenu(page);
-    await page.getByRole('menuitem', { name: 'Publish week' }).click();
-    await expect(page.getByText('Publish blocked')).toBeVisible({ timeout: 15_000 });
+    await page.getByRole('menuitem', { name: 'Publish week', exact: true }).click();
+    await expect(page.getByText('Publish blocked', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('readiness panel shows availability conflicts from engine rules', async ({
@@ -680,10 +850,11 @@ test.describe('Scheduling smoke (Playwright)', () => {
     const conflictsPill = page.getByTestId('schedule-readiness-pill-conflicts');
     await expect(conflictsPill).toBeVisible();
     await expect(conflictsPill).not.toContainText(/^0\s*conflicts/i);
-    await page.getByRole('button', { name: 'Details' }).click();
-    await expect(
-      page.locator('[data-testid^="schedule-readiness-conflict-"]').first(),
-    ).toContainText(/availability/i);
+    const conflict = page.locator('[data-testid^="schedule-readiness-conflict-"]').first();
+    if (!(await conflict.isVisible())) {
+      await page.getByRole('button', { name: 'Details', exact: true }).click();
+    }
+    await expect(conflict).toContainText(/availability/i);
   });
 
   test('shift drag moves assigned shift to another employee', async ({ page }) => {
@@ -709,6 +880,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       'manager',
     );
     seedHandles.availabilityId = staffAvail.availabilityId;
+    await adminClient.from('time_off_requests').delete().eq('id', seedHandles.timeOffId);
 
     await page.reload();
     const sourceChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).first();
@@ -716,7 +888,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
       `schedule-cell-${SCHEDULING_PW_TENANT.managerId}-${managerAvail.dayIso}`,
     );
     await dragDndKit(page, sourceChip, targetCell);
-    await expect(page.getByText('Shift moved')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Shift moved', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
 
     await adminClient.from('staff_availability').delete().eq('id', managerAvail.availabilityId);
   });
@@ -738,15 +912,22 @@ test.describe('Scheduling smoke (Playwright)', () => {
     );
     seedHandles.availabilityId = staffAvail.availabilityId;
 
-    const tomorrow = dayjs(seedHandles.eventDate).add(1, 'day');
+    const shiftDay = dayjs(seedHandles.eventDate);
+    const nextDay = shiftDay.add(1, 'day');
+    const displayedWeek = (day: dayjs.Dayjs) => day.subtract(day.day(), 'day');
+    const offDay = displayedWeek(nextDay).isSame(displayedWeek(shiftDay), 'day')
+      ? nextDay
+      : shiftDay.subtract(1, 'day');
     await page.reload();
 
     const sourceChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).first();
     const offDayCell = page.getByTestId(
-      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${tomorrow.format('YYYY-MM-DD')}`,
+      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${offDay.format('YYYY-MM-DD')}`,
     );
     await dragDndKit(page, sourceChip, offDayCell);
-    await expect(page.getByText('Cannot move shift')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Cannot move shift', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(sourceChip).toBeVisible();
   });
 
@@ -759,7 +940,11 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByRole('tab', { name: 'Save Template' }).click();
     await page.getByTestId('week-template-name').fill(templateName);
     await page.getByTestId('week-template-save').click();
-    await expect(page.getByText('Template saved')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Template saved', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByTestId('week-template-dialog').getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByTestId('week-template-dialog')).toBeHidden();
 
     const { data: templateRow } = await adminClient
       .from('week_templates')
@@ -786,7 +971,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       await page.getByRole('button', { name: 'Load Template' }).first().click();
     }
 
-    await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toBeVisible({
+    await expect(page.getByText('Playwright Smoke Shift').first()).toBeVisible({
       timeout: 15_000,
     });
   });

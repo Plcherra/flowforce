@@ -30,7 +30,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -535,8 +534,8 @@ export function AvailabilityRequestForm({
               </span>
             )}
           </div>
-          <ScrollArea className="max-h-[360px] w-full">
-            <table className="w-full text-sm">
+          <div className="max-h-[360px] w-full overflow-auto">
+            <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr>
                   <th className="sticky left-0 bg-muted/80 px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">
@@ -595,7 +594,7 @@ export function AvailabilityRequestForm({
                 ))}
               </tbody>
             </table>
-          </ScrollArea>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">

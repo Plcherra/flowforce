@@ -37,8 +37,10 @@ const vendorLabelLookup: Record<string, string> = {
   general: "Vendor Visit",
 };
 
-const getVendorLabel = (vendorType: string) =>
-  vendorLabelLookup[vendorType] ?? vendorType.replace(/_/g, " ");
+const getVendorLabel = (vendorType: string | null | undefined) => {
+  if (!vendorType) return "Vendor";
+  return vendorLabelLookup[vendorType] ?? vendorType.replace(/_/g, " ");
+};
 
 const parseHourlyRate = (value: string) => {
   if (value.trim().length === 0) return null;
@@ -280,7 +282,7 @@ export function ShiftDetailsPanel({
                         className="flex items-center justify-between text-xs"
                       >
                         <span className="font-medium text-muted-foreground">
-                          {getVendorLabel(event.vendor_type)}
+                          {getVendorLabel(event.service_type || event.vendor_name)}
                         </span>
                         <span className="text-muted-foreground">
                           {event.event_date
@@ -375,7 +377,7 @@ export function ShiftDetailsPanel({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="start_time">Start Time</Label>
                   <Input

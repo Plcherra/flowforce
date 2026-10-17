@@ -379,7 +379,7 @@ export function DragDropScheduleCalendar({
         <Sheet open={showShiftSheet} onOpenChange={setShowShiftSheet}>
           <SheetContent
             side="right"
-            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl"
+            className="flex h-full w-full flex-col overflow-hidden p-0 sm:max-w-xl [&>button]:hidden"
           >
             <ShiftDetailsPanel
               shiftId={selectedShift}
@@ -404,7 +404,7 @@ export function DragDropScheduleCalendar({
 
       {/* Add Multiple Shifts Dialog */}
       <Dialog open={showMultiAdd} onOpenChange={setShowMultiAdd}>
-        <DialogContent className="sm:max-w-[560px]">
+        <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[560px]">
           <DialogHeader>
             <DialogTitle>Add Multiple Shifts</DialogTitle>
           </DialogHeader>

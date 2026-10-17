@@ -164,7 +164,7 @@ export function WeekTemplateDialog({
 
     setLoading(true);
     try {
-      const targetStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      const targetStart = weekStart;
       await applyTemplate(template.id, targetStart, {
         bulkCreateShifts: bulkCreateShifts!,
         assign: assign!,
@@ -205,7 +205,7 @@ export function WeekTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]" data-testid="week-template-dialog">
+      <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[600px]" data-testid="week-template-dialog">
         <DialogHeader>
           <DialogTitle>Week Templates</DialogTitle>
           <DialogDescription>

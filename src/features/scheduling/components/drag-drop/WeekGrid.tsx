@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
@@ -221,11 +221,11 @@ function GridCellComponent({
             key={event.id}
             className="relative z-10 rounded-full px-2 py-1 text-[10px] font-medium"
             style={{
-              backgroundColor: `${getVendorColor(event.vendor_type)}20`,
-              color: getVendorColor(event.vendor_type),
+              backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}20`,
+              color: getVendorColor(event.service_type || event.vendor_name || ""),
             }}
           >
-            Vendor · {getVendorLabel(event.vendor_type)}
+            Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
           </div>
         ))}
       </div>
@@ -332,7 +332,25 @@ export function WeekGrid({
   getVendorColor,
 }: WeekGridProps) {
   const internalScrollRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = scrollContainerRef ?? internalScrollRef;
+  const weekKey = weekDays[0]?.toISOString() ?? "";
+
+  useLayoutEffect(() => {
+    const scroller = horizontalScrollRef.current;
+    if (!scroller) return;
+    const alignToday = () => {
+      const todayIndex = weekDays.findIndex((day) => isSameDay(day, new Date()));
+      if (todayIndex < 0) return;
+      if (scroller.scrollWidth <= scroller.clientWidth + 1) return;
+      const columnWidth = scroller.scrollWidth / 8;
+      const columnEnd = columnWidth * (todayIndex + 2);
+      scroller.scrollLeft = Math.max(0, columnEnd - scroller.clientWidth + 8);
+    };
+    alignToday();
+    const frame = requestAnimationFrame(alignToday);
+    return () => cancelAnimationFrame(frame);
+  }, [weekDays, weekKey]);
 
   const unassignedLookup = useMemo(
     () =>
@@ -411,7 +429,7 @@ export function WeekGrid({
   );
 
   return (
-    <div className="overflow-x-auto">
+    <div ref={horizontalScrollRef} className="overflow-x-auto">
       <div className="min-w-[800px]">
         {showAvailabilityLayer ? <AvailabilityLegend /> : null}
         <div className="grid grid-cols-8 border-b bg-background relative z-10">

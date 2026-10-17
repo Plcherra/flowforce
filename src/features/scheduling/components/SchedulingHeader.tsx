@@ -49,6 +49,7 @@ export function SchedulingHeader({ role, onPanelOpen }: SchedulingHeaderProps) {
                 variant="outline"
                 size="sm"
                 className="gap-2"
+                aria-label="My availability"
                 onClick={() => onPanelOpen("availability")}
               >
                 <Clock className="h-4 w-4" />
@@ -58,6 +59,7 @@ export function SchedulingHeader({ role, onPanelOpen }: SchedulingHeaderProps) {
                 variant="outline"
                 size="sm"
                 className="gap-2"
+                aria-label="Time off"
                 onClick={() => onPanelOpen("timeoff")}
               >
                 <Calendar className="h-4 w-4" />
@@ -67,6 +69,7 @@ export function SchedulingHeader({ role, onPanelOpen }: SchedulingHeaderProps) {
                 variant="outline"
                 size="sm"
                 className="gap-2"
+                aria-label="Swaps"
                 onClick={() => onPanelOpen("swaps")}
               >
                 <ArrowRightLeft className="h-4 w-4" />
@@ -76,7 +79,12 @@ export function SchedulingHeader({ role, onPanelOpen }: SchedulingHeaderProps) {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  aria-label="More options"
+                >
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="hidden sm:inline">More options</span>
                 </Button>

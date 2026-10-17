@@ -2,7 +2,7 @@
  * Hook for drag and drop handlers in scheduling calendar
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import type { ShiftTemplate } from "@/features/scheduling/components/drag-drop/types";
@@ -66,21 +66,29 @@ export function useDragDropHandlers({
   locationFilter,
 }: UseDragDropHandlersProps) {
   const { toast } = useToast();
+  const draggedTemplateRef = useRef<ShiftTemplate | null>(null);
+  const draggedVendorRef = useRef<VendorPaletteItem | null>(null);
 
   const handleTemplateDragStart = useCallback(
     (e: React.DragEvent, template: ShiftTemplate) => {
+      draggedVendorRef.current = null;
+      draggedTemplateRef.current = template;
       setDraggedVendor(null);
       setDraggedTemplate(template);
       e.dataTransfer.effectAllowed = "copy";
+      e.dataTransfer.setData("text/plain", template.id);
     },
     [setDraggedTemplate, setDraggedVendor],
   );
 
   const handleVendorDragStart = useCallback(
     (e: React.DragEvent, vendor: VendorPaletteItem) => {
+      draggedTemplateRef.current = null;
+      draggedVendorRef.current = vendor;
       setDraggedTemplate(null);
       setDraggedVendor(vendor);
       e.dataTransfer.effectAllowed = "copy";
+      e.dataTransfer.setData("text/plain", vendor.id);
     },
     [setDraggedTemplate, setDraggedVendor],
   );
@@ -93,6 +101,8 @@ export function useDragDropHandlers({
   const handleDropOnUserDay = useCallback(
     async (event: React.DragEvent, day: Date, userId: string) => {
       event.preventDefault();
+      const draggedTemplate = draggedTemplateRef.current;
+      const draggedVendor = draggedVendorRef.current;
 
       if (draggedTemplate) {
         const startHour = Number.parseInt(
@@ -122,6 +132,7 @@ export function useDragDropHandlers({
                 validation.reasons[0] ?? "Employee is unavailable for this shift.",
               variant: "destructive",
             });
+            draggedTemplateRef.current = null;
             setDraggedTemplate(null);
             return;
           }
@@ -180,6 +191,7 @@ export function useDragDropHandlers({
             variant: "destructive",
           });
         } finally {
+          draggedTemplateRef.current = null;
           setDraggedTemplate(null);
         }
         return;
@@ -198,14 +210,13 @@ export function useDragDropHandlers({
           end: endTime,
         });
         setVendorModalOpen(true);
+        draggedVendorRef.current = null;
         setDraggedVendor(null);
       }
     },
     [
       assign,
       createSchedule,
-      draggedTemplate,
-      draggedVendor,
       getCellAvailability,
       locationFilter,
       refetchAll,
@@ -220,6 +231,8 @@ export function useDragDropHandlers({
   const handleUnassignedDrop = useCallback(
     async (event: React.DragEvent, day: Date) => {
       event.preventDefault();
+      const draggedTemplate = draggedTemplateRef.current;
+      const draggedVendor = draggedVendorRef.current;
 
       if (draggedTemplate) {
         const startHour = Number.parseInt(
@@ -279,6 +292,7 @@ export function useDragDropHandlers({
             variant: "destructive",
           });
         } finally {
+          draggedTemplateRef.current = null;
           setDraggedTemplate(null);
         }
         return;
@@ -297,13 +311,12 @@ export function useDragDropHandlers({
           end: endTime,
         });
         setVendorModalOpen(true);
+        draggedVendorRef.current = null;
         setDraggedVendor(null);
       }
     },
     [
       createSchedule,
-      draggedTemplate,
-      draggedVendor,
       locationFilter,
       refetchAll,
       setDraggedTemplate,

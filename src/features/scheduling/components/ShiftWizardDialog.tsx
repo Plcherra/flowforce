@@ -463,9 +463,9 @@ export function ShiftWizardDialog({
       }}
     >
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-hidden p-0 sm:rounded-lg">
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-1rem)] max-w-3xl overflow-hidden p-0 sm:rounded-lg">
         <form
-          className="flex h-full max-h-[90vh] flex-col"
+          className="flex h-full max-h-[90dvh] flex-col"
           onSubmit={(event) => {
             event.preventDefault();
             handleSave(true);

@@ -102,7 +102,7 @@ export function VendorEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         data-testid="vendor-event-dialog"
-        className="sm:max-w-[520px] z-50 bg-background"
+        className="z-50 max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto bg-background sm:max-w-[520px]"
       >
         <DialogHeader>
           <DialogTitle>Schedule Vendor Visit</DialogTitle>
