@@ -58,14 +58,16 @@ const RawMessageSchema = z
   .object({
     id: z.string(),
     channel_id: z.string(),
-    senderid: z.string(),
+    sender_id: z.string().optional(),
+    senderid: z.string().optional(),
     content: z.string(),
     created_at: z.string(),
     updated_at: z.string(),
+    reply_to_id: z.string().nullable().optional(),
     reply_toid: z.string().nullable().optional(),
     message_type: z.string().nullable().optional(),
     attachments: z.array(AttachmentSchema).nullable().optional(),
-    senderprofile: ProfileSchema,
+    senderprofile: ProfileSchema.optional(),
     reply_to_message: z
       .union([
         z
@@ -85,7 +87,17 @@ const RawMessageSchema = z
       ])
       .optional(),
   })
-  .passthrough();
+  .passthrough()
+  .transform((message) => ({
+    ...message,
+    senderid: message.senderid ?? message.sender_id ?? "",
+    reply_toid: message.reply_toid ?? message.reply_to_id ?? null,
+    senderprofile: message.senderprofile ?? {
+      first_name: null,
+      last_name: null,
+      avatar_url: null,
+    },
+  }));
 
 const SearchResultSchema = z
   .object({
@@ -195,8 +207,8 @@ async function createChannel(
       name: channelData.name,
       description: channelData.description ?? null,
       type: channelData.type ?? "team",
-      departmentid: channelData.departmentid ?? null,
       created_by: creatorId,
+      department_id: channelData.departmentid ?? null,
       is_private: channelData.is_private ?? false,
     })
     .select(
@@ -308,11 +320,7 @@ async function listMessages(
     .select(
       `
       *,
-      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_toid(
-        content,
-        senderprofile:profiles!senderid(first_name, last_name)
-      )
+      senderprofile:profiles!messages_sender_id_fkey(first_name, last_name, avatar_url)
     `,
     )
     .eq("channel_id", channelId)
@@ -430,20 +438,16 @@ async function insertMessage(
     .from("messages")
     .insert({
       channel_id: channelId,
-      senderid: senderId,
+      sender_id: senderId,
       content,
-      reply_toid: options.replyToId ?? null,
+      reply_to_id: options.replyToId ?? null,
       attachments: attachmentsPayload,
       message_type: messageType,
     })
     .select(
       `
       *,
-      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_toid(
-        content,
-        senderprofile:profiles!senderid(first_name, last_name)
-      )
+      senderprofile:profiles!messages_sender_id_fkey(first_name, last_name, avatar_url)
     `,
     )
     .single();
@@ -473,15 +477,11 @@ async function updateMessage(
       edited_at: new Date().toISOString(),
     })
     .eq("id", messageId)
-    .eq("senderid", senderId)
+    .eq("sender_id", senderId)
     .select(
       `
       *,
-      senderprofile:profiles!senderid(first_name, last_name, avatar_url),
-      reply_to_message:messages!reply_toid(
-        content,
-        senderprofile:profiles!senderid(first_name, last_name)
-      )
+      senderprofile:profiles!messages_sender_id_fkey(first_name, last_name, avatar_url)
     `,
     )
     .single();
@@ -504,7 +504,7 @@ async function deleteMessage(messageId: string, senderId: string) {
     .from("messages")
     .delete()
     .eq("id", messageId)
-    .eq("senderid", senderId);
+    .eq("sender_id", senderId);
 
   if (error) throw error;
 }
@@ -523,7 +523,7 @@ async function searchMessages(
       id,
       content,
       created_at,
-      senderprofile:profiles!messages_senderid_fkey(
+      senderprofile:profiles!messages_sender_id_fkey(
         first_name,
         last_name,
         avatar_url

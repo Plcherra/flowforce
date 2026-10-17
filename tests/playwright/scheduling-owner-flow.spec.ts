@@ -192,7 +192,7 @@ test.describe('Scheduling owner flow', () => {
     await page.goto('/app/messages');
     await page.getByRole('button', { name: 'New chat' }).click();
     await expect(page.getByRole('heading', { name: 'Choose someone' })).toBeVisible();
-    await page.getByText('Riley Quinn').click();
+    await page.getByRole('button', { name: /Riley Quinn/ }).click();
     const composer = page.getByPlaceholder(/Message /);
     await expect(composer).toBeVisible({ timeout: 15_000 });
     await composer.fill(messageBody);
