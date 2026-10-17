@@ -213,15 +213,18 @@ export function useCompanyRegistration() {
       throw new Error("Supabase did not return a user id after signup.");
     }
 
-    if (!authData.session) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: data.userInfo.password,
-      });
+    let session = authData.session;
+    if (!session) {
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password: data.userInfo.password,
+        });
+      session = signInData.session;
 
-      if (signInError) {
+      if (signInError || !session) {
         logger.warn(
-          "Signup completed without an active session; continuing onboarding data save",
+          "Signup completed without an active session; onboarding will continue and the owner must confirm email before entering the workspace",
           {
             error: signInError,
             context: { userId },
@@ -232,9 +235,11 @@ export function useCompanyRegistration() {
     }
 
     const companyId = await completeOnboardingOnServer(data, userId);
-    await updateUserMetadata(data, companyId);
+    if (session) {
+      await updateUserMetadata(data, companyId);
+    }
 
-    return { userId, companyId };
+    return { userId, companyId, sessionActive: Boolean(session) };
   };
 
   const handleRegistrationError = (error: unknown): RegistrationError => {
@@ -341,7 +346,19 @@ export function useCompanyRegistration() {
       }
 
       // Create user and company in a single flow
-      await createCompanyWithUser(data);
+      const setup = await createCompanyWithUser(data);
+
+      if (!setup.sessionActive) {
+        toast({
+          title: "Confirm your email to enter FlowForce",
+          description: `${data.companyInfo.name} is set up. Open the confirmation link, then sign in. The dashboard stays locked until that session exists.`,
+        });
+        navigate(
+          `/auth?email=${encodeURIComponent(data.userInfo.email.trim().toLowerCase())}`,
+          { replace: true },
+        );
+        return;
+      }
 
       const { error: sessionError } = await supabase.auth.refreshSession();
       if (sessionError) {

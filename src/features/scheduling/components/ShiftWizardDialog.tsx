@@ -41,6 +41,7 @@ import {
   getShiftLaborHours,
 } from "@/features/scheduling/utils/scheduleReadiness";
 import { queryKeys } from "@/lib/queryKeys";
+import { insertTask } from "@/features/tasks/repositories/tasksRepository";
 import { logger } from "@/utils/logger";
 
 interface ShiftWizardDialogProps {
@@ -284,6 +285,44 @@ export function ShiftWizardDialog({
     setActiveTab("details");
   };
 
+  const persistShiftTasks = async (shiftId: string, shiftEnd: Date) => {
+    if (!companyId || !user?.id || formData.tasks.length === 0) return [];
+
+    const errors: string[] = [];
+    for (const task of formData.tasks) {
+      const title = task.title.trim();
+      if (!title) continue;
+      try {
+        await insertTask({
+          title,
+          description: task.description.trim() || null,
+          priority: task.priority,
+          estimated_hours: task.estimated_minutes / 60,
+          company_id: companyId,
+          created_by: user.id,
+          assigned_to: formData.assignedusers[0] ?? null,
+          due_date: shiftEnd.toISOString().slice(0, 10),
+          status: "todo",
+          source: "schedule",
+          tags: ["schedule", shiftId],
+          links: {
+            schedule_id: shiftId,
+            shift_title: formData.title || "Untitled shift",
+          },
+        });
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to save shift task";
+        logger.error("Failed to save shift task", {
+          error: err,
+          tags: ["error"],
+        });
+        errors.push(message);
+      }
+    }
+    return errors;
+  };
+
   const handleAssignUsers = async (shiftId: string) => {
     if (!assign) return;
     const assignments = formData.assignedusers ?? [];
@@ -352,6 +391,7 @@ export function ShiftWizardDialog({
       const created = await createSchedule(payload);
       if (created) {
         await handleAssignUsers(created.id);
+        const taskErrors = await persistShiftTasks(created.id, end);
 
         if (companyId && weekRange?.start && weekRange?.end) {
           await Promise.all([
@@ -377,8 +417,12 @@ export function ShiftWizardDialog({
         resetForm();
 
         toast({
-          title: "Shift created",
-          description: `Shift "${formData.title || "Untitled"}" has been ${publish ? "published" : "saved as draft"}.`,
+          title: taskErrors.length > 0 ? "Shift created, task not saved" : "Shift created",
+          description:
+            taskErrors.length > 0
+              ? taskErrors[0]
+              : `Shift "${formData.title || "Untitled"}" has been ${publish ? "published" : "saved as draft"}${formData.tasks.length > 0 ? " and its tasks were added to Tasks." : "."}`,
+          variant: taskErrors.length > 0 ? "destructive" : "default",
         });
       }
     } catch (err) {

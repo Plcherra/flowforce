@@ -76,17 +76,17 @@ export const WEAK_PASSWORD_PATTERNS = [
   // Sequential letters (forward and backward)
   /abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|cba|dcb|edc|fed|gfe|hgf|ihg|jih|kji|lkj|mlk|nml|onm|pon|qpo|rqp|srq|tsr|uts|vut|wvu|xwv|yxw|zyx/i,
 
-  // Common keyboard patterns
-  /qwer|wert|erty|rtyu|tyui|yuio|uiop|asdf|sdfg|dfgh|fghj|ghjk|hjkl|zxcv|xcvb|cvbn|vbnm|qaz|wsx|edc|rfv|tgb|yhn|ujm|ik|ol|p/i,
+  // Keyboard walks of at least three keys. Shorter fragments (ik, ol, and a bare "p")
+  // matched inside ordinary words and blocked valid signup passwords.
+  /qwer|wert|erty|rtyu|tyui|yuio|uiop|asdf|sdfg|dfgh|fghj|ghjk|hjkl|zxcv|xcvb|cvbn|vbnm|qaz|wsx|edc|rfv|tgb|yhn|ujm/i,
 
   // Years (1900-2030)
   /19[0-9][0-9]|20[0-2][0-9]|203[0]/,
 
-  // Months
-  /january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec/i,
+  // Month and day names as whole words, so "smart" or "sunday" inside a longer token is allowed.
+  /\b(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i,
 
-  // Days
-  /monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun/i,
+  /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/i,
 
   // Common words that might be in personal info
   /love|family|house|money|work/i,

@@ -14,6 +14,13 @@ import { Building2, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CompanyInfo, COMPANY_SIZES, INDUSTRIES } from "@/types/onboarding";
 
+const industryTranslationKey = (industry: string) => {
+  const compact = industry.toLowerCase().replace(/[^a-z]/g, "");
+  if (compact === "foodbeverage") return "foodBeverage";
+  if (compact === "professionalservices") return "professionalServices";
+  return compact;
+};
+
 interface CompanyInfoFormProps {
   companyInfo: CompanyInfo;
   onCompanyInfoChange: (companyInfo: CompanyInfo) => void;
@@ -93,7 +100,7 @@ export default function CompanyInfoForm({
                 {INDUSTRIES.map((industry) => (
                   <SelectItem key={industry} value={industry}>
                     {t(
-                      `onboarding.userInfo.industries.${industry.toLowerCase().replace(/[^a-z]/g, "")}`,
+                      `onboarding.userInfo.industries.${industryTranslationKey(industry)}`,
                     )}
                   </SelectItem>
                 ))}
@@ -138,7 +145,9 @@ export default function CompanyInfoForm({
                   <SelectItem key={size} value={size}>
                     <div className="flex items-center">
                       <Users className="mr-2 h-4 w-4" />
-                      {t(`onboarding.userInfo.sizes.${size.split(" ")[0]}`)}
+                      {t(
+                        `onboarding.userInfo.companySizes.${size.split(" ")[0]}`,
+                      )}
                     </div>
                   </SelectItem>
                 ))}

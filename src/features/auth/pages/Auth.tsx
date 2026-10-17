@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import AuthHeader from "@/features/auth/components/AuthHeader";
 import CompanyRegistrationCard from "@/features/auth/components/CompanyRegistrationCard";
@@ -22,6 +23,7 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { signIn, signUp, resetPassword, updatePassword, user, loading } =
     useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -34,6 +36,7 @@ export default function Auth() {
   const userId = user?.id ?? null;
 
   useEffect(() => {
+    if (inviteCode) return;
     if (userId && !loading) {
       navigate(authSuccessPath);
     }
@@ -42,7 +45,7 @@ export default function Auth() {
     if (isPasswordReset) {
       setShowPasswordReset(true);
     }
-  }, [userId, loading, navigate, isPasswordReset, authSuccessPath]);
+  }, [inviteCode, userId, loading, navigate, isPasswordReset, authSuccessPath]);
 
   const handleSignIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -64,19 +67,52 @@ export default function Auth() {
   ) => {
     setIsLoading(true);
 
-    const metadata: UserMetadata = {
-      first_name: firstName,
-      last_name: lastName,
-      ...(inviteCode ? { invite_token: inviteCode } : {}),
-    };
-
-    await signUp(email, password, firstName, lastName, metadata);
     if (inviteCode) {
+      const response = await fetch("/api/employees/invite/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteToken: inviteCode, password }),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      if (!response.ok) {
+        toast({
+          title: "Could not activate invite",
+          description: result.message || "Check the invite link and try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const { error } = await signIn(email, password);
+      if (error) {
+        toast({
+          title: "Account activated",
+          description:
+            "Your password is set. Sign in with that password to continue.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { acceptCompanyInvite } = await import(
         "@/features/employees/utils/acceptCompanyInvite"
       );
       await acceptCompanyInvite(inviteCode);
+      navigate(authSuccessPath);
+      setIsLoading(false);
+      return;
     }
+
+    const metadata: UserMetadata = {
+      first_name: firstName,
+      last_name: lastName,
+    };
+
+    await signUp(email, password, firstName, lastName, metadata);
 
     setIsLoading(false);
   };
