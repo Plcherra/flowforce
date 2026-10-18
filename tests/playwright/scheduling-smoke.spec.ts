@@ -1034,6 +1034,14 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await details.getByRole('tab', { name: 'Templates' }).click();
     await details.getByRole('button', { name: 'Save as Shift Template' }).click();
     await expect(page.getByText('Template saved', { exact: true })).toBeVisible();
+    await details.getByRole('button', { name: 'Close shift details' }).click();
+    await expect(details).toBeHidden();
+    await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
+    await expect(details).toBeVisible();
+    await details.getByRole('tab', { name: 'Templates' }).click();
+    await details.getByLabel('Shift template').click();
+    await expect(page.getByRole('option', { name: 'Playwright Smoke Shift', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
 
     await details.getByRole('tab', { name: 'Details' }).click();
     await details.getByLabel('Title').fill('Renamed shift');

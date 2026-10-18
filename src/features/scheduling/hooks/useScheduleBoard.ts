@@ -19,6 +19,7 @@ import {
 import {
   calculateDailyGridStats,
 } from "@/features/scheduling/utils/hoursCalculation";
+import { vendorEventStart } from "@/features/scheduling/utils/calendarDay";
 
 interface LocationOption {
   id: string;
@@ -194,8 +195,8 @@ export function useScheduleBoard({
 
   const vendorEventsThisWeek = useMemo(() => {
     return vendorEvents.filter((event) => {
-      if (!event.event_date) return false;
-      const eventDate = new Date(event.event_date);
+      const eventDate = vendorEventStart(event);
+      if (!eventDate) return false;
       return eventDate >= weekStart && eventDate < weekEnd;
     });
   }, [vendorEvents, weekEnd, weekStart]);

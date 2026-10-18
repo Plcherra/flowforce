@@ -17,6 +17,7 @@ import {
   VIRTUALIZE_EMPLOYEE_THRESHOLD,
 } from "@/features/scheduling/utils/gridIndexes";
 import { ShiftChip } from "@/features/scheduling/components/drag-drop/ShiftChip";
+import { vendorEventStart } from "@/features/scheduling/utils/calendarDay";
 import { WeekGridFooter } from "@/features/scheduling/components/drag-drop/WeekGridFooter";
 
 interface EmployeeSummary {
@@ -368,8 +369,7 @@ export function WeekGrid({
         vendorEvents.filter(
           (event) =>
             !event.shift_id &&
-            event.event_date &&
-            isSameDay(new Date(event.event_date), day),
+            isSameDay(vendorEventStart(event) ?? new Date(NaN), day),
         ),
       );
     }

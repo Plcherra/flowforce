@@ -261,7 +261,7 @@ export function DragDropScheduleCalendar({
               try {
                 await createVendorEvent({
                   vendor_type: "general",
-                  event_date: selectedDate.toISOString().split("T")[0],
+                  event_date: format(selectedDate, "yyyy-MM-dd"),
                   start_time: "09:00",
                   end_time: "10:00",
                   notes: "Quick vendor visit",

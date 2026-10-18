@@ -35,6 +35,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
+import {
+  parseCalendarInstant,
+  vendorEventStart,
+} from "@/features/scheduling/utils/calendarDay";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/public-types";
 import {
@@ -750,7 +754,10 @@ export function ShiftDetailsPanel({
                     <Badge variant="outline">{linkedVendorVisits.length}</Badge>
                   </div>
                   <div className="space-y-2">
-                    {linkedVendorVisits.map((event) => (
+                    {linkedVendorVisits.map((event) => {
+                      const start = vendorEventStart(event);
+                      const end = parseCalendarInstant(event.end_time);
+                      return (
                       <div
                         key={event.id}
                         className="flex items-center justify-between text-xs"
@@ -759,14 +766,12 @@ export function ShiftDetailsPanel({
                           {getVendorLabel(event.service_type || event.vendor_name)}
                         </span>
                         <span className="text-muted-foreground">
-                          {event.event_date
-                            ? format(new Date(event.event_date), "MMM d")
-                            : "—"}{" "}
-                          · {(event.start_time ?? "").slice(0, 5) || "--"}-
-                          {(event.end_time ?? "").slice(0, 5) || "--"}
+                          {start ? format(start, "MMM d · HH:mm") : "—"}
+                          {end ? `–${format(end, "HH:mm")}` : ""}
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
