@@ -40,8 +40,16 @@ const taskRowObjectSchema = z
     created_by: z.string(),
     goal_id: z.string().nullable(),
     due_date: z.string().nullable(),
-    estimated_hours: z.number().nullable(),
-    actual_hours: z.number().nullable(),
+    estimated_hours: z.preprocess(
+      (value) =>
+        typeof value === "string" && value.trim() !== "" ? Number(value) : value,
+      z.number().nullable(),
+    ),
+    actual_hours: z.preprocess(
+      (value) =>
+        typeof value === "string" && value.trim() !== "" ? Number(value) : value,
+      z.number().nullable(),
+    ),
     attachments: z.unknown().nullable(), // Json type from database
     completed_at: z.string().nullable(),
     created_at: z.string(),
