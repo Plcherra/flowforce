@@ -70,6 +70,40 @@ const parseHourlyRate = (value: string) => {
 
 const shiftTaskPriorities = ["low", "medium", "high"] as const;
 
+const visitTypeStorageKey = (companyId: string) =>
+  `ff-visit-types:${companyId}`;
+const hiddenVisitTypeStorageKey = (companyId: string) =>
+  `ff-visit-types-hidden:${companyId}`;
+
+const readStringList = (key: string) => {
+  if (typeof window === "undefined") return [] as string[];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "[]");
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeStringList = (key: string, values: string[]) => {
+  window.localStorage.setItem(key, JSON.stringify(values));
+};
+
+const mergeVisitTypes = (current: string[], extra: string[], hidden: Set<string>) => {
+  const seen = new Set<string>();
+  const next: string[] = [];
+  for (const value of [...current, ...extra]) {
+    const label = value.trim();
+    const key = label.toLowerCase();
+    if (!label || hidden.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    next.push(label);
+  }
+  return next.sort((a, b) => a.localeCompare(b));
+};
+
 type StoredShiftTask = {
   title?: string;
   description?: string;
@@ -141,7 +175,7 @@ export function ShiftDetailsPanel({
   const [addingVisit, setAddingVisit] = useState(false);
   const [visitSetupOpen, setVisitSetupOpen] = useState(false);
   const [visitForm, setVisitForm] = useState({
-    vendorType: "inspection",
+    vendorType: "",
     vendorName: "",
     start: "",
     end: "",
@@ -151,6 +185,7 @@ export function ShiftDetailsPanel({
   const [savedTasks, setSavedTasks] = useState<ShiftTask[]>([]);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [taskDraftReset, setTaskDraftReset] = useState(0);
+  const [savedVisitTypes, setSavedVisitTypes] = useState<string[]>([]);
   const taskDraftRef = useRef<Pick<
     ShiftTask,
     "title" | "description" | "priority" | "estimated_minutes"
@@ -210,6 +245,43 @@ export function ShiftDetailsPanel({
       });
     }
   }, [shift]);
+
+  useEffect(() => {
+    if (!companyId) {
+      setSavedVisitTypes([]);
+      return;
+    }
+    const hidden = new Set(
+      readStringList(hiddenVisitTypeStorageKey(companyId)).map((item) =>
+        item.toLowerCase(),
+      ),
+    );
+    setSavedVisitTypes(
+      mergeVisitTypes(readStringList(visitTypeStorageKey(companyId)), [], hidden),
+    );
+    let cancelled = false;
+    void supabase
+      .from("vendor_visits")
+      .select("service_type")
+      .eq("company_id", companyId)
+      .then(({ data }) => {
+        if (cancelled || !companyId) return;
+        const latestHidden = new Set(
+          readStringList(hiddenVisitTypeStorageKey(companyId)).map((item) =>
+            item.toLowerCase(),
+          ),
+        );
+        const used = (data ?? [])
+          .map((row) => row.service_type)
+          .filter((value): value is string => Boolean(value));
+        setSavedVisitTypes((current) =>
+          mergeVisitTypes(current, used, latestHidden),
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId]);
 
   const handleSave = async () => {
     if (!shift) return;
@@ -291,10 +363,39 @@ export function ShiftDetailsPanel({
     ];
   }, [savedTasks, shiftTasksQuery.data]);
 
+  const saveCurrentVisitType = () => {
+    const label = visitForm.vendorType.trim();
+    if (!label || !companyId) return;
+    const hidden = readStringList(hiddenVisitTypeStorageKey(companyId)).filter(
+      (item) => item.toLowerCase() !== label.toLowerCase(),
+    );
+    writeStringList(hiddenVisitTypeStorageKey(companyId), hidden);
+    const next = mergeVisitTypes(savedVisitTypes, [label], new Set());
+    writeStringList(visitTypeStorageKey(companyId), next);
+    setSavedVisitTypes(next);
+  };
+
+  const deleteVisitType = (label: string) => {
+    const name = label.trim();
+    if (!name || !companyId) return;
+    const hidden = readStringList(hiddenVisitTypeStorageKey(companyId));
+    if (!hidden.some((item) => item.toLowerCase() === name.toLowerCase())) {
+      writeStringList(hiddenVisitTypeStorageKey(companyId), [...hidden, name]);
+    }
+    const next = savedVisitTypes.filter(
+      (item) => item.toLowerCase() !== name.toLowerCase(),
+    );
+    writeStringList(visitTypeStorageKey(companyId), next);
+    setSavedVisitTypes(next);
+    if (visitForm.vendorType.trim().toLowerCase() === name.toLowerCase()) {
+      setVisitForm((current) => ({ ...current, vendorType: "" }));
+    }
+  };
+
   const openVisitSetup = () => {
     if (!shift) return;
     setVisitForm({
-      vendorType: "inspection",
+      vendorType: "",
       vendorName: "",
       start: format(new Date(shift.start_time), "yyyy-MM-dd'T'HH:mm"),
       end: format(new Date(shift.end_time), "yyyy-MM-dd'T'HH:mm"),
@@ -316,7 +417,9 @@ export function ShiftDetailsPanel({
       });
       return;
     }
-    const vendorName = visitForm.vendorName.trim() || getVendorLabel(visitForm.vendorType);
+    const typedVisit = visitForm.vendorType.trim();
+    const vendorName = visitForm.vendorName.trim() || typedVisit || "Vendor visit";
+    const serviceType = typedVisit || vendorName;
     setAddingVisit(true);
     try {
       const ev = await createVendorVisit({
@@ -325,7 +428,7 @@ export function ShiftDetailsPanel({
         start: start.toISOString(),
         end: end.toISOString(),
         location: visitForm.location.trim() || shift.location || undefined,
-        vendor: { name: vendorName, service_type: visitForm.vendorType },
+        vendor: { name: vendorName, service_type: serviceType },
         related_shift_ids: [shift.id],
       });
       try {
@@ -336,6 +439,7 @@ export function ShiftDetailsPanel({
           tags: ["warning"],
         });
       }
+      if (typedVisit) saveCurrentVisitType();
       setVisitSetupOpen(false);
       toast({
         title: "Vendor visit linked",
@@ -858,23 +962,92 @@ export function ShiftDetailsPanel({
                   <p className="text-sm font-medium">Schedule vendor visit</p>
                   <div className="space-y-2">
                     <Label htmlFor="visit-type">Visit type</Label>
-                    <Select
-                      value={visitForm.vendorType}
-                      onValueChange={(value) =>
-                        setVisitForm((current) => ({ ...current, vendorType: value }))
-                      }
-                    >
-                      <SelectTrigger id="visit-type" aria-label="Visit type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="inspection">Health Inspection</SelectItem>
-                        <SelectItem value="ecolab">Ecolab Service</SelectItem>
-                        <SelectItem value="electrician">Electrician</SelectItem>
-                        <SelectItem value="cleaning">Cleaning Crew</SelectItem>
-                        <SelectItem value="general">Other vendor</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <Input
+                        id="visit-type"
+                        value={visitForm.vendorType}
+                        placeholder="Type a visit type"
+                        className="pr-16"
+                        onChange={(event) =>
+                          setVisitForm((current) => ({
+                            ...current,
+                            vendorType: event.target.value,
+                          }))
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            saveCurrentVisitType();
+                          }
+                        }}
+                      />
+                      <div className="absolute inset-y-0 right-1 flex items-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label="Save visit type"
+                          title="Save visit type"
+                          disabled={!visitForm.vendorType.trim()}
+                          onClick={saveCurrentVisitType}
+                        >
+                          <Save className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          aria-label="Delete visit type"
+                          title="Delete visit type"
+                          disabled={
+                            !savedVisitTypes.some(
+                              (type) =>
+                                type.toLowerCase() ===
+                                visitForm.vendorType.trim().toLowerCase(),
+                            )
+                          }
+                          onClick={() => deleteVisitType(visitForm.vendorType)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                    {savedVisitTypes.length > 0 && (
+                      <div className="space-y-1">
+                        {savedVisitTypes.map((type) => (
+                          <div
+                            key={type.toLowerCase()}
+                            className="flex items-center gap-1 rounded-md border bg-background px-2"
+                          >
+                            <button
+                              type="button"
+                              className="min-w-0 flex-1 truncate py-1.5 text-left text-sm"
+                              onClick={() =>
+                                setVisitForm((current) => ({
+                                  ...current,
+                                  vendorType: type,
+                                }))
+                              }
+                            >
+                              {type}
+                            </button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              aria-label={`Delete ${type}`}
+                              title={`Delete ${type}`}
+                              onClick={() => deleteVisitType(type)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="visit-name">Vendor name</Label>

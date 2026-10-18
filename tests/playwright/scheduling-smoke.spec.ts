@@ -1008,8 +1008,13 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(details.getByRole('button', { name: 'Close shift details' })).toHaveCount(1);
 
     await details.getByRole('button', { name: 'Add vendor visit' }).click();
+    await details.getByRole('textbox', { name: 'Visit type' }).fill('Delivery');
+    await details.getByRole('button', { name: 'Save visit type' }).click();
+    await expect(details.getByRole('button', { name: 'Delivery', exact: true })).toBeVisible();
+    await details.getByRole('button', { name: 'Delete Delivery' }).click();
+    await expect(details.getByRole('button', { name: 'Delivery', exact: true })).toHaveCount(0);
     await details.getByLabel('Vendor name').fill('Health Inspection');
-    await details.getByRole('button', { name: 'Save visit' }).click();
+    await details.getByRole('button', { name: 'Save visit', exact: true }).click();
     await expect(details.getByPlaceholder('Event title')).toHaveValue('Health Inspection', {
       timeout: 15_000,
     });
