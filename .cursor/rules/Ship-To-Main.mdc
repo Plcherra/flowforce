@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+
+# Ship straight to main
+
+The owner tests on https://www.flowforce.uk. Preview deployments cannot sign in, because they do not have the production Supabase keys.
+
+For each product change the owner asks to try:
+
+1. Commit on `main`. Do not open a new branch or pull request for that change.
+2. Push `main`. Vercel deploys that push to production by itself.
+3. Say that the production deploy is in progress, and that a refresh of flowforce.uk shows it when the deploy finishes.
+
+Do not force-push `main`. Do not add a workflow that merges every pull request: the repository is public, and that would let an outside pull request reach production.
