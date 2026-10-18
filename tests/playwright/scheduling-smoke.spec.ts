@@ -1008,13 +1008,22 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(details.getByRole('button', { name: 'Close shift details' })).toHaveCount(1);
 
     await details.getByRole('button', { name: 'Add vendor visit' }).click();
-    await expect(details.getByPlaceholder('Event title')).toHaveValue('Vendor Visit', { timeout: 15_000 });
+    await details.getByLabel('Vendor name').fill('Health Inspection');
+    await details.getByRole('button', { name: 'Save visit' }).click();
+    await expect(details.getByPlaceholder('Event title')).toHaveValue('Health Inspection', {
+      timeout: 15_000,
+    });
     await expect(page.getByText('Vendor visit not saved')).toHaveCount(0);
+    await expect(details.getByText('Vendor_visit')).toHaveCount(0);
 
     await details.getByRole('tab', { name: 'Tasks' }).click();
     await details.getByPlaceholder('Task title').fill('Count the till');
     await details.getByRole('button', { name: 'Add shift task' }).click();
-    await expect(details.getByText('Count the till')).toBeVisible();
+    await expect(details.getByRole('heading', { name: 'Count the till' })).toBeVisible();
+    await details.getByPlaceholder('Task title').fill('Lock the safe');
+    await details.getByRole('button', { name: 'Add shift task' }).click();
+    await expect(details.getByRole('heading', { name: 'Lock the safe' })).toBeVisible();
+    await expect(details.getByRole('heading', { name: 'Count the till' })).toBeVisible();
     await expect(page.getByText('Task added', { exact: true })).toBeVisible();
 
     await details.getByRole('tab', { name: 'Templates' }).click();

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ const vendorLabelLookup: Record<string, string> = {
   cleaning: "Cleaning Crew",
   inspection: "Health Inspection",
   general: "Vendor Visit",
+  vendor_visit: "Vendor visit",
 };
 
 const getVendorLabel = (vendorType: string | null | undefined) => {
@@ -138,6 +139,34 @@ export function ShiftDetailsPanel({
   const { templates, createTemplate } = useShiftTemplates();
   const [loading, setLoading] = useState(false);
   const [addingVisit, setAddingVisit] = useState(false);
+  const [visitSetupOpen, setVisitSetupOpen] = useState(false);
+  const [visitForm, setVisitForm] = useState({
+    vendorType: "inspection",
+    vendorName: "",
+    start: "",
+    end: "",
+    location: "",
+    notes: "",
+  });
+  const [savedTasks, setSavedTasks] = useState<ShiftTask[]>([]);
+  const [taskError, setTaskError] = useState<string | null>(null);
+  const [taskDraftReset, setTaskDraftReset] = useState(0);
+  const taskDraftRef = useRef<Pick<
+    ShiftTask,
+    "title" | "description" | "priority" | "estimated_minutes"
+  > | null>(null);
+  const addTaskRef = useRef<(task: ShiftTask) => Promise<void>>(async () => {});
+  const handleTaskDraftChange = useCallback(
+    (
+      draft: Pick<
+        ShiftTask,
+        "title" | "description" | "priority" | "estimated_minutes"
+      > | null,
+    ) => {
+      taskDraftRef.current = draft;
+    },
+    [],
+  );
   const [templateSaving, setTemplateSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [activeTab, setActiveTab] = useState("details");
@@ -194,6 +223,14 @@ export function ShiftDetailsPanel({
         end_time: new Date(formData.end_time).toISOString(),
       });
 
+      const draft = taskDraftRef.current;
+      if (draft?.title.trim()) {
+        await addTaskRef.current({
+          id: `draft-${Date.now()}`,
+          ...draft,
+        });
+      }
+
       // Persist edits for linked events (title/location) using same Save action
       const linked = getEventsForShift(shift.id);
       for (const ev of linked) {
@@ -239,42 +276,57 @@ export function ShiftDetailsPanel({
         .select("id, title, description, priority, estimated_hours")
         .eq("company_id", companyId)
         .eq("source", "schedule")
-        .contains("tags", JSON.stringify([shiftId]))
+        .filter("links->>schedule_id", "eq", shiftId)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []).map(toShiftTask);
     },
   });
-  const shiftTasks = shiftTasksQuery.data ?? [];
+  const shiftTasks = useMemo(() => {
+    const fromQuery = shiftTasksQuery.data ?? [];
+    const seen = new Set(fromQuery.map((task) => task.id));
+    return [
+      ...fromQuery,
+      ...savedTasks.filter((task) => !seen.has(task.id)),
+    ];
+  }, [savedTasks, shiftTasksQuery.data]);
+
+  const openVisitSetup = () => {
+    if (!shift) return;
+    setVisitForm({
+      vendorType: "inspection",
+      vendorName: "",
+      start: format(new Date(shift.start_time), "yyyy-MM-dd'T'HH:mm"),
+      end: format(new Date(shift.end_time), "yyyy-MM-dd'T'HH:mm"),
+      location: shift.location || "",
+      notes: "",
+    });
+    setVisitSetupOpen(true);
+  };
 
   const handleAddVendorVisit = async () => {
     if (!shift || addingVisit) return;
+    const start = new Date(visitForm.start);
+    const end = new Date(visitForm.end);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+      toast({
+        title: "Check the visit times",
+        description: "End time has to be after the start time.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const vendorName = visitForm.vendorName.trim() || getVendorLabel(visitForm.vendorType);
     setAddingVisit(true);
     try {
-      const start = new Date(shift.start_time);
-      const end = new Date(shift.end_time);
       const ev = await createVendorVisit({
-        title: "Vendor Visit",
-        description: "Vendor visit linked to this shift",
+        title: vendorName,
+        description: visitForm.notes.trim() || undefined,
         start: start.toISOString(),
         end: end.toISOString(),
-        location: shift.location || "Site",
-        vendor: { name: "Vendor", service_type: "general" },
+        location: visitForm.location.trim() || shift.location || undefined,
+        vendor: { name: vendorName, service_type: visitForm.vendorType },
         related_shift_ids: [shift.id],
-        checklist: [
-          {
-            id: "sv1",
-            text: "Supervisor greet vendor",
-            done: false,
-            who: "supervisor",
-          },
-          {
-            id: "vd1",
-            text: "Perform service tasks",
-            done: false,
-            who: "vendor",
-          },
-        ],
       });
       try {
         await linkVisitToShifts(ev.id, [shift.id]);
@@ -284,9 +336,10 @@ export function ShiftDetailsPanel({
           tags: ["warning"],
         });
       }
+      setVisitSetupOpen(false);
       toast({
         title: "Vendor visit linked",
-        description: "The visit is saved on this shift.",
+        description: `${vendorName} is saved on this shift.`,
       });
     } catch (error) {
       logger.error("Error linking vendor visit", { error, tags: ["error"] });
@@ -306,7 +359,7 @@ export function ShiftDetailsPanel({
     }
     const title = task.title.trim();
     try {
-      await insertTask({
+      const created = await insertTask({
         title,
         description: task.description.trim() || null,
         priority: task.priority,
@@ -323,12 +376,20 @@ export function ShiftDetailsPanel({
           shift_title: shift.title || "Untitled shift",
         },
       });
+      setSavedTasks((current) => [
+        ...current.filter((item) => item.id !== created.id),
+        toShiftTask(created),
+      ]);
+      setTaskError(null);
+      taskDraftRef.current = null;
+      setTaskDraftReset((value) => value + 1);
       await queryClient.invalidateQueries({
         queryKey: ["shift-tasks", companyId, shift.id],
       });
       toast({ title: "Task added", description: title });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to save shift task";
+      setTaskError(message);
       logger.error("Failed to save shift task", { error, tags: ["error"] });
       toast({
         title: "Task not saved",
@@ -338,11 +399,13 @@ export function ShiftDetailsPanel({
       throw error;
     }
   };
+  addTaskRef.current = handleAddTask;
 
   const handleRemoveTask = async (taskId: string) => {
     if (!companyId) return;
     try {
       await deleteTaskRow(taskId, companyId);
+      setSavedTasks((current) => current.filter((task) => task.id !== taskId));
       await queryClient.invalidateQueries({
         queryKey: ["shift-tasks", companyId, shiftId],
       });
@@ -781,7 +844,7 @@ export function ShiftDetailsPanel({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={handleAddVendorVisit}
+                  onClick={openVisitSetup}
                   disabled={addingVisit}
                   title="Add vendor visit"
                   aria-label="Add vendor visit"
@@ -790,7 +853,123 @@ export function ShiftDetailsPanel({
                 </Button>
               </div>
 
-              {linkedEvents.length === 0 && (
+              {visitSetupOpen && (
+                <div className="space-y-3 rounded-md border bg-muted/20 p-3">
+                  <p className="text-sm font-medium">Schedule vendor visit</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="visit-type">Visit type</Label>
+                    <Select
+                      value={visitForm.vendorType}
+                      onValueChange={(value) =>
+                        setVisitForm((current) => ({ ...current, vendorType: value }))
+                      }
+                    >
+                      <SelectTrigger id="visit-type" aria-label="Visit type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="inspection">Health Inspection</SelectItem>
+                        <SelectItem value="ecolab">Ecolab Service</SelectItem>
+                        <SelectItem value="electrician">Electrician</SelectItem>
+                        <SelectItem value="cleaning">Cleaning Crew</SelectItem>
+                        <SelectItem value="general">Other vendor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="visit-name">Vendor name</Label>
+                    <Input
+                      id="visit-name"
+                      value={visitForm.vendorName}
+                      placeholder={getVendorLabel(visitForm.vendorType)}
+                      onChange={(event) =>
+                        setVisitForm((current) => ({
+                          ...current,
+                          vendorName: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="visit-start">Start</Label>
+                      <Input
+                        id="visit-start"
+                        type="datetime-local"
+                        value={visitForm.start}
+                        onChange={(event) =>
+                          setVisitForm((current) => ({
+                            ...current,
+                            start: event.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="visit-end">End</Label>
+                      <Input
+                        id="visit-end"
+                        type="datetime-local"
+                        value={visitForm.end}
+                        onChange={(event) =>
+                          setVisitForm((current) => ({
+                            ...current,
+                            end: event.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="visit-location">Location</Label>
+                    <Input
+                      id="visit-location"
+                      value={visitForm.location}
+                      placeholder="Where they should go"
+                      onChange={(event) =>
+                        setVisitForm((current) => ({
+                          ...current,
+                          location: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="visit-notes">Notes</Label>
+                    <Textarea
+                      id="visit-notes"
+                      rows={2}
+                      value={visitForm.notes}
+                      placeholder="What should the shift do for this visit?"
+                      onChange={(event) =>
+                        setVisitForm((current) => ({
+                          ...current,
+                          notes: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleAddVendorVisit}
+                      disabled={addingVisit}
+                    >
+                      {addingVisit ? "Saving visit..." : "Save visit"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setVisitSetupOpen(false)}
+                      disabled={addingVisit}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {linkedEvents.length === 0 && !visitSetupOpen && (
                 <p className="text-xs text-muted-foreground">
                   No events linked to this shift.
                 </p>
@@ -840,8 +1019,8 @@ export function ShiftDetailsPanel({
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="capitalize">
-                        {ev.type || "event"}
+                      <Badge variant="outline">
+                        {getVendorLabel(ev.vendor?.service_type || ev.type)}
                       </Badge>
                       <Button
                         variant="ghost"
@@ -895,10 +1074,20 @@ export function ShiftDetailsPanel({
               tasks={shiftTasks}
               onAddTask={handleAddTask}
               onRemoveTask={handleRemoveTask}
+              onDraftChange={handleTaskDraftChange}
+              draftResetKey={taskDraftReset}
             />
+            {shiftTasks.length === 0 && !shiftTasksQuery.isLoading && (
+              <p className="text-sm text-muted-foreground">
+                No tasks on this shift yet. Add one here, or type it and use Save Changes.
+              </p>
+            )}
+            {taskError && (
+              <p className="text-sm text-destructive">{taskError}</p>
+            )}
             {shiftTasksQuery.isError && (
               <p className="text-sm text-destructive">
-                Shift tasks could not be loaded.
+                Saved tasks could not be reloaded. A task you just added still stays in this list.
               </p>
             )}
           </TabsContent>

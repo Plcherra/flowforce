@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,11 +16,21 @@ import type { ShiftTask } from "./types";
 
 type TasksTabProps = {
   tasks: ShiftTask[];
-  onAddTask: (task: ShiftTask) => void;
-  onRemoveTask: (taskId: string) => void;
+  onAddTask: (task: ShiftTask) => void | Promise<void>;
+  onRemoveTask: (taskId: string) => void | Promise<void>;
+  onDraftChange?: (
+    draft: Pick<ShiftTask, "title" | "description" | "priority" | "estimated_minutes"> | null,
+  ) => void;
+  draftResetKey?: number;
 };
 
-export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
+export function TasksTab({
+  tasks,
+  onAddTask,
+  onRemoveTask,
+  onDraftChange,
+  draftResetKey = 0,
+}: TasksTabProps) {
   const [newTask, setNewTask] = useState<
     Pick<ShiftTask, "title" | "description" | "priority" | "estimated_minutes">
   >({
@@ -29,6 +39,23 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
     priority: "medium",
     estimated_minutes: 30,
   });
+
+  const seenResetKey = useRef(draftResetKey);
+
+  useEffect(() => {
+    if (draftResetKey === seenResetKey.current) return;
+    seenResetKey.current = draftResetKey;
+    setNewTask({
+      title: "",
+      description: "",
+      priority: "medium",
+      estimated_minutes: 30,
+    });
+  }, [draftResetKey]);
+
+  useEffect(() => {
+    onDraftChange?.(newTask.title.trim() ? newTask : null);
+  }, [newTask, onDraftChange]);
 
   const addTask = async () => {
     if (!newTask.title.trim()) return;
@@ -72,7 +99,7 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
             }
             rows={2}
           />
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <Select
               value={newTask.priority}
               onValueChange={(value) =>
@@ -105,7 +132,8 @@ export function TasksTab({ tasks, onAddTask, onRemoveTask }: TasksTabProps) {
               }
             />
             <Button type="button" aria-label="Add shift task" onClick={addTask}>
-              <Plus className="h-4 w-4" />
+              <Plus className="mr-1 h-4 w-4" />
+              Add task
             </Button>
           </div>
         </CardContent>
