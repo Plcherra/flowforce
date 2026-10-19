@@ -17,7 +17,6 @@ import {
   VIRTUALIZE_EMPLOYEE_THRESHOLD,
 } from "@/features/scheduling/utils/gridIndexes";
 import { ShiftChip } from "@/features/scheduling/components/drag-drop/ShiftChip";
-import { vendorEventStart } from "@/features/scheduling/utils/calendarDay";
 import { WeekGridFooter } from "@/features/scheduling/components/drag-drop/WeekGridFooter";
 
 interface EmployeeSummary {
@@ -36,8 +35,8 @@ export interface WeekGridProps {
   weekDays: Date[];
   employees: EmployeeSummary[];
   unassignedShifts: UnassignedBucket[];
-  vendorEvents: VendorEventWithMetadata[];
   vendorEventsByShift: Map<string, VendorEventWithMetadata[]>;
+  looseVendorEventsByDay: Map<string, VendorEventWithMetadata[]>;
   cellAvailability: Map<string, Map<string, GridCellAvailability>>;
   shiftsByEmployeeDay: ShiftsByEmployeeDay;
   conflictByShiftId: Map<string, boolean>;
@@ -316,8 +315,8 @@ export function WeekGrid({
   weekDays,
   employees,
   unassignedShifts,
-  vendorEvents,
   vendorEventsByShift,
+  looseVendorEventsByDay,
   cellAvailability,
   shiftsByEmployeeDay,
   conflictByShiftId,
@@ -360,21 +359,6 @@ export function WeekGrid({
       ),
     [unassignedShifts],
   );
-
-  const unlinkedByDay = useMemo(() => {
-    const map = new Map<string, VendorEventWithMetadata[]>();
-    for (const day of weekDays) {
-      map.set(
-        dayIso(day),
-        vendorEvents.filter(
-          (event) =>
-            !event.shift_id &&
-            isSameDay(vendorEventStart(event) ?? new Date(NaN), day),
-        ),
-      );
-    }
-    return map;
-  }, [vendorEvents, weekDays]);
 
   const useVirtualization =
     employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD;
@@ -452,7 +436,7 @@ export function WeekGrid({
           </div>
           {weekDays.map((day) => {
             const shifts = unassignedLookup.get(day.toISOString()) ?? [];
-            const unlinked = unlinkedByDay.get(dayIso(day)) ?? [];
+            const unlinked = looseVendorEventsByDay.get(dayIso(day)) ?? [];
             return (
               <GridCell
                 key={`unassigned-${dayIso(day)}`}

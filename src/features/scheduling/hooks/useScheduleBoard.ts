@@ -3,11 +3,11 @@ import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useProfile } from "@/hooks/useProfile";
-import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
+  ShiftWithAssignments,
   VendorEventWithMetadata,
-  ProfileSummary,
-} from "./useSchedulingConsolidated";
+} from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import type { ProfileSummary } from "./useSchedulingConsolidated";
 import { buildCellAvailabilityMap } from "@/features/scheduling/services/availability/scheduleAvailabilityEngine";
 import type { GridCellAvailability } from "@/types/platform";
 import { logger } from "@/utils/logger";
@@ -20,6 +20,10 @@ import {
   calculateDailyGridStats,
 } from "@/features/scheduling/utils/hoursCalculation";
 import { vendorEventStart } from "@/features/scheduling/utils/calendarDay";
+import {
+  chosenShiftIds,
+  placeEventsOnDayShifts,
+} from "@/features/scheduling/services/placeDayEvents";
 
 interface LocationOption {
   id: string;
@@ -195,7 +199,6 @@ export function useScheduleBoard({
 
   const vendorEventsThisWeek = useMemo(() => {
     return vendorEvents.filter((event) => {
-      if (event.shift_id) return true;
       const eventDate = vendorEventStart(event);
       if (!eventDate) return false;
       return eventDate >= weekStart && eventDate < weekEnd;
@@ -214,16 +217,23 @@ export function useScheduleBoard({
     }));
   }, [weekDays, weekSchedules]);
 
-  const vendorEventsByShift = useMemo(() => {
-    const map = new Map<string, VendorEventWithMetadata[]>();
-    vendorEventsThisWeek.forEach((event) => {
-      if (!event.shift_id) return;
-      const list = map.get(event.shift_id) ?? [];
-      list.push(event);
-      map.set(event.shift_id, list);
-    });
-    return map;
-  }, [vendorEventsThisWeek]);
+  const eventPlacement = useMemo(
+    () =>
+      placeEventsOnDayShifts<VendorEventWithMetadata>({
+        events: vendorEventsThisWeek,
+        shifts: weekSchedules.flatMap((schedule) =>
+          schedule.start_time
+            ? [{ id: schedule.id, start: new Date(schedule.start_time) }]
+            : [],
+        ),
+        days: weekDays,
+        eventStart: vendorEventStart,
+        chosenShiftIds,
+      }),
+    [vendorEventsThisWeek, weekDays, weekSchedules],
+  );
+  const vendorEventsByShift = eventPlacement.byShift;
+  const looseVendorEventsByDay = eventPlacement.looseByDay;
 
   const weekCsvRows = useMemo(() => {
     return [
@@ -398,6 +408,7 @@ export function useScheduleBoard({
     refreshLocations: fetchLocations,
     candidateVendorShifts,
     vendorEventsByShift,
+    looseVendorEventsByDay,
     cellAvailability,
     getCellAvailability,
     shiftsByEmployeeDay,

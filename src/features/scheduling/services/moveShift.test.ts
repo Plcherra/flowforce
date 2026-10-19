@@ -70,23 +70,7 @@ export async function runMoveShiftTests() {
   assert.equal(dayMoveResult.ok, true);
   assert.ok(updated, "day change updates schedule times");
 
-  let followedDay: Date | null = null;
-  const followed = await moveShift({
-    shift,
-    sourceEmployeeId: "user-a",
-    targetEmployeeId: "user-a",
-    targetDay: dayMoveTarget,
-    updateSchedule: async () => ({}),
-    assign: async () => true,
-    unassign: async () => true,
-    moveLinkedEvents: async (_shiftId, day) => {
-      followedDay = day;
-      return 1;
-    },
-  });
-  assert.equal(followed.movedEventCount, 1);
-  assert.ok(followedDay);
-
+  let scheduleWrites = 0;
   const employeeOnly = await moveShift({
     shift,
     sourceEmployeeId: "user-a",
@@ -96,15 +80,15 @@ export async function runMoveShiftTests() {
       day.setHours(0, 0, 0, 0);
       return day;
     })(),
-    updateSchedule: async () => ({}),
+    updateSchedule: async () => {
+      scheduleWrites += 1;
+      return {};
+    },
     assign: async () => true,
     unassign: async () => true,
-    moveLinkedEvents: async () => {
-      throw new Error("employee-only moves must not move events");
-    },
   });
   assert.equal(employeeOnly.ok, true);
-  assert.equal(employeeOnly.movedEventCount, 0);
+  assert.equal(scheduleWrites, 0);
 
   const blocked = await moveShift({
     shift,

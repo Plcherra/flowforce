@@ -29,13 +29,13 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { useEvents } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
-import { moveEventsWithShift } from "@/features/scheduling/repositories/followShiftDayRepository";
+import { eventShowsOnShift } from "@/features/scheduling/services/placeDayEvents";
 import {
   parseCalendarInstant,
   vendorEventStart,
@@ -161,7 +161,6 @@ export function ShiftDetailsPanel({
     staffAvailability,
     vendorEvents,
     mutations: { updateSchedule, deleteSchedule },
-    refetchAll,
   } = useScheduling();
   const {
     getEventsForShift,
@@ -295,22 +294,12 @@ export function ShiftDetailsPanel({
     setLoading(true);
     try {
       const nextStart = new Date(formData.start_time);
-      const previousStart = shift.start_time ? new Date(shift.start_time) : null;
       await updateSchedule(shift.id, {
         ...formData,
         hourly_rate: parseHourlyRate(formData.hourly_rate),
         start_time: nextStart.toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
       });
-      if (
-        previousStart &&
-        !Number.isNaN(previousStart.getTime()) &&
-        !Number.isNaN(nextStart.getTime()) &&
-        !isSameDay(previousStart, nextStart)
-      ) {
-        await moveEventsWithShift(shift.id, nextStart);
-        await refetchAll();
-      }
 
       const draft = taskDraftRef.current;
       if (draft?.title.trim()) {
@@ -675,7 +664,14 @@ export function ShiftDetailsPanel({
   );
   const linkedVendorVisits = useMemo(
     () =>
-      shift ? vendorEvents.filter((event) => event.shift_id === shift.id) : [],
+      shift
+        ? vendorEvents.filter((event) =>
+            eventShowsOnShift(event, {
+              id: shift.id,
+              start_time: shift.start_time,
+            }),
+          )
+        : [],
     [shift, vendorEvents],
   );
   const conflictWarnings = useMemo(

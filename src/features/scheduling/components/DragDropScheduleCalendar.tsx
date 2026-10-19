@@ -123,7 +123,6 @@ export function DragDropScheduleCalendar({
 
   const {
     employees,
-    vendorEventsThisWeek,
     weekSchedules: boardWeekSchedules,
     weekDays,
     weekStart,
@@ -131,6 +130,7 @@ export function DragDropScheduleCalendar({
     candidateVendorShifts,
     unassignedShifts: boardUnassignedShifts,
     vendorEventsByShift,
+    looseVendorEventsByDay,
     cellAvailability,
     getCellAvailability,
     shiftsByEmployeeDay: boardShiftsByEmployeeDay,
@@ -338,8 +338,10 @@ export function DragDropScheduleCalendar({
                     : employees
                 }
                 unassignedShifts={unassignedShifts}
-                vendorEvents={readOnly ? [] : vendorEventsThisWeek}
                 vendorEventsByShift={readOnly ? new Map() : vendorEventsByShift}
+                looseVendorEventsByDay={
+                  readOnly ? new Map() : looseVendorEventsByDay
+                }
                 cellAvailability={cellAvailability}
                 shiftsByEmployeeDay={boardShiftsByEmployeeDay}
                 conflictByShiftId={boardConflictByShiftId}

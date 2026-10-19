@@ -9,6 +9,8 @@ export type ProfileRow = Tables<"profiles">;
 export type VendorEventWithMetadata = VendorEventRow & {
   shift_id?: string | null;
   linked_event_id?: string | null;
+  /** Shifts the user picked for this event. Empty means every shift on the event's day. */
+  related_shift_ids?: string[] | null;
 };
 
 export type ProfileSummary = Pick<

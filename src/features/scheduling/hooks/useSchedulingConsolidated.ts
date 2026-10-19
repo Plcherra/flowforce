@@ -241,6 +241,26 @@ export function useSchedulingConsolidated(
         );
         if (options?.refresh !== false) {
           await refetchAll();
+        } else {
+          setShifts((current) =>
+            current.map((shift) => {
+              if (shift.id !== shiftId) return shift;
+              if (shift.assignments?.some((row) => row.user_id === userId)) {
+                return shift;
+              }
+              return {
+                ...shift,
+                assignments: [
+                  ...(shift.assignments ?? []),
+                  {
+                    schedule_id: shiftId,
+                    user_id: userId,
+                    status,
+                  } as AssignmentWithUser,
+                ],
+              };
+            }),
+          );
         }
         if (
           !options?.silent &&
@@ -281,6 +301,19 @@ export function useSchedulingConsolidated(
         await unassignUserFromShift(shiftId, userId);
         if (options?.refresh !== false) {
           await refetchAll();
+        } else {
+          setShifts((current) =>
+            current.map((shift) =>
+              shift.id === shiftId
+                ? {
+                    ...shift,
+                    assignments: (shift.assignments ?? []).filter(
+                      (row) => row.user_id !== userId,
+                    ),
+                  }
+                : shift,
+            ),
+          );
         }
         return true;
       } catch (err) {
@@ -317,6 +350,20 @@ export function useSchedulingConsolidated(
         });
         if (options?.refresh !== false) {
           await refetchAll();
+        } else if (record && payload.id) {
+          setShifts((current) =>
+            current.map((shift) =>
+              shift.id === payload.id
+                ? {
+                    ...shift,
+                    ...(payload.start_time
+                      ? { start_time: payload.start_time }
+                      : {}),
+                    ...(payload.end_time ? { end_time: payload.end_time } : {}),
+                  }
+                : shift,
+            ),
+          );
         }
         return record;
       } catch (err) {

@@ -12,7 +12,6 @@ import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedu
 import type { GridCellAvailability } from "@/types/platform";
 import type { SchedulingMutationOptions } from "@/features/scheduling/types/mutations";
 import { moveShift } from "@/features/scheduling/services/moveShift";
-import { moveEventsWithShift } from "@/features/scheduling/repositories/followShiftDayRepository";
 import { ShiftChipOverlay } from "@/features/scheduling/components/drag-drop/ShiftChip";
 
 interface UseShiftDragDropParams {
@@ -106,7 +105,6 @@ export function useShiftDragDrop({
         unassign: (shiftId, userId) =>
           unassign(shiftId, userId, dragMutationOptions),
         getCellAvailability,
-        moveLinkedEvents: moveEventsWithShift,
       });
 
       if (result.noOp) return;
@@ -120,22 +118,12 @@ export function useShiftDragDrop({
         return;
       }
 
-      await refetchAll();
+      void refetchAll();
 
       if (result.severity === "warning") {
         toast({
           title: "Shift moved with warning",
           description: result.reasons[0] ?? "Employee has a scheduling conflict.",
-        });
-      } else {
-        toast({
-          title: "Shift moved",
-          description:
-            result.movedEventCount && result.movedEventCount > 0
-              ? result.movedEventCount === 1
-                ? "The linked event moved to the same day."
-                : `${result.movedEventCount} linked events moved to the same day.`
-              : "Schedule updated successfully.",
         });
       }
     },
