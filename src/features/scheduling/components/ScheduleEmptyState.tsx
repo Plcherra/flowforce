@@ -116,7 +116,7 @@ export function ScheduleEmptyState({
           ) : null}
           {!readOnly && view === "staff" && onOpenStaffPanel ? (
             <Button size="sm" variant="outline" onClick={onOpenStaffPanel}>
-              Staff management
+              Team requests
             </Button>
           ) : null}
         </div>
@@ -157,7 +157,7 @@ export function ScheduleEmptyState({
         ) : null}
         {!readOnly && view === "staff" && onOpenStaffPanel ? (
           <Button size="sm" variant="outline" onClick={onOpenStaffPanel}>
-            Staff management
+            Team requests
           </Button>
         ) : null}
       </div>

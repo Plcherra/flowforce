@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useScheduling } from "@/contexts/SchedulingContext";
+import { useSchedulingRole } from "@/features/scheduling/hooks/useSchedulingRole";
 import { useAvailabilityManagement } from "@/features/availability/manage/useAvailabilityManagement";
 import { LockControls } from "@/features/availability/manage/LockControls";
 import { RequestsQueue } from "@/features/availability/manage/RequestsQueue";
@@ -38,14 +39,9 @@ export function TeamAvailabilityPanel({
     isFallbackData,
   } = useScheduling();
 
+  const schedulingRole = useSchedulingRole();
   const orgId = profile?.companyId ?? profile?.company_id ?? DEFAULT_ORG_ID;
-  const resolvedRole = (profile?.role ?? "").toLowerCase();
-  const canManageAvailability = [
-    "manager",
-    "owner",
-    "company_admin",
-    "admin",
-  ].includes(resolvedRole);
+  const canManageAvailability = schedulingRole.canManageAvailability;
   const hasOrgContext = Boolean(profile?.companyId ?? profile?.company_id);
   const baseQueriesEnabled =
     canManageAvailability && hasOrgContext && !profileLoading;
@@ -116,7 +112,7 @@ export function TeamAvailabilityPanel({
     );
   }
 
-  if (profileLoading || schedulingLoading) {
+  if (profileLoading || schedulingLoading || schedulingRole.isLoading) {
     return (
       <Card className={className}>
         <CardContent className="py-10">
@@ -169,11 +165,10 @@ export function TeamAvailabilityPanel({
         <CardContent>
           <Alert className="border-primary/40">
             <ShieldAlert className="h-5 w-5 text-primary" />
-            <AlertTitle>Manager access required</AlertTitle>
+            <AlertTitle>Schedule permission required</AlertTitle>
             <AlertDescription>
-              Only managers or owners can control team availability. Ask your
-              administrator for the right permissions if you believe this is a
-              mistake.
+              Team hours are for people allowed to build the schedule. Your own
+              hours stay under My availability.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -277,8 +272,8 @@ export function TeamAvailabilityPanel({
       <CardHeader>
         <CardTitle>Team Availability Controls</CardTitle>
         <CardDescription>
-          Manage locks, approve requests, and handle exceptions for all
-          locations.
+          Manage locks, requests, and exceptions for other people. Your own
+          hours stay on My availability.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

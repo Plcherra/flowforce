@@ -226,8 +226,8 @@ export function PersonalAvailabilityPanel({
             My Availability
           </CardTitle>
           <CardDescription>
-            Select when you&apos;re free to work. Submit a request if this week
-            is locked by your manager.
+            These hours are only yours. They do not change another employee's
+            availability. Submit a request if this week is locked.
           </CardDescription>
         </div>
         <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs text-primary">

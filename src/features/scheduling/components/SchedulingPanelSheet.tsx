@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import {
   ArrowRightLeft,
+  Bell,
   Calendar,
   Clock,
-  Settings,
   Users,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,19 +40,14 @@ const ShiftSwapsPanel = lazy(() =>
     default: m.ShiftSwapsPanel,
   })),
 );
-const TimeOffManagementPanel = lazy(() =>
-  import("./TimeOffManagementPanel").then((m) => ({
-    default: m.TimeOffManagementPanel,
+const ScheduleRemindersPanel = lazy(() =>
+  import("./ScheduleRemindersPanel").then((m) => ({
+    default: m.ScheduleRemindersPanel,
   })),
 );
-const SchedulingWorkflow = lazy(() =>
-  import("./SchedulingWorkflow").then((m) => ({
-    default: m.SchedulingWorkflow,
-  })),
-);
-const SchedulingNotifications = lazy(() =>
-  import("./SchedulingNotifications").then((m) => ({
-    default: m.SchedulingNotifications,
+const TimeOffRequestPanel = lazy(() =>
+  import("@/features/availability/components/TimeOffRequestPanel").then((m) => ({
+    default: m.TimeOffRequestPanel,
   })),
 );
 
@@ -61,7 +56,7 @@ const panelIcons: Record<SchedulingPanelId, typeof Users> = {
   availability: Clock,
   timeoff: Calendar,
   swaps: ArrowRightLeft,
-  workflow: Settings,
+  workflow: Bell,
 };
 
 interface SchedulingPanelSheetProps {
@@ -88,8 +83,39 @@ export function SchedulingPanelSheet({
   const panelMeta = SCHEDULING_PANELS.find((entry) => entry.id === panel);
   const Icon = panel ? panelIcons[panel] : Users;
 
-  const canOpenTeamAvailability =
-    role.canManageAvailability && !role.isStaff;
+  const canOpenTeamAvailability = role.canManageAvailability;
+  const availabilityIsTeam =
+    canOpenTeamAvailability && availabilityView === "team";
+  const panelTitle =
+    panel === "availability"
+      ? availabilityIsTeam
+        ? "Team availability"
+        : "My availability"
+      : panel === "staff"
+        ? "Team requests"
+        : panel === "timeoff"
+          ? "My time off"
+          : panel === "swaps"
+            ? "My swaps"
+            : panel === "workflow"
+              ? "Reminders"
+              : (panelMeta?.label ?? "Scheduling");
+  const panelDescription =
+    panel === "availability"
+      ? availabilityIsTeam
+        ? "Locks, exceptions, and change requests for other people. Your own hours stay under My availability."
+        : "The hours you can work. Saving here does not change anyone else's availability."
+      : panel === "staff"
+        ? "Decide the team's shift swaps and time off. This does not edit your own hours."
+        : panel === "timeoff"
+          ? "Request time away for yourself. Approving other people is under Team requests."
+          : panel === "swaps"
+            ? "Swaps you asked for or that were offered to you."
+            : panel === "workflow"
+              ? role.canManageSchedule
+                ? "Keep your own reminders, and assign ones that staff can see but cannot change."
+                : "Reminders you control for yourself. Assigned reminders stay as a manager set them."
+              : panelMeta?.description;
 
   return (
     <Sheet open={panel !== null} onOpenChange={(open) => !open && onClose()}>
@@ -100,10 +126,10 @@ export function SchedulingPanelSheet({
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2">
             <Icon className="h-5 w-5 text-primary" />
-            {panelMeta?.label ?? "Scheduling"}
+            {panelTitle}
           </SheetTitle>
-          {panelMeta?.description ? (
-            <SheetDescription>{panelMeta.description}</SheetDescription>
+          {panelDescription ? (
+            <SheetDescription>{panelDescription}</SheetDescription>
           ) : null}
         </SheetHeader>
 
@@ -111,16 +137,22 @@ export function SchedulingPanelSheet({
           advancedFeaturesDisabled ? (
             <FeatureUnavailableCard
               icon={Users}
-              title="Staff management disabled"
+              title="Team requests need a live connection"
               description="We need live staff data to process swaps and time-off requests."
               actionLabel="Retry data sync"
               onAction={onRetry}
               disabled={retryDisabled}
             />
-          ) : role.isStaff ? null : (
+          ) : role.canApproveRequests || role.canManageSchedule ? (
             <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
               <StaffShiftManagement />
             </Suspense>
+          ) : (
+            <FeatureUnavailableCard
+              icon={Users}
+              title="Team requests are limited"
+              description="Approving other people's swaps and time off needs schedule or approval permission. Your own requests stay under My time off and My swaps."
+            />
           )
         ) : null}
 
@@ -141,8 +173,8 @@ export function SchedulingPanelSheet({
               className="space-y-4"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="personal">My Availability</TabsTrigger>
-                <TabsTrigger value="team">Manage Availability</TabsTrigger>
+                <TabsTrigger value="personal">My hours</TabsTrigger>
+                <TabsTrigger value="team">Team hours</TabsTrigger>
               </TabsList>
               <TabsContent value="personal" className="mt-0">
                 <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
@@ -174,10 +206,7 @@ export function SchedulingPanelSheet({
             />
           ) : (
             <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
-              <TimeOffManagementPanel
-                canApprove={role.canApproveRequests}
-                staffOnly={role.isStaff}
-              />
+              <TimeOffRequestPanel employeeId={role.profileId} />
             </Suspense>
           )
         ) : null}
@@ -194,34 +223,15 @@ export function SchedulingPanelSheet({
             />
           ) : (
             <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
-              <ShiftSwapsPanel
-                canApprove={role.canApproveRequests}
-                staffOnly={role.isStaff}
-              />
+              <ShiftSwapsPanel canApprove={false} staffOnly />
             </Suspense>
           )
         ) : null}
 
         {panel === "workflow" ? (
-          role.isStaff ? null : advancedFeaturesDisabled ? (
-            <FeatureUnavailableCard
-              icon={Settings}
-              title="Automation paused"
-              description="Automations and reminders resume once scheduling data is back online."
-              actionLabel="Retry data sync"
-              onAction={onRetry}
-              disabled={retryDisabled}
-            />
-          ) : (
-            <div className="grid gap-6">
-              <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-                <SchedulingWorkflow />
-              </Suspense>
-              <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
-                <SchedulingNotifications />
-              </Suspense>
-            </div>
-          )
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <ScheduleRemindersPanel canAssignReminders={role.canManageSchedule} />
+          </Suspense>
         ) : null}
       </SheetContent>
     </Sheet>

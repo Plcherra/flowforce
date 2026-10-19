@@ -14,9 +14,10 @@ export function StaffShiftManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Staff Management</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Team requests</h2>
         <p className="text-muted-foreground">
-          Review shift swaps and time off requests from one place.
+          Review other people's shift swaps and time off. Your own hours and
+          requests stay in My availability, My time off, and My swaps.
         </p>
       </div>
 

@@ -112,24 +112,28 @@ function ReadinessPill({
 
 function StaffReadinessPanel({
   locationFilter,
-  profileId,
+  role,
   onAction,
+  onOpenAvailability,
 }: {
   locationFilter?: string;
-  profileId: string | null;
+  role: SchedulingRole;
   onAction?: (target: ReadinessAction) => void;
+  onOpenAvailability?: (view: "personal" | "team") => void;
 }) {
   const { shifts, timeOff, loading, isFallbackData, error } = useScheduling();
+  const profileId = role.profileId;
 
   const myShifts = useMemo(() => {
     const filtered = locationFilter
       ? shifts.filter((shift) => (shift.location ?? "") === locationFilter)
       : shifts;
+    const profileId = role.profileId;
     if (!profileId) return filtered;
     return filtered.filter((shift) =>
       shift.assignments?.some((assignment) => assignment.user_id === profileId),
     );
-  }, [locationFilter, profileId, shifts]);
+  }, [locationFilter, role.profileId, shifts]);
 
   const myShiftCount = myShifts.length;
 
@@ -207,7 +211,11 @@ function StaffReadinessPanel({
           </div>
         )}
 
-        <ScheduleMoreMenu isStaff onAction={onAction} />
+        <ScheduleMoreMenu
+          role={role}
+          onAction={onAction}
+          onOpenAvailability={onOpenAvailability}
+        />
       </div>
 
       {(isFallbackData || error) && (
@@ -228,11 +236,15 @@ function StaffReadinessPanel({
 
 function ManagerReadinessPanel({
   locationFilter,
+  role,
   onAction,
+  onOpenAvailability,
   hoursSummary,
 }: {
   locationFilter?: string;
+  role: SchedulingRole;
   onAction?: (target: ReadinessAction) => void;
+  onOpenAvailability?: (view: "personal" | "team") => void;
   hoursSummary?: HoursSummary;
 }) {
   const {
@@ -359,9 +371,10 @@ function ManagerReadinessPanel({
         )}
 
         <ScheduleMoreMenu
-          isStaff={false}
+          role={role}
           conflicts={summary.conflicts}
           onAction={onAction}
+          onOpenAvailability={onOpenAvailability}
         />
       </div>
 
@@ -384,20 +397,23 @@ function ManagerReadinessPanel({
 export function ScheduleReadinessPanel({
   locationFilter,
   onAction,
+  onOpenAvailability,
   role,
   hoursSummary,
 }: {
   locationFilter?: string;
   onAction?: (target: ReadinessAction) => void;
+  onOpenAvailability?: (view: "personal" | "team") => void;
   role: SchedulingRole;
   hoursSummary?: HoursSummary;
 }) {
-  if (role.isStaff) {
+  if (!role.canManageSchedule) {
     return (
       <StaffReadinessPanel
         locationFilter={locationFilter}
-        profileId={role.profileId}
+        role={role}
         onAction={onAction}
+        onOpenAvailability={onOpenAvailability}
       />
     );
   }
@@ -405,7 +421,9 @@ export function ScheduleReadinessPanel({
   return (
     <ManagerReadinessPanel
       locationFilter={locationFilter}
+      role={role}
       onAction={onAction}
+      onOpenAvailability={onOpenAvailability}
       hoursSummary={hoursSummary}
     />
   );

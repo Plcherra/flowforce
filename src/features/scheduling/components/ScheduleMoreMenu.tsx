@@ -1,10 +1,9 @@
 import {
   ArrowRightLeft,
+  Bell,
   Calendar,
   Clock,
-  LayoutGrid,
   MoreHorizontal,
-  Settings,
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { SchedulingRole } from "../hooks/useSchedulingRole";
+import { scheduleMenuAccess } from "../utils/scheduleMenuAccess";
 import type { SchedulingPanelId } from "../types/panels";
 
 type ReadinessAction = SchedulingPanelId | "schedule" | "reports";
@@ -29,16 +30,22 @@ export type ScheduleConflictNotice = {
 };
 
 interface ScheduleMoreMenuProps {
-  isStaff: boolean;
+  role: SchedulingRole;
   conflicts?: ScheduleConflictNotice[];
   onAction?: (target: ReadinessAction) => void;
+  onOpenAvailability?: (view: "personal" | "team") => void;
 }
 
 export function ScheduleMoreMenu({
-  isStaff,
+  role,
   conflicts = [],
   onAction,
+  onOpenAvailability,
 }: ScheduleMoreMenuProps) {
+  const access = scheduleMenuAccess(role);
+  const showTeam =
+    access.canReviewTeam || access.canManageTeamAvailability;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -57,51 +64,43 @@ export function ScheduleMoreMenu({
           ) : null}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        {isStaff ? (
+      <DropdownMenuContent align="end" className="w-72">
+        <DropdownMenuLabel>You</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => onOpenAvailability?.("personal")}>
+          <Clock className="mr-2 h-4 w-4" />
+          My availability
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAction?.("timeoff")}>
+          <Calendar className="mr-2 h-4 w-4" />
+          My time off
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAction?.("swaps")}>
+          <ArrowRightLeft className="mr-2 h-4 w-4" />
+          My swaps
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAction?.("workflow")}>
+          <Bell className="mr-2 h-4 w-4" />
+          Reminders
+        </DropdownMenuItem>
+
+        {showTeam ? (
           <>
-            <DropdownMenuItem onClick={() => onAction?.("availability")}>
-              <Clock className="mr-2 h-4 w-4" />
-              My availability
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("timeoff")}>
-              <Calendar className="mr-2 h-4 w-4" />
-              Time off
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("swaps")}>
-              <ArrowRightLeft className="mr-2 h-4 w-4" />
-              Swaps
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem onClick={() => onAction?.("staff")}>
-              <Users className="mr-2 h-4 w-4" />
-              Staff management
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("availability")}>
-              <Clock className="mr-2 h-4 w-4" />
-              Availability
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("timeoff")}>
-              <Calendar className="mr-2 h-4 w-4" />
-              Time off
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("swaps")}>
-              <ArrowRightLeft className="mr-2 h-4 w-4" />
-              Shift swaps
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction?.("schedule")}>
-              <LayoutGrid className="mr-2 h-4 w-4" />
-              Go to board
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onAction?.("workflow")}>
-              <Settings className="mr-2 h-4 w-4" />
-              Automation
-            </DropdownMenuItem>
+            <DropdownMenuLabel>Team</DropdownMenuLabel>
+            {access.canReviewTeam ? (
+              <DropdownMenuItem onClick={() => onAction?.("staff")}>
+                <Users className="mr-2 h-4 w-4" />
+                Team requests
+              </DropdownMenuItem>
+            ) : null}
+            {access.canManageTeamAvailability ? (
+              <DropdownMenuItem onClick={() => onOpenAvailability?.("team")}>
+                <Clock className="mr-2 h-4 w-4" />
+                Team availability
+              </DropdownMenuItem>
+            ) : null}
           </>
-        )}
+        ) : null}
 
         {conflicts.length > 0 ? (
           <>

@@ -124,7 +124,7 @@ export function NextGenSchedulingSystem({
     setSmartFillTrigger((count) => count + 1);
   }, [setSmartFillOpen]);
 
-  const isStaffView = schedulingRole.isStaff;
+  const canBuildSchedule = schedulingRole.canManageSchedule;
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden bg-background">
@@ -195,6 +195,7 @@ export function NextGenSchedulingSystem({
         <ScheduleReadinessPanel
           locationFilter={sanitizedLocationFilter}
           onAction={handleReadinessAction}
+          onOpenAvailability={(view) => openPanel("availability", view)}
           role={schedulingRole}
           hoursSummary={hoursSummary}
         />
@@ -207,16 +208,16 @@ export function NextGenSchedulingSystem({
                 onOpenPanel={openPanel}
                 onAutoScheduleClick={() => setShowAutoScheduler(true)}
                 actionsDisabled={actionsDisabled}
-                readOnly={isStaffView}
+                readOnly={!canBuildSchedule}
                 profileId={schedulingRole.profileId}
                 onSuggestFills={handleSuggestFills}
-                smartFillOpen={isStaffView ? undefined : smartFill.open}
-                onToggleSmartFill={isStaffView ? undefined : smartFill.toggle}
+                smartFillOpen={canBuildSchedule ? smartFill.open : undefined}
+                onToggleSmartFill={canBuildSchedule ? smartFill.toggle : undefined}
               />
             </Suspense>
           </div>
 
-          {!isStaffView && (
+          {canBuildSchedule && (
             <div
               className={cn(
                 "min-h-0 shrink-0 overflow-hidden",
@@ -248,7 +249,7 @@ export function NextGenSchedulingSystem({
         onAvailabilityViewChange={handleAvailabilityViewChange}
       />
 
-      {!isStaffView && (
+      {canBuildSchedule && (
         <AutoScheduleDialog
           open={showAutoScheduler}
           onOpenChange={setShowAutoScheduler}

@@ -23,9 +23,9 @@ export interface SchedulingPanel {
 export const SCHEDULING_PANELS: SchedulingPanel[] = [
   {
     id: "staff",
-    label: "Staff Management",
+    label: "Team requests",
     icon: Users,
-    description: "Shift swaps, assignments, and time-off requests",
+    description: "Shift swaps and time off waiting on a decision",
   },
   {
     id: "availability",
@@ -47,9 +47,9 @@ export const SCHEDULING_PANELS: SchedulingPanel[] = [
   },
   {
     id: "workflow",
-    label: "Automation",
+    label: "Reminders",
     icon: Settings,
-    description: "Automated workflows and reminders",
+    description: "Personal reminders and reminders assigned to the team",
   },
 ];
 
