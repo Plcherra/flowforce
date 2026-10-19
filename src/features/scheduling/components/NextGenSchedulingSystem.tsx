@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Calendar } from "lucide-react";
@@ -15,6 +16,7 @@ import { useSchedulingPanels } from "@/features/scheduling/hooks/useSchedulingPa
 import { useSchedulingRole } from "@/features/scheduling/hooks/useSchedulingRole";
 import { useHoursSummary } from "@/features/scheduling/hooks/useHoursSummary";
 import { sanitizeLocationFilter } from "@/features/scheduling/utils/locationFilter";
+import { useSmartFillPanel } from "@/features/scheduling/hooks/useSmartFillPanel";
 import { ScheduleReadinessPanel } from "./ScheduleReadinessPanel";
 import { SchedulingHeader } from "./SchedulingHeader";
 import { SchedulingPanelSheet } from "./SchedulingPanelSheet";
@@ -80,6 +82,8 @@ export function NextGenSchedulingSystem({
 
   const [showAutoScheduler, setShowAutoScheduler] = useState(false);
   const [smartFillTrigger, setSmartFillTrigger] = useState(0);
+  const smartFill = useSmartFillPanel(schedulingRole.profileId);
+  const setSmartFillOpen = smartFill.setOpen;
 
   const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
   const schedulingSetupMissing = isMissingBackendResourceError(
@@ -116,16 +120,17 @@ export function NextGenSchedulingSystem({
   };
 
   const handleSuggestFills = useCallback(() => {
+    setSmartFillOpen(true);
     setSmartFillTrigger((count) => count + 1);
-  }, []);
+  }, [setSmartFillOpen]);
 
   const isStaffView = schedulingRole.isStaff;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <SchedulingHeader role={schedulingRole} onPanelOpen={openPanel} />
+    <div className="flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden bg-background">
+      <SchedulingHeader role={schedulingRole} />
 
-      <div className="flex min-h-0 w-full flex-1 flex-col px-4 py-3 sm:px-6 sm:py-4">
+      <div className="flex min-h-0 w-full flex-1 flex-col px-2 py-1.5 sm:px-3">
         {schedulingSetupMissing ? (
           <FeatureSetupRequiredState
             title="Scheduling module is not fully set up yet"
@@ -194,14 +199,8 @@ export function NextGenSchedulingSystem({
           hoursSummary={hoursSummary}
         />
 
-        <div
-          className={
-            isStaffView
-              ? "mt-3 flex min-h-0 flex-1 flex-col"
-              : "mt-3 flex min-h-0 flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]"
-          }
-        >
-          <div className="flex min-h-0 flex-1 flex-col">
+        <div className="mt-1.5 flex min-h-0 flex-1">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
               <EnhancedCalendarView
                 locationFilter={sanitizedLocationFilter}
@@ -211,17 +210,29 @@ export function NextGenSchedulingSystem({
                 readOnly={isStaffView}
                 profileId={schedulingRole.profileId}
                 onSuggestFills={handleSuggestFills}
+                smartFillOpen={isStaffView ? undefined : smartFill.open}
+                onToggleSmartFill={isStaffView ? undefined : smartFill.toggle}
               />
             </Suspense>
           </div>
 
           {!isStaffView && (
-            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-              <SmartFillSidebar
-                locationFilter={sanitizedLocationFilter}
-                expandTrigger={smartFillTrigger}
-              />
-            </Suspense>
+            <div
+              className={cn(
+                "min-h-0 shrink-0 overflow-hidden",
+                smartFill.inline ? "ml-2 w-[300px]" : "w-0",
+              )}
+            >
+              <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+                <SmartFillSidebar
+                  locationFilter={sanitizedLocationFilter}
+                  expandTrigger={smartFillTrigger}
+                  open={smartFill.open}
+                  useDrawer={!smartFill.canInline}
+                  onOpenChange={smartFill.setOpen}
+                />
+              </Suspense>
+            </div>
           )}
         </div>
       </div>

@@ -858,7 +858,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(conflictsPill).not.toContainText(/^0\s*conflicts/i);
     const conflict = page.locator('[data-testid^="schedule-readiness-conflict-"]').first();
     if (!(await conflict.isVisible())) {
-      await page.getByRole('button', { name: 'Details', exact: true }).click();
+      await page.getByRole('button', { name: 'More options', exact: true }).click();
     }
     await expect(conflict).toContainText(/availability/i);
   });

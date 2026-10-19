@@ -36,7 +36,7 @@ const managerCopyByView: Record<
     title: "No staff shifts to show",
     description:
       "Add shifts on the week board first, then assign teammates from the staff panel or by dragging.",
-    hint: "Open More options for swaps, time off, and availability.",
+    hint: "Open the more menu for swaps, time off, and availability.",
   },
 };
 

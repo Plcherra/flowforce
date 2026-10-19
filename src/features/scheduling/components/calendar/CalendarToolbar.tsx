@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CardHeader } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Settings, Users } from "lucide-react";
+import { formatCount } from "@/features/scheduling/utils/pluralize";
 
 type CalendarToolbarProps = {
   weekSchedules: any[];
@@ -75,11 +76,11 @@ export function CalendarToolbar({
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
 
   return (
-    <CardHeader className="shrink-0 border-b py-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <CardHeader className="shrink-0 border-b px-3 py-1">
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="h-7">
-            {weekSchedules.length} shifts
+          <Badge variant="outline" className="h-6">
+            {formatCount(weekSchedules.length, "shift")}
           </Badge>
           <div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
             <span>{totalHours} hrs</span>
@@ -93,8 +94,14 @@ export function CalendarToolbar({
         <div className="flex flex-wrap items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                View options
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1 px-2"
+                aria-label="View options"
+              >
+                <Settings className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">View options</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -139,7 +146,7 @@ export function CalendarToolbar({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8"
+                className="h-7"
                 onClick={onOpenTimeOffPanel}
               >
                 Request time off
@@ -149,7 +156,7 @@ export function CalendarToolbar({
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8">
+                  <Button variant="outline" size="sm" className="h-7">
                     Actions
                   </Button>
                 </DropdownMenuTrigger>
@@ -192,7 +199,7 @@ export function CalendarToolbar({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" className="h-8">
+                  <Button size="sm" className="h-7">
                     Add
                   </Button>
                 </DropdownMenuTrigger>

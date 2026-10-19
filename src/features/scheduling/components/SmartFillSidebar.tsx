@@ -13,7 +13,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useCopilotScheduler } from "@/features/scheduling/hooks/useCopilotScheduler";
 import type { ScheduleSummary } from "@/features/scheduling/hooks/copilotSchedulerTypes";
@@ -27,23 +26,28 @@ import {
   RefreshCw,
   Sparkles,
   UploadCloud,
+  X,
 } from "lucide-react";
 
 interface SmartFillSidebarProps {
   locationFilter?: string;
   expandTrigger?: number;
+  open: boolean;
+  useDrawer: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function SmartFillSidebar({
   locationFilter,
   expandTrigger = 0,
+  open,
+  useDrawer,
+  onOpenChange,
 }: SmartFillSidebarProps) {
-  const isMobile = useIsMobile();
   const { shifts, timeOff, unavailability, staffAvailability, weekRange, refetchAll } =
     useScheduling();
   const [expanded, setExpanded] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const readiness = useMemo(
@@ -96,13 +100,12 @@ export function SmartFillSidebar({
   const handleSuggestFills = useCallback(async () => {
     setExpanded(true);
     setHasGenerated(true);
-    if (isMobile) {
-      setMobileSheetOpen(true);
-    } else {
+    onOpenChange(true);
+    if (!useDrawer) {
       sidebarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
     await scheduler.regenerate();
-  }, [isMobile, scheduler]);
+  }, [onOpenChange, scheduler, useDrawer]);
 
   useEffect(() => {
     if (expandTrigger > 0) {
@@ -124,14 +127,26 @@ export function SmartFillSidebar({
               current week load.
             </p>
           </div>
-          {hasGenerated && scheduler.lastGeneratedAt ? (
-            <Badge
-              variant="outline"
-              className="shrink-0 text-[10px] uppercase tracking-wide"
+          <div className="flex shrink-0 items-center gap-1">
+            {hasGenerated && scheduler.lastGeneratedAt ? (
+              <Badge
+                variant="outline"
+                className="text-[10px] uppercase tracking-wide"
+              >
+                {format(new Date(scheduler.lastGeneratedAt), "MMM d, HH:mm")}
+              </Badge>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              aria-label="Hide Smart Fill"
+              onClick={() => onOpenChange(false)}
             >
-              {format(new Date(scheduler.lastGeneratedAt), "MMM d, HH:mm")}
-            </Badge>
-          ) : null}
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {!isExpanded ? (
@@ -271,17 +286,15 @@ export function SmartFillSidebar({
               Adds draft shifts to the week board. Publish the full week from
               the board Actions menu when ready.
             </p>
-            {!isMobile && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-muted-foreground"
-                onClick={() => setExpanded(false)}
-              >
-                <ChevronUp className="mr-2 h-4 w-4" />
-                Collapse
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground"
+              onClick={() => setExpanded(false)}
+            >
+              <ChevronUp className="mr-2 h-4 w-4" />
+              Collapse
+            </Button>
           </CardFooter>
         </>
       ) : (
@@ -293,49 +306,26 @@ export function SmartFillSidebar({
             onClick={() => setExpanded(true)}
           >
             <ChevronDown className="mr-2 h-4 w-4" />
-            Show details
+            Show suggestions
           </Button>
         </CardFooter>
       )}
     </>
   );
 
-  if (isMobile) {
+  if (useDrawer) {
     return (
-      <>
-        <div className="fixed bottom-4 right-4 z-40 lg:hidden">
-          <Button
-            size="sm"
-            className="shadow-lg"
-            onClick={() => {
-              setMobileSheetOpen(true);
-              if (!hasGenerated) {
-                void handleSuggestFills();
-              }
-            }}
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            Smart Fill
-            {needsAttention > 0 ? (
-              <Badge variant="secondary" className="ml-2 h-5 px-1.5">
-                {needsAttention}
-              </Badge>
-            ) : null}
-          </Button>
-        </div>
-
-        <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto p-0">
-            <SheetHeader className="border-b px-4 py-3 text-left">
-              <SheetTitle className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Smart Fill
-              </SheetTitle>
-            </SheetHeader>
-            <Card className="border-0 shadow-none">{sidebarBody}</Card>
-          </SheetContent>
-        </Sheet>
-      </>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="w-[min(100%,20rem)] overflow-y-auto p-0">
+          <SheetHeader className="border-b px-4 py-3 text-left">
+            <SheetTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Smart Fill
+            </SheetTitle>
+          </SheetHeader>
+          <Card className="border-0 shadow-none">{sidebarBody}</Card>
+        </SheetContent>
+      </Sheet>
     );
   }
 
@@ -343,7 +333,8 @@ export function SmartFillSidebar({
     <Card
       ref={sidebarRef}
       className={cn(
-        "sticky top-20 self-start max-h-[calc(100dvh-12rem)] overflow-hidden transition-colors",
+        "flex h-full max-h-full flex-col overflow-hidden",
+        !open && "hidden",
         showProminent && needsAttention > 0
           ? "border-amber-300 shadow-sm dark:border-amber-800"
           : undefined,
