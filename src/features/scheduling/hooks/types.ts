@@ -6,7 +6,10 @@ export type TimeOffRequestRow = Tables<"time_off_requests">;
 export type UnavailabilityRow = Tables<"user_unavailability">;
 export type VendorEventRow = Tables<"vendor_event">;
 export type ProfileRow = Tables<"profiles">;
-export type VendorEventWithMetadata = VendorEventRow;
+export type VendorEventWithMetadata = VendorEventRow & {
+  shift_id?: string | null;
+  linked_event_id?: string | null;
+};
 
 export type ProfileSummary = Pick<
   ProfileRow,

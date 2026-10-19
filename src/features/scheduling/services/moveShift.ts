@@ -18,6 +18,7 @@ export interface MoveShiftParams {
     employeeId: string,
     day: Date,
   ) => GridCellAvailability | undefined;
+  moveLinkedEvents?: (shiftId: string, targetDay: Date) => Promise<number>;
 }
 
 export interface MoveShiftResult {
@@ -25,6 +26,7 @@ export interface MoveShiftResult {
   severity: "ok" | "warning" | "blocking";
   reasons: string[];
   noOp?: boolean;
+  movedEventCount?: number;
 }
 
 function reanchorTimes(
@@ -59,6 +61,7 @@ export async function moveShift(params: MoveShiftParams): Promise<MoveShiftResul
     assign,
     unassign,
     getCellAvailability,
+    moveLinkedEvents,
   } = params;
 
   const times = reanchorTimes(shift, targetDay);
@@ -77,6 +80,7 @@ export async function moveShift(params: MoveShiftParams): Promise<MoveShiftResul
 
   let severity: MoveShiftResult["severity"] = "ok";
   const reasons: string[] = [];
+  let movedEventCount = 0;
 
   if (targetEmployeeId && getCellAvailability) {
     const cell = getCellAvailability(targetEmployeeId, targetDay);
@@ -112,6 +116,16 @@ export async function moveShift(params: MoveShiftParams): Promise<MoveShiftResul
       start_time: times.start.toISOString(),
       end_time: times.end.toISOString(),
     });
+    if (moveLinkedEvents) {
+      try {
+        movedEventCount = await moveLinkedEvents(shift.id, times.start);
+      } catch {
+        severity = "warning";
+        reasons.push(
+          "The shift moved, but a linked event stayed on the old day.",
+        );
+      }
+    }
   }
 
   if (employeeChanged) {
@@ -130,5 +144,5 @@ export async function moveShift(params: MoveShiftParams): Promise<MoveShiftResul
     }
   }
 
-  return { ok: true, severity, reasons };
+  return { ok: true, severity, reasons, movedEventCount };
 }

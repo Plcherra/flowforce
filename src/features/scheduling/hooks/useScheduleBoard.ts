@@ -195,6 +195,7 @@ export function useScheduleBoard({
 
   const vendorEventsThisWeek = useMemo(() => {
     return vendorEvents.filter((event) => {
+      if (event.shift_id) return true;
       const eventDate = vendorEventStart(event);
       if (!eventDate) return false;
       return eventDate >= weekStart && eventDate < weekEnd;

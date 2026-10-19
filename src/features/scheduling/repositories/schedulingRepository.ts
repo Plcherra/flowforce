@@ -13,7 +13,9 @@ import type {
   UnavailabilityWithUser,
   VendorEventUpsertInput,
   VendorEventRow,
+  VendorEventWithMetadata,
 } from "@/features/scheduling/hooks/types";
+import { singleShiftByEvent } from "@/features/scheduling/services/followShiftDay";
 import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
 import type {
   AssignScheduleValidationResult,
@@ -149,8 +151,77 @@ export interface SchedulingWeekResult {
   timeOff: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
   staffAvailability: StaffAvailabilityRow[];
-  vendorEvents: VendorEventRow[];
+  vendorEvents: VendorEventWithMetadata[];
   teamMembers: ProfileSummary[];
+}
+
+async function attachShiftLinks(
+  events: VendorEventRow[],
+  shiftIds: string[],
+): Promise<VendorEventWithMetadata[]> {
+  if (shiftIds.length === 0) return events;
+
+  const { data: weekLinks, error: weekLinksError } = await supabase
+    .from("event_shift_links")
+    .select("event_id, shift_id")
+    .in("shift_id", shiftIds);
+  if (weekLinksError) throw weekLinksError;
+
+  const eventIds = [
+    ...new Set(
+      (weekLinks ?? [])
+        .map((link) => link.event_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  if (eventIds.length === 0) return events;
+
+  const [{ data: allLinks, error: allLinksError }, visitsResponse] =
+    await Promise.all([
+      supabase
+        .from("event_shift_links")
+        .select("event_id, shift_id")
+        .in("event_id", eventIds),
+      supabase
+        .from("vendor_visits")
+        .select(
+          "id, company_id, description, end_time, location, service_type, start_time, vendor_name, linked_event_id",
+        )
+        .in("linked_event_id", eventIds),
+    ]);
+  if (allLinksError) throw allLinksError;
+  if (visitsResponse.error) throw visitsResponse.error;
+
+  const shiftByEvent = singleShiftByEvent(allLinks ?? []);
+  const byId = new Map<string, VendorEventWithMetadata>();
+  for (const event of events) {
+    if (event.id) byId.set(event.id, event);
+  }
+
+  for (const visit of visitsResponse.data ?? []) {
+    const shiftId = visit.linked_event_id
+      ? (shiftByEvent.get(visit.linked_event_id) ?? null)
+      : null;
+    const existing = byId.get(visit.id);
+    byId.set(visit.id, {
+      id: visit.id,
+      company_id: visit.company_id,
+      description: visit.description,
+      end_time: visit.end_time,
+      event_date: existing?.event_date ?? visit.start_time?.slice(0, 10) ?? null,
+      event_end_date:
+        existing?.event_end_date ?? visit.end_time?.slice(0, 10) ?? null,
+      location: visit.location,
+      service_type: visit.service_type,
+      start_time: visit.start_time,
+      vendor_name: visit.vendor_name,
+      ...existing,
+      shift_id: shiftId,
+      linked_event_id: visit.linked_event_id,
+    });
+  }
+
+  return [...byId.values()];
 }
 
 function collectIsoWeekStarts(startIso: string, endIso: string) {
@@ -317,9 +388,10 @@ export async function fetchSchedulingWeek(params: {
         : null,
     })) as unknown as UnavailabilityWithUser[];
 
-  const vendorEvents = z
-    .array(vendorEventRowSchema)
-    .parse(vendorEventRows ?? []);
+  const vendorEvents = await attachShiftLinks(
+    z.array(vendorEventRowSchema).parse(vendorEventRows ?? []),
+    schedules.map((schedule) => schedule.id),
+  );
 
   const staffAvailability = z
     .array(staffAvailabilityRowSchema)

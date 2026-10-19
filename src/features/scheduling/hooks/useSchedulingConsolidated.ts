@@ -13,7 +13,7 @@ import type {
   TimeOffWithUser,
   UnavailabilityWithUser,
   VendorEventUpsertInput,
-  VendorEventRow,
+  VendorEventWithMetadata,
   ProfileSummary,
 } from "./types";
 import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
@@ -34,7 +34,7 @@ interface SchedulingConsolidatedResult {
   timeOffRequests: TimeOffWithUser[];
   unavailability: UnavailabilityWithUser[];
   staffAvailability: StaffAvailabilityRow[];
-  vendorEvents: VendorEventRow[];
+  vendorEvents: VendorEventWithMetadata[];
   teamMembers: ProfileSummary[];
   loading: boolean;
   error: string | null;
@@ -56,7 +56,7 @@ interface SchedulingConsolidatedResult {
   ) => Promise<Tables<"schedules"> | null>;
   upsertVendorEvent: (
     payload: VendorEventUpsertInput,
-  ) => Promise<VendorEventRow | null>;
+  ) => Promise<VendorEventWithMetadata | null>;
   isUsingFallbackData: boolean;
 }
 
@@ -87,7 +87,7 @@ export function useSchedulingConsolidated(
   const [staffAvailability, setStaffAvailability] = useState<
     StaffAvailabilityRow[]
   >([]);
-  const [vendorEvents, setVendorEvents] = useState<VendorEventRow[]>([]);
+  const [vendorEvents, setVendorEvents] = useState<VendorEventWithMetadata[]>([]);
   const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
@@ -384,7 +384,7 @@ export type {
   AssignmentWithUser,
   TimeOffWithUser,
   UnavailabilityWithUser,
-  VendorEventRow as VendorEventWithMetadata,
+  VendorEventWithMetadata,
   ProfileSummary,
   ShiftUpsertInput,
   VendorEventUpsertInput,

@@ -12,6 +12,10 @@ const importTs = jiti(import.meta.url, {
 const { runMoveShiftTests } = importTs(
   "../src/features/scheduling/services/moveShift.test.ts",
 );
+const { runFollowShiftDayTests } = importTs(
+  "../src/features/scheduling/services/followShiftDay.test.ts",
+);
 
 await runMoveShiftTests();
+runFollowShiftDayTests();
 console.log("moveShift tests passed");
