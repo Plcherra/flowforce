@@ -8,7 +8,7 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Settings,
+  Sparkles,
 } from "lucide-react";
 import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
@@ -38,6 +38,8 @@ interface EnhancedCalendarViewProps {
   actionsDisabled?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
+  smartFillOpen?: boolean;
+  onToggleSmartFill?: () => void;
 }
 
 export function EnhancedCalendarView({
@@ -48,6 +50,8 @@ export function EnhancedCalendarView({
   actionsDisabled = false,
   readOnly = false,
   profileId = null,
+  smartFillOpen = false,
+  onToggleSmartFill,
 }: EnhancedCalendarViewProps) {
   const { shifts, loading, setWeekReference, weekRange } = useScheduling();
   const isMobile = useIsMobile();
@@ -136,22 +140,22 @@ export function EnhancedCalendarView({
   return (
     <div id="schedule-board" className="flex min-h-0 flex-1 flex-col">
       <Card className="flex min-h-0 flex-1 flex-col">
-        <CardHeader className="shrink-0 space-y-2 py-2">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
+        <CardHeader className="shrink-0 space-y-0 px-3 py-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 p-0"
                   aria-label="Previous period"
                   onClick={() => navigateDate("prev")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
-                <div className="min-w-[180px] px-1 text-center">
-                  <h2 className="text-base font-semibold">
+                <div className="min-w-[9.5rem] px-1 text-center">
+                  <h2 className="text-sm font-semibold">
                     {getDateRangeText()}
                   </h2>
                 </div>
@@ -159,7 +163,7 @@ export function EnhancedCalendarView({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 p-0"
                   aria-label="Next period"
                   onClick={() => navigateDate("next")}
                 >
@@ -170,20 +174,20 @@ export function EnhancedCalendarView({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8"
+                className="h-7 px-2"
                 onClick={() => setSelectedDate(new Date())}
               >
                 Today
               </Button>
 
-              <Badge variant="outline" className="h-7">
+              <Badge variant="outline" className="h-6">
                 {loading
                   ? "Loading…"
                   : `${filteredShifts.length} shift${filteredShifts.length === 1 ? "" : "s"}`}
               </Badge>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               {availableViews.map((view) => {
                 const config = viewConfig[view];
                 const Icon = config.icon;
@@ -192,7 +196,7 @@ export function EnhancedCalendarView({
                     key={view}
                     variant={currentView === view ? "default" : "outline"}
                     size="sm"
-                    className="h-8 gap-1.5"
+                    className="h-7 gap-1 px-2"
                     aria-label={config.label}
                     onClick={() => setCurrentView(view)}
                   >
@@ -202,35 +206,45 @@ export function EnhancedCalendarView({
                 );
               })}
 
-              {!readOnly && (
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Settings className="h-4 w-4" />
+              {onToggleSmartFill ? (
+                <Button
+                  type="button"
+                  variant={smartFillOpen ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 gap-1 px-2"
+                  aria-pressed={smartFillOpen}
+                  aria-label="Smart Fill"
+                  title={smartFillOpen ? "Hide Smart Fill" : "Show Smart Fill"}
+                  onClick={onToggleSmartFill}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Smart Fill</span>
                 </Button>
+              ) : null}
+
+              {!readOnly && (
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-sm bg-green-500" />
+                    Published
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-sm bg-yellow-500" />
+                    Draft
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-sm bg-red-500" />
+                    Understaffed
+                  </span>
+                </div>
               )}
             </div>
           </div>
-
-          {!readOnly && (
-            <div className="flex flex-wrap items-center gap-3 border-t pt-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="h-2.5 w-2.5 rounded bg-green-500" />
-                <span>Published</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="h-2.5 w-2.5 rounded bg-yellow-500" />
-                <span>Draft</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="h-2.5 w-2.5 rounded bg-red-500" />
-                <span>Understaffed</span>
-              </div>
-            </div>
-          )}
         </CardHeader>
 
         <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {loading ? (
-            <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="flex min-h-0 flex-1 items-center justify-center">
               <div className="text-center">
                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
                 <p className="mt-2 text-sm text-muted-foreground">

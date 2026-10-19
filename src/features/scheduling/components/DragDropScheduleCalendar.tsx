@@ -236,7 +236,7 @@ export function DragDropScheduleCalendar({
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] flex-col lg:min-h-[calc(100dvh-220px)]">
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="space-y-4 p-4">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-72 w-full" />
@@ -323,7 +323,7 @@ export function DragDropScheduleCalendar({
           <div
             ref={gridScrollRef}
             data-testid="schedule-grid-scroll"
-            className="min-h-[60vh] flex-1 overflow-auto lg:min-h-[calc(100dvh-220px)]"
+            className="min-h-0 flex-1 overflow-auto"
           >
             <DndContext
               sensors={sensors}
