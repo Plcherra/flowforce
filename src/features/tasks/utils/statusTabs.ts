@@ -26,6 +26,8 @@ export function generateStatusTabs(
   const tabs: StatusTab[] = [{ value: "all", label: "All", count: totalTasks }];
 
   KNOWN_STATUSES.forEach((status) => {
+    // "completed" is the value new writes store. It is not a second tab.
+    if (status === "completed") return;
     tabs.push({
       value: status,
       label: STATUS_LABELS[status],

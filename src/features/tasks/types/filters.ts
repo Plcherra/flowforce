@@ -2,6 +2,8 @@
  * Types for task filtering
  */
 
+// `completed` stays in the stored status list. The Tasks page shows it on the
+// Done tab with `done` and keeps writing `completed` from the status buttons.
 export const KNOWN_STATUSES = [
   "todo",
   "in_progress",

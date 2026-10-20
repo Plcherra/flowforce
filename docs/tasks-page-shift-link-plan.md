@@ -79,11 +79,11 @@ Files:
 - `src/features/tasks/utils/taskFiltering.ts`
 - `src/features/tasks/types/filters.ts` only if the tab value list needs a comment
 
-- [ ] The status tabs show one Done tab, not both Done and Completed.
-- [ ] That tab's count is the number of tasks whose status is `done` or `completed`.
-- [ ] Selecting Done shows both statuses.
-- [ ] Badges still say Done for `completed`. Keep writing `completed` from the status buttons.
-- [ ] Do not rename stored `done` rows.
+- [x] The status tabs show one Done tab, not both Done and Completed.
+- [x] That tab's count is the number of tasks whose status is `done` or `completed`.
+- [x] Selecting Done shows both statuses.
+- [x] Badges still say Done for `completed`. Keep writing `completed` from the status buttons.
+- [x] Do not rename stored `done` rows.
 
 Acceptance: a list with one `done` task and one `completed` task shows a Done count of 2 and no second completed tab.
 

@@ -18,7 +18,9 @@ export function calculateTasksByStatus(
   return tasks.reduce<Record<KnownTaskStatus | "other", number>>(
     (acc, task) => {
       const key = normalizeStatus(task.status);
-      acc[key] = (acc[key] ?? 0) + 1;
+      // Stored "completed" rows share the Done tab with "done".
+      const bucket = key === "completed" ? "done" : key;
+      acc[bucket] = (acc[bucket] ?? 0) + 1;
       return acc;
     },
     {} as Record<KnownTaskStatus | "other", number>,

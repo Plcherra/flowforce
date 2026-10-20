@@ -40,7 +40,9 @@ export function filterTasks(
         ? true
         : statusFilter === "other"
           ? normalizedStatus === "other"
-          : normalizedStatus === statusFilter;
+          : statusFilter === "done" || statusFilter === "completed"
+            ? normalizedStatus === "done" || normalizedStatus === "completed"
+            : normalizedStatus === statusFilter;
 
     const matchesPriority =
       priorityFilter === "all"
