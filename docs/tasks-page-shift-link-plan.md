@@ -43,13 +43,13 @@ The Tasks card (`TaskCard`) and details dialog (`TaskDetailsDialog`) do not read
 
 ## Phase 1: Read a shift link
 
-- [ ] Add `src/features/tasks/utils/scheduleTaskLink.ts`.
-- [ ] `readScheduleTaskLink(task)` returns `{ scheduleId, shiftTitle, href }` when `source === "schedule"` and `links.schedule_id` is a non-empty string. Otherwise it returns null.
-- [ ] Accept `links` as an object. Ignore arrays and other shapes.
-- [ ] `href` is `/app/enhanced-scheduling?shift=<scheduleId>`.
-- [ ] `shiftTitle` is `links.shift_title` when that is a non-empty string, otherwise `"Shift"`.
-- [ ] `dueDateFromShiftEnd(endIso)` returns `yyyy-MM-dd` in local time. Return null for a missing or invalid time. Do not use `toISOString().slice(0, 10)`.
-- [ ] Add `src/features/tasks/utils/scheduleTaskLink.test.ts` and run it with the same jiti style as `scripts/test-move-shift.mjs`.
+- [x] Add `src/features/tasks/utils/scheduleTaskLink.ts`.
+- [x] `readScheduleTaskLink(task)` returns `{ scheduleId, shiftTitle, href }` when `source === "schedule"` and `links.schedule_id` is a non-empty string. Otherwise it returns null.
+- [x] Accept `links` as an object. Ignore arrays and other shapes.
+- [x] `href` is `/app/enhanced-scheduling?shift=<scheduleId>`.
+- [x] `shiftTitle` is `links.shift_title` when that is a non-empty string, otherwise `"Shift"`.
+- [x] `dueDateFromShiftEnd(endIso)` returns `yyyy-MM-dd` in local time. Return null for a missing or invalid time. Do not use `toISOString().slice(0, 10)`.
+- [x] Add `src/features/tasks/utils/scheduleTaskLink.test.ts` and run it with the same jiti style as `scripts/test-move-shift.mjs`.
 
 Acceptance: a schedule task with a shift id produces a link. A normal task returns null. An overnight end keeps the local calendar date.
 
