@@ -119,11 +119,11 @@ Acceptance: moving a shift to another day changes the linked task due date. Movi
 
 ## Phase 6: Check and ship
 
-- [ ] `npm run typecheck:src`
-- [ ] The new node tests for the link helper, the Done tab count, and the due-date helper.
-- [ ] Do not restore a schedule UI preview harness.
-- [ ] Do not require a signed-in browser pass in this environment. Say that the live check is a refresh of flowforce.uk.
-- [ ] Push `main`.
+- [x] `npm run typecheck:src`
+- [x] The new node tests for the link helper, the Done tab count, and the due-date helper.
+- [x] Do not restore a schedule UI preview harness.
+- [x] Do not require a signed-in browser pass in this environment. Say that the live check is a refresh of flowforce.uk.
+- [x] Push `main`.
 
 ## Out of scope
 
