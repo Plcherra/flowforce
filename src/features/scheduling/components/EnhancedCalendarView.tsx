@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,8 @@ import { ShiftDetailsPanel } from "./ShiftDetailsPanel";
 import { ScheduleEmptyState } from "./ScheduleEmptyState";
 import type { SchedulingPanelId } from "../types/panels";
 import { useScheduling } from "@/contexts/SchedulingContext";
+import { useSearchParams } from "@/lib/router-adapter";
+import { supabase } from "@/integrations/supabase/client";
 import {
   format,
   addWeeks,
@@ -55,9 +57,109 @@ export function EnhancedCalendarView({
 }: EnhancedCalendarViewProps) {
   const { shifts, loading, setWeekReference, weekRange } = useScheduling();
   const isMobile = useIsMobile();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedShiftId = searchParams.get("shift");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedShift, setSelectedShift] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewMode>("week");
+  const dismissedShiftIdRef = useRef<string | null>(null);
+  const openedShiftIdRef = useRef<string | null>(null);
+  const pendingShiftWeekRef = useRef<{
+    shiftId: string;
+    weekStart: number;
+    shiftsSnapshot: typeof shifts;
+  } | null>(null);
+
+  const clearShiftParam = useCallback(() => {
+    setSearchParams((prev) => {
+      if (!prev.get("shift")) return prev;
+      const next = new URLSearchParams(prev);
+      next.delete("shift");
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const closeShiftSheet = useCallback(() => {
+    if (requestedShiftId) {
+      dismissedShiftIdRef.current = requestedShiftId;
+    }
+    setSelectedShift(null);
+    clearShiftParam();
+  }, [clearShiftParam, requestedShiftId]);
+
+  useEffect(() => {
+    if (!requestedShiftId) {
+      dismissedShiftIdRef.current = null;
+      openedShiftIdRef.current = null;
+      pendingShiftWeekRef.current = null;
+      return;
+    }
+    if (
+      dismissedShiftIdRef.current === requestedShiftId ||
+      openedShiftIdRef.current === requestedShiftId
+    ) {
+      return;
+    }
+    if (loading) return;
+
+    if (shifts.some((shift) => shift.id === requestedShiftId)) {
+      pendingShiftWeekRef.current = null;
+      openedShiftIdRef.current = requestedShiftId;
+      setSelectedShift(requestedShiftId);
+      return;
+    }
+
+    const pending = pendingShiftWeekRef.current;
+    if (pending?.shiftId === requestedShiftId) {
+      const weekReady =
+        startOfWeek(weekRange.start).getTime() === pending.weekStart;
+      const shiftsUpdated = shifts !== pending.shiftsSnapshot;
+      if (!weekReady || !shiftsUpdated) return;
+      pendingShiftWeekRef.current = null;
+      clearShiftParam();
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from("schedules")
+        .select("start_time")
+        .eq("id", requestedShiftId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data?.start_time) {
+        if (!error) clearShiftParam();
+        return;
+      }
+      const start = new Date(data.start_time);
+      if (Number.isNaN(start.getTime())) {
+        clearShiftParam();
+        return;
+      }
+      const targetWeek = startOfWeek(start).getTime();
+      if (targetWeek === startOfWeek(weekRange.start).getTime()) {
+        clearShiftParam();
+        return;
+      }
+      pendingShiftWeekRef.current = {
+        shiftId: requestedShiftId,
+        weekStart: targetWeek,
+        shiftsSnapshot: shifts,
+      };
+      setSelectedDate(start);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    clearShiftParam,
+    loading,
+    requestedShiftId,
+    shifts,
+    weekRange.start,
+  ]);
 
   const availableViews = readOnly
     ? (["week"] as CalendarViewMode[])
@@ -309,10 +411,7 @@ export function EnhancedCalendarView({
       </Card>
 
       {selectedShift && (
-        <Sheet
-          open={!!selectedShift}
-          onOpenChange={() => setSelectedShift(null)}
-        >
+        <Sheet open={!!selectedShift} onOpenChange={() => closeShiftSheet()}>
           <SheetContent
             side="right"
             hideClose
@@ -320,7 +419,7 @@ export function EnhancedCalendarView({
           >
             <ShiftDetailsPanel
               shiftId={selectedShift}
-              onClose={() => setSelectedShift(null)}
+              onClose={closeShiftSheet}
             />
           </SheetContent>
         </Sheet>

@@ -94,11 +94,11 @@ Files:
 - `src/features/scheduling/components/EnhancedCalendarView.tsx`
 - `src/features/scheduling/pages/EnhancedScheduling.tsx` only if the query param is read higher up
 
-- [ ] `?shift=<id>` opens `ShiftDetailsPanel` for that id.
-- [ ] Closing the sheet removes `shift` from the URL and leaves `panel` and `availability` alone.
-- [ ] If that shift is already in the loaded week, open it directly.
-- [ ] If it is not in the loaded week, read that schedule's `start_time` and move the week to the week that contains it, then open the sheet.
-- [ ] An unknown id does not trap the page. Drop the param and stay on the schedule.
+- [x] `?shift=<id>` opens `ShiftDetailsPanel` for that id.
+- [x] Closing the sheet removes `shift` from the URL and leaves `panel` and `availability` alone.
+- [x] If that shift is already in the loaded week, open it directly.
+- [x] If it is not in the loaded week, read that schedule's `start_time` and move the week to the week that contains it, then open the sheet.
+- [x] An unknown id does not trap the page. Drop the param and stay on the schedule.
 
 Acceptance: from a task, Open shift lands on the schedule with that shift sheet open. Closing the sheet leaves the week board usable.
 
