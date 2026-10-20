@@ -62,11 +62,11 @@ Files:
 - `src/features/tasks/components/TaskDetailsDialog.tsx`
 - `src/features/tasks/utils/taskFiltering.ts`
 
-- [ ] Replace the page subtitle with: `Today's work, including tasks that came from a shift.`
-- [ ] On a linked task, the card shows a `Schedule` badge and the shift title.
-- [ ] The details dialog shows the same badge, the shift title, and a link labeled `Open shift` to `href`.
-- [ ] Search matches the shift title as well as the title, description, goal, and assignee.
-- [ ] Tasks with no schedule link look the same as they do now.
+- [x] Replace the page subtitle with: `Today's work, including tasks that came from a shift.`
+- [x] On a linked task, the card shows a `Schedule` badge and the shift title.
+- [x] The details dialog shows the same badge, the shift title, and a link labeled `Open shift` to `href`.
+- [x] Search matches the shift title as well as the title, description, goal, and assignee.
+- [x] Tasks with no schedule link look the same as they do now.
 
 Acceptance: a schedule task is recognizable in the list and the dialog. A manual task has no Schedule badge and no Open shift link.
 

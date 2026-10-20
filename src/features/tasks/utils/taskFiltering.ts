@@ -4,12 +4,15 @@
 
 import type { TaskStatusFilter, TaskPriorityFilter } from "../types/filters";
 import { normalizeStatus, normalizePriority } from "./normalization";
+import { readScheduleTaskLink } from "./scheduleTaskLink";
 
 interface Task {
   title?: string | null;
   description?: string | null;
   status?: string | null;
   priority?: string | null;
+  source?: string | null;
+  links?: unknown;
   goal?: { title?: string | null } | null;
   assignedprofile?: {
     first_name?: string | null;
@@ -46,8 +49,9 @@ export function filterTasks(
           ? normalizedPriority === "other"
           : normalizedPriority === priorityFilter;
 
+    const shiftTitle = readScheduleTaskLink(task)?.shiftTitle ?? "";
     const matchesSearch = search
-      ? `${task.title ?? ""} ${task.description ?? ""} ${task.goal?.title ?? ""} ${task.assignedprofile ? `${task.assignedprofile.first_name} ${task.assignedprofile.last_name}` : ""}`
+      ? `${task.title ?? ""} ${task.description ?? ""} ${task.goal?.title ?? ""} ${shiftTitle} ${task.assignedprofile ? `${task.assignedprofile.first_name} ${task.assignedprofile.last_name}` : ""}`
           .toLowerCase()
           .includes(search)
       : true;

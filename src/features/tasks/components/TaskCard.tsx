@@ -19,6 +19,7 @@ import {
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
+import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
 import type { SelectionHandlers } from "../hooks/useTaskSelection";
 
 interface TaskCardProps {
@@ -34,6 +35,8 @@ export function TaskCard({
   highlighted,
   selectionHandlers,
 }: TaskCardProps) {
+  const scheduleLink = readScheduleTaskLink(task);
+
   return (
     <Card
       key={task.id}
@@ -67,6 +70,7 @@ export function TaskCard({
               <Badge className={getTaskStatusBadgeClass(task.status)}>
                 {getTaskStatusLabel(task.status)}
               </Badge>
+              {scheduleLink ? <Badge variant="outline">Schedule</Badge> : null}
             </div>
             {dueBadge && (
               <Badge
@@ -101,6 +105,11 @@ export function TaskCard({
               <Flag className="h-4 w-4" />
               <span className="capitalize">{task.priority ?? "not set"}</span>
             </div>
+            {scheduleLink ? (
+              <div className="flex items-center gap-1">
+                <span>{scheduleLink.shiftTitle}</span>
+              </div>
+            ) : null}
             {task.goal && (
               <div className="flex items-center gap-1">
                 <Target className="h-4 w-4" />

@@ -30,6 +30,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
+import Link from "next/link";
 import {
   useTasks,
   TASK_STATUS_TRANSITIONS,
@@ -49,6 +50,7 @@ import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
 import { useTaskComments } from "@/features/tasks/hooks";
 import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { logger } from "@/utils/logger";
+import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
 
 type ButtonVariant = "default" | "secondary" | "outline";
 interface TaskDetailsDialogProps {
@@ -481,6 +483,8 @@ export function TaskDetailsDialog({
 
   if (!currentTask) return null;
 
+  const scheduleLink = readScheduleTaskLink(currentTask);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[720px] max-h-[85vh] overflow-y-auto">
@@ -495,6 +499,20 @@ export function TaskDetailsDialog({
                   {currentTask.description}
                 </DialogDescription>
               )}
+              {scheduleLink ? (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Badge variant="outline">Schedule</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {scheduleLink.shiftTitle}
+                  </span>
+                  <Link
+                    href={scheduleLink.href}
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Open shift
+                  </Link>
+                </div>
+              ) : null}
             </div>
             <div className="flex items-center space-x-2">
               <div

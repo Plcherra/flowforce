@@ -135,8 +135,7 @@ export default function Tasks() {
             Tasks
           </h1>
           <p className="text-muted-foreground">
-            Manage and track work across your projects with filters built for
-            quick focus.
+            {"Today's work, including tasks that came from a shift."}
           </p>
         </div>
         <div
