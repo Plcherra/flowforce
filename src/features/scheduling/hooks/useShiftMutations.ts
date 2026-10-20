@@ -23,6 +23,7 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cancelTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
 import type { ShiftInsertPayload, SchedulingMutationOptions } from "../types/mutations";
 import type { ShiftUpsertInput } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
@@ -159,6 +160,7 @@ export function useShiftMutations({
 
       try {
         ensureCompanyContext();
+        await cancelTasksForShift(id);
         const { error: deleteError } = await supabase
           .from("schedules")
           .delete()

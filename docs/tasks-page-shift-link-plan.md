@@ -106,14 +106,14 @@ Acceptance: from a task, Open shift lands on the schedule with that shift sheet 
 
 Add `src/features/tasks/repositories/scheduleTaskSync.ts`.
 
-- [ ] `refreshTasksForShift(shiftId)` loads that schedule's `end_time` and assignment `user_id`s. It updates rows where `source` is `schedule` and `links->>schedule_id` equals the shift id.
-- [ ] The update sets `due_date` from `dueDateFromShiftEnd` and `assigned_to` to the first assignee, or null when the shift has nobody. It does not change title, description, priority, or status.
-- [ ] `cancelTasksForShift(shiftId)` sets those same rows to `status: "cancelled"`. It does not delete them.
-- [ ] Call `refreshTasksForShift` after a successful drag move in `useShiftDragDrop`, and after a successful save in `ShiftDetailsPanel.handleSave`.
-- [ ] Call `cancelTasksForShift` before `deleteSchedule` removes the shift. If the cancel fails, do not delete the shift.
-- [ ] A shift with no linked tasks is a no-op.
-- [ ] Failure to refresh after a move shows a warning toast: `The shift moved, but its tasks still have the old day.` The shift move itself still stands.
-- [ ] Do not add a success toast for the task sync.
+- [x] `refreshTasksForShift(shiftId)` loads that schedule's `end_time` and assignment `user_id`s. It updates rows where `source` is `schedule` and `links->>schedule_id` equals the shift id.
+- [x] The update sets `due_date` from `dueDateFromShiftEnd` and `assigned_to` to the first assignee, or null when the shift has nobody. It does not change title, description, priority, or status.
+- [x] `cancelTasksForShift(shiftId)` sets those same rows to `status: "cancelled"`. It does not delete them.
+- [x] Call `refreshTasksForShift` after a successful drag move in `useShiftDragDrop`, and after a successful save in `ShiftDetailsPanel.handleSave`.
+- [x] Call `cancelTasksForShift` before `deleteSchedule` removes the shift. If the cancel fails, do not delete the shift.
+- [x] A shift with no linked tasks is a no-op.
+- [x] Failure to refresh after a move shows a warning toast: `The shift moved, but its tasks still have the old day.` The shift move itself still stands.
+- [x] Do not add a success toast for the task sync.
 
 Acceptance: moving a shift to another day changes the linked task due date. Moving it onto one person sets that person. Removing the last person clears the assignee. Deleting the shift marks the task cancelled and the task remains on the Tasks page under Cancelled.
 

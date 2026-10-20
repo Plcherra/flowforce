@@ -13,6 +13,7 @@ import type { GridCellAvailability } from "@/types/platform";
 import type { SchedulingMutationOptions } from "@/features/scheduling/types/mutations";
 import { moveShift } from "@/features/scheduling/services/moveShift";
 import { ShiftChipOverlay } from "@/features/scheduling/components/drag-drop/ShiftChip";
+import { refreshTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
 
 interface UseShiftDragDropParams {
   enabled: boolean;
@@ -116,6 +117,16 @@ export function useShiftDragDrop({
           variant: "destructive",
         });
         return;
+      }
+
+      try {
+        await refreshTasksForShift(shift.id);
+      } catch {
+        toast({
+          title: "Tasks not updated",
+          description:
+            "The shift moved, but its tasks still have the old day.",
+        });
       }
 
       void refetchAll();

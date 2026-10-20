@@ -16,7 +16,11 @@ const { runScheduleTaskLinkTests } = importTs(
 const { runDoneTabTests } = importTs(
   "../src/features/tasks/utils/statusTabs.test.ts",
 );
+const { runScheduleTaskSyncTests } = importTs(
+  "../src/features/tasks/repositories/scheduleTaskSync.test.ts",
+);
 
 runScheduleTaskLinkTests();
 runDoneTabTests();
+runScheduleTaskSyncTests();
 console.log("scheduleTaskLink tests passed");

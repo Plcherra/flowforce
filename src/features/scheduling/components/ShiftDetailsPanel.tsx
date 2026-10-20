@@ -46,6 +46,7 @@ import {
   deleteTaskRow,
   insertTask,
 } from "@/features/tasks/repositories/tasksRepository";
+import { refreshTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
 import type {
   CopilotDraftWarning,
   CopilotScheduleMetadata,
@@ -294,12 +295,27 @@ export function ShiftDetailsPanel({
     setLoading(true);
     try {
       const nextStart = new Date(formData.start_time);
-      await updateSchedule(shift.id, {
+      const saved = await updateSchedule(shift.id, {
         ...formData,
         hourly_rate: parseHourlyRate(formData.hourly_rate),
         start_time: nextStart.toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
       });
+      if (saved) {
+        try {
+          await refreshTasksForShift(shift.id);
+        } catch (error) {
+          logger.error("Failed to refresh tasks for shift", {
+            error,
+            tags: ["error"],
+          });
+          toast({
+            title: "Tasks not updated",
+            description:
+              "The shift moved, but its tasks still have the old day.",
+          });
+        }
+      }
 
       const draft = taskDraftRef.current;
       if (draft?.title.trim()) {
