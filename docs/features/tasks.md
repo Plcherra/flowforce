@@ -241,7 +241,7 @@ Prove: Skip. Do not add a test until the Open question "Missed form, missed item
 
 ### Phase 9 — Link a handover task to the next opening
 
-- [ ] Blocked by Open question "Next opening checklist or shift". Skip this phase. Do not look up an opening checklist or a shift for a handover task.
+- [x] Blocked by Open question "Next opening checklist or shift". Skip this phase. Do not look up an opening checklist or a shift for a handover task.
 
 Prove: Skip. Do not add a test until the Open question "Next opening checklist or shift" is answered.
 
@@ -404,3 +404,9 @@ Questions: none.
 Skipped. Blocked by Open question "Missed form, missed item, or reported issue". No detector was added, and no checklist task is inserted from a form result. No test was added.
 
 Questions: The phase needs the Open question "Missed form, missed item, or reported issue" answered: what counts as a missed form, a missed item, or a reported issue, and who the task is assigned to.
+
+### 2026-10-21 — Phase 9 Link a handover task to the next opening
+
+Skipped. Blocked by Open question "Next opening checklist or shift". A handover task is not matched to an opening checklist or a shift. No test was added.
+
+Questions: The phase needs the Open question "Next opening checklist or shift" answered.
