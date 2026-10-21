@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,7 +24,13 @@ import { formatDistanceToNow } from "date-fns";
 import { logger } from "@/utils/logger";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export function NotificationsPanel() {
+export function NotificationsPanel({
+  embedded = false,
+  onUnreadCount,
+}: {
+  embedded?: boolean;
+  onUnreadCount?: (count: number) => void;
+}) {
   const {
     notifications,
     unreadCount,
@@ -107,6 +113,10 @@ export function NotificationsPanel() {
     return null;
   };
 
+  useEffect(() => {
+    onUnreadCount?.(unreadCount);
+  }, [onUnreadCount, unreadCount]);
+
   const handleNotificationClick = async (notification: any) => {
     if (!notification.read_at) {
       await markAsRead(notification.id);
@@ -120,24 +130,8 @@ export function NotificationsPanel() {
     }
   };
 
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative">
-          {unreadCount > 0 ? (
-            <BellRing className="h-5 w-5" />
-          ) : (
-            <Bell className="h-5 w-5" />
-          )}
-          {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <Card className="border-0 shadow-lg">
+  const inbox = (
+        <Card className={embedded ? "border-0 shadow-none" : "border-0 shadow-lg"}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Notifications</CardTitle>
@@ -154,7 +148,7 @@ export function NotificationsPanel() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="h-80">
+            <ScrollArea className={embedded ? "h-56" : "h-80"}>
               {error && (
                 <div className="px-4">
                   <Alert variant="destructive">
@@ -250,6 +244,28 @@ export function NotificationsPanel() {
             </ScrollArea>
           </CardContent>
         </Card>
+  );
+
+  if (embedded) return inbox;
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="sm" className="relative" aria-label="Notifications">
+          {unreadCount > 0 ? (
+            <BellRing className="h-5 w-5" />
+          ) : (
+            <Bell className="h-5 w-5" />
+          )}
+          {unreadCount > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="end">
+        {inbox}
       </PopoverContent>
     </Popover>
   );
