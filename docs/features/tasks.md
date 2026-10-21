@@ -235,7 +235,7 @@ Prove: Unit test `src/features/forms/utils/handoverTask.test.ts` covers the titl
 
 ### Phase 8 — Missed form, missed item, or reported issue
 
-- [ ] Blocked by Open question "Missed form, missed item, or reported issue". Skip this phase. Do not add a detector and do not insert checklist tasks from a form result.
+- [x] Blocked by Open question "Missed form, missed item, or reported issue". Skip this phase. Do not add a detector and do not insert checklist tasks from a form result.
 
 Prove: Skip. Do not add a test until the Open question "Missed form, missed item, or reported issue" is answered.
 
@@ -398,3 +398,9 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-21 — Phase 8 Missed form, missed item, or reported issue
+
+Skipped. Blocked by Open question "Missed form, missed item, or reported issue". No detector was added, and no checklist task is inserted from a form result. No test was added.
+
+Questions: The phase needs the Open question "Missed form, missed item, or reported issue" answered: what counts as a missed form, a missed item, or a reported issue, and who the task is assigned to.
