@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+
+# Feature workflow
+
+When the task says "next phase":
+
+1. Read `docs/roadmap.md`.
+2. Open only the feature file marked active.
+3. Implement the next unchecked phase in that file.
+4. Follow that phase's rules and its done-when.
+5. Append a dated entry to that file's Progress log: what shipped, commits, blockers, and questions that came up.
+
+Never guess an Open question. If a phase is blocked by one, skip that phase and log the skip.
+
+Old history is in git. Do not recreate it.

@@ -1,6 +1,6 @@
 # Tasks page: show shift tasks and keep them current
 
-**Status:** Ready to execute. Do not redesign the schedule page.
+**Status:** done. Do not redesign the schedule page.
 
 **When this file is the task, implement every unchecked phase in order. Do not ask which phase to do. Do not stop to confirm the decisions below. Stop only when a phase check fails, and then fix that phase before continuing.**
 
