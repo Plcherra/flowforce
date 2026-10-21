@@ -529,7 +529,7 @@ Prove: Skip. Do not add a test until the Open question "Time off policies" is an
 
 ### Phase 24 — Repeating weekday patterns
 
-- [ ] Blocked by Open question "Repeating weekday patterns". Skip this phase. Do not store "2 Sundays in the month" or alternating Saturdays.
+- [x] Blocked by Open question "Repeating weekday patterns". Skip this phase. Do not store "2 Sundays in the month" or alternating Saturdays.
 
 Prove: Skip. Do not add a test until the Open question "Repeating weekday patterns" is answered.
 
@@ -831,3 +831,9 @@ Questions: none. Phone steps: none. This phase is the column and the generated t
 Skipped. Blocked by Open question "Time off policies". No allowance math and no policy tab were added. No test was added.
 
 Questions: The phase needs the Open question "Time off policies" answered: how several policies combine into one allowance, and whether the notice period is a company number and where it is edited.
+
+### 2026-10-21 — Phase 24 Repeating weekday patterns
+
+Skipped. Blocked by Open question "Repeating weekday patterns". Did not store "2 Sundays in the month" or alternating Saturdays. No test was added.
+
+Questions: The phase needs the Open question "Repeating weekday patterns" answered.
