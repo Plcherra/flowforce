@@ -80,6 +80,7 @@ export function SchedulingPanelSheet({
   onRetry,
   onAvailabilityViewChange,
 }: SchedulingPanelSheetProps) {
+  const fullWidthAvailability = panel === "availability";
   const panelMeta = SCHEDULING_PANELS.find((entry) => entry.id === panel);
   const Icon = panel ? panelIcons[panel] : Users;
 
@@ -121,7 +122,11 @@ export function SchedulingPanelSheet({
     <Sheet open={panel !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        className="w-full overflow-y-auto p-4 sm:max-w-2xl sm:p-6"
+        data-testid="scheduling-panel-sheet"
+        data-panel-width={fullWidthAvailability ? "full" : "narrow"}
+        className={`w-full overflow-y-auto p-4 sm:p-6 ${
+          fullWidthAvailability ? "sm:max-w-none" : "sm:max-w-2xl"
+        }`}
       >
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2">

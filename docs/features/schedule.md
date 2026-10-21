@@ -212,7 +212,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 5 — Full-width availability sheet
 
-- [ ] Stop opening My availability in the narrow side sheet.
+- [x] Stop opening My availability in the narrow side sheet.
 
 Rules:
 
@@ -620,6 +620,22 @@ Phone steps for Pedro:
 2. Put two assigned shifts on the same day with different roles and colors.
 3. Each chip should be a solid color, and each should show its role or position name as well as the title.
 4. An unassigned shift on that day should still look plain, not filled with its color.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 5 Full-width availability sheet
+
+Shipped: My availability and Team hours open in a full-width sheet. Team requests, My time off, My swaps, and Reminders stay at `sm:max-w-2xl`. The availability form is unchanged.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-05-availability-sheet.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It asserts My availability and Team hours are full width and the other four panels stay narrow. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. Typecheck and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Schedule.
+2. Open My availability. The sheet should use the full width of the phone or desktop screen.
+3. Open Team hours. It should also be full width.
+4. Open Team requests, My time off, My swaps, and Reminders. Each of those should stay a narrow side sheet.
 
 Blockers: none for this phase.
 
