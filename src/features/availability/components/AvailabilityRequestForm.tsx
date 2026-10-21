@@ -364,6 +364,40 @@ export function AvailabilityRequestForm({
     return diff;
   }, [editingGrid, initialAvailability]);
 
+  const sendFixedAvailability = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("availability_request").insert({
+        employee_id: employeeId,
+        company_id: orgId,
+        week_start: weekStart,
+        status: "pending",
+        payload: {
+          source: "my-availability",
+          desiredAvailability: editingGrid,
+        },
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Fixed availability sent",
+        description: "The posted window is unchanged until a manager approves a later window.",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["availability-last-request", employeeId],
+      });
+    },
+    onError: (error) => {
+      logger.error("Error sending fixed availability", { error, tags: ["error"] });
+      toast({
+        title: "Unable to send fixed availability",
+        description:
+          error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const directSave = useMutation({
     mutationFn: async () => {
       if (!onSaveDirect) {
@@ -672,6 +706,16 @@ export function AvailabilityRequestForm({
             >
               Save changes
             </Button>
+            {lockInfo?.availabilityChoice === "fixed" ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => sendFixedAvailability.mutate()}
+                disabled={sendFixedAvailability.isPending}
+              >
+                Send fixed availability
+              </Button>
+            ) : null}
               </>
             )}
             <Dialog

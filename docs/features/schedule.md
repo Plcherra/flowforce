@@ -316,7 +316,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 11 — Send another fixed availability
 
-- [ ] My availability can send a new fixed availability after the first login.
+- [x] My availability can send a new fixed availability after the first login.
 
 Rules:
 
@@ -716,6 +716,21 @@ Phone steps for Pedro:
 3. The first screen inside the app should be Send your fixed availability.
 4. Set at least one day and tap Send fixed availability.
 5. The step should close. Team requests should show a pending availability request for that employee. Their posted hours on the schedule should stay as they were.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 11 Send another fixed availability
+
+Shipped: When the company choice is fixed, My availability has Send fixed availability. That button inserts another pending `availability_request` from the weekday rows. It does not write `staff_availability`, so the posted window stays as it was. The next-window rule is still Phase 12.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-11-send-fixed-availability.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It seeds a posted Monday window, sends another fixed availability from My availability, and asserts the posted `staff_availability` row is unchanged and a `my-availability` request was added. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an employee whose company choice is Fixed, and who already sent availability once.
+2. Open My availability. Change a day, then tap Send fixed availability. Do not tap Save changes.
+3. A new pending availability request should exist. The hours already posted for this week should stay the same.
 
 Blockers: none for this phase.
 
