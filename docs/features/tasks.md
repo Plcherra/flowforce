@@ -253,7 +253,7 @@ Prove: Skip. Do not add a test until the Open question "Recurring shift tasks" i
 
 ### Phase 11 — AI draft tasks from form notes
 
-- [ ] Blocked by Open question "AI draft tasks from form notes". Skip this phase. Do not call a model and do not insert a draft task from a note.
+- [x] Blocked by Open question "AI draft tasks from form notes". Skip this phase. Do not call a model and do not insert a draft task from a note.
 
 Prove: Skip. Do not add a test until the Open question "AI draft tasks from form notes" is answered.
 
@@ -416,3 +416,9 @@ Questions: The phase needs the Open question "Next opening checklist or shift" a
 Skipped. Blocked by Open question "Recurring shift tasks". A shift task stays the existing row. It is not copied onto later shifts. No test was added.
 
 Questions: The phase needs the Open question "Recurring shift tasks" answered.
+
+### 2026-10-21 — Phase 11 AI draft tasks from form notes
+
+Skipped. Blocked by Open question "AI draft tasks from form notes". No model is called, and a note is not turned into a draft task. No test was added.
+
+Questions: The phase needs the Open question "AI draft tasks from form notes" answered: which notes become drafts, who approves them, and when it runs.
