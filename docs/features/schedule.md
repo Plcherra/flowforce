@@ -282,7 +282,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 9 — Open availability does not require the grid
 
-- [ ] When the company choice is open, My availability does not require the weekday grid.
+- [x] When the company choice is open, My availability does not require the weekday grid.
 
 Rules:
 
@@ -683,6 +683,22 @@ Phone steps for Pedro:
 2. Set Choice to Fixed. Set Window start to Monday, Window end to Friday, and Posting weekday to Wednesday.
 3. Tap Save availability choice.
 4. Reload the page and open Team hours again. Those four values should still be selected. Flexible should not be a choice.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 9 Open availability does not require the grid
+
+Shipped: When `org_prefs.availability_choice` is `open`, My availability shows that the person can work any day and any time. The weekday rows and Save changes stay hidden. Fixed, and a company with no choice yet, still use the Phase 6 weekday rows.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-09-open-availability.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It sets the company choice to open and asserts My availability has no weekday grid and no Save changes button. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can manage availability, open Team hours, set Choice to Open, and save.
+2. Sign in as an employee and open My availability.
+3. The screen should say any day, any time. The weekday rows and Save changes should not be there.
+4. Set the company choice back to Fixed if you still want the weekday rows.
 
 Blockers: none for this phase.
 

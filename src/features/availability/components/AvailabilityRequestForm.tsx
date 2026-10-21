@@ -72,6 +72,7 @@ interface LockInfo {
   state: Awaited<ReturnType<typeof getLockStateForWeek>>;
   nextLock?: Date | null;
   deps: LockEngineDeps;
+  availabilityChoice: "open" | "fixed" | null;
 }
 
 const toISODate = (date: Date | dayjs.Dayjs) => {
@@ -123,7 +124,7 @@ export function AvailabilityRequestForm({
       const { data: prefData, error: prefError } = await supabase
         .from("org_prefs")
         .select(
-          "id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour",
+          "id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour, availability_choice",
         )
         .eq("id", orgId)
         .maybeSingle();
@@ -131,6 +132,10 @@ export function AvailabilityRequestForm({
       if (prefError) {
         throw prefError;
       }
+
+      const storedChoice = prefData?.availability_choice;
+      const availabilityChoice =
+        storedChoice === "open" || storedChoice === "fixed" ? storedChoice : null;
 
       const prefs: OrgPrefs | null = prefData
         ? {
@@ -227,6 +232,7 @@ export function AvailabilityRequestForm({
         state,
         nextLock,
         deps: overrides,
+        availabilityChoice,
       };
     },
   });
@@ -308,6 +314,8 @@ export function AvailabilityRequestForm({
       });
     }
   }, [lastRequestError]);
+
+  const availabilityIsOpen = lockInfo?.availabilityChoice === "open";
 
   const directEditAllowed = useMemo(() => {
     if (!lockInfo) return false;
@@ -491,8 +499,9 @@ export function AvailabilityRequestForm({
               Availability
             </CardTitle>
             <CardDescription>
-              Each day is all day on, or off with the hours you can work.
-              Locked weeks require a manager review.
+              {availabilityIsOpen
+                ? "Open availability is any day and any time. The weekday grid is not required."
+                : "Each day is all day on, or off with the hours you can work. Locked weeks require a manager review."}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -535,6 +544,15 @@ export function AvailabilityRequestForm({
               </span>
             )}
           </div>
+          {availabilityIsOpen ? (
+            <div className="space-y-2 p-4" data-testid="availability-open-notice">
+              <p className="text-sm font-medium">Any day, any time</p>
+              <p className="text-sm text-muted-foreground">
+                This company uses open availability. You do not need to fill in
+                the weekday grid.
+              </p>
+            </div>
+          ) : (
           <div className="space-y-2 p-3" data-testid="availability-weekday-rows">
             {DAY_LABELS.map((label, dayIndex) => {
               const hours = editingGrid[dayIndex] ?? [];
@@ -626,16 +644,21 @@ export function AvailabilityRequestForm({
               );
             })}
           </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <AlertCircle className="h-4 w-4 text-amber-500" />
-            {directEditAllowed
-              ? "Changes save instantly for unlocked days."
-              : "Week is locked. Submit a request to update availability."}
+            {availabilityIsOpen
+              ? "Open availability does not require the weekday grid."
+              : directEditAllowed
+                ? "Changes save instantly for unlocked days."
+                : "Week is locked. Submit a request to update availability."}
           </div>
           <div className="flex items-center gap-2">
+            {availabilityIsOpen ? null : (
+              <>
             <Button
               variant="outline"
               onClick={() => setEditingGrid(cloneGrid(initialAvailability))}
@@ -649,6 +672,8 @@ export function AvailabilityRequestForm({
             >
               Save changes
             </Button>
+              </>
+            )}
             <Dialog
               open={requestDialogOpen}
               onOpenChange={setRequestDialogOpen}
