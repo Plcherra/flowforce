@@ -487,7 +487,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 21 — Deactivate follows allow_deactivate
 
-- [ ] The assignee can turn an assigned reminder off only when the flag allows it.
+- [x] The assignee can turn an assigned reminder off only when the flag allows it.
 
 Rules:
 
@@ -873,5 +873,21 @@ Phone steps for Pedro:
 4. Sign in as that person and open Reminders. The form name should be there, with 09:00 and Weekly.
 
 Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 21 Deactivate follows allow_deactivate
+
+Shipped: `allow_deactivate` stays on the assigned reminder. A person with `schedule.reminders.grant_deactivate` can turn that flag on or off. The assignee gets a Deactivate control only when the flag is on. Deactivating marks that row completed, so it leaves their list and the open-record list. Other people's reminders stay. A manager still sees the row.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-21-allow-deactivate.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. With the flag off, the staff user has no deactivate control. After the manager turns the flag on, deactivating hides that reminder for the staff user and leaves the manager's reminder in place. The manager still sees the staff reminder. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the Playwright test was not executed here. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an employee who has an assigned reminder with deactivate not allowed. Open Reminders. There should be no Deactivate button on it.
+2. Sign in as someone with Reminders: Grant deactivate. Open that same reminder and turn Allow deactivate on.
+3. Sign in as the employee again. Tap Deactivate. That reminder should disappear from their list.
+4. Sign in as the manager. Their own reminders should still be there, and the employee's reminder can still be seen on the manager list.
+
+Blockers: none for this phase. Migration `20261021110620_reminders_allow_deactivate.sql` was already applied.
 
 Questions: none.

@@ -10,6 +10,9 @@ import {
 
 export const SCHEDULE_ASSIGNMENT_REMINDER_TYPE = "schedule.assignment";
 
+const REMINDER_COLUMNS =
+  "id, user_id, title, description, remind_at, repeat_interval, type, allow_deactivate, completed";
+
 const scheduleReminderSchema = z
   .object({
     id: z.string(),
@@ -18,6 +21,8 @@ const scheduleReminderSchema = z
     description: z.string().nullable(),
     remind_at: z.string().nullable(),
     repeat_interval: z.string().nullable(),
+    allow_deactivate: z.boolean().optional(),
+    completed: z.boolean().nullable().optional(),
   })
   .passthrough();
 
@@ -28,7 +33,7 @@ export async function fetchScheduleAssignmentReminders(
 ): Promise<ScheduleAssignmentReminder[]> {
   let query = supabase
     .from("reminders")
-    .select("id, user_id, title, description, remind_at, repeat_interval, type")
+    .select(REMINDER_COLUMNS)
     .eq("type", SCHEDULE_ASSIGNMENT_REMINDER_TYPE)
     .order("remind_at", { ascending: true });
 
@@ -56,7 +61,7 @@ export async function fetchScheduleAssignmentReminders(
 function linkedQuery(userId?: string | null) {
   let query = supabase
     .from("reminders")
-    .select("id, user_id, title, description, remind_at, repeat_interval, type")
+    .select(REMINDER_COLUMNS)
     .like("type", "record.%")
     .order("remind_at", { ascending: true });
   if (userId) query = query.eq("user_id", userId);
@@ -118,6 +123,29 @@ export async function createFormScheduleReminder(input: {
     allow_deactivate: false,
   });
 
+  if (error) throw error;
+}
+
+export async function setReminderAllowDeactivate(
+  id: string,
+  allowDeactivate: boolean,
+): Promise<void> {
+  const { error } = await supabase
+    .from("reminders")
+    .update({ allow_deactivate: allowDeactivate })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function deactivateAssignedReminder(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("reminders")
+    .update({
+      completed: true,
+      completed_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("allow_deactivate", true);
   if (error) throw error;
 }
 

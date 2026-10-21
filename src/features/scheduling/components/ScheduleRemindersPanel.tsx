@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePersonalScheduleReminders } from "@/features/scheduling/hooks/usePersonalScheduleReminders";
 import { LinkedRecordReminders } from "@/features/scheduling/components/LinkedRecordReminders";
 import { AssignFormReminderForm } from "@/features/scheduling/components/AssignFormReminderForm";
+import { AssignedReminderControls } from "@/features/scheduling/components/AssignedReminderControls";
 import {
   clockLabel,
   repeatLabel,
@@ -71,6 +72,7 @@ export function ScheduleRemindersPanel({
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { can } = useCan();
   const canAssignToSomeoneElse = can("schedule.reminders.assign");
+  const canGrantDeactivate = can("schedule.reminders.grant_deactivate");
   const personal = usePersonalScheduleReminders(profileId);
   const queryClient = useQueryClient();
 
@@ -122,8 +124,11 @@ export function ScheduleRemindersPanel({
 
   const visibleAssigned = useMemo(() => {
     const rows = assignedQuery.data ?? [];
-    if (canAssignReminders) return rows;
-    return rows.filter((row) => row.user_id === profileId);
+    const scoped = canAssignReminders
+      ? rows
+      : rows.filter((row) => row.user_id === profileId);
+    if (canAssignReminders) return scoped;
+    return scoped.filter((row) => row.completed !== true);
   }, [assignedQuery.data, canAssignReminders, profileId]);
 
   const addPersonal = () => {
@@ -342,7 +347,16 @@ export function ScheduleRemindersPanel({
                     {repeatLabel(reminder.repeat_interval)}
                   </p>
                 </div>
-                {canAssignReminders ? (
+                <div className="flex items-center gap-2">
+                  <AssignedReminderControls
+                    companyId={companyId}
+                    reminderId={reminder.id}
+                    title={reminder.title || "Reminder"}
+                    allowDeactivate={reminder.allow_deactivate === true}
+                    isAssignee={reminder.user_id === profileId}
+                    canGrantDeactivate={canGrantDeactivate}
+                  />
+                  {canAssignReminders ? (
                   <Button
                     type="button"
                     size="icon"
@@ -354,6 +368,7 @@ export function ScheduleRemindersPanel({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 ) : null}
+                </div>
               </div>
             );
           })}
