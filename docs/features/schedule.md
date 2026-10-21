@@ -523,7 +523,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 23 — Time off policies
 
-- [ ] Blocked by Open question "Time off policies". Skip this phase. Do not invent allowance math or a policy tab.
+- [x] Blocked by Open question "Time off policies". Skip this phase. Do not invent allowance math or a policy tab.
 
 Prove: Skip. Do not add a test until the Open question "Time off policies" is answered.
 
@@ -825,3 +825,9 @@ The Supabase CLI could not run `supabase db push` because it has no access token
 Blockers: none for this phase. Phases that depend on this column are not blocked.
 
 Questions: none. Phone steps: none. This phase is the column and the generated types.
+
+### 2026-10-21 — Phase 23 Time off policies
+
+Skipped. Blocked by Open question "Time off policies". No allowance math and no policy tab were added. No test was added.
+
+Questions: The phase needs the Open question "Time off policies" answered: how several policies combine into one allowance, and whether the notice period is a company number and where it is edited.
