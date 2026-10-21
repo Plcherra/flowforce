@@ -535,7 +535,7 @@ Prove: Skip. Do not add a test until the Open question "Repeating weekday patter
 
 ### Phase 25 — Who sees the leadership schedule
 
-- [ ] Blocked by Open question "Who sees the leadership schedule" (business type and scale). Skip this phase. Do not add a coffee-shop mode, an office mode, or a large-grid layout.
+- [x] Blocked by Open question "Who sees the leadership schedule" (business type and scale). Skip this phase. Do not add a coffee-shop mode, an office mode, or a large-grid layout.
 
 Prove: Skip. Do not add a test for business type or grid scale until the Open question "Who sees the leadership schedule" is answered.
 
@@ -837,3 +837,9 @@ Questions: The phase needs the Open question "Time off policies" answered: how s
 Skipped. Blocked by Open question "Repeating weekday patterns". Did not store "2 Sundays in the month" or alternating Saturdays. No test was added.
 
 Questions: The phase needs the Open question "Repeating weekday patterns" answered.
+
+### 2026-10-21 — Phase 25 Who sees the leadership schedule
+
+Skipped. Blocked by Open question "Who sees the leadership schedule" (business type and scale). No coffee-shop mode, office mode, or large-grid layout was added. No test was added.
+
+Questions: The phase needs the Open question "Who sees the leadership schedule" answered.
