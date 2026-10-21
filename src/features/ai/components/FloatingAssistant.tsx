@@ -18,7 +18,7 @@ export function FloatingAssistant({
   const toggleAssistant = () => setIsOpen((prev) => !prev);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="above-bottom-icon-nav fixed right-6 z-50 flex flex-col items-end gap-3">
       {isOpen && (
         <div className="rounded-xl border border-border bg-background shadow-2xl">
           <AIAssistant

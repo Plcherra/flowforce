@@ -1,12 +1,7 @@
 import { ReactNode, Suspense } from "react";
 import { Outlet } from "@/lib/router-adapter";
-import { AppSidebar } from "@/app-shell/navigation/AppSidebar";
+import { BottomIconNav } from "@/app-shell/navigation/bottomNav/BottomIconNav";
 import { TopNavbar } from "@/app-shell/layout/TopNavbar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,35 +53,32 @@ export default function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <SidebarProvider className="app-viewport min-h-0 w-full overflow-hidden">
+    <div className="app-viewport flex min-h-0 w-full flex-col overflow-hidden">
       <CompanyThemeSync />
       <IdleSessionGuard />
-      <AppSidebar />
 
-      <SidebarInset className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-12 shrink-0 items-center border-b border-primary/20 bg-background/95 px-2 backdrop-blur-sm md:px-4">
-          <SidebarTrigger className="mr-2 md:mr-4" />
-          <TopNavbar />
-        </header>
+      <header className="flex h-12 shrink-0 items-center border-b border-primary/20 bg-background/95 px-2 backdrop-blur-sm md:px-4">
+        <TopNavbar />
+      </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="px-4 pt-4">
-            <EmployeeAvailabilityOnboarding />
-          </div>
-          <MobileOfflineQueueStatus />
-          <ErrorBoundary showDetails={appEnv.DEV}>
-            <Suspense
-              fallback={
-                <div className="p-6">
-                  <LoadingSpinner text="Loading page..." />
-                </div>
-              }
-            >
-              {children || <Outlet />}
-            </Suspense>
-          </ErrorBoundary>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+      <main className="bottom-icon-nav-pad min-h-0 flex-1 overflow-y-auto">
+        <div className="px-4 pt-4">
+          <EmployeeAvailabilityOnboarding />
+        </div>
+        <MobileOfflineQueueStatus />
+        <ErrorBoundary showDetails={appEnv.DEV}>
+          <Suspense
+            fallback={
+              <div className="p-6">
+                <LoadingSpinner text="Loading page..." />
+              </div>
+            }
+          >
+            {children || <Outlet />}
+          </Suspense>
+        </ErrorBoundary>
+      </main>
+      <BottomIconNav />
+    </div>
   );
 }

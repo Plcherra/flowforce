@@ -125,6 +125,30 @@
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
   }
+
+  .bottom-icon-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    pointer-events: none;
+    bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  .bottom-icon-nav-pad {
+    padding-bottom: 4.75rem;
+  }
+
+  .above-bottom-icon-nav {
+    bottom: var(--bottom-nav-stack, calc(4.75rem + env(safe-area-inset-bottom)));
+  }
 }
 
 /* React Quill Editor Styling */

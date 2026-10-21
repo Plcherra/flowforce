@@ -529,7 +529,7 @@ export default function EventsIndex() {
 
               {/* Floating Add button */}
               <button
-                className="fixed right-6 bottom-6 bg-primary text-white rounded-full h-14 w-14 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+                className="above-bottom-icon-nav fixed right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105"
                 aria-label="Add Event"
                 onClick={() => {
                   handleQuickAdd();

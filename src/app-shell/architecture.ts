@@ -18,6 +18,7 @@ export type ShellStateKind =
 export interface ShellViewportRule {
   viewport: ShellViewport;
   minWidth: number;
+  /** Hidden on every viewport. The shell uses the floating bottom icon nav. */
   sidebar: "hidden" | "drawer" | "collapsible";
   topNav: "compact" | "standard";
   contentPadding: "compact" | "comfortable";
@@ -43,21 +44,21 @@ export const shellViewportRules: ShellViewportRule[] = [
   {
     viewport: "mobile",
     minWidth: 0,
-    sidebar: "drawer",
+    sidebar: "hidden",
     topNav: "compact",
     contentPadding: "compact",
   },
   {
     viewport: "tablet",
     minWidth: 768,
-    sidebar: "collapsible",
+    sidebar: "hidden",
     topNav: "standard",
     contentPadding: "comfortable",
   },
   {
     viewport: "desktop",
     minWidth: 1024,
-    sidebar: "collapsible",
+    sidebar: "hidden",
     topNav: "standard",
     contentPadding: "comfortable",
   },
@@ -70,7 +71,7 @@ export const shellGuardOrder = [
   "protected-route",
   "profile-and-tenant-context",
   "tenant-setup-required",
-  "sidebar-provider",
+  "bottom-icon-nav",
   "route-error-boundary",
 ] as const;
 

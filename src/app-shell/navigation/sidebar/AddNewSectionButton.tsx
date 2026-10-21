@@ -5,15 +5,18 @@ import { useNavigate } from "@/lib/router-adapter";
 interface AddNewSectionButtonProps {
   category: string;
   categoryKey: string;
+  onNavigate?: () => void;
 }
 
 export function AddNewSectionButton({
   category,
   categoryKey,
+  onNavigate,
 }: AddNewSectionButtonProps) {
   const navigate = useNavigate();
 
   const handleAddNew = () => {
+    onNavigate?.();
     navigate(`/add-section?category=${categoryKey}`);
   };
 

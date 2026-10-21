@@ -15,7 +15,7 @@ export function AvailabilityToggle() {
     })();
   }, []);
   return (
-    <div className="fixed bottom-4 right-4 left-4 md:left-auto md:w-auto bg-card border rounded-lg p-3 flex items-center justify-between shadow-sm">
+    <div className="above-bottom-icon-nav fixed right-4 left-4 flex items-center justify-between rounded-lg border bg-card p-3 shadow-sm md:left-auto md:w-auto">
       <div className="text-sm">
         <div className="font-medium">Available to Help</div>
         <div className="text-xs text-muted-foreground">
