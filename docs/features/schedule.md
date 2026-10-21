@@ -246,7 +246,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 7 — org_prefs choice and schedule window
 
-- [ ] Add the company availability choice and the three schedule-window weekdays on `org_prefs`.
+- [x] Add the company availability choice and the three schedule-window weekdays on `org_prefs`.
 
 Rules:
 
@@ -655,5 +655,17 @@ Phone steps for Pedro:
 5. Monday should still be All day on. Tuesday should still be Off from 14:00 to 18:00.
 
 Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 7 org_prefs choice and schedule window
+
+Shipped: `org_prefs` has `availability_choice` (`open` or `fixed` only) and `schedule_window_start_weekday`, `schedule_window_end_weekday`, and `schedule_posting_weekday` (0–6, no default day). This does not reuse `availability_lock_mode` and does not add a flexible value. Generated types in `src/integrations/supabase/types.ts` include the columns. Migration file: `supabase/migrations/20261021104137_org_prefs_availability_choice.sql`.
+
+Proven: Unit test `src/integrations/supabase/orgPrefsAvailabilityChoice.test.ts` asserts the generated `org_prefs` types include the choice and the three weekday columns, and that the migration allows only `open` and `fixed`. Ran that test; it passed. `npm run typecheck` is part of this phase's checks.
+
+The Supabase CLI could not run `supabase db push` because it has no access token. The same SQL was applied to the linked project through the Supabase migration API. Remote migration version `20261021104137` matches the file. The four columns are present on `org_prefs`.
+
+Blockers: none for this phase. Phases that depend on this migration are not blocked.
 
 Questions: none.

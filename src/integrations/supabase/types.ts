@@ -4407,25 +4407,37 @@ export type Database = {
         Row: {
           auto_lock_day_of_week: number | null
           auto_lock_hour: number | null
+          availability_choice: string | null
           availability_lock_mode: string | null
           created_at: string | null
           id: string
+          schedule_posting_weekday: number | null
+          schedule_window_end_weekday: number | null
+          schedule_window_start_weekday: number | null
           updated_at: string | null
         }
         Insert: {
           auto_lock_day_of_week?: number | null
           auto_lock_hour?: number | null
+          availability_choice?: string | null
           availability_lock_mode?: string | null
           created_at?: string | null
           id?: string
+          schedule_posting_weekday?: number | null
+          schedule_window_end_weekday?: number | null
+          schedule_window_start_weekday?: number | null
           updated_at?: string | null
         }
         Update: {
           auto_lock_day_of_week?: number | null
           auto_lock_hour?: number | null
+          availability_choice?: string | null
           availability_lock_mode?: string | null
           created_at?: string | null
           id?: string
+          schedule_posting_weekday?: number | null
+          schedule_window_end_weekday?: number | null
+          schedule_window_start_weekday?: number | null
           updated_at?: string | null
         }
         Relationships: []
