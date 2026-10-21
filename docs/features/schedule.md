@@ -194,7 +194,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 4 — Opaque shift chips
 
-- [ ] Make shifts readable when several roles are on one day.
+- [x] Make shifts readable when several roles are on one day.
 
 Rules:
 
@@ -604,6 +604,22 @@ Phone steps for Pedro:
 2. Open Schedule and tap Add shift.
 3. On Details, set a start time and a location, then open Load shift template and choose the saved template.
 4. The title, end time, position, and headcount should fill in. The start time and location you typed should stay. Create New Shift should still be open. No shift should appear on the grid until you save.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 4 Opaque shift chips
+
+Shipped: Assigned shift chips use a solid fill of the shift color. The old color-plus-`15` tint is gone. Each full chip shows the role or position name with the title. Unassigned chips stay on the plain background. Minimized view still shows only the title. Row count, paging, and store filters are unchanged.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-04-opaque-chips.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It asserts two same-day assigned chips are opaque and each shows its role, and that an unassigned chip stays visually distinct. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. Typecheck and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Schedule.
+2. Put two assigned shifts on the same day with different roles and colors.
+3. Each chip should be a solid color, and each should show its role or position name as well as the title.
+4. An unassigned shift on that day should still look plain, not filled with its color.
 
 Blockers: none for this phase.
 

@@ -71,6 +71,8 @@ export function ShiftChip({
       : undefined;
 
   const isAssigned = variant === "assigned";
+  const fillColor = schedule.color ?? "#3b82f6";
+  const roleLabel = schedule.job_position?.name || schedule.role || "";
 
   return (
     <button
@@ -80,16 +82,17 @@ export function ShiftChip({
         ...style,
         ...(isAssigned
           ? {
-              backgroundColor: `${schedule.color ?? "#3b82f6"}15`,
-              borderLeft: `3px solid ${schedule.color ?? "#3b82f6"}`,
+              backgroundColor: fillColor,
+              borderLeft: `3px solid ${fillColor}`,
             }
           : {}),
       }}
       data-testid={`schedule-shift-${schedule.id}`}
       data-minimized={minimized ? "true" : "false"}
+      data-opaque={isAssigned ? "true" : "false"}
       className={cn(
         "relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
-        isAssigned ? "bg-background" : "bg-background border-border shadow-sm",
+        isAssigned ? "text-white" : "bg-background border-border shadow-sm",
         isDragging && "opacity-40",
         draggable && "touch-none",
       )}
@@ -108,12 +111,20 @@ export function ShiftChip({
       </div>
       {minimized ? null : (
         <>
+          {roleLabel ? (
+            <div data-testid="shift-chip-role" className="truncate font-medium">
+              {roleLabel}
+            </div>
+          ) : null}
           <div data-testid="shift-chip-time" className="text-xs opacity-75">
             {formatShiftWindow(schedule)}
           </div>
           <div
             data-testid="shift-chip-duration"
-            className="text-[10px] text-muted-foreground"
+            className={cn(
+              "text-[10px]",
+              isAssigned ? "text-white/80" : "text-muted-foreground",
+            )}
           >
             {formatShiftDuration(schedule)}
             {schedule.required_headcount
@@ -150,9 +161,9 @@ export function ShiftChipOverlay({
 }) {
   return (
     <div
-      className="rounded px-2 py-1 text-[11px] bg-background border shadow-lg cursor-grabbing"
+      className="rounded px-2 py-1 text-[11px] border text-white shadow-lg cursor-grabbing"
       style={{
-        backgroundColor: `${schedule.color ?? "#3b82f6"}15`,
+        backgroundColor: schedule.color ?? "#3b82f6",
         borderLeft: `3px solid ${schedule.color ?? "#3b82f6"}`,
       }}
     >
@@ -162,6 +173,11 @@ export function ShiftChipOverlay({
         ) : null}
         {schedule.title ?? schedule.job_position?.name ?? "Shift"}
       </div>
+      {schedule.job_position?.name || schedule.role ? (
+        <div className="truncate font-medium">
+          {schedule.job_position?.name || schedule.role}
+        </div>
+      ) : null}
       <div className="text-xs opacity-75">{formatShiftWindow(schedule)}</div>
     </div>
   );
