@@ -333,7 +333,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 12 — Next window after the posting weekday
 
-- [ ] An approved fixed availability applies to the next window after the posting weekday.
+- [x] An approved fixed availability applies to the next window after the posting weekday.
 
 Rules:
 
@@ -735,3 +735,13 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-21 — Phase 12 Next window after the posting weekday
+
+Shipped: `approvedFixedAvailabilityWindow` stores an approved fixed availability on the next window that starts after the next posting weekday. A send on the posting weekday uses the following posting date, so it does not change the window that posting is for. Weekdays come from `org_prefs` (0 is Sunday through 6 is Saturday). No day and no notice period are hardcoded.
+
+Proven: Unit test `src/features/availability/utils/nextAvailabilityWindow.test.ts` asserts a send on the posting weekday is stored for the following window and does not change the posted window. It covers two different posting and window weekdays. Ran that test; it passed.
+
+Blockers: none for this phase.
+
+Questions: none. Phone steps: none. This phase is a unit test.
