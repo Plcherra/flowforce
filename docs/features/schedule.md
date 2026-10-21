@@ -454,7 +454,7 @@ Prove: Unit test asserts the generated `reminders` type includes `allow_deactiva
 
 ### Phase 19 — Reminders open the real record
 
-- [ ] A person can open the task, form, or shift a reminder points at.
+- [x] A person can open the task, form, or shift a reminder points at.
 
 Rules:
 
@@ -843,3 +843,19 @@ Questions: The phase needs the Open question "Repeating weekday patterns" answer
 Skipped. Blocked by Open question "Who sees the leadership schedule" (business type and scale). No coffee-shop mode, office mode, or large-grid layout was added. No test was added.
 
 Questions: The phase needs the Open question "Who sees the leadership schedule" answered.
+
+### 2026-10-21 — Phase 19 Reminders open the real record
+
+Shipped: Reminders that point at a task, form, or shift the person can already open are listed under Open from a reminder. Clicking one opens that record's existing page: a task opens `/app/tasks` on that task card, a form opens `/app/forms`, and a shift opens the schedule shift sheet. The link is stored on the existing reminder row (`task_id` for a task, `type` `record.form:<id>` or `record.shift:<id>` for a form or shift) so it does not need a new column. A personal reminder can keep the same kind of link in the person's own list. Personal reminders are not copied into tasks, and this phase does not assign a reminder to someone else.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-19-open-reminder.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It opens a shift from the staff user's reminder and lands on that shift's details. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the Playwright test was not executed here. Unit test `src/features/scheduling/utils/linkedScheduleReminder.test.ts` asserts a task, form, and shift link resolve to the existing page. Ran that test; it passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an employee who has a reminder pointing at a shift, form, or task they can already open.
+2. Open Schedule, then Reminders.
+3. Under Open from a reminder, tap the reminder.
+4. A shift opens that shift's details. A form opens Forms with that form on the page. A task opens Tasks on that task.
+
+Blockers: none for this phase.
+
+Questions: none.

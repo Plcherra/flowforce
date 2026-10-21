@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { usePersonalScheduleReminders } from "@/features/scheduling/hooks/usePersonalScheduleReminders";
+import { LinkedRecordReminders } from "@/features/scheduling/components/LinkedRecordReminders";
 import {
   createScheduleAssignmentReminder,
   deleteScheduleAssignmentReminder,
@@ -269,6 +270,11 @@ export function ScheduleRemindersPanel({
           </div>
         </CardContent>
       </Card>
+
+      <LinkedRecordReminders
+        userId={profileId}
+        personalReminders={personal.reminders}
+      />
 
       <Card>
         <CardHeader>
