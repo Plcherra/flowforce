@@ -1,7 +1,6 @@
 import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
 import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -30,6 +29,7 @@ import {
   TaskEmptyState,
 } from "@/features/tasks/components";
 import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
+import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -146,14 +146,6 @@ export default function Tasks() {
           }
         >
           <TaskNotifications onTaskNavigate={handleNotificationNavigate} />
-          <Button
-            data-testid="tasks-create-button"
-            onClick={() => setShowCreateDialog(true)}
-            size={isMobile ? "sm" : "default"}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {isMobile ? "New" : "Create Task"}
-          </Button>
         </div>
       </div>
 
@@ -176,11 +168,8 @@ export default function Tasks() {
         </Alert>
       )}
 
-      <TaskExecutionReadinessPanel
-        tasks={tasks}
-        onCreateTask={() => setShowCreateDialog(true)}
-        onOpenTask={openTask}
-      />
+      <TaskExecutionReadinessPanel tasks={tasks} onOpenTask={openTask} />
+      <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
 
       <TaskMetricsCards metrics={metrics} />
 
@@ -213,7 +202,6 @@ export default function Tasks() {
           {tasks.length === 0 || filteredTasks.length === 0 ? (
             <TaskEmptyState
               hasTasks={tasks.length > 0}
-              onCreateTask={() => setShowCreateDialog(true)}
               onResetFilters={handleResetFilters}
             />
           ) : (

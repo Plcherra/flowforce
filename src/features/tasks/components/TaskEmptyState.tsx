@@ -2,19 +2,17 @@
  * Task empty state component
  */
 
-import { MessageSquare, Plus, Search } from "lucide-react";
+import { MessageSquare, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface TaskEmptyStateProps {
   hasTasks: boolean;
-  onCreateTask: () => void;
   onResetFilters?: () => void;
 }
 
 export function TaskEmptyState({
   hasTasks,
-  onCreateTask,
   onResetFilters,
 }: TaskEmptyStateProps) {
   if (hasTasks) {
@@ -42,13 +40,9 @@ export function TaskEmptyState({
       <CardContent className="flex flex-col items-center justify-center rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
         <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No tasks yet</h3>
-        <p className="text-muted-foreground text-center mb-4">
+        <p className="text-muted-foreground text-center">
           Create your first task to get started with project management.
         </p>
-        <Button onClick={onCreateTask}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Task
-        </Button>
       </CardContent>
     </Card>
   );

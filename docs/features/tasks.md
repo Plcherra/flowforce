@@ -101,7 +101,7 @@ A phase that adds a migration follows the Feature workflow migration rule. If th
 
 ### Phase 1 — One create button
 
-- [ ] Replace the two create buttons with one floating create menu.
+- [x] Replace the two create buttons with one floating create menu.
 
 Rules:
 
@@ -288,3 +288,20 @@ The AI action should help forms and reports by turning additional-information no
 Each person should be able to create a task type for others, for themselves, or not at all. The access grid turns a whole verb on or off, so it cannot store Others, Self, and None separately per type. Which existing screen edits that choice for one person?
 
 ## Progress log
+
+### 2026-10-21 — Phase 1 One create button
+
+Shipped: The Tasks page has one floating + button. Its menu item is New custom task, and that opens the existing create dialog. The header Create Task button, the readiness New Task button, and the empty-state create button are gone.
+
+Proven: Playwright test `tests/playwright/tasks-phase-01-create-button.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It opens Tasks, asserts one create button, and opens New custom task. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. The header should not say Create Task, and Execution Readiness should not say New Task.
+3. Tap the round + button at the bottom right. The menu should say New custom task.
+4. Tap New custom task. The existing create dialog should open.
+5. If the list is empty, that empty card should not have its own Create Task button.
+
+Blockers: none for this phase.
+
+Questions: none.

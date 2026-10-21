@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
@@ -17,7 +16,6 @@ import { buildTaskExecutionSummary } from "@/features/tasks/utils/taskExecutionR
 
 interface TaskExecutionReadinessPanelProps {
   tasks: TaskWithRelations[];
-  onCreateTask: () => void;
   onOpenTask: (taskId: string) => void;
 }
 
@@ -30,7 +28,6 @@ const issueTone: Record<string, string> = {
 
 export function TaskExecutionReadinessPanel({
   tasks,
-  onCreateTask,
   onOpenTask,
 }: TaskExecutionReadinessPanelProps) {
   const { reminders, loading: remindersLoading } = useReminders();
@@ -90,9 +87,6 @@ export function TaskExecutionReadinessPanel({
               Tasks, goals, reminders, and ownership in one operating view.
             </p>
           </div>
-          <Button type="button" onClick={onCreateTask}>
-            New Task
-          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
