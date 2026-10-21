@@ -1,4 +1,4 @@
-import { CalendarPlus, Clock, Copy, LayoutGrid, Sparkles } from "lucide-react";
+import { CalendarPlus, Clock, LayoutGrid, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ScheduleEmptyView = "month" | "week" | "staff";
@@ -11,8 +11,6 @@ interface ScheduleEmptyStateProps {
   onSwitchToWeek?: () => void;
   onOpenStaffPanel?: () => void;
   onOpenAvailability?: () => void;
-  onCopyPreviousWeek?: () => void;
-  onAddShift?: () => void;
   onSuggestFills?: () => void;
 }
 
@@ -23,8 +21,8 @@ const managerCopyByView: Record<
   week: {
     title: "No shifts this week",
     description:
-      "Copy last week, add your first shift, or let Smart Fill suggest coverage.",
-    hint: "Use the toolbar to copy last week or add shifts.",
+      "Use Add shift on the toolbar, or let Smart Fill suggest coverage.",
+    hint: "Copy previous week stays in Actions.",
   },
   month: {
     title: "No shifts this month",
@@ -55,8 +53,6 @@ export function ScheduleEmptyState({
   onSwitchToWeek,
   onOpenStaffPanel,
   onOpenAvailability,
-  onCopyPreviousWeek,
-  onAddShift,
   onSuggestFills,
 }: ScheduleEmptyStateProps) {
   const copy = readOnly ? staffCopy : managerCopyByView[view];
@@ -89,17 +85,6 @@ export function ScheduleEmptyState({
           {readOnly && onOpenAvailability ? (
             <Button size="sm" variant="outline" onClick={onOpenAvailability}>
               Update availability
-            </Button>
-          ) : null}
-          {!readOnly && view === "week" && onCopyPreviousWeek ? (
-            <Button size="sm" variant="outline" onClick={onCopyPreviousWeek}>
-              <Copy className="mr-1.5 h-3.5 w-3.5" />
-              Copy last week
-            </Button>
-          ) : null}
-          {!readOnly && view === "week" && onAddShift ? (
-            <Button size="sm" onClick={onAddShift}>
-              Add first shift
             </Button>
           ) : null}
           {!readOnly && view === "week" && onSuggestFills ? (

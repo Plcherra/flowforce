@@ -158,7 +158,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 2 — One Add shift button
 
-- [ ] Keep View options and Actions. Replace the Add control with one Add shift button.
+- [x] Keep View options and Actions. Replace the Add control with one Add shift button.
 
 Rules:
 
@@ -572,5 +572,23 @@ Phone steps for Pedro:
 6. Close the wizard, then drag Barista Morning onto a person's day. It should still create and assign that shift.
 
 Blockers: none for this phase. `supabase db push` was not needed.
+
+Questions: none.
+
+### 2026-10-21 — Phase 2 One Add shift button
+
+Shipped: View options and Actions stay on the toolbar. One Add shift button opens the single-shift wizard. The menu on that same control opens Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off. There is no Add single shift item and no second add button. An empty week no longer shows Copy last week or Add first shift. Suggest fills stays on the empty-week banner. Copy previous week stays in Actions.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-02-add-shift-button.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It opens Add shift and its menu on an empty week and on a week that has a shift. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit the schedule, and open Schedule on a week with no shifts.
+2. Confirm View options and Actions are still there. Confirm there is no Copy last week button and no Add first shift button.
+3. Tap Add shift. Create New Shift should open. Close it.
+4. Tap the arrow on that same Add shift control. The menu should list Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off. It should not list Add single shift.
+5. Tap Add multiple shifts and confirm that dialog opens, then close it.
+6. Add a shift, or open a week that already has one. Add shift should still be the only add control, and its menu should open the same four items.
+
+Blockers: none for this phase.
 
 Questions: none.

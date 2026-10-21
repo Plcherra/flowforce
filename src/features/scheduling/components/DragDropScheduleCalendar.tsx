@@ -333,8 +333,6 @@ export function DragDropScheduleCalendar({
               view="week"
               hasLocationFilter={Boolean(locationFilter)}
               readOnly={readOnly}
-              onCopyPreviousWeek={readOnly ? undefined : copyPreviousWeekAction}
-              onAddShift={readOnly ? undefined : openBlankShiftWizard}
               onSuggestFills={readOnly ? undefined : onSuggestFills}
               onOpenAvailability={
                 onOpenPanel ? () => onOpenPanel("availability") : undefined

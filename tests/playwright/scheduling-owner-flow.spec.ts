@@ -117,8 +117,7 @@ test.describe('Scheduling owner flow', () => {
     await expect(page.getByText('Alex Rivera')).toHaveCount(0);
     await shot(page, 'scheduling_empty_week');
 
-    await page.getByRole('button', { name: 'Add', exact: true }).click();
-    await page.getByRole('menuitem', { name: 'Add single shift' }).click();
+    await page.getByRole('button', { name: 'Add shift', exact: true }).click();
     await page.getByLabel('Shift Title').fill(shiftTitle);
     await page.getByRole('tab', { name: 'Tasks' }).click();
     await page.getByPlaceholder('Task title').fill(taskTitle);

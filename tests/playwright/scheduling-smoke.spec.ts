@@ -494,7 +494,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       await close.click();
       await expect(details).toBeHidden();
 
-      await page.getByRole('button', { name: 'Add', exact: true }).click();
+      await page.getByRole('button', { name: 'Add shift menu' }).click();
       await page.getByRole('menuitem', { name: 'Add unavailability' }).click();
       const dialog = page.getByRole('dialog');
       await expect(dialog.getByRole('heading', { name: 'Add Unavailability' })).toBeVisible();

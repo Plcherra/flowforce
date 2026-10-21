@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CardHeader } from "@/components/ui/card";
-import { Settings, Users } from "lucide-react";
+import { ChevronDown, Settings, Users } from "lucide-react";
 import { formatCount } from "@/features/scheduling/utils/pluralize";
 
 type CalendarToolbarProps = {
@@ -197,32 +197,42 @@ export function CalendarToolbar({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" className="h-7">
-                    Add
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60">
-                  <DropdownMenuItem onClick={onOpenAddShift}>
-                    Add single shift
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenMultiAdd}>
-                    Add multiple shifts
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onOpenImportShifts}>
-                    Import shifts from Excel
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onOpenAddUnavailability}>
-                    Add unavailability
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenAddTimeOff}>
-                    Add time off
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="inline-flex items-center" data-testid="add-shift-control">
+                <Button
+                  size="sm"
+                  className="h-7 rounded-r-none"
+                  onClick={onOpenAddShift}
+                >
+                  Add shift
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="h-7 rounded-l-none border-l border-primary-foreground/30 px-1.5"
+                      aria-label="Add shift menu"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuItem onClick={onOpenMultiAdd}>
+                      Add multiple shifts
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onOpenImportShifts}>
+                      Import shifts from Excel
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onOpenAddUnavailability}>
+                      Add unavailability
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onOpenAddTimeOff}>
+                      Add time off
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </>
           )}
         </div>
