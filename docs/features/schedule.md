@@ -368,7 +368,7 @@ Prove: `npm run check:roles` and `productLevels.test.ts` assert `schedule.grant`
 
 ### Phase 14 — Team hours drops locks and exceptions
 
-- [ ] Remove locks and per-person exceptions from Team hours.
+- [x] Remove locks and per-person exceptions from Team hours.
 
 Rules:
 
@@ -755,3 +755,18 @@ Proven: `npm run check:roles` passed. `productLevels.test.ts`, run through `npm 
 Blockers: none for this phase.
 
 Questions: none. Phone steps: none. This phase is the permission keys.
+
+### 2026-10-21 — Phase 14 Team hours drops locks and exceptions
+
+Shipped: Team hours no longer renders lock controls or per-person exceptions. Those components stay in the repo. The availability choice editor and the requests queue stay. The Team hours sheet description no longer names locks or exceptions.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-14-team-hours-screen.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It opens Team hours and asserts Lock controls and Per-person exceptions are absent. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can manage availability and open Team hours.
+2. Availability choice should still be there.
+3. Lock controls and Per-person exceptions should not be on the screen.
+
+Blockers: none for this phase.
+
+Questions: none.

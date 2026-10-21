@@ -104,7 +104,7 @@ export function SchedulingPanelSheet({
   const panelDescription =
     panel === "availability"
       ? availabilityIsTeam
-        ? "Locks, exceptions, and change requests for other people. Your own hours stay under My availability."
+        ? "Availability choice and change requests for other people. Your own hours stay under My availability."
         : "The hours you can work. Saving here does not change anyone else's availability."
       : panel === "staff"
         ? "Decide the team's shift swaps and time off. This does not edit your own hours."

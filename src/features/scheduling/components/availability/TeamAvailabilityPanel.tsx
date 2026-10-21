@@ -17,9 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useSchedulingRole } from "@/features/scheduling/hooks/useSchedulingRole";
 import { useAvailabilityManagement } from "@/features/availability/manage/useAvailabilityManagement";
-import { LockControls } from "@/features/availability/manage/LockControls";
 import { RequestsQueue } from "@/features/availability/manage/RequestsQueue";
-import { ExceptionsTable } from "@/features/availability/manage/ExceptionsTable";
 import { DEFAULT_ORG_ID } from "@/features/availability/utils/lockEngine";
 import { AvailabilityChoiceEditor } from "@/features/scheduling/components/availability/AvailabilityChoiceEditor";
 import { isMissingRelationError } from "@/utils/supabaseErrors";
@@ -273,37 +271,12 @@ export function TeamAvailabilityPanel({
       <CardHeader>
         <CardTitle>Team Availability Controls</CardTitle>
         <CardDescription>
-          Manage locks, requests, and exceptions for other people. Your own
+          Availability choice and change requests for other people. Your own
           hours stay on My availability.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <AvailabilityChoiceEditor orgId={orgId} />
-        <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
-          <LockControls
-            mode={management.pendingMode}
-            day={management.pendingDay}
-            hour={management.pendingHour}
-            onModeChange={(value) => management.setPendingMode(value)}
-            onDayChange={(value) => management.setPendingDay(value)}
-            onHourChange={(value) => management.setPendingHour(value)}
-            onSave={management.updateLockSettings}
-            saving={management.updateLockSettingsPending}
-            dayOptions={management.dayOptions}
-            hourOptions={management.hourOptions}
-            lockStatePreview={management.lockStatePreview}
-          />
-
-          <ExceptionsTable
-            employees={management.employeesQuery.data ?? []}
-            exceptions={management.exceptionsQuery.data ?? []}
-            form={management.exceptionForm}
-            onFormChange={management.setExceptionForm}
-            onSubmit={management.saveException}
-            saving={management.saveExceptionPending}
-            isLoading={management.exceptionsQuery.isLoading}
-          />
-        </div>
 
         <RequestsQueue
           requests={management.requestsQuery.data ?? []}
