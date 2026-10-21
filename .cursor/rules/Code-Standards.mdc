@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+
+# Code standards
+
+Next.js App Router app, Supabase, and a Capacitor shell (`capacitor.config.ts`).
+
+- Split a file as it approaches about 400 lines.
+- Reuse the feature's existing components, hooks, repositories, and services. Do not add a second pattern beside one that already exists.
+- Permission checks use the role matrix in `src/features/roles` and the existing gates (`useCan`, `IfCan` in `src/components/permissions`). Do not add another permission list.
+- The browser uses the anon client in `src/integrations/supabase/client.ts`. Service-role keys and other secrets stay server-side (`src/lib/env.ts`, `src/server`). Do not put them in client code.
+- Before commit, run `npm run typecheck`, `npm run lint`, and the `npm run check:*` or test script that covers the change.

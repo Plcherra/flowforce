@@ -12,7 +12,7 @@ FlowForce helps small and medium businesses manage employees, scheduling, tasks,
 - **Team Management** — Employee directory, invitations & roles
 - **Smart Scheduling** — Drag & drop shifts, availability, time-off
 - **Real-time Messaging** — Team communication & announcements
-- **Task & Goal Tracking** — Priorities, accountability & OKRs
+- **Task Tracking** — Priorities and accountability
 - **Forms & Workflows** — Custom forms and process automation
 - **Analytics & Insights** — Performance dashboards and reports
 

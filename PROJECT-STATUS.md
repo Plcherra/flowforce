@@ -1,6 +1,6 @@
 # Project Status
 
-Scanned 2026-10-16 from the current app routes, `src/features`, `src/data/navigationData.tsx`, and `src/app-shell/navigation/moduleRouteInventory.json` (updated 2026-06-30). The June pilot tracker (`docs/PILOT-FEATURE-TRACKER.md`) still marks every pilot module unverified. Status below is what the pages actually render.
+Scanned 2026-10-16 from the current app routes, `src/features`, `src/data/navigationData.tsx`, and `src/app-shell/navigation/moduleRouteInventory.json` (updated 2026-06-30). Status below is what the pages actually render. Production, beta, hidden, and deprecated labels come from that inventory file. The old pilot tracker is not a status source.
 
 ## 1. Features in code
 
@@ -8,7 +8,7 @@ Public pages outside the module inventory: `/` (marketing), `/features`, `/prici
 
 ### Production
 
-These routes mount real feature pages and are marked production in the June inventory. The main sidebar (`navigationData.tsx`) links Dashboard, Scheduling, Tasks, Messages, Company Updates, Forms, Inventory, Reports, Team, and Settings. Inventory children are linked from the inventory nav, not the main sidebar. The June tracker said Items, Counts, Purchasing, Prep, Cookbook, and Inventory Reports were main-sidebar items; that list does not match the current sidebar.
+These routes mount real feature pages and are marked production in `moduleRouteInventory.json`. The main sidebar (`navigationData.tsx`) links Dashboard, Scheduling, Tasks, Messages, Company Updates, Forms, Inventory, Reports, Team, and Settings. Items, Counts, Purchasing, Prep, Cookbook, and Inventory Reports are linked from the inventory nav, not the main sidebar.
 
 | Feature | Route | Code |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ These routes mount real feature pages and are marked production in the June inve
 | Waste and actions | `/app/inventory/actions` | Logs waste, adjustments, transfers, and production. Hidden from the main sidebar; linked inside inventory. |
 | Reports | `/app/reports` | Pilot reports page under `src/features/analytics`. |
 | Team | `/app/employees` | Directory and invites. |
-| Settings | `/app/settings` | Company, security, localization, notifications, and feature panels. The June tracker still marks this shell unverified. |
+| Settings | `/app/settings` | Company, security, localization, notifications, and feature panels. Marked production in the inventory. |
 | Profile | `/app/profile` | User menu page, not a sidebar module. |
 | Position management | `/app/position-management` | Hidden admin page. |
 | Section permissions | `/app/sections-permissions` | Hidden; also reachable from settings and team. |
@@ -38,7 +38,7 @@ These routes mount real feature pages and are marked production in the June inve
 
 ### Beta
 
-Marked beta in the June inventory. All of these still have pages, and the ones with `sidebar: true` are still in the main sidebar.
+Marked beta in `moduleRouteInventory.json`. All of these still have pages, and the ones with `sidebar: true` are still in the main sidebar.
 
 | Feature | Route | Flag |
 | --- | --- | --- |
@@ -62,7 +62,7 @@ Marked beta in the June inventory. All of these still have pages, and the ones w
 
 ### Deprecated
 
-June inventory aliases, plus two abandoned redirects that are no longer in that file.
+Aliases in `moduleRouteInventory.json`, plus two abandoned redirects that are no longer in that file.
 
 | Route | What the page does now |
 | --- | --- |
@@ -71,8 +71,8 @@ June inventory aliases, plus two abandoned redirects that are no longer in that 
 | `/app/schedule-lobby` | Redirects to `/app/enhanced-scheduling`. |
 | `/app/scheduling/timeoff`, `/app/time-off` | Redirect to the time-off panel. Inventory still lists `/app/time-off` as hidden, not deprecated. |
 | `/app/invite-employee` | Client redirect to `/app/employees?invite=1`. |
-| `/app/goals` | Redirects to `/app/tasks`. **Abandoned:** `src/features/goals` is gone. The June tracker said this route was deleted. |
-| `/app/help-desk` | Redirects to `/app/messages`. **Abandoned:** `src/features/helpdesk` is gone. The June tracker said this route was deleted. |
+| `/app/goals` | Redirects to `/app/tasks`. **Abandoned:** `src/features/goals` is gone. |
+| `/app/help-desk` | Redirects to `/app/messages`. **Abandoned:** `src/features/helpdesk` is gone. |
 
 **Marked deprecated, but still mount a full page (not a redirect):**
 
@@ -87,9 +87,9 @@ Sign-in, invite signup, and password reset live at `/auth`. `NavigationGuard` an
 
 ## 3. Top five unfinished items
 
-Ranked by what still blocks a restaurant from running a real pilot. The June tracker (2026-06-30) left all 11 pilot modules unchecked, left Settings unverified, and left the hands-off signup and “real tenant data” success metrics open. `docs/test-results/visible-modules-smoke.json` is not in the repo.
+Ranked by what still blocks a restaurant from running a real pilot. There is no pilot sign-off file in the repo. `docs/test-results/visible-modules-smoke.json` is not in the repo.
 
-1. **The 11-route pilot path has never been signed off on current code.** Dashboard, team, settings, scheduling, tasks, messages, company updates, forms, inventory, purchasing, and reports are all still “Not verified” in the June tracker. **Fix:** run visible-module smoke against a seeded company and repair whatever fails on those 11 routes before treating the demo path as done.
+1. **The 11-route pilot path has no sign-off record in the repo.** Dashboard, team, settings, scheduling, tasks, messages, company updates, forms, inventory, purchasing, and reports are marked production in `moduleRouteInventory.json`. **Fix:** run visible-module smoke against a seeded company and repair whatever fails on those 11 routes before treating the demo path as done.
 2. **Live screens substitute demo data when queries fail.** Scheduling injects fallback shifts, the working cookbook shows demo recipes, and operations returns mock KPIs. **Fix:** on a failed or missing tenant query, show an empty or error state and do not render fallback shifts, recipes, or KPI mocks.
 3. **A new owner can still get stuck before the dashboard.** Signup continues without a session when email confirmation blocks `signInWithPassword`, and a permissions failure tells the user to check the onboarding service-role key. **Fix:** make `/company-registration` finish with a session and a `company_id` profile and land on `/app/dashboard` with no second sign-in and no manual env step.
 4. **Inventory routes the inventory file calls production are split or empty.** `/app/inventory/prep` is an empty mock, `/app/inventory/cookbook` is a coming-soon card while the real cookbook is only on `/app/cookbook`, and inventory-report waste, variance, and prep tabs are placeholders. The main sidebar does not link items, counts, or purchasing. **Fix:** point the canonical prep, cookbook, and inventory-report routes at the live item, recipe, waste, and count queries, and add Items, Counts, and Purchasing to the pilot sidebar.
