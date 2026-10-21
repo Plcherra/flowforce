@@ -9,6 +9,8 @@ import { useForms, type FormWithMeta } from "@/features/forms/hooks/useForms";
 import { useFormDefinition } from "@/features/forms/hooks/useFormDefinition";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useCan } from "@/hooks/useCan";
+import { useTasks } from "@/hooks/useTasks";
 import { logger } from "@/utils/logger";
 import { FormSubmissionData } from "@/types/api";
 import { orderFormFields } from "@/features/forms/components/utils/orderFormFields";
@@ -25,6 +27,9 @@ import {
   StepNavigation,
   WizardFooter,
 } from "./wizard";
+import { HandoverNotesField } from "./HandoverNotesField";
+import { handoverTaskDraft } from "../utils/handoverTask";
+import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import type {
   FormFieldDataLocal,
   ValidationRules,
@@ -47,8 +52,16 @@ export default function FormFillDialog({
 }: FormFillDialogProps) {
   const resolvedFormId = formId ?? initialForm?.id ?? null;
   const { submitForm } = useForms();
+  const { createTask } = useTasks();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const checklistLevel = taskCreateLevel({
+    createOthers: can("tasks.checklist.create_others"),
+    createSelf: can("tasks.checklist.create_self"),
+    legacyEdit: can("editTasks"),
+  });
+  const canMakeHandoverTask = permissionsLoading || checklistLevel !== "none";
 
   const {
     form: hydratedForm,
@@ -70,6 +83,8 @@ export default function FormFillDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [handoverNote, setHandoverNote] = useState("");
+  const [makeHandoverTask, setMakeHandoverTask] = useState(false);
 
   const orderedFields = useMemo(() => orderFormFields(fields), [fields]);
   const buckets = useMemo(
@@ -99,6 +114,8 @@ export default function FormFillDialog({
       setVisibleFields(new Set());
       setHasInitialized(false);
       setSubmissionId(null);
+      setHandoverNote("");
+      setMakeHandoverTask(false);
       wizard.reset();
     }
   }, [open, form, wizard]);
@@ -240,10 +257,10 @@ export default function FormFillDialog({
     }
     setIsSubmitting(true);
     try {
-      const { data, error: submitError } = await submitForm(
-        resolvedFormId,
-        values,
-      );
+      const { data, error: submitError } = await submitForm(resolvedFormId, {
+        ...values,
+        additional_information: handoverNote.trim(),
+      });
       if (submitError) {
         toast({
           title: "Unable to submit form",
@@ -254,10 +271,51 @@ export default function FormFillDialog({
         return;
       }
       setSubmissionId(data?.id ?? null);
-      toast({
-        title: "Response submitted",
-        description: "Your form was submitted successfully.",
-      });
+
+      let taskFailed = false;
+      const draft =
+        makeHandoverTask && canMakeHandoverTask && user
+          ? handoverTaskDraft({
+              note: handoverNote,
+              formId: resolvedFormId,
+              userId: user.id,
+            })
+          : null;
+      if (draft) {
+        try {
+          const created = await createTask({
+            title: draft.title,
+            description: draft.description,
+            status: draft.status,
+            source: draft.source,
+            priority: draft.priority,
+            due_date: draft.due_date,
+            assigned_to: draft.assigned_to,
+            links: draft.links,
+            created_by: user.id,
+          });
+          taskFailed = Boolean(created.error);
+        } catch (taskError) {
+          taskFailed = true;
+          logger.error("Handover task was not created", {
+            error: taskError,
+            tags: ["error"],
+          });
+        }
+      }
+
+      toast(
+        taskFailed
+          ? {
+              title: "Form saved",
+              description: "The form was saved, but the task was not.",
+              variant: "destructive",
+            }
+          : {
+              title: "Response submitted",
+              description: "Your form was submitted successfully.",
+            },
+      );
       onSubmitted?.();
       wizard.setCurrentStepIndex(steps.length - 1);
     } catch (err) {
@@ -384,6 +442,13 @@ export default function FormFillDialog({
               headerSubtitle="Preview your answers before submitting."
               meta={metaCardProps}
               sections={reviewSections}
+            />
+            <HandoverNotesField
+              note={handoverNote}
+              onNoteChange={setHandoverNote}
+              makeTask={makeHandoverTask}
+              onMakeTaskChange={setMakeHandoverTask}
+              canMakeTask={canMakeHandoverTask}
             />
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" onClick={handleExport}>

@@ -22,9 +22,13 @@ const { runTaskKindTests } = importTs(
 const { runTaskCreateLevelTests } = importTs(
   "../src/features/tasks/utils/taskCreateLevel.test.ts",
 );
+const { runHandoverTaskTests } = importTs(
+  "../src/features/forms/utils/handoverTask.test.ts",
+);
 
 runStatusTabLayoutTests();
 runReadinessFilterTests();
 runTaskKindTests();
 runTaskCreateLevelTests();
+runHandoverTaskTests();
 console.log("tasks page tests passed");

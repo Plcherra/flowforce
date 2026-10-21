@@ -216,7 +216,7 @@ Prove: Unit test `src/features/tasks/utils/taskCreateLevel.test.ts`. Run it with
 
 ### Phase 7 — Additional information on a form
 
-- [ ] Let a form note create a task for tomorrow.
+- [x] Let a form note create a task for tomorrow.
 
 Rules:
 
@@ -377,6 +377,23 @@ Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk as a manager who can edit tasks. Open Tasks. The + button should still be there.
 2. Sign in as a staff person who cannot edit tasks. The + button should not be there.
 3. If a person is allowed to create custom tasks only for themselves, open New custom task. It should say Assigned to you, with no list of other people.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 7 Additional information on a form
+
+Shipped: The last step of a form shows Additional information. When the person may create a checklist task, it also shows Make a task for tomorrow. The note is stored on the submission as `additional_information`. A filled note with the checkbox on inserts one checklist task due the next local day, assigned to the signed-in person, with `links.form_id` set to that form. A blank note does not insert a task. If the task insert fails, the submission stays saved and the toast says the form was saved but the task was not. This does not look up an opening shift.
+
+Proven: Unit test `src/features/forms/utils/handoverTask.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the title, the 80-character limit, the next local day, the form link, and a blank note. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit tasks. Open a form and go to the last step.
+2. Additional information should be at the end, with Make a task for tomorrow.
+3. Type "place the rubber mats before opening", turn the checkbox on, and submit.
+4. Open Tasks. That note should be a Checklist task due tomorrow.
+5. Submit another form with the checkbox off, or with the note empty. It should not add a task.
 
 Blockers: none for this phase.
 
