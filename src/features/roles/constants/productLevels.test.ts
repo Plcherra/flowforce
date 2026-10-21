@@ -68,7 +68,8 @@ export function runProductLevelTests() {
   assert.equal(permissionAllowedAtLevel("staff", "viewTeamSchedules"), true);
   assert.equal(permissionAllowedAtLevel("staff", "schedule.view"), true);
   assert.equal(permissionAllowedAtLevel("staff", "viewTeamProfiles"), true);
-  assert.equal(permissionAllowedAtLevel("staff", "editSchedules"), false);
+  assert.equal(permissionAllowedAtLevel("staff", "editSchedules"), true);
+  assert.equal(permissionAllowedAtLevel("staff", "schedule.edit"), true);
   for (const key of [
     "schedule.grant",
     "schedule.reminders.assign",
@@ -91,7 +92,8 @@ export function runProductLevelTests() {
   });
   assert.equal(staffGrant.viewTeamSchedules, true);
   assert.equal(staffGrant["schedule.view"], true);
-  assert.equal(staffGrant.editSchedules, undefined);
+  assert.equal(staffGrant.editSchedules, true);
+  assert.equal(staffGrant["schedule.edit"], undefined);
   assert.equal(staffGrant["billing.manage"], undefined);
 
   const staffDefault = cloneClassFromProductLevel("staff", "FOH");

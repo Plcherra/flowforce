@@ -163,15 +163,22 @@ for (const permission of [
   );
 }
 for (const permission of [
-  "editSchedules",
-  "schedule.edit",
   "approveTimeOff",
   "billing.manage",
   "admin.settings",
+  "schedule.grant",
+  "schedule.create",
+  "schedule.delete",
 ]) {
   assert(
     !staffGrantable.has(permission),
     `staff ceiling must not allow ${permission}`,
+  );
+}
+for (const permission of ["editSchedules", "schedule.edit"]) {
+  assert(
+    staffGrantable.has(permission),
+    `staff ceiling must allow ${permission} to be turned on for that person`,
   );
 }
 
@@ -256,10 +263,19 @@ assert(
   "Staff ceiling must allow See on team schedule",
 );
 assert(
-  ![...teamSchedule.verbs.edit, ...teamSchedule.verbs.create_delete].some(
-    (permission) => staffGrantable.has(permission),
+  teamSchedule.verbs.edit
+    .filter(
+      (permission) =>
+        permission !== "editSchedules" && permission !== "schedule.edit",
+    )
+    .every((permission) => !staffGrantable.has(permission)),
+  "Staff ceiling must not allow schedule grant or reminder keys",
+);
+assert(
+  teamSchedule.verbs.create_delete.every(
+    (permission) => !staffGrantable.has(permission),
   ),
-  "Staff ceiling must not allow Edit or Create / delete on team schedule",
+  "Staff ceiling must not allow Create / delete on team schedule",
 );
 const settingsArea = operatorAreas.find((area) => area.key === "settings");
 assert(

@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
+import { effectiveInvitePermissions } from "@/features/employees/utils/staffInviteScheduleDefaults";
 import {
-  applyPermissionDiffsToClassPermissions,
   operatorVerbsToPermissionDiffs,
   permissionDiffsToOperatorVerbs,
   retainAllowedDiffs,
@@ -66,7 +66,7 @@ export function InvitePersonCardForm({
     ? resolveProductLevel(selectedClass)
     : "staff";
   const classPermissions = selectedClass?.permissions ?? {};
-  const effectivePermissions = applyPermissionDiffsToClassPermissions(
+  const effectivePermissions = effectiveInvitePermissions(
     level,
     classPermissions,
     card.permissionOverrides,

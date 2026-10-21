@@ -24,14 +24,19 @@ const { runPersonAccessDiffTests } = importTs(
 const { runGrantCeilingTests } = importTs(
   "../src/features/roles/constants/grantCeiling.test.ts",
 );
+const { runStaffInviteScheduleDefaultTests } = importTs(
+  "../src/features/employees/utils/staffInviteScheduleDefaults.test.ts",
+);
 
 await runProductRolesSetupTests();
 runProductLevelTests();
 runOperatorBoxTests();
 runPersonAccessDiffTests();
 runGrantCeilingTests();
+runStaffInviteScheduleDefaultTests();
 console.log("productRolesSetup tests passed");
 console.log("productLevels tests passed");
 console.log("operatorBoxes tests passed");
 console.log("personAccessDiffs tests passed");
 console.log("grantCeiling tests passed");
+console.log("staffInviteScheduleDefaults tests passed");

@@ -69,8 +69,8 @@ export function runGrantCeilingTests() {
   );
   assert.equal(
     inviterCanGrantVerb(teamSchedule, "edit", "staff", "manager", manager),
-    false,
-    "Staff cannot receive team schedule Edit",
+    true,
+    "A manager can turn draft and create-shift on for a staff invite",
   );
   assert.equal(
     inviterCanGrantVerb(settings, "see", "staff", "manager", manager),

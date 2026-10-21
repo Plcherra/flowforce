@@ -401,7 +401,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 16 — Staff invite scheduling defaults
 
-- [ ] The invite card uses the Decision 6 scheduling defaults.
+- [x] The invite card uses the Decision 6 scheduling defaults.
 
 Rules:
 
@@ -787,3 +787,13 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-21 — Phase 16 Staff invite scheduling defaults
+
+Shipped: A staff invite starts with own schedule, the team published grid (`viewTeamSchedules` and `schedule.view`), and draft and create-shift off. Those two can be switched on for that person on the existing Operator access grid. `schedule.grant` and create or delete stay off the staff ceiling.
+
+Proven: Unit test `src/features/employees/utils/staffInviteScheduleDefaults.test.ts`, run through `npm run test:product-roles`, asserts the staff invite defaults and that `editSchedules` and `schedule.edit` can be switched on. `npm run check:roles` passed. `npm run typecheck` passed.
+
+Blockers: none for this phase.
+
+Questions: none. Phone steps: none. This phase is a unit test. The invite card on https://www.flowforce.uk uses the same defaults.

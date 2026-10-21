@@ -40,7 +40,7 @@ export function runOperatorBoxTests() {
   const teamSchedule = getOperatorAreaDefinition("team_schedule");
   assert.ok(teamSchedule);
   assert.equal(isVerbAvailable(teamSchedule, "see", "staff"), true);
-  assert.equal(isVerbAvailable(teamSchedule, "edit", "staff"), false);
+  assert.equal(isVerbAvailable(teamSchedule, "edit", "staff"), true);
   assert.equal(isVerbAvailable(teamSchedule, "create_delete", "staff"), false);
 
   const inventory = getOperatorAreaDefinition("inventory");
@@ -68,7 +68,7 @@ export function runOperatorBoxTests() {
   assert.equal(staffWithSchedule.viewTeamSchedules, true);
   assert.equal(staffWithSchedule["schedule.view"], true);
   assert.equal(staffWithSchedule["directory.view"], true);
-  assert.equal(staffWithSchedule.editSchedules, undefined);
+  assert.equal(staffWithSchedule.editSchedules, false);
   assert.equal(staffWithSchedule["billing.manage"], undefined);
   assert.deepEqual(permissionsToOperatorVerbs("staff", staffWithSchedule), [
     "profile:see",

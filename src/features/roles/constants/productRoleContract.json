@@ -333,6 +333,8 @@
       "viewTeamProfiles",
       "viewTeamSchedules",
       "schedule.view",
+      "editSchedules",
+      "schedule.edit",
       "viewTeamTasks",
       "directory.view"
     ]
