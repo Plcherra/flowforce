@@ -32,6 +32,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { parse, differenceInMinutes } from "date-fns";
+import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import { DetailsTab } from "./shift-wizard/DetailsTab";
 import { UsersTab } from "./shift-wizard/UsersTab";
 import { TasksTab } from "./shift-wizard/TasksTab";
@@ -126,6 +127,7 @@ export function ShiftWizardDialog({
   const companyId = profile?.companyId ?? metadataCompanyId ?? null;
 
   const { positions } = usePositions();
+  const { templates: shiftTemplates } = useShiftTemplates();
   const {
     employees,
     loading: employeesLoading,
@@ -559,6 +561,7 @@ export function ShiftWizardDialog({
                         distinctLocations={distinctLocations}
                         hours={hours}
                         laborCost={draftLaborCost}
+                        shiftTemplates={shiftTemplates}
                       />
                     </TabsContent>
 

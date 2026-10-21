@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,9 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, Clock, Plus, X } from "lucide-react";
 import { format, addHours, parse } from "date-fns";
 import type { Dispatch, SetStateAction } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import type { Position } from "@/hooks/usePositions";
+import type { ShiftTemplate } from "@/features/scheduling/hooks/useShiftTemplates";
 import type { ShiftWizardFormData, BreakItem } from "./types";
-import { logger } from "@/utils/logger";
 
 type DetailsTabProps = {
   formData: ShiftWizardFormData;
@@ -27,19 +25,41 @@ type DetailsTabProps = {
   distinctLocations: string[];
   hours: { total: number; net: number };
   laborCost: number;
+  shiftTemplates: ShiftTemplate[];
 };
 
-type ShiftTemplate = {
-  id: string;
-  name: string;
-  description?: string | null;
-  duration_hours?: number | null;
-  is_all_day?: boolean | null;
-  job_position_id?: string | null;
-  required_headcount?: number | null;
-  default_notes?: string | null;
-  color?: string | null;
-};
+function applyLoadedShiftTemplate(
+  template: ShiftTemplate,
+  positions: Position[],
+  setFormData: Dispatch<SetStateAction<ShiftWizardFormData>>,
+) {
+  setFormData((prev) => {
+    const next = { ...prev };
+    if (template.name) next.title = template.name;
+    if (template.is_all_day != null) next.is_all_day = template.is_all_day;
+    if (
+      template.duration_hours != null &&
+      template.is_all_day !== true &&
+      prev.start_time
+    ) {
+      const start = parse(prev.start_time, "HH:mm", prev.date);
+      next.end_time = format(addHours(start, template.duration_hours), "HH:mm");
+    }
+    if (template.job_position_id) {
+      next.job_position_id = template.job_position_id;
+      const positionName =
+        template.job_position?.name ??
+        positions.find((position) => position.id === template.job_position_id)
+          ?.name ??
+        null;
+      if (positionName) next.job_position_input = positionName;
+    }
+    if (template.required_headcount != null) {
+      next.required_headcount = template.required_headcount;
+    }
+    return next;
+  });
+}
 
 export function DetailsTab({
   formData,
@@ -48,52 +68,12 @@ export function DetailsTab({
   distinctLocations,
   hours,
   laborCost,
+  shiftTemplates,
 }: DetailsTabProps) {
-  const { user } = useAuth();
   const [showPositionSuggestions, setShowPositionSuggestions] = useState(false);
   const [positionActiveIndex, setPositionActiveIndex] = useState<number>(-1);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [locationActiveIndex, setLocationActiveIndex] = useState<number>(-1);
-
-  const [templateInput, setTemplateInput] = useState("");
-  const [showTemplateSuggestions, setShowTemplateSuggestions] = useState(false);
-  const [templateActiveIndex, setTemplateActiveIndex] = useState(-1);
-  const [shiftTemplates, setShiftTemplates] = useState<ShiftTemplate[]>([]);
-
-  useEffect(() => {
-    const fetchTemplates = async () => {
-      if (!user) return;
-
-      try {
-        const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
-        const companyId =
-          typeof metadata["company_id"] === "string"
-            ? (metadata["company_id"] as string)
-            : null;
-        let query = supabase
-          .from("shift_templates")
-          .select(
-            "id, name, description, duration_hours, is_all_day, job_position_id, required_headcount, default_notes, color",
-          )
-          .order("name");
-
-        if (companyId) {
-          query = query.eq("company_id", companyId);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        setShiftTemplates((data ?? []) as ShiftTemplate[]);
-      } catch (err) {
-        logger.error("Failed to load shift templates", {
-          error: err,
-          tags: ["error"],
-        });
-      }
-    };
-
-    fetchTemplates();
-  }, [user]);
 
   const filteredPositions = useMemo(
     () =>
@@ -104,44 +84,6 @@ export function DetailsTab({
       ),
     [formData.job_position_input, positions],
   );
-
-  const filteredTemplates = useMemo(
-    () =>
-      shiftTemplates.filter((tpl) =>
-        tpl.name?.toLowerCase().includes(templateInput.toLowerCase()),
-      ),
-    [shiftTemplates, templateInput],
-  );
-
-  const applyTemplate = (template: ShiftTemplate) => {
-    const date = formData.date;
-    let newEnd = formData.end_time;
-
-    if (
-      !template.is_all_day &&
-      formData.start_time &&
-      template.duration_hours
-    ) {
-      const start = parse(formData.start_time, "HH:mm", date);
-      const end = addHours(start, template.duration_hours);
-      newEnd = format(end, "HH:mm");
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      title: template.name || prev.title,
-      is_all_day: template.is_all_day ?? prev.is_all_day,
-      end_time: newEnd,
-      job_position_id: template.job_position_id || prev.job_position_id,
-      job_position_input: template.job_position_id
-        ? (positions.find((p) => p.id === template.job_position_id)?.name ??
-          prev.job_position_input)
-        : prev.job_position_input,
-      required_headcount:
-        template.required_headcount || prev.required_headcount,
-      notes: template.default_notes || prev.notes,
-    }));
-  };
 
   const addBreak = () => {
     const newBreak: BreakItem = {
@@ -486,77 +428,46 @@ export function DetailsTab({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="shift_template">Template</Label>
-        <div className="relative flex items-center gap-2">
-          <div className="relative flex-1">
-            <Input
-              id="shift_template"
-              placeholder="Type to search or name a template"
-              value={templateInput}
-              onChange={(event) => {
-                const value = event.target.value;
-                setTemplateInput(value);
-                setShowTemplateSuggestions(Boolean(value));
-                setTemplateActiveIndex(-1);
-              }}
-              onFocus={() => setShowTemplateSuggestions(Boolean(templateInput))}
-              onBlur={() =>
-                setTimeout(() => setShowTemplateSuggestions(false), 120)
-              }
-              onKeyDown={(event) => {
-                if (filteredTemplates.length === 0) return;
+        <Label htmlFor="required_headcount">Headcount</Label>
+        <Input
+          id="required_headcount"
+          type="number"
+          min={1}
+          value={formData.required_headcount}
+          onChange={(event) => {
+            const value = Number(event.target.value);
+            if (!Number.isFinite(value) || value < 1) return;
+            setFormData((prev) => ({ ...prev, required_headcount: value }));
+          }}
+        />
+      </div>
 
-                if (event.key === "ArrowDown") {
-                  event.preventDefault();
-                  setTemplateActiveIndex((prev) =>
-                    Math.min(prev + 1, filteredTemplates.length - 1),
-                  );
-                } else if (event.key === "ArrowUp") {
-                  event.preventDefault();
-                  setTemplateActiveIndex((prev) => Math.max(prev - 1, 0));
-                } else if (event.key === "Enter") {
-                  const pick =
-                    filteredTemplates[Math.max(templateActiveIndex, 0)];
-                  if (pick) {
-                    setTemplateInput(pick.name ?? "");
-                    applyTemplate(pick);
-                    setShowTemplateSuggestions(false);
-                  }
-                }
-              }}
-            />
-            {showTemplateSuggestions && (
-              <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
-                <div className="max-h-56 overflow-y-auto py-1">
-                  {filteredTemplates.slice(0, 8).map((template, index) => (
-                    <button
-                      type="button"
-                      key={template.id}
-                      className={cn(
-                        "w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                        index === templateActiveIndex &&
-                          "bg-accent text-accent-foreground",
-                      )}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        setTemplateInput(template.name ?? "");
-                        applyTemplate(template);
-                        setShowTemplateSuggestions(false);
-                      }}
-                    >
-                      {template.name}
-                    </button>
-                  ))}
-                  {filteredTemplates.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No templates found. Type a name and press Enter to load.
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="space-y-1">
+        <Label htmlFor="load-shift-template">Load shift template</Label>
+        <select
+          id="load-shift-template"
+          aria-label="Load shift template"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          value=""
+          onChange={(event) => {
+            const selected = shiftTemplates.find(
+              (template) => template.id === event.target.value,
+            );
+            if (!selected) return;
+            applyLoadedShiftTemplate(selected, positions, setFormData);
+          }}
+        >
+          <option value="">
+            {shiftTemplates.length === 0
+              ? "No saved shift templates"
+              : "Choose a template"}
+          </option>
+          {shiftTemplates.map((template) => (
+            <option key={template.id} value={template.id}>
+              {template.name ?? "Untitled template"}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-1">

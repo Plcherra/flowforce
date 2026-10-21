@@ -177,7 +177,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 3 — Load a shift template inside the wizard
 
-- [ ] Load a saved shift template without closing the wizard.
+- [x] Load a saved shift template without closing the wizard.
 
 Rules:
 
@@ -588,6 +588,22 @@ Phone steps for Pedro:
 4. Tap the arrow on that same Add shift control. The menu should list Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off. It should not list Add single shift.
 5. Tap Add multiple shifts and confirm that dialog opens, then close it.
 6. Add a shift, or open a week that already has one. Add shift should still be the only add control, and its menu should open the same four items.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 3 Load a shift template inside the wizard
+
+Shipped: Details has Load shift template. The list is `useShiftTemplates()` for the current company. Choosing one copies the template name, duration onto the end time, position, and headcount when those values exist. Start time, location, and notes stay as the user left them. The shift is not created until save. The wizard stays open.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-03-load-shift-template.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It loads Opening Bar in the open wizard and asserts the wizard stays open. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. Typecheck and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit the schedule. Save a shift template for the company first if none exist (name, duration, position, and headcount).
+2. Open Schedule and tap Add shift.
+3. On Details, set a start time and a location, then open Load shift template and choose the saved template.
+4. The title, end time, position, and headcount should fill in. The start time and location you typed should stay. Create New Shift should still be open. No shift should appear on the grid until you save.
 
 Blockers: none for this phase.
 
