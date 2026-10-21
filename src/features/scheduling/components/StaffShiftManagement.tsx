@@ -12,7 +12,7 @@ export function StaffShiftManagement() {
   const role = useSchedulingRole();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="team-requests">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Team requests</h2>
         <p className="text-muted-foreground">

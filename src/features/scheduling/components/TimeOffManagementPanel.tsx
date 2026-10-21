@@ -13,7 +13,6 @@ import {
   Search,
 } from "lucide-react";
 import { TimeOffRequest } from "@/types/scheduling-unified";
-import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import {
@@ -21,6 +20,11 @@ import {
   updateTimeOffStatus,
 } from "@/features/scheduling/repositories/shiftSwapsRepository";
 import { TimeOffRequestPanel } from "@/features/availability/components/TimeOffRequestPanel";
+import {
+  formatRequestedWhen,
+  timeLeftLabel,
+  timeOffStatusLabel,
+} from "@/features/scheduling/utils/timeOffRequestDetail";
 
 interface TimeOffManagementPanelProps {
   canApprove?: boolean;
@@ -52,6 +56,7 @@ function getStatusIcon(status: string) {
     case "approved":
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     case "denied":
+    case "rejected":
       return <XCircle className="h-4 w-4 text-red-500" />;
     default:
       return <AlertCircle className="h-4 w-4 text-yellow-500" />;
@@ -165,7 +170,7 @@ export function TimeOffManagementPanel({
   }
 
   const pendingCount = filteredTimeOffRequests.filter(
-    (request) => request.status === "requested",
+    (request) => timeOffStatusLabel(request.status) === "pending",
   ).length;
 
   return (
@@ -194,7 +199,7 @@ export function TimeOffManagementPanel({
 
       {filteredTimeOffRequests.length > 0 ? (
         filteredTimeOffRequests.map((request) => (
-          <Card key={request.id}>
+          <Card key={request.id} data-testid="time-off-request">
             <CardContent className="p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
@@ -209,8 +214,19 @@ export function TimeOffManagementPanel({
                       {getDisplayName(request.user)}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {format(new Date(request.start_date), "MMM d")} -{" "}
-                      {format(new Date(request.end_date), "MMM d, yyyy")}
+                      <span data-testid="time-off-start">
+                        {formatRequestedWhen(request.start_date)}
+                      </span>
+                      {" – "}
+                      <span data-testid="time-off-end">
+                        {formatRequestedWhen(request.end_date)}
+                      </span>
+                    </div>
+                    <div
+                      className="text-sm text-muted-foreground"
+                      data-testid="time-off-time-left"
+                    >
+                      {timeLeftLabel(request.start_date)}
                     </div>
                     <Badge variant="outline" className="mt-1 capitalize">
                       {request.type}
@@ -223,19 +239,20 @@ export function TimeOffManagementPanel({
                     {getStatusIcon(request.status)}
                     <Badge
                       variant={
-                        request.status === "approved"
+                        timeOffStatusLabel(request.status) === "approved"
                           ? "default"
-                          : request.status === "denied"
+                          : timeOffStatusLabel(request.status) === "rejected"
                             ? "destructive"
                             : "secondary"
                       }
                       className="capitalize"
+                      data-testid="time-off-status"
                     >
-                      {request.status}
+                      {timeOffStatusLabel(request.status)}
                     </Badge>
                   </div>
 
-                  {canApprove && request.status === "requested" && (
+                  {canApprove && timeOffStatusLabel(request.status) === "pending" && (
                     <div className="flex gap-2">
                       <Button
                         size="sm"

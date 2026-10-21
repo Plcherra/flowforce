@@ -144,6 +144,7 @@ export function DragDropScheduleCalendar({
     dailyGridStats: boardDailyGridStats,
     showAvailabilityLayer,
     setShowAvailabilityLayer,
+    timeOffRequests,
     weekCsvContent,
     weekCsvFilename,
     loading,
@@ -376,6 +377,7 @@ export function DragDropScheduleCalendar({
                 getVendorLabel={getVendorLabel}
                 getVendorColor={getVendorColor}
                 minimizedView={minimizedView}
+                timeOffRequests={timeOffRequests}
               />
               {dragOverlay}
             </DndContext>

@@ -505,7 +505,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 22 — Team requests on the list and on the grid
 
-- [ ] Show request detail, and show requested time off on the grid.
+- [x] Show request detail, and show requested time off on the grid.
 
 Rules:
 
@@ -889,5 +889,21 @@ Phone steps for Pedro:
 4. Sign in as the manager. Their own reminders should still be there, and the employee's reminder can still be seen on the manager list.
 
 Blockers: none for this phase. Migration `20261021110620_reminders_allow_deactivate.sql` was already applied.
+
+Questions: none.
+
+### 2026-10-21 — Phase 22 Team requests on the list and on the grid
+
+Shipped: Team requests lists each time-off row with status (pending, approved, or rejected), the requested start and end, and the time left until that start. A pending or approved request shows Requested off on that person's day in the week grid. The shift stays on the grid. Approve and Reject stay behind the existing `approveTimeOff` / `canApproveRequests` check. No new permission list and no migration.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-22-team-requests.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It seeds a pending time-off request and a published shift on that day, asserts the request shows pending, the start and end, and time left, asserts Requested off on the week grid with the shift still present, and asserts a staff user without approval permission has no Approve button. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the Playwright test was not executed here. Unit test `src/features/scheduling/utils/timeOffRequestDetail.test.ts` covers status labels, which day counts as requested off, the date format, and time left. Ran that test; it passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can approve time off. Have a teammate with a pending time-off request that covers a day this week, and a shift still on that day.
+2. Open Schedule. That person's day should say Requested off, and the shift should still be there.
+3. Open Team requests, then Time Off. The row should show pending, the requested start and end, and time left.
+4. Sign in as someone who cannot approve time off and open the same Team requests row. Approve should not be there.
+
+Blockers: none for this phase.
 
 Questions: none.

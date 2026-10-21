@@ -18,6 +18,10 @@ import {
 } from "@/features/scheduling/utils/gridIndexes";
 import { ShiftChip } from "@/features/scheduling/components/drag-drop/ShiftChip";
 import { WeekGridFooter } from "@/features/scheduling/components/drag-drop/WeekGridFooter";
+import {
+  isRequestedOffDay,
+  type TimeOffSpan,
+} from "@/features/scheduling/utils/timeOffRequestDetail";
 
 interface EmployeeSummary {
   id: string;
@@ -44,6 +48,7 @@ export interface WeekGridProps {
   showAvailabilityLayer?: boolean;
   showGridFooter?: boolean;
   enableShiftDrag?: boolean;
+  timeOffRequests?: TimeOffSpan[];
   scrollContainerRef?: React.RefObject<HTMLElement | null>;
   onShiftClick: (shiftId: string) => void;
   onDrop?: (event: React.DragEvent, day: Date, employeeId?: string) => void;
@@ -154,6 +159,7 @@ function GridCellComponent({
   getVendorLabel,
   getVendorColor,
   minimizedView = false,
+  requestedOff = false,
 }: {
   employeeId?: string;
   day: Date;
@@ -172,6 +178,7 @@ function GridCellComponent({
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
   minimizedView?: boolean;
+  requestedOff?: boolean;
 }) {
   const dropId = `${employeeId ?? "unassigned"}-${dayIso(day)}`;
   const { isOver, setNodeRef } = useDroppable({
@@ -208,6 +215,14 @@ function GridCellComponent({
     >
       {showAvailabilityLayer && employeeId ? (
         <AvailabilityCellOverlay cell={cell} />
+      ) : null}
+      {requestedOff ? (
+        <div
+          className="pointer-events-none absolute left-1 top-1 z-[7] rounded bg-amber-100 px-1 text-[10px] font-medium text-amber-950"
+          data-testid="schedule-requested-off"
+        >
+          Requested off
+        </div>
       ) : null}
       <div className="flex flex-wrap gap-1">
         {daySchedules.map((schedule) => (
@@ -256,6 +271,7 @@ function EmployeeRowComponent({
   getVendorLabel,
   getVendorColor,
   minimizedView = false,
+  timeOffRequests = [],
 }: {
   employee: EmployeeSummary;
   weekDays: Date[];
@@ -276,6 +292,7 @@ function EmployeeRowComponent({
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
   minimizedView?: boolean;
+  timeOffRequests?: TimeOffSpan[];
 }) {
   const employeeDays = shiftsByEmployeeDay.get(employee.id);
 
@@ -320,6 +337,7 @@ function EmployeeRowComponent({
             getVendorLabel={getVendorLabel}
             getVendorColor={getVendorColor}
             minimizedView={minimizedView}
+            requestedOff={isRequestedOffDay(timeOffRequests, employee.id, day)}
           />
         );
       })}
@@ -350,6 +368,7 @@ export function WeekGrid({
   getVendorLabel,
   getVendorColor,
   minimizedView = false,
+  timeOffRequests = [],
 }: WeekGridProps) {
   const internalScrollRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
@@ -416,6 +435,7 @@ export function WeekGrid({
         getVendorLabel={getVendorLabel}
         getVendorColor={getVendorColor}
         minimizedView={minimizedView}
+        timeOffRequests={timeOffRequests}
       />
     ),
     [
@@ -429,6 +449,7 @@ export function WeekGrid({
       shiftsByEmployeeDay,
       showAvailabilityLayer,
       minimizedView,
+      timeOffRequests,
       vendorEventsByShift,
       weekDays,
     ],
