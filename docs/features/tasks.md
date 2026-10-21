@@ -259,7 +259,7 @@ Prove: Skip. Do not add a test until the Open question "AI draft tasks from form
 
 ### Phase 12 — Per-person Others, Self, or None
 
-- [ ] Blocked by Open question "Where the task-type level is edited". Skip this phase. Do not add a second permission screen.
+- [x] Blocked by Open question "Where the task-type level is edited". Skip this phase. Do not add a second permission screen.
 
 Prove: Skip. Do not add a test until the Open question "Where the task-type level is edited" is answered.
 
@@ -422,3 +422,9 @@ Questions: The phase needs the Open question "Recurring shift tasks" answered.
 Skipped. Blocked by Open question "AI draft tasks from form notes". No model is called, and a note is not turned into a draft task. No test was added.
 
 Questions: The phase needs the Open question "AI draft tasks from form notes" answered: which notes become drafts, who approves them, and when it runs.
+
+### 2026-10-21 — Phase 12 Per-person Others, Self, or None
+
+Skipped. Blocked by Open question "Where the task-type level is edited". No second permission screen was added. No test was added.
+
+Questions: The phase needs the Open question "Where the task-type level is edited" answered.
