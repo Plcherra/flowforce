@@ -25,6 +25,7 @@ import {
   applyReadinessFilter,
   type ReadinessFilter,
 } from "@/features/tasks/utils/readinessFilters";
+import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import {
   TaskMetricsCards,
   TaskFilters,
@@ -69,6 +70,7 @@ export default function Tasks() {
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
   );
+  const [kindFilter, setKindFilter] = useState<TaskKindFilter>("all");
   const {
     statusFilter,
     setStatusFilter,
@@ -114,8 +116,9 @@ export default function Tasks() {
         statusFilter,
         priorityFilter,
         searchTerm,
+        kindFilter,
       ) as TaskListItem[],
-    [tasks, statusFilter, priorityFilter, searchTerm],
+    [tasks, statusFilter, priorityFilter, searchTerm, kindFilter],
   );
 
   const listedTasks = useMemo(
@@ -126,8 +129,10 @@ export default function Tasks() {
   const handleResetFilters = () => {
     resetFilters();
     setReadinessFilter(null);
+    setKindFilter("all");
   };
-  const filtersAreActive = filtersActive || readinessFilter !== null;
+  const filtersAreActive =
+    filtersActive || readinessFilter !== null || kindFilter !== "all";
 
   if (loading) {
     return <TaskPageSkeleton isMobile={isMobile} />;
@@ -213,6 +218,8 @@ export default function Tasks() {
             priorityFilter={priorityFilter}
             onPriorityChange={setPriorityFilter}
             priorityOptions={priorityOptions}
+            kindFilter={kindFilter}
+            onKindChange={setKindFilter}
             filtersActive={filtersAreActive}
             onResetFilters={handleResetFilters}
           />

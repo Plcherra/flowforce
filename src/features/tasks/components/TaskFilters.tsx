@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { TaskPriorityFilter } from "../types/filters";
+import { TASK_KIND_LABELS, type TaskKindFilter } from "../utils/taskKind";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -22,6 +23,8 @@ interface TaskFiltersProps {
   priorityFilter: TaskPriorityFilter;
   onPriorityChange: (value: TaskPriorityFilter) => void;
   priorityOptions: Array<{ value: TaskPriorityFilter; label: string }>;
+  kindFilter: TaskKindFilter;
+  onKindChange: (value: TaskKindFilter) => void;
   filtersActive: boolean;
   onResetFilters: () => void;
 }
@@ -32,6 +35,8 @@ export function TaskFilters({
   priorityFilter,
   onPriorityChange,
   priorityOptions,
+  kindFilter,
+  onKindChange,
   filtersActive,
   onResetFilters,
 }: TaskFiltersProps) {
@@ -82,6 +87,25 @@ export function TaskFilters({
                 {option.label}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={kindFilter}
+          onValueChange={(value) => onKindChange(value as TaskKindFilter)}
+        >
+          <SelectTrigger
+            className={isMobile ? "w-full" : "w-44"}
+            data-testid="tasks-kind-filter"
+            aria-label="Filter tasks by type"
+          >
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="shift">{TASK_KIND_LABELS.shift}</SelectItem>
+            <SelectItem value="checklist">{TASK_KIND_LABELS.checklist}</SelectItem>
+            <SelectItem value="custom">{TASK_KIND_LABELS.custom}</SelectItem>
           </SelectContent>
         </Select>
       </div>

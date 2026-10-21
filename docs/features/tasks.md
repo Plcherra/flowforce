@@ -159,7 +159,7 @@ Prove: Unit test `src/features/tasks/utils/readinessFilters.test.ts` covers the 
 
 ### Phase 4 — Shift, Checklist, and Custom badges
 
-- [ ] Show the task kind and filter the list by it.
+- [x] Show the task kind and filter the list by it.
 
 Rules:
 
@@ -335,6 +335,23 @@ Phone steps for Pedro:
 3. Tap Overdue. The list should show only overdue tasks. Tap Overdue again. The list should go back to the tab.
 4. Switch to To Do. The three numbers should count only To Do tasks.
 5. Open More and choose Cancelled if it is there. Overdue and Due should not treat finished or cancelled tasks as due.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 4 Shift, Checklist, and Custom badges
+
+Shipped: Each task shows a Shift, Checklist, or Custom badge from its source. A shift task keeps its shift title and Open shift. The list has a type filter for those three kinds. Readiness counts still follow the status tab.
+
+Proven: Unit test `src/features/tasks/utils/taskKind.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the three kinds and the filter. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. A task that came from a shift should say Shift, and still name the shift. Open it. Open shift should still be there.
+3. A task you created yourself should say Custom.
+4. Open the type filter and choose Shift. The list should show shift tasks only.
+5. Clear filters. All three kinds should be listed again.
 
 Blockers: none for this phase.
 

@@ -16,7 +16,11 @@ const { runStatusTabLayoutTests } = importTs(
 const { runReadinessFilterTests } = importTs(
   "../src/features/tasks/utils/readinessFilters.test.ts",
 );
+const { runTaskKindTests } = importTs(
+  "../src/features/tasks/utils/taskKind.test.ts",
+);
 
 runStatusTabLayoutTests();
 runReadinessFilterTests();
+runTaskKindTests();
 console.log("tasks page tests passed");

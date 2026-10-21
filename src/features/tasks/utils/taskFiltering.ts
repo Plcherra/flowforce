@@ -5,6 +5,7 @@
 import type { TaskStatusFilter, TaskPriorityFilter } from "../types/filters";
 import { normalizeStatus, normalizePriority } from "./normalization";
 import { readScheduleTaskLink } from "./scheduleTaskLink";
+import { readTaskKind, type TaskKindFilter } from "./taskKind";
 
 interface Task {
   title?: string | null;
@@ -28,6 +29,7 @@ export function filterTasks(
   statusFilter: TaskStatusFilter,
   priorityFilter: TaskPriorityFilter,
   searchTerm: string,
+  kindFilter: TaskKindFilter = "all",
 ): Task[] {
   const search = searchTerm.trim().toLowerCase();
 
@@ -58,6 +60,9 @@ export function filterTasks(
           .includes(search)
       : true;
 
-    return matchesStatus && matchesPriority && matchesSearch;
+    const matchesKind =
+      kindFilter === "all" || readTaskKind(task) === kindFilter;
+
+    return matchesStatus && matchesPriority && matchesSearch && matchesKind;
   });
 }

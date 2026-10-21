@@ -51,6 +51,7 @@ import { useTaskComments } from "@/features/tasks/hooks";
 import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { logger } from "@/utils/logger";
 import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
+import { readTaskKind, TASK_KIND_LABELS } from "@/features/tasks/utils/taskKind";
 
 type ButtonVariant = "default" | "secondary" | "outline";
 interface TaskDetailsDialogProps {
@@ -484,6 +485,7 @@ export function TaskDetailsDialog({
   if (!currentTask) return null;
 
   const scheduleLink = readScheduleTaskLink(currentTask);
+  const kindLabel = TASK_KIND_LABELS[readTaskKind(currentTask)];
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -499,20 +501,22 @@ export function TaskDetailsDialog({
                   {currentTask.description}
                 </DialogDescription>
               )}
-              {scheduleLink ? (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <Badge variant="outline">Schedule</Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {scheduleLink.shiftTitle}
-                  </span>
-                  <Link
-                    href={scheduleLink.href}
-                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    Open shift
-                  </Link>
-                </div>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Badge variant="outline">{kindLabel}</Badge>
+                {scheduleLink ? (
+                  <>
+                    <span className="text-sm text-muted-foreground">
+                      {scheduleLink.shiftTitle}
+                    </span>
+                    <Link
+                      href={scheduleLink.href}
+                      className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      Open shift
+                    </Link>
+                  </>
+                ) : null}
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <div

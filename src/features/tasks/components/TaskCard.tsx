@@ -20,6 +20,7 @@ import type { TaskWithRelations } from "@/hooks/useTasks";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
+import { readTaskKind, TASK_KIND_LABELS } from "../utils/taskKind";
 import type { SelectionHandlers } from "../hooks/useTaskSelection";
 
 interface TaskCardProps {
@@ -36,6 +37,7 @@ export function TaskCard({
   selectionHandlers,
 }: TaskCardProps) {
   const scheduleLink = readScheduleTaskLink(task);
+  const kindLabel = TASK_KIND_LABELS[readTaskKind(task)];
 
   return (
     <Card
@@ -70,7 +72,9 @@ export function TaskCard({
               <Badge className={getTaskStatusBadgeClass(task.status)}>
                 {getTaskStatusLabel(task.status)}
               </Badge>
-              {scheduleLink ? <Badge variant="outline">Schedule</Badge> : null}
+              <Badge variant="outline" data-testid="task-kind-badge">
+                {kindLabel}
+              </Badge>
             </div>
             {dueBadge && (
               <Badge
