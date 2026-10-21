@@ -21,6 +21,7 @@ import { LockControls } from "@/features/availability/manage/LockControls";
 import { RequestsQueue } from "@/features/availability/manage/RequestsQueue";
 import { ExceptionsTable } from "@/features/availability/manage/ExceptionsTable";
 import { DEFAULT_ORG_ID } from "@/features/availability/utils/lockEngine";
+import { AvailabilityChoiceEditor } from "@/features/scheduling/components/availability/AvailabilityChoiceEditor";
 import { isMissingRelationError } from "@/utils/supabaseErrors";
 
 interface TeamAvailabilityPanelProps {
@@ -277,6 +278,7 @@ export function TeamAvailabilityPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <AvailabilityChoiceEditor orgId={orgId} />
         <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
           <LockControls
             mode={management.pendingMode}

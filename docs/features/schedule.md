@@ -265,7 +265,7 @@ Prove: Unit test asserts the generated `org_prefs` types include the choice and 
 
 ### Phase 8 — Team hours editor for open or fixed
 
-- [ ] Let a manager set open or fixed, and the three weekdays, on Team hours.
+- [x] Let a manager set open or fixed, and the three weekdays, on Team hours.
 
 Rules:
 
@@ -667,5 +667,23 @@ Proven: Unit test `src/integrations/supabase/orgPrefsAvailabilityChoice.test.ts`
 The Supabase CLI could not run `supabase db push` because it has no access token. The same SQL was applied to the linked project through the Supabase migration API. Remote migration version `20261021104137` matches the file. The four columns are present on `org_prefs`.
 
 Blockers: none for this phase. Phases that depend on this migration are not blocked.
+
+Questions: none.
+
+### 2026-10-21 — Phase 8 Team hours editor for open or fixed
+
+Shipped: Team hours shows Availability choice when the person can manage availability. The choice is open or fixed only. The same editor saves the schedule window start weekday, end weekday, and posting weekday on `org_prefs`. Weekdays use Sunday as 0, matching the existing lock day list, and start unset. Saving upserts the company row. Migration `supabase/migrations/20261021104800_org_prefs_manager_write.sql` grants authenticated insert and update on `org_prefs` and limits those writes to company managers and people allowed to edit schedules. Lock controls and per-person exceptions stay on this screen.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-08-availability-choice.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It sets fixed, window start Monday, window end Friday, and posting Wednesday, reloads, and checks those values. Flexible is not a choice. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+The Supabase CLI could not run `supabase db push` because it has no access token. The same SQL was applied to the linked project through the Supabase migration API. Remote migration version `20261021104800` matches the file. Insert and update grants and the manager policies are present on `org_prefs`.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can manage availability, and open Schedule, then Team hours.
+2. Set Choice to Fixed. Set Window start to Monday, Window end to Friday, and Posting weekday to Wednesday.
+3. Tap Save availability choice.
+4. Reload the page and open Team hours again. Those four values should still be selected. Flexible should not be a choice.
+
+Blockers: none for this phase.
 
 Questions: none.
