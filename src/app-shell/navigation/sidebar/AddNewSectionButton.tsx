@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "@/lib/router-adapter";
 
@@ -9,7 +8,6 @@ interface AddNewSectionButtonProps {
 }
 
 export function AddNewSectionButton({
-  category,
   categoryKey,
   onNavigate,
 }: AddNewSectionButtonProps) {
@@ -21,14 +19,15 @@ export function AddNewSectionButton({
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="w-full justify-start text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mt-1"
+    <button
+      type="button"
       onClick={handleAddNew}
+      className="flex h-full w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-primary/30 px-2 py-3 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
     >
-      <Plus className="mr-2 h-3 w-3" />
-      <span className="text-xs">Add new</span>
-    </Button>
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-muted">
+        <Plus className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <span className="text-center text-xs font-medium">Add new</span>
+    </button>
   );
 }

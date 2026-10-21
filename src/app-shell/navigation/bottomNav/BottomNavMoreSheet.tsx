@@ -33,26 +33,24 @@ export function BottomNavMoreSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[min(70dvh,32rem)] overflow-y-auto rounded-t-3xl pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+        className="max-h-[min(78dvh,40rem)] overflow-y-auto rounded-t-3xl pb-[max(1.25rem,env(safe-area-inset-bottom))]"
       >
         <SheetHeader className="text-left">
           <SheetTitle>{t("navigation.more", { defaultValue: "More" })}</SheetTitle>
           <SheetDescription>
             {t("navigation.moreDescription", {
-              defaultValue: "The rest of your workspace",
+              defaultValue: "Jump into another part of FlowForce",
             })}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-4 space-y-6">
+        <div className="mx-auto mt-4 max-w-3xl space-y-5" data-testid="more-app-grid">
           {sections.map((section) => {
             const sectionLabel = navSectionLabel(t, section);
             return (
               <section key={section.id} aria-label={sectionLabel}>
-                <h3 className="px-1 text-xs font-semibold uppercase tracking-wider text-primary/80">
-                  {sectionLabel}
-                </h3>
-                <ul className="mt-2 space-y-1">
+                <h3 className="mb-2 text-xs text-muted-foreground">{sectionLabel}</h3>
+                <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                   {section.items.map((item) => {
                     const label = navItemLabel(t, item);
                     return (
@@ -62,34 +60,49 @@ export function BottomNavMoreSheet({
                           onClick={() => onSelect(item.href)}
                           aria-current={item.isActive ? "page" : undefined}
                           className={cn(
-                            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
-                            item.isActive && "bg-primary/10 font-medium text-primary",
+                            "flex h-full w-full flex-col items-center gap-2 rounded-2xl px-2 py-3 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
+                            item.isActive && "bg-primary/10 text-primary",
                           )}
                         >
-                          <NavGlyph icon={item.icon} className="h-4 w-4 shrink-0" />
-                          <span>{label}</span>
+                          <span
+                            className={cn(
+                              "grid h-11 w-11 place-items-center rounded-2xl bg-muted",
+                              item.isActive && "bg-primary/15",
+                            )}
+                          >
+                            <NavGlyph icon={item.icon} className="h-5 w-5" />
+                          </span>
+                          <span className="line-clamp-2 text-center text-xs font-medium leading-tight">
+                            {label}
+                          </span>
                         </button>
                       </li>
                     );
                   })}
+                  {canManageSections ? (
+                    <li>
+                      <AddNewSectionButton
+                        category={sectionLabel}
+                        categoryKey={section.translationKey || "custom"}
+                        onNavigate={() => onOpenChange(false)}
+                      />
+                    </li>
+                  ) : null}
                 </ul>
-                {canManageSections ? (
-                  <AddNewSectionButton
-                    category={sectionLabel}
-                    categoryKey={section.translationKey || "custom"}
-                    onNavigate={() => onOpenChange(false)}
-                  />
-                ) : null}
               </section>
             );
           })}
 
           {sections.length === 0 && canManageSections ? (
-            <AddNewSectionButton
-              category={t("navigation.custom", { defaultValue: "Custom" })}
-              categoryKey="custom"
-              onNavigate={() => onOpenChange(false)}
-            />
+            <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <li>
+                <AddNewSectionButton
+                  category={t("navigation.custom", { defaultValue: "Custom" })}
+                  categoryKey="custom"
+                  onNavigate={() => onOpenChange(false)}
+                />
+              </li>
+            </ul>
           ) : null}
         </div>
       </SheetContent>
