@@ -8,10 +8,20 @@ When the task says "next phase":
 
 1. Read `docs/roadmap.md`.
 2. Open only the feature file marked active.
-3. Implement the next unchecked phase in that file.
-4. Follow that phase's rules and its done-when.
-5. Append a dated entry to that file's Progress log: what shipped, commits, blockers, and questions that came up.
+3. Implement the next unchecked phase that is not blocked and does not depend on an unapplied migration.
+4. Follow that phase's rules, its done-when, and its Prove line.
+5. Prove done-when with a unit test or a Playwright test. Playwright tests use the scheduling tenant seed in `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. If the phase cannot be tested, write manual phone steps for the owner in the Progress log.
+6. Append a dated Progress log entry: what shipped, the commit, blockers, and questions. Never guess an Open question. Skip a blocked phase and log the skip.
+7. After the phase is green, continue to the next unblocked phase that does not depend on an unapplied migration, in the same run if time allows. Each phase is its own commit.
 
-Never guess an Open question. If a phase is blocked by one, skip that phase and log the skip.
+Migrations, for any phase that adds one:
+
+- The owner approves migrations going live during the feature.
+- Commit the migration and the generated types.
+- If the Supabase CLI can reach the linked project, apply it with `supabase db push`.
+- Otherwise log `needs owner: supabase db push <migration>` in the Progress log and continue with phases that do not depend on it.
+- `check:supabase:remote-drift` in deploy-readiness fails until the migration is applied. That is expected.
+
+Ship each phase with the Ship-To-Main rule: commit on `main`, then push `main`. Do not open a pull request.
 
 Old history is in git. Do not recreate it.

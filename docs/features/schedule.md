@@ -134,7 +134,9 @@ These are locked for the auto run. Implement them. Do not edit this section whil
 
 ## Phases
 
-Auto run: the next phase is the first unchecked phase that is not blocked. Implement that phase only. Then append the Progress log and stop. A blocked phase is skipped and logged, and it does not count as the phase for that run.
+Auto run: start at the first unchecked phase that is not blocked and does not depend on an unapplied migration. After that phase is green, continue to the next such phase in the same run if time allows. Each phase is its own commit on `main`. Append the Progress log as you go. Skip a blocked phase and log the skip.
+
+A phase that adds a migration follows the Feature workflow migration rule. If the Progress log has `needs owner: supabase db push <migration>`, skip phases that depend on that migration and continue with phases that do not. `check:supabase:remote-drift` in deploy-readiness fails until the push lands. That is expected.
 
 ### Phase 1 — Minimized view and role-template click
 
@@ -152,13 +154,15 @@ Done when:
 - Toggling Minimized view changes the chips on the week grid and turning it off restores the full chip.
 - Clicking a role template opens the wizard prefilled from that template, and dragging that template still works.
 
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` toggles Minimized view and clicks a role template.
+
 ### Phase 2 — One Add shift button
 
 - [ ] Keep View options and Actions. Replace the Add control with one Add shift button.
 
 Rules:
 
-- Files: `src/features/scheduling/components/calendar/CalendarToolbar.tsx`, `src/features/scheduling/components/ScheduleEmptyState.tsx`, and the props passed from `DragDropScheduleCalendar.tsx`.
+- Files: `src/features/scheduling/components/drag-drop/ScheduleToolbar.tsx` (passes props to `src/features/scheduling/components/calendar/CalendarToolbar.tsx`; update both in the same commit; do not add a third toolbar), `src/features/scheduling/components/ScheduleEmptyState.tsx`, and the props passed from `DragDropScheduleCalendar.tsx`.
 - Follow Decision 1. Do not rename View options or Actions. Do not move Copy previous week, Week templates, publish, export, or print.
 - The Add shift button calls `onOpenAddShift`. Its menu calls the existing handlers for multiple shifts, import, unavailability, and time off.
 - Remove the empty-week Copy last week button and the empty-week Add first shift button. Do not add a second button that opens the wizard.
@@ -168,6 +172,8 @@ Done when:
 - View options and Actions are still on the toolbar.
 - One Add shift button opens the single-shift wizard, and its menu still opens multiple shifts, import, unavailability, and time off.
 - An empty week does not show Copy last week or Add first shift. Add shift is the only add control, on an empty week and on a week that already has shifts.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` opens Add shift and its menu on an empty week and on a week that has shifts.
 
 ### Phase 3 — Load a shift template inside the wizard
 
@@ -183,6 +189,8 @@ Rules:
 Done when:
 
 - With the wizard open, choosing a template fills the form and leaves the wizard open on the same shift.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` loads a template in the open wizard and asserts the wizard stays open.
 
 ### Phase 4 — Opaque shift chips
 
@@ -200,6 +208,8 @@ Done when:
 
 - Two shifts of different roles on the same day are both solid colors, and each chip shows its role or position name.
 
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` asserts two same-day chips are opaque and each shows its role or position name.
+
 ### Phase 5 — Full-width availability sheet
 
 - [ ] Stop opening My availability in the narrow side sheet.
@@ -214,6 +224,8 @@ Rules:
 Done when:
 
 - My availability and Team hours use the full viewport width. The other four panels stay narrow.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` asserts My availability and Team hours are full width and the other four panels stay narrow.
 
 ### Phase 6 — Weekday availability rows
 
@@ -230,77 +242,268 @@ Done when:
 
 - A person can set Monday all day on, Tuesday off from 14:00 to 18:00, save, reload, and see the same rows.
 
-### Phase 7 — Open or fixed, and the schedule window
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` saves Monday all day on and Tuesday off 14:00 to 18:00, reloads, and sees the same rows.
 
-- [ ] Store the company availability choice and the schedule window. There is no flexible availability.
+### Phase 7 — org_prefs choice and schedule window
+
+- [ ] Add the company availability choice and the three schedule-window weekdays on `org_prefs`.
 
 Rules:
 
-- Follow Decision 5. The stored choice is only `open` or `fixed`.
-- Add columns on `org_prefs` for the choice and the three weekdays. Update the generated Supabase types the repo already checks in.
-- The editor sits on Team hours, visible only when `canManageAvailability` is true. It offers open and fixed, and no third choice.
-- When the company choice is fixed, the employee's first login runs that step inside employee onboarding (`src/features/onboarding`) and sends their fixed availability. My availability keeps a way to send a new fixed availability after that.
-- A send creates the existing availability request and does not overwrite the posted window. Use the posting weekday on `org_prefs` for the next-window rule. Do not hardcode a day or a 7-day notice.
+- This phase is the migration and the generated types. The editor, the open grid, onboarding, and the next-window rule are later phases.
+- Follow Decision 5. The stored choice is only `open` or `fixed`. Add columns on `org_prefs` for that choice and for the schedule window start weekday, end weekday, and posting weekday. Do not reuse `availability_lock_mode`. Do not add a flexible value.
+- Update the generated Supabase types the repo already checks in (`src/integrations/supabase/types.ts`).
+- Commit the migration and the generated types. If the Supabase CLI can reach the linked project, run `supabase db push`. Otherwise log `needs owner: supabase db push <migration>` in the Progress log, using the migration filename, and continue with phases that do not depend on this one.
+- `check:supabase:remote-drift` in deploy-readiness fails until that push is applied. That is expected.
+
+Done when:
+
+- The migration and the generated `org_prefs` types include the choice and the three weekdays.
+- The Progress log says that `supabase db push` ran, or it contains `needs owner: supabase db push <migration>`.
+
+Prove: Unit test asserts the generated `org_prefs` types include the choice and the three weekday columns.
+
+### Phase 8 — Team hours editor for open or fixed
+
+- [ ] Let a manager set open or fixed, and the three weekdays, on Team hours.
+
+Rules:
+
+- Depends on Phase 7 applied to the linked database. If the Progress log still has `needs owner: supabase db push <migration>` for that migration, skip this phase.
+- Files: `src/features/scheduling/components/availability/TeamAvailabilityPanel.tsx`.
+- Follow Decision 5. The editor is visible only when `canManageAvailability` is true. It offers open and fixed, and the three weekdays. There is no third choice.
+- Do not build onboarding or the next-window rule in this phase.
 
 Done when:
 
 - A manager can set open or fixed, and the three weekdays, reload, and see them again. Flexible is not a choice.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` sets open or fixed and the three weekdays, reloads, and sees them.
+
+### Phase 9 — Open availability does not require the grid
+
+- [ ] When the company choice is open, My availability does not require the weekday grid.
+
+Rules:
+
+- Depends on Phase 7 applied to the linked database. If that migration was not pushed, skip this phase.
+- Files: `src/features/availability/components/AvailabilityRequestForm.tsx`.
+- Follow Decision 5. `open` means any day, any time, and no grid is required.
+- Leave the weekday rows from Phase 6 in place for when the choice is fixed.
+
+Done when:
+
 - With the choice set to open, My availability does not require the grid.
-- A new employee's first login sends fixed availability when the company choice is fixed, and that person can send another fixed availability later.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` with the company choice open shows My availability without requiring the weekday grid.
+
+### Phase 10 — First login sends fixed availability
+
+- [ ] When the company choice is fixed, the employee's first login sends their fixed availability.
+
+Rules:
+
+- Depends on Phase 7 applied to the linked database. If that migration was not pushed, skip this phase.
+- Files: employee onboarding under `src/features/onboarding`.
+- Follow Decision 5. The step runs inside employee onboarding. A send creates the existing availability request.
+- Do not hardcode Friday, Saturday, Sunday, or 7 days. The later send from My availability is Phase 11.
+
+Done when:
+
+- A new employee's first login sends fixed availability when the company choice is fixed.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` asserts a new employee's first login sends fixed availability when the company choice is fixed.
+
+### Phase 11 — Send another fixed availability
+
+- [ ] My availability can send a new fixed availability after the first login.
+
+Rules:
+
+- Depends on Phase 7 applied to the linked database. If that migration was not pushed, skip this phase.
+- Files: `src/features/availability/components/AvailabilityRequestForm.tsx`.
+- Follow Decision 5. A new fixed availability can always be sent after the first login. A send creates the existing availability request and does not overwrite the posted window.
+- The next-window rule is Phase 12.
+
+Done when:
+
+- That person can send another fixed availability later, and the send does not overwrite the posted window.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` sends another fixed availability from My availability and asserts the posted window is unchanged.
+
+### Phase 12 — Next window after the posting weekday
+
+- [ ] An approved fixed availability applies to the next window after the posting weekday.
+
+Rules:
+
+- Depends on Phase 7 applied to the linked database. If that migration was not pushed, skip this phase.
+- Use the posting weekday on `org_prefs`. After approval, the availability applies to the next window that starts after the next posting weekday.
+- A send on the posting weekday does not change that window.
+- Do not hardcode a day or a 7-day notice.
+
+Done when:
+
 - A send on the posting weekday does not change that window, and after approval it is stored for the following window.
 
-### Phase 8 — Team hours is the schedule matrix
+Prove: Unit test asserts a send on the posting weekday is stored for the following window and does not change the posted window.
+
+### Phase 13 — Decision 7 permission keys
+
+- [ ] Add the missing schedule permission keys to the existing registry and role matrix.
+
+Rules:
+
+- This phase is the keys only. Team hours and reminders UI are later phases.
+- Files: `src/lib/permissions/registry.ts`, `src/features/roles/constants/productRoleContract.json`, `src/features/roles/constants/productLevels.test.ts`.
+- Follow Decision 7. Add only missing keys: `schedule.grant`, `schedule.reminders.assign`, `schedule.reminders.grant_deactivate`. Defaults: owner, admin, and manager on; staff off.
+- Do not add a second permission list. Run `npm run check:roles`.
+
+Done when:
+
+- `npm run check:roles` passes with those keys in the registry and `productRoleContract.json`.
+- `productLevels.test.ts` asserts owner, admin, and manager have the three keys and staff does not.
+
+Prove: `npm run check:roles` and `productLevels.test.ts` assert `schedule.grant`, `schedule.reminders.assign`, and `schedule.reminders.grant_deactivate` are on for owner, admin, and manager and off for staff.
+
+### Phase 14 — Team hours drops locks and exceptions
 
 - [ ] Remove locks and per-person exceptions from Team hours.
 
 Rules:
 
-- Files: `src/features/scheduling/components/availability/TeamAvailabilityPanel.tsx`, `src/features/roles`, `src/lib/permissions/registry.ts`, `src/features/employees/components/invites/InvitePersonCard.tsx`.
-- Follow Decisions 6 and 7.
-- Team hours lists people and their schedule permissions. A person with `schedule.grant` can turn those permissions on or off for someone else, including giving a staff user draft and create-shift permissions.
+- Files: `src/features/scheduling/components/availability/TeamAvailabilityPanel.tsx`.
 - Do not render `LockControls` or `ExceptionsTable` on Team hours. Leave those files in the repo.
-- The invite card already uses `OperatorAccessGrid`. The scheduling permissions in Decision 6 are on that grid and can be changed for the invited person before and after they are set up.
+- Do not build the permission matrix in this phase.
 
 Done when:
 
 - Team hours does not show lock controls or per-person exceptions.
-- A staff invite defaults to own schedule plus the team published grid, with draft and create-shift off, and those can be switched on for that person.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` opens Team hours and asserts lock controls and per-person exceptions are absent.
+
+### Phase 15 — Team hours permission matrix
+
+- [ ] Team hours lists people and their schedule permissions.
+
+Rules:
+
+- Depends on Phase 13. The keys have to exist before this phase edits them.
+- Files: `src/features/scheduling/components/availability/TeamAvailabilityPanel.tsx`.
+- Follow Decisions 6 and 7. A person with `schedule.grant` can turn schedule permissions on or off for someone else, including draft and create-shift for a staff user.
+- Lock controls and per-person exceptions stay off this screen.
+
+Done when:
+
 - Turning a permission off for an existing user removes it, and reloading shows the same matrix.
 
-### Phase 9 — My swaps is linked to a shift
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` turns a staff user's draft or create-shift permission off, reloads, and sees it still off.
+
+### Phase 16 — Staff invite scheduling defaults
+
+- [ ] The invite card uses the Decision 6 scheduling defaults.
+
+Rules:
+
+- Depends on Phase 13 so the Decision 7 keys are on the same grid.
+- Files: `src/features/employees/components/invites/InvitePersonCard.tsx` and the role defaults it already reads.
+- Follow Decision 6. The scheduling permissions are on the existing `OperatorAccessGrid`. They can be changed for the invited person before and after they are set up.
+- Staff defaults to `viewOwnSchedules`, `viewTeamSchedules`, and `schedule.view`. `editSchedules` and `schedule.edit` stay off until turned on for that person.
+
+Done when:
+
+- A staff invite defaults to own schedule plus the team published grid, with draft and create-shift off, and those can be switched on for that person.
+
+Prove: Unit test asserts a staff invite defaults to `viewOwnSchedules`, `viewTeamSchedules`, and `schedule.view`, with `editSchedules` and `schedule.edit` off, and that those two can be switched on.
+
+### Phase 17 — My swaps is linked to a shift
 
 - [ ] Let a person request a swap from a shift and see it under My swaps.
 
 Rules:
 
-- Files: `src/features/scheduling/components/ShiftSwapsPanel.tsx`, `src/features/scheduling/repositories/shiftSwapsRepository.ts`, and the shift sheet that already opens from a chip click.
+- Files: `src/features/scheduling/components/ShiftSwapsPanel.tsx`, `src/features/scheduling/repositories/shiftSwapsRepository.ts`, and `src/features/scheduling/components/ShiftDetailsPanel.tsx` (the shift sheet that already opens from a chip click).
 - Add a create function beside `fetchShiftSwaps` and `updateShiftSwapStatus`. Use the existing swap table and columns. Do not add a swap system.
 - The shift sheet offers Request swap for a shift the current user is on. My swaps lists swaps they requested or that were offered to them.
 - Approving stays on Team requests and keeps the current `canApprove` behavior.
 
 Done when:
 
-- Requesting a swap on a shift creates a row, and that row is visible in My swaps for that user without a manual refresh path other than the panel's existing query.
+- Requesting a swap on a shift creates a row, and the row appears in My swaps after the panel's existing query refetches.
 
-### Phase 10 — Reminders for the person and for the manager
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` requests a swap from the shift sheet and asserts the row appears in My swaps after the panel's existing query refetches.
 
-- [ ] Split personal reminders from assigned reminders, and link an assigned reminder to a real record.
+### Phase 18 — allow_deactivate on assigned reminders
+
+- [ ] Store `allow_deactivate` on the assigned reminder row.
 
 Rules:
 
-- Files: `src/features/scheduling/components/ScheduleRemindersPanel.tsx`, `src/features/scheduling/repositories/scheduleRemindersRepository.ts`, `src/features/scheduling/hooks/usePersonalScheduleReminders.ts`, and the registry in Decision 7.
-- Follow Decisions 7 and 8.
-- A person sees reminders for tasks, forms, and shifts they can already open. Clicking one opens that record's existing page.
-- A person with `schedule.reminders.assign` can assign a reminder to someone else, with the time and how often.
-- `allow_deactivate` is stored on that assigned reminder. The assignee can turn it off only when that flag is on. A person with `schedule.reminders.grant_deactivate` can set the flag, and can turn it off later.
-- Personal reminders stay the person's own list. Do not copy them into tasks.
+- This phase is the migration and the generated types. Reminder UI is later phases.
+- Files: a new migration, and `src/integrations/supabase/types.ts`. The column is `allow_deactivate` on `reminders`, the table `scheduleRemindersRepository` already uses.
+- Follow the Feature workflow migration rule. Commit the migration and the generated types. If the Supabase CLI can reach the linked project, run `supabase db push`. Otherwise log `needs owner: supabase db push <migration>` and continue with phases that do not depend on this column.
+- `check:supabase:remote-drift` in deploy-readiness fails until that push is applied. That is expected.
+- Do not merge reminders into tasks.
 
 Done when:
 
-- A manager can assign a form reminder to a staff user, set whether that user may deactivate it, and the staff user opens the form from the reminder.
+- The migration and the generated `reminders` types include `allow_deactivate`.
+- The Progress log says that `supabase db push` ran, or it contains `needs owner: supabase db push <migration>`.
+
+Prove: Unit test asserts the generated `reminders` type includes `allow_deactivate`.
+
+### Phase 19 — Reminders open the real record
+
+- [ ] A person can open the task, form, or shift a reminder points at.
+
+Rules:
+
+- Files: `src/features/scheduling/components/ScheduleRemindersPanel.tsx`, `src/features/scheduling/hooks/usePersonalScheduleReminders.ts`. Put new UI in a small file next to the panel.
+- A person sees reminders for tasks, forms, and shifts they can already open. Clicking one opens that record's existing page.
+- Personal reminders stay the person's own list. Do not copy them into tasks. Do not assign reminders to someone else in this phase.
+
+Done when:
+
+- The staff user opens the form, task, or shift from the reminder.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` opens a task, form, or shift from a reminder and lands on that record's existing page.
+
+### Phase 20 — Assign a reminder
+
+- [ ] A manager can assign a reminder to someone else.
+
+Rules:
+
+- Depends on Phase 13 for `schedule.reminders.assign`.
+- Files: `src/features/scheduling/components/ScheduleRemindersPanel.tsx`, `src/features/scheduling/repositories/scheduleRemindersRepository.ts`. Put new UI in a small file next to the panel.
+- Follow Decisions 7 and 8. A person with `schedule.reminders.assign` can assign a reminder to someone else, with the time and how often.
+- The deactivate flag is Phase 21. Personal reminders stay the person's own list.
+
+Done when:
+
+- A manager can assign a form reminder to a staff user, with a time and how often, and that staff user sees it.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` assigns a form reminder to a staff user and asserts that user sees the time and repeat.
+
+### Phase 21 — Deactivate follows allow_deactivate
+
+- [ ] The assignee can turn an assigned reminder off only when the flag allows it.
+
+Rules:
+
+- Depends on Phase 18 applied to the linked database. If the Progress log still has `needs owner: supabase db push <migration>` for `allow_deactivate`, skip this phase.
+- Depends on Phase 13 for `schedule.reminders.grant_deactivate`.
+- Files: `src/features/scheduling/components/ScheduleRemindersPanel.tsx`, `src/features/scheduling/repositories/scheduleRemindersRepository.ts`.
+- `allow_deactivate` is stored on that assigned reminder. The assignee can turn it off only when that flag is on. A person with `schedule.reminders.grant_deactivate` can set the flag, and can turn it off later.
 - With the flag off, that staff user has no deactivate control. With the flag on, deactivating hides it for them and leaves other people's reminders alone.
 
-### Phase 11 — Team requests on the list and on the grid
+Done when:
+
+- With the flag off, that staff user has no deactivate control. With the flag on, deactivating hides it for them and leaves other people's reminders alone.
+
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` asserts no deactivate control when `allow_deactivate` is off, and that turning it on hides that reminder for the assignee only.
+
+### Phase 22 — Team requests on the list and on the grid
 
 - [ ] Show request detail, and show requested time off on the grid.
 
@@ -316,17 +519,25 @@ Done when:
 - A pending time-off request appears in Team requests with status, requested times, and time left, and the same request is visible on the week grid as requested off.
 - A person without approval permission cannot approve it.
 
-### Phase 12 — Time off policies
+Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenant.ts` asserts the pending request shows status, times, and time left, appears as requested off on the week grid, and cannot be approved without approval permission.
+
+### Phase 23 — Time off policies
 
 - [ ] Blocked by Open question "Time off policies". Skip this phase. Do not invent allowance math or a policy tab.
 
-### Phase 13 — Repeating weekday patterns
+Prove: Skip. Do not add a test until the Open question "Time off policies" is answered.
+
+### Phase 24 — Repeating weekday patterns
 
 - [ ] Blocked by Open question "Repeating weekday patterns". Skip this phase. Do not store "2 Sundays in the month" or alternating Saturdays.
 
-### Phase 14 — Who sees the leadership schedule
+Prove: Skip. Do not add a test until the Open question "Repeating weekday patterns" is answered.
 
-- [ ] Blocked by Open question "Who sees the leadership schedule". Skip this phase. Do not add a coffee-shop mode, an office mode, or a large-grid layout.
+### Phase 25 — Who sees the leadership schedule
+
+- [ ] Blocked by Open question "Who sees the leadership schedule" (business type and scale). Skip this phase. Do not add a coffee-shop mode, an office mode, or a large-grid layout.
+
+Prove: Skip. Do not add a test for business type or grid scale until the Open question "Who sees the leadership schedule" is answered.
 
 ## Open questions
 
