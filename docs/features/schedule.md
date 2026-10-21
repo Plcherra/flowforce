@@ -50,11 +50,10 @@ The small drawer on the side is bad because it cuts off a lot of space.
 
 The tab seems very complex, but it is beautiful.
 
-We could use some options for availability:
+Availability choices are open and fixed. There is no flexible availability.
 
 - open = any day, any time
-
-We could let the business choose whether a fixed or a flexible availability option is available for employees to choose. Fixed would be set up once the person is hired, set up on first onboarding, and then be available for sending a new availability.
+- fixed is sent on the first login, as part of employee onboarding. A new fixed availability can always be sent.
 
 The owner, or whoever the owner makes able to manage this, can choose which day the availability window starts, along with the schedule, with a simple way to change the start day and the end day. For example:
 
@@ -120,15 +119,14 @@ The Team requests tab will show detailed information about the requests: time le
 
 These are locked for the auto run. Implement them. Do not edit this section while implementing a phase.
 
-1. Display, week actions, and adding a shift are three different jobs. They are not a View options / Actions / Add row.
-   - Display is an icon button. It holds Minimized view, Daily info, Show availability layer, and Role templates. It does not hold week templates.
-   - Week is one menu. It holds Copy previous week, Week templates, Auto-schedule week, Clear week, Publish week, Unpublish week, Export CSV, and Print week. Each of those appears once.
-   - Add shift is one primary button. The button opens the single-shift wizard. A menu on that same button holds Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off.
+1. View options and Actions stay as they are. The only toolbar change is the Add control.
+   - One Add shift button. It opens the single-shift wizard. A menu on that same button holds Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off.
+   - There is no second Add button and no separate "Add single shift" item.
    - On an empty week, Copy last week is not a second button. Add first shift stays, and it opens the same single-shift wizard.
 2. Shift chips are opaque. The role or position name is on the chip. This does not decide how a 25, 50, 100, or 500 person grid works.
 3. My availability and Team hours open in a full-width sheet. The other schedule sheets stay as they are.
 4. Availability is one row per weekday: all day on, or off. Off stores a from-time and a to-time on the existing `staff_availability` row. There is no checkmark grid.
-5. A company availability choice lives on `org_prefs`, next to the existing lock columns. Do not reuse `availability_lock_mode` for this. The choice is `open`, `fixed`, or `flexible`. The same row stores the schedule window start weekday, end weekday, and posting weekday. A person who can manage availability edits those four values. `open` means any day, any time, and no grid is required. `fixed` is set once at hire or first onboarding; a later send is a request. `flexible` may be sent again. A request does not change the window being posted. After it is approved, it applies to the next window that starts after the next posting weekday. Do not hardcode Friday, Saturday, Sunday, or 7 days.
+5. The only availability choices are open and fixed. Delete flexible availability. Do not add a flexible value, label, or branch. The choice lives on `org_prefs`, next to the existing lock columns. Do not reuse `availability_lock_mode` for this. The same row stores the schedule window start weekday, end weekday, and posting weekday. A person who can manage availability edits the choice and those three weekdays. `open` means any day, any time, and no grid is required. `fixed` is sent on the employee's first login, inside employee onboarding. A new fixed availability can always be sent after that. A send does not change the window being posted. After it is approved, it applies to the next window that starts after the next posting weekday. Do not hardcode Friday, Saturday, Sunday, or 7 days.
 6. Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Staff already default to `viewOwnSchedules`. Also default staff to `viewTeamSchedules` and `schedule.view` so they see their own published shifts and their team's published shifts. Draft weeks, creating shifts, and assigning shifts stay off for staff until those existing keys are turned on for that person (`editSchedules`, `schedule.edit`). Team hours reads and edits those keys. Lock controls and per-person exceptions are not the Team hours screen.
 7. If a needed schedule permission key does not exist yet, add it to the existing registry and role matrix. Defaults: owner, admin, and manager on; staff off. Keys to add only when missing: `schedule.grant` (grant or remove another person's schedule permissions), `schedule.reminders.assign` (assign a reminder to someone else), `schedule.reminders.grant_deactivate` (decide whether that person may turn that reminder off).
 8. Schedule reminders stay reminders. Do not merge them into tasks.
@@ -154,22 +152,22 @@ Done when:
 - Toggling Minimized view changes the chips on the week grid and turning it off restores the full chip.
 - Clicking a role template opens the wizard prefilled from that template, and dragging that template still works.
 
-### Phase 2 — One control for each job
+### Phase 2 — One Add shift button
 
-- [ ] Replace the View options, Actions, and Add row.
+- [ ] Keep View options and Actions. Replace the Add control with one Add shift button.
 
 Rules:
 
 - Files: `src/features/scheduling/components/calendar/CalendarToolbar.tsx`, `src/features/scheduling/components/ScheduleEmptyState.tsx`, and the props passed from `DragDropScheduleCalendar.tsx`.
-- Follow Decision 1. Every action listed there still calls the handler it calls today.
-- Copy previous week has one entry, under Week. Week templates has one entry, under Week.
-- The primary Add shift button and Add first shift both call `onOpenAddShift`.
+- Follow Decision 1. Do not rename View options or Actions. Do not move Copy previous week, Week templates, publish, export, or print.
+- The Add shift button calls `onOpenAddShift`. Its menu calls the existing handlers for multiple shifts, import, unavailability, and time off.
+- Remove the empty-week Copy last week button. Add first shift stays and calls `onOpenAddShift`.
 
 Done when:
 
-- The schedule toolbar has Display, Week, and Add shift, and it does not have buttons labeled View options, Actions, or Add.
-- Copy previous week and Week templates each appear once.
-- Add shift and Add first shift open the single-shift wizard. The Add shift menu still opens multiple shifts, import, unavailability, and time off.
+- View options and Actions are still on the toolbar.
+- One Add shift button opens the single-shift wizard, and its menu still opens multiple shifts, import, unavailability, and time off.
+- An empty week has Add first shift and does not have a Copy last week button. Add first shift opens the same wizard.
 
 ### Phase 3 — Load a shift template inside the wizard
 
@@ -232,23 +230,24 @@ Done when:
 
 - A person can set Monday all day on, Tuesday off from 14:00 to 18:00, save, reload, and see the same rows.
 
-### Phase 7 — Open, fixed, or flexible, and the schedule window
+### Phase 7 — Open or fixed, and the schedule window
 
-- [ ] Store the company availability choice and the schedule window.
+- [ ] Store the company availability choice and the schedule window. There is no flexible availability.
 
 Rules:
 
-- Follow Decision 5.
+- Follow Decision 5. The stored choice is only `open` or `fixed`.
 - Add columns on `org_prefs` for the choice and the three weekdays. Update the generated Supabase types the repo already checks in.
-- The editor sits on Team hours, visible only when `canManageAvailability` is true.
-- Fixed setup is offered on first onboarding for a new employee (`src/features/onboarding`). A later send from My availability creates the existing availability request and does not overwrite the posted window.
-- Use the posting weekday on `org_prefs` for the next-window rule. Do not hardcode a day or a 7-day notice.
+- The editor sits on Team hours, visible only when `canManageAvailability` is true. It offers open and fixed, and no third choice.
+- When the company choice is fixed, the employee's first login runs that step inside employee onboarding (`src/features/onboarding`) and sends their fixed availability. My availability keeps a way to send a new fixed availability after that.
+- A send creates the existing availability request and does not overwrite the posted window. Use the posting weekday on `org_prefs` for the next-window rule. Do not hardcode a day or a 7-day notice.
 
 Done when:
 
-- A manager can set the choice and the three weekdays, reload, and see them again.
+- A manager can set open or fixed, and the three weekdays, reload, and see them again. Flexible is not a choice.
 - With the choice set to open, My availability does not require the grid.
-- A request sent on the posting weekday does not change that window, and after approval it is stored for the following window.
+- A new employee's first login sends fixed availability when the company choice is fixed, and that person can send another fixed availability later.
+- A send on the posting weekday does not change that window, and after approval it is stored for the following window.
 
 ### Phase 8 — Team hours is the schedule matrix
 
