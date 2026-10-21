@@ -168,6 +168,12 @@ export default function Tasks() {
         </Alert>
       )}
 
+      <TaskStatusTabs
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        statusTabs={statusTabs}
+      />
+
       <TaskExecutionReadinessPanel tasks={tasks} onOpenTask={openTask} />
       <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
 
@@ -183,12 +189,6 @@ export default function Tasks() {
             priorityOptions={priorityOptions}
             filtersActive={filtersActive}
             onResetFilters={handleResetFilters}
-          />
-
-          <TaskStatusTabs
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            statusTabs={statusTabs}
           />
         </CardContent>
       </Card>

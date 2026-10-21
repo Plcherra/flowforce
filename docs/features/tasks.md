@@ -120,7 +120,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 2 — Status tabs, definitions, and More
 
-- [ ] Move the status tabs above readiness, and explain each status.
+- [x] Move the status tabs above readiness, and explain each status.
 
 Rules:
 
@@ -301,6 +301,23 @@ Phone steps for Pedro:
 3. Tap the round + button at the bottom right. The menu should say New custom task.
 4. Tap New custom task. The existing create dialog should open.
 5. If the list is empty, that empty card should not have its own Create Task button.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 2 Status tabs, definitions, and More
+
+Shipped: Status tabs sit above the readiness strip. All stays visible. A status with a zero count, such as Cancelled or In Review, is under More unless it is the selected tab. Each status has its one-line tooltip. Done still includes tasks stored as done or completed.
+
+Proven: Unit test `src/features/tasks/utils/statusTabLayout.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers More, a selected zero-count tab, and the definition text. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. The status tabs should sit above Execution Readiness.
+3. Press and hold, or hover, To Do. The tooltip should say Not started yet.
+4. Open More. Cancelled and In Review should be there when their counts are 0.
+5. Choose Cancelled. That tab should move into the main row, and the list should show cancelled tasks only.
 
 Blockers: none for this phase.
 
