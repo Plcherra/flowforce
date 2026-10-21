@@ -247,7 +247,7 @@ Prove: Skip. Do not add a test until the Open question "Next opening checklist o
 
 ### Phase 10 — Recurring shift-task template
 
-- [ ] Blocked by Open question "Recurring shift tasks". Skip this phase. Do not copy a task onto future shifts.
+- [x] Blocked by Open question "Recurring shift tasks". Skip this phase. Do not copy a task onto future shifts.
 
 Prove: Skip. Do not add a test until the Open question "Recurring shift tasks" is answered.
 
@@ -410,3 +410,9 @@ Questions: The phase needs the Open question "Missed form, missed item, or repor
 Skipped. Blocked by Open question "Next opening checklist or shift". A handover task is not matched to an opening checklist or a shift. No test was added.
 
 Questions: The phase needs the Open question "Next opening checklist or shift" answered.
+
+### 2026-10-21 — Phase 10 Recurring shift-task template
+
+Skipped. Blocked by Open question "Recurring shift tasks". A shift task stays the existing row. It is not copied onto later shifts. No test was added.
+
+Questions: The phase needs the Open question "Recurring shift tasks" answered.
