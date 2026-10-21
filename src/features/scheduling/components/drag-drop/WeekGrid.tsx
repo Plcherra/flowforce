@@ -50,6 +50,7 @@ export interface WeekGridProps {
   onDragOver?: (event: React.DragEvent) => void;
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
+  minimizedView?: boolean;
 }
 
 const formatName = (employee: EmployeeSummary) =>
@@ -152,6 +153,7 @@ function GridCellComponent({
   onShiftClick,
   getVendorLabel,
   getVendorColor,
+  minimizedView = false,
 }: {
   employeeId?: string;
   day: Date;
@@ -169,6 +171,7 @@ function GridCellComponent({
   onShiftClick: (shiftId: string) => void;
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
+  minimizedView?: boolean;
 }) {
   const dropId = `${employeeId ?? "unassigned"}-${dayIso(day)}`;
   const { isOver, setNodeRef } = useDroppable({
@@ -189,11 +192,16 @@ function GridCellComponent({
           ? `schedule-cell-${employeeId}-${dayIso(day)}`
           : `schedule-unassigned-day-${dayIso(day)}`
       }
+      data-minimized={minimizedView ? "true" : "false"}
       className={cn(
-        "border-l border-r relative min-h-[52px] hover:bg-muted/20 transition-colors p-1",
+        "border-l border-r relative hover:bg-muted/20 transition-colors p-1",
+        minimizedView
+          ? "min-h-6"
+          : employeeId
+            ? "min-h-[52px]"
+            : "min-h-[48px]",
         showAvailabilityLayer && cell?.status === "blocked" && "bg-destructive/5",
         enableShiftDrag && isOver && "ring-2 ring-primary/40 bg-primary/5",
-        !employeeId && "min-h-[48px]",
       )}
       onDragOver={html5Drop?.onDragOver}
       onDrop={html5Drop?.onDrop}
@@ -214,6 +222,7 @@ function GridCellComponent({
             getVendorLabel={getVendorLabel}
             getVendorColor={getVendorColor}
             onShiftClick={onShiftClick}
+            minimized={minimizedView}
           />
         ))}
         {unlinkedVendorEvents.map((event) => (
@@ -246,6 +255,7 @@ function EmployeeRowComponent({
   onShiftClick,
   getVendorLabel,
   getVendorColor,
+  minimizedView = false,
 }: {
   employee: EmployeeSummary;
   weekDays: Date[];
@@ -265,11 +275,19 @@ function EmployeeRowComponent({
   onShiftClick: (shiftId: string) => void;
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
+  minimizedView?: boolean;
 }) {
   const employeeDays = shiftsByEmployeeDay.get(employee.id);
 
   return (
-    <div className="grid grid-cols-8 border-b min-h-[52px]">
+    <div
+      className={cn(
+        "grid grid-cols-8 border-b",
+        minimizedView ? "min-h-7" : "min-h-[52px]",
+      )}
+      data-testid="schedule-employee-row"
+      data-minimized={minimizedView ? "true" : "false"}
+    >
       <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center gap-2">
         <Avatar className="h-6 w-6">
           <AvatarImage src={employee.avatar_url ?? undefined} />
@@ -301,6 +319,7 @@ function EmployeeRowComponent({
             onShiftClick={onShiftClick}
             getVendorLabel={getVendorLabel}
             getVendorColor={getVendorColor}
+            minimizedView={minimizedView}
           />
         );
       })}
@@ -330,6 +349,7 @@ export function WeekGrid({
   onDragOver,
   getVendorLabel,
   getVendorColor,
+  minimizedView = false,
 }: WeekGridProps) {
   const internalScrollRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
@@ -366,7 +386,7 @@ export function WeekGrid({
   const virtualizer = useVirtualizer({
     count: employees.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => EMPLOYEE_ROW_HEIGHT,
+    estimateSize: () => (minimizedView ? 28 : EMPLOYEE_ROW_HEIGHT),
     overscan: 5,
     enabled: employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD,
   });
@@ -395,6 +415,7 @@ export function WeekGrid({
         onShiftClick={onShiftClick}
         getVendorLabel={getVendorLabel}
         getVendorColor={getVendorColor}
+        minimizedView={minimizedView}
       />
     ),
     [
@@ -407,13 +428,19 @@ export function WeekGrid({
       onShiftClick,
       shiftsByEmployeeDay,
       showAvailabilityLayer,
+      minimizedView,
       vendorEventsByShift,
       weekDays,
     ],
   );
 
   return (
-    <div ref={horizontalScrollRef} className="overflow-x-auto">
+    <div
+      ref={horizontalScrollRef}
+      className="overflow-x-auto"
+      data-testid="schedule-week-grid"
+      data-minimized={minimizedView ? "true" : "false"}
+    >
       <div className="min-w-[800px]">
         {showAvailabilityLayer ? <AvailabilityLegend /> : null}
         <div className="grid grid-cols-8 border-b bg-background relative z-10">
@@ -452,6 +479,7 @@ export function WeekGrid({
                 onShiftClick={onShiftClick}
                 getVendorLabel={getVendorLabel}
                 getVendorColor={getVendorColor}
+                minimizedView={minimizedView}
               />
             );
           })}

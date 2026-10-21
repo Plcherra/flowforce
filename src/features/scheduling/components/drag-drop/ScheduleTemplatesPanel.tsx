@@ -15,6 +15,7 @@ interface ScheduleTemplatesPanelProps {
     event: React.DragEvent,
     vendor: VendorPaletteItem,
   ) => void;
+  onTemplateClick?: (template: ShiftTemplate) => void;
   onQuickVendorVisit: () => Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export function ScheduleTemplatesPanel({
   vendors,
   onTemplateDragStart,
   onVendorDragStart,
+  onTemplateClick,
   onQuickVendorVisit,
 }: ScheduleTemplatesPanelProps) {
   return (
@@ -43,8 +45,10 @@ export function ScheduleTemplatesPanel({
         {templates.map((template) => (
           <div
             key={template.id}
+            data-testid={`role-template-${template.id}`}
             draggable
             onDragStart={(event) => onTemplateDragStart(event, template)}
+            onClick={() => onTemplateClick?.(template)}
             className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
             style={{ borderLeftColor: template.color, borderLeftWidth: "4px" }}
           >

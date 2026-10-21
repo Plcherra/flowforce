@@ -30,6 +30,7 @@ interface ShiftChipProps {
   employeeId?: string | null;
   draggable?: boolean;
   variant?: "assigned" | "unassigned";
+  minimized?: boolean;
   vendorEvents?: VendorEventWithMetadata[];
   getVendorLabel: (vendorType: string) => string;
   getVendorColor: (vendorType: string) => string;
@@ -42,6 +43,7 @@ export function ShiftChip({
   employeeId = null,
   draggable = false,
   variant = "assigned",
+  minimized = false,
   vendorEvents = [],
   getVendorLabel,
   getVendorColor,
@@ -84,6 +86,7 @@ export function ShiftChip({
           : {}),
       }}
       data-testid={`schedule-shift-${schedule.id}`}
+      data-minimized={minimized ? "true" : "false"}
       className={cn(
         "relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
         isAssigned ? "bg-background" : "bg-background border-border shadow-sm",
@@ -94,32 +97,46 @@ export function ShiftChip({
       onClick={() => onShiftClick(schedule.id)}
       {...(draggable ? { ...listeners, ...attributes } : {})}
     >
-      <div className="font-medium truncate flex items-center gap-1">
+      <div
+        data-testid="shift-chip-title"
+        className="font-medium truncate flex items-center gap-1"
+      >
         {hasConflict ? (
           <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
         ) : null}
         {schedule.title ?? schedule.job_position?.name ?? "Shift"}
       </div>
-      <div className="text-xs opacity-75">{formatShiftWindow(schedule)}</div>
-      <div className="text-[10px] text-muted-foreground">
-        {formatShiftDuration(schedule)}
-        {schedule.required_headcount
-          ? ` · ${schedule.required_headcount} req.`
-          : ""}
-      </div>
-      {vendorEvents.map((event) => (
-        <div
-          key={`${event.id}-chip`}
-          data-testid={`schedule-vendor-chip-${event.id}`}
-          className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
-          style={{
-            backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}15`,
-            color: getVendorColor(event.service_type || event.vendor_name || ""),
-          }}
-        >
-          Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
-        </div>
-      ))}
+      {minimized ? null : (
+        <>
+          <div data-testid="shift-chip-time" className="text-xs opacity-75">
+            {formatShiftWindow(schedule)}
+          </div>
+          <div
+            data-testid="shift-chip-duration"
+            className="text-[10px] text-muted-foreground"
+          >
+            {formatShiftDuration(schedule)}
+            {schedule.required_headcount
+              ? ` · ${schedule.required_headcount} req.`
+              : ""}
+          </div>
+          {vendorEvents.map((event) => (
+            <div
+              key={`${event.id}-chip`}
+              data-testid={`schedule-vendor-chip-${event.id}`}
+              className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
+              style={{
+                backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}15`,
+                color: getVendorColor(
+                  event.service_type || event.vendor_name || "",
+                ),
+              }}
+            >
+              Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
+            </div>
+          ))}
+        </>
+      )}
     </button>
   );
 }

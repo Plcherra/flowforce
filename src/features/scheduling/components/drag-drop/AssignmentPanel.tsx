@@ -13,6 +13,7 @@ interface AssignmentPanelProps {
     event: React.DragEvent,
     vendor: VendorPaletteItem,
   ) => void;
+  onTemplateClick?: (template: ShiftTemplate) => void;
   onQuickVendorVisit: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ export function AssignmentPanel({
   vendors,
   onTemplateDragStart,
   onVendorDragStart,
+  onTemplateClick,
   onQuickVendorVisit,
 }: AssignmentPanelProps) {
   if (!showTemplates) {
@@ -35,6 +37,7 @@ export function AssignmentPanel({
         vendors={vendors}
         onTemplateDragStart={onTemplateDragStart}
         onVendorDragStart={onVendorDragStart}
+        onTemplateClick={onTemplateClick}
         onQuickVendorVisit={onQuickVendorVisit}
       />
     </div>

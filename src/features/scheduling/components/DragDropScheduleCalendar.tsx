@@ -6,7 +6,10 @@ import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/Assi
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
 import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
 import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetailsPanel";
-import { ShiftWizardDialog } from "@/features/scheduling/components/ShiftWizardDialog";
+import {
+  ShiftWizardDialog,
+  type ShiftWizardTemplateSeed,
+} from "@/features/scheduling/components/ShiftWizardDialog";
 import { WeekTemplateDialog } from "@/features/scheduling/components/WeekTemplateDialog";
 import { ImportShiftsDialog } from "@/features/scheduling/components/ImportShiftsDialog";
 import { ScheduleEmptyState } from "@/features/scheduling/components/ScheduleEmptyState";
@@ -22,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
-import type { PendingVendorEvent } from "./drag-drop/types";
+import type { PendingVendorEvent, ShiftTemplate } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,
   VENDOR_PALETTE,
@@ -118,6 +121,9 @@ export function DragDropScheduleCalendar({
   const [toEndDate, setToEndDate] = useState("");
   const [toReason, setToReason] = useState("");
   const [minimizedView, setMinimizedView] = useState(false);
+  const [wizardSeed, setWizardSeed] = useState<ShiftWizardTemplateSeed | null>(
+    null,
+  );
   const [showDailyInfo, setShowDailyInfo] = useState(true);
   const gridScrollRef = useRef<HTMLDivElement>(null);
 
@@ -214,6 +220,21 @@ export function DragDropScheduleCalendar({
     conflictByShiftId: boardConflictByShiftId,
   });
 
+  const openBlankShiftWizard = () => {
+    setWizardSeed(null);
+    setShowAddShift(true);
+  };
+
+  const openRoleTemplateWizard = (template: ShiftTemplate) => {
+    setWizardSeed({
+      title: template.name,
+      startTime: template.startTime,
+      endTime: template.endTime,
+      role: template.role,
+    });
+    setShowAddShift(true);
+  };
+
   const openShiftDetails = (scheduleId: string) => {
     setSelectedShift(scheduleId);
     setShowShiftSheet(true);
@@ -256,6 +277,7 @@ export function DragDropScheduleCalendar({
             templates={ROLE_TEMPLATES}
             vendors={VENDOR_PALETTE}
             onTemplateDragStart={handleTemplateDragStart}
+            onTemplateClick={openRoleTemplateWizard}
             onVendorDragStart={handleVendorDragStart}
             onQuickVendorVisit={async () => {
               try {
@@ -289,7 +311,7 @@ export function DragDropScheduleCalendar({
             onClearWeek={clearCurrentWeekAction}
             onPublishWeek={publishWeekStatusAction}
             onExportWeekCsv={exportWeekCsv}
-            onOpenAddShift={() => setShowAddShift(true)}
+            onOpenAddShift={openBlankShiftWizard}
             onOpenMultiAdd={() => setShowMultiAdd(true)}
             onOpenImportShifts={() => setShowImportShifts(true)}
             onOpenAddUnavailability={() => setShowAddUnavailability(true)}
@@ -312,7 +334,7 @@ export function DragDropScheduleCalendar({
               hasLocationFilter={Boolean(locationFilter)}
               readOnly={readOnly}
               onCopyPreviousWeek={readOnly ? undefined : copyPreviousWeekAction}
-              onAddShift={readOnly ? undefined : () => setShowAddShift(true)}
+              onAddShift={readOnly ? undefined : openBlankShiftWizard}
               onSuggestFills={readOnly ? undefined : onSuggestFills}
               onOpenAvailability={
                 onOpenPanel ? () => onOpenPanel("availability") : undefined
@@ -355,6 +377,7 @@ export function DragDropScheduleCalendar({
                 onDragOver={readOnly ? undefined : handleDragOver}
                 getVendorLabel={getVendorLabel}
                 getVendorColor={getVendorColor}
+                minimizedView={minimizedView}
               />
               {dragOverlay}
             </DndContext>
@@ -397,6 +420,7 @@ export function DragDropScheduleCalendar({
         open={showAddShift}
         onOpenChange={setShowAddShift}
         selectedDate={selectedDate}
+        templateSeed={wizardSeed}
       />
 
       {/* Import Shifts Dialog */}

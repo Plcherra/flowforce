@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -44,10 +45,18 @@ import { queryKeys } from "@/lib/queryKeys";
 import { insertTask } from "@/features/tasks/repositories/tasksRepository";
 import { logger } from "@/utils/logger";
 
+export interface ShiftWizardTemplateSeed {
+  title: string;
+  startTime: string;
+  endTime: string;
+  role: string;
+}
+
 interface ShiftWizardDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   selectedDate: Date;
+  templateSeed?: ShiftWizardTemplateSeed | null;
   children?: ReactNode;
 }
 
@@ -96,6 +105,7 @@ export function ShiftWizardDialog({
   open,
   onOpenChange,
   selectedDate,
+  templateSeed = null,
   children,
 }: ShiftWizardDialogProps) {
   const [activeTab, setActiveTab] = useState("details");
@@ -103,6 +113,7 @@ export function ShiftWizardDialog({
     createDefaultFormState(selectedDate),
   );
   const [loading, setLoading] = useState(false);
+  const wasOpenRef = useRef(false);
   const { toast } = useToast();
 
   const { user } = useAuth();
@@ -134,10 +145,27 @@ export function ShiftWizardDialog({
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (open) {
-      setFormData((prev) => ({ ...prev, date: selectedDate }));
+    const justOpened = Boolean(open) && !wasOpenRef.current;
+    wasOpenRef.current = Boolean(open);
+    if (!open) return;
+    if (justOpened) {
+      const next = createDefaultFormState(selectedDate);
+      if (templateSeed) {
+        next.title = templateSeed.title;
+        next.start_time = templateSeed.startTime;
+        next.end_time = templateSeed.endTime;
+        next.job_position_input = templateSeed.role;
+      }
+      setFormData(next);
+      setActiveTab("details");
+      return;
     }
-  }, [open, selectedDate]);
+    setFormData((prev) =>
+      prev.date.getTime() === selectedDate.getTime()
+        ? prev
+        : { ...prev, date: selectedDate },
+    );
+  }, [open, selectedDate, templateSeed]);
 
   const distinctLocations = useMemo(
     () =>

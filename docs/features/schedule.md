@@ -140,7 +140,7 @@ A phase that adds a migration follows the Feature workflow migration rule. If th
 
 ### Phase 1 — Minimized view and role-template click
 
-- [ ] Make the two broken view controls do something.
+- [x] Make the two broken view controls do something.
 
 Rules:
 
@@ -556,3 +556,21 @@ Is there a way to record availability for someone who can work "2 Sundays in the
 How does the schedule differ for a coffee shop or an office that should not see the leadership insights? How do we test that while there are no other users? How does the grid work for 25, 50, 100, and 500 people, with multiple roles and stores?
 
 ## Progress log
+
+### 2026-10-21 — Phase 1 Minimized view and role-template click
+
+Shipped: Minimized view shortens the week-grid rows and each shift chip shows only its title. Turning it off restores the title, time, and duration. Clicking a role template opens the existing shift wizard with that template's title, start, end, and role. Dragging a role template onto the grid is unchanged.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-01-minimized-role-template.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It toggles Minimized view and clicks the Barista Morning role template. This environment has no `SUPABASE_SERVICE_ROLE_KEY` and the Supabase CLI has no access token, so the test was not executed here. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit the schedule, and open Schedule.
+2. Open View options and turn on Minimized view. A shift chip should show only its title, and the week rows should get shorter.
+3. Turn Minimized view off. The chip should show the title, the time, and the duration again, and the rows should be taller.
+4. Open View options and tap Toggle role templates.
+5. Tap Barista Morning. Create New Shift should open with title Barista Morning, start 06:00, end 14:00, and job position Barista.
+6. Close the wizard, then drag Barista Morning onto a person's day. It should still create and assign that shift.
+
+Blockers: none for this phase. `supabase db push` was not needed.
+
+Questions: none.
