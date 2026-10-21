@@ -195,7 +195,7 @@ Prove: `npm run check:roles` and `npm run test:product-roles`. The product-level
 
 ### Phase 6 — Custom create follows the permission level
 
-- [ ] Hide custom create when the level is none, and keep it for someone who can already edit tasks.
+- [x] Hide custom create when the level is none, and keep it for someone who can already edit tasks.
 
 Rules:
 
@@ -366,3 +366,18 @@ Proven: `npm run check:roles` passed. `npm run test:product-roles` passed. `prod
 Blockers: none for this phase.
 
 Questions: none. Phone steps: none. This phase is the permission keys.
+
+### 2026-10-21 — Phase 6 Custom create follows the permission level
+
+Shipped: The floating create button stays for someone with `editTasks` when the new custom keys are off. It stays for someone with only `tasks.custom.create_self`, and that dialog says Assigned to you and saves the task to them. It is hidden when both custom keys are off and `editTasks` is off. While permissions are loading, the button stays.
+
+Proven: Unit test `src/features/tasks/utils/taskCreateLevel.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers none, the `editTasks` fallback, self winning over that fallback, and others. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as a manager who can edit tasks. Open Tasks. The + button should still be there.
+2. Sign in as a staff person who cannot edit tasks. The + button should not be there.
+3. If a person is allowed to create custom tasks only for themselves, open New custom task. It should say Assigned to you, with no list of other people.
+
+Blockers: none for this phase.
+
+Questions: none.

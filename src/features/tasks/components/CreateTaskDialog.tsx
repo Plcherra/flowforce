@@ -37,9 +37,14 @@ import { logger } from "@/utils/logger";
 interface CreateTaskDialogProps {
   open: boolean;
   onClose: () => void;
+  createLevel?: "self" | "others";
 }
 
-export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
+export function CreateTaskDialog({
+  open,
+  onClose,
+  createLevel = "others",
+}: CreateTaskDialogProps) {
   const { createTask } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -146,7 +151,12 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
         estimated_hours: formData.estimated_hours
           ? parseFloat(formData.estimated_hours)
           : null,
-        assigned_to: formData.assigned_to ? formData.assigned_to : null,
+        assigned_to:
+          createLevel === "self"
+            ? user.id
+            : formData.assigned_to
+              ? formData.assigned_to
+              : null,
         departmentid: null,
         tags: null,
         attachments: [],
@@ -285,6 +295,12 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {createLevel === "self" ? (
+              <div className="space-y-2">
+                <Label>Assign To</Label>
+                <p className="text-sm text-muted-foreground">Assigned to you</p>
+              </div>
+            ) : (
             <div className="space-y-2">
               <Label htmlFor="assigned_to">Assign To</Label>
               <Select
@@ -316,6 +332,7 @@ export function CreateTaskDialog({ open, onClose }: CreateTaskDialogProps) {
                 </SelectContent>
               </Select>
             </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="goal_id">Linked Goal</Label>

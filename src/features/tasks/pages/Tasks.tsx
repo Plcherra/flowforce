@@ -25,6 +25,8 @@ import {
   applyReadinessFilter,
   type ReadinessFilter,
 } from "@/features/tasks/utils/readinessFilters";
+import { useCan } from "@/hooks/useCan";
+import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import {
   TaskMetricsCards,
@@ -64,6 +66,13 @@ type TaskListItem = TaskWithRelations & { id: string };
 
 export default function Tasks() {
   const isMobile = useIsMobile();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const customCreateLevel = taskCreateLevel({
+    createOthers: can("tasks.custom.create_others"),
+    createSelf: can("tasks.custom.create_self"),
+    legacyEdit: can("editTasks"),
+  });
+  const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
   const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -206,7 +215,9 @@ export default function Tasks() {
         onReadinessFilterChange={setReadinessFilter}
         onOpenTask={openTask}
       />
-      <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
+      {showCreateMenu ? (
+        <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
+      ) : null}
 
       <TaskMetricsCards metrics={metrics} />
 
@@ -282,9 +293,10 @@ export default function Tasks() {
       )}
 
       <Suspense fallback={null}>
-        {showCreateDialog && (
+        {showCreateDialog && showCreateMenu && (
           <CreateTaskDialog
             open={showCreateDialog}
+            createLevel={customCreateLevel === "self" ? "self" : "others"}
             onClose={() => setShowCreateDialog(false)}
           />
         )}
