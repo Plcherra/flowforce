@@ -17,6 +17,7 @@ import { useMobilePushNotifications } from "@/hooks/useMobilePushNotifications";
 import { MobileOfflineQueueStatus } from "@/app-shell/mobile/MobileOfflineQueueStatus";
 import { CompanyThemeSync } from "@/app-shell/theme/CompanyThemeSync";
 import { IdleSessionGuard } from "@/app-shell/auth/IdleSessionGuard";
+import { EmployeeAvailabilityOnboarding } from "@/features/onboarding/components/EmployeeAvailabilityOnboarding";
 
 interface AppShellProps {
   children?: ReactNode;
@@ -69,6 +70,9 @@ export default function AppShell({ children }: AppShellProps) {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="px-4 pt-4">
+            <EmployeeAvailabilityOnboarding />
+          </div>
           <MobileOfflineQueueStatus />
           <ErrorBoundary showDetails={appEnv.DEV}>
             <Suspense

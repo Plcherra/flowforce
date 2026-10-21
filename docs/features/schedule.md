@@ -299,7 +299,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 10 — First login sends fixed availability
 
-- [ ] When the company choice is fixed, the employee's first login sends their fixed availability.
+- [x] When the company choice is fixed, the employee's first login sends their fixed availability.
 
 Rules:
 
@@ -699,6 +699,23 @@ Phone steps for Pedro:
 2. Sign in as an employee and open My availability.
 3. The screen should say any day, any time. The weekday rows and Save changes should not be there.
 4. Set the company choice back to Fixed if you still want the weekday rows.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 10 First login sends fixed availability
+
+Shipped: When the company choice is fixed, an employee's first login shows Send your fixed availability inside the app shell. That step is employee onboarding. Sending inserts a pending `availability_request` with the weekday hours they chose. It does not write `staff_availability`, so the posted window stays as it was. Managers do not see the step. Open, and a company with no choice yet, do not show it. No Friday, Saturday, Sunday, or 7-day rule is hardcoded.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-10-first-login-fixed.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It sets the company choice to fixed, signs in as the staff user with no availability request, sends Monday all day, and asserts one pending request tagged `employee-onboarding`. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can manage availability. Set Team hours Choice to Fixed and save.
+2. Use an employee who has never sent availability, or remove their availability requests, then sign in as that employee.
+3. The first screen inside the app should be Send your fixed availability.
+4. Set at least one day and tap Send fixed availability.
+5. The step should close. Team requests should show a pending availability request for that employee. Their posted hours on the schedule should stay as they were.
 
 Blockers: none for this phase.
 
