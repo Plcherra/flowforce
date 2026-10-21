@@ -34,6 +34,12 @@
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
+        "tasks.shift.create_self",
+        "tasks.shift.create_others",
+        "tasks.checklist.create_self",
+        "tasks.checklist.create_others",
+        "tasks.custom.create_self",
+        "tasks.custom.create_others",
         "viewOwnExpenses",
         "viewTeamExpenses",
         "approveExpenses",
@@ -104,6 +110,12 @@
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
+        "tasks.shift.create_self",
+        "tasks.shift.create_others",
+        "tasks.checklist.create_self",
+        "tasks.checklist.create_others",
+        "tasks.custom.create_self",
+        "tasks.custom.create_others",
         "viewOwnExpenses",
         "viewTeamExpenses",
         "approveExpenses",
@@ -212,7 +224,16 @@
       "owner_locked_verbs": [],
       "verbs": {
         "see": ["viewTeamTasks"],
-        "edit": ["editTasks", "approveFormSubmissions"],
+        "edit": [
+          "editTasks",
+          "approveFormSubmissions",
+          "tasks.shift.create_self",
+          "tasks.shift.create_others",
+          "tasks.checklist.create_self",
+          "tasks.checklist.create_others",
+          "tasks.custom.create_self",
+          "tasks.custom.create_others"
+        ],
         "create_delete": ["createForms", "manageForms"]
       }
     },

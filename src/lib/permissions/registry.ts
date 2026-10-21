@@ -143,6 +143,42 @@ export const PERMISSION_DEFINITIONS = [
     description: "Create and edit tasks",
     category: "Tasks",
   },
+  {
+    key: "tasks.shift.create_self",
+    label: "Shift tasks: Create for self",
+    description: "Create a shift task assigned to yourself",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.shift.create_others",
+    label: "Shift tasks: Create for others",
+    description: "Create a shift task assigned to someone else",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.checklist.create_self",
+    label: "Checklist tasks: Create for self",
+    description: "Create a checklist task assigned to yourself",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.checklist.create_others",
+    label: "Checklist tasks: Create for others",
+    description: "Create a checklist task assigned to someone else",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.custom.create_self",
+    label: "Custom tasks: Create for self",
+    description: "Create a custom task assigned to yourself",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.custom.create_others",
+    label: "Custom tasks: Create for others",
+    description: "Create a custom task assigned to someone else",
+    category: "Tasks",
+  },
 
   // Expenses & Time Off
   {

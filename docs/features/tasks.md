@@ -177,7 +177,7 @@ Prove: Unit test `src/features/tasks/utils/taskKind.test.ts` covers the three ki
 
 ### Phase 5 — Task-type permission keys
 
-- [ ] Add the six create keys to the existing matrix.
+- [x] Add the six create keys to the existing matrix.
 
 Rules:
 
@@ -356,3 +356,13 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-21 — Phase 5 Task-type permission keys
+
+Shipped: The registry and the product role contract include create-for-self and create-for-others for shift, checklist, and custom tasks. Owner, admin, and manager have all six. Staff has none, and the staff ceiling does not grant them. They sit on Run lists edit. `editTasks` is unchanged. No new screen.
+
+Proven: `npm run check:roles` passed. `npm run test:product-roles` passed. `productLevels.test.ts` asserts the six keys are on for owner, admin, and manager and off for staff. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Blockers: none for this phase.
+
+Questions: none. Phone steps: none. This phase is the permission keys.

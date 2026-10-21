@@ -74,6 +74,12 @@ export function runProductLevelTests() {
     "schedule.grant",
     "schedule.reminders.assign",
     "schedule.reminders.grant_deactivate",
+    "tasks.shift.create_self",
+    "tasks.shift.create_others",
+    "tasks.checklist.create_self",
+    "tasks.checklist.create_others",
+    "tasks.custom.create_self",
+    "tasks.custom.create_others",
   ] as const) {
     assert.equal(permissionAllowedAtLevel("owner", key), true);
     assert.equal(permissionAllowedAtLevel("admin", key), true);
