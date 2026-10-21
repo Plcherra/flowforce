@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import FormsSection from "@/features/forms/components/FormsSection";
 import { FormsReadinessPanel } from "@/features/forms/components/FormsReadinessPanel";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
 import { useForms } from "@/features/forms/hooks/useForms";
@@ -62,6 +63,9 @@ export default function Forms() {
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
   const [builderFallback, setBuilderFallback] = useState<BuilderFallback>(null);
   const [fillFormId, setFillFormId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const requestedFormId = searchParams.get("form");
+  const openedFormRef = useRef<string | null>(null);
 
   const canCreateForms = canUse("createForms");
   const statusTabs: StatusFilter[] = ["all", "published", "draft", "archived"];
@@ -161,6 +165,13 @@ export default function Forms() {
   const handleOpenFill = useCallback((formId: string) => {
     setFillFormId(formId);
   }, []);
+
+  useEffect(() => {
+    if (!requestedFormId || openedFormRef.current === requestedFormId) return;
+    if (!forms.some((form) => form.id === requestedFormId)) return;
+    openedFormRef.current = requestedFormId;
+    setFillFormId(requestedFormId);
+  }, [forms, requestedFormId]);
 
   const handleFillDialogChange = useCallback((open: boolean) => {
     if (!open) {

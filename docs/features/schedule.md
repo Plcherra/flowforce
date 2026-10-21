@@ -860,6 +860,23 @@ Blockers: none for this phase.
 
 Questions: none.
 
+### 2026-10-21 — Personal reminder can open a task, form, or shift
+
+Shipped: Your reminders now has Opens. A person can leave it as just this reminder, or attach a task, form, or shift they can already open. The saved row has Open task, Open form, or Open shift. A form link opens that form. The 10:10 reminder already saved stays a note, because it was stored before this choice existed. Personal reminders still stay on this device and are not copied into tasks.
+
+Proven: The attach control is `data-testid="personal-reminder-opens"` on the Reminders sheet. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so a signed-in browser pass was not run here. `npm run typecheck` and ESLint on the changed files are the checks for this change.
+
+Phone steps for Pedro:
+1. Hard-refresh https://www.flowforce.uk, open Schedule, then Reminders.
+2. Under Your reminders, set New reminder, then set Opens to A task, A form, or A shift, and pick the record.
+3. Tap Add. The row should show Open task, Open form, or Open shift.
+4. Tap that link. A shift opens the shift sheet. A task opens that task. A form opens that form.
+5. The reminder already saved at 10:10 has no Opens value. Add a new one to try the link.
+
+Blockers: none.
+
+Questions: none.
+
 ### 2026-10-21 — Phase 20 Assign a reminder
 
 Shipped: A person with `schedule.reminders.assign` can assign a form reminder to someone else. The form picks the form, the person, a time, and how often (daily, weekly, or weekdays). The row is a reminder, not a task. The assignee sees that time and repeat under Assigned to you. Personal reminders stay on that person's own list. The deactivate flag is still phase 21, and new rows keep `allow_deactivate` off.

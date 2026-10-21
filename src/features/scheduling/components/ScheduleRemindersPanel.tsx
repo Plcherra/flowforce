@@ -27,7 +27,13 @@ import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { usePersonalScheduleReminders } from "@/features/scheduling/hooks/usePersonalScheduleReminders";
+import { Link } from "@/lib/router-adapter";
 import { LinkedRecordReminders } from "@/features/scheduling/components/LinkedRecordReminders";
+import { PersonalReminderAttachField } from "@/features/scheduling/components/PersonalReminderAttachField";
+import {
+  linkedRecordHref,
+  type LinkedRecordKind,
+} from "@/features/scheduling/utils/linkedScheduleReminder";
 import { AssignFormReminderForm } from "@/features/scheduling/components/AssignFormReminderForm";
 import { AssignedReminderControls } from "@/features/scheduling/components/AssignedReminderControls";
 import {
@@ -79,6 +85,8 @@ export function ScheduleRemindersPanel({
   const [personalTitle, setPersonalTitle] = useState("");
   const [personalDay, setPersonalDay] = useState<string>("sunday");
   const [personalTime, setPersonalTime] = useState("18:00");
+  const [personalKind, setPersonalKind] = useState<LinkedRecordKind | "">("");
+  const [personalRecordId, setPersonalRecordId] = useState("");
 
   const [teamTitle, setTeamTitle] = useState("");
   const [teamMessage, setTeamMessage] = useState("");
@@ -139,8 +147,12 @@ export function ScheduleRemindersPanel({
       message: "Personal reminder. This does not change anyone else's reminders.",
       day: personalDay,
       time: personalTime,
+      recordKind: personalKind || undefined,
+      recordId: personalKind && personalRecordId ? personalRecordId : undefined,
     });
     setPersonalTitle("");
+    setPersonalKind("");
+    setPersonalRecordId("");
   };
 
   const addTeamReminder = async () => {
@@ -218,6 +230,15 @@ export function ScheduleRemindersPanel({
                 <p className="text-xs text-muted-foreground">
                   {weekdayLabel(reminder.day)} at {reminder.time}
                 </p>
+                {reminder.recordKind && reminder.recordId ? (
+                  <Link
+                    to={linkedRecordHref(reminder.recordKind, reminder.recordId)}
+                    data-testid={`open-personal-reminder-${reminder.id}`}
+                    className="text-xs font-medium text-primary"
+                  >
+                    Open {reminder.recordKind}
+                  </Link>
+                ) : null}
               </div>
               <div className="flex items-center gap-2">
                 <Switch
@@ -276,11 +297,23 @@ export function ScheduleRemindersPanel({
               />
             </div>
             <div className="flex items-end">
-              <Button type="button" size="sm" onClick={addPersonal} disabled={!personalTitle.trim()}>
+              <Button
+                type="button"
+                size="sm"
+                onClick={addPersonal}
+                disabled={!personalTitle.trim() || (Boolean(personalKind) && !personalRecordId)}
+              >
                 Add
               </Button>
             </div>
           </div>
+          <PersonalReminderAttachField
+            companyId={companyId}
+            kind={personalKind}
+            recordId={personalRecordId}
+            onKindChange={setPersonalKind}
+            onRecordChange={setPersonalRecordId}
+          />
         </CardContent>
       </Card>
 
