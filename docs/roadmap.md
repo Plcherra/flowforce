@@ -6,4 +6,5 @@ Read this index and open only the feature file marked active.
 
 | Feature | Status | File |
 | --- | --- | --- |
-| Schedule | active | [docs/features/schedule.md](features/schedule.md) |
+| Schedule | phases 23–25 blocked on open questions | [docs/features/schedule.md](features/schedule.md) |
+| Tasks | active | [docs/features/tasks.md](features/tasks.md) |
