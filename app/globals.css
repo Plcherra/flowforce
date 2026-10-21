@@ -142,6 +142,37 @@
     bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
 
+  .bottom-icon-nav-icons {
+    pointer-events: auto;
+    display: flex;
+    max-width: 100%;
+    align-items: center;
+    justify-content: safe center;
+    gap: 0.125rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .bottom-icon-nav-icons::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bottom-icon-nav-icons button {
+      opacity: 0.35;
+      transition:
+        opacity 160ms ease,
+        color 160ms ease;
+    }
+
+    .bottom-icon-nav-icons:hover button,
+    .bottom-icon-nav-icons:focus-within button {
+      opacity: 1;
+    }
+  }
+
   .bottom-icon-nav-pad {
     padding-bottom: 4.75rem;
   }

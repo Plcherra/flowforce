@@ -8,6 +8,7 @@ interface BottomIconButtonProps {
   onClick: () => void;
   children: ReactNode;
   expanded?: boolean;
+  className?: string;
 }
 
 export function BottomIconButton({
@@ -16,6 +17,7 @@ export function BottomIconButton({
   onClick,
   children,
   expanded,
+  className,
 }: BottomIconButtonProps) {
   return (
     <Tooltip>
@@ -28,8 +30,9 @@ export function BottomIconButton({
           aria-haspopup={expanded === undefined ? undefined : "dialog"}
           onClick={onClick}
           className={cn(
-            "relative flex h-11 w-11 items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-foreground shadow-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary",
+            "relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-muted-foreground shadow-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary",
             active && "text-primary",
+            className,
           )}
         >
           {children}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import {
   navItemLabel,
   partitionBottomNavigation,
   shouldShowMoreNav,
+  wideBottomNavItems,
 } from "./bottomNavDestinations";
 import { NavGlyph } from "./NavGlyph";
 
@@ -44,29 +45,45 @@ export function BottomIconNav() {
   const showMore = shouldShowMoreNav(moreSections, Boolean(canManageSections));
   const moreActive = isMoreNavActive(moreSections);
   const moreLabel = t("navigation.more", { defaultValue: "More" });
+  const addLabel = t("navigation.addNew", { defaultValue: "Add new" });
+  const wideItems = wideBottomNavItems(primary, moreSections);
+  const primaryIds = new Set(primary.map((item) => item.id));
 
   return (
     <TooltipProvider delayDuration={300}>
       <nav aria-label="Main" data-bottom-icon-nav="true" className="bottom-icon-nav">
-        <div className="pointer-events-auto flex items-center justify-center gap-0.5 border-0 bg-transparent px-2 shadow-none backdrop-blur-none">
-          {primary.map((item) => {
+        <div className="bottom-icon-nav-icons border-0 bg-transparent shadow-none backdrop-blur-none">
+          {wideItems.map((item) => {
             const label = navItemLabel(t, item);
             return (
               <BottomIconButton
                 key={item.id}
                 label={label}
                 active={item.isActive}
+                className={primaryIds.has(item.id) ? undefined : "hidden lg:flex"}
                 onClick={() => navigate(item.href)}
               >
                 <NavGlyph icon={item.icon} />
               </BottomIconButton>
             );
           })}
+          {canManageSections ? (
+            <BottomIconButton
+              label={addLabel}
+              active={false}
+              expanded={moreOpen}
+              className="hidden lg:flex"
+              onClick={() => setMoreOpen(true)}
+            >
+              <Plus className="h-6 w-6" aria-hidden="true" />
+            </BottomIconButton>
+          ) : null}
           {showMore ? (
             <BottomIconButton
               label={moreLabel}
               active={moreActive}
               expanded={moreOpen}
+              className="lg:hidden"
               onClick={() => setMoreOpen(true)}
             >
               <MoreHorizontal className="h-6 w-6" aria-hidden="true" />

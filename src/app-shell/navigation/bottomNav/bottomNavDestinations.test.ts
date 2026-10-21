@@ -7,6 +7,7 @@ import {
   navItemLabel,
   partitionBottomNavigation,
   shouldShowMoreNav,
+  wideBottomNavItems,
 } from "./bottomNavDestinations";
 
 function asProcessed(
@@ -62,6 +63,15 @@ export function runBottomNavDestinationTests() {
   for (const name of ["Scheduling", "Tasks", "Messages", "Team Directory"]) {
     assert.equal(moreNames.includes(name), false, `${name} should stay on the icon row`);
   }
+
+  const wideNames = wideBottomNavItems(primary, moreSections).map((item) => item.name);
+  assert.equal(wideNames[0], "Dashboard");
+  assert.equal(wideNames.includes("Scheduling"), true);
+  assert.equal(wideNames.includes("Company Updates"), true);
+  assert.equal(wideNames.includes("Calendar"), true);
+  assert.equal(wideNames.includes("AI Insights"), true);
+  assert.equal(wideNames.filter((name) => name === "Tasks").length, 1);
+  assert.equal(wideNames.length, primary.length + moreNames.length);
 
   const dailyOnly = asProcessed(
     navigationSections.filter((section) => section.translationKey === "dailyOperations"),

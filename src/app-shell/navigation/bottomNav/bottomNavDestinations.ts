@@ -119,3 +119,21 @@ export function shouldShowMoreNav(
 export function isMoreNavActive(moreSections: ProcessedNavigationSection[]): boolean {
   return moreSections.some((section) => section.items.some((item) => item.isActive));
 }
+
+/** Every visible page, in sidebar order, for the wide icon row. */
+export function wideBottomNavItems(
+  primary: ProcessedNavigationItem[],
+  moreSections: ProcessedNavigationSection[],
+): ProcessedNavigationItem[] {
+  const seen = new Set<string>();
+  const items: ProcessedNavigationItem[] = [];
+
+  for (const item of [...primary, ...moreSections.flatMap((section) => section.items)]) {
+    const key = item.id || bottomNavKey(item.href);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(item);
+  }
+
+  return items;
+}
