@@ -121,8 +121,8 @@ These are locked for the auto run. Implement them. Do not edit this section whil
 
 1. View options and Actions stay as they are. The only toolbar change is the Add control.
    - One Add shift button. It opens the single-shift wizard. A menu on that same button holds Add multiple shifts, Import shifts from Excel, Add unavailability, and Add time off.
-   - There is no second Add button and no separate "Add single shift" item.
-   - On an empty week, Copy last week is not a second button. Add first shift stays, and it opens the same single-shift wizard.
+   - There is no second add button. Do not keep Add first shift, and do not keep a separate "Add single shift" item.
+   - On an empty week, Copy last week is not a second button. The same Add shift button is the only add control.
 2. Shift chips are opaque. The role or position name is on the chip. This does not decide how a 25, 50, 100, or 500 person grid works.
 3. My availability and Team hours open in a full-width sheet. The other schedule sheets stay as they are.
 4. Availability is one row per weekday: all day on, or off. Off stores a from-time and a to-time on the existing `staff_availability` row. There is no checkmark grid.
@@ -161,13 +161,13 @@ Rules:
 - Files: `src/features/scheduling/components/calendar/CalendarToolbar.tsx`, `src/features/scheduling/components/ScheduleEmptyState.tsx`, and the props passed from `DragDropScheduleCalendar.tsx`.
 - Follow Decision 1. Do not rename View options or Actions. Do not move Copy previous week, Week templates, publish, export, or print.
 - The Add shift button calls `onOpenAddShift`. Its menu calls the existing handlers for multiple shifts, import, unavailability, and time off.
-- Remove the empty-week Copy last week button. Add first shift stays and calls `onOpenAddShift`.
+- Remove the empty-week Copy last week button and the empty-week Add first shift button. Do not add a second button that opens the wizard.
 
 Done when:
 
 - View options and Actions are still on the toolbar.
 - One Add shift button opens the single-shift wizard, and its menu still opens multiple shifts, import, unavailability, and time off.
-- An empty week has Add first shift and does not have a Copy last week button. Add first shift opens the same wizard.
+- An empty week does not show Copy last week or Add first shift. Add shift is the only add control, on an empty week and on a week that already has shifts.
 
 ### Phase 3 — Load a shift template inside the wizard
 
