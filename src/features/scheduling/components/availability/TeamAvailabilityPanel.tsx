@@ -20,6 +20,7 @@ import { useAvailabilityManagement } from "@/features/availability/manage/useAva
 import { RequestsQueue } from "@/features/availability/manage/RequestsQueue";
 import { DEFAULT_ORG_ID } from "@/features/availability/utils/lockEngine";
 import { AvailabilityChoiceEditor } from "@/features/scheduling/components/availability/AvailabilityChoiceEditor";
+import { TeamHoursPermissionMatrix } from "@/features/scheduling/components/availability/TeamHoursPermissionMatrix";
 import { isMissingRelationError } from "@/utils/supabaseErrors";
 
 interface TeamAvailabilityPanelProps {
@@ -277,6 +278,7 @@ export function TeamAvailabilityPanel({
       </CardHeader>
       <CardContent className="space-y-6">
         <AvailabilityChoiceEditor orgId={orgId} />
+        <TeamHoursPermissionMatrix orgId={orgId} />
 
         <RequestsQueue
           requests={management.requestsQuery.data ?? []}

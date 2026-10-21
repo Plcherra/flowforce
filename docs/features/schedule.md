@@ -384,7 +384,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 15 — Team hours permission matrix
 
-- [ ] Team hours lists people and their schedule permissions.
+- [x] Team hours lists people and their schedule permissions.
 
 Rules:
 
@@ -766,6 +766,23 @@ Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk as someone who can manage availability and open Team hours.
 2. Availability choice should still be there.
 3. Lock controls and Per-person exceptions should not be on the screen.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 15 Team hours permission matrix
+
+Shipped: Team hours lists people and the schedule permissions from Decisions 6 and 7: own schedule, team schedule, published grid, draft weeks (`editSchedules`), and create and assign shifts (`schedule.edit`). A person with `schedule.grant` can turn each one on or off. The change is stored as an allow or deny override on `user_permissions` and stays after reload. Lock controls and per-person exceptions stay off this screen. Migration `supabase/migrations/20261021110015_user_permissions_schedule_grant.sql` lets that person read teammate overrides and write those schedule keys.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-15-team-hours-matrix.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It turns the staff user's draft permission off, reloads, and asserts it is still off. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+The Supabase CLI could not run `supabase db push` because it has no access token. The same SQL was applied to the linked project through the Supabase migration API. Remote migration version `20261021110015` matches the file.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone with schedule grant permission and open Team hours.
+2. Find a staff person. Turn Draft weeks off if it is on, or turn it on and then off.
+3. Reload Team hours. Draft weeks should still be off for that person.
 
 Blockers: none for this phase.
 

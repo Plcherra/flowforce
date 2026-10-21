@@ -111,7 +111,11 @@ export async function ensureSchedulingPlaywrightTenant(admin: SupabaseClient) {
       name: 'Manager',
       description: 'Playwright scheduling manager',
       hierarchy_level: 2,
-      permissions: { editSchedules: true, approveTimeOff: true },
+      permissions: {
+        editSchedules: true,
+        approveTimeOff: true,
+        'schedule.grant': true,
+      },
       is_system_role: true,
       is_active: true,
       created_by: tenant.managerId,
