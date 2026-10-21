@@ -22,6 +22,10 @@ import { generateStatusTabs } from "@/features/tasks/utils/statusTabs";
 import { generatePriorityOptions } from "@/features/tasks/utils";
 import { calculateDueBadge } from "@/features/tasks/utils/dueDateHelpers";
 import {
+  applyReadinessFilter,
+  type ReadinessFilter,
+} from "@/features/tasks/utils/readinessFilters";
+import {
   TaskMetricsCards,
   TaskFilters,
   TaskStatusTabs,
@@ -62,6 +66,9 @@ export default function Tasks() {
   const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
+    null,
+  );
   const {
     statusFilter,
     setStatusFilter,
@@ -95,6 +102,11 @@ export default function Tasks() {
     [tasks],
   );
 
+  const statusScopedTasks = useMemo(
+    () => filterTasks(tasks, statusFilter, "all", "") as TaskListItem[],
+    [tasks, statusFilter],
+  );
+
   const filteredTasks = useMemo(
     () =>
       filterTasks(
@@ -106,7 +118,16 @@ export default function Tasks() {
     [tasks, statusFilter, priorityFilter, searchTerm],
   );
 
-  const handleResetFilters = resetFilters;
+  const listedTasks = useMemo(
+    () => applyReadinessFilter(filteredTasks, readinessFilter),
+    [filteredTasks, readinessFilter],
+  );
+
+  const handleResetFilters = () => {
+    resetFilters();
+    setReadinessFilter(null);
+  };
+  const filtersAreActive = filtersActive || readinessFilter !== null;
 
   if (loading) {
     return <TaskPageSkeleton isMobile={isMobile} />;
@@ -174,7 +195,12 @@ export default function Tasks() {
         statusTabs={statusTabs}
       />
 
-      <TaskExecutionReadinessPanel tasks={tasks} onOpenTask={openTask} />
+      <TaskExecutionReadinessPanel
+        tasks={statusScopedTasks}
+        readinessFilter={readinessFilter}
+        onReadinessFilterChange={setReadinessFilter}
+        onOpenTask={openTask}
+      />
       <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
 
       <TaskMetricsCards metrics={metrics} />
@@ -187,7 +213,7 @@ export default function Tasks() {
             priorityFilter={priorityFilter}
             onPriorityChange={setPriorityFilter}
             priorityOptions={priorityOptions}
-            filtersActive={filtersActive}
+            filtersActive={filtersAreActive}
             onResetFilters={handleResetFilters}
           />
         </CardContent>
@@ -199,14 +225,14 @@ export default function Tasks() {
         }
       >
         <div className={isMobile ? "space-y-3" : "space-y-4 lg:col-span-2"}>
-          {tasks.length === 0 || filteredTasks.length === 0 ? (
+          {tasks.length === 0 || listedTasks.length === 0 ? (
             <TaskEmptyState
               hasTasks={tasks.length > 0}
               onResetFilters={handleResetFilters}
             />
           ) : (
             <div data-testid="tasks-list" className="space-y-4">
-              {filteredTasks.map((task) => {
+              {listedTasks.map((task) => {
                 const dueBadge = calculateDueBadge(task);
                 const selectionHandlers = getSelectionHandlers(task.id);
 

@@ -13,6 +13,10 @@ const importTs = jiti(import.meta.url, {
 const { runStatusTabLayoutTests } = importTs(
   "../src/features/tasks/utils/statusTabLayout.test.ts",
 );
+const { runReadinessFilterTests } = importTs(
+  "../src/features/tasks/utils/readinessFilters.test.ts",
+);
 
 runStatusTabLayoutTests();
+runReadinessFilterTests();
 console.log("tasks page tests passed");

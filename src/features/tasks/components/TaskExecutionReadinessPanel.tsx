@@ -1,117 +1,102 @@
 import { useMemo } from "react";
-import {
-  AlertTriangle,
-  Bell,
-  CheckCircle2,
-  Link2,
-  Repeat,
-  UserRound,
-} from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { buildTaskExecutionSummary } from "@/features/tasks/utils/taskExecutionReadiness";
+import {
+  READINESS_DEFINITIONS,
+  readinessCounts,
+  type ReadinessFilter,
+} from "@/features/tasks/utils/readinessFilters";
 
 interface TaskExecutionReadinessPanelProps {
   tasks: TaskWithRelations[];
+  readinessFilter: ReadinessFilter | null;
+  onReadinessFilterChange: (value: ReadinessFilter | null) => void;
   onOpenTask: (taskId: string) => void;
 }
 
 const issueTone: Record<string, string> = {
-  critical: "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-100",
+  critical:
+    "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-100",
   warning:
     "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100",
   info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-100",
 };
 
+const readinessItems: Array<{ key: ReadinessFilter; label: string }> = [
+  { key: "overdue", label: "Overdue" },
+  { key: "unassigned", label: "Unassigned" },
+  { key: "due", label: "Due" },
+];
+
 export function TaskExecutionReadinessPanel({
   tasks,
+  readinessFilter,
+  onReadinessFilterChange,
   onOpenTask,
 }: TaskExecutionReadinessPanelProps) {
-  const { reminders, loading: remindersLoading } = useReminders();
+  const { reminders } = useReminders();
   const summary = useMemo(
     () => buildTaskExecutionSummary({ tasks, reminders }),
     [reminders, tasks],
   );
-
-  const cards = [
-    {
-      label: "Active work",
-      value: summary.activeTasks,
-      detail: `${summary.dueTodayTasks} due today`,
-      icon: CheckCircle2,
-    },
-    {
-      label: "Blocked / overdue",
-      value: summary.blockedTasks + summary.overdueTasks,
-      detail: `${summary.overdueTasks} overdue`,
-      icon: AlertTriangle,
-    },
-    {
-      label: "Unassigned",
-      value: summary.unassignedTasks,
-      detail: "Needs owner",
-      icon: UserRound,
-    },
-    {
-      label: "Connected",
-      value: summary.connectedTasks,
-      detail: `${summary.unlinkedTasks} standalone`,
-      icon: Link2,
-    },
-    {
-      label: "Reminders",
-      value: summary.taskReminders,
-      detail: remindersLoading
-        ? "Loading"
-        : `${summary.recurringReminders} recurring`,
-      icon: Bell,
-    },
-    {
-      label: "Completion",
-      value: `${summary.completionRate}%`,
-      detail: `${summary.totalTasks} total`,
-      icon: Repeat,
-    },
-  ];
+  const counts = useMemo(() => readinessCounts(tasks), [tasks]);
 
   return (
     <Card className="border-border/70 bg-background/95 shadow-sm">
       <CardHeader className="space-y-3">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <CardTitle className="text-xl">Execution Readiness</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Tasks, goals, reminders, and ownership in one operating view.
-            </p>
-          </div>
+        <div>
+          <CardTitle className="text-xl">Execution Readiness</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Counts follow the status tab. Press one to filter the list.
+          </p>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-          {cards.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.label}
-                className="rounded-lg border border-border/70 bg-muted/30 p-3"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-medium uppercase text-muted-foreground">
-                    {item.label}
-                  </p>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {item.value}
-                </p>
-                <p className="text-xs text-muted-foreground">{item.detail}</p>
-              </div>
-            );
-          })}
-        </div>
+        <TooltipProvider delayDuration={200}>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {readinessItems.map((item) => {
+              const pressed = readinessFilter === item.key;
+              return (
+                <Tooltip key={item.key}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-pressed={pressed}
+                      data-testid={`tasks-readiness-${item.key}`}
+                      className={`rounded-lg border p-3 text-left ${
+                        pressed
+                          ? "border-primary bg-primary/10"
+                          : "border-border/70 bg-muted/30"
+                      }`}
+                      onClick={() =>
+                        onReadinessFilterChange(pressed ? null : item.key)
+                      }
+                    >
+                      <p className="text-xs font-medium uppercase text-muted-foreground">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-foreground">
+                        {counts[item.key]}
+                      </p>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{READINESS_DEFINITIONS[item.key]}</TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </TooltipProvider>
 
         {summary.issues.length > 0 ? (
           <Alert>

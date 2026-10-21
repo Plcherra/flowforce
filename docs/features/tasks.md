@@ -139,7 +139,7 @@ Prove: Unit test `src/features/tasks/utils/statusTabLayout.test.ts` covers More,
 
 ### Phase 3 — Readiness counts filter the list
 
-- [ ] Make overdue, unassigned, and due into filters the status tab controls.
+- [x] Make overdue, unassigned, and due into filters the status tab controls.
 
 Rules:
 
@@ -318,6 +318,23 @@ Phone steps for Pedro:
 3. Press and hold, or hover, To Do. The tooltip should say Not started yet.
 4. Open More. Cancelled and In Review should be there when their counts are 0.
 5. Choose Cancelled. That tab should move into the main row, and the list should show cancelled tasks only.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 3 Readiness counts filter the list
+
+Shipped: Execution Readiness shows Overdue, Unassigned, and Due. Each is a button with its definition. The counts use the tasks in the selected status tab, and they stay put when a readiness filter is on. Pressing a count filters the list. Pressing it again clears that filter. Reset filters clears it too. The six summary cards are gone. The manager-review list stays. The metric cards stay.
+
+Proven: Unit test `src/features/tasks/utils/readinessFilters.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the three counts, due today, a finished task that is not overdue, and filtering. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks. Leave the status on All.
+2. Execution Readiness should show Overdue, Unassigned, and Due, each with a number. Hover or press and hold one. The tooltip should explain it.
+3. Tap Overdue. The list should show only overdue tasks. Tap Overdue again. The list should go back to the tab.
+4. Switch to To Do. The three numbers should count only To Do tasks.
+5. Open More and choose Cancelled if it is there. Overdue and Due should not treat finished or cancelled tasks as due.
 
 Blockers: none for this phase.
 
