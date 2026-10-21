@@ -115,6 +115,7 @@ export async function ensureSchedulingPlaywrightTenant(admin: SupabaseClient) {
         editSchedules: true,
         approveTimeOff: true,
         'schedule.grant': true,
+        'schedule.reminders.assign': true,
       },
       is_system_role: true,
       is_active: true,

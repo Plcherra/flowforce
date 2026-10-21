@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
+import { linkedRecordType } from "@/features/scheduling/utils/linkedScheduleReminder";
 import { nextWeekdayTime } from "@/features/scheduling/utils/nextWeekdayTime";
+import {
+  remindAtForClock,
+  type ReminderRepeat,
+} from "@/features/scheduling/utils/reminderRepeat";
 
 export const SCHEDULE_ASSIGNMENT_REMINDER_TYPE = "schedule.assignment";
 
@@ -31,10 +36,31 @@ export async function fetchScheduleAssignmentReminders(
     query = query.eq("user_id", userId);
   }
 
-  const { data, error } = await query;
+  const [assignments, linkedRecords] = await Promise.all([
+    query,
+    linkedQuery(userId),
+  ]);
 
-  if (error) throw error;
-  return scheduleReminderSchema.array().parse(data ?? []);
+  if (assignments.error) throw assignments.error;
+  if (linkedRecords.error) throw linkedRecords.error;
+
+  const merged = [...(assignments.data ?? []), ...(linkedRecords.data ?? [])];
+  merged.sort((left, right) => {
+    const leftTime = left.remind_at ? new Date(left.remind_at).getTime() : 0;
+    const rightTime = right.remind_at ? new Date(right.remind_at).getTime() : 0;
+    return leftTime - rightTime;
+  });
+  return scheduleReminderSchema.array().parse(merged);
+}
+
+function linkedQuery(userId?: string | null) {
+  let query = supabase
+    .from("reminders")
+    .select("id, user_id, title, description, remind_at, repeat_interval, type")
+    .like("type", "record.%")
+    .order("remind_at", { ascending: true });
+  if (userId) query = query.eq("user_id", userId);
+  return query;
 }
 
 export async function createScheduleAssignmentReminder(input: {
@@ -66,12 +92,49 @@ export async function createScheduleAssignmentReminder(input: {
   if (error) throw error;
 }
 
-export async function deleteScheduleAssignmentReminder(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("reminders")
-    .delete()
-    .eq("id", id)
-    .eq("type", SCHEDULE_ASSIGNMENT_REMINDER_TYPE);
+export async function createFormScheduleReminder(input: {
+  userId: string;
+  formId: string;
+  title: string;
+  time: string;
+  repeat: ReminderRepeat;
+}): Promise<void> {
+  const { error } = await supabase.from("reminders").insert({
+    user_id: input.userId,
+    title: input.title.trim(),
+    description: null,
+    remind_at: remindAtForClock(input.time).toISOString(),
+    type: linkedRecordType("form", input.formId),
+    priority: "normal",
+    completed: false,
+    repeat_enabled: true,
+    repeat_interval: input.repeat,
+    notification_methods: ["in_app"],
+    sound_enabled: false,
+    sound_type: "default",
+    snooze_enabled: false,
+    snooze_count: 0,
+    auto_complete: false,
+    allow_deactivate: false,
+  });
 
+  if (error) throw error;
+}
+
+export async function deleteScheduleAssignmentReminder(id: string): Promise<void> {
+  const { data, error: readError } = await supabase
+    .from("reminders")
+    .select("type")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) throw readError;
+  const type = data?.type ?? "";
+  if (
+    type !== SCHEDULE_ASSIGNMENT_REMINDER_TYPE &&
+    !type.startsWith("record.")
+  ) {
+    return;
+  }
+  const { error } = await supabase.from("reminders").delete().eq("id", id);
   if (error) throw error;
 }

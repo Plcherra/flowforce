@@ -470,7 +470,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 20 — Assign a reminder
 
-- [ ] A manager can assign a reminder to someone else.
+- [x] A manager can assign a reminder to someone else.
 
 Rules:
 
@@ -855,6 +855,22 @@ Phone steps for Pedro:
 2. Open Schedule, then Reminders.
 3. Under Open from a reminder, tap the reminder.
 4. A shift opens that shift's details. A form opens Forms with that form on the page. A task opens Tasks on that task.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 20 Assign a reminder
+
+Shipped: A person with `schedule.reminders.assign` can assign a form reminder to someone else. The form picks the form, the person, a time, and how often (daily, weekly, or weekdays). The row is a reminder, not a task. The assignee sees that time and repeat under Assigned to you. Personal reminders stay on that person's own list. The deactivate flag is still phase 21, and new rows keep `allow_deactivate` off.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-20-assign-reminder.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. The manager assigns the Playwright Barista Checklist form to the staff user at 09:00, weekly, and that staff user sees the time and Weekly. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the Playwright test was not executed here. Unit test `src/features/scheduling/utils/reminderRepeat.test.ts` covers the time and repeat labels. Ran that test; it passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone whose role includes Reminders: Assign. Open Schedule, then Reminders.
+2. Under the assign section, choose a form, choose another person, set the time to 09:00, and set How often to Weekly.
+3. Tap Assign form reminder.
+4. Sign in as that person and open Reminders. The form name should be there, with 09:00 and Weekly.
 
 Blockers: none for this phase.
 

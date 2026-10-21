@@ -23,10 +23,16 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { usePersonalScheduleReminders } from "@/features/scheduling/hooks/usePersonalScheduleReminders";
 import { LinkedRecordReminders } from "@/features/scheduling/components/LinkedRecordReminders";
+import { AssignFormReminderForm } from "@/features/scheduling/components/AssignFormReminderForm";
+import {
+  clockLabel,
+  repeatLabel,
+} from "@/features/scheduling/utils/reminderRepeat";
 import {
   createScheduleAssignmentReminder,
   deleteScheduleAssignmentReminder,
@@ -63,6 +69,8 @@ export function ScheduleRemindersPanel({
   const { profile } = useProfile();
   const profileId = profile?.id ?? null;
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const { can } = useCan();
+  const canAssignToSomeoneElse = can("schedule.reminders.assign");
   const personal = usePersonalScheduleReminders(profileId);
   const queryClient = useQueryClient();
 
@@ -90,7 +98,7 @@ export function ScheduleRemindersPanel({
 
   const peopleQuery = useQuery({
     queryKey: ["schedule-reminder-people", companyId],
-    enabled: Boolean(companyId) && canAssignReminders,
+    enabled: Boolean(companyId) && (canAssignReminders || canAssignToSomeoneElse),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
@@ -316,6 +324,7 @@ export function ScheduleRemindersPanel({
               <div
                 key={reminder.id}
                 className="flex items-start justify-between gap-3 rounded-md border p-3"
+                data-testid="assigned-reminder"
               >
                 <div>
                   <p className="text-sm font-medium">{reminder.title || "Reminder"}</p>
@@ -325,6 +334,12 @@ export function ScheduleRemindersPanel({
                   <p className="text-xs text-muted-foreground">
                     {canAssignReminders ? `${target} · ` : ""}
                     {when}
+                  </p>
+                  <p className="text-xs text-muted-foreground" data-testid="assigned-reminder-time">
+                    {clockLabel(reminder.remind_at)}
+                  </p>
+                  <p className="text-xs text-muted-foreground" data-testid="assigned-reminder-repeat">
+                    {repeatLabel(reminder.repeat_interval)}
                   </p>
                 </div>
                 {canAssignReminders ? (
@@ -417,6 +432,13 @@ export function ScheduleRemindersPanel({
                 {savingTeam ? "Assigning..." : "Assign reminder"}
               </Button>
             </div>
+          ) : null}
+          {canAssignToSomeoneElse && companyId ? (
+            <AssignFormReminderForm
+              companyId={companyId}
+              people={peopleQuery.data ?? []}
+              profileId={profileId}
+            />
           ) : null}
         </CardContent>
       </Card>
