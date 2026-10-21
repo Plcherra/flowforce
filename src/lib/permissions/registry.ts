@@ -88,6 +88,24 @@ export const PERMISSION_DEFINITIONS = [
     category: "Scheduling",
   },
   {
+    key: "schedule.grant",
+    label: "Schedules: Grant",
+    description: "Grant or remove another person's schedule permissions",
+    category: "Scheduling",
+  },
+  {
+    key: "schedule.reminders.assign",
+    label: "Reminders: Assign",
+    description: "Assign a reminder to someone else",
+    category: "Scheduling",
+  },
+  {
+    key: "schedule.reminders.grant_deactivate",
+    label: "Reminders: Grant deactivate",
+    description: "Decide whether that person may turn that reminder off",
+    category: "Scheduling",
+  },
+  {
     key: "viewOwnSchedules",
     label: "View Own Schedules",
     description: "View own schedules",

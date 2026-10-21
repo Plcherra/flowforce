@@ -28,6 +28,9 @@
         "schedule.edit",
         "schedule.create",
         "schedule.delete",
+        "schedule.grant",
+        "schedule.reminders.assign",
+        "schedule.reminders.grant_deactivate",
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
@@ -95,6 +98,9 @@
         "schedule.view",
         "schedule.edit",
         "schedule.create",
+        "schedule.grant",
+        "schedule.reminders.assign",
+        "schedule.reminders.grant_deactivate",
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
@@ -176,7 +182,13 @@
       "owner_locked_verbs": [],
       "verbs": {
         "see": ["viewTeamSchedules", "schedule.view"],
-        "edit": ["schedule.edit", "editSchedules"],
+        "edit": [
+          "schedule.edit",
+          "editSchedules",
+          "schedule.grant",
+          "schedule.reminders.assign",
+          "schedule.reminders.grant_deactivate"
+        ],
         "create_delete": ["schedule.create", "schedule.delete"]
       }
     },

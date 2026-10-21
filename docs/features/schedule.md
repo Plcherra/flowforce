@@ -350,7 +350,7 @@ Prove: Unit test asserts a send on the posting weekday is stored for the followi
 
 ### Phase 13 — Decision 7 permission keys
 
-- [ ] Add the missing schedule permission keys to the existing registry and role matrix.
+- [x] Add the missing schedule permission keys to the existing registry and role matrix.
 
 Rules:
 
@@ -745,3 +745,13 @@ Proven: Unit test `src/features/availability/utils/nextAvailabilityWindow.test.t
 Blockers: none for this phase.
 
 Questions: none. Phone steps: none. This phase is a unit test.
+
+### 2026-10-21 — Phase 13 Decision 7 permission keys
+
+Shipped: The registry and `productRoleContract.json` include `schedule.grant`, `schedule.reminders.assign`, and `schedule.reminders.grant_deactivate`. Owner, admin, and manager have them. Staff does not. They sit on the existing Team schedule edit verb. No second permission list was added.
+
+Proven: `npm run check:roles` passed. `productLevels.test.ts`, run through `npm run test:product-roles`, asserts the three keys are on for owner, admin, and manager and off for staff. `npm run typecheck` passed.
+
+Blockers: none for this phase.
+
+Questions: none. Phone steps: none. This phase is the permission keys.
