@@ -144,11 +144,12 @@ test.describe('Scheduling owner flow', () => {
 
     await staffPage.goto('/app/enhanced-scheduling?panel=availability');
     await expect(staffPage.getByRole('heading', { name: /Availability/i })).toBeVisible();
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dayIndex = (new Date().getDay() + 6) % 7;
-    for (const hour of [9, 10, 11, 12, 13, 14, 15, 16]) {
-      const row = staffPage.locator('tbody tr').nth(hour - 6);
-      await row.locator('button').nth(dayIndex).click();
-    }
+    const dayLabel = dayLabels[dayIndex];
+    const dayRow = staffPage.getByTestId(`availability-day-${dayLabel.toLowerCase()}`);
+    await dayRow.getByLabel(`${dayLabel} from`).fill('09:00');
+    await dayRow.getByLabel(`${dayLabel} to`).fill('17:00');
     await staffPage.getByRole('button', { name: 'Save changes' }).click();
     await expect(staffPage.getByText('Availability saved', { exact: true })).toBeVisible({
       timeout: 15_000,

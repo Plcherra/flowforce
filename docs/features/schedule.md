@@ -229,7 +229,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 6 — Weekday availability rows
 
-- [ ] Replace the checkmark availability grid.
+- [x] Replace the checkmark availability grid.
 
 Rules:
 
@@ -636,6 +636,23 @@ Phone steps for Pedro:
 2. Open My availability. The sheet should use the full width of the phone or desktop screen.
 3. Open Team hours. It should also be full width.
 4. Open Team requests, My time off, My swaps, and Reminders. Each of those should stay a narrow side sheet.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-21 — Phase 6 Weekday availability rows
+
+Shipped: The checkmark hour grid is gone. Each weekday is one row: All day on, or Off. Off shows from and to times. Save still writes `staff_availability` `day_of_week`, `start_time`, `end_time`, and `week_start_date`. All day on stores 06:00–21:00, the range the schedule code already treats as a full day. No new table.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-06-weekday-availability.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It saves Monday all day on and Tuesday off 14:00–18:00, reloads, and checks the same rows. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. Typecheck and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an employee and open My availability.
+2. Set Monday to All day on.
+3. Set Tuesday to Off, from 14:00 to 18:00.
+4. Save, then reload the page.
+5. Monday should still be All day on. Tuesday should still be Off from 14:00 to 18:00.
 
 Blockers: none for this phase.
 

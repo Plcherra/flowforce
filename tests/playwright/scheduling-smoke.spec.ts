@@ -686,14 +686,11 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByRole('heading', { name: /Availability/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(
-      page.getByText(/Filled cells are hours you can work/i),
-    ).toBeVisible();
-    await expect(page.getByRole('table')).toBeVisible();
-
-    const firstHourCell = page.locator('tbody button:not([disabled])').first();
-    await expect(firstHourCell).toBeVisible();
-    await firstHourCell.click();
+    await expect(page.getByTestId('availability-weekday-rows')).toBeVisible();
+    await page
+      .getByTestId('availability-day-mon')
+      .getByRole('button', { name: 'All day on' })
+      .click();
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
   });
 

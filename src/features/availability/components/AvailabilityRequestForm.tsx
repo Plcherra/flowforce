@@ -4,7 +4,6 @@ import dayjs from "dayjs";
 import {
   AlertCircle,
   Calendar,
-  Check,
   Clock,
   Lock,
   Unlock,
@@ -49,8 +48,13 @@ import type {
 } from "@/types/availability";
 import { notifyManagersNewRequest } from "@/notifications/availability";
 import { logger } from "@/utils/logger";
+import {
+  FULL_DAY_HOURS,
+  clockRangeFromHours,
+  hoursFromClockRange,
+  isFullDayHours,
+} from "@/features/availability/utils/availabilityUtils";
 
-const HOURS = Array.from({ length: 16 }).map((_, index) => 6 + index); // 06:00 -> 21:00
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export type AvailabilityGrid = Record<number, number[]>; // 0 = Monday ... 6 = Sunday
@@ -319,18 +323,16 @@ export function AvailabilityRequestForm({
     return lockInfo.state.mode !== "open-with-exceptions";
   }, [lockInfo]);
 
-  const toggleCell = (dayIndex: number, hour: number) => {
+  const dayIsEditable = (dayIndex: number) => {
     const date = getDateForOffset(weekStart, dayIndex).format("YYYY-MM-DD");
-    if (!directEditAllowed || (allowMap && allowMap[date] === false)) return;
+    return directEditAllowed && !(allowMap && allowMap[date] === false);
+  };
+
+  const setDayHours = (dayIndex: number, hours: number[]) => {
+    if (!dayIsEditable(dayIndex)) return;
     setEditingGrid((prev) => {
       const next = cloneGrid(prev);
-      const hours = new Set(next[dayIndex] ?? []);
-      if (hours.has(hour)) {
-        hours.delete(hour);
-      } else {
-        hours.add(hour);
-      }
-      next[dayIndex] = Array.from(hours).sort((a, b) => a - b);
+      next[dayIndex] = hours;
       return next;
     });
   };
@@ -489,9 +491,8 @@ export function AvailabilityRequestForm({
               Availability
             </CardTitle>
             <CardDescription>
-              Filled cells are hours you can work. Empty cells mean you are not
-              available unless a manager overrides. Locked weeks require a
-              manager review.
+              Each day is all day on, or off with the hours you can work.
+              Locked weeks require a manager review.
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -534,66 +535,96 @@ export function AvailabilityRequestForm({
               </span>
             )}
           </div>
-          <div className="max-h-[360px] w-full overflow-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr>
-                  <th className="sticky left-0 bg-muted/80 px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground">
-                    Hour
-                  </th>
-                  {DAY_LABELS.map((label) => (
-                    <th
-                      key={label}
-                      className="px-3 py-2 text-left text-xs font-medium uppercase text-muted-foreground"
+          <div className="space-y-2 p-3" data-testid="availability-weekday-rows">
+            {DAY_LABELS.map((label, dayIndex) => {
+              const hours = editingGrid[dayIndex] ?? [];
+              const allDay = isFullDayHours(hours);
+              const range =
+                allDay || hours.length === 0
+                  ? { fromTime: "09:00", toTime: "17:00" }
+                  : clockRangeFromHours(hours);
+              const disabled = !dayIsEditable(dayIndex);
+              return (
+                <div
+                  key={label}
+                  data-testid={`availability-day-${label.toLowerCase()}`}
+                  className="flex flex-col gap-2 rounded-md border px-3 py-2 sm:flex-row sm:items-center"
+                >
+                  <span className="w-12 text-sm font-medium">{label}</span>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={allDay ? "default" : "outline"}
+                      aria-pressed={allDay}
+                      disabled={disabled}
+                      onClick={() => setDayHours(dayIndex, [...FULL_DAY_HOURS])}
                     >
-                      {label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {HOURS.map((hour) => (
-                  <tr key={hour}>
-                    <td className="sticky left-0 bg-muted/80 px-3 py-2 text-xs text-muted-foreground">
-                      {dayjs().hour(hour).minute(0).format("h A")}
-                    </td>
-                    {DAY_LABELS.map((_, dayIndex) => {
-                      const dateISO = getDateForOffset(
-                        weekStart,
-                        dayIndex,
-                      ).format("YYYY-MM-DD");
-                      const isSelected = editingGrid[dayIndex]?.includes(hour);
-                      const disabled =
-                        !directEditAllowed ||
-                        (allowMap && allowMap[dateISO] === false);
-                      return (
-                        <td key={`${dayIndex}-${hour}`} className="px-3 py-1.5">
-                          <button
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => toggleCell(dayIndex, hour)}
-                            className={cn(
-                              "flex h-8 w-full items-center justify-center rounded border text-xs transition",
-                              disabled
-                                ? "cursor-not-allowed border-dashed border-muted-foreground/30 text-muted-foreground/50"
-                                : "border border-muted-foreground/30 hover:border-primary",
-                              isSelected &&
-                                !disabled &&
-                                "bg-primary text-primary-foreground hover:bg-primary/90",
-                              isSelected &&
-                                disabled &&
-                                "bg-muted text-muted-foreground",
-                            )}
-                          >
-                            {isSelected ? <Check className="h-3 w-3" /> : ""}
-                          </button>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      All day on
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={!allDay ? "default" : "outline"}
+                      aria-pressed={!allDay}
+                      disabled={disabled}
+                      onClick={() =>
+                        setDayHours(
+                          dayIndex,
+                          hoursFromClockRange(range.fromTime, range.toTime),
+                        )
+                      }
+                    >
+                      Off
+                    </Button>
+                  </div>
+                  {allDay ? null : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Label
+                        htmlFor={`availability-${label}-from`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        From
+                      </Label>
+                      <Input
+                        id={`availability-${label}-from`}
+                        aria-label={`${label} from`}
+                        type="time"
+                        className="h-8 w-32"
+                        disabled={disabled}
+                        value={range.fromTime}
+                        onChange={(event) =>
+                          setDayHours(
+                            dayIndex,
+                            hoursFromClockRange(event.target.value, range.toTime),
+                          )
+                        }
+                      />
+                      <Label
+                        htmlFor={`availability-${label}-to`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        To
+                      </Label>
+                      <Input
+                        id={`availability-${label}-to`}
+                        aria-label={`${label} to`}
+                        type="time"
+                        className="h-8 w-32"
+                        disabled={disabled}
+                        value={range.toTime}
+                        onChange={(event) =>
+                          setDayHours(
+                            dayIndex,
+                            hoursFromClockRange(range.fromTime, event.target.value),
+                          )
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

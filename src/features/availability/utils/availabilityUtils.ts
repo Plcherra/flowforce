@@ -94,6 +94,37 @@ export const rangesFromGrid = (
   return ranges;
 };
 
+/** Hours 06:00–21:00. rangesFromGrid stores that as 06:00 to 21:00. */
+export const FULL_DAY_HOURS = Array.from({ length: 15 }, (_, index) => 6 + index);
+
+export const isFullDayHours = (hours: number[] | undefined) => {
+  const sorted = [...(hours ?? [])].sort((a, b) => a - b);
+  return (
+    sorted.length === FULL_DAY_HOURS.length &&
+    FULL_DAY_HOURS.every((hour, index) => sorted[index] === hour)
+  );
+};
+
+export const hoursFromClockRange = (fromTime: string, toTime: string) => {
+  const start = Number(fromTime.slice(0, 2));
+  const end = Number(toTime.slice(0, 2));
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return [];
+  const hours: number[] = [];
+  for (let hour = start; hour < end; hour += 1) hours.push(hour);
+  return hours;
+};
+
+export const clockRangeFromHours = (hours: number[] | undefined) => {
+  const sorted = [...(hours ?? [])].sort((a, b) => a - b);
+  if (sorted.length === 0) {
+    return { fromTime: "09:00", toTime: "17:00" };
+  }
+  return {
+    fromTime: `${String(sorted[0]).padStart(2, "0")}:00`,
+    toTime: `${String(sorted[sorted.length - 1] + 1).padStart(2, "0")}:00`,
+  };
+};
+
 export const hoursDelta = (
   original: AvailabilityGrid,
   desired: AvailabilityGrid,
