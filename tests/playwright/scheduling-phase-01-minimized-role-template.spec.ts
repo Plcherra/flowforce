@@ -58,9 +58,13 @@ async function login(page: Page) {
   }).toPass({ timeout: 40_000 });
 }
 
+async function openWeekDesk(page: Page) {
+  await page.getByRole('button', { name: 'Week desk' }).click();
+}
+
 async function toggleMinimizedView(page: Page) {
-  await page.getByRole('button', { name: 'View options' }).click();
-  await page.getByRole('menuitemcheckbox', { name: 'Minimized view' }).click();
+  await openWeekDesk(page);
+  await page.getByRole('switch', { name: 'Compact rows' }).click();
   await page.keyboard.press('Escape');
 }
 
@@ -140,8 +144,8 @@ test.describe('Schedule phase 1 minimized view and role templates', () => {
     expect(restoredChipBox!.height).toBeGreaterThan(compactChipBox!.height);
     expect(restoredRowBox!.height).toBeGreaterThan(compactRowBox!.height);
 
-    await page.getByRole('button', { name: 'View options' }).click();
-    await page.getByRole('menuitem', { name: 'Toggle role templates' }).click();
+    await openWeekDesk(page);
+    await page.getByRole('button', { name: 'Role templates' }).click();
     const template = page.getByTestId('role-template-1');
     await expect(template).toBeVisible();
     await expect(template).toHaveAttribute('draggable', 'true');

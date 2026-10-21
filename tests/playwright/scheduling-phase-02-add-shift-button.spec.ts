@@ -15,10 +15,10 @@ const HAS_SUPABASE_CREDS = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 const SHIFT_TITLE = 'Phase 2 Existing Shift';
 
 const MENU_ITEMS = [
-  'Add multiple shifts',
-  'Import shifts from Excel',
-  'Add unavailability',
-  'Add time off',
+  'Several shifts',
+  'Import spreadsheet',
+  'Mark unavailability',
+  'Book time off',
 ] as const;
 
 function createSupabaseAdmin(): SupabaseClient {
@@ -53,27 +53,29 @@ async function openSchedule(page: Page) {
 }
 
 async function expectSingleAddControl(page: Page, label: string) {
-  await expect(page.getByRole('button', { name: 'View options' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Actions' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Add shift', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Add shift menu' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Week desk' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'View options' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Actions' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Copy last week' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Add first shift' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Add', exact: true })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Add shift', exact: true }).click();
+  await page.getByRole('button', { name: 'Create', exact: true }).click();
+  await page.getByTestId('create-menu').getByRole('button', { name: 'New shift' }).click();
   const wizard = page.getByRole('dialog');
   await expect(wizard.getByRole('heading', { name: 'Create New Shift' })).toBeVisible();
-  await expect(wizard.getByRole('menuitem', { name: 'Add single shift' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Add single shift' })).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(wizard).toBeHidden();
 
-  await page.getByRole('button', { name: 'Add shift menu' }).click();
+  await page.getByRole('button', { name: 'Create', exact: true }).click();
+  const menu = page.getByTestId('create-menu');
   for (const item of MENU_ITEMS) {
-    await expect(page.getByRole('menuitem', { name: item })).toBeVisible();
+    await expect(menu.getByRole('button', { name: item })).toBeVisible();
   }
-  await expect(page.getByRole('menuitem', { name: 'Add single shift' })).toHaveCount(0);
-  await page.getByRole('menuitem', { name: 'Add multiple shifts' }).click();
+  await expect(page.getByRole('button', { name: 'Add single shift' })).toHaveCount(0);
+  await menu.getByRole('button', { name: 'Several shifts' }).click();
   await expect(page.getByRole('heading', { name: 'Add Multiple Shifts' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'Add Multiple Shifts' })).toHaveCount(0);

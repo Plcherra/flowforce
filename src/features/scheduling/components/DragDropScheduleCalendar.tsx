@@ -50,6 +50,8 @@ interface DragDropScheduleCalendarProps {
   profileId?: string | null;
   onOpenPanel?: (panel: import("../types/panels").SchedulingPanelId) => void;
   onSuggestFills?: () => void;
+  smartFillOpen?: boolean;
+  onToggleSmartFill?: () => void;
 }
 
 type VendorShiftOption = {
@@ -81,6 +83,8 @@ export function DragDropScheduleCalendar({
   profileId = null,
   onOpenPanel,
   onSuggestFills,
+  smartFillOpen = false,
+  onToggleSmartFill,
 }: DragDropScheduleCalendarProps) {
   const { toast } = useToast();
   const [draggedVendor, setDraggedVendor] = useState<
@@ -326,6 +330,8 @@ export function DragDropScheduleCalendar({
             onOpenTimeOffPanel={
               onOpenPanel ? () => onOpenPanel("timeoff") : undefined
             }
+            smartFillOpen={smartFillOpen}
+            onToggleSmartFill={onToggleSmartFill}
           />
 
           {isWeekEmpty ? (

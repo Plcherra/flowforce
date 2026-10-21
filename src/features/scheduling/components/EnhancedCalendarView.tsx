@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Grid3X3,
-  LayoutGrid,
-  Users,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
 import { DragDropScheduleCalendar } from "./DragDropScheduleCalendar";
@@ -29,8 +19,13 @@ import {
 } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { formatCount } from "@/features/scheduling/utils/pluralize";
+import {
+  ScheduleRangeBar,
+  type ScheduleRangeView,
+} from "./ScheduleRangeBar";
 
-type CalendarViewMode = "month" | "week" | "staff";
+type CalendarViewMode = ScheduleRangeView;
 
 interface EnhancedCalendarViewProps {
   locationFilter?: string;
@@ -228,121 +223,27 @@ export function EnhancedCalendarView({
     }
   };
 
-  const viewConfig: Record<
-    CalendarViewMode,
-    { icon: typeof LayoutGrid; label: string }
-  > = {
-    month: { icon: LayoutGrid, label: "Month" },
-    week: { icon: Grid3X3, label: "Week" },
-    staff: { icon: Users, label: "Staff Grid" },
-  };
-
   const noShiftsAvailable = !loading && filteredShifts.length === 0;
+  const shiftCountLabel = loading
+    ? "Loading shifts"
+    : formatCount(filteredShifts.length, "shift");
 
   return (
     <div id="schedule-board" className="flex min-h-0 flex-1 flex-col">
       <Card className="flex min-h-0 flex-1 flex-col">
-        <CardHeader className="shrink-0 space-y-0 px-3 py-1.5">
-          <div className="flex flex-wrap items-center justify-between gap-1.5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  aria-label="Previous period"
-                  onClick={() => navigateDate("prev")}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                <div className="min-w-[9.5rem] px-1 text-center">
-                  <h2 className="text-sm font-semibold">
-                    {getDateRangeText()}
-                  </h2>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  aria-label="Next period"
-                  onClick={() => navigateDate("next")}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2"
-                onClick={() => setSelectedDate(new Date())}
-              >
-                Today
-              </Button>
-
-              <Badge variant="outline" className="h-6">
-                {loading
-                  ? "Loading…"
-                  : `${filteredShifts.length} shift${filteredShifts.length === 1 ? "" : "s"}`}
-              </Badge>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              {availableViews.map((view) => {
-                const config = viewConfig[view];
-                const Icon = config.icon;
-                return (
-                  <Button
-                    key={view}
-                    variant={currentView === view ? "default" : "outline"}
-                    size="sm"
-                    className="h-7 gap-1 px-2"
-                    aria-label={config.label}
-                    onClick={() => setCurrentView(view)}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {!isMobile && config.label}
-                  </Button>
-                );
-              })}
-
-              {onToggleSmartFill ? (
-                <Button
-                  type="button"
-                  variant={smartFillOpen ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 gap-1 px-2"
-                  aria-pressed={smartFillOpen}
-                  aria-label="Smart Fill"
-                  title={smartFillOpen ? "Hide Smart Fill" : "Show Smart Fill"}
-                  onClick={onToggleSmartFill}
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Smart Fill</span>
-                </Button>
-              ) : null}
-
-              {!readOnly && (
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-sm bg-green-500" />
-                    Published
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-sm bg-yellow-500" />
-                    Draft
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-sm bg-red-500" />
-                    Understaffed
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardHeader>
+        <div className="shrink-0 border-b px-3 py-2">
+          <ScheduleRangeBar
+            title={readOnly ? "My Schedule" : "Schedule"}
+            rangeLabel={getDateRangeText()}
+            shiftCountLabel={shiftCountLabel}
+            views={availableViews}
+            currentView={currentView}
+            onViewChange={setCurrentView}
+            onPrevious={() => navigateDate("prev")}
+            onNext={() => navigateDate("next")}
+            onJumpToToday={() => setSelectedDate(new Date())}
+          />
+        </div>
 
         <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {loading ? (
@@ -383,6 +284,8 @@ export function EnhancedCalendarView({
                   profileId={profileId}
                   onOpenPanel={onOpenPanel}
                   onSuggestFills={onSuggestFills}
+                  smartFillOpen={smartFillOpen}
+                  onToggleSmartFill={onToggleSmartFill}
                 />
               )}
 

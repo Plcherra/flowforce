@@ -25,6 +25,8 @@ interface ScheduleToolbarProps {
   setShowAvailabilityLayer?: (value: boolean) => void;
   readOnly?: boolean;
   onOpenTimeOffPanel?: () => void;
+  smartFillOpen?: boolean;
+  onToggleSmartFill?: () => void;
 }
 
 export function ScheduleToolbar({
@@ -51,6 +53,8 @@ export function ScheduleToolbar({
   setShowAvailabilityLayer,
   readOnly = false,
   onOpenTimeOffPanel,
+  smartFillOpen = false,
+  onToggleSmartFill,
 }: ScheduleToolbarProps) {
   return (
     <CalendarToolbar
@@ -77,6 +81,8 @@ export function ScheduleToolbar({
       onOpenAddTimeOff={onOpenAddTimeOff}
       readOnly={readOnly}
       onOpenTimeOffPanel={onOpenTimeOffPanel}
+      smartFillOpen={smartFillOpen}
+      onToggleSmartFill={onToggleSmartFill}
     />
   );
 }

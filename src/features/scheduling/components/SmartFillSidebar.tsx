@@ -284,7 +284,7 @@ export function SmartFillSidebar({
             </div>
             <p className="w-full text-center text-[11px] leading-snug text-muted-foreground">
               Adds draft shifts to the week board. Publish the full week from
-              the board Actions menu when ready.
+              Week desk when ready.
             </p>
             <Button
               variant="ghost"

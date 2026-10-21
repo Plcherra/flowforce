@@ -368,19 +368,19 @@ async function openSchedulePage(page: Page, heading: string | RegExp = 'Schedule
   await expect(page.getByRole('heading', { name: heading })).toBeVisible();
 }
 
+async function openWeekDesk(page: Page) {
+  await page.getByRole('button', { name: 'Week desk' }).click();
+}
+
 async function toggleRoleTemplates(page: Page) {
-  await page.getByRole('button', { name: 'View options' }).click();
-  await page.getByRole('menuitem', { name: 'Toggle role templates' }).click();
+  await openWeekDesk(page);
+  await page.getByRole('button', { name: 'Role templates' }).click();
   await expect(page.getByText('Role Templates', { exact: true })).toBeVisible();
 }
 
-async function openActionsMenu(page: Page) {
-  await page.getByRole('button', { name: 'Actions' }).click();
-}
-
 async function openWeekTemplatesDialog(page: Page) {
-  await openActionsMenu(page);
-  await page.getByRole('menuitem', { name: 'Week templates' }).click();
+  await openWeekDesk(page);
+  await page.getByRole('button', { name: 'Week blueprints' }).click();
   await expect(page.getByTestId('week-template-dialog')).toBeVisible();
 }
 
@@ -439,7 +439,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
   test('mobile viewport renders manager schedule shell', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'View options' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Week desk' })).toBeVisible();
   });
 
   test('schedule screens stay inside the viewport on phone, tablet, and desktop', async ({
@@ -494,8 +494,8 @@ test.describe('Scheduling smoke (Playwright)', () => {
       await close.click();
       await expect(details).toBeHidden();
 
-      await page.getByRole('button', { name: 'Add shift menu' }).click();
-      await page.getByRole('menuitem', { name: 'Add unavailability' }).click();
+      await page.getByRole('button', { name: 'Create', exact: true }).click();
+      await page.getByTestId('create-menu').getByRole('button', { name: 'Mark unavailability' }).click();
       const dialog = page.getByRole('dialog');
       await expect(dialog.getByRole('heading', { name: 'Add Unavailability' })).toBeVisible();
       const dialogBox = await dialog.boundingBox();
@@ -762,12 +762,12 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.reload();
     await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
 
-    await page.getByRole('button', { name: 'View options' }).click();
-    await page.getByRole('menuitemcheckbox', { name: 'Show availability layer' }).click();
+    await openWeekDesk(page);
+    const shading = page.getByRole('switch', { name: 'Availability shading' });
+    await shading.click();
     await expect(page.getByTestId('schedule-availability-legend')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'View options' }).click();
-    await page.getByRole('menuitemcheckbox', { name: 'Show availability layer' }).click();
+    await shading.click();
     await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
     await expect(page.getByTestId('schedule-cell-availability-hint')).toContainText(
       /1:30/i,
@@ -825,8 +825,8 @@ test.describe('Scheduling smoke (Playwright)', () => {
     );
 
     await page.reload();
-    await openActionsMenu(page);
-    await page.getByRole('menuitem', { name: 'Publish week', exact: true }).click();
+    await openWeekDesk(page);
+    await page.getByRole('button', { name: 'Publish to the team' }).click();
     await expect(page.getByText('Publish blocked', { exact: true })).toBeVisible({
       timeout: 15_000,
     });
@@ -960,8 +960,8 @@ test.describe('Scheduling smoke (Playwright)', () => {
     }
 
     page.once('dialog', (dialog) => dialog.accept());
-    await openActionsMenu(page);
-    await page.getByRole('menuitem', { name: 'Clear week' }).click();
+    await openWeekDesk(page);
+    await page.getByRole('button', { name: 'Empty this week' }).click();
 
     await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toHaveCount(0, {
       timeout: 15_000,

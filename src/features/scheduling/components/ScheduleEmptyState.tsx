@@ -21,8 +21,8 @@ const managerCopyByView: Record<
   week: {
     title: "No shifts this week",
     description:
-      "Use Add shift on the toolbar, or let Smart Fill suggest coverage.",
-    hint: "Copy previous week stays in Actions.",
+      "Use the plus button to add a shift, or open Week desk and run Coverage coach.",
+    hint: "Repeat previous week lives in the Week desk.",
   },
   month: {
     title: "No shifts this month",

@@ -100,7 +100,8 @@ test.describe('Schedule phase 3 load a shift template in the wizard', () => {
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto('/app/enhanced-scheduling');
     await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
-    await page.getByRole('button', { name: 'Add shift', exact: true }).click();
+    await page.getByRole('button', { name: 'Create', exact: true }).click();
+    await page.getByTestId('create-menu').getByRole('button', { name: 'New shift' }).click();
 
     const wizard = page.getByRole('dialog');
     await expect(wizard.getByRole('heading', { name: 'Create New Shift' })).toBeVisible();

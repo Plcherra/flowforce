@@ -18,7 +18,6 @@ import { useHoursSummary } from "@/features/scheduling/hooks/useHoursSummary";
 import { sanitizeLocationFilter } from "@/features/scheduling/utils/locationFilter";
 import { useSmartFillPanel } from "@/features/scheduling/hooks/useSmartFillPanel";
 import { ScheduleReadinessPanel } from "./ScheduleReadinessPanel";
-import { SchedulingHeader } from "./SchedulingHeader";
 import { SchedulingPanelSheet } from "./SchedulingPanelSheet";
 import { AutoScheduleDialog } from "./AutoScheduleDialog";
 import type { SchedulingPanelId } from "../types/panels";
@@ -128,8 +127,6 @@ export function NextGenSchedulingSystem({
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden bg-background">
-      <SchedulingHeader role={schedulingRole} />
-
       <div className="flex min-h-0 w-full flex-1 flex-col px-2 py-1.5 sm:px-3">
         {schedulingSetupMissing ? (
           <FeatureSetupRequiredState

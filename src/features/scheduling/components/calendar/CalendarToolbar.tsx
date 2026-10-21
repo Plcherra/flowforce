@@ -1,17 +1,5 @@
 import { differenceInMinutes } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { CardHeader } from "@/components/ui/card";
-import { ChevronDown, Settings, Users } from "lucide-react";
+import { ScheduleWeekDesk } from "@/features/scheduling/components/calendar/ScheduleWeekDesk";
 import { formatCount } from "@/features/scheduling/utils/pluralize";
 
 type CalendarToolbarProps = {
@@ -38,205 +26,24 @@ type CalendarToolbarProps = {
   onOpenAddTimeOff: () => void;
   readOnly?: boolean;
   onOpenTimeOffPanel?: () => void;
+  smartFillOpen?: boolean;
+  onToggleSmartFill?: () => void;
 };
 
-export function CalendarToolbar({
-  weekSchedules,
-  minimizedView,
-  setMinimizedView,
-  showDailyInfo,
-  setShowDailyInfo,
-  showAvailabilityLayer = true,
-  setShowAvailabilityLayer,
-  onToggleTemplates,
-  onOpenWeekTemplates,
-  onCopyPreviousWeek,
-  onAutoScheduleWeek,
-  autoScheduleDisabled = false,
-  onClearWeek,
-  onPublishWeek,
-  onExportWeekCsv,
-  onPrintWeek,
-  onOpenAddShift,
-  onOpenMultiAdd,
-  onOpenImportShifts,
-  onOpenAddUnavailability,
-  onOpenAddTimeOff,
-  readOnly = false,
-  onOpenTimeOffPanel,
-}: CalendarToolbarProps) {
+export function CalendarToolbar(props: CalendarToolbarProps) {
+  const { weekSchedules } = props;
   const uniqueUsers = new Set<string>();
   let totalMinutes = 0;
-  weekSchedules.forEach((s: any) => {
-    const start = new Date(s.start_time);
-    const end = new Date(s.end_time);
+  weekSchedules.forEach((schedule: any) => {
+    const start = new Date(schedule.start_time);
+    const end = new Date(schedule.end_time);
     totalMinutes += Math.max(0, differenceInMinutes(end, start));
-    (s.assignments || []).forEach((a: any) => uniqueUsers.add(a.user_id));
+    (schedule.assignments || []).forEach((assignment: any) =>
+      uniqueUsers.add(assignment.user_id),
+    );
   });
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+  const summary = `${formatCount(weekSchedules.length, "shift")} · ${totalHours} hrs · ${uniqueUsers.size} people`;
 
-  return (
-    <CardHeader className="shrink-0 border-b px-3 py-1">
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="h-6">
-            {formatCount(weekSchedules.length, "shift")}
-          </Badge>
-          <div className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
-            <span>{totalHours} hrs</span>
-            <span className="inline-flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {uniqueUsers.size}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 gap-1 px-2"
-                aria-label="View options"
-              >
-                <Settings className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">View options</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Display</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem
-                checked={minimizedView}
-                onCheckedChange={setMinimizedView}
-              >
-                Minimized view
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={showDailyInfo}
-                onCheckedChange={setShowDailyInfo}
-              >
-                Daily info
-              </DropdownMenuCheckboxItem>
-              {setShowAvailabilityLayer ? (
-                <DropdownMenuCheckboxItem
-                  checked={showAvailabilityLayer}
-                  onCheckedChange={setShowAvailabilityLayer}
-                >
-                  Show availability layer
-                </DropdownMenuCheckboxItem>
-              ) : null}
-              {!readOnly && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Templates</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={onToggleTemplates}>
-                    Toggle role templates
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenWeekTemplates}>
-                    Open week templates
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {readOnly ? (
-            onOpenTimeOffPanel ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7"
-                onClick={onOpenTimeOffPanel}
-              >
-                Request time off
-              </Button>
-            ) : null
-          ) : (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7">
-                    Actions
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuItem onClick={onCopyPreviousWeek}>
-                    Copy previous week
-                  </DropdownMenuItem>
-                  {onAutoScheduleWeek ? (
-                    <DropdownMenuItem
-                      onClick={onAutoScheduleWeek}
-                      disabled={autoScheduleDisabled}
-                      className="text-muted-foreground"
-                    >
-                      Auto-schedule week
-                    </DropdownMenuItem>
-                  ) : null}
-                  <DropdownMenuItem onClick={onClearWeek}>
-                    Clear week
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onPublishWeek(true)}>
-                    Publish week
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onPublishWeek(false)}>
-                    Unpublish week
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onExportWeekCsv}>
-                    Export CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onPrintWeek}>
-                    Print week
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={onOpenWeekTemplates}>
-                    Week templates
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="inline-flex items-center" data-testid="add-shift-control">
-                <Button
-                  size="sm"
-                  className="h-7 rounded-r-none"
-                  onClick={onOpenAddShift}
-                >
-                  Add shift
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="h-7 rounded-l-none border-l border-primary-foreground/30 px-1.5"
-                      aria-label="Add shift menu"
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-60">
-                    <DropdownMenuItem onClick={onOpenMultiAdd}>
-                      Add multiple shifts
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onOpenImportShifts}>
-                      Import shifts from Excel
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onOpenAddUnavailability}>
-                      Add unavailability
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onOpenAddTimeOff}>
-                      Add time off
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </CardHeader>
-  );
+  return <ScheduleWeekDesk {...props} summary={summary} />;
 }

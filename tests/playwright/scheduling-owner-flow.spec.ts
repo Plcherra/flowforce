@@ -117,7 +117,8 @@ test.describe('Scheduling owner flow', () => {
     await expect(page.getByText('Alex Rivera')).toHaveCount(0);
     await shot(page, 'scheduling_empty_week');
 
-    await page.getByRole('button', { name: 'Add shift', exact: true }).click();
+    await page.getByRole('button', { name: 'Create', exact: true }).click();
+    await page.getByTestId('create-menu').getByRole('button', { name: 'New shift' }).click();
     await page.getByLabel('Shift Title').fill(shiftTitle);
     await page.getByRole('tab', { name: 'Tasks' }).click();
     await page.getByPlaceholder('Task title').fill(taskTitle);
@@ -175,8 +176,8 @@ test.describe('Scheduling owner flow', () => {
     await details.getByRole('button', { name: 'Close shift details' }).click();
     await expect(details).toBeHidden();
 
-    await page.getByRole('button', { name: 'Actions' }).click();
-    await page.getByRole('menuitem', { name: 'Publish week', exact: true }).click();
+    await page.getByRole('button', { name: 'Week desk' }).click();
+    await page.getByRole('button', { name: 'Publish to the team' }).click();
     await expect(page.getByText('Week published')).toBeVisible({ timeout: 20_000 });
     await shot(page, 'scheduling_published_week');
 
