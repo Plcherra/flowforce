@@ -4933,6 +4933,7 @@ export type Database = {
       }
       reminders: {
         Row: {
+          allow_deactivate: boolean
           auto_complete: boolean | null
           completed: boolean | null
           completed_at: string | null
@@ -4957,6 +4958,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          allow_deactivate?: boolean
           auto_complete?: boolean | null
           completed?: boolean | null
           completed_at?: string | null
@@ -4981,6 +4983,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          allow_deactivate?: boolean
           auto_complete?: boolean | null
           completed?: boolean | null
           completed_at?: string | null

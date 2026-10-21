@@ -435,7 +435,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 18 — allow_deactivate on assigned reminders
 
-- [ ] Store `allow_deactivate` on the assigned reminder row.
+- [x] Store `allow_deactivate` on the assigned reminder row.
 
 Rules:
 
@@ -813,3 +813,15 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-21 — Phase 18 allow_deactivate on assigned reminders
+
+Shipped: `reminders.allow_deactivate` is a boolean, default false. Existing rows stay off until someone sets the flag. Generated types in `src/integrations/supabase/types.ts` include the column. Migration file: `supabase/migrations/20261021110620_reminders_allow_deactivate.sql`. Reminders are not merged into tasks.
+
+Proven: Unit test `src/integrations/supabase/remindersAllowDeactivate.test.ts` asserts the generated `reminders` type includes `allow_deactivate`. Ran that test; it passed. `npm run typecheck` passed.
+
+The Supabase CLI could not run `supabase db push` because it has no access token. The same SQL was applied to the linked project through the Supabase migration API. Remote migration version `20261021110620` matches the file. The column is present on `reminders`.
+
+Blockers: none for this phase. Phases that depend on this column are not blocked.
+
+Questions: none. Phone steps: none. This phase is the column and the generated types.
