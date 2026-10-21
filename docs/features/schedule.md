@@ -418,7 +418,7 @@ Prove: Unit test asserts a staff invite defaults to `viewOwnSchedules`, `viewTea
 
 ### Phase 17 — My swaps is linked to a shift
 
-- [ ] Let a person request a swap from a shift and see it under My swaps.
+- [x] Let a person request a swap from a shift and see it under My swaps.
 
 Rules:
 
@@ -797,3 +797,19 @@ Proven: Unit test `src/features/employees/utils/staffInviteScheduleDefaults.test
 Blockers: none for this phase.
 
 Questions: none. Phone steps: none. This phase is a unit test. The invite card on https://www.flowforce.uk uses the same defaults.
+
+### 2026-10-21 — Phase 17 My swaps is linked to a shift
+
+Shipped: The shift sheet shows Request swap when the signed-in person is assigned to that shift. Requesting inserts a pending row on the existing `shift_swaps` table through `createShiftSwap`, next to the existing fetch and status update. My swaps already lists swaps that person requested, and the panel query is invalidated so the new row shows up. Approving stays on Team requests.
+
+Proven: Playwright test `tests/playwright/scheduling-phase-17-request-swap.spec.ts` uses `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. It requests a swap from the shift sheet and asserts the shift title appears in My swaps. This environment has no `SUPABASE_SERVICE_ROLE_KEY`, so the test was not executed here. `npm run typecheck` and ESLint on the changed files are the checks run for this phase.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an employee who is assigned to a published shift.
+2. Open Schedule and tap that shift.
+3. Tap Request swap.
+4. Open My swaps. The shift should be listed there.
+
+Blockers: none for this phase.
+
+Questions: none.

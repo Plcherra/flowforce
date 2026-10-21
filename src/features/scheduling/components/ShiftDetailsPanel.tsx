@@ -34,6 +34,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { RequestShiftSwapButton } from "@/features/scheduling/components/RequestShiftSwapButton";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import { eventShowsOnShift } from "@/features/scheduling/services/placeDayEvents";
 import {
@@ -216,6 +217,10 @@ export function ShiftDetailsPanel({
   >({});
 
   const shift = shifts.find((s) => s.id === shiftId);
+  const currentUserIsAssigned = Boolean(
+    user?.id &&
+      shift?.assignments?.some((assignment) => assignment.user_id === user.id),
+  );
   const copilotRequirements = shift?.requirements as
     | { copilot?: CopilotScheduleMetadata }
     | null
@@ -770,6 +775,12 @@ export function ShiftDetailsPanel({
           </TabsList>
 
           <TabsContent value="details" className="space-y-4">
+            {currentUserIsAssigned && user?.id ? (
+              <RequestShiftSwapButton
+                scheduleId={shiftId}
+                requestingUserId={user.id}
+              />
+            ) : null}
             {/* Basic Information */}
             <div className="space-y-4">
               {linkedVendorVisits.length > 0 && (

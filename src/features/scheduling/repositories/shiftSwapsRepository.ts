@@ -109,6 +109,21 @@ export async function fetchTimeOffRequests(params: {
   return z.array(timeOffRequestSchema).parse(data ?? []);
 }
 
+export async function createShiftSwap(params: {
+  scheduleId: string;
+  requestingUserId: string;
+  reason?: string | null;
+}): Promise<void> {
+  const { error } = await supabase.from("shift_swaps").insert({
+    schedule_id: params.scheduleId,
+    requestinguser_id: params.requestingUserId,
+    swap_type: "swap",
+    status: "pending",
+    reason: params.reason ?? null,
+  });
+  if (error) throw error;
+}
+
 export async function updateShiftSwapStatus(params: {
   swapId: string;
   status: "approved" | "rejected";
