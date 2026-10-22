@@ -402,7 +402,7 @@ Prove: Extend `taskSchedule.test.ts`, or add the XP cases beside `taskCompletion
 
 ### Phase 19 — Points and performance
 
-- [ ] Blocked by Open question "Task points and performance". Skip this phase. Do not write a performance score from task points.
+- [x] Blocked by Open question "Task points and performance". Skip this phase. Do not write a performance score from task points.
 
 Prove: Skip. Do not add a test until the Open question "Task points and performance" is answered.
 
@@ -672,3 +672,9 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-22 — Phase 19 Points and performance
+
+Skipped. Blocked by Open question "Task points and performance". Task points are not written to `staff_performance`. No test was added.
+
+Questions: The phase needs the Open question "Task points and performance" answered: how those points change `staff_performance`, and whether that number is the same as the leaderboard XP.
