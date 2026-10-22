@@ -248,7 +248,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 11 — Messages
 
-- [ ] Move hard-coded colors in Messages onto the tokens.
+- [x] Move hard-coded colors in Messages onto the tokens.
 
 Rules:
 
@@ -598,6 +598,22 @@ Phone steps for Pedro:
 3. Start a new update. The gradient presets should still be there, and the rich-text color control should still be there.
 4. Preview the update on the phone frame. The frame should stay dark, the title should stay light on the background, and a chosen gradient should still paint the post.
 5. Switch to Dark and repeat the preview. The phone frame and the title should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 11 Messages
+
+Shipped: Message classes now use the theme tokens. `src/features/messages` and `src/styles/messages.css` have no baseline entries. Search hits use warning-muted. Dialog scrims stay dark in Dark. The video call room stays dark, with light text, in FlowForce, Light, and Dark.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Messages.
+2. A search match should highlight in amber. Announcement severity should read as red, amber, or green.
+3. Open a dialog from Messages. The scrim should stay dark.
+4. Switch to Dark and open a video call preview if one is available. The call room should stay dark and the names should stay light.
 
 Blockers: none. No migration.
 

@@ -253,9 +253,9 @@ export function MessageAttachments({
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex-shrink-0">
                       {isImage(attachment.type) ? (
-                        <Image className="h-5 w-5 text-blue-500" />
+                        <Image className="h-5 w-5 text-primary" />
                       ) : (
-                        <File className="h-5 w-5 text-gray-500" />
+                        <File className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ export function MessageAttachments({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
                         onClick={() => removeAttachment(attachment)}
                       >
                         <X className="h-4 w-4" />

@@ -252,7 +252,7 @@ export function MessageScheduler({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive/80"
                             onClick={() => cancelScheduledMessage(message.id)}
                           >
                             <Trash2 className="h-3 w-3" />

@@ -132,15 +132,15 @@ export function VideoCallDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[600px] p-0">
-        <div className="flex flex-col h-full bg-gray-900 text-white rounded-lg overflow-hidden">
+        <div className="flex flex-col h-full bg-foreground text-primary-foreground dark:bg-background rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-gray-800">
+          <div className="flex items-center justify-between p-4 bg-primary-foreground/10">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 {callType === "video" ? (
-                  <Video className="h-5 w-5 text-blue-400" />
+                  <Video className="h-5 w-5 text-primary" />
                 ) : (
-                  <Phone className="h-5 w-5 text-green-400" />
+                  <Phone className="h-5 w-5 text-success" />
                 )}
                 <h3 className="font-semibold">{channelName}</h3>
               </div>
@@ -153,7 +153,7 @@ export function VideoCallDialog({
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-300">
+            <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
               <span>{participants.length} participants</span>
             </div>
           </div>
@@ -161,7 +161,7 @@ export function VideoCallDialog({
           {/* Video Grid */}
           <div className="flex-1 p-4 grid grid-cols-2 gap-4">
             {/* Local Video */}
-            <Card className="relative bg-gray-800 border-gray-700">
+            <Card className="relative bg-primary-foreground/5 border-primary-foreground/20">
               <CardContent className="p-0 h-full">
                 {isVideoEnabled && callType === "video" ? (
                   <video
@@ -171,18 +171,18 @@ export function VideoCallDialog({
                     className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full bg-gray-700 rounded-lg">
+                  <div className="flex items-center justify-center h-full bg-primary-foreground/10 rounded-lg">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-xl font-semibold text-white">
+                      <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-xl font-semibold text-primary-foreground">
                           You
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300">Camera off</p>
+                      <p className="text-sm text-primary-foreground/70">Camera off</p>
                     </div>
                   </div>
                 )}
-                <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-xs">
+                <div className="absolute bottom-2 left-2 bg-foreground/50 dark:bg-background/50 px-2 py-1 rounded text-xs">
                   You {!isAudioEnabled && "(muted)"}
                 </div>
               </CardContent>
@@ -192,25 +192,25 @@ export function VideoCallDialog({
             {participants.slice(0, 3).map((participant, _index) => (
               <Card
                 key={participant.id}
-                className="relative bg-gray-800 border-gray-700"
+                className="relative bg-primary-foreground/5 border-primary-foreground/20"
               >
                 <CardContent className="p-0 h-full">
-                  <div className="flex items-center justify-center h-full bg-gray-700 rounded-lg">
+                  <div className="flex items-center justify-center h-full bg-primary-foreground/10 rounded-lg">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <span className="text-xl font-semibold text-white">
+                      <div className="w-16 h-16 bg-success rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-xl font-semibold text-primary-foreground">
                           {participant.name
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300">
+                      <p className="text-sm text-primary-foreground/70">
                         {participant.name}
                       </p>
                     </div>
                   </div>
-                  <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-xs">
+                  <div className="absolute bottom-2 left-2 bg-foreground/50 dark:bg-background/50 px-2 py-1 rounded text-xs">
                     {participant.name}
                   </div>
                 </CardContent>
@@ -219,7 +219,7 @@ export function VideoCallDialog({
           </div>
 
           {/* Controls */}
-          <div className="p-4 bg-gray-800 flex items-center justify-center gap-4">
+          <div className="p-4 bg-primary-foreground/10 flex items-center justify-center gap-4">
             <Button
               variant={isAudioEnabled ? "default" : "destructive"}
               size="lg"

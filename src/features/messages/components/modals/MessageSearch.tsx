@@ -201,7 +201,7 @@ export function MessageSearch({
         index % 2 === 1 ? (
           <mark
             key={`${part}-${index}`}
-            className="rounded px-1 bg-yellow-200 dark:bg-yellow-800"
+            className="rounded px-1 bg-warning-muted"
           >
             {part}
           </mark>
@@ -216,7 +216,7 @@ export function MessageSearch({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 z-50">
+    <div className="fixed inset-0 bg-foreground/50 dark:bg-background/50 flex items-start justify-center pt-20 z-50">
       <Card className="w-full max-w-2xl mx-4">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">

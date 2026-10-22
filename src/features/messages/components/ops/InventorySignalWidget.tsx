@@ -23,7 +23,7 @@ const signalCards = [
     label: "Low stock",
     value: "12 items",
     detail: "Top priority: Yeast, Tri-tip, 2× garnish kits",
-    tone: "text-amber-600",
+    tone: "text-warning",
     icon: AlertTriangle,
   },
   {
@@ -31,7 +31,7 @@ const signalCards = [
     label: "Waste trend",
     value: "-6.2%",
     detail: "vs last week",
-    tone: "text-emerald-600",
+    tone: "text-success",
     icon: TrendingDown,
   },
 ];

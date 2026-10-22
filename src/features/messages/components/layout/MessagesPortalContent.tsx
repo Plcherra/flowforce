@@ -82,7 +82,7 @@ export function MessagesPortalContent({ vm }: MessagesPortalContentProps) {
       )}
 
       {vm.isThreadOpen && vm.threadMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 dark:bg-background/50 p-4">
           <div className="h-[600px] w-full max-w-2xl rounded-2xl bg-background shadow-xl">
             <ThreadedMessageView
               message={vm.threadMessage}

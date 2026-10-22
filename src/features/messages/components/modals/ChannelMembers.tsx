@@ -153,22 +153,22 @@ export function ChannelMembers({
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "admin":
-        return <Crown className="h-4 w-4 text-yellow-500" />;
+        return <Crown className="h-4 w-4 text-warning" />;
       case "moderator":
-        return <Shield className="h-4 w-4 text-blue-500" />;
+        return <Shield className="h-4 w-4 text-primary" />;
       default:
-        return <UserIcon className="h-4 w-4 text-gray-500" />;
+        return <UserIcon className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-warning-muted text-warning-foreground border-warning/40";
       case "moderator":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-primary/10 text-primary border-primary/40";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-foreground border-border";
     }
   };
 
