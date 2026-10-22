@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function InviteEmployeesModal({
   open: controlledOpen,
   onOpenChange,
 }: InviteEmployeesModalProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"cards" | "many">("cards");
@@ -97,16 +99,15 @@ export function InviteEmployeesModal({
         {trigger ?? (
           <Button>
             <Users className="mr-2 h-4 w-4" />
-            Add User
+            {t("employees.addUser")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Invite teammates</DialogTitle>
+          <DialogTitle>{t("employees.inviteTeammates")}</DialogTitle>
           <DialogDescription>
-            Pick a class, give or take a few boxes, then send. Add many only
-            when you already have a list.
+            {t("employees.pickAClassGiveOrTakeAFewBoxesThenSendAddManyOnlyWhenYouAlreadyHaveAList")}
           </DialogDescription>
         </DialogHeader>
 
@@ -115,8 +116,8 @@ export function InviteEmployeesModal({
           onValueChange={(value) => setActiveTab(value as "cards" | "many")}
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cards">People</TabsTrigger>
-            <TabsTrigger value="many">Add many</TabsTrigger>
+            <TabsTrigger value="cards">{t("schedule.people")}</TabsTrigger>
+            <TabsTrigger value="many">{t("employees.addMany")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cards" className="mt-4 space-y-4">

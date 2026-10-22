@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,27 +21,28 @@ export default function DeletionTestForm({
   isRunningTest,
   onRunTests,
 }: DeletionTestFormProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="testEmail">Test Email (for deleted account)</Label>
+        <Label htmlFor="testEmail">{t("profile.testEmailForDeletedAccount")}</Label>
         <Input
           id="testEmail"
           type="email"
           value={testEmail}
           onChange={(e) => setTestEmail(e.target.value)}
-          placeholder="email@example.com"
+          placeholder={t("profile.emailExampleCom")}
           disabled={isRunningTest}
         />
       </div>
       <div>
-        <Label htmlFor="testPassword">Test Password</Label>
+        <Label htmlFor="testPassword">{t("profile.testPassword")}</Label>
         <Input
           id="testPassword"
           type="password"
           value={testPassword}
           onChange={(e) => setTestPassword(e.target.value)}
-          placeholder="password"
+          placeholder={t("profile.password")}
           disabled={isRunningTest}
         />
       </div>
@@ -53,7 +55,7 @@ export default function DeletionTestForm({
         {isRunningTest ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Running Tests...
+            {t("profile.runningTests")}
           </>
         ) : (
           "Run Deletion Tests"

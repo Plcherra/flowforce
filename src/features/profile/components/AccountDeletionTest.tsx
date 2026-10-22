@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -11,6 +12,7 @@ import DeletionTestResults from "./DeletionTestResults";
 import DeletionTestInstructions from "./DeletionTestInstructions";
 
 export default function AccountDeletionTest() {
+  const { t } = useTranslation();
   const {
     testEmail,
     setTestEmail,
@@ -24,10 +26,9 @@ export default function AccountDeletionTest() {
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Account Deletion Test Suite</CardTitle>
+        <CardTitle>{t("profile.accountDeletionTestSuite")}</CardTitle>
         <CardDescription>
-          Test that account deletion properly removes users and prevents future
-          logins
+          {t("profile.testThatAccountDeletionProperlyRemovesUsersAndPreventsFutureLogins")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

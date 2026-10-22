@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -12,10 +13,10 @@ import {
   type ListIssueGrant,
 } from "@/features/tasks/utils/listIssueGather";
 
-const LEVELS: Array<{ value: ListIssueGrant; label: string }> = [
-  { value: "none", label: "None" },
-  { value: "read", label: "Read" },
-  { value: "act", label: "Act" },
+const LEVELS: Array<{ value: ListIssueGrant; labelKey: string }> = [
+  { value: "none", labelKey: "employees.accessNone" },
+  { value: "read", labelKey: "employees.accessRead" },
+  { value: "act", labelKey: "employees.accessAct" },
 ];
 
 export function ListIssueAccessSection({
@@ -29,13 +30,14 @@ export function ListIssueAccessSection({
   disabled: boolean;
   onChange: (grant: ListIssueGrant) => void;
 }) {
+  const { t } = useTranslation();
   const grant = listIssueGrantFromDiffs(classPermissions, diffs);
 
   return (
     <div className="space-y-1.5" data-testid="employee-list-issue-access">
-      <Label htmlFor="list-issue-grant">List issues</Label>
+      <Label htmlFor="list-issue-grant">{t("tasks.listIssues")}</Label>
       <p className="text-sm text-muted-foreground">
-        None, read, or act on the issues gathered for the owner.
+        {t("employees.noneReadOrActOnTheIssuesGatheredForTheOwner")}
       </p>
       <Select
         value={grant}
@@ -48,7 +50,7 @@ export function ListIssueAccessSection({
         <SelectContent>
           {LEVELS.map((option) => (
             <SelectItem key={option.value} value={option.value}>
-              {option.label}
+              {t(option.labelKey)}
             </SelectItem>
           ))}
         </SelectContent>

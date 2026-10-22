@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import type { Tables } from "@/integrations/supabase/public-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ export function RoleConfigPanel({
   employeeId,
   employee,
 }: RoleConfigPanelProps) {
+  const { t } = useTranslation();
   const { data: roles = [], isLoading } = useRoles();
   const assignRole = useAssignRole();
   const { data: access } = useEmployeeAccess(employeeId);
@@ -62,7 +64,7 @@ export function RoleConfigPanel({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Role Configuration</CardTitle>
+          <CardTitle>{t("sections.roleConfiguration")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -76,7 +78,7 @@ export function RoleConfigPanel({
             disabled={isLoading || assignRole.isPending}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Assign new role" />
+              <SelectValue placeholder={t("employees.assignNewRole")} />
             </SelectTrigger>
             <SelectContent>
               {availableRoleOptions.map((role) => (
@@ -88,7 +90,7 @@ export function RoleConfigPanel({
           </Select>
 
           {assignRole.isPending && (
-            <p className="text-sm text-muted-foreground">Updating role…</p>
+            <p className="text-sm text-muted-foreground">{t("employees.updatingRole")}</p>
           )}
         </CardContent>
       </Card>
@@ -96,7 +98,7 @@ export function RoleConfigPanel({
       {suggestions.items.length > 0 && (
         <Alert>
           <Sparkles className="h-4 w-4" />
-          <AlertTitle>Copilot Suggestions</AlertTitle>
+          <AlertTitle>{t("employees.copilotSuggestions")}</AlertTitle>
           <AlertDescription className="mt-2 space-y-2">
             {suggestions.items.map((item) => (
               <Button
@@ -124,6 +126,7 @@ function PermissionsMatrix({
 }: {
   roles: Array<{ id: string; name: string; permissions: string[] }>;
 }) {
+  const { t } = useTranslation();
   const uniquePermissions = useMemo(() => {
     const permissionSet = new Set<string>();
     roles.forEach((role) => {
@@ -136,12 +139,11 @@ function PermissionsMatrix({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Permissions</CardTitle>
+          <CardTitle>{t("registration.roles.permissions")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Assign a role to preview the permissions that will apply to this
-            teammate.
+            {t("employees.assignARoleToPreviewThePermissionsThatWillApplyToThisTeammate")}
           </p>
         </CardContent>
       </Card>
@@ -151,12 +153,12 @@ function PermissionsMatrix({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Permissions</CardTitle>
+        <CardTitle>{t("registration.roles.permissions")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Assigned Roles
+            {t("employees.assignedRoles")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {roles.map((role) => (
@@ -169,7 +171,7 @@ function PermissionsMatrix({
 
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Effective Permissions
+            {t("employees.effectivePermissions")}
           </p>
           {uniquePermissions.length ? (
             <div className="mt-2 flex flex-wrap gap-2">
@@ -181,7 +183,7 @@ function PermissionsMatrix({
             </div>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">
-              The assigned roles do not grant any additional permissions.
+              {t("employees.theAssignedRolesDoNotGrantAnyAdditionalPermissions")}
             </p>
           )}
         </div>

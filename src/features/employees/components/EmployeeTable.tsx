@@ -2,6 +2,7 @@
  * Employee table component
  */
 
+import { useTranslation } from "react-i18next";
 import { Mail, Building2, MoreHorizontal } from "lucide-react";
 import {
   Table,
@@ -34,6 +35,7 @@ export function EmployeeTable({
   departmentMap,
   onEmployeeClick,
 }: EmployeeTableProps) {
+  const { t } = useTranslation();
   const getDisplayName = (employee: Employee) => {
     const fullName =
       `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
@@ -51,12 +53,12 @@ export function EmployeeTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[42%] md:w-[30%]">Name</TableHead>
-            <TableHead className="hidden md:table-cell">Role</TableHead>
-            <TableHead className="hidden md:table-cell">Department</TableHead>
-            <TableHead className="hidden md:table-cell">Hire Date</TableHead>
-            <TableHead className="hidden md:table-cell">Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="w-[42%] md:w-[30%]">{t("schedule.name")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("messages.role")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("messages.department")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("dashboard.profile.hireDate")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("schedule.status")}</TableHead>
+            <TableHead className="text-right">{t("inventory.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -135,7 +137,7 @@ export function EmployeeTable({
                         onEmployeeClick(employee);
                       }}
                     >
-                      View Details
+                      {t("employees.viewDetails")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

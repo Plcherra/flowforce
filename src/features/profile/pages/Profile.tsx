@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -7,6 +8,7 @@ import AccountSecurity from "@/features/profile/components/AccountSecurity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Profile() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
   const { profile, loading, refetchProfile } = useProfile();
@@ -27,10 +29,10 @@ export default function Profile() {
         <h1
           className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold tracking-tight`}
         >
-          Profile Settings
+          {t("profile.profileSettings")}
         </h1>
         <p className="text-muted-foreground">
-          Manage your account settings and preferences
+          {t("profile.manageYourAccountSettingsAndPreferences")}
         </p>
       </div>
 
@@ -39,8 +41,8 @@ export default function Profile() {
         className={`${isMobile ? "space-y-4" : "space-y-6"}`}
       >
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="profile">{t("common.profile")}</TabsTrigger>
+          <TabsTrigger value="security">{t("profile.security")}</TabsTrigger>
         </TabsList>
 
         <TabsContent

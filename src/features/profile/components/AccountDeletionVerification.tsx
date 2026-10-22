@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -20,6 +21,7 @@ interface VerificationResult {
 }
 
 export default function AccountDeletionVerification() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [testEmail, setTestEmail] = useState("");
   const [testPassword, setTestPassword] = useState("");
@@ -206,34 +208,33 @@ export default function AccountDeletionVerification() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-warning" />
-          Deletion Verification Tests
+          {t("profile.deletionVerificationTests")}
         </CardTitle>
         <CardDescription>
-          Verify that account deletion completely removes users and prevents
-          future access
+          {t("profile.verifyThatAccountDeletionCompletelyRemovesUsersAndPreventsFutureAccess")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="testEmail">Email of Deleted Account</Label>
+            <Label htmlFor="testEmail">{t("profile.emailOfDeletedAccount")}</Label>
             <Input
               id="testEmail"
               type="email"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder="deleted-user@example.com"
+              placeholder={t("profile.deletedUserExampleCom")}
               disabled={isRunning}
             />
           </div>
           <div>
-            <Label htmlFor="testPassword">Password of Deleted Account</Label>
+            <Label htmlFor="testPassword">{t("profile.passwordOfDeletedAccount")}</Label>
             <Input
               id="testPassword"
               type="password"
               value={testPassword}
               onChange={(e) => setTestPassword(e.target.value)}
-              placeholder="Previous password"
+              placeholder={t("profile.previousPassword")}
               disabled={isRunning}
             />
           </div>
@@ -246,7 +247,7 @@ export default function AccountDeletionVerification() {
             {isRunning ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Running Verification Tests...
+                {t("profile.runningVerificationTests")}
               </>
             ) : (
               "Run Deletion Verification"
@@ -256,7 +257,7 @@ export default function AccountDeletionVerification() {
 
         {results.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-medium">Verification Results:</h3>
+            <h3 className="text-sm font-medium">{t("profile.verificationResults")}</h3>
             {results.map((result, index) => (
               <div
                 key={index}
@@ -276,12 +277,12 @@ export default function AccountDeletionVerification() {
 
         <div className="text-xs text-muted-foreground space-y-1 p-3 bg-muted rounded">
           <p>
-            <strong>How to test:</strong>
+            <strong>{t("profile.howToTest")}</strong>
           </p>
-          <p>1. Create a test account with known credentials</p>
+          <p>{t("profile.n1CreateATestAccountWithKnownCredentials")}</p>
           <p>2. Delete that account using the &quot;Delete Account&quot; feature</p>
-          <p>3. Run these verification tests with those credentials</p>
-          <p>4. All tests should pass if deletion is working correctly</p>
+          <p>{t("profile.n3RunTheseVerificationTestsWithThoseCredentials")}</p>
+          <p>{t("profile.n4AllTestsShouldPassIfDeletionIsWorkingCorrectly")}</p>
         </div>
       </CardContent>
     </Card>

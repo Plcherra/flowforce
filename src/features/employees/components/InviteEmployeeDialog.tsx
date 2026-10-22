@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -24,6 +25,7 @@ export function InviteEmployeeDialog({
   onOpenChange,
   onSuccess,
 }: InviteEmployeeDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { classes, locations, departments } = useInviteAccessOptions();
   const { bulkInviteMutation } = useInviteMutations({
@@ -69,12 +71,12 @@ export function InviteEmployeeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Invite teammates</DialogTitle>
+          <DialogTitle>{t("employees.inviteTeammates")}</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="cards">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cards">People</TabsTrigger>
-            <TabsTrigger value="many">Add many</TabsTrigger>
+            <TabsTrigger value="cards">{t("schedule.people")}</TabsTrigger>
+            <TabsTrigger value="many">{t("employees.addMany")}</TabsTrigger>
           </TabsList>
           <TabsContent value="cards" className="mt-4">
             <InvitePersonStack

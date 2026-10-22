@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { Shield, RotateCcw, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,6 +57,7 @@ interface UserPermissionsTabProps {
 }
 
 export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { roles } = useCompanyRoles();
@@ -217,7 +219,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Class
+            {t("employees.class")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -229,7 +231,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
                 disabled={!canEditAccess}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
+                  <SelectValue placeholder={t("employees.selectAClass")} />
                 </SelectTrigger>
                 <SelectContent>
                   {inviteableRoles.map((role) => (
@@ -246,7 +248,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
               disabled={!hasChanges}
             >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Reset to class
+              {t("employees.resetToClass")}
             </Button>
           </div>
           {selectedRole ? (
@@ -261,7 +263,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Access</CardTitle>
+          <CardTitle>{t("employees.access")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {selectedRole ? (

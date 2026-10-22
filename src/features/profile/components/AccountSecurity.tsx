@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ export default function AccountSecurity({
   userId,
   onSignOut,
 }: AccountSecurityProps) {
+  const { t } = useTranslation();
   const {
     isDeleting,
     deletionProgress,
@@ -33,10 +35,10 @@ export default function AccountSecurity({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
           <Shield className="h-5 w-5" />
-          Account Security & Data
+          {t("profile.accountSecurityData")}
         </CardTitle>
         <CardDescription>
-          Manage your account security settings and permanent data deletion
+          {t("profile.manageYourAccountSecuritySettingsAndPermanentDataDeletion")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -47,12 +49,10 @@ export default function AccountSecurity({
             <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
             <div className="flex-1">
               <h4 className="font-medium text-destructive">
-                Permanent Account Deletion
+                {t("profile.permanentAccountDeletion")}
               </h4>
               <p className="text-sm text-destructive mt-1">
-                Completely remove your account and all associated data from our
-                servers. This action cannot be undone and will prevent future
-                login.
+                {t("profile.completelyRemoveYourAccountAndAllAssociatedDataFromOurServersThisActionCannotBeUndoneAndWillPreventFutureLogin")}
               </p>
 
               <AccountDeletionDialog

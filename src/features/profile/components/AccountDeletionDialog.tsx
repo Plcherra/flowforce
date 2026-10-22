@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Loader2,
   Trash2,
@@ -38,6 +39,7 @@ export default function AccountDeletionDialog({
   deletionStats,
   onDeleteAccount,
 }: AccountDeletionDialogProps) {
+  const { t } = useTranslation();
   if (isDeleting || deletionComplete) {
     return (
       <div className="mt-4 space-y-4 p-4 border rounded-lg bg-muted">
@@ -46,46 +48,51 @@ export default function AccountDeletionDialog({
             <CheckCircle className="h-12 w-12 text-success mx-auto" />
             <div>
               <h3 className="text-lg font-semibold text-success">
-                Account Deleted Successfully
+                {t("profile.accountDeletedSuccessfully")}
               </h3>
               <p className="text-sm text-success mt-2">
-                Your account and all associated data have been permanently
-                removed from our servers.
+                {t("profile.yourAccountAndAllAssociatedDataHaveBeenPermanentlyRemovedFromOurServers")}
               </p>
               {deletionStats && (
                 <div className="mt-3 p-3 bg-success-muted border border-success/40 rounded text-xs text-success space-y-1">
                   <div className="font-medium flex items-center justify-center gap-2">
                     <Database className="h-3 w-3" />
-                    Comprehensive Deletion Summary
+                    {t("profile.comprehensiveDeletionSummary")}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-left">
                     <div className="flex items-center gap-1">
                       <Shield className="h-3 w-3" />
-                      Records deleted: {deletionStats.totalRecordsDeleted}
+                      {t("profile.recordsDeleted", {
+                        count: deletionStats.totalRecordsDeleted,
+                      })}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      Completed in:{" "}
-                      {Math.round(deletionStats.executionTimeMs / 1000)}s
+                      {t("profile.completedIn", {
+                        seconds: Math.round(deletionStats.executionTimeMs / 1000),
+                      })}
                     </div>
                     <div className="col-span-2">
-                      Tables processed:{" "}
-                      {deletionStats.deletedTables?.length || 0}
+                      {t("profile.tablesProcessed", {
+                        count: deletionStats.deletedTables?.length || 0,
+                      })}
                     </div>
                     {deletionStats.errors &&
                       deletionStats.errors.length > 0 && (
                         <div className="col-span-2 text-warning-foreground">
-                          Warnings: {deletionStats.errors.length} issues noted
+                          {t("profile.warningsNoted", {
+                            count: deletionStats.errors.length,
+                          })}
                         </div>
                       )}
                   </div>
                   <div className="text-center mt-2 pt-2 border-t border-success/40">
-                    ✅ Authentication permanently revoked
+                    {t("profile.authenticationPermanentlyRevoked")}
                   </div>
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-3">
-                You will be redirected to the sign-in page shortly...
+                {t("profile.youWillBeRedirectedToTheSignInPageShortly")}
               </p>
             </div>
           </div>
@@ -101,12 +108,16 @@ export default function AccountDeletionDialog({
             <div className="text-xs text-muted-foreground space-y-1">
               <p className="flex items-center">
                 <AlertTriangle className="h-3 w-3 mr-1" />
-                Bulletproof deletion in progress - cannot be interrupted
+                {t("profile.bulletproofDeletionInProgressCannotBeInterrupted")}
               </p>
-              <p>Progress: {Math.round(deletionProgress)}% complete</p>
+              <p>
+                {t("profile.progressComplete", {
+                  percent: Math.round(deletionProgress),
+                })}
+              </p>
               {deletionProgress > 80 && (
                 <p className="text-destructive font-medium">
-                  🔒 Final deletion phase - point of no return reached
+                  {t("profile.finalDeletionPhasePointOfNoReturnReached")}
                 </p>
               )}
             </div>
@@ -122,51 +133,49 @@ export default function AccountDeletionDialog({
         <AlertDialogTrigger asChild>
           <Button variant="destructive" size="sm" disabled={isDeleting}>
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Account Permanently
+            {t("profile.deleteAccountPermanently")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              Bulletproof Account Deletion
+              {t("profile.bulletproofAccountDeletion")}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <div className="p-3 bg-destructive/10 border border-destructive/40 rounded">
                   <p className="text-sm font-medium text-destructive mb-2">
-                    🚨 This enhanced deletion process is IRREVERSIBLE and will:
+                    {t("profile.thisEnhancedDeletionProcessIsIrreversibleAndWill")}
                   </p>
                   <ul className="text-xs space-y-1 pl-2">
-                    <li>• Scan and delete from 25+ database tables</li>
-                    <li>• Remove ALL personal and business data</li>
-                    <li>• Transfer or delete company ownership</li>
-                    <li>• Cascade through all foreign key relationships</li>
-                    <li>• Revoke authentication and all sessions</li>
-                    <li>• Complete comprehensive data verification</li>
+                    <li>{t("profile.scanAndDeleteFrom25DatabaseTables")}</li>
+                    <li>{t("profile.removeAllPersonalAndBusinessData")}</li>
+                    <li>{t("profile.transferOrDeleteCompanyOwnership")}</li>
+                    <li>{t("profile.cascadeThroughAllForeignKeyRelationships")}</li>
+                    <li>{t("profile.revokeAuthenticationAndAllSessions")}</li>
+                    <li>{t("profile.completeComprehensiveDataVerification")}</li>
                   </ul>
                 </div>
 
                 <div className="p-3 bg-primary/10 border border-primary/40 rounded">
                   <p className="text-xs text-primary">
-                    <strong>✨ Enhanced Security Features:</strong>
+                    <strong>{t("profile.enhancedSecurityFeatures")}</strong>
                     <br />
-                    • Atomic transaction processing
+                    {t("profile.atomicTransactionProcessing")}
                     <br />
-                    • Foreign key CASCADE optimization
+                    {t("profile.foreignKeyCascadeOptimization")}
                     <br />
-                    • Real-time deletion progress tracking
+                    {t("profile.realTimeDeletionProgressTracking")}
                     <br />
-                    • Comprehensive verification system
+                    {t("profile.comprehensiveVerificationSystem")}
                     <br />• Optimized for {`<1`} second completion
                   </p>
                 </div>
 
                 <div className="p-3 bg-warning-muted border border-warning/40 rounded">
                   <p className="text-xs text-warning-foreground font-medium">
-                    ⚡ This bulletproof process cannot be stopped once started
-                    and will permanently erase your digital footprint from our
-                    entire system.
+                    {t("profile.thisBulletproofProcessCannotBeStoppedOnceStartedAndWillPermanentlyEraseYourDigitalFootprintFromOurEntireSystem")}
                   </p>
                 </div>
               </div>
@@ -174,7 +183,7 @@ export default function AccountDeletionDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>
-              Cancel - Keep My Account
+              {t("profile.cancelKeepMyAccount")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={onDeleteAccount}
@@ -184,12 +193,12 @@ export default function AccountDeletionDialog({
               {isDeleting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t("profile.deleting")}
                 </>
               ) : (
                 <>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Yes, Delete Everything
+                  {t("profile.yesDeleteEverything")}
                 </>
               )}
             </AlertDialogAction>

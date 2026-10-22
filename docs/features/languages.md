@@ -341,7 +341,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 17 — Employees and profile strings
 
-- [ ] Move employee and profile chrome into the six locales.
+- [x] Move employee and profile chrome into the six locales.
 
 Rules:
 
@@ -1012,6 +1012,23 @@ Phone steps for Pedro:
 2. Set your language to Deutsch on Settings, then Region. Reload. Section settings, page labels, and empty states should be in German. A section name someone typed stays as they wrote it. A path such as `/sections/` stays the same.
 3. Open the events calendar and meetings if they are in your navigation. Search boxes and empty states should follow the language. Switch to Español and check the same screens.
 4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 17 Employees and profile strings
+
+Shipped: Employee and profile chrome under `src/features/employees` and `src/features/profile` now uses `useTranslation` and the `employees` and `profile` namespaces. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Close, Save, Refresh, and Retry, stay on those keys. Sample names such as Jordan Smith, Lee, and Acme Supplies, and the sample emails, stay the same in every language. The CSV header `first_name,last_name,email,phone,class,department` stays in English because the paste format expects those column names. Names people type stay as names. Counts that sit next to a word are one phrase. Both directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3568 keys for each locale and `hard-coded strings 1223`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/employees` and `src/features/profile`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Employees (`/app/employees`).
+2. Set your language to Español on Settings, then Region. Reload. The directory title, search, department filter, tabs, and HR readiness cards should be in Spanish. A person's name stays as it was written. The sample vendor name Acme Supplies stays Acme Supplies.
+3. Open a teammate if you have one. Overview labels such as department, role, and hire date should follow the language. Switch to Deutsch and open Profile (`/app/profile`). Profile settings, the security tab, and the password form should be in German.
+4. If you can invite someone, the class, department, and send labels should follow the language. The paste hint `first_name,last_name,email,phone,class,department` stays in English.
+5. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
 

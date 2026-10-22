@@ -2,6 +2,7 @@
  * Directory pagination component
  */
 
+import { useTranslation } from "react-i18next";
 import {
   Pagination,
   PaginationContent,
@@ -41,6 +42,7 @@ export function DirectoryPagination({
   onPageChange,
   onPageSizeChange,
 }: DirectoryPaginationProps) {
+  const { t } = useTranslation();
   const paginationSequence = generatePaginationSequence(page, totalPages);
 
   return (
@@ -52,7 +54,7 @@ export function DirectoryPagination({
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Rows per page:</span>
+          <span className="text-sm text-muted-foreground">{t("employees.rowsPerPage")}</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}

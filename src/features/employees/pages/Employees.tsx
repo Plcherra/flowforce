@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { PageLoader } from "@/components/common/PageLoader";
 import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
@@ -14,6 +15,7 @@ const TeamDirectory = lazy(async () =>
 );
 
 export default function EmployeesPage() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const leadership = isLeadershipLevel({ name: profile?.role });
   const bootstrap = useCommunicationBootstrap({
@@ -24,8 +26,8 @@ export default function EmployeesPage() {
     return (
       <div className="p-6">
         <EmptyStateCard
-          title="Employee directory"
-          description="This page is for managers and above."
+          title={t("employees.employeeDirectory")}
+          description={t("employees.managersOnly")}
           icon={<Users className="h-5 w-5" />}
         />
       </div>
@@ -33,14 +35,14 @@ export default function EmployeesPage() {
   }
 
   if (!bootstrap.userReady || bootstrap.loading) {
-    return <PageLoader text="Loading employee directory..." />;
+    return <PageLoader text={t("employees.loadingEmployeeDirectory")} />;
   }
 
   if (bootstrap.error) {
     return (
       <div className="p-6">
         <Alert variant="destructive">
-          <AlertTitle>Unable to load directory</AlertTitle>
+          <AlertTitle>{t("employees.unableToLoadDirectory")}</AlertTitle>
           <AlertDescription>{bootstrap.error}</AlertDescription>
         </Alert>
       </div>
@@ -51,8 +53,8 @@ export default function EmployeesPage() {
     return (
       <div className="p-6">
         <EmptyStateCard
-          title="Waiting for your roster"
-          description="Employee tools unlock once we finish loading your organization and roster."
+          title={t("employees.waitingForYourRoster")}
+          description={t("employees.employeeToolsUnlock")}
           icon={<Users className="h-5 w-5" />}
         />
       </div>

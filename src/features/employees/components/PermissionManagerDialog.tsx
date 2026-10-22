@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -25,6 +26,7 @@ export function PermissionManagerDialog({
   open,
   onOpenChange,
 }: PermissionManagerDialogProps) {
+  const { t } = useTranslation();
   const { roles, featureKeys, isLoading, updateFlag, isUpdating } =
     usePermissionFlags();
   const { hasRole } = usePermissions();
@@ -60,19 +62,19 @@ export function PermissionManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Manage permissions</DialogTitle>
+          <DialogTitle>{t("employees.managePermissions")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Role</Label>
+            <Label>{t("messages.role")}</Label>
             <Select
               value={selectedRoleId}
               onValueChange={setSelectedRoleId}
               disabled={isLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={t("employees.selectARole")} />
               </SelectTrigger>
               <SelectContent>
                 {availableRoles.map((role) => (
@@ -86,7 +88,7 @@ export function PermissionManagerDialog({
 
           {!canManagePermissions && (
             <p className="rounded border border-warning/40 bg-warning-muted px-3 py-2 text-sm text-warning-foreground">
-              You need elevated access to modify company permissions.
+              {t("employees.youNeedElevatedAccessToModifyCompanyPermissions")}
             </p>
           )}
 

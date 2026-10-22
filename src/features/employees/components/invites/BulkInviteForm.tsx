@@ -2,6 +2,7 @@
  * Bulk invite form component
  */
 
+import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
 import { FileSpreadsheet, Copy, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export function BulkInviteForm({
   onCopyLink,
   onError,
 }: BulkInviteFormProps) {
+  const { t } = useTranslation();
   const [fileInputKey, setFileInputKey] = useState(0);
   const [pasteText, setPasteText] = useState("");
 
@@ -73,17 +75,16 @@ export function BulkInviteForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Add many</CardTitle>
+        <CardTitle>{t("employees.addMany")}</CardTitle>
         <CardDescription>
-          Paste or upload a list with first_name, last_name, email or phone,
-          class, and department. Use this when you already have a roster.
+          {t("employees.pasteOrUploadAListWithFirstNameLastNameEmailOrPhoneClassAndDepartmentUseThisWhenYouAlreadyHaveARoster")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Textarea
           value={pasteText}
           onChange={(event) => setPasteText(event.target.value)}
-          placeholder="first_name,last_name,email,phone,class,department"
+          placeholder={t("employees.firstNameLastNameEmailPhoneClassDepartment")}
           rows={5}
         />
         <div className="flex flex-wrap items-center gap-3">
@@ -100,7 +101,7 @@ export function BulkInviteForm({
             onClick={() => applyText(pasteText)}
             disabled={!pasteText.trim()}
           >
-            Review paste
+            {t("employees.reviewPaste")}
           </Button>
           <Button
             onClick={onProcess}
@@ -152,11 +153,13 @@ export function BulkInviteForm({
         {results.length > 0 && (
           <div className="space-y-3 rounded-lg border border-muted p-4">
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge variant="outline">Results</Badge>
-              <span>{bulkSummary.success} invites created</span>
+              <Badge variant="outline">{t("employees.results")}</Badge>
+              <span>
+                {t("employees.invitesCreated", { count: bulkSummary.success })}
+              </span>
               {bulkSummary.errors > 0 && (
                 <span className="text-destructive">
-                  {bulkSummary.errors} failed
+                  {t("employees.invitesFailed", { count: bulkSummary.errors })}
                 </span>
               )}
             </div>
@@ -182,10 +185,10 @@ export function BulkInviteForm({
                         onClick={() => onCopyLink(result.inviteLink ?? null)}
                       >
                         <Copy className="mr-2 h-4 w-4" />
-                        Copy link
+                        {t("employees.copyLink")}
                       </Button>
                     ) : (
-                      <Badge variant="destructive">Error</Badge>
+                      <Badge variant="destructive">{t("dashboard.error")}</Badge>
                     )}
                   </div>
                 ))}

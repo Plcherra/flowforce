@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -32,6 +33,7 @@ export function RoleManagerDialog({
   employees,
   onRoleUpdated,
 }: RoleManagerDialogProps) {
+  const { t } = useTranslation();
   const { roles, isLoading, assignRole, isAssigning } = useTeamManagement();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
@@ -67,17 +69,17 @@ export function RoleManagerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Update team roles</DialogTitle>
+          <DialogTitle>{t("employees.updateTeamRoles")}</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleAssign}>
           <div className="space-y-1.5">
-            <Label>Employee</Label>
+            <Label>{t("schedule.employee")}</Label>
             <Select
               value={selectedEmployeeId}
               onValueChange={setSelectedEmployeeId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a teammate" />
+                <SelectValue placeholder={t("employees.selectATeammate")} />
               </SelectTrigger>
               <SelectContent>
                 {employeeOptions.map((employee) => (
@@ -90,14 +92,14 @@ export function RoleManagerDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Role</Label>
+            <Label>{t("messages.role")}</Label>
             <Select
               value={selectedRoleId}
               onValueChange={setSelectedRoleId}
               disabled={isLoading && !roles.length}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Assign a role" />
+                <SelectValue placeholder={t("employees.assignARole")} />
               </SelectTrigger>
               <SelectContent>
                 {roles.map((role) => (
@@ -115,7 +117,7 @@ export function RoleManagerDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"

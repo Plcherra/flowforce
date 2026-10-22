@@ -2,6 +2,7 @@
  * Vendor table component
  */
 
+import { useTranslation } from "react-i18next";
 import { Mail, Phone, Truck } from "lucide-react";
 import {
   Table,
@@ -21,6 +22,7 @@ interface VendorTableProps {
 }
 
 export function VendorTable({ vendors, isLoading }: VendorTableProps) {
+  const { t } = useTranslation();
   if (isLoading) {
     return null; // Loading handled by parent
   }
@@ -30,10 +32,10 @@ export function VendorTable({ vendors, isLoading }: VendorTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[30%]">Company Name</TableHead>
-            <TableHead className="hidden md:table-cell">Contact</TableHead>
-            <TableHead className="hidden md:table-cell">Email</TableHead>
-            <TableHead className="hidden md:table-cell">Phone</TableHead>
+            <TableHead className="w-[30%]">{t("registration.companyInfo.name")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("employees.contact")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("auth.email")}</TableHead>
+            <TableHead className="hidden md:table-cell">{t("onboarding.userInfo.fields.phone")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -49,7 +51,7 @@ export function VendorTable({ vendors, isLoading }: VendorTableProps) {
                   <div className="min-w-0">
                     <div className="font-medium truncate">{vendor.name}</div>
                     <div className="text-xs text-muted-foreground truncate">
-                      Vendor
+                      {t("schedule.vendor")}
                     </div>
                   </div>
                 </div>
@@ -73,7 +75,7 @@ export function VendorTable({ vendors, isLoading }: VendorTableProps) {
           ))}
         </TableBody>
         {vendors.length === 0 && (
-          <TableCaption>No vendors match your filters.</TableCaption>
+          <TableCaption>{t("employees.noVendorsMatchYourFilters")}</TableCaption>
         )}
       </Table>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ export function InvitePersonCardForm({
   onChange: (card: InvitePersonCard) => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslation();
   const selectedClass = classes.find((role) => role.id === card.roleId);
   const level: ProductLevel = selectedClass
     ? resolveProductLevel(selectedClass)
@@ -82,7 +84,9 @@ export function InvitePersonCardForm({
     <Card>
       <CardContent className="space-y-4 p-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium">Person {index + 1}</p>
+          <p className="text-sm font-medium">
+            {t("employees.personNumber", { number: index + 1 })}
+          </p>
           {canRemove ? (
             <Button
               type="button"
@@ -92,39 +96,39 @@ export function InvitePersonCardForm({
               onClick={onRemove}
             >
               <Trash2 className="mr-1 h-4 w-4" />
-              Remove
+              {t("forms.remove")}
             </Button>
           ) : null}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor={`${card.id}-first`}>First name</Label>
+            <Label htmlFor={`${card.id}-first`}>{t("employees.firstName")}</Label>
             <Input
               id={`${card.id}-first`}
               value={card.firstName}
               onChange={(event) =>
                 onChange({ ...card, firstName: event.target.value })
               }
-              placeholder="Jordan"
+              placeholder={t("employees.jordan")}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor={`${card.id}-last`}>Last name</Label>
+            <Label htmlFor={`${card.id}-last`}>{t("employees.lastName")}</Label>
             <Input
               id={`${card.id}-last`}
               value={card.lastName}
               onChange={(event) =>
                 onChange({ ...card, lastName: event.target.value })
               }
-              placeholder="Lee"
+              placeholder={t("employees.lee")}
             />
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor={`${card.id}-email`}>Email</Label>
+            <Label htmlFor={`${card.id}-email`}>{t("auth.email")}</Label>
             <Input
               id={`${card.id}-email`}
               type="email"
@@ -132,11 +136,11 @@ export function InvitePersonCardForm({
               onChange={(event) =>
                 onChange({ ...card, email: event.target.value })
               }
-              placeholder="jordan@example.com"
+              placeholder={t("employees.jordanExampleCom")}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor={`${card.id}-phone`}>Phone</Label>
+            <Label htmlFor={`${card.id}-phone`}>{t("onboarding.userInfo.fields.phone")}</Label>
             <Input
               id={`${card.id}-phone`}
               value={card.phone}
@@ -150,7 +154,7 @@ export function InvitePersonCardForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Class</Label>
+            <Label>{t("employees.class")}</Label>
             <Select
               value={card.roleId}
               onValueChange={(value) => {
@@ -169,7 +173,7 @@ export function InvitePersonCardForm({
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a class" />
+                <SelectValue placeholder={t("employees.chooseAClass")} />
               </SelectTrigger>
               <SelectContent>
                 {classes.map((role) => (
@@ -182,7 +186,7 @@ export function InvitePersonCardForm({
           </div>
           {showLocations ? (
             <div className="space-y-1.5">
-              <Label>Location</Label>
+              <Label>{t("forms.location")}</Label>
               <Select
                 value={card.locationId}
                 onValueChange={(value) =>
@@ -190,7 +194,7 @@ export function InvitePersonCardForm({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a location" />
+                  <SelectValue placeholder={t("employees.chooseALocation")} />
                 </SelectTrigger>
                 <SelectContent>
                   {locations.map((location) => (
@@ -204,7 +208,7 @@ export function InvitePersonCardForm({
           ) : null}
           {showDepartments ? (
             <div className="space-y-1.5">
-              <Label>Department</Label>
+              <Label>{t("messages.department")}</Label>
               <Select
                 value={card.departmentId}
                 onValueChange={(value) =>
@@ -212,7 +216,7 @@ export function InvitePersonCardForm({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a department" />
+                  <SelectValue placeholder={t("employees.chooseADepartment")} />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((department) => (

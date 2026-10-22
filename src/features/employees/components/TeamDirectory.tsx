@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   lazy,
   Suspense,
@@ -45,6 +46,7 @@ import { HrReadinessPanel } from "./HrReadinessPanel";
 import type { EmployeesTab } from "../types/directory";
 
 export function TeamDirectory() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { profile: currentUserProfile, loading: profileLoading } = useProfile();
   const companyId =
@@ -168,7 +170,7 @@ export function TeamDirectory() {
         message:
           error instanceof Error
             ? error.message
-            : "Unable to create vendor. Please try again.",
+            : t("employees.unableToCreateVendor"),
       });
     }
   };
@@ -188,18 +190,18 @@ export function TeamDirectory() {
     try {
       return JSON.stringify(errorValue);
     } catch {
-      return "We couldn’t load your team directory data. Please try again.";
+      return t("employees.unableToLoadTeamDirectory");
     }
-  }, [combinedError]);
+  }, [combinedError, t]);
   const vendorErrorMessage = useMemo(() => {
     if (!companyId && !profileLoading) {
-      return "Connect your profile to a company to see vendor records.";
+      return t("employees.connectProfileForVendors");
     }
     if (!vendorsError) return null;
     if (vendorsError instanceof Error) return vendorsError.message;
     if (typeof vendorsError === "string") return vendorsError;
-    return "We couldn’t load vendor data. Try refreshing once Supabase is back online.";
-  }, [companyId, profileLoading, vendorsError]);
+    return t("employees.unableToLoadVendorRefresh");
+  }, [companyId, profileLoading, vendorsError, t]);
   const showEmptyState = !loading && !combinedError && employees.length === 0;
   const showEmployeeFilterEmptyState =
     !loading &&
@@ -249,10 +251,10 @@ export function TeamDirectory() {
             <h1
               className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold text-foreground`}
             >
-              Team Directory
+              {t("sections.teamDirectory")}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Browse, filter and export your company roster
+              {t("employees.browseFilterAndExportYourCompanyRoster")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -293,7 +295,7 @@ export function TeamDirectory() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
               <div className="space-y-1">
-                <AlertTitle>Live data unavailable</AlertTitle>
+                <AlertTitle>{t("employees.liveDataUnavailable")}</AlertTitle>
                 <AlertDescription>{combinedErrorMessage}</AlertDescription>
               </div>
             </div>
@@ -304,14 +306,14 @@ export function TeamDirectory() {
           <EmptyStateCard
             data-testid="employees-empty-state"
             icon={<Users className="h-6 w-6" />}
-            title="No team members yet"
-            description="Invite your first teammate to unlock the full directory experience."
+            title={t("employees.noTeamMembersYet")}
+            description={t("employees.inviteFirstTeammate")}
             action={
               <Button
                 onClick={() => handleInviteChange(true)}
                 className="self-center sm:self-auto"
               >
-                Invite teammates
+                {t("employees.inviteTeammates")}
               </Button>
             }
           />
@@ -325,15 +327,17 @@ export function TeamDirectory() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <TabsList>
                   <TabsTrigger value="all">
-                    All ({employees.length})
+                    {t("employees.allCount", { count: employees.length })}
                   </TabsTrigger>
                   <TabsTrigger value="managers">
-                    Leads ({leaderCount})
+                    {t("employees.leadsCount", { count: leaderCount })}
                   </TabsTrigger>
                   <TabsTrigger value="inactive">
-                    Inactive ({inactiveEmployeesCount})
+                    {t("employees.inactiveCount", {
+                      count: inactiveEmployeesCount,
+                    })}
                   </TabsTrigger>
-                  <TabsTrigger value="vendors">Vendors</TabsTrigger>
+                  <TabsTrigger value="vendors">{t("employees.vendors")}</TabsTrigger>
                 </TabsList>
 
                 <DirectoryFilters
@@ -357,10 +361,10 @@ export function TeamDirectory() {
                       <div className="flex items-start gap-3">
                         <AlertTriangle className="h-5 w-5 flex-shrink-0 text-destructive" />
                         <div className="space-y-1">
-                          <AlertTitle>Vendor data unavailable</AlertTitle>
+                          <AlertTitle>{t("employees.vendorDataUnavailable")}</AlertTitle>
                           <AlertDescription>
                             {vendorErrorMessage ??
-                              "Unable to load vendor data"}
+                              t("employees.unableToLoadVendorData")}
                           </AlertDescription>
                         </div>
                       </div>
@@ -370,11 +374,11 @@ export function TeamDirectory() {
                   ) : showVendorEmptyState ? (
                     <EmptyStateCard
                       icon={<SearchX className="h-5 w-5" />}
-                      title="No vendors found"
+                      title={t("employees.noVendorsFound")}
                       description={
                         searchTerm
-                          ? "No vendors match the current search. Clear the search or add a vendor."
-                          : "Add vendors to keep purchasing contacts available from the team directory."
+                          ? t("employees.noVendorsMatchSearch")
+                          : t("employees.addVendorsHint")
                       }
                       action={
                         canManageEmployees ? (
@@ -382,7 +386,7 @@ export function TeamDirectory() {
                             type="button"
                             onClick={() => setShowAddVendorDialog(true)}
                           >
-                            Add vendor
+                            {t("employees.addVendor2")}
                           </Button>
                         ) : undefined
                       }
@@ -398,8 +402,8 @@ export function TeamDirectory() {
                 ) : showEmployeeFilterEmptyState ? (
                   <EmptyStateCard
                     icon={<SearchX className="h-5 w-5" />}
-                    title="No teammates match these filters"
-                    description="Try a different search, status tab, or department filter."
+                    title={t("employees.noTeammatesMatchTheseFilters")}
+                    description={t("employees.tryDifferentSearch")}
                     action={
                       <Button
                         type="button"
@@ -410,7 +414,7 @@ export function TeamDirectory() {
                           setActiveTab("all");
                         }}
                       >
-                        Clear filters
+                        {t("tasks.clearFilters")}
                       </Button>
                     }
                   />
@@ -447,7 +451,7 @@ export function TeamDirectory() {
         {/* Summary Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Team Snapshot</CardTitle>
+            <CardTitle>{t("employees.teamSnapshot")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div
@@ -457,25 +461,25 @@ export function TeamDirectory() {
                 <div className="text-2xl font-bold text-primary">
                   {employees.length}
                 </div>
-                <div className="text-sm text-muted-foreground">People</div>
+                <div className="text-sm text-muted-foreground">{t("schedule.people")}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-success">
                   {activeEmployeesCount}
                 </div>
-                <div className="text-sm text-muted-foreground">Active</div>
+                <div className="text-sm text-muted-foreground">{t("sections.active")}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-warning">
                   {leaderCount}
                 </div>
-                <div className="text-sm text-muted-foreground">Leads</div>
+                <div className="text-sm text-muted-foreground">{t("employees.leads")}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-secondary">
                   {departments.length}
                 </div>
-                <div className="text-sm text-muted-foreground">Departments</div>
+                <div className="text-sm text-muted-foreground">{t("updates.departments")}</div>
               </div>
             </div>
           </CardContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ interface AccessControlPanelProps {
 }
 
 export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
+  const { t } = useTranslation();
   const canManage = usePermission("manage_roles");
   const { data, isLoading, isError, error, refetch } =
     useEmployeeAccess(employeeId);
@@ -55,15 +57,14 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            Access Overview
+            {t("employees.accessOverview")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            This team member does not have any roles assigned yet. Assign a role
-            to grant system access.
+            {t("employees.thisTeamMemberDoesNotHaveAnyRolesAssignedYetAssignARoleToGrantSystemAccess")}
           </p>
-          {canManage && <Button onClick={() => refetch()}>Refresh</Button>}
+          {canManage && <Button onClick={() => refetch()}>{t("common.refresh")}</Button>}
         </CardContent>
       </Card>
     );
@@ -75,7 +76,7 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            Access Overview
+            {t("employees.accessOverview")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -92,7 +93,7 @@ export function AccessControlPanel({ employeeId }: AccessControlPanelProps) {
       {canManage && (
         <div className="flex justify-end">
           <Button type="button" variant="outline">
-            Edit Access
+            {t("employees.editAccess")}
           </Button>
         </div>
       )}
@@ -167,6 +168,7 @@ function AccessCard({
   title: string;
   permissions: string[];
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="border border-muted/30">
       <CardHeader className="pb-2">
@@ -183,7 +185,7 @@ function AccessCard({
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No individual permissions defined for this role.
+            {t("employees.noIndividualPermissionsDefinedForThisRole")}
           </p>
         )}
       </CardContent>

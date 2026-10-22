@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Mail,
   Phone,
@@ -18,6 +19,7 @@ interface UserOverviewTabProps {
 }
 
 export function UserOverviewTab({ user }: UserOverviewTabProps) {
+  const { t } = useTranslation();
   const displayName =
     `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
     user.email ||
@@ -60,7 +62,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Contact Information
+            {t("employees.contactInformation")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -68,7 +70,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Email</p>
+                <p className="text-sm font-medium">{t("auth.email")}</p>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
@@ -76,7 +78,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Phone</p>
+                <p className="text-sm font-medium">{t("onboarding.userInfo.fields.phone")}</p>
                 <p className="text-sm text-muted-foreground">
                   {user.phone || "Not provided"}
                 </p>
@@ -86,7 +88,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div className="flex items-center gap-3">
               <IdCard className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Employee ID</p>
+                <p className="text-sm font-medium">{t("dashboard.profile.employeeId")}</p>
                 <p className="text-sm text-muted-foreground">
                   {user.employee_id || "Not assigned"}
                 </p>
@@ -96,7 +98,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Birth Date</p>
+                <p className="text-sm font-medium">{t("employees.birthDate")}</p>
                 <p className="text-sm text-muted-foreground">
                   {user.birth_date
                     ? formatDate(user.birth_date)
@@ -112,7 +114,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Address</p>
+                  <p className="text-sm font-medium">{t("employees.address")}</p>
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {typeof user.address === "string"
                       ? user.address
@@ -130,20 +132,20 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Employment Details
+            {t("employees.employmentDetails")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-medium">Role</p>
+              <p className="text-sm font-medium">{t("messages.role")}</p>
               <Badge variant="outline" className="mt-1 capitalize">
                 {user.role ?? "Unassigned"}
               </Badge>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Employment Status</p>
+              <p className="text-sm font-medium">{t("dashboard.profile.employmentStatus")}</p>
               <Badge
                 variant={
                   user.employment_status === "active" ? "default" : "secondary"
@@ -155,14 +157,14 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             </div>
 
             <div>
-              <p className="text-sm font-medium">Hire Date</p>
+              <p className="text-sm font-medium">{t("dashboard.profile.hireDate")}</p>
               <p className="text-sm text-muted-foreground">
                 {formatDate(user.hire_date)}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Department</p>
+              <p className="text-sm font-medium">{t("messages.department")}</p>
               <p className="text-sm text-muted-foreground">
                 {departmentName}
               </p>
@@ -173,13 +175,13 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <p className="text-sm font-medium">Skill Level</p>
+              <p className="text-sm font-medium">{t("employees.skillLevel")}</p>
               <p className="text-sm text-muted-foreground">
                 {user.skillLevel ? `Level ${user.skillLevel}` : "Not assessed"}
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium">Certifications</p>
+              <p className="text-sm font-medium">{t("common.certifications")}</p>
               <p className="text-sm text-muted-foreground">
                 {user.badges?.length
                   ? `${user.badges.length} on file`
@@ -187,7 +189,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium">Reliability</p>
+              <p className="text-sm font-medium">{t("employees.reliability")}</p>
               <p className="text-sm text-muted-foreground">
                 {typeof user.reliability === "number"
                   ? `${user.reliability}%`
@@ -200,7 +202,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <>
               <Separator />
               <div>
-                <p className="text-sm font-medium mb-2">Emergency Contact</p>
+                <p className="text-sm font-medium mb-2">{t("employees.emergencyContact")}</p>
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {typeof user.emergency_contact === "string"
                     ? user.emergency_contact
@@ -215,26 +217,26 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
       {/* Activity Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Account Activity</CardTitle>
+          <CardTitle>{t("employees.accountActivity")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Created</span>
+            <span className="text-sm font-medium">{t("forms.created")}</span>
             <span className="text-sm text-muted-foreground">
               {formatDate(user.created_at)}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Last Updated</span>
+            <span className="text-sm font-medium">{t("employees.lastUpdated")}</span>
             <span className="text-sm text-muted-foreground">
               {getTimeAgo(user.updated_at)}
             </span>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Last Login</span>
-            <span className="text-sm text-muted-foreground">Not tracked</span>
+            <span className="text-sm font-medium">{t("employees.lastLogin")}</span>
+            <span className="text-sm text-muted-foreground">{t("employees.notTracked")}</span>
           </div>
         </CardContent>
       </Card>

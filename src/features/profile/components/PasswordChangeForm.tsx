@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { FormEvent, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { getPasswordStrengthColor } from "@/utils/passwordValidation";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function PasswordChangeForm() {
+  const { t } = useTranslation();
   const { updatePassword } = useAuth();
   const { validationResult, validatePassword, hasErrors } =
     usePasswordValidation();
@@ -64,16 +66,16 @@ export default function PasswordChangeForm() {
       <div className="flex items-center gap-2">
         <Lock className="h-5 w-5 text-primary" />
         <div>
-          <h3 className="text-lg font-semibold">Change Password</h3>
+          <h3 className="text-lg font-semibold">{t("profile.changePassword")}</h3>
           <p className="text-sm text-muted-foreground">
-            Choose a strong password to keep your account secure.
+            {t("profile.chooseAStrongPasswordToKeepYourAccountSecure")}
           </p>
         </div>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="new-password">New Password</Label>
+          <Label htmlFor="new-password">{t("auth.newPassword")}</Label>
           <Input
             id="new-password"
             type="password"
@@ -83,7 +85,7 @@ export default function PasswordChangeForm() {
               if (!passwordTouched) setPasswordTouched(true);
               validatePassword(event.target.value);
             }}
-            placeholder="Enter a new password"
+            placeholder={t("profile.enterANewPassword")}
             autoComplete="new-password"
           />
           {strengthLabel && (
@@ -106,13 +108,13 @@ export default function PasswordChangeForm() {
           {!hasErrors && newPassword && (
             <p className="flex items-center gap-1 text-xs text-success">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Looks good! Your password meets all requirements.
+              {t("profile.looksGoodYourPasswordMeetsAllRequirements")}
             </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirm-password">Confirm Password</Label>
+          <Label htmlFor="confirm-password">{t("registration.userInfo.confirmPassword")}</Label>
           <Input
             id="confirm-password"
             type="password"
@@ -121,20 +123,20 @@ export default function PasswordChangeForm() {
               setConfirmPassword(event.target.value);
               if (!confirmTouched) setConfirmTouched(true);
             }}
-            placeholder="Confirm your new password"
+            placeholder={t("profile.confirmYourNewPassword")}
             autoComplete="new-password"
           />
           {!passwordsMatch && (
             <p className="flex items-center gap-1 text-xs text-destructive">
               <AlertCircle className="h-3.5 w-3.5" />
-              Passwords do not match. Please re-enter them.
+              {t("profile.passwordsDoNotMatchPleaseReEnterThem")}
             </p>
           )}
         </div>
 
         <div className="flex justify-end">
           <Button type="submit" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Updating..." : "Update Password"}
+            {isSubmitting ? t("profile.updating") : t("profile.updatePassword")}
           </Button>
         </div>
       </form>

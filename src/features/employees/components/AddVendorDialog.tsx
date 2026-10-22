@@ -2,6 +2,7 @@
  * Add vendor dialog component
  */
 
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,7 @@ export function AddVendorDialog({
   onReset,
   isMobile,
 }: AddVendorDialogProps) {
+  const { t } = useTranslation();
   const handleOpenChange = (value: boolean) => {
     onOpenChange(value);
     if (!value) {
@@ -53,12 +55,12 @@ export function AddVendorDialog({
       <DialogTrigger asChild>
         <Button size={isMobile ? "sm" : "default"}>
           <Truck className="mr-2 h-4 w-4" />
-          {isMobile ? "Add" : "Add Vendor"}
+          {isMobile ? t("employees.addShort") : t("employees.addVendor")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Vendor</DialogTitle>
+          <DialogTitle>{t("employees.addNewVendor")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -67,11 +69,11 @@ export function AddVendorDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Company Name *</FormLabel>
+                  <FormLabel>{t("auth.companyName")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Acme Supplies"
+                      placeholder={t("employees.acmeSupplies")}
                       autoComplete="organization"
                     />
                   </FormControl>
@@ -84,11 +86,11 @@ export function AddVendorDialog({
               name="contact_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Name</FormLabel>
+                  <FormLabel>{t("employees.contactName")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Jordan Smith"
+                      placeholder={t("employees.jordanSmith")}
                       autoComplete="name"
                     />
                   </FormControl>
@@ -102,12 +104,12 @@ export function AddVendorDialog({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("auth.email")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="email"
-                        placeholder="orders@example.com"
+                        placeholder={t("employees.ordersExampleCom")}
                         autoComplete="email"
                       />
                     </FormControl>
@@ -120,7 +122,7 @@ export function AddVendorDialog({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
+                    <FormLabel>{t("onboarding.userInfo.fields.phone")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -138,12 +140,12 @@ export function AddVendorDialog({
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>{t("employees.address")}</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
                       rows={2}
-                      placeholder="123 Main St, Springfield"
+                      placeholder={t("employees.n123MainStSpringfield")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -155,12 +157,12 @@ export function AddVendorDialog({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
+                  <FormLabel>{t("schedule.notes")}</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
                       rows={2}
-                      placeholder="Preferred delivery window, payment terms, etc."
+                      placeholder={t("employees.preferredDeliveryWindowPaymentTermsEtc")}
                     />
                   </FormControl>
                   <FormMessage />
@@ -173,9 +175,9 @@ export function AddVendorDialog({
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
-              <Button type="submit">Add Vendor</Button>
+              <Button type="submit">{t("employees.addVendor")}</Button>
             </div>
           </form>
         </Form>

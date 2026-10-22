@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,16 +16,16 @@ import {
 import { taskCreateLevelFromDiffs } from "@/features/tasks/utils/taskCreateAccess";
 import type { TaskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 
-const KIND_LABELS: Record<TaskCreateKind, string> = {
-  shift: "Shift",
-  checklist: "Checklist",
-  custom: "Custom",
+const KIND_KEYS: Record<TaskCreateKind, string> = {
+  shift: "employees.taskKindShift",
+  checklist: "employees.taskKindChecklist",
+  custom: "common.custom",
 };
 
-const LEVELS: Array<{ value: TaskCreateLevel; label: string }> = [
-  { value: "none", label: "None" },
-  { value: "self", label: "For myself" },
-  { value: "others", label: "For others" },
+const LEVELS: Array<{ value: TaskCreateLevel; labelKey: string }> = [
+  { value: "none", labelKey: "employees.accessNone" },
+  { value: "self", labelKey: "employees.forMyself" },
+  { value: "others", labelKey: "employees.forOthers" },
 ];
 
 interface TaskCreateAccessSectionProps {
@@ -40,12 +41,13 @@ export function TaskCreateAccessSection({
   disabled,
   onChange,
 }: TaskCreateAccessSectionProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3" data-testid="employee-task-create-access">
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold">Tasks</h3>
+        <h3 className="text-sm font-semibold">{t("common.tasks")}</h3>
         <p className="text-sm text-muted-foreground">
-          For each type, this person can create for others, for themselves, or not at all.
+          {t("employees.forEachTypeThisPersonCanCreateForOthersForThemselvesOrNotAtAll")}
         </p>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
@@ -53,7 +55,7 @@ export function TaskCreateAccessSection({
           const level = taskCreateLevelFromDiffs(classPermissions, diffs, kind);
           return (
             <div key={kind} className="space-y-1.5">
-              <Label htmlFor={`task-create-${kind}`}>{KIND_LABELS[kind]}</Label>
+              <Label htmlFor={`task-create-${kind}`}>{t(KIND_KEYS[kind])}</Label>
               <Select
                 value={level}
                 onValueChange={(value) => onChange(kind, value as TaskCreateLevel)}
@@ -65,7 +67,7 @@ export function TaskCreateAccessSection({
                 <SelectContent>
                   {LEVELS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                      {t(option.labelKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>

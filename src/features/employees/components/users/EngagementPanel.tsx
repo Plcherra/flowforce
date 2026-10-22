@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { RotateCcw, Award } from "lucide-react";
 import {
   Card,
@@ -40,6 +41,7 @@ export function EngagementPanel({
   role,
   displayName,
 }: EngagementPanelProps) {
+  const { t } = useTranslation();
   const engagementFeatureEnabled = useFeatureFlag(
     "operations.engagementMetrics",
   );
@@ -66,10 +68,9 @@ export function EngagementPanel({
 
   const renderDisabledState = () => (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <p>Engagement metrics are currently disabled for this workspace.</p>
+      <p>{t("employees.engagementMetricsAreCurrentlyDisabledForThisWorkspace")}</p>
       <p className="text-xs text-muted-foreground">
-        Turn on the engagement metrics feature to start tracking progress.
-        Existing activity will backfill automatically once enabled.
+        {t("employees.turnOnTheEngagementMetricsFeatureToStartTrackingProgressExistingActivityWillBackfillAutomaticallyOnceEnabled")}
       </p>
       <div className="rounded-lg border border-dashed border-primary/20 bg-primary/5 px-4 py-3 text-primary">
         {milestoneTip}
@@ -94,7 +95,9 @@ export function EngagementPanel({
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium text-muted-foreground">
-            XP Progress · {role ?? "role"}
+            {t("employees.xpProgress", {
+              role: role ?? t("employees.roleFallback"),
+            })}
           </span>
           <span className="text-muted-foreground">
             {snapshot.xpIntoLevel} / {snapshot.xpNeededForNextLevel} XP
@@ -102,8 +105,10 @@ export function EngagementPanel({
         </div>
         <Progress value={progressValue} className="h-2" />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Total XP: {snapshot.xp}</span>
-          <span>Next milestone: L{snapshot.nextLevel}</span>
+          <span>{t("employees.totalXp", { xp: snapshot.xp })}</span>
+          <span>
+            {t("employees.nextMilestone", { level: snapshot.nextLevel })}
+          </span>
         </div>
       </section>
 
@@ -113,7 +118,7 @@ export function EngagementPanel({
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Earned badges</span>
+          <span className="text-sm font-medium">{t("employees.earnedBadges")}</span>
           <Badge variant="outline" className="text-xs">
             {badges.length}
           </Badge>
@@ -121,7 +126,7 @@ export function EngagementPanel({
 
         {badges.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No badges yet. Keep going to earn your first badge!
+            {t("employees.noBadgesYetKeepGoingToEarnYourFirstBadge")}
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -178,7 +183,7 @@ export function EngagementPanel({
     <Card className="border-primary/20 shadow-sm">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
-          <CardTitle className="text-lg">Engagement</CardTitle>
+          <CardTitle className="text-lg">{t("updates.engagement2")}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -195,7 +200,7 @@ export function EngagementPanel({
             className="h-8 w-8"
             onClick={refresh}
             disabled={loading || !engagementFeatureEnabled}
-            aria-label="Refresh engagement data"
+            aria-label={t("employees.refreshEngagementData")}
           >
             <RotateCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </Button>

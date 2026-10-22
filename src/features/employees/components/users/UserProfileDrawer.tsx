@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { User, Shield, FileText, Crown, Users } from "lucide-react";
 import {
@@ -40,6 +41,7 @@ export function UserProfileDrawer({
   open,
   onOpenChange,
 }: UserProfileDrawerProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const auditEnabled = useFeatureFlag("admin.auditLogs");
 
@@ -138,7 +140,7 @@ export function UserProfileDrawer({
               </div>
               <DrawerClose asChild>
                 <Button variant="outline" size="sm">
-                  Close
+                  {t("common.close")}
                 </Button>
               </DrawerClose>
             </div>
@@ -158,14 +160,14 @@ export function UserProfileDrawer({
                   className="flex items-center gap-2"
                 >
                   <User className="h-4 w-4" />
-                  Profile
+                  {t("common.profile")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="permissions"
                   className="flex items-center gap-2"
                 >
                   <Shield className="h-4 w-4" />
-                  Access
+                  {t("employees.access")}
                 </TabsTrigger>
                 {auditEnabled && (
                   <TabsTrigger
@@ -173,7 +175,7 @@ export function UserProfileDrawer({
                     className="flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4" />
-                    Activity
+                    {t("employees.activity")}
                   </TabsTrigger>
                 )}
               </TabsList>

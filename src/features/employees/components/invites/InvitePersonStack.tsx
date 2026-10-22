@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,7 @@ export function InvitePersonStack({
   onSuccess?: (inviteLink: string | null) => void;
   hideIntro?: boolean;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const {
@@ -108,10 +110,9 @@ export function InvitePersonStack({
     <div className="space-y-4">
       {hideIntro ? null : (
         <div>
-          <h3 className="text-lg font-semibold">Invite teammates</h3>
+          <h3 className="text-lg font-semibold">{t("employees.inviteTeammates")}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pick a class. The boxes paint. Give or take only what you can
-            grant.
+            {t("employees.pickAClassTheBoxesPaintGiveOrTakeOnlyWhatYouCanGrant")}
           </p>
         </div>
       )}
@@ -149,7 +150,7 @@ export function InvitePersonStack({
           disabled={isLoading}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add another
+          {t("employees.addAnother")}
         </Button>
         <Button
           type="button"

@@ -2,6 +2,7 @@
  * Directory filters component
  */
 
+import { useTranslation } from "react-i18next";
 import { Search, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +31,7 @@ export function DirectoryFilters({
   onDepartmentChange,
   isMobile,
 }: DirectoryFiltersProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={
@@ -46,7 +48,7 @@ export function DirectoryFilters({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search employees..."
+            placeholder={t("schedule.searchEmployees")}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
@@ -58,10 +60,10 @@ export function DirectoryFilters({
         <Building2 className="h-4 w-4 text-muted-foreground" />
         <Select value={departmentFilter} onValueChange={onDepartmentChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Department" />
+            <SelectValue placeholder={t("messages.department")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Departments</SelectItem>
+            <SelectItem value="all">{t("employees.allDepartments")}</SelectItem>
             {departments.map((d) => (
               <SelectItem key={d.id} value={d.id}>
                 {d.name}

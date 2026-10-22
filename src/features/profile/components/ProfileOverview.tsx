@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +33,7 @@ export default function ProfileOverview({
   profile,
   userEmail,
 }: ProfileOverviewProps) {
+  const { t } = useTranslation();
   return (
     <Card className="lg:col-span-1">
       <CardHeader className="text-center">
@@ -56,15 +58,20 @@ export default function ProfileOverview({
       <CardContent className="space-y-3">
         <div className="flex items-center space-x-2 text-sm">
           <Building2 className="h-4 w-4 text-muted-foreground" />
-          <span>Employee ID: {profile?.employee_id || "N/A"}</span>
+          <span>
+            {t("employees.employeeIdLine", {
+              id: profile?.employee_id || t("dashboard.notAvailable"),
+            })}
+          </span>
         </div>
         <div className="flex items-center space-x-2 text-sm">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span>
-            Hired:{" "}
-            {profile?.hire_date
-              ? new Date(profile.hire_date).toLocaleDateString()
-              : "Not set"}
+            {t("employees.hiredOn", {
+              date: profile?.hire_date
+                ? new Date(profile.hire_date).toLocaleDateString()
+                : t("dashboard.profile.notSet"),
+            })}
           </span>
         </div>
       </CardContent>

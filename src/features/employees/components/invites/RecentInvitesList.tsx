@@ -2,6 +2,7 @@
  * Recent invites list component
  */
 
+import { useTranslation } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
 import { Mail, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,10 +21,11 @@ interface RecentInvitesListProps {
 }
 
 function RefreshIcon({ spinning }: { spinning: boolean }) {
+  const { t } = useTranslation();
   return (
     <span className="flex items-center gap-1">
       <Loader2 className={`h-3.5 w-3.5 ${spinning ? "animate-spin" : ""}`} />
-      Refresh
+      {t("common.refresh")}
     </span>
   );
 }
@@ -35,13 +37,14 @@ export function RecentInvitesList({
   onRefresh,
   onCopyLink,
 }: RecentInvitesListProps) {
+  const { t } = useTranslation();
   return (
     <>
       <Separator />
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Recent invites
+            {t("employees.recentInvites")}
           </h3>
           <Button
             variant="ghost"
@@ -57,7 +60,7 @@ export function RecentInvitesList({
             <div className="divide-y">
               {isLoading ? (
                 <div className="px-6 py-10 text-center text-sm text-muted-foreground">
-                  Loading invites...
+                  {t("employees.loadingInvites")}
                 </div>
               ) : Array.isArray(invites) && invites.length > 0 ? (
                 invites.map((invite) => (
@@ -80,7 +83,7 @@ export function RecentInvitesList({
                           : `Expires ${formatDistanceToNow(new Date(invite.expiresAt), { addSuffix: true })}`}
                       </div>
                       {invite.acceptedAt ? (
-                        <Badge variant="secondary">Accepted</Badge>
+                        <Badge variant="secondary">{t("employees.accepted")}</Badge>
                       ) : (
                         <Button
                           size="sm"
@@ -90,7 +93,7 @@ export function RecentInvitesList({
                           }
                         >
                           <Mail className="mr-2 h-4 w-4" />
-                          Copy link
+                          {t("employees.copyLink")}
                         </Button>
                       )}
                     </div>
@@ -99,7 +102,7 @@ export function RecentInvitesList({
               ) : (
                 <div className="px-6 py-10 text-center text-sm text-muted-foreground">
                   <Clock className="mx-auto mb-3 h-5 w-5" />
-                  No invites yet. Generate your first invite above.
+                  {t("employees.noInvitesYetGenerateYourFirstInviteAbove")}
                 </div>
               )}
             </div>

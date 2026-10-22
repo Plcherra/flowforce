@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import type { Employee } from "@/hooks/useEmployees";
 import {
@@ -39,6 +40,7 @@ export function EmployeeDrawer({
   initialTab = "profile",
   onOpenChange,
 }: EmployeeDrawerProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<EmployeeDrawerTab>("profile");
   const canManageAccess = usePermission("manage_roles");
   const canInvite = usePermission("invite_employees");
@@ -159,7 +161,7 @@ export function EmployeeDrawer({
 
           <footer className="flex-none border-t px-6 py-4 text-right">
             <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
+              <Button variant="outline">{t("common.close")}</Button>
             </DrawerClose>
           </footer>
         </div>
@@ -169,14 +171,14 @@ export function EmployeeDrawer({
 }
 
 function HeaderContent({ employee }: { employee: Employee | null }) {
+  const { t } = useTranslation();
   if (!employee) {
     return (
       <div className="flex items-center justify-between gap-4">
         <div>
-          <DrawerTitle className="text-2xl">Team Invitations</DrawerTitle>
+          <DrawerTitle className="text-2xl">{t("employees.teamInvitations")}</DrawerTitle>
           <p className="mt-1 text-sm text-muted-foreground">
-            Invite teammates or resend pending invitations without leaving the
-            directory.
+            {t("employees.inviteTeammatesOrResendPendingInvitationsWithoutLeavingTheDirectory")}
           </p>
         </div>
       </div>

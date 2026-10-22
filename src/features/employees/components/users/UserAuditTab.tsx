@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { FileText, Search, Calendar, User, Clock, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ interface UserAuditTabProps {
 }
 
 export function UserAuditTab({ user }: UserAuditTabProps) {
+  const { t } = useTranslation();
   const {
     data: allAuditLogs,
     isLoading,
@@ -44,7 +46,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-muted-foreground">
-            <p>Audit logging is currently disabled for this workspace.</p>
+            <p>{t("employees.auditLoggingIsCurrentlyDisabledForThisWorkspace")}</p>
           </div>
         </CardContent>
       </Card>
@@ -102,11 +104,11 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
 
     switch (action) {
       case "created":
-        return `Created ${target}`;
+        return t("employees.createdTarget", { target });
       case "updated":
-        return `Updated ${target}`;
+        return t("employees.updatedTarget", { target });
       case "deleted":
-        return `Deleted ${target}`;
+        return t("employees.deletedTarget", { target });
       default:
         return log.action.replace("_", " ");
     }
@@ -117,7 +119,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-destructive">
-            <p>Error loading audit logs: {error.message}</p>
+            <p>{t("employees.auditLoadError", { message: error.message })}</p>
           </div>
         </CardContent>
       </Card>
@@ -135,7 +137,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
               <div>
                 <p className="text-2xl font-bold">{userAuditLogs.length}</p>
                 <p className="text-sm text-muted-foreground">
-                  Total Activities
+                  {t("employees.totalActivities")}
                 </p>
               </div>
             </div>
@@ -154,7 +156,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                   }
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Actions Performed
+                  {t("employees.actionsPerformed")}
                 </p>
               </div>
             </div>
@@ -180,7 +182,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                       })
                     : "Never"}
                 </p>
-                <p className="text-sm text-muted-foreground">Last Activity</p>
+                <p className="text-sm text-muted-foreground">{t("employees.lastActivity")}</p>
               </div>
             </div>
           </CardContent>
@@ -192,7 +194,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Activity Log
+            {t("employees.activityLog")}
           </CardTitle>
 
           {/* Filters */}
@@ -200,7 +202,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search activities..."
+                placeholder={t("employees.searchActivities")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -210,10 +212,10 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
             <Select value={actionFilter} onValueChange={setActionFilter}>
               <SelectTrigger className="w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by action" />
+                <SelectValue placeholder={t("employees.filterByAction")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="all">{t("employees.allActions")}</SelectItem>
                 {uniqueActions.map((action) => (
                   <SelectItem key={action} value={action}>
                     {action.replace("_", " ")}
@@ -239,10 +241,10 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Performed By</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Details</TableHead>
+                    <TableHead>{t("employees.action")}</TableHead>
+                    <TableHead>{t("employees.performedBy")}</TableHead>
+                    <TableHead>{t("schedule.date")}</TableHead>
+                    <TableHead>{t("schedule.details")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

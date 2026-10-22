@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import {
   ArrowUpRight,
@@ -40,19 +41,16 @@ const toneStyles = {
     item: "border-success/40 bg-success-muted",
     icon: "bg-success-muted text-success",
     badge: "border-success/40 bg-success-muted text-success",
-    label: "Ready",
   },
   watch: {
     item: "border-warning/40 bg-warning-muted",
     icon: "bg-warning-muted text-warning-foreground",
     badge: "border-warning/40 bg-warning-muted text-warning-foreground",
-    label: "Watch",
   },
   urgent: {
     item: "border-destructive/40 bg-destructive/20",
     icon: "bg-destructive/10 text-destructive",
     badge: "border-destructive/40 bg-destructive/10 text-destructive",
-    label: "Fix",
   },
 };
 
@@ -62,50 +60,53 @@ function countTone(value: number) {
   return "steady";
 }
 
-function buildReadinessItems(readiness: HrReadiness): ReadinessItem[] {
+function buildReadinessItems(
+  readiness: HrReadiness,
+  t: (key: string) => string,
+): ReadinessItem[] {
   return [
     {
-      label: "Profiles",
+      label: t("employees.readinessProfiles"),
       value: readiness.incompleteProfiles,
-      detail: "Active teammates missing core profile fields.",
+      detail: t("employees.readinessProfilesDetail"),
       href: "/app/employees",
-      action: "Complete profiles",
+      action: t("employees.completeProfiles"),
       icon: FileUser,
       tone: countTone(readiness.incompleteProfiles),
     },
     {
-      label: "Departments",
+      label: t("dashboard.stats.departments"),
       value: readiness.missingDepartments,
-      detail: "Active teammates without department assignment.",
+      detail: t("employees.readinessDepartmentsDetail"),
       href: "/app/employees",
-      action: "Assign departments",
+      action: t("employees.assignDepartments"),
       icon: Building2,
       tone: countTone(readiness.missingDepartments),
     },
     {
-      label: "Availability",
+      label: t("schedule.availability"),
       value: readiness.missingAvailability,
-      detail: "Active teammates without availability on file.",
+      detail: t("employees.readinessAvailabilityDetail"),
       href: "/app/enhanced-scheduling?panel=availability&availability=team",
-      action: "Collect availability",
+      action: t("employees.collectAvailability"),
       icon: CalendarCheck,
       tone: countTone(readiness.missingAvailability),
     },
     {
-      label: "Certifications",
+      label: t("common.certifications"),
       value: readiness.missingCertifications,
-      detail: "Active teammates without current certifications.",
+      detail: t("employees.readinessCertificationsDetail"),
       href: "/app/certifications",
-      action: "Review certs",
+      action: t("employees.reviewCerts"),
       icon: BadgeCheck,
       tone: countTone(readiness.missingCertifications),
     },
     {
-      label: "Performance",
+      label: t("common.performance"),
       value: readiness.lowReliability,
-      detail: "Active teammates below reliability threshold.",
+      detail: t("employees.readinessPerformanceDetail"),
       href: "/app/performance",
-      action: "Review performance",
+      action: t("employees.reviewPerformance"),
       icon: Gauge,
       tone: countTone(readiness.lowReliability),
     },
@@ -134,6 +135,7 @@ export function HrReadinessPanel({
   canManageEmployees = false,
   onOpenInvite,
 }: HrReadinessPanelProps) {
+  const { t } = useTranslation();
   const {
     data: readiness,
     isLoading,
@@ -156,7 +158,7 @@ export function HrReadinessPanel({
     missingCertifications: 0,
     lowReliability: 0,
   };
-  const items = buildReadinessItems(current);
+  const items = buildReadinessItems(current, t);
   const blockers = items.reduce(
     (sum, item) => sum + (typeof item.value === "number" ? item.value : 0),
     0,
@@ -166,17 +168,16 @@ export function HrReadinessPanel({
   return (
     <section
       className="space-y-4 rounded-lg border bg-background p-4"
-      aria-label="Employee readiness"
+      aria-label={t("employees.employeeReadiness")}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">HR readiness</h2>
+            <h2 className="text-lg font-semibold">{t("employees.hrReadiness")}</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Profiles, roles, departments, availability, certifications, and
-            performance links for basic staff management.
+            {t("employees.profilesRolesDepartmentsAvailabilityCertificationsAndPerformanceLinksForBasicStaffManagement")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -189,7 +190,7 @@ export function HrReadinessPanel({
                 : toneStyles.steady.badge,
             )}
           >
-            {current.activeEmployeeCount} active
+            {t("employees.activeCount", { count: current.activeEmployeeCount })}
           </Badge>
           <Badge
             variant="outline"
@@ -200,19 +201,19 @@ export function HrReadinessPanel({
                 : toneStyles.steady.badge,
             )}
           >
-            {blockers} open items
+            {t("employees.openItems", { count: blockers })}
           </Badge>
         </div>
       </div>
 
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>HR readiness data unavailable</AlertTitle>
+          <AlertTitle>{t("employees.hrReadinessDataUnavailable")}</AlertTitle>
           <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span>
               {error instanceof Error
                 ? error.message
-                : "Unable to load HR readiness data."}
+                : t("employees.unableToLoadHrReadiness")}
             </span>
             <Button
               type="button"
@@ -220,7 +221,7 @@ export function HrReadinessPanel({
               size="sm"
               onClick={() => void refetch()}
             >
-              Retry
+              {t("shell.retry")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -260,7 +261,13 @@ export function HrReadinessPanel({
                     </div>
                   </div>
                   <Badge variant="outline" className={styles.badge}>
-                    {styles.label}
+                    {t(
+                      item.tone === "steady"
+                        ? "employees.toneReady"
+                        : item.tone === "watch"
+                          ? "employees.toneWatch"
+                          : "employees.toneFix",
+                    )}
                   </Badge>
                 </div>
                 <p className="mt-3 min-h-10 text-sm leading-snug text-muted-foreground">
@@ -278,25 +285,24 @@ export function HrReadinessPanel({
 
       <div className="flex flex-col gap-3 rounded-lg border bg-muted/25 p-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="font-medium">Manager setup actions</div>
+          <div className="font-medium">{t("employees.managerSetupActions")}</div>
           <p className="text-sm text-muted-foreground">
-            Invite staff, assign access, collect availability, and review HR
-            readiness before building schedules.
+            {t("employees.inviteStaffAssignAccessCollectAvailabilityAndReviewHrReadinessBeforeBuildingSchedules")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {canManageEmployees && (
             <Button type="button" onClick={onOpenInvite}>
-              Invite staff
+              {t("employees.inviteStaff")}
             </Button>
           )}
           <Button type="button" variant="outline" asChild>
             <Link to="/app/enhanced-scheduling?panel=availability&availability=team">
-              Availability
+              {t("schedule.availability")}
             </Link>
           </Button>
           <Button type="button" variant="outline" asChild>
-            <Link to="/app/certifications">Certifications</Link>
+            <Link to="/app/certifications">{t("common.certifications")}</Link>
           </Button>
         </div>
       </div>

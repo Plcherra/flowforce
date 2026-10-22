@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -41,6 +42,7 @@ export default function ProfileForm({
   userId,
   onProfileUpdate,
 }: ProfileFormProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -113,24 +115,24 @@ export default function ProfileForm({
         <div>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Personal Information
+            {t("profile.personalInformation")}
           </CardTitle>
           <CardDescription>
-            Update your personal details and contact information
+            {t("profile.updateYourPersonalDetailsAndContactInformation")}
           </CardDescription>
         </div>
         {!isEditing ? (
           <Button onClick={startEditing} variant="outline">
-            Edit Profile
+            {t("profile.editProfile")}
           </Button>
         ) : (
           <div className="flex space-x-2">
             <Button onClick={handleSaveProfile} disabled={isSaving} size="sm">
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? t("profile.saving") : t("common.save")}
             </Button>
             <Button onClick={cancelEditing} variant="outline" size="sm">
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
         )}
@@ -138,7 +140,7 @@ export default function ProfileForm({
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first_name">First Name</Label>
+            <Label htmlFor="first_name">{t("registration.userInfo.firstName")}</Label>
             {isEditing ? (
               <Input
                 id="first_name"
@@ -146,18 +148,18 @@ export default function ProfileForm({
                 onChange={(e) =>
                   setFormData({ ...formData, first_name: e.target.value })
                 }
-                placeholder="Enter first name"
+                placeholder={t("profile.enterFirstName")}
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <User className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.first_name || "Not set"}</span>
+                <span>{profile?.first_name || t("dashboard.profile.notSet")}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="last_name">Last Name</Label>
+            <Label htmlFor="last_name">{t("registration.userInfo.lastName")}</Label>
             {isEditing ? (
               <Input
                 id="last_name"
@@ -165,29 +167,29 @@ export default function ProfileForm({
                 onChange={(e) =>
                   setFormData({ ...formData, last_name: e.target.value })
                 }
-                placeholder="Enter last name"
+                placeholder={t("profile.enterLastName")}
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <User className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.last_name || "Not set"}</span>
+                <span>{profile?.last_name || t("dashboard.profile.notSet")}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <div className="flex items-center space-x-2 p-2 border rounded bg-muted">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span>{userEmail}</span>
               <Badge variant="secondary" className="ml-auto text-xs">
-                Read-only
+                {t("profile.readOnly")}
               </Badge>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">{t("auth.phoneNumber")}</Label>
             {isEditing ? (
               <Input
                 id="phone"
@@ -195,18 +197,18 @@ export default function ProfileForm({
                 onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
-                placeholder="Enter phone number"
+                placeholder={t("profile.enterPhoneNumber")}
               />
             ) : (
               <div className="flex items-center space-x-2 p-2 border rounded">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{profile?.phone || "Not set"}</span>
+                <span>{profile?.phone || t("dashboard.profile.notSet")}</span>
               </div>
             )}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="birth_date">Birth Date</Label>
+            <Label htmlFor="birth_date">{t("employees.birthDate")}</Label>
             {isEditing ? (
               <Input
                 id="birth_date"
@@ -222,7 +224,7 @@ export default function ProfileForm({
                 <span>
                   {profile?.birth_date
                     ? new Date(profile.birth_date).toLocaleDateString()
-                    : "Not set"}
+                    : t("dashboard.profile.notSet")}
                 </span>
               </div>
             )}

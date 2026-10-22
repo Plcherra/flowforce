@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { TestResults, TestStatus } from "@/hooks/useAccountDeletionTests";
 
@@ -8,6 +9,7 @@ interface DeletionTestResultsProps {
 export default function DeletionTestResults({
   testResults,
 }: DeletionTestResultsProps) {
+  const { t } = useTranslation();
   const getStatusIcon = (status: TestStatus) => {
     switch (status) {
       case "success":
@@ -32,10 +34,10 @@ export default function DeletionTestResults({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium">Test Results:</h3>
+      <h3 className="text-sm font-medium">{t("profile.testResults")}</h3>
 
       <div className="flex items-center justify-between p-3 border rounded">
-        <span className="text-sm">Login attempt should fail</span>
+        <span className="text-sm">{t("profile.loginAttemptShouldFail")}</span>
         <div className="flex items-center space-x-2">
           {getStatusIcon(testResults.loginAttemptAfterDeletion)}
           <span className="text-sm">
@@ -45,7 +47,7 @@ export default function DeletionTestResults({
       </div>
 
       <div className="flex items-center justify-between p-3 border rounded">
-        <span className="text-sm">User data should be removed</span>
+        <span className="text-sm">{t("profile.userDataShouldBeRemoved")}</span>
         <div className="flex items-center space-x-2">
           {getStatusIcon(testResults.userDataCheck)}
           <span className="text-sm">
@@ -55,7 +57,7 @@ export default function DeletionTestResults({
       </div>
 
       <div className="flex items-center justify-between p-3 border rounded">
-        <span className="text-sm">Token refresh should fail</span>
+        <span className="text-sm">{t("profile.tokenRefreshShouldFail")}</span>
         <div className="flex items-center space-x-2">
           {getStatusIcon(testResults.tokenRefreshAttempt)}
           <span className="text-sm">
