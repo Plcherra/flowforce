@@ -25,7 +25,9 @@ export default function BlogDetail() {
           {t("resources.blog.title")} {t("resources.details.notFound")}
         </h1>
         <p className="text-muted-foreground">
-          {t("resources.details.requestedNotFound", { type: "blog post" })}
+          {t("resources.details.requestedNotFound", {
+            type: t("resources.blogPost"),
+          })}
         </p>
       </div>
     );
@@ -70,8 +72,7 @@ export default function BlogDetail() {
           <div className="prose max-w-none">
             <p>{post.content}</p>
             <p className="mt-4 text-muted-foreground">
-              This is a placeholder for the actual blog post content. The full
-              article would be displayed here.
+              {t("resources.thisIsAPlaceholderForTheActualBlogPostContentTheFullArticleWouldBeDisplayedHere")}
             </p>
           </div>
         </CardContent>

@@ -87,7 +87,7 @@ export default function Resources() {
           className="bg-background shadow-lg hover:bg-muted"
         >
           <Home className="h-4 w-4 mr-2" />
-          Back to Home
+          {t("onboarding.backToHome")}
         </Button>
       </div>
 

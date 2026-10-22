@@ -386,7 +386,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 20 — Resources strings
 
-- [ ] Finish resources strings in all six locales.
+- [x] Finish resources strings in all six locales.
 
 Rules:
 
@@ -1061,6 +1061,22 @@ Phone steps for Pedro:
 1. Open https://www.flowforce.uk while signed out. Use the language switcher in the header and choose Italiano. The hero, footer links, and feature labels should be in Italian. FlowForce stays FlowForce.
 2. Open Pricing (`/pricing`). The plan intro and the most-popular label should follow the language. Starter, Growth, and Enterprise stay those names. If checkout was canceled, the reactivate screen should follow the language and mention Stripe by name.
 3. Open the product demo if the button is on the page. The title and the coming-soon line should follow the language. Switch to Deutsch and check the footer: About, Blog, and Help Center should be German.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 20 Resources strings
+
+Shipped: Resources chrome under `src/features/resources` now uses `useTranslation` and the `resources` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed stay on those keys. FlowForce stays FlowForce. Read times `10 min`, `15 min`, `30 min`, and `45 min`, the sample `Authorization: Bearer YOUR_API_TOKEN`, and the API host stay as written. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3797 keys for each locale and `hard-coded strings 922`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/resources`.
+
+Phone steps for Pedro:
+1. Open https://www.flowforce.uk/resources while signed out, or from the footer. Use the header language switcher and choose Español. The page title, section names, and help cards should be in Spanish. FlowForce stays FlowForce.
+2. Open the Getting Started guide and the User Manual. The steps, table of contents, and page counts should follow the language. Switch to Português and open API Documentation. Endpoint descriptions should be Portuguese. The paths, methods, and `Authorization: Bearer YOUR_API_TOKEN` stay as written.
+3. Open Integration Guides in Français. The guide title, custom-integration bullets, and the start button should be French. Starting an integration should toast in French and keep the product name.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

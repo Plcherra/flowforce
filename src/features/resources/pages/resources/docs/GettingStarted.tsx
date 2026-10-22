@@ -17,28 +17,28 @@ export default function GettingStarted() {
   const breadcrumbItems = [
     { label: t("landing.resources"), href: "/resources" },
     { label: t("resources.documentation.title"), href: "/resources" },
-    { label: "Getting Started Guide" },
+    { label: t("resources.gettingStartedGuide") },
   ];
 
   const steps = [
     {
-      title: "Create Your Account",
-      description: "Sign up for FlowForce and set up your company profile",
+      title: t("resources.createYourAccount"),
+      description: t("resources.createYourAccountDescription"),
       completed: true,
     },
     {
-      title: "Add Your Team",
-      description: "Invite employees and set up departments and roles",
+      title: t("resources.addYourTeam"),
+      description: t("resources.addYourTeamDescription"),
       completed: false,
     },
     {
-      title: "Configure Settings",
-      description: "Customize your workspace and preferences",
+      title: t("resources.configureSettings"),
+      description: t("resources.configureSettingsDescription"),
       completed: false,
     },
     {
-      title: "Create Your First Schedule",
-      description: "Set up shifts and assign employees",
+      title: t("resources.createYourFirstScheduleStep"),
+      description: t("resources.createYourFirstScheduleStepDescription"),
       completed: false,
     },
   ];
@@ -58,29 +58,27 @@ export default function GettingStarted() {
                 <BookOpen className="h-6 w-6 text-primary mr-3" />
                 <div>
                   <CardTitle className="text-2xl">
-                    Getting Started Guide
+                    {t("resources.gettingStartedGuide")}
                   </CardTitle>
                   <CardDescription className="mt-2">
-                    Everything you need to set up FlowForce for your team
+                    {t("resources.everythingYouNeedToSetUpFlowforceForYourTeam")}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Guide</Badge>
+                <Badge variant="secondary">{t("resources.guide")}</Badge>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
-                  10 min
+                  {t("resources.n10Min")}
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <h3>Welcome to FlowForce!</h3>
+              <h3>{t("dashboard.welcomeToFlowforce")}</h3>
               <p>
-                This guide will walk you through the essential steps to get your
-                team up and running with FlowForce. Follow these steps in order
-                to ensure a smooth setup process.
+                {t("resources.thisGuideWillWalkYouThroughTheEssentialStepsToGetYourTeamUpAndRunningWithFlowforceFollowTheseStepsInOrderToEnsureASmoothSetupProcess")}
               </p>
 
               <div className="space-y-4 mt-6">
@@ -110,15 +108,12 @@ export default function GettingStarted() {
                 ))}
               </div>
 
-              <h3 className="mt-8">Next Steps</h3>
-              <p>
-                Once you&apos;ve completed the basic setup, explore our other
-                documentation sections:
-              </p>
+              <h3 className="mt-8">{t("resources.nextSteps")}</h3>
+              <p>{t("resources.onceSetupComplete")}</p>
               <ul>
-                <li>API Documentation for integration guidance</li>
-                <li>User Manual for detailed feature explanations</li>
-                <li>Integration Guides for connecting with other tools</li>
+                <li>{t("resources.apiDocumentationForIntegrationGuidance")}</li>
+                <li>{t("resources.userManualForDetailedFeatureExplanations")}</li>
+                <li>{t("resources.integrationGuidesForConnectingWithOtherTools")}</li>
               </ul>
             </div>
           </CardContent>

@@ -17,38 +17,38 @@ export default function UserManual() {
   const breadcrumbItems = [
     { label: t("landing.resources"), href: "/resources" },
     { label: t("resources.documentation.title"), href: "/resources" },
-    { label: "User Manual" },
+    { label: t("resources.userManual") },
   ];
 
   const sections = [
     {
-      title: "Dashboard Overview",
-      description: "Understanding your main dashboard and key metrics",
+      title: t("resources.dashboardOverview"),
+      description: t("resources.dashboardOverviewDescription"),
       pages: 5,
     },
     {
-      title: "Employee Management",
-      description: "Adding, editing, and managing employee profiles",
+      title: t("features.employeeManagement.title"),
+      description: t("resources.employeeProfilesDescription"),
       pages: 8,
     },
     {
-      title: "Scheduling",
-      description: "Creating schedules, managing shifts, and time tracking",
+      title: t("common.scheduling"),
+      description: t("resources.schedulingGuideDescription"),
       pages: 12,
     },
     {
-      title: "Task Management",
-      description: "Creating, assigning, and tracking tasks and workflows",
+      title: t("features.taskManagement.title"),
+      description: t("resources.taskWorkflowsDescription"),
       pages: 7,
     },
     {
-      title: "Forms & Documents",
-      description: "Building forms, collecting data, and document management",
+      title: t("resources.formsAndDocuments"),
+      description: t("resources.formsAndDocumentsDescription"),
       pages: 6,
     },
     {
-      title: "Reporting & Analytics",
-      description: "Generating reports and analyzing business metrics",
+      title: t("resources.reportingAndAnalytics"),
+      description: t("resources.reportingAndAnalyticsDescription"),
       pages: 9,
     },
   ];
@@ -67,28 +67,26 @@ export default function UserManual() {
               <div className="flex items-center">
                 <Book className="h-6 w-6 text-warning mr-3" />
                 <div>
-                  <CardTitle className="text-2xl">User Manual</CardTitle>
+                  <CardTitle className="text-2xl">{t("resources.userManual")}</CardTitle>
                   <CardDescription className="mt-2">
-                    Comprehensive guide to all FlowForce features
+                    {t("resources.comprehensiveGuideToAllFlowforceFeatures")}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Manual</Badge>
+                <Badge variant="secondary">{t("resources.manual")}</Badge>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
-                  45 min
+                  {t("resources.n45Min")}
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <h3>Table of Contents</h3>
+              <h3>{t("resources.tableOfContents")}</h3>
               <p>
-                This comprehensive user manual covers all aspects of using
-                FlowForce. Click on any section below to jump to detailed
-                instructions and examples.
+                {t("resources.thisComprehensiveUserManualCoversAllAspectsOfUsingFlowforceClickOnAnySectionBelowToJumpToDetailedInstructionsAndExamples")}
               </p>
 
               <div className="space-y-3 mt-6">
@@ -104,7 +102,7 @@ export default function UserManual() {
                             {section.title}
                           </h4>
                           <div className="flex items-center text-sm text-muted-foreground">
-                            {section.pages} pages
+                            {t("resources.pageCount", { count: section.pages })}
                           </div>
                         </div>
                         <p className="text-muted-foreground">{section.description}</p>
@@ -115,43 +113,36 @@ export default function UserManual() {
                 ))}
               </div>
 
-              <h3 className="mt-8">Quick Start</h3>
-              <p>New to FlowForce? Start with these essential sections:</p>
+              <h3 className="mt-8">{t("resources.quickStart")}</h3>
+              <p>{t("resources.newToFlowforceStartWithTheseEssentialSections")}</p>
               <ul>
                 <li>
-                  <strong>Dashboard Overview</strong> - Get familiar with the
-                  interface
+                  <strong>{t("resources.dashboardOverview")}</strong> {t("resources.getFamiliarWithTheInterface")}
                 </li>
                 <li>
-                  <strong>Employee Management</strong> - Set up your team
+                  <strong>{t("features.employeeManagement.title")}</strong> {t("resources.setUpYourTeam")}
                 </li>
                 <li>
-                  <strong>Scheduling</strong> - Create your first schedule
+                  <strong>{t("common.scheduling")}</strong> {t("resources.createYourFirstSchedule")}
                 </li>
               </ul>
 
-              <h3>Advanced Features</h3>
-              <p>
-                Once you&apos;re comfortable with the basics, explore advanced
-                features like:
-              </p>
+              <h3>{t("resources.advancedFeatures")}</h3>
+              <p>{t("resources.onceComfortable")}</p>
               <ul>
-                <li>Automated workflows and task dependencies</li>
-                <li>Custom form builder and digital signatures</li>
-                <li>Advanced reporting and data analytics</li>
-                <li>API integrations and custom webhooks</li>
+                <li>{t("resources.automatedWorkflowsAndTaskDependencies")}</li>
+                <li>{t("resources.customFormBuilderAndDigitalSignatures")}</li>
+                <li>{t("resources.advancedReportingAndDataAnalytics")}</li>
+                <li>{t("resources.apiIntegrationsAndCustomWebhooks")}</li>
               </ul>
 
-              <h3>Need Help?</h3>
-              <p>
-                Can&apos;t find what you&apos;re looking for? Check out our other
-                resources:
-              </p>
+              <h3>{t("resources.needHelp")}</h3>
+              <p>{t("resources.cantFindResources")}</p>
               <ul>
-                <li>Getting Started Guide for quick setup</li>
-                <li>API Documentation for developers</li>
-                <li>Integration Guides for connecting other tools</li>
-                <li>Community Forum for user discussions</li>
+                <li>{t("resources.gettingStartedGuideForQuickSetup")}</li>
+                <li>{t("resources.apiDocumentationForDevelopers")}</li>
+                <li>{t("resources.integrationGuidesForConnectingOtherTools")}</li>
+                <li>{t("resources.communityForumForUserDiscussions")}</li>
               </ul>
             </div>
           </CardContent>

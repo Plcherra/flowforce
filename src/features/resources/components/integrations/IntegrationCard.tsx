@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Clock, ExternalLink, CheckCircle, ArrowRight } from "lucide-react";
 import { IntegrationStep } from "./IntegrationStep";
@@ -22,6 +23,7 @@ export function IntegrationCard({
   integration,
   onStartIntegration,
 }: IntegrationCardProps) {
+  const { t } = useTranslation();
   return (
     <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow bg-muted">
       <div className="flex items-start justify-between mb-4">
@@ -56,7 +58,7 @@ export function IntegrationCard({
       <div className="grid md:grid-cols-3 gap-6 mt-6">
         <div className="md:col-span-2">
           <h5 className="font-semibold text-foreground mb-3">
-            Step-by-Step Guide
+            {t("resources.stepByStepGuide")}
           </h5>
           <div className="space-y-3">
             {integration.steps.map((step, stepIndex) => (
@@ -67,7 +69,7 @@ export function IntegrationCard({
 
         <div className="space-y-4">
           <div>
-            <h5 className="font-semibold text-foreground mb-2">Requirements</h5>
+            <h5 className="font-semibold text-foreground mb-2">{t("certifications.requirements")}</h5>
             <ul className="space-y-1">
               {integration.requirements.map((req, reqIndex) => (
                 <li
@@ -82,7 +84,7 @@ export function IntegrationCard({
           </div>
 
           <div>
-            <h5 className="font-semibold text-foreground mb-2">Benefits</h5>
+            <h5 className="font-semibold text-foreground mb-2">{t("resources.benefits")}</h5>
             <ul className="space-y-1">
               {integration.benefits.map((benefit, benefitIndex) => (
                 <li
@@ -103,7 +105,7 @@ export function IntegrationCard({
           onClick={() => onStartIntegration(integration.name)}
           className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center text-sm"
         >
-          Start Integration
+          {t("resources.startIntegration")}
           <ExternalLink className="h-4 w-4 ml-2" />
         </button>
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ export default function DownloadCard({
   format,
   downloadUrl,
 }: DownloadCardProps) {
+  const { t } = useTranslation();
   const handleDownload = () => {
     window.open(downloadUrl, "_blank");
   };
@@ -57,7 +59,7 @@ export default function DownloadCard({
           onClick={handleDownload}
         >
           <Download className="mr-2 h-4 w-4" />
-          Download
+          {t("resources.download")}
         </Button>
       </CardContent>
     </Card>

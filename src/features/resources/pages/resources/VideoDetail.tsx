@@ -27,7 +27,9 @@ export default function VideoDetail() {
           {t("resources.videos.title")} {t("resources.details.notFound")}
         </h1>
         <p className="text-muted-foreground">
-          {t("resources.details.requestedNotFound", { type: "video" })}
+          {t("resources.details.requestedNotFound", {
+            type: t("resources.video"),
+          })}
         </p>
       </div>
     );

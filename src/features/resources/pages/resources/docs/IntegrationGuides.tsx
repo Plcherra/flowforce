@@ -23,13 +23,15 @@ export default function IntegrationGuides() {
   const breadcrumbItems = [
     { label: t("landing.resources"), href: "/resources" },
     { label: t("resources.documentation.title"), href: "/resources" },
-    { label: "Integration Guides" },
+    { label: t("resources.integrationGuides") },
   ];
 
   const handleStartIntegration = (integrationName: string) => {
     toast({
-      title: "Integration Started",
-      description: `Starting ${integrationName} integration setup. You would typically be redirected to the integration flow or settings page.`,
+      title: t("resources.integrationStarted"),
+      description: t("resources.integrationStartedDescription", {
+        name: integrationName,
+      }),
     });
 
     // Here you would typically redirect to the actual integration page or open a modal
@@ -49,28 +51,26 @@ export default function IntegrationGuides() {
               <div className="flex items-center">
                 <Puzzle className="h-6 w-6 text-success mr-3" />
                 <div>
-                  <CardTitle className="text-2xl">Integration Guides</CardTitle>
+                  <CardTitle className="text-2xl">{t("resources.integrationGuides")}</CardTitle>
                   <CardDescription className="mt-2">
-                    Connect FlowForce with your existing tools
+                    {t("resources.connectFlowforceWithYourExistingTools")}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Tutorial</Badge>
+                <Badge variant="secondary">{t("resources.tutorial")}</Badge>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
-                  15 min
+                  {t("resources.n15Min")}
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <h3>Popular Integrations</h3>
+              <h3>{t("resources.popularIntegrations")}</h3>
               <p>
-                FlowForce integrates seamlessly with popular business tools to
-                streamline your workflow. Choose from our pre-built integrations
-                or create custom connections using our API.
+                {t("resources.flowforceIntegratesSeamlesslyWithPopularBusinessToolsToStreamlineYourWorkflowChooseFromOurPreBuiltIntegrationsOrCreateCustomConnectionsUsingOurApi")}
               </p>
 
               <div className="space-y-8 mt-8">

@@ -17,27 +17,27 @@ export default function ApiDocumentation() {
   const breadcrumbItems = [
     { label: t("landing.resources"), href: "/resources" },
     { label: t("resources.documentation.title"), href: "/resources" },
-    { label: "API Documentation" },
+    { label: t("resources.apiDocumentation") },
   ];
 
   const endpoints = [
     {
       method: "GET",
       path: "/api/v1/employees",
-      description: "Retrieve all employees",
-      auth: "Required",
+      description: t("resources.retrieveAllEmployees"),
+      auth: t("forms.required"),
     },
     {
       method: "POST",
       path: "/api/v1/schedules",
-      description: "Create a new schedule",
-      auth: "Required",
+      description: t("resources.createANewSchedule"),
+      auth: t("forms.required"),
     },
     {
       method: "PUT",
       path: "/api/v1/tasks/{id}",
-      description: "Update a specific task",
-      auth: "Required",
+      description: t("resources.updateASpecificTask"),
+      auth: t("forms.required"),
     },
   ];
 
@@ -55,39 +55,38 @@ export default function ApiDocumentation() {
               <div className="flex items-center">
                 <Code className="h-6 w-6 text-secondary mr-3" />
                 <div>
-                  <CardTitle className="text-2xl">API Documentation</CardTitle>
+                  <CardTitle className="text-2xl">{t("resources.apiDocumentation")}</CardTitle>
                   <CardDescription className="mt-2">
-                    Complete reference for our REST API
+                    {t("resources.completeReferenceForOurRestApi")}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Reference</Badge>
+                <Badge variant="secondary">{t("resources.reference")}</Badge>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
-                  30 min
+                  {t("resources.n30Min")}
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <h3>Authentication</h3>
+              <h3>{t("resources.authentication")}</h3>
               <p>
-                FlowForce API uses Bearer token authentication. Include your API
-                token in the Authorization header:
+                {t("resources.flowforceApiUsesBearerTokenAuthenticationIncludeYourApiTokenInTheAuthorizationHeader")}
               </p>
               <pre className="bg-muted p-4 rounded-lg">
-                <code>Authorization: Bearer YOUR_API_TOKEN</code>
+                <code>{t("resources.authorizationBearerYourApiToken")}</code>
               </pre>
 
-              <h3>Base URL</h3>
-              <p>All API requests should be made to:</p>
+              <h3>{t("resources.baseUrl")}</h3>
+              <p>{t("resources.allApiRequestsShouldBeMadeTo")}</p>
               <pre className="bg-muted p-4 rounded-lg">
                 <code>https://api.flowforce.com/v1</code>
               </pre>
 
-              <h3>Common Endpoints</h3>
+              <h3>{t("resources.commonEndpoints")}</h3>
               <div className="space-y-4 mt-4">
                 {endpoints.map((endpoint, index) => (
                   <div key={index} className="border rounded-lg p-4">
@@ -115,17 +114,14 @@ export default function ApiDocumentation() {
                 ))}
               </div>
 
-              <h3>Rate Limits</h3>
+              <h3>{t("resources.rateLimits")}</h3>
               <p>
-                API requests are limited to 1000 requests per hour per API
-                token. Rate limit information is included in response headers.
+                {t("resources.apiRequestsAreLimitedTo1000RequestsPerHourPerApiTokenRateLimitInformationIsIncludedInResponseHeaders")}
               </p>
 
-              <h3>Error Handling</h3>
+              <h3>{t("resources.errorHandling")}</h3>
               <p>
-                The API returns standard HTTP status codes. Error responses
-                include a JSON object with error details and suggestions for
-                resolution.
+                {t("resources.theApiReturnsStandardHttpStatusCodesErrorResponsesIncludeAJsonObjectWithErrorDetailsAndSuggestionsForResolution")}
               </p>
             </div>
           </CardContent>

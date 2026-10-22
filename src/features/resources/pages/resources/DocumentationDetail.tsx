@@ -74,8 +74,7 @@ export default function DocumentationDetail() {
           <div className="prose max-w-none">
             <p>{doc.content}</p>
             <p className="mt-4 text-muted-foreground">
-              This is a placeholder for the actual documentation content. The
-              full documentation would be loaded here.
+              {t("resources.thisIsAPlaceholderForTheActualDocumentationContentTheFullDocumentationWouldBeLoadedHere")}
             </p>
           </div>
         </CardContent>

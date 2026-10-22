@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Video } from "lucide-react";
 import { Link } from "@/lib/router-adapter";
@@ -19,6 +20,7 @@ export default function VideoCard({
   thumbnail,
   embedUrl,
 }: VideoCardProps) {
+  const { t } = useTranslation();
   const isPlaceholder = embedUrl === "placeholder";
 
   return (
@@ -38,7 +40,7 @@ export default function VideoCard({
           </div>
           {isPlaceholder && (
             <div className="absolute top-2 left-2 bg-warning text-foreground px-2 py-1 rounded text-xs font-semibold">
-              Coming Soon
+              {t("resources.details.comingSoon")}
             </div>
           )}
         </div>

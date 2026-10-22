@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ export default function BlogCard({
   url,
   publishDate,
 }: BlogCardProps) {
+  const { t } = useTranslation();
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
@@ -51,7 +53,7 @@ export default function BlogCard({
         </div>
         <Button variant="outline" className="w-full group" asChild>
           <Link to={url}>
-            Read More
+            {t("resources.details.readMore")}
             <ExternalLink className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </Button>
