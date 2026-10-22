@@ -73,6 +73,12 @@ export const TRANSLATABLE_FIELDS: Record<
     title: {},
     description: {},
   },
+  recognition_events: {
+    message: {},
+  },
+  employee_badge: {
+    reason: {},
+  },
 };
 
 export function translatableFieldRule(

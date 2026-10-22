@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -9,17 +10,63 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RecognitionRecord } from "@/types/recognition";
 import { useTranslation } from "react-i18next";
+import { RecognitionText } from "@/features/recognition/components/RecognitionText";
+import {
+  useBadgeReasonTranslations,
+  useRecognitionMessageTranslations,
+} from "@/features/recognition/hooks/useRecognitionTranslations";
+
+interface EarnedBadgeReason {
+  id: string;
+  title: string;
+  reason: string | null;
+  awardedAt?: string;
+}
 
 interface RecognitionFeedProps {
   recognitions: RecognitionRecord[];
   loading: boolean;
+  earnedBadges?: EarnedBadgeReason[];
 }
 
 export function RecognitionFeed({
   recognitions,
   loading,
+  earnedBadges = [],
 }: RecognitionFeedProps) {
   const { t } = useTranslation();
+  const messageSources = useMemo(
+    () =>
+      recognitions.map((recognition) => ({
+        id: recognition.id,
+        text: recognition.reward_details?.message ?? "",
+        updated_at: recognition.awarded_at,
+      })),
+    [recognitions],
+  );
+  const badgeSources = useMemo(
+    () =>
+      earnedBadges.map((badge) => ({
+        id: badge.id,
+        text: badge.reason,
+        updated_at: badge.awardedAt ?? null,
+      })),
+    [earnedBadges],
+  );
+  const messageTranslations = useRecognitionMessageTranslations(messageSources);
+  const reasonTranslations = useBadgeReasonTranslations(badgeSources);
+  const badgesWithReasons = earnedBadges.filter((badge) => badge.reason);
+  const badgeReasonList = badgesWithReasons.map((badge) => (
+    <div key={badge.id} className="rounded-xl border bg-muted/20 p-3">
+      <p className="text-sm font-semibold">{badge.title}</p>
+      <RecognitionText
+        recordId={badge.id}
+        text={badge.reason ?? ""}
+        translation={reasonTranslations.get(badge.id) ?? null}
+        className="text-sm text-foreground"
+      />
+    </div>
+  ));
   if (loading && recognitions.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -45,13 +92,16 @@ export function RecognitionFeed({
 
   if (!loading && recognitions.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-base">{t("recognition.recognitionFeed")}</CardTitle>
-          <CardDescription>{t("updates.noRecognitionsYet")}</CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">{t("recognition.onceTeammatesCompleteGoalsTasksOrTrainingTheir")}</CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-base">{t("recognition.recognitionFeed")}</CardTitle>
+            <CardDescription>{t("updates.noRecognitionsYet")}</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">{t("recognition.onceTeammatesCompleteGoalsTasksOrTrainingTheir")}</CardContent>
+        </Card>
+        {badgeReasonList}
+      </div>
     );
   }
 
@@ -91,7 +141,12 @@ export function RecognitionFeed({
                 <p className="text-xs text-muted-foreground capitalize">
                   {source.replace(/_/g, " ")}
                 </p>
-                <p className="text-sm text-foreground">{message}</p>
+                <RecognitionText
+                  recordId={recognition.id}
+                  text={message}
+                  translation={messageTranslations.get(recognition.id) ?? null}
+                  className="text-sm text-foreground"
+                />
               </div>
               <div className="text-xs text-muted-foreground">
                 {new Date(recognition.awarded_at).toLocaleDateString()}
@@ -99,6 +154,7 @@ export function RecognitionFeed({
             </div>
           );
         })}
+        {badgeReasonList}
       </CardContent>
     </Card>
   );

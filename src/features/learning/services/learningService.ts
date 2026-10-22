@@ -6,6 +6,7 @@ import {
   LEARNING_MODULE_TABLE,
 } from "@/features/learning/learningContent";
 import { scheduleLearningTranslation } from "@/features/learning/scheduleLearningContent";
+import { scheduleBadgeReason } from "@/features/recognition/scheduleRecognitionContent";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import type { TablesInsert } from "@/integrations/supabase/public-types";
 import type {
@@ -883,6 +884,8 @@ export async function ensureCourseCompletionRewards(
     employeeId: string;
     awardingProfileId?: string;
     roleHint?: string;
+    companyId?: string | null;
+    sourceLocale?: AppLanguage;
   },
 ) {
   if (course.xpReward <= 0 && !course.certificationCode) {
@@ -926,12 +929,25 @@ export async function ensureCourseCompletionRewards(
       .maybeSingle();
 
     if (!existingBadge) {
-      await learningClient.from("employee_badge").insert({
-        employee_id: options.employeeId,
-        badge_code: course.certificationCode,
-        awarded_by: options.awardingProfileId ?? null,
-        reason: `Completed ${course.title}`,
-      });
+      const reason = `Completed ${course.title}`;
+      const { data: awarded } = await learningClient
+        .from("employee_badge")
+        .insert({
+          employee_id: options.employeeId,
+          badge_code: course.certificationCode,
+          awarded_by: options.awardingProfileId ?? null,
+          reason,
+        })
+        .select("id, reason")
+        .maybeSingle();
+      if (awarded?.id && options.companyId && options.sourceLocale) {
+        scheduleBadgeReason({
+          companyId: options.companyId,
+          sourceId: awarded.id,
+          sourceLocale: options.sourceLocale,
+          reason: typeof awarded.reason === "string" ? awarded.reason : reason,
+        });
+      }
     }
   }
 }
@@ -1016,6 +1032,8 @@ export async function completeEnrollment(
     employeeId: string;
     awardingProfileId?: string;
     roleHint?: string;
+    companyId?: string | null;
+    sourceLocale?: AppLanguage;
   },
 ) {
   const updated = await updateEnrollmentProgress(enrollment.id, {

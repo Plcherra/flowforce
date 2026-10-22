@@ -309,13 +309,18 @@ export async function upsertCertificationProgressRows(
 export async function upsertEmployeeBadgeRecord(
   payload: TablesInsert<"employee_badge">,
 ) {
-  const { error } = await supabase.from("employee_badge").upsert(payload, {
-    onConflict: "employee_id,badge_code",
-  });
+  const { data, error } = await supabase
+    .from("employee_badge")
+    .upsert(payload, {
+      onConflict: "employee_id,badge_code",
+    })
+    .select("id, reason")
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
+  return data;
 }
 
 export async function upsertSkillMatrixRecord(

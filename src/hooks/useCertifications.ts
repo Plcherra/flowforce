@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "./useAuth";
+import { useProfile } from "./useProfile";
+import { appLanguageFromTag, type AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleBadgeReason } from "@/features/recognition/scheduleRecognitionContent";
 import type {
   Tables,
   TablesInsert,
@@ -104,12 +108,16 @@ const requirementLabelKeys: Record<RequirementDetail["key"], string> = {
 };
 
 export function useCertifications() {
+  const { i18n } = useTranslation();
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const queryKey = useMemo(
-    () => ["certifications", user?.id] as const,
-    [user?.id],
+    () => ["certifications", user?.id, companyId] as const,
+    [user?.id, companyId],
   );
 
   const {
@@ -119,7 +127,7 @@ export function useCertifications() {
     error: queryError,
   } = useQuery({
     queryKey,
-    enabled: Boolean(user?.id),
+    enabled: Boolean(user?.id) && !profileLoading,
     queryFn: () => {
       if (!user?.id) {
         return Promise.resolve<CertificationEvaluationResult>({
@@ -127,7 +135,10 @@ export function useCertifications() {
           metrics: null,
         });
       }
-      return evaluateCertifications(user.id);
+      return evaluateCertifications(user.id, {
+        companyId,
+        sourceLocale,
+      });
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000,
@@ -150,10 +161,11 @@ export function useCertifications() {
 
 async function evaluateCertifications(
   employeeId: string,
+  source?: { companyId: string | null; sourceLocale: AppLanguage },
 ): Promise<CertificationEvaluationResult> {
   try {
     const context = await fetchCertificationContext(employeeId);
-    return await buildCertificationEvaluation(employeeId, context);
+    return await buildCertificationEvaluation(employeeId, context, source);
   } catch (error) {
     if (appEnv.DEV) {
       logger.error("Failed to load certifications", { error, tags: ["error"] });
@@ -165,6 +177,7 @@ async function evaluateCertifications(
 async function buildCertificationEvaluation(
   employeeId: string,
   context: CertificationRepositoryContext,
+  source?: { companyId: string | null; sourceLocale: AppLanguage },
 ): Promise<CertificationEvaluationResult> {
   const totalXp = context.skillMatrix.reduce(
     (sum, row) => sum + (row.xp ?? 0),
@@ -389,11 +402,19 @@ async function buildCertificationEvaluation(
 
       const badgeCode = reward.catalog.badge_code;
       if (shouldAutoAward && badgeCode && !reward.badgeAlreadyAwarded) {
-        await upsertEmployeeBadgeRecord({
+        const awarded = await upsertEmployeeBadgeRecord({
           employee_id: employeeId,
           badge_code: badgeCode,
           reason: `Auto-awarded after completing ${reward.catalog.title}`,
         });
+        if (awarded?.id && source?.companyId) {
+          scheduleBadgeReason({
+            companyId: source.companyId,
+            sourceId: awarded.id,
+            sourceLocale: source.sourceLocale,
+            reason: typeof awarded.reason === "string" ? awarded.reason : null,
+          });
+        }
         const updatedViewModel = viewModelMap.get(reward.catalog.code);
         if (updatedViewModel) {
           updatedViewModel.badgeAwarded = true;

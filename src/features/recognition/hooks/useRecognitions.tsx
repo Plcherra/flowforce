@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -16,8 +18,10 @@ type UseRecognitionsOptions = {
 };
 
 export function useRecognitions(options?: UseRecognitionsOptions) {
+  const { i18n } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const queryClient = useQueryClient();
 
   const companyId = profile?.companyId ?? null;
@@ -66,6 +70,7 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
         companyId,
         actorId: user.id,
         input,
+        sourceLocale,
       });
     },
     onSuccess: invalidateRecognitions,
@@ -79,6 +84,7 @@ export function useRecognitions(options?: UseRecognitionsOptions) {
       await recognitionRepository.syncRecognitionAutomation({
         companyId,
         actorId: user.id,
+        sourceLocale,
       });
     },
     onSettled: invalidateRecognitions,

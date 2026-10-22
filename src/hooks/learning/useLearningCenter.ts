@@ -483,6 +483,8 @@ export function useLearningCenter() {
             employeeId: enrollment.employeeId,
             awardingProfileId: profile?.userId ?? undefined,
             roleHint: profile?.role ?? undefined,
+            companyId,
+            sourceLocale,
           });
           if (companyId) {
             await recordCourseCompletionMetadata(course, {

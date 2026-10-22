@@ -12,6 +12,8 @@ import type {
   TablesInsert,
 } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleRecognitionMessage } from "@/features/recognition/scheduleRecognitionContent";
 
 type GoalRow = Tables<"goals">;
 type GoalMilestoneRow = Tables<"goal_milestones">;
@@ -149,6 +151,28 @@ const awardRuleSchema = z.object({
 
 const DEFAULT_LOOKBACK_DAYS = 365;
 const MAX_RECOGNITION_RESULTS = 500;
+
+function scheduleInsertedRecognitionMessages(
+  companyId: string,
+  sourceLocale: AppLanguage | undefined,
+  rows: unknown,
+) {
+  if (!sourceLocale || !Array.isArray(rows)) return;
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const id = "id" in row && typeof row.id === "string" ? row.id : null;
+    const details = parseRecognitionDetailsValue(
+      "reward_details" in row ? row.reward_details : null,
+    );
+    if (!id || !details?.message) continue;
+    scheduleRecognitionMessage({
+      companyId,
+      sourceId: id,
+      sourceLocale,
+      message: details.message,
+    });
+  }
+}
 
 function parseRecognitionDetailsValue(raw: unknown): RecognitionDetails | null {
   if (!raw) return null;
@@ -415,10 +439,12 @@ export async function createManualRecognition({
   companyId,
   actorId,
   input,
+  sourceLocale,
 }: {
   companyId: string;
   actorId: string;
   input: ManualRecognitionInput;
+  sourceLocale?: AppLanguage;
 }) {
   const details: RecognitionDetails = {
     source: input.source ?? "manual",
@@ -444,10 +470,15 @@ export async function createManualRecognition({
     company_id: companyId,
   };
 
-  const { error } = await supabase.from("goal_rewards").insert(payload);
+  const { data, error } = await supabase
+    .from("goal_rewards")
+    .insert(payload)
+    .select("id, reward_details")
+    .single();
   if (error) {
     throw new Error(error.message ?? "Failed to create recognition");
   }
+  scheduleInsertedRecognitionMessages(companyId, sourceLocale, data ? [data] : []);
 }
 
 export async function fetchExistingRecognitionRows(companyId: string) {
@@ -592,6 +623,7 @@ async function generateTrainingRecognitions(
   companyId: string,
   actorId: string,
   existing: RecognitionRow[],
+  sourceLocale?: AppLanguage,
 ) {
   const { data: completions, error } = await supabase
     .from("v_training_completion_events")
@@ -699,19 +731,22 @@ async function generateTrainingRecognitions(
 
   if (newRecognitionsPayload.length === 0) return;
 
-  const { error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("goal_rewards")
-    .insert(newRecognitionsPayload);
+    .insert(newRecognitionsPayload)
+    .select("id, reward_details");
   if (insertError)
     throw new Error(
       insertError.message ?? "Failed to insert training recognitions",
     );
+  scheduleInsertedRecognitionMessages(companyId, sourceLocale, inserted);
 }
 
 async function generateMilestoneRecognitions(
   companyId: string,
   actorId: string,
   existing: RecognitionRow[],
+  sourceLocale?: AppLanguage,
 ) {
   const { data: milestones, error } = await supabase
     .from("goal_milestones")
@@ -805,19 +840,22 @@ async function generateMilestoneRecognitions(
 
   if (newRecognitionsPayload.length === 0) return;
 
-  const { error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("goal_rewards")
-    .insert(newRecognitionsPayload);
+    .insert(newRecognitionsPayload)
+    .select("id, reward_details");
   if (insertError)
     throw new Error(
       insertError.message ?? "Failed to insert milestone recognitions",
     );
+  scheduleInsertedRecognitionMessages(companyId, sourceLocale, inserted);
 }
 
 async function generateTaskRecognitions(
   companyId: string,
   actorId: string,
   existing: RecognitionRow[],
+  sourceLocale?: AppLanguage,
 ) {
   const { data: goalTasks, error } = await supabase
     .from("goal_tasks")
@@ -876,19 +914,22 @@ async function generateTaskRecognitions(
 
   if (newRecognitionsPayload.length === 0) return;
 
-  const { error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("goal_rewards")
-    .insert(newRecognitionsPayload);
+    .insert(newRecognitionsPayload)
+    .select("id, reward_details");
   if (insertError)
     throw new Error(
       insertError.message ?? "Failed to insert task recognitions",
     );
+  scheduleInsertedRecognitionMessages(companyId, sourceLocale, inserted);
 }
 
 async function applyAwardRules(
   companyId: string,
   actorId: string,
   existing: RecognitionRow[],
+  sourceLocale?: AppLanguage,
 ) {
   const { data: rules, error } = await supabase
     .from("recognition_award_rules")
@@ -1001,34 +1042,38 @@ async function applyAwardRules(
     return;
   }
 
-  const { error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("goal_rewards")
-    .insert(inserts);
+    .insert(inserts)
+    .select("id, reward_details");
   if (insertError)
     throw new Error(
       insertError.message ?? "Failed to insert award rule recognitions",
     );
+  scheduleInsertedRecognitionMessages(companyId, sourceLocale, inserted);
 }
 
 export async function syncRecognitionAutomation({
   companyId,
   actorId,
+  sourceLocale,
 }: {
   companyId: string;
   actorId: string;
+  sourceLocale?: AppLanguage;
 }) {
   await seedDefaultTrainingModules(companyId, actorId);
   await ensureNewHireAssignments(companyId, actorId);
   const existing = await fetchExistingRecognitionRows(companyId);
 
   await Promise.all([
-    generateTrainingRecognitions(companyId, actorId, existing),
-    generateMilestoneRecognitions(companyId, actorId, existing),
-    generateTaskRecognitions(companyId, actorId, existing),
+    generateTrainingRecognitions(companyId, actorId, existing, sourceLocale),
+    generateMilestoneRecognitions(companyId, actorId, existing, sourceLocale),
+    generateTaskRecognitions(companyId, actorId, existing, sourceLocale),
   ]);
 
   const refreshed = await fetchExistingRecognitionRows(companyId);
-  await applyAwardRules(companyId, actorId, refreshed);
+  await applyAwardRules(companyId, actorId, refreshed, sourceLocale);
 }
 
 export const recognitionRepository = {

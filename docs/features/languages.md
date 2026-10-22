@@ -720,7 +720,7 @@ Prove: Unit test the four field paths. Run it with the jiti runner.
 
 ### Phase 42 — Recognition
 
-- [ ] Translate recognition messages and badge reasons.
+- [x] Translate recognition messages and badge reasons.
 
 Rules:
 
@@ -1408,5 +1408,21 @@ Phone steps for Pedro:
 4. Set the language back to English. The course and module text should be the English words you typed, with no translated-from line.
 
 Blockers: none. Migration `20261022163546_content_translations_learning_modules` is applied.
+
+Questions: none.
+
+### 2026-10-22 — Phase 42 Recognition
+
+Shipped: A recognition keeps the message that was written. A badge keeps the reason that was written. The cache paths are `recognition_events.message` and `employee_badge.reason`. The person's name is not sent. The save returns before the model runs. The recognition feed shows the translated message, and an earned badge on that page shows the translated reason, each with one see-original line when the languages differ. The person's name stays as stored.
+
+Proven: `src/features/recognition/recognitionTranslation.test.ts` passed through the jiti runner. The message and the reason are translated. The model is not called with `Pedro Alves`. A second read of the message does not call the model again. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Recognition and use Sync automation, or finish a course that awards a badge. The feed message and the badge reason should save without waiting. The person's name on the feed stays as stored.
+3. Set your language to Español and open Recognition again. The message should be Spanish, with Traducido de English. The badge reason should be Spanish. The person's name should be unchanged.
+4. Set the language back to English. The message and the reason should be the English words that were stored, with no translated-from line.
+
+Blockers: none. No new migration.
 
 Questions: none.

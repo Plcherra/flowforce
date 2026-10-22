@@ -8,6 +8,7 @@ import { RecognitionHeader } from "./RecognitionHeader";
 import { BadgeGrid, type BadgeCard } from "./BadgeGrid";
 import { RecognitionFeed } from "./RecognitionFeed";
 import { useTranslation } from "react-i18next";
+import { useRecognition } from "@/features/gamification/hooks/useRecognition";
 
 type BadgeBlueprint = {
   id: string;
@@ -78,6 +79,7 @@ export function RecognitionPage() {
   const { t } = useTranslation();
   const { recognitions, loading, syncing, error, refresh, syncAutomation } =
     useRecognitions({ lookbackDays: 90 });
+  const { earnedBadges } = useRecognition();
   const badges = buildBadgeCards(recognitions);
 
   return (
@@ -100,7 +102,11 @@ export function RecognitionPage() {
       )}
 
       <BadgeGrid badges={badges} loading={loading} />
-      <RecognitionFeed recognitions={recognitions} loading={loading} />
+      <RecognitionFeed
+        recognitions={recognitions}
+        loading={loading}
+        earnedBadges={earnedBadges}
+      />
     </div>
   );
 }
