@@ -7,14 +7,19 @@ import {
   Globe,
   Plug,
   Shield,
-  SlidersHorizontal,
   Sparkles,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import { IfCan } from "@/components/permissions/IfCan";
 import { SystemSettingsLayout } from "../components/SystemSettingsLayout";
 import { PersonalLanguageSelect } from "../components/PersonalLanguageSelect";
 import { ErrorState } from "../components/ErrorState";
+import {
+  SETTINGS_CONTROL_GATES,
+  SETTINGS_TAB_KEYS,
+  type SettingsTabKey,
+} from "../utils/settingsTabs";
 
 const GeneralSettingsPanel = lazy(async () => {
   const mod = await import("../components/GeneralSettingsPanel");
@@ -65,141 +70,149 @@ const PanelFallback = () => (
   </div>
 );
 
+function tabLabel(key: SettingsTabKey, t: (key: string) => string) {
+  switch (key) {
+    case "general":
+      return t("settings.tabGeneral");
+    case "security":
+      return t("settings.tabSecurity");
+    case "localization":
+      return t("settings.tabRegion");
+    case "notifications":
+      return t("settings.tabNotifications");
+    case "copilot":
+      return t("settings.tabAi");
+    case "integrations":
+      return t("footer.integrations");
+    case "billing":
+      return t("settings.tabBilling");
+  }
+}
+
+function tabIcon(key: SettingsTabKey) {
+  switch (key) {
+    case "general":
+      return Building2;
+    case "security":
+      return Shield;
+    case "localization":
+      return Globe;
+    case "notifications":
+      return Bell;
+    case "copilot":
+      return Sparkles;
+    case "integrations":
+      return Plug;
+    case "billing":
+      return CreditCard;
+  }
+}
+
 export default function SettingsPage() {
   const { t } = useTranslation();
   return (
     <SystemSettingsLayout
-      tabs={[
-        {
-          key: "general",
-          label: t("settings.tabGeneral"),
-          icon: Building2,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <GeneralSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "security",
-          label: t("settings.tabSecurity"),
-          icon: Shield,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <SecuritySettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "localization",
-          label: t("settings.tabRegion"),
-          icon: Globe,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <PersonalLanguageSelect />
-              <Suspense fallback={<PanelFallback />}>
-                <LocalizationSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "notifications",
-          label: t("settings.tabNotifications"),
-          icon: Bell,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <NotificationSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "copilot",
-          label: t("settings.tabAi"),
-          icon: Sparkles,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <AICopilotSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "integrations",
-          label: t("footer.integrations"),
-          icon: Plug,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <IntegrationSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "billing",
-          label: t("settings.tabBilling"),
-          icon: CreditCard,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <BillingSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-        {
-          key: "admin",
-          label: t("common.admin"),
-          icon: SlidersHorizontal,
-          content: (
-            <ErrorBoundary
-              FallbackComponent={({ error }) => (
-                <ErrorState message={error.message} />
-              )}
-            >
-              <Suspense fallback={<PanelFallback />}>
-                <AdminSettingsPanel />
-              </Suspense>
-            </ErrorBoundary>
-          ),
-        },
-      ]}
+      tabs={SETTINGS_TAB_KEYS.map((key) => ({
+        key,
+        label: tabLabel(key, t),
+        icon: tabIcon(key),
+        content: <SettingsTabContent tabKey={key} />,
+      }))}
     />
+  );
+}
+
+function SettingsTabContent({ tabKey }: { tabKey: SettingsTabKey }) {
+  if (tabKey === "general") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <GeneralSettingsPanel />
+        </Suspense>
+        <IfCan permission={SETTINGS_CONTROL_GATES.export.permission}>
+          <Suspense fallback={<PanelFallback />}>
+            <AdminSettingsPanel section="maintenance" />
+          </Suspense>
+        </IfCan>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "security") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <SecuritySettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "localization") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <PersonalLanguageSelect />
+        <Suspense fallback={<PanelFallback />}>
+          <LocalizationSettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "notifications") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <NotificationSettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "copilot") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <AICopilotSettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "integrations") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <IntegrationSettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+    >
+      <Suspense fallback={<PanelFallback />}>
+        <BillingSettingsPanel />
+      </Suspense>
+      <IfCan permission={SETTINGS_CONTROL_GATES.billing.permission}>
+        <Suspense fallback={<PanelFallback />}>
+          <AdminSettingsPanel section="billing" />
+        </Suspense>
+      </IfCan>
+    </ErrorBoundary>
   );
 }

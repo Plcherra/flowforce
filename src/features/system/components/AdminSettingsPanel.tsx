@@ -40,7 +40,11 @@ import { useTranslation } from "react-i18next";
 const toBillingIsoDate = (value: string) =>
   value ? new Date(`${value}T23:59:59.000Z`).toISOString() : null;
 
-export function AdminSettingsPanel() {
+export function AdminSettingsPanel({
+  section,
+}: {
+  section: "billing" | "maintenance";
+}) {
   const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
@@ -119,8 +123,12 @@ export function AdminSettingsPanel() {
     }));
   };
 
+  const showBilling = section === "billing";
+  const showMaintenance = section === "maintenance";
+
   return (
     <div className="space-y-6">
+      {showBilling ? (
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -307,7 +315,10 @@ export function AdminSettingsPanel() {
           </div>
         </CardContent>
       </Card>
+      ) : null}
 
+      {showMaintenance ? (
+      <>
       <Card>
         <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
@@ -463,6 +474,8 @@ export function AdminSettingsPanel() {
           )}
         </CardContent>
       </Card>
+      </>
+      ) : null}
 
       {saveError && <ErrorState message={saveError.message} />}
 

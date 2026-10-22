@@ -1,12 +1,12 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 3.
+Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 4.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
 The permission-grant plan is the second half. Those phases start now that this row is active in `docs/roadmap.md`.
 
-Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, Billing, and Admin.
+Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, and Billing. Phase 3 removed the Admin tab.
 
 ## Candidates
 
@@ -71,7 +71,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phase 3 is the next unchecked phase.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phase 3 is checked. Phase 4 is the next unchecked phase.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -87,7 +87,7 @@ These are locked when this file is the active feature. Implement them. Do not ed
 
 ### Phase 3 — Admin is not an access model
 
-- [ ] Remove the Admin tab and the Admin page as the way access is granted.
+- [x] Remove the Admin tab and the Admin page as the way access is granted.
 
 Rules:
 
@@ -187,5 +187,22 @@ Shipped: this plan only. No product code. Decisions 1–5 and phases 3–7 are u
 Proven: this file is the plan.
 
 Blockers: these phases wait until this file is marked active. Candidate phase 2 stays blocked on which candidates to remove.
+
+Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 3 Admin is not an access model
+
+Shipped: Settings no longer has an Admin tab. The sidebar no longer has an Admin item. Billing plan and billing stay on the Billing tab, and the plan editor stays behind `billing.manage`. Settings export, audit, and danger actions stay on General behind `systemSettings`. User management stays on the employee directory behind `manageUsers`. `/app/admin` opens the employee directory instead of an access page. No new permission key.
+
+Proven: `src/features/system/utils/settingsTabs.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. The settings tab keys do not include `admin`. The navigation items do not include an Admin href of `/admin`. Billing stays on the billing tab behind `billing.manage`. Export, audit, and danger stay behind `systemSettings`. User management stays behind `manageUsers` on the employee directory. `npm run check:i18n` printed 4625 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed. No new locale strings.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Settings. The tabs are General, Security, Region, Notifications, AI, Integrations, and Billing. There is no Admin tab.
+2. In the sidebar, Administration shows Settings and Resources. There is no Admin item.
+3. Open Billing. The plan, seats, and billing actions are on that tab. With billing manage, the plan editor, seats, and workspace access are on Billing too.
+4. Open General as an owner or someone with system settings. Export backup, the high-risk confirmation, and recent audit activity are on General. Sign in as a manager without system settings. Those blocks are hidden.
+5. Open the team directory and open a person. Access and Roles & Permissions show only for someone with manage users. Open `/app/admin`. It leaves that address and opens the employee directory.
+
+Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
 
 Questions: Which candidates to remove? No new question.

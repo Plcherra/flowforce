@@ -183,12 +183,6 @@ export const navigationSections: NavigationSection[] = [
         translationKey: "settings",
       },
       {
-        name: "Admin",
-        href: "/admin",
-        icon: Shield,
-        translationKey: "admin",
-      },
-      {
         name: "Resources",
         href: "/resources",
         icon: FileText,

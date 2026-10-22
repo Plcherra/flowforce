@@ -16,6 +16,7 @@ import { InviteEmployeePanel } from "./InviteEmployeePanel";
 import { UserPermissionsTab } from "./users/UserPermissionsTab";
 import { RoleConfigPanel } from "./RoleConfigPanel";
 import { UserOverviewTab } from "@/features/employees/components/users/UserOverviewTab";
+import { useCanCheck } from "@/hooks/useCan";
 import { usePermission } from "@/hooks/usePermission";
 import "@/styles/employee.css";
 
@@ -42,9 +43,8 @@ export function EmployeeDrawer({
 }: EmployeeDrawerProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<EmployeeDrawerTab>("profile");
-  const canManageAccess = usePermission("manage_roles");
+  const canManageUsers = useCanCheck("manageUsers");
   const canInvite = usePermission("invite_employees");
-  const canManageRoles = usePermission("assignpermissions");
 
   const hasEmployee = !!employee;
   const employeeId = employee?.id ?? null;
@@ -55,17 +55,17 @@ export function EmployeeDrawer({
       {
         value: "access",
         label: "Access",
-        enabled: hasEmployee && canManageAccess,
+        enabled: hasEmployee && canManageUsers,
       },
       { value: "invite", label: "Invitations", enabled: canInvite },
       {
         value: "roles",
         label: "Roles & Permissions",
-        enabled: hasEmployee && canManageRoles,
+        enabled: hasEmployee && canManageUsers,
       },
     ];
     return baseTabs.filter((tab) => tab.enabled);
-  }, [canInvite, canManageAccess, canManageRoles, hasEmployee]);
+  }, [canInvite, canManageUsers, hasEmployee]);
 
   useEffect(() => {
     if (!tabs.length) {
@@ -127,7 +127,7 @@ export function EmployeeDrawer({
                 </TabsContent>
               )}
 
-              {hasEmployee && canManageAccess && (
+              {hasEmployee && canManageUsers && (
                 <TabsContent
                   value="access"
                   className="mt-0 flex-1 overflow-y-auto"
@@ -145,7 +145,7 @@ export function EmployeeDrawer({
                 </TabsContent>
               )}
 
-              {hasEmployee && canManageRoles && (
+              {hasEmployee && canManageUsers && (
                 <TabsContent
                   value="roles"
                   className="mt-0 flex-1 overflow-y-auto"
