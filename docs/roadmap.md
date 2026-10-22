@@ -4,44 +4,58 @@
 Read this index and open only the feature file marked active.
 `PROJECT-STATUS.md` is the current status of the app.
 
-The next run starts Scheduling + Time Off and opens [docs/features/time-off.md](features/time-off.md).
+The 6 AM daily run opens the one row marked active. That row is Theme: [docs/features/theme.md](features/theme.md).
 
-## This week
+When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. The handoff is Theme, then Languages, then Time Off. Do not skip a row.
 
-| Feature | Status | File |
-| --- | --- | --- |
-| Scheduling + Time Off | active | [docs/features/time-off.md](features/time-off.md) |
+## Order
+
+| # | Feature | Status | File |
+| --- | --- | --- | --- |
+| 1 | Theme | active | [docs/features/theme.md](features/theme.md) |
+| 2 | Languages | next | [docs/features/languages.md](features/languages.md) |
+| 3 | Time Off, then remaining Tasks | queued | [docs/features/time-off.md](features/time-off.md), then [docs/features/tasks.md](features/tasks.md) |
+| 4 | System and Admin | queued | [docs/features/system-admin.md](features/system-admin.md) |
+| 5 | Operations | queued | [docs/features/forms-communication.md](features/forms-communication.md) |
+| 6 | Team | queued | Feature file not written yet |
+| 7 | Reports | queued | Feature file not written yet |
+| 8 | Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
+
+Only one row is active. Do not start a later row while an earlier one is still open.
 
 Shipped schedule work stays in [docs/features/schedule.md](features/schedule.md). Phases 1–25 are checked: time off policies `820802f`, repeating availability `5dca98d`, and the leadership grid `a9aa674`. Do not reopen those phases.
 
-Tasks phases 8, 19, and 22–24 are checked. Phases 9–12 stay skipped. Tasks stays closed. [docs/features/tasks.md](features/tasks.md)
+### 1. Theme
 
-## Next week
+Active. The 6 AM run starts here. When every phase in `docs/features/theme.md` is checked, mark this row done, mark Languages active, and open [docs/features/languages.md](features/languages.md).
 
-| Feature | Status | File |
-| --- | --- | --- |
-| System and Admin rework | next | [docs/features/system-admin.md](features/system-admin.md) |
+### 2. Languages
 
-That file lists systems that look wrong or unnecessary, and Pedro's permission-grant plan. It stays next. It is not the active feature. Candidate phase 2 waits on the owner. The permission-grant phases wait until this file is active.
+Next. Do not open it while Theme is active. When every phase in `docs/features/languages.md` is checked, mark this row done, mark Time Off active, and open [docs/features/time-off.md](features/time-off.md).
 
-## After that
+### 3. Time Off, then remaining Tasks
 
-| Feature | Status | File |
-| --- | --- | --- |
-| Forms and Communication | queued | [docs/features/forms-communication.md](features/forms-communication.md) |
-| Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
-| AI Insights | queued | [docs/features/ai-insights.md](features/ai-insights.md) |
+Time Off has 9 phases in [docs/features/time-off.md](features/time-off.md). When those 9 are checked, open [docs/features/tasks.md](features/tasks.md) for the remaining phases. Phases 9–12 stay skipped until their open questions are answered. Do not redo the checked Tasks phases. If 9–12 are still blocked, log the skip and move the pointer to System and Admin.
 
-Open these in that order. Do not start one while an earlier row is still open.
+### 4. System and Admin
 
-## Later
+The permission-grant model. Chats, updates, and the features below need it, so this row comes before them. Candidate phase 2 still waits on the owner. The permission-grant phases wait until this row is active. [docs/features/system-admin.md](features/system-admin.md)
 
-Leave these closed. Theme and Languages stay written, and they are not the feature the next run opens.
+### 5. Operations
 
-| Feature | Status | File |
-| --- | --- | --- |
-| Theme | later | [docs/features/theme.md](features/theme.md) |
-| Languages | later, after Theme | [docs/features/languages.md](features/languages.md) |
+Forms, communication (chats), and company updates. The file is [docs/features/forms-communication.md](features/forms-communication.md). Do not open it before System and Admin.
+
+### 6. Team
+
+Recognition, XP, performance, and certifications. The feature file is not written yet. Do not start this row early, and do not invent the file from a Theme, Languages, or Time Off run.
+
+### 7. Reports
+
+Reports sit on top of the features above. The feature file is not written yet. [docs/features/ai-insights.md](features/ai-insights.md) stays closed until this row is active.
+
+### 8. Inventory
+
+Last. [docs/features/inventory.md](features/inventory.md). Do not open it before Reports.
 
 ## AI providers
 

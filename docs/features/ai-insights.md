@@ -1,6 +1,6 @@
 # AI Insights
 
-Queued. Leave this file closed until the roadmap row for AI Insights is the one the next run opens.
+Queued. Leave this file closed until the Reports row in `docs/roadmap.md` is active. Reports sit on top of the earlier features. Do not open this file before that row.
 
 No phases yet. Do not invent phases from this file.
 

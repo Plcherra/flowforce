@@ -1,5 +1,7 @@
 # Tasks
 
+Queued until Time Off's 9 phases are checked. The remaining work is phases 9–12, and those stay skipped until their open questions are answered. Do not redo the checked phases. Do not open this file from a Theme or Languages run.
+
 This file is a manual review of the Tasks page, to decide what the final product will be from what we have now.
 
 Do not edit the Audit section. That includes editing it to pass a check.

@@ -1,6 +1,6 @@
 # Inventory
 
-Queued. Leave this file closed until the roadmap row for Inventory is the one the next run opens.
+Queued, and last. Leave this file closed until the Inventory row in `docs/roadmap.md` is active. That row comes after Reports.
 
 No phases yet. Do not invent phases from this file.
 

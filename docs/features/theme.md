@@ -1,5 +1,7 @@
 # Theme
 
+Active. The roadmap marks this file for the 6 AM run. When every phase here is checked, update `docs/roadmap.md`: this row becomes done, Languages becomes active, and the run opens [docs/features/languages.md](languages.md).
+
 ## Goal
 
 FlowForce has one brand palette. The signed-in app offers three themes and nothing else: FlowForce, Light, and Dark. FlowForce is the blue the signed-in app already paints from the company colors, baked into `:root` as fixed tokens. Light and Dark are that same blue on different surfaces. There is no color picker, no palette picker, and no company accent.

@@ -1,10 +1,10 @@
 # System and Admin rework
 
-Next week. This file is not active. Scheduling + Time Off stays the active feature.
+Queued. This file is not active. Theme is the active feature. Do not start this file from a Theme, Languages, or Time Off run. Chats, updates, and the later features need the permission-grant plan, so this row comes before Operations.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
-The permission-grant plan is the second half. Those phases wait until this file is marked active. Do not start them from a Time Off run.
+The permission-grant plan is the second half. Those phases wait until the System and Admin row in `docs/roadmap.md` is active. Do not start them from a Theme, Languages, or Time Off run.
 
 Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, Billing, and Admin.
 
@@ -65,7 +65,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is next, not active. Do not start these phases while Scheduling + Time Off is the active feature. Do not change product code from this plan until this file is marked active.
+This plan is queued, not active. Do not start these phases while this file is not the active row in `docs/roadmap.md`. Do not change product code from this plan until that row is active.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 

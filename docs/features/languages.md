@@ -1,5 +1,7 @@
 # Languages
 
+Next, after Theme. Do not open this file while Theme is active. When every phase here is checked, update `docs/roadmap.md`: this row becomes done, Time Off becomes active, and the run opens [docs/features/time-off.md](time-off.md).
+
 ## Goal
 
 The app speaks the viewer's language. A person picks one of six languages. If they have not picked, the company language is used. If the company has not picked, the language is English.

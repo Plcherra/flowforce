@@ -1,6 +1,6 @@
 # Forms and Communication
 
-Queued. Leave this file closed until the roadmap row for Forms and Communication is the one the next run opens.
+Queued. Leave this file closed until the Operations row in `docs/roadmap.md` is active. That row is forms, chats, and company updates, and it comes after System and Admin.
 
 No phases yet. Do not invent phases from this file.
 

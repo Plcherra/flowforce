@@ -1,6 +1,6 @@
 # Time Off
 
-Scheduling plus Time Off is the current feature. This file is the one the roadmap marks for the next run.
+Queued, after Languages. The 6 AM run does not open this file while Theme or Languages is active. This file has 9 phases. When they are checked, the run opens the remaining Tasks phases in [docs/features/tasks.md](tasks.md). Phases 9–12 there stay skipped until their open questions are answered.
 
 Shipped schedule work stays in [docs/features/schedule.md](schedule.md). Do not reopen it. Phases 1–25 there are checked. The base for this file is:
 

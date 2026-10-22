@@ -7,12 +7,13 @@ alwaysApply: true
 When the task says "next phase":
 
 1. Read `docs/roadmap.md`.
-2. Open only the feature file marked active.
+2. Open only the feature file whose row is marked active. The 6 AM run uses that row as its pointer. Do not hardcode a filename.
 3. Implement the next unchecked phase that is not blocked and does not depend on an unapplied migration.
 4. Follow that phase's rules, its done-when, and its Prove line.
 5. Prove done-when with a unit test or a Playwright test. Playwright tests use the scheduling tenant seed in `tests/playwright/helpers/schedulingPlaywrightTenant.ts`. If the phase cannot be tested, write manual phone steps for the owner in the Progress log.
 6. Append a dated Progress log entry: what shipped, the commit, blockers, and questions. Never guess an Open question. Skip a blocked phase and log the skip.
 7. After the phase is green, continue to the next unblocked phase that does not depend on an unapplied migration, in the same run if time allows. Each phase is its own commit.
+8. When the active file has no unchecked phase left, update `docs/roadmap.md` in that same run. Mark the finished row done. Mark the next row in that file's order active. Open the new file. The handoff is Theme, then Languages, then Time Off. Follow the rest of the order written there. Do not skip a row.
 
 Migrations, for any phase that adds one:
 
