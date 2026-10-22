@@ -126,15 +126,15 @@ export default function FormInsights({
   const getInsightColor = (type: string) => {
     switch (type) {
       case "improvement":
-        return "text-blue-500";
+        return "text-primary";
       case "success":
-        return "text-green-500";
+        return "text-success";
       case "warning":
-        return "text-orange-500";
+        return "text-warning";
       case "trend":
-        return "text-purple-500";
+        return "text-secondary";
       default:
-        return "text-gray-500";
+        return "text-muted-foreground";
     }
   };
 
@@ -155,7 +155,7 @@ export default function FormInsights({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-yellow-500" />
+          <Lightbulb className="h-5 w-5 text-warning" />
           Smart Insights
         </CardTitle>
       </CardHeader>
@@ -217,7 +217,7 @@ export default function FormInsights({
 
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <h5 className="font-medium mb-2 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <TrendingUp className="h-4 w-4 text-success" />
             Overall Form Health
           </h5>
           <div className="space-y-2">

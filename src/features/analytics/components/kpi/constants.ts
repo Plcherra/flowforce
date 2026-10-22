@@ -8,7 +8,7 @@ export const TREND_LABEL: Record<
   "up" | "down" | "flat",
   { icon: typeof TrendingUp; tone: string }
 > = {
-  up: { icon: TrendingUp, tone: "text-emerald-500" },
+  up: { icon: TrendingUp, tone: "text-success" },
   down: { icon: TrendingDown, tone: "text-destructive" },
   flat: { icon: TrendingUp, tone: "text-muted-foreground" },
 };

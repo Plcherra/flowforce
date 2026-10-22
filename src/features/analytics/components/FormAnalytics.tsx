@@ -64,7 +64,7 @@ interface AnalyticsData {
   deviceBreakdown: { device: string; count: number; percentage: number }[];
 }
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#0088fe"];
+const COLORS = ["hsl(var(--secondary))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--warning))", "hsl(var(--primary))"];
 
 export default function FormAnalytics({
   formId,
@@ -512,7 +512,7 @@ export default function FormAnalytics({
                     <div className="text-2xl font-bold">
                       {analyticsData.completionRate}%
                     </div>
-                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <TrendingUp className="h-4 w-4 text-success" />
                   </div>
                 </CardContent>
               </Card>
@@ -568,7 +568,7 @@ export default function FormAnalytics({
                     <Line
                       type="monotone"
                       dataKey="submissions"
-                      stroke="#8884d8"
+                      stroke="hsl(var(--secondary))"
                       strokeWidth={2}
                     />
                   </LineChart>
@@ -589,7 +589,7 @@ export default function FormAnalytics({
                     <XAxis dataKey="field" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="interactions" fill="#8884d8" />
+                    <Bar dataKey="interactions" fill="hsl(var(--secondary))" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -612,13 +612,13 @@ export default function FormAnalytics({
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-muted-foreground">
                           Completion:{" "}
-                          <span className="font-medium text-green-600">
+                          <span className="font-medium text-success">
                             {field.completion}%
                           </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Drop-off:{" "}
-                          <span className="font-medium text-red-600">
+                          <span className="font-medium text-destructive">
                             {field.dropoff}%
                           </span>
                         </div>

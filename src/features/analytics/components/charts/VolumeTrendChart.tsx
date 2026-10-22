@@ -24,11 +24,11 @@ export function VolumeTrendChart({ data }: VolumeTrendChartProps) {
         <XAxis dataKey="date" />
         <YAxis />
         <Tooltip />
-        <Line type="monotone" dataKey="forms" stroke="#3b82f6" name="Forms" />
+        <Line type="monotone" dataKey="forms" stroke="hsl(var(--primary))" name="Forms" />
         <Line
           type="monotone"
           dataKey="reports"
-          stroke="#10b981"
+          stroke="hsl(var(--success))"
           name="Reports"
         />
       </LineChart>

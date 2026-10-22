@@ -264,7 +264,7 @@ export function BusinessAnalyticsBoard({
                       positiveSignals.map((item, index) => (
                         <li
                           key={index}
-                          className="text-sm leading-relaxed text-emerald-600"
+                          className="text-sm leading-relaxed text-success"
                         >
                           {item}
                         </li>

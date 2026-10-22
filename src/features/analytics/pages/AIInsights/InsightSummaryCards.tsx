@@ -15,8 +15,8 @@ const toneClasses: Record<InsightTone, string> = {
   purple:
     "border border-primary/20 bg-primary/5 text-primary dark:bg-primary/10",
   green:
-    "border border-emerald-400/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-300/40",
-  blue: "border border-sky-400/30 bg-sky-500/10 text-sky-700 dark:border-sky-300/40",
+    "border border-success/30 bg-success/10 text-success",
+  blue: "border border-primary/30 bg-primary/10 text-primary",
   slate: "border border-border bg-muted/50 text-foreground",
 };
 

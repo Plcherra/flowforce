@@ -72,11 +72,11 @@ const STATUS_META: Record<
 function statusClass(tone: "default" | "warning" | "success" | "destructive") {
   switch (tone) {
     case "warning":
-      return "border-amber-500/40 text-amber-600 bg-amber-500/10";
+      return "border-warning/40 text-warning bg-warning/10";
     case "success":
-      return "border-emerald-500/40 text-emerald-600 bg-emerald-500/10";
+      return "border-success/40 text-success bg-success/10";
     case "destructive":
-      return "border-red-500/40 text-red-600 bg-red-500/10";
+      return "border-destructive/40 text-destructive bg-destructive/10";
     default:
       return "";
   }
@@ -248,7 +248,7 @@ export default function ReportsPage() {
       <div className="container mx-auto px-6 py-16">
         <Card>
           <CardContent className="py-16 text-center space-y-3">
-            <AlertCircle className="mx-auto h-10 w-10 text-amber-500" />
+            <AlertCircle className="mx-auto h-10 w-10 text-warning" />
             <h2 className="text-xl font-semibold">Access restricted</h2>
             <p className="text-muted-foreground">
               You do not have permission to view reporting data. Contact an
@@ -461,7 +461,7 @@ export default function ReportsPage() {
                         {doc.events.length > 0 ? (
                           <Badge
                             variant="outline"
-                            className="bg-emerald-50 text-emerald-700 border-emerald-200"
+                            className="bg-success-muted text-success border-success/40"
                           >
                             {doc.events.length} tracked
                           </Badge>

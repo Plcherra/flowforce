@@ -19,9 +19,9 @@ export interface StatusBreakdownItem {
 }
 
 export const CHART_COLORS = [
-  "#3b82f6",
-  "#10b981",
-  "#8b5cf6",
-  "#f59e0b",
-  "#ef4444",
+  "hsl(var(--primary))",
+  "hsl(var(--success))",
+  "hsl(var(--secondary))",
+  "hsl(var(--warning))",
+  "hsl(var(--destructive))",
 ];

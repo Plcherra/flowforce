@@ -25,8 +25,8 @@ export function ComparisonBarChart({ data }: ComparisonBarChartProps) {
         <XAxis dataKey="label" />
         <YAxis />
         <Tooltip />
-        <Bar dataKey="forms" fill="#6366f1" name="Forms" />
-        <Bar dataKey="reports" fill="#f97316" name="Reports" />
+        <Bar dataKey="forms" fill="hsl(var(--primary))" name="Forms" />
+        <Bar dataKey="reports" fill="hsl(var(--warning))" name="Reports" />
       </ReBarChart>
     </ResponsiveContainer>
   );

@@ -17,11 +17,11 @@ export function MetricBlock({
 }: MetricBlockProps) {
   const toneClass =
     tone === "warning"
-      ? "border-amber-300/70 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/10"
+      ? "border-warning/70 bg-warning/60"
       : tone === "success"
-        ? "border-emerald-300/70 bg-emerald-50/60 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+        ? "border-success/70 bg-success/60"
         : tone === "info"
-          ? "border-sky-300/70 bg-sky-50/60 dark:border-sky-500/30 dark:bg-sky-500/10"
+          ? "border-primary/70 bg-primary/60"
           : "border-border/60 bg-muted/40";
 
   return (

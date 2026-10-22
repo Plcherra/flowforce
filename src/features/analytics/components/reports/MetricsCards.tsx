@@ -29,7 +29,7 @@ export function MetricsCards({
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{completionRate}%</div>
-            <TrendingUp className="h-5 w-5 text-emerald-500" />
+            <TrendingUp className="h-5 w-5 text-success" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Combined forms and reports completed this window.
@@ -48,7 +48,7 @@ export function MetricsCards({
             <div className="text-2xl font-semibold">
               {reportsEngagementScore}%
             </div>
-            <Activity className="h-5 w-5 text-blue-500" />
+            <Activity className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Reports analyzed vs intake, factoring follow-up actions.
@@ -65,7 +65,7 @@ export function MetricsCards({
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{accuracyScore}%</div>
-            <ShieldCheck className="h-5 w-5 text-indigo-500" />
+            <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Percent of reports that finished processing successfully.
@@ -82,7 +82,7 @@ export function MetricsCards({
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="text-2xl font-semibold">{followUpActions}</div>
-            <Workflow className="h-5 w-5 text-purple-500" />
+            <Workflow className="h-5 w-5 text-secondary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             Tasks spawned from AI insights and report reviews.

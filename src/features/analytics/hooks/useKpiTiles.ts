@@ -69,7 +69,7 @@ export function useKpiTiles({
         title: "Scheduling Health",
         icon: CalendarDays,
         accent:
-          "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300",
+          "bg-primary/10 text-primary",
         metric:
           schedulingMetrics.coverage > 0
             ? `${schedulingMetrics.coverage}%`
@@ -99,7 +99,7 @@ export function useKpiTiles({
         title: "Performance Pulse",
         icon: BarChart3,
         accent:
-          "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300",
+          "bg-success-muted text-success",
         metric:
           performanceMetrics.averageCompletionRate > 0
             ? `${performanceMetrics.averageCompletionRate}%`

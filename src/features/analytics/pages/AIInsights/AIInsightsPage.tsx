@@ -229,12 +229,12 @@ function buildPredictionRows(
         : null;
     const trendClass =
       progress >= 80
-        ? "text-emerald-600"
+        ? "text-success"
         : progress >= 60
-          ? "text-blue-600"
+          ? "text-primary"
           : progress >= 40
-            ? "text-amber-600"
-            : "text-red-500";
+            ? "text-warning"
+            : "text-destructive";
 
     return {
       id: review.reviewId ?? `${review.goalId}-${review.reviewDate}`,
@@ -268,16 +268,16 @@ function buildRecommendations(
   return goalReviews.slice(0, 4).map((review, index) => {
     const progress = review.goalProgress ?? 0;
     let badgeLabel = "Focus Goal";
-    let badgeClassName = "bg-slate-100 text-slate-700";
+    let badgeClassName = "bg-muted text-muted-foreground";
     let message = "Align next steps with managers to maintain trajectory.";
 
     if (progress >= 80) {
       badgeLabel = "Accelerate";
-      badgeClassName = "bg-emerald-100 text-emerald-700";
+      badgeClassName = "bg-success-muted text-success";
       message = "Add a stretch target for additional XP bonus.";
     } else if (progress < 40) {
       badgeLabel = "Intervene";
-      badgeClassName = "bg-amber-100 text-amber-700";
+      badgeClassName = "bg-warning-muted text-warning-foreground";
       message = "Assign support tasks to unblock this goal.";
     }
 

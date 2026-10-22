@@ -26,7 +26,7 @@ import {
   Cell,
 } from "recharts";
 
-const COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"];
+const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--secondary))"];
 
 export default function AnalyticsDashboard() {
   const { data: analytics, isLoading } = useAnalytics();
@@ -39,8 +39,8 @@ export default function AnalyticsDashboard() {
           <Card key={i}>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-8 bg-muted rounded w-3/4"></div>
               </div>
             </CardContent>
           </Card>
@@ -77,11 +77,11 @@ export default function AnalyticsDashboard() {
                   {analytics?.totalEmployees || 0}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-blue-500" />
+              <Users className="h-8 w-8 text-primary" />
             </div>
             <div className="flex items-center mt-2">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-500">
+              <TrendingUp className="h-4 w-4 text-success mr-1" />
+              <span className="text-sm text-success">
                 +12% from last month
               </span>
             </div>
@@ -99,7 +99,7 @@ export default function AnalyticsDashboard() {
                   {analytics?.activeEmployees || 0}
                 </p>
               </div>
-              <CheckSquare className="h-8 w-8 text-green-500" />
+              <CheckSquare className="h-8 w-8 text-success" />
             </div>
             <div className="flex items-center mt-2">
               <Badge variant="outline" className="text-xs">
@@ -126,7 +126,7 @@ export default function AnalyticsDashboard() {
                   {analytics?.pendingTimeOffRequests || 0}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-orange-500" />
+              <Clock className="h-8 w-8 text-warning" />
             </div>
             <div className="flex items-center mt-2">
               <Badge
@@ -155,16 +155,16 @@ export default function AnalyticsDashboard() {
                   {analytics?.overdueTasks || 0}
                 </p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <AlertTriangle className="h-8 w-8 text-destructive" />
             </div>
             <div className="flex items-center mt-2">
               {analytics?.overdueTasks === 0 ? (
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+                <TrendingUp className="h-4 w-4 text-success mr-1" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
+                <TrendingDown className="h-4 w-4 text-destructive mr-1" />
               )}
               <span
-                className={`text-sm ${analytics?.overdueTasks === 0 ? "text-green-500" : "text-red-500"}`}
+                className={`text-sm ${analytics?.overdueTasks === 0 ? "text-success" : "text-destructive"}`}
               >
                 {analytics?.overdueTasks === 0
                   ? "Great work!"
@@ -191,19 +191,19 @@ export default function AnalyticsDashboard() {
                 <Line
                   type="monotone"
                   dataKey="employees"
-                  stroke="#3b82f6"
+                  stroke="hsl(var(--primary))"
                   name="Employees"
                 />
                 <Line
                   type="monotone"
                   dataKey="tasks"
-                  stroke="#10b981"
+                  stroke="hsl(var(--success))"
                   name="Tasks"
                 />
                 <Line
                   type="monotone"
                   dataKey="timeOff"
-                  stroke="#f59e0b"
+                  stroke="hsl(var(--warning))"
                   name="Time Off"
                 />
               </LineChart>
@@ -229,7 +229,7 @@ export default function AnalyticsDashboard() {
                 <Tooltip />
                 <Bar
                   dataKey="completion_rate"
-                  fill="#3b82f6"
+                  fill="hsl(var(--primary))"
                   name="Completion Rate %"
                 />
               </BarChart>
@@ -252,7 +252,7 @@ export default function AnalyticsDashboard() {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="hsl(var(--secondary))"
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
                 >
@@ -276,28 +276,28 @@ export default function AnalyticsDashboard() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="flex items-center">
-                <FileText className="h-4 w-4 mr-2 text-blue-500" />
+                <FileText className="h-4 w-4 mr-2 text-primary" />
                 Total Forms
               </span>
               <Badge variant="outline">{analytics?.totalForms || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
-                <CheckSquare className="h-4 w-4 mr-2 text-green-500" />
+                <CheckSquare className="h-4 w-4 mr-2 text-success" />
                 Form Submissions
               </span>
               <Badge variant="outline">{analytics?.formSubmissions || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-orange-500" />
+                <Clock className="h-4 w-4 mr-2 text-warning" />
                 Completed Tasks
               </span>
               <Badge variant="outline">{analytics?.completedTasks || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
-                <Users className="h-4 w-4 mr-2 text-purple-500" />
+                <Users className="h-4 w-4 mr-2 text-secondary" />
                 Task Completion Rate
               </span>
               <Badge variant="outline">

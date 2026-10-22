@@ -91,7 +91,7 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="value" fill="#3b82f6" />
+          <Bar dataKey="value" fill="hsl(var(--primary))" />
         </BarChart>
       </ResponsiveContainer>
     );
@@ -102,8 +102,8 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-muted rounded w-1/4"></div>
+            <div className="h-32 bg-muted rounded"></div>
           </div>
         </CardContent>
       </Card>

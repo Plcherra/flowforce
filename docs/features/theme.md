@@ -290,7 +290,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 14 — Analytics
 
-- [ ] Move hard-coded colors in Analytics onto the tokens.
+- [x] Move hard-coded colors in Analytics onto the tokens.
 
 Rules:
 
@@ -646,6 +646,22 @@ Phone steps for Pedro:
 2. An enabled section should read as green. A readiness warning should read as amber, and a blocker as red.
 3. Open the events calendar. Days in the month should sit on the page background. Days outside the month should be a muted wash. The selected day, week, or month button should be blue with light text.
 4. Switch to Dark. Section titles and the calendar should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 14 Analytics
+
+Shipped: Analytics classes now use the theme tokens. Chart series use primary, success, secondary, warning, and destructive. Readiness rows use the same status tokens. `src/features/analytics` has no baseline entries. A form chart that used both yellow and orange now uses warning for both, because Decision 7 maps both of those to warning.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Analytics or Reports.
+2. The main chart series should be blue, green, purple, amber, and red. They should follow the theme, not a separate hex palette.
+3. A healthy metric should read as green, a warning as amber, and a blocked metric as red.
+4. Switch to Dark. The chart lines and the metric text should stay readable.
 
 Blockers: none. No migration.
 
