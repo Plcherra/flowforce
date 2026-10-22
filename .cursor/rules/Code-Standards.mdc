@@ -12,3 +12,4 @@ Next.js App Router app, Supabase, and a Capacitor shell (`capacitor.config.ts`).
 - The browser uses the anon client in `src/integrations/supabase/client.ts`. Service-role keys and other secrets stay server-side (`src/lib/env.ts`, `src/server`). Do not put them in client code.
 - `check:brand-mentions` is known to flag `docs/features/schedule.md` (owner audit). Never edit the audit to pass it.
 - Run the checks covering files you changed (`npm run typecheck`, `npm run lint`, and the relevant tests or `npm run check:*` scripts). Do not run `check:local` or `check:release`.
+- Every new user-facing string is added to src/locales/en.json, es.json, pt.json, fr.json, it.json, and de.json in the same commit.

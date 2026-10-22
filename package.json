@@ -113,6 +113,7 @@
     "typecheck:supabase": "NODE_OPTIONS='--max-old-space-size=2048' tsc -p tsconfig.typecheck.supabase.json --pretty false",
     "check:supabase:remote-drift": "node scripts/check-supabase-migration-drift.mjs",
     "check:theme-colors": "node scripts/check-theme-colors.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "supabase:doctor": "node scripts/verify-supabase-cli-auth.mjs",
     "supabase": "node scripts/supabase-cli.mjs",
     "supabase:link": "node scripts/supabase-cli.mjs link --yes",

@@ -41,6 +41,9 @@ jobs:
       - name: Architecture contract
         run: npm run check:architecture
 
+      - name: Locale keys and hard-coded strings
+        run: npm run check:i18n
+
       - name: Install Supabase CLI
         run: npm install --global supabase@${{ env.SUPABASE_CLI_VERSION }}
 

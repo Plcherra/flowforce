@@ -107,7 +107,7 @@ Prove: A node script, inline in the phase commit or the Phase 2 checker if that 
 
 ### Phase 2 — Locale check and the cursor rule
 
-- [ ] Fail CI when a locale is behind, or when a new hard-coded string appears.
+- [x] Fail CI when a locale is behind, or when a new hard-coded string appears.
 
 Rules:
 
@@ -771,6 +771,20 @@ Phone steps for Pedro:
 2. Choose Español, then Português, Français, Italiano, and Deutsch. Labels that used to stay in English should follow the language you picked.
 3. Switch back to English. Wording that was already English should read the same as before this deploy.
 4. Sign in and open the dashboard. A greeting or profile label should follow the language chosen in the header.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 2 Locale check and the cursor rule
+
+Shipped: `npm run check:i18n` fails when a locale key is missing from one of the six files, or when a hard-coded JSX string under `src/` or `app/` is not in `scripts/i18n-hardcoded-baseline.json`. The baseline is the current tree, 4524 strings. Deploy readiness runs the check after the architecture contract. The code-standards rule now says every new user-facing string goes into all six locale files in the same commit.
+
+Proven: `npm run check:i18n` printed 603 keys for each locale and `hard-coded strings 4524`, then exited 0. The comparator test in `src/i18n/i18nCheck.test.ts` expects failure for a missing Spanish key and for an extra literal. Run with jiti. It passed.
+
+Phone steps for Pedro:
+1. This phase does not change what you see on the phone. Open https://www.flowforce.uk and confirm the language switch still changes the header language.
+2. No new screen and no new setting.
 
 Blockers: none. No migration.
 
