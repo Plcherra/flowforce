@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNavigationData } from "@/hooks/useNavigationData";
 import { BottomIconButton } from "./BottomIconButton";
 import { BottomNavMoreSheet } from "./BottomNavMoreSheet";
@@ -51,9 +50,10 @@ export function BottomIconNav() {
   const primaryIds = new Set(primary.map((item) => item.id));
 
   return (
-    <TooltipProvider delayDuration={300}>
+    <>
       <nav aria-label="Main" data-bottom-icon-nav="true" className="bottom-icon-nav">
-        <div className="bottom-icon-nav-icons border-0 shadow-none backdrop-blur-none">
+        <div className="bottom-icon-nav-icons border-0 shadow-none">
+          <div className="bottom-icon-nav-row">
           {groups.map((group) => {
             const visibleOnPhone = group.items.some((item) =>
               primaryIds.has(item.id),
@@ -113,6 +113,7 @@ export function BottomIconNav() {
               <MoreHorizontal className="h-6 w-6" aria-hidden="true" />
             </BottomIconButton>
           ) : null}
+          </div>
         </div>
       </nav>
 
@@ -126,6 +127,6 @@ export function BottomIconNav() {
           navigate(href);
         }}
       />
-    </TooltipProvider>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useMutation } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import {
   type ProductLevel,
 } from "@/features/roles/constants/productLevels";
 import { allowKeysToClearOnClassSave } from "@/features/roles/constants/personAccessDiffs";
+import { roleFetchBlocksUi } from "@/hooks/resumeStability";
 
 export interface CompanyRole {
   id: string;
@@ -114,12 +115,14 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
   const [roles, setRoles] = useState<CompanyRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<CompanyRolesError | null>(null);
+  const loadedUserIdRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   const fetchRoles = useCallback(async () => {
     if (!user) return;
 
-    setLoading(true);
+    const blocksUi = roleFetchBlocksUi(loadedUserIdRef.current, user.id);
+    if (blocksUi) setLoading(true);
     setError(null);
 
     try {
@@ -180,6 +183,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
       });
 
       setRoles(parsedRoles);
+      loadedUserIdRef.current = user.id;
     } catch (err: unknown) {
       logger.error("Error fetching company roles", {
         error: err,
@@ -190,7 +194,8 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
 
       if (onboarding && isMissingCompanyError(normalizedError)) {
         setRoles([...MINIMAL_ONBOARDING_ROLES]);
-      } else {
+        loadedUserIdRef.current = user.id;
+      } else if (roleFetchBlocksUi(loadedUserIdRef.current, user.id)) {
         setRoles([]);
       }
     } finally {
@@ -207,6 +212,7 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         });
       });
     } else {
+      loadedUserIdRef.current = null;
       setRoles([]);
       setError(null);
       setLoading(false);

@@ -36,6 +36,7 @@ import {
   getMobileSignUpRedirectUrl,
   registerMobileAppResumeHandler,
 } from "@/services/mobile/mobileAuthRouting";
+import { sameAuthSession, sameAuthUser } from "@/hooks/resumeStability";
 
 interface AuthContextType {
   user: User | null;
@@ -133,8 +134,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.auth.getSession();
         if (!isMounted) return;
 
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
+        const nextSession = data.session;
+        const nextUser = nextSession?.user ?? null;
+        setSession((previous) =>
+          sameAuthSession(previous, nextSession) ? previous : nextSession,
+        );
+        setUser((previous) =>
+          sameAuthUser(previous, nextUser) ? previous : nextUser,
+        );
       } catch (error) {
         logger.error("Failed to sync auth session", {
           error,
@@ -158,24 +165,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
       const nextUser = nextSession?.user ?? null;
 
-      setSession((previousSession) => {
-        if (
-          previousSession?.access_token === nextSession?.access_token &&
-          previousSession?.user?.id === nextSession?.user?.id
-        ) {
-          return previousSession;
-        }
-        return nextSession;
-      });
-      setUser((previousUser) => {
-        if (
-          previousUser?.id === nextUser?.id &&
-          previousUser?.updated_at === nextUser?.updated_at
-        ) {
-          return previousUser;
-        }
-        return nextUser;
-      });
+      setSession((previousSession) =>
+        sameAuthSession(previousSession, nextSession)
+          ? previousSession
+          : nextSession,
+      );
+      setUser((previousUser) =>
+        sameAuthUser(previousUser, nextUser) ? previousUser : nextUser,
+      );
       setLoading(false);
     });
 
