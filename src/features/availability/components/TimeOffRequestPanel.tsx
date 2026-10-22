@@ -44,6 +44,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useScheduling } from "@/contexts/SchedulingContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useTimeOffPolicies } from "@/features/scheduling/hooks/useTimeOffPolicies";
+import {
+  balanceLabel,
+  policyAppliesTo,
+  remainingBalances,
+} from "@/features/scheduling/utils/timeOffPolicy";
 import type { AvailabilityGrid } from "@/features/availability/components/AvailabilityRequestForm";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -111,10 +118,13 @@ export function TimeOffRequestPanel({
   availabilityGrid,
 }: TimeOffRequestPanelProps) {
   const { toast } = useToast();
+  const { profile } = useProfile();
   const { timeOff, shifts, loading, isFallbackData, mutations } =
     useScheduling();
+  const { policies } = useTimeOffPolicies(profile?.companyId ?? null);
 
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [requestPolicyId, setRequestPolicyId] = useState("");
   const [requestType, setRequestType] = useState<TimeOffType>("vacation");
   const [requestStart, setRequestStart] = useState("");
   const [requestEnd, setRequestEnd] = useState("");
@@ -165,6 +175,29 @@ export function TimeOffRequestPanel({
     [personalRequests],
   );
 
+  const applicablePolicies = useMemo(
+    () =>
+      policies.filter((policy) =>
+        policyAppliesTo(policy, employeeId, profile?.roleId),
+      ),
+    [employeeId, policies, profile?.roleId],
+  );
+  const policyBalances = useMemo(
+    () =>
+      remainingBalances({
+        policies: applicablePolicies,
+        usage: personalRequests.map((request) => ({
+          policyId: request.policy_id ?? "",
+          startDate: request.start_date,
+          endDate: request.end_date,
+          status: request.status ?? "",
+        })),
+        userId: employeeId,
+        roleId: profile?.roleId,
+        asOf: new Date().toISOString().slice(0, 10),
+      }),
+    [applicablePolicies, employeeId, personalRequests, profile?.roleId],
+  );
   const allowanceRemaining = Math.max(
     BASE_TIME_OFF_ALLOWANCE - approvedDays,
     0,
@@ -256,10 +289,20 @@ export function TimeOffRequestPanel({
     try {
       const success = await mutations.requestTimeOff({
         userId: employeeId,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: requestStart,
+        endDate: requestEnd,
         type: requestType,
         reason: requestReason || undefined,
+        policyId: applicablePolicies.length > 0 ? requestPolicyId : null,
+        policies: applicablePolicies,
+        roleId: profile?.roleId,
+        asOf: new Date().toISOString().slice(0, 10),
+        usage: personalRequests.map((request) => ({
+          policyId: request.policy_id ?? "",
+          startDate: request.start_date,
+          endDate: request.end_date,
+          status: request.status ?? "",
+        })),
       });
 
       if (success) {
@@ -340,6 +383,23 @@ export function TimeOffRequestPanel({
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {applicablePolicies.length > 0 ? (
+                <div className="grid gap-2">
+                  <Label htmlFor="timeoff-policy">Policy</Label>
+                  <Select value={requestPolicyId} onValueChange={setRequestPolicyId}>
+                    <SelectTrigger id="timeoff-policy">
+                      <SelectValue placeholder="Choose a policy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {applicablePolicies.map((policy) => (
+                        <SelectItem key={policy.id} value={policy.id}>
+                          {policy.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null}
               <div className="grid gap-2">
                 <Label htmlFor="timeoff-type">Type</Label>
                 <Select
@@ -411,12 +471,22 @@ export function TimeOffRequestPanel({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <SummaryTile
-            icon={Calendar}
-            label="Balance remaining"
-            value={`${allowanceRemaining} days`}
-            hint={`You’ve used ${approvedDays} of ${BASE_TIME_OFF_ALLOWANCE} days`}
-          />
+          {policyBalances.length > 0 ? (
+            <div className="space-y-1 sm:col-span-2" data-testid="time-off-balances">
+              {policyBalances.map((balance) => (
+                <p key={balance.policy.id} className="text-sm">
+                  {balance.policy.name}: {balanceLabel(balance)}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <SummaryTile
+              icon={Calendar}
+              label="Balance remaining"
+              value={`${allowanceRemaining} days`}
+              hint={`You’ve used ${approvedDays} of ${BASE_TIME_OFF_ALLOWANCE} days`}
+            />
+          )}
           <SummaryTile
             icon={CheckCircle2}
             label="Requested"

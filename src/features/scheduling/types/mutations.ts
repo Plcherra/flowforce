@@ -11,6 +11,10 @@ import type {
   VendorEventUpsertInput,
   VendorEventWithMetadata,
 } from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import type {
+  TimeOffPolicy,
+  TimeOffUsage,
+} from "@/features/scheduling/utils/timeOffPolicy";
 
 export type ShiftInsertPayload = Omit<
   TablesInsert<"schedules">,
@@ -63,6 +67,11 @@ export interface SchedulingMutations {
     endDate: string;
     type: "vacation" | "sick" | "personal" | "other";
     reason?: string | null;
+    policyId?: string | null;
+    policies?: TimeOffPolicy[];
+    usage?: TimeOffUsage[];
+    roleId?: string | null;
+    asOf?: string;
   }) => Promise<boolean>;
   bulkCreateShifts: (payloads: ShiftInsertPayload[]) => Promise<boolean>;
   copyWeek: (params: {

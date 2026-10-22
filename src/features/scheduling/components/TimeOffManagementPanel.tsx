@@ -25,6 +25,7 @@ import {
   timeLeftLabel,
   timeOffStatusLabel,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
+import { TimeOffPoliciesSection } from "@/features/scheduling/components/TimeOffPoliciesSection";
 
 interface TimeOffManagementPanelProps {
   canApprove?: boolean;
@@ -175,6 +176,19 @@ export function TimeOffManagementPanel({
 
   return (
     <div className="space-y-4">
+      <TimeOffPoliciesSection
+        companyId={companyId}
+        canManage={canApprove}
+        userId={profile?.id ?? null}
+        roleId={profile?.roleId ?? null}
+        requests={timeOffRequests.map((request) => ({
+          policyId: request.policy_id ?? "",
+          startDate: request.start_date,
+          endDate: request.end_date,
+          status: request.status ?? "",
+          userId: request.user_id,
+        }))}
+      />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">

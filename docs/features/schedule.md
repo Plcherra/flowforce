@@ -531,7 +531,7 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 23 — Time off policies
 
-- [ ] One policy carries the allowance, the weekdays, the notice, and who it applies to.
+- [x] One policy carries the allowance, the weekdays, the notice, and who it applies to.
 
 Rules:
 
@@ -955,5 +955,24 @@ Phone steps for Pedro:
 4. Sign in as someone who cannot approve time off and open the same Team requests row. Approve should not be there.
 
 Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 23 Time off policies
+
+Shipped: A time off policy has a name, a unit of hours, days, or minutes, and caps per week, month, and year at the same time. It also has eligible weekdays, a notice period, and the roles or people it applies to. Empty roles and people means everyone. Weekend and weekday are examples the maker can fill and save. They are not hardcoded policies. Employees and managers see the remaining balance for each policy that applies. A request that misses the weekdays, the notice, or a cap is not saved. A request that fits is stored with that policy. When no policy exists, the old 25-day allowance stays. One eligible day counts as 1 day, 8 hours, or 480 minutes.
+
+Proven: Unit test `src/features/scheduling/utils/timeOffPolicy.test.ts`, run with `node scripts/test-schedule-task-link.mjs`, covers the weekend example, the weekday example, a month cap and a year cap together, remaining balance, notice, hours, and minutes. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. Playwright was not run: this environment has no `SUPABASE_SERVICE_ROLE_KEY`.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can approve time off. Open Team requests, then Time Off.
+2. Tap Weekend example, then Save policy. Tap Weekday example, then Save policy.
+3. Your remaining balance should show Weekend as 2 days left this month and 24 days left this year, and Weekday as 90 days left this year.
+4. Request time off on the Weekend policy for a Friday. It should be rejected.
+5. Request Saturday and Sunday this month on the Weekend policy. It should save. The month balance should then show 0 days left this month.
+6. Request a weekday that starts sooner than 7 days on the Weekday policy. It should be rejected. A weekday at least 7 days out should save.
+7. Sign in as an employee. The same balances for policies that apply to them should show on time off, and they should not see the policy editor.
+
+Blockers: none for this phase. Migration `20261022014849_time_off_policies.sql` was applied to the linked project.
 
 Questions: none.

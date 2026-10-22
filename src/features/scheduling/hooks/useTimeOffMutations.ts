@@ -6,6 +6,11 @@ import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { ProfileSummary } from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import {
+  requestFitsPolicy,
+  type TimeOffPolicy,
+  type TimeOffUsage,
+} from "@/features/scheduling/utils/timeOffPolicy";
 
 interface UseTimeOffMutationsProps {
   companyId: string | null;
@@ -88,10 +93,46 @@ export function useTimeOffMutations({
       endDate: string;
       type: "vacation" | "sick" | "personal" | "other";
       reason?: string | null;
+      policyId?: string | null;
+      policies?: TimeOffPolicy[];
+      usage?: TimeOffUsage[];
+      roleId?: string | null;
+      asOf?: string;
     }) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
         return false;
+      }
+
+      const policies = payload.policies ?? [];
+      if (policies.length > 0) {
+        const policy = policies.find((item) => item.id === payload.policyId);
+        if (!policy) {
+          toast({
+            title: "Choose a policy",
+            description: "Pick the time off policy this request uses.",
+            variant: "destructive",
+          });
+          return false;
+        }
+        const fit = requestFitsPolicy({
+          policy,
+          startDate: payload.startDate,
+          endDate: payload.endDate,
+          usage: (payload.usage ?? []).filter((row) => row.policyId === policy.id),
+          userId: payload.userId,
+          roleId: payload.roleId,
+          asOf: payload.asOf ?? new Date().toISOString().slice(0, 10),
+        });
+        const reason = "reason" in fit ? fit.reason : null;
+        if (reason) {
+          toast({
+            title: "Request does not fit the policy",
+            description: reason,
+            variant: "destructive",
+          });
+          return false;
+        }
       }
 
       try {
@@ -99,14 +140,16 @@ export function useTimeOffMutations({
           .from("time_off_requests")
           .insert({
             user_id: payload.userId,
-            start_date: payload.startDate,
-            end_date: payload.endDate,
+            company_id: companyId,
+            start_date: payload.startDate.slice(0, 10),
+            end_date: payload.endDate.slice(0, 10),
             type: payload.type,
             reason: payload.reason ?? "time off",
             status: "pending",
             notes: null,
             approved_by: null,
             approved_at: null,
+            policy_id: payload.policyId ?? null,
           });
         if (insertError) throw insertError;
         await refetchAll();
@@ -126,7 +169,7 @@ export function useTimeOffMutations({
         return false;
       }
     },
-    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+    [companyId, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
   );
 
   const approveTimeOff = useCallback(

@@ -6001,6 +6001,54 @@ export type Database = {
         }
         Relationships: []
       }
+      time_off_policies: {
+        Row: {
+          applies_to_role_ids: string[]
+          applies_to_user_ids: string[]
+          cap_month: number | null
+          cap_week: number | null
+          cap_year: number | null
+          company_id: string
+          created_at: string
+          eligible_weekdays: number[]
+          id: string
+          name: string
+          notice_days: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_role_ids?: string[]
+          applies_to_user_ids?: string[]
+          cap_month?: number | null
+          cap_week?: number | null
+          cap_year?: number | null
+          company_id: string
+          created_at?: string
+          eligible_weekdays?: number[]
+          id?: string
+          name: string
+          notice_days?: number
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_role_ids?: string[]
+          applies_to_user_ids?: string[]
+          cap_month?: number | null
+          cap_week?: number | null
+          cap_year?: number | null
+          company_id?: string
+          created_at?: string
+          eligible_weekdays?: number[]
+          id?: string
+          name?: string
+          notice_days?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_off_requests: {
         Row: {
           approved_at: string | null
@@ -6010,6 +6058,7 @@ export type Database = {
           end_date: string | null
           id: string
           notes: string | null
+          policy_id: string | null
           reason: string | null
           start_date: string | null
           status: string | null
@@ -6025,6 +6074,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
+          policy_id?: string | null
           reason?: string | null
           start_date?: string | null
           status?: string | null
@@ -6040,6 +6090,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
+          policy_id?: string | null
           reason?: string | null
           start_date?: string | null
           status?: string | null
