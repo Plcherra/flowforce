@@ -351,7 +351,7 @@ Prove: Phone steps for Pedro are in the Progress log. This phase is layout.
 
 ### Phase 16 — List, then reminders and activity
 
-- [ ] Give the list the full width, and place reminders and activity underneath.
+- [x] Give the list the full width, and place reminders and activity underneath.
 
 Rules:
 
@@ -367,7 +367,7 @@ Prove: Phone steps for Pedro are in the Progress log. This phase is layout.
 
 ### Phase 17 — Start, end, and publish
 
-- [ ] Replace estimated hours with a window, and add publish, schedule, and draft.
+- [x] Replace estimated hours with a window, and add publish, schedule, and draft.
 
 Rules:
 
@@ -619,6 +619,39 @@ Phone steps for Pedro:
 2. If a task is overdue, blocked, or unassigned, it should be one short row under Warnings, not a large coloured card.
 3. Several warnings should stack in one list. Open one by tapping its row.
 4. On a page with nothing overdue, blocked, or unassigned, and no due task missing a reminder, Warnings should be absent. There should be no green "no blockers" banner.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 16 List, then reminders and activity
+
+Shipped: The task list uses the full width. Reminders and activity sit under the list, two columns on a wide screen and stacked on a narrow one. They are not a rail beside the list. What they load is unchanged.
+
+Proven: `npm run typecheck` passed. ESLint passed on `src/features/tasks/pages/Tasks.tsx`. This phase is layout.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks on a wide screen.
+2. The task cards should span the page. Reminders and activity should sit under the list, side by side.
+3. Narrow the window. Reminders and activity should stack, still under the list.
+4. The left side of the page should not be an empty column beside those two panels.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 17 Start, end, and publish
+
+Shipped: Create and task details ask for a start and an end, each a date and a time, instead of estimated hours. Publish now, Schedule for the start, and Draft are saved on `links.publish_state`, with `starts_at` and `ends_at` on the same object. Other link keys stay. `due_date` is the end's local calendar date. A missing publish state stays published. Drafts are listed only for the creator. A scheduled task is listed for other people once the start time is reached. The creator always sees it. The card shows the window, and Draft or Scheduled when that applies. The list and its counts use that viewer rule. No migration.
+
+Proven: Unit test `src/features/tasks/utils/taskSchedule.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the local due date, preserved link keys, draft visibility, and scheduled visibility. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks. Tap the round + button, then New custom task.
+2. The form should ask for Starts and Ends, not Estimated hours. Set Thursday 22 at 7:00am through Friday at 7:00am.
+3. Choose Schedule for the start and create the task. The card should show that window and Scheduled.
+4. Create another task as Draft. You should see it. Ask someone else in the company to open Tasks. They should not see the draft, or a scheduled task before its start.
+5. Open a task. Execution controls should save a start, an end, and a publish choice, not estimated hours.
 
 Blockers: none for this phase.
 

@@ -21,6 +21,11 @@ import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
 import { readTaskKind, TASK_KIND_LABELS } from "../utils/taskKind";
+import {
+  formatTaskWindow,
+  readTaskSchedule,
+  taskPublishLabel,
+} from "../utils/taskSchedule";
 import type { SelectionHandlers } from "../hooks/useTaskSelection";
 
 interface TaskCardProps {
@@ -38,6 +43,9 @@ export function TaskCard({
 }: TaskCardProps) {
   const scheduleLink = readScheduleTaskLink(task);
   const kindLabel = TASK_KIND_LABELS[readTaskKind(task)];
+  const schedule = readTaskSchedule(task.links);
+  const windowLabel = formatTaskWindow(schedule.startsAt, schedule.endsAt);
+  const publishLabel = taskPublishLabel(schedule.publishState);
 
   return (
     <Card
@@ -75,6 +83,11 @@ export function TaskCard({
               <Badge variant="outline" data-testid="task-kind-badge">
                 {kindLabel}
               </Badge>
+              {publishLabel ? (
+                <Badge variant="outline" data-testid="task-publish-badge">
+                  {publishLabel}
+                </Badge>
+              ) : null}
             </div>
             {dueBadge && (
               <Badge
@@ -99,6 +112,12 @@ export function TaskCard({
                 </span>
               </div>
             )}
+            {windowLabel ? (
+              <div className="flex items-center gap-1" data-testid="task-window">
+                <Calendar className="h-4 w-4" />
+                <span>{windowLabel}</span>
+              </div>
+            ) : null}
             {task.due_date && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />

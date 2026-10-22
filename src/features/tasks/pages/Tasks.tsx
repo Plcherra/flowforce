@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
+import { useAuth } from "@/hooks/useAuth";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TaskNotifications } from "@/features/tasks/components/TaskNotifications";
@@ -26,6 +27,7 @@ import {
 } from "@/features/tasks/utils/readinessFilters";
 import { useCan } from "@/hooks/useCan";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
+import { isTaskListedForViewer } from "@/features/tasks/utils/taskSchedule";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
 import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
@@ -67,8 +69,16 @@ export default function Tasks() {
     legacyEdit: can("editTasks"),
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
+  const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
+  const visibleTasks = useMemo(
+    () =>
+      tasks.filter((task) =>
+        isTaskListedForViewer(task, user?.id ?? null),
+      ),
+    [tasks, user?.id],
+  );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
@@ -91,35 +101,35 @@ export default function Tasks() {
     closeTask,
     handleNotificationNavigate,
     getSelectionHandlers,
-  } = useTaskSelection<TaskListItem>(tasks);
+  } = useTaskSelection<TaskListItem>(visibleTasks);
 
-  const totalTasks = tasks.length;
+  const totalTasks = visibleTasks.length;
 
   const statusTabs = useMemo(
-    () => generateStatusTabs(tasks, totalTasks),
-    [tasks, totalTasks],
+    () => generateStatusTabs(visibleTasks, totalTasks),
+    [visibleTasks, totalTasks],
   );
 
   const priorityOptions = useMemo(
-    () => generatePriorityOptions(tasks),
-    [tasks],
+    () => generatePriorityOptions(visibleTasks),
+    [visibleTasks],
   );
 
   const statusScopedTasks = useMemo(
-    () => filterTasks(tasks, statusFilter, "all", "") as TaskListItem[],
-    [tasks, statusFilter],
+    () => filterTasks(visibleTasks, statusFilter, "all", "") as TaskListItem[],
+    [visibleTasks, statusFilter],
   );
 
   const filteredTasks = useMemo(
     () =>
       filterTasks(
-        tasks,
+        visibleTasks,
         statusFilter,
         priorityFilter,
         searchTerm,
         kindFilter,
       ) as TaskListItem[],
-    [tasks, statusFilter, priorityFilter, searchTerm, kindFilter],
+    [visibleTasks, statusFilter, priorityFilter, searchTerm, kindFilter],
   );
 
   const listedTasks = useMemo(
@@ -226,52 +236,35 @@ export default function Tasks() {
         <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
       ) : null}
 
-      <div
-        className={
-          isMobile ? "space-y-4" : "grid grid-cols-1 gap-6 lg:grid-cols-3"
-        }
-      >
-        <div className={isMobile ? "space-y-3" : "space-y-4 lg:col-span-2"}>
-          {tasks.length === 0 || listedTasks.length === 0 ? (
-            <TaskEmptyState
-              hasTasks={tasks.length > 0}
-              onResetFilters={handleResetFilters}
-            />
-          ) : (
-            <div data-testid="tasks-list" className="space-y-4">
-              {listedTasks.map((task) => {
-                const dueBadge = calculateDueBadge(task);
-                const selectionHandlers = getSelectionHandlers(task.id);
+      <div className="space-y-4">
+        {visibleTasks.length === 0 || listedTasks.length === 0 ? (
+          <TaskEmptyState
+            hasTasks={visibleTasks.length > 0}
+            onResetFilters={handleResetFilters}
+          />
+        ) : (
+          <div data-testid="tasks-list" className="space-y-4">
+            {listedTasks.map((task) => {
+              const dueBadge = calculateDueBadge(task);
+              const selectionHandlers = getSelectionHandlers(task.id);
 
-                return (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    dueBadge={dueBadge}
-                    highlighted={highlightedTaskId === task.id}
-                    selectionHandlers={selectionHandlers}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {!isMobile && (
-          <div className="space-y-6 lg:sticky lg:top-24">
-            <Suspense fallback={<ReminderListSkeleton />}>
-              <RemindersPanel />
-            </Suspense>
-            <Suspense fallback={<ActivityFeedSkeleton />}>
-              <TaskActivityFeed />
-            </Suspense>
+              return (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  dueBadge={dueBadge}
+                  highlighted={highlightedTaskId === task.id}
+                  selectionHandlers={selectionHandlers}
+                />
+              );
+            })}
           </div>
         )}
-      </div>
 
-      {/* Mobile-only panels */}
-      {isMobile && (
-        <div className="space-y-4">
+        <div
+          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+          data-testid="tasks-below-list"
+        >
           <Suspense fallback={<ReminderListSkeleton />}>
             <RemindersPanel />
           </Suspense>
@@ -279,7 +272,7 @@ export default function Tasks() {
             <TaskActivityFeed />
           </Suspense>
         </div>
-      )}
+      </div>
 
       <Suspense fallback={null}>
         {showCreateDialog && showCreateMenu && (

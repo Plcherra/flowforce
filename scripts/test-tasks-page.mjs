@@ -28,6 +28,9 @@ const { runTaskCreateLevelTests } = importTs(
 const { runHandoverTaskTests } = importTs(
   "../src/features/forms/utils/handoverTask.test.ts",
 );
+const { runTaskScheduleTests } = importTs(
+  "../src/features/tasks/utils/taskSchedule.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -35,4 +38,5 @@ runReadinessFilterTests();
 runTaskKindTests();
 runTaskCreateLevelTests();
 runHandoverTaskTests();
+runTaskScheduleTests();
 console.log("tasks page tests passed");

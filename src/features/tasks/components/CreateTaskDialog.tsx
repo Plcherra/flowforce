@@ -18,14 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +25,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CreateReminderDialog } from "@/features/tasks/components/reminders/CreateReminderDialog";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
 import { logger } from "@/utils/logger";
+import {
+  dueDateFromWindowEnd,
+  fromDatetimeLocalValue,
+  mergeTaskSchedule,
+  type TaskPublishState,
+} from "@/features/tasks/utils/taskSchedule";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -55,7 +53,6 @@ export function CreateTaskDialog({
     error: optionsError,
   } = useTaskFormOptions(open);
   const [loading, setLoading] = useState(false);
-  const [dueDate, setDueDate] = useState<Date | undefined>();
   const [createReminder, setCreateReminder] = useState(false);
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
@@ -63,7 +60,9 @@ export function CreateTaskDialog({
     title: "",
     description: "",
     priority: "medium",
-    estimated_hours: "",
+    starts_at: "",
+    ends_at: "",
+    publish_state: "published" as TaskPublishState,
     assigned_to: "",
     goal_id: "",
   });
@@ -98,11 +97,12 @@ export function CreateTaskDialog({
       title: "",
       description: "",
       priority: "medium",
-      estimated_hours: "",
+      starts_at: "",
+      ends_at: "",
+      publish_state: "published",
       assigned_to: "",
       goal_id: "",
     });
-    setDueDate(undefined);
     setCreateReminder(false);
     setErrors({});
   };
@@ -112,11 +112,13 @@ export function CreateTaskDialog({
     if (!formData.title.trim()) {
       nextErrors.title = "A title is required.";
     }
-    if (formData.estimated_hours) {
-      const value = parseFloat(formData.estimated_hours);
-      if (Number.isNaN(value) || value < 0) {
-        nextErrors.estimated_hours =
-          "Estimated hours must be a positive number.";
+    if (formData.starts_at || formData.ends_at) {
+      const startsAt = fromDatetimeLocalValue(formData.starts_at);
+      const endsAt = fromDatetimeLocalValue(formData.ends_at);
+      if (!startsAt || !endsAt) {
+        nextErrors.ends_at = "A window needs a start and an end.";
+      } else if (new Date(endsAt).getTime() < new Date(startsAt).getTime()) {
+        nextErrors.ends_at = "The end must be after the start.";
       }
     }
     return nextErrors;
@@ -141,16 +143,20 @@ export function CreateTaskDialog({
 
     setLoading(true);
     try {
+      const startsAt = fromDatetimeLocalValue(formData.starts_at);
+      const endsAt = fromDatetimeLocalValue(formData.ends_at);
       const taskData = {
         title: formData.title,
         description: formData.description || null,
         status: "todo" as const,
         priority: formData.priority as any,
         created_by: user.id,
-        due_date: dueDate?.toISOString() || null,
-        estimated_hours: formData.estimated_hours
-          ? parseFloat(formData.estimated_hours)
-          : null,
+        due_date: dueDateFromWindowEnd(endsAt),
+        links: mergeTaskSchedule(null, {
+          startsAt,
+          endsAt,
+          publishState: formData.publish_state,
+        }),
         assigned_to:
           createLevel === "self"
             ? user.id
@@ -265,32 +271,22 @@ export function CreateTaskDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="estimated_hours">Estimated Hours</Label>
-              <Input
-                id="estimated_hours"
-                type="number"
-                step="0.5"
-                placeholder="0"
-                value={formData.estimated_hours}
-                onChange={(e) =>
-                  handleFieldChange("estimated_hours", e.target.value)
+              <Label htmlFor="publish_state">Publish</Label>
+              <Select
+                value={formData.publish_state}
+                onValueChange={(value) =>
+                  handleFieldChange("publish_state", value)
                 }
-                aria-invalid={Boolean(errors.estimated_hours)}
-                aria-describedby={
-                  errors.estimated_hours
-                    ? "create-task-estimated-hours-error"
-                    : undefined
-                }
-                min={0}
-              />
-              {errors.estimated_hours && (
-                <p
-                  className="text-sm text-destructive"
-                  id="create-task-estimated-hours-error"
-                >
-                  {errors.estimated_hours}
-                </p>
-              )}
+              >
+                <SelectTrigger id="publish_state">
+                  <SelectValue placeholder="Publish" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="published">Publish now</SelectItem>
+                  <SelectItem value="scheduled">Schedule for the start</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -366,30 +362,41 @@ export function CreateTaskDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Due Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                  aria-label="Pick a due date"
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="starts_at">Starts</Label>
+              <Input
+                id="starts_at"
+                type="datetime-local"
+                value={formData.starts_at}
+                onChange={(e) => handleFieldChange("starts_at", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ends_at">Ends</Label>
+              <Input
+                id="ends_at"
+                type="datetime-local"
+                value={formData.ends_at}
+                onChange={(e) => handleFieldChange("ends_at", e.target.value)}
+                aria-invalid={Boolean(errors.ends_at)}
+                aria-describedby={
+                  errors.ends_at ? "create-task-window-error" : undefined
+                }
+              />
+              {errors.ends_at && (
+                <p
+                  className="text-sm text-destructive"
+                  id="create-task-window-error"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+                  {errors.ends_at}
+                </p>
+              )}
+            </div>
           </div>
+          <p className="text-sm text-muted-foreground">
+            The window is when the task is open. It is not how long the work takes.
+          </p>
 
           {/* Reminder Option */}
           <div className="flex items-center space-x-2">

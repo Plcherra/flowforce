@@ -48,6 +48,14 @@ import {
 } from "@/constants/taskStatus";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
 import { useTaskComments } from "@/features/tasks/hooks";
+import {
+  dueDateFromWindowEnd,
+  fromDatetimeLocalValue,
+  mergeTaskSchedule,
+  readTaskSchedule,
+  toDatetimeLocalValue,
+  type TaskPublishState,
+} from "@/features/tasks/utils/taskSchedule";
 import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { logger } from "@/utils/logger";
 import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
@@ -134,8 +142,9 @@ export function TaskDetailsDialog({
   const [updatingGoal, setUpdatingGoal] = useState(false);
   const [executionForm, setExecutionForm] = useState({
     priority: "medium",
-    due_date: "",
-    estimated_hours: "",
+    starts_at: "",
+    ends_at: "",
+    publish_state: "published" as TaskPublishState,
     actual_hours: "",
   });
   const [savingExecution, setSavingExecution] = useState(false);
@@ -157,13 +166,12 @@ export function TaskDetailsDialog({
 
     setAssignmentValue(task.assigned_to ?? "none");
     setGoalValue(task.goal_id ?? "none");
+    const schedule = readTaskSchedule(task.links);
     setExecutionForm({
       priority: task.priority ?? "medium",
-      due_date: task.due_date ? task.due_date.split("T")[0] : "",
-      estimated_hours:
-        task.estimated_hours != null
-          ? String(task.estimated_hours)
-          : "",
+      starts_at: toDatetimeLocalValue(schedule.startsAt),
+      ends_at: toDatetimeLocalValue(schedule.endsAt),
+      publish_state: schedule.publishState,
       actual_hours: task.actual_hours != null ? String(task.actual_hours) : "",
     });
   }, [currentTask]);
@@ -177,15 +185,36 @@ export function TaskDetailsDialog({
   const handleSaveExecution = async () => {
     if (!currentTask) return;
 
+    const startsAt = fromDatetimeLocalValue(executionForm.starts_at);
+    const endsAt = fromDatetimeLocalValue(executionForm.ends_at);
+    if ((executionForm.starts_at || executionForm.ends_at) && (!startsAt || !endsAt)) {
+      toast({
+        title: "Window incomplete",
+        description: "A window needs a start and an end.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (startsAt && endsAt && new Date(endsAt).getTime() < new Date(startsAt).getTime()) {
+      toast({
+        title: "Window incomplete",
+        description: "The end must be after the start.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSavingExecution(true);
     try {
       const { data, error } = await updateTask(currentTask.id, {
         priority: executionForm.priority,
-        due_date: executionForm.due_date
-          ? new Date(`${executionForm.due_date}T12:00:00`).toISOString()
-          : null,
-        estimated_hours: parseHoursInput(executionForm.estimated_hours),
+        due_date: dueDateFromWindowEnd(endsAt),
         actual_hours: parseHoursInput(executionForm.actual_hours),
+        links: mergeTaskSchedule(currentTask.links, {
+          startsAt,
+          endsAt,
+          publishState: executionForm.publish_state,
+        }),
       });
 
       if (error || !data) {
@@ -201,7 +230,7 @@ export function TaskDetailsDialog({
       onTaskUpdate?.(updatedTask);
       toast({
         title: "Execution details saved",
-        description: "Priority, due date, and hour tracking were updated.",
+        description: "The window and publish setting were updated.",
       });
     } catch (error) {
       logger.error("Error saving task execution details:", {
@@ -646,19 +675,19 @@ export function TaskDetailsDialog({
 
               <div className="space-y-2">
                 <Label
-                  htmlFor="task-due-date"
+                  htmlFor="task-starts-at"
                   className="text-xs font-semibold uppercase text-muted-foreground"
                 >
-                  Due date
+                  Starts
                 </Label>
                 <Input
-                  id="task-due-date"
-                  type="date"
-                  value={executionForm.due_date}
+                  id="task-starts-at"
+                  type="datetime-local"
+                  value={executionForm.starts_at}
                   onChange={(event) =>
                     setExecutionForm((prev) => ({
                       ...prev,
-                      due_date: event.target.value,
+                      starts_at: event.target.value,
                     }))
                   }
                 />
@@ -666,24 +695,46 @@ export function TaskDetailsDialog({
 
               <div className="space-y-2">
                 <Label
-                  htmlFor="task-estimated-hours"
+                  htmlFor="task-ends-at"
                   className="text-xs font-semibold uppercase text-muted-foreground"
                 >
-                  Estimated hours
+                  Ends
                 </Label>
                 <Input
-                  id="task-estimated-hours"
-                  type="number"
-                  min={0}
-                  step="0.25"
-                  value={executionForm.estimated_hours}
+                  id="task-ends-at"
+                  type="datetime-local"
+                  value={executionForm.ends_at}
                   onChange={(event) =>
                     setExecutionForm((prev) => ({
                       ...prev,
-                      estimated_hours: event.target.value,
+                      ends_at: event.target.value,
                     }))
                   }
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                  Publish
+                </Label>
+                <Select
+                  value={executionForm.publish_state}
+                  onValueChange={(value) =>
+                    setExecutionForm((prev) => ({
+                      ...prev,
+                      publish_state: value as TaskPublishState,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Publish" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="published">Publish now</SelectItem>
+                    <SelectItem value="scheduled">Schedule for the start</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
