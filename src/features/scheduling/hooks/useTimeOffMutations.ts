@@ -3,8 +3,11 @@
  */
 
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleTimeOffTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import type { ProfileSummary } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import {
   requestFitsPolicy,
@@ -30,6 +33,8 @@ export function useTimeOffMutations({
   teamMembers,
 }: UseTimeOffMutationsProps) {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   const addUnavailability = useCallback(
     async (payload: {
@@ -144,7 +149,8 @@ export function useTimeOffMutations({
       }
 
       try {
-        const { error: insertError } = await supabase
+        const reason = payload.reason ?? "time off";
+        const { data: created, error: insertError } = await supabase
           .from("time_off_requests")
           .insert({
             user_id: payload.userId,
@@ -152,14 +158,25 @@ export function useTimeOffMutations({
             start_date: payload.startDate.slice(0, 10),
             end_date: payload.endDate.slice(0, 10),
             type: payload.type,
-            reason: payload.reason ?? "time off",
+            reason,
             status: "pending",
             notes: null,
             approved_by: null,
             approved_at: null,
             policy_id: payload.policyId ?? null,
-          });
+          })
+          .select("id")
+          .single();
         if (insertError) throw insertError;
+        if (created?.id && companyId) {
+          scheduleTimeOffTextTranslation({
+            companyId,
+            sourceId: created.id,
+            sourceLocale,
+            reason,
+            notes: null,
+          });
+        }
         await refetchAll();
         toast({
           title: "Time off requested",
@@ -177,7 +194,7 @@ export function useTimeOffMutations({
         return false;
       }
     },
-    [companyId, isUsingFallbackData, refetchAll, showReadOnlyNotice, toast],
+    [companyId, isUsingFallbackData, refetchAll, showReadOnlyNotice, sourceLocale, toast],
   );
 
   const approveTimeOff = useCallback(
@@ -199,6 +216,14 @@ export function useTimeOffMutations({
           .eq("id", requestId);
 
         if (updateError) throw updateError;
+        if (companyId && notes && notes.trim()) {
+          scheduleTimeOffTextTranslation({
+            companyId,
+            sourceId: requestId,
+            sourceLocale,
+            notes,
+          });
+        }
 
         await refetchAll();
         toast({
@@ -219,7 +244,7 @@ export function useTimeOffMutations({
         return false;
       }
     },
-    [isUsingFallbackData, refetchAll, showReadOnlyNotice, toast, userId],
+    [companyId, isUsingFallbackData, refetchAll, showReadOnlyNotice, sourceLocale, toast, userId],
   );
 
   return {

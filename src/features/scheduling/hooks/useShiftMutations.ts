@@ -21,8 +21,11 @@
  */
 
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleShiftTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import { cancelTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
 import type { ShiftInsertPayload, SchedulingMutationOptions } from "../types/mutations";
 import type { ShiftUpsertInput } from "@/features/scheduling/hooks/useSchedulingConsolidated";
@@ -64,6 +67,8 @@ export function useShiftMutations({
   ensureCompanyContext,
 }: UseShiftMutationsProps) {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   /**
    * Create a new shift
@@ -225,10 +230,23 @@ export function useShiftMutations({
           };
         });
 
-        const { error: insertError } = await supabase
+        const { data: createdRows, error: insertError } = await supabase
           .from("schedules")
-          .insert(normalizedPayloads);
+          .insert(normalizedPayloads)
+          .select("id, title, notes");
         if (insertError) throw insertError;
+        if (companyId) {
+          for (const row of createdRows ?? []) {
+            if (!row.id) continue;
+            scheduleShiftTextTranslation({
+              companyId,
+              sourceId: row.id,
+              sourceLocale,
+              title: row.title,
+              notes: row.notes,
+            });
+          }
+        }
 
         await refetchAll();
 
@@ -254,6 +272,7 @@ export function useShiftMutations({
       isUsingFallbackData,
       refetchAll,
       showReadOnlyNotice,
+      sourceLocale,
       toast,
       userId,
     ],

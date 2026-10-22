@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleShiftTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import { useAuth } from "@/hooks/useAuth";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
 import { logger } from "@/utils/logger";
@@ -77,6 +80,8 @@ export function useSchedulingConsolidated(
   const { companyId, start, end, enabled = true } = params;
   const { toast } = useToast();
   const { user } = useAuth();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   const [shifts, setShifts] = useState<ShiftWithAssignments[]>([]);
   const [assignments, setAssignments] = useState<AssignmentWithUser[]>([]);
@@ -348,6 +353,19 @@ export function useSchedulingConsolidated(
           company_id: payload.company_id ?? companyId ?? null,
           created_by: payload.created_by ?? user?.id ?? null,
         });
+        if (
+          record?.id &&
+          companyId &&
+          (payload.title !== undefined || payload.notes !== undefined)
+        ) {
+          scheduleShiftTextTranslation({
+            companyId,
+            sourceId: record.id,
+            sourceLocale,
+            title: typeof payload.title === "string" ? payload.title : null,
+            notes: typeof payload.notes === "string" ? payload.notes : null,
+          });
+        }
         if (options?.refresh !== false) {
           await refetchAll();
         } else if (record && payload.id) {
@@ -377,7 +395,7 @@ export function useSchedulingConsolidated(
         return null;
       }
     },
-    [companyId, ensureCompanyContext, refetchAll, toast, user?.id],
+    [companyId, ensureCompanyContext, refetchAll, sourceLocale, toast, user?.id],
   );
 
   const upsertVendorEvent = useCallback(

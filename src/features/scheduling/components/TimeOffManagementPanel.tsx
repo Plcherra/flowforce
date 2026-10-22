@@ -27,6 +27,8 @@ import {
   timeOffStatusLabel,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
 import { TimeOffPoliciesSection } from "@/features/scheduling/components/TimeOffPoliciesSection";
+import { useTimeOffTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
+import { TimeOffCopy } from "@/features/scheduling/components/TimeOffCopy";
 
 interface TimeOffManagementPanelProps {
   canApprove?: boolean;
@@ -82,7 +84,20 @@ export function TimeOffManagementPanel({
     queryFn: () => fetchTimeOffRequests({ companyId: companyId!, limit: 50 }),
   });
 
-  const timeOffRequests = (timeOffQuery.data ?? []) as unknown as TimeOffRequest[];
+  const timeOffRequests = useMemo(
+    () => (timeOffQuery.data ?? []) as unknown as TimeOffRequest[],
+    [timeOffQuery.data],
+  );
+  const timeOffSources = useMemo(
+    () =>
+      timeOffRequests.map((request) => ({
+        id: request.id,
+        reason: request.reason,
+        notes: request.notes,
+      })),
+    [timeOffRequests],
+  );
+  const timeOffTranslations = useTimeOffTextTranslations(timeOffSources);
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const loading = timeOffQuery.isLoading;
 
@@ -291,11 +306,18 @@ export function TimeOffManagementPanel({
                 </div>
               </div>
 
-              {request.reason && (
+              {request.reason || request.notes ? (
                 <div className="mt-3 rounded bg-muted/50 p-2 text-sm">
-                  <strong>{t("schedule.reason2")}</strong> {request.reason}
+                  {request.reason ? (
+                    <strong>{t("schedule.reason2")}</strong>
+                  ) : null}
+                  <TimeOffCopy
+                    reason={request.reason}
+                    notes={request.notes}
+                    translation={timeOffTranslations.get(request.id) ?? null}
+                  />
                 </div>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         ))

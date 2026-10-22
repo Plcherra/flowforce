@@ -11,6 +11,8 @@ import type {
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";
+import { useShiftTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
+import { ShiftGridCopy } from "@/features/scheduling/components/ShiftGridCopy";
 
 interface WeekViewProps {
   schedules: ShiftWithAssignments[];
@@ -36,6 +38,16 @@ export function WeekView({
   locationFilter,
 }: WeekViewProps) {
   const { t } = useTranslation();
+  const shiftSources = useMemo(
+    () =>
+      schedules.map((shift) => ({
+        id: shift.id,
+        title: shift.title,
+        notes: shift.notes,
+      })),
+    [schedules],
+  );
+  const shiftTranslations = useShiftTextTranslations(shiftSources);
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const weekStart = startOfWeek(selectedDate);
@@ -183,9 +195,15 @@ export function WeekView({
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-foreground text-sm">
-                          {shift.title || shift.job_position?.name || "Shift"}
-                        </div>
+                        <ShiftGridCopy
+                          shiftId={shift.id}
+                          title={shift.title}
+                          notes={shift.notes}
+                          fallback={shift.job_position?.name || "Shift"}
+                          translation={shiftTranslations.get(shift.id) ?? null}
+                          titleClassName="font-medium text-foreground text-sm"
+                          notesClassName="text-xs text-muted-foreground"
+                        />
                         <div className="text-sm text-muted-foreground">
                           {format(new Date(shift.start_time), "HH:mm")} -
                           {format(new Date(shift.end_time), "HH:mm")}
@@ -464,11 +482,19 @@ export function WeekView({
                                   }}
                                   onClick={() => onSelectShift(shift.id)}
                                 >
-                                  <div className="font-medium truncate mb-1">
-                                    {shift.title ||
-                                      shift.job_position?.name ||
-                                      "Shift"}
-                                  </div>
+                                  <ShiftGridCopy
+                                    shiftId={shift.id}
+                                    title={shift.title}
+                                    notes={shift.notes}
+                                    fallback={
+                                      shift.job_position?.name || "Shift"
+                                    }
+                                    translation={
+                                      shiftTranslations.get(shift.id) ?? null
+                                    }
+                                    titleClassName="font-medium truncate mb-1"
+                                    notesClassName="truncate opacity-90"
+                                  />
                                   <div className="flex items-center gap-1 text-[11px] opacity-90">
                                     <Clock className="h-3 w-3" />
                                     {format(

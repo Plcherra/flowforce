@@ -650,7 +650,7 @@ Prove: Unit test those field paths and a skipped amount. Run it with the jiti ru
 
 ### Phase 37 — Schedule text
 
-- [ ] Translate shift titles, shift notes, and time-off reasons.
+- [x] Translate shift titles, shift notes, and time-off reasons.
 
 Rules:
 
@@ -1326,6 +1326,22 @@ Phone steps for Pedro:
 2. Open the report builder and save a report with an English name and description. Open the employee report inbox and write an English note about a person. Both should save without waiting.
 3. Set your language to Español and open the report again. The name and description should be Spanish. The employee note should be Spanish, with Traducido de English. The person's name, the severity number, and any amount should stay as stored.
 4. Set the language back to English. The name, description, and note should be the English words you typed.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 37 Schedule text
+
+Shipped: A shift keeps the title and notes that were typed. A time-off request keeps the reason and the approval note. The cache paths are `schedules.title`, `schedules.notes`, `time_off_requests.reason`, and `time_off_requests.notes`. Shift color and a person's name are not sent. The save returns before the model runs. The week grid shows the translated title and notes. The time-off list shows the translated reason and notes, with one see-original line when the languages differ.
+
+Proven: `src/features/scheduling/scheduleTextTranslation.test.ts` passed through the jiti runner. The four paths are translated. The model is not called with the color `#2255aa` or the name `Pedro Alves`. An English viewer gets no time-off translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Add a shift with an English title and notes. Request time off with an English reason. Both should save without waiting. The shift color and the person's name stay as they are.
+3. Set your language to Español and open the week grid. The shift title and notes should be Spanish, with Traducido de English. Open time off. The reason should be Spanish. The person's name should be unchanged.
+4. Set the language back to English. The title, notes, and reason should be the English words you typed.
 
 Blockers: none. No new migration.
 

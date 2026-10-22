@@ -42,6 +42,14 @@ export const TRANSLATABLE_FIELDS: Record<
   employee_report: {
     notes: {},
   },
+  schedules: {
+    title: {},
+    notes: {},
+  },
+  time_off_requests: {
+    reason: {},
+    notes: {},
+  },
 };
 
 export function translatableFieldRule(
