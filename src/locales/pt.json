@@ -4494,7 +4494,9 @@
     "tabRegion": "Região",
     "tabNotifications": "Notificações",
     "tabAi": "IA",
-    "tabBilling": "Faturamento"
+    "tabBilling": "Faturamento",
+    "accessCountApproval": "Aprovação de contagens",
+    "accessReportsExport": "Exportação de relatórios"
   },
   "roles": {
     "aiSuggestions": "Sugestões de IA",

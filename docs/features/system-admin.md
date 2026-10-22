@@ -1,6 +1,6 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 4.
+Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 5.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
@@ -71,7 +71,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phase 3 is checked. Phase 4 is the next unchecked phase.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3 and 4 are checked. Phase 5 is the next unchecked phase.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -105,7 +105,7 @@ Prove: `src/features/system/utils/settingsTabs.test.ts` asserts the settings tab
 
 ### Phase 4 — Access types are only what the permission needs
 
-- [ ] Show read, create, edit, and delete only when that permission needs them.
+- [x] Show read, create, edit, and delete only when that permission needs them.
 
 Rules:
 
@@ -202,6 +202,23 @@ Phone steps for Pedro:
 3. Open Billing. The plan, seats, and billing actions are on that tab. With billing manage, the plan editor, seats, and workspace access are on Billing too.
 4. Open General as an owner or someone with system settings. Export backup, the high-risk confirmation, and recent audit activity are on General. Sign in as a manager without system settings. Those blocks are hidden.
 5. Open the team directory and open a person. Access and Roles & Permissions show only for someone with manage users. Open `/app/admin`. It leaves that address and opens the employee directory.
+
+Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
+
+Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 4 Access types are only what the permission needs
+
+Shipped: Each grant-screen switch is read, create, edit, delete, or the separate grant right. A read-only row, including own schedule and inventory export, has no create, edit, or delete switch. `approveTimeOff` still exists, and its grant-screen type is edit. Approve, export, manage, suggest, assign, and automate are no longer switch types. Count approval and reports export are their own rows so one switch does not turn the other permission on. Count approval and reports export are translated in all six locales.
+
+Proven: `src/features/roles/constants/permissionAccessTypes.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. A switch outside read, create, edit, delete, and grant fails. A read-only row has no create, edit, or delete switch. Time off approval maps to edit, and `approveTimeOff` is still a registry key. `npm run check:i18n` printed 4627 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as an owner. Open the team directory, open a person, and open Access.
+2. Time off shows Edit. It does not show Approve. Turning Edit off is the time-off approval permission.
+3. Own schedule and inventory export show Read only. They do not show Create, Edit, or Delete.
+4. Reports shows Read for viewing. Reports export is its own row and its switch is Read. Count approval is its own row and its switch is Edit.
+5. Switch labels on that screen are Read, Create, Edit, Delete, or Grant. There is no Approve, Export, Manage, or Suggest switch.
 
 Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
 

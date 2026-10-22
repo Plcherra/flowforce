@@ -4494,7 +4494,9 @@
     "tabRegion": "Region",
     "tabNotifications": "Benachrichtigungen",
     "tabAi": "KI",
-    "tabBilling": "Abrechnung"
+    "tabBilling": "Abrechnung",
+    "accessCountApproval": "Zählungsfreigabe",
+    "accessReportsExport": "Berichtsexport"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

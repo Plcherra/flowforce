@@ -2,8 +2,18 @@ import type { PermissionKey } from "@/lib/permissions/registry";
 import type { PermissionDiffMap } from "./personAccessDiffs";
 import { permissionAllowedAtLevel, type ProductLevel } from "./productLevels";
 
+export const ACCESS_SWITCH_TYPES = [
+  "read",
+  "create",
+  "edit",
+  "delete",
+  "grant",
+] as const;
+
+export type AccessSwitchType = (typeof ACCESS_SWITCH_TYPES)[number];
+
 export type AccessSwitch = {
-  id: string;
+  id: AccessSwitchType;
   label: string;
   keys: PermissionKey[];
   ownerLocked?: boolean;
@@ -12,8 +22,19 @@ export type AccessSwitch = {
 export type AccessRow = {
   id: string;
   label: string;
+  labelKey?: string;
   switches: AccessSwitch[];
 };
+
+const WRITE_SWITCH_TYPES = new Set<AccessSwitchType>(["create", "edit", "delete"]);
+
+export function accessSwitchTypeAllowed(id: string): id is AccessSwitchType {
+  return (ACCESS_SWITCH_TYPES as readonly string[]).includes(id);
+}
+
+export function rowShowsWriteSwitch(row: AccessRow): boolean {
+  return row.switches.some((item) => WRITE_SWITCH_TYPES.has(item.id));
+}
 
 export const ACCESS_ROWS: AccessRow[] = [
   { id: "own_profile", label: "Own profile", switches: [
@@ -39,7 +60,7 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "grant", label: "Grant", keys: ["schedule.grant"] },
   ]},
   { id: "reminders", label: "Reminders", switches: [
-    { id: "assign", label: "Assign", keys: ["schedule.reminders.assign"] },
+    { id: "create", label: "Create", keys: ["schedule.reminders.assign"] },
     { id: "grant", label: "Grant", keys: ["schedule.reminders.grant_deactivate"] },
   ]},
   { id: "own_tasks", label: "Own tasks", switches: [
@@ -58,7 +79,7 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "delete", label: "Delete", keys: ["manageForms"] },
   ]},
   { id: "form_approval", label: "Form submissions", switches: [
-    { id: "approve", label: "Approve", keys: ["approveFormSubmissions"] },
+    { id: "edit", label: "Edit", keys: ["approveFormSubmissions"] },
   ]},
   { id: "own_expenses", label: "Own expenses", switches: [
     { id: "read", label: "Read", keys: ["viewOwnExpenses"] },
@@ -67,10 +88,10 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "read", label: "Read", keys: ["viewTeamExpenses"] },
   ]},
   { id: "expense_approval", label: "Expenses", switches: [
-    { id: "approve", label: "Approve", keys: ["approveExpenses"] },
+    { id: "edit", label: "Edit", keys: ["approveExpenses"] },
   ]},
   { id: "time_off", label: "Time off", switches: [
-    { id: "approve", label: "Approve", keys: ["approveTimeOff"] },
+    { id: "edit", label: "Edit", keys: ["approveTimeOff"] },
   ]},
   { id: "inventory_items", label: "Inventory items", switches: [
     { id: "read", label: "Read", keys: ["inventory.view"] },
@@ -85,17 +106,19 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "create", label: "Create", keys: ["inventory.import"] },
   ]},
   { id: "inventory_export", label: "Inventory export", switches: [
-    { id: "export", label: "Export", keys: ["inventory.export"] },
+    { id: "read", label: "Read", keys: ["inventory.export"] },
   ]},
   { id: "purchasing", label: "Purchasing", switches: [
     { id: "read", label: "Read", keys: ["inventory.purchasing.view"] },
-    { id: "manage", label: "Manage", keys: ["inventory.purchasing.manage"] },
+    { id: "edit", label: "Edit", keys: ["inventory.purchasing.manage"] },
   ]},
   { id: "counts", label: "Counts", switches: [
     { id: "read", label: "Read", keys: ["inventory.counts.view"] },
     { id: "create", label: "Create", keys: ["inventory.counts.create"] },
     { id: "edit", label: "Edit", keys: ["inventory.counts.edit"] },
-    { id: "approve", label: "Approve", keys: ["inventory.counts.approve"] },
+  ]},
+  { id: "count_approval", label: "Count approval", labelKey: "settings.accessCountApproval", switches: [
+    { id: "edit", label: "Edit", keys: ["inventory.counts.approve"] },
   ]},
   { id: "waste", label: "Waste", switches: [
     { id: "read", label: "Read", keys: ["inventory.waste.view"] },
@@ -107,25 +130,27 @@ export const ACCESS_ROWS: AccessRow[] = [
   ]},
   { id: "reports", label: "Reports", switches: [
     { id: "read", label: "Read", keys: ["reports.view"] },
-    { id: "export", label: "Export", keys: ["reports.export"] },
+  ]},
+  { id: "reports_export", label: "Reports export", labelKey: "settings.accessReportsExport", switches: [
+    { id: "read", label: "Read", keys: ["reports.export"] },
   ]},
   { id: "ai_insights", label: "AI insights", switches: [
     { id: "read", label: "Read", keys: ["viewAIInsights", "ai.insights.view"] },
   ]},
   { id: "ai_suggest", label: "AI suggestions", switches: [
-    { id: "suggest", label: "Suggest", keys: ["ai.actions.suggest"] },
+    { id: "create", label: "Create", keys: ["ai.actions.suggest"] },
   ]},
   { id: "ai_approve", label: "AI approval", switches: [
-    { id: "approve", label: "Approve", keys: ["ai.actions.approve"] },
+    { id: "edit", label: "Edit", keys: ["ai.actions.approve"] },
   ]},
   { id: "ai_audit", label: "AI audit", switches: [
     { id: "read", label: "Read", keys: ["ai.audit.view"] },
   ]},
   { id: "ai_automate", label: "AI automation", switches: [
-    { id: "automate", label: "Automate", keys: ["ai.actions.automate"] },
+    { id: "edit", label: "Edit", keys: ["ai.actions.automate"] },
   ]},
   { id: "ai_governance", label: "AI governance", switches: [
-    { id: "manage", label: "Manage", keys: ["ai.governance.manage"] },
+    { id: "edit", label: "Edit", keys: ["ai.governance.manage"] },
   ]},
   { id: "directory", label: "Directory", switches: [
     { id: "read", label: "Read", keys: ["directory.view"] },
@@ -135,11 +160,12 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "edit", label: "Edit", keys: ["managePositions", "admin.roles", "admin.permissions"], ownerLocked: true },
   ]},
   { id: "people", label: "People", switches: [
-    { id: "manage", label: "Create / delete", keys: ["manageUsers"], ownerLocked: true },
+    { id: "create", label: "Create", keys: ["manageUsers"], ownerLocked: true },
+    { id: "delete", label: "Delete", keys: ["manageUsers"], ownerLocked: true },
   ]},
   { id: "billing", label: "Billing", switches: [
     { id: "read", label: "Read", keys: ["billing.view"], ownerLocked: true },
-    { id: "manage", label: "Manage", keys: ["billing.manage"], ownerLocked: true },
+    { id: "edit", label: "Edit", keys: ["billing.manage"], ownerLocked: true },
   ]},
   { id: "settings", label: "Company settings", switches: [
     { id: "edit", label: "Edit", keys: ["systemSettings", "admin.settings", "managePayments"], ownerLocked: true },

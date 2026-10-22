@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Switch } from "@/components/ui/switch";
 import {
   ACCESS_ROWS,
   accessSwitchOn,
   accessSwitchVisible,
+  type AccessRow,
   type AccessSwitch,
 } from "@/features/roles/constants/permissionAccessTypes";
 import { inviterHoldsKey } from "@/features/roles/constants/grantCeiling";
@@ -39,6 +41,9 @@ export function OperatorAccessGrid({
   idPrefix?: string;
   onAccessChange: (rowId: string, switchId: string, enabled: boolean) => void;
 }) {
+  const { t } = useTranslation();
+  const labelFor = (row: AccessRow) =>
+    row.labelKey ? t(row.labelKey) : row.label;
   return (
     <div className="space-y-2" data-testid="operator-access-grid">
       {ACCESS_ROWS.map((row) => {
@@ -50,7 +55,7 @@ export function OperatorAccessGrid({
             className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-3"
             data-testid={`access-row-${row.id}`}
           >
-            <p className="text-sm font-medium">{row.label}</p>
+            <p className="text-sm font-medium">{labelFor(row)}</p>
             <div className="flex flex-wrap gap-3">
               {switches.map((item) => {
                 const locked = level === "owner" && Boolean(item.ownerLocked);
@@ -78,7 +83,7 @@ export function OperatorAccessGrid({
                     {grantable ? (
                       <Switch
                         id={`${idPrefix}-${row.id}-${item.id}`}
-                        aria-label={`${row.label} ${item.label}`}
+                        aria-label={`${labelFor(row)} ${item.label}`}
                         checked={enabled}
                         disabled={disabled || locked || !grantable}
                         onCheckedChange={(checked) =>
