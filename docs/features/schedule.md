@@ -1,5 +1,7 @@
 # Schedule
 
+Phases 1–25 in this file are checked. Time off follow-ups are in [docs/features/time-off.md](time-off.md). Do not add phases here.
+
 This file is a manual review of each page, to decide what the final product will be from what we have now.
 
 ## Schedule grid and roles
