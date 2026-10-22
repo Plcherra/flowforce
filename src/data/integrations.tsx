@@ -6,7 +6,7 @@ export const integrations = [
     description: "Sync notifications and messages with your Slack workspace",
     difficulty: "Easy",
     time: "5 min",
-    icon: <Zap className="h-6 w-6 text-purple-600" />,
+    icon: <Zap className="h-6 w-6 text-secondary" />,
     steps: [
       "Open your Slack workspace and go to Apps",
       'Search for "FlowForce" and click "Add to Slack"',
@@ -29,7 +29,7 @@ export const integrations = [
     description: "Sync schedules and events with Google Calendar",
     difficulty: "Medium",
     time: "15 min",
-    icon: <Globe className="h-6 w-6 text-blue-600" />,
+    icon: <Globe className="h-6 w-6 text-primary" />,
     steps: [
       "Go to FlowForce Settings > Integrations",
       'Click "Connect Google Calendar"',
@@ -47,7 +47,7 @@ export const integrations = [
     description: "Connect FlowForce with 5000+ apps through Zapier",
     difficulty: "Medium",
     time: "20 min",
-    icon: <Settings className="h-6 w-6 text-orange-600" />,
+    icon: <Settings className="h-6 w-6 text-warning" />,
     steps: [
       "Create a Zapier account at zapier.com",
       'Search for "FlowForce" in the apps directory',
@@ -69,7 +69,7 @@ export const integrations = [
     description: "Set up custom webhooks for real-time data sync",
     difficulty: "Advanced",
     time: "30 min",
-    icon: <Key className="h-6 w-6 text-red-600" />,
+    icon: <Key className="h-6 w-6 text-destructive" />,
     steps: [
       "Generate API credentials in FlowForce Settings",
       "Set up your webhook endpoint URL",

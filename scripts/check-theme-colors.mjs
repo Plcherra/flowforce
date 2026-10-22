@@ -87,11 +87,54 @@ function loadBaseline() {
   return parsed;
 }
 
+// Literal colors that stay after the baseline is empty.
+// Decision 8: position colors, shift colors, rich-text color, post backgrounds,
+// and the vendor list. Phase 2 locks the viewport theme color. Decision 4 locks
+// the logo plate. Role colors match the colors planted in the database.
+// Signature ink and printable schedules use real colors outside the theme.
+const allowedFiles = new Set([
+  "app/globals.css",
+  "app/layout.tsx",
+  "src/lib/theme/applyTheme.ts",
+  "src/lib/theme/applyTheme.test.ts",
+  "src/features/system/components/LogoEditorDialog.tsx",
+  "src/features/positions/components/PositionManagement.tsx",
+  "src/features/positions/components/PositionManagementDialog.tsx",
+  "src/features/scheduling/components/DayView.tsx",
+  "src/features/scheduling/components/drag-drop/ScheduleTemplatesPanel.tsx",
+  "src/features/scheduling/components/drag-drop/ShiftChip.tsx",
+  "src/features/scheduling/components/DragDropScheduleCalendar.tsx",
+  "src/features/scheduling/components/MonthView.tsx",
+  "src/features/scheduling/components/ShiftDetailsPanel.tsx",
+  "src/features/scheduling/components/ShiftWizardDialog.tsx",
+  "src/features/scheduling/components/WeekView.tsx",
+  "src/features/scheduling/constants/templates.ts",
+  "src/features/scheduling/hooks/fallbackData.ts",
+  "src/features/scheduling/utils/weekHelpers.ts",
+  "src/features/scheduling/utils/weekTemplateSerializer.test.ts",
+  "src/features/scheduling/utils/weekTemplateSerializer.ts",
+  "src/lib/api/scheduleGateway.mock.ts",
+  "tests/playwright/scheduling-phase-04-opaque-chips.spec.ts",
+  "src/features/company-updates/wizard/RichTextEditor.tsx",
+  "src/features/company-updates/wizard/steps/DesignContentStep.tsx",
+  "src/features/company-updates/wizard/steps/TemplateSelectionStep.tsx",
+  "src/features/company-updates/wizard/useCompanyUpdateDraft.ts",
+  "src/features/forms/components/builder/RichTextContentEditor.tsx",
+  "src/features/forms/components/fields/SignatureField.tsx",
+  "src/data/updateTemplates.ts",
+  "src/features/roles/constants/productRoleContract.json",
+  "src/features/system/hooks/useAdminSettings.ts",
+  "src/hooks/useCompany.tsx",
+  "src/hooks/useCompanyRoles.tsx",
+  "src/hooks/useEvents.tsx",
+]);
+
 const found = scanTree();
 const baseline = loadBaseline();
 const missing = [];
 
 for (const [file, colors] of Object.entries(found)) {
+  if (allowedFiles.has(file)) continue;
   const allowed = new Set(Array.isArray(baseline[file]) ? baseline[file] : []);
   for (const color of colors) {
     if (!allowed.has(color)) missing.push(`${file}: ${color}`);

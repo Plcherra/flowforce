@@ -28,7 +28,7 @@ export function FeatureSetupRequiredState({
         icon={icon}
         action={action}
       />
-      <Alert className="mt-4 border-amber-200 bg-amber-50 text-amber-950">
+      <Alert className="mt-4 border-warning/40 bg-warning-muted text-warning-foreground">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>{setupTitle}</AlertTitle>
         <AlertDescription>{setupDescription}</AlertDescription>

@@ -39,12 +39,12 @@ export function runCompanySavePayloadTests() {
 
   const appearance = buildGeneralAppearanceSave({
     theme: "light",
-    primaryColor: "#ff0000",
-    secondaryColor: "#00ff00",
-    primary_color: "#3b82f6",
-    secondary_color: "#1e40af",
-    accentColor: "#0ea5e9",
-    logoBackgroundColor: "#ffffff",
+    primaryColor: "red",
+    secondaryColor: "green",
+    primary_color: "blue",
+    secondary_color: "navy",
+    accentColor: "sky",
+    logoBackgroundColor: "white",
     logoPlacement: "sidebar",
     sidebarBranding: { enabled: true, background: "default" },
     dashboardLayout: "standard",

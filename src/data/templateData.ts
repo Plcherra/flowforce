@@ -6,9 +6,9 @@ export const templates = {
     title: "Retail Template",
     description:
       "Streamline your retail operations with specialized tools for inventory, scheduling, and customer service.",
-    color: "text-blue-600",
-    bgColor: "bg-blue-500",
-    gradient: "from-blue-500 to-blue-600",
+    color: "text-primary",
+    bgColor: "bg-primary",
+    gradient: "from-primary to-primary",
     features: [
       "Shift coverage alerts",
       "Sales performance tracking",
@@ -41,9 +41,9 @@ export const templates = {
     title: "Hospitality Template",
     description:
       "Enhance guest experiences with coordinated front-of-house and back-of-house operations.",
-    color: "text-orange-600",
-    bgColor: "bg-orange-500",
-    gradient: "from-orange-500 to-red-500",
+    color: "text-warning",
+    bgColor: "bg-warning",
+    gradient: "from-warning to-destructive",
     features: [
       "Kitchen display systems",
       "Server scheduling",
@@ -76,9 +76,9 @@ export const templates = {
     title: "Healthcare Template",
     description:
       "Ensure patient care excellence with compliance-focused scheduling and documentation.",
-    color: "text-green-600",
-    bgColor: "bg-green-500",
-    gradient: "from-green-500 to-emerald-600",
+    color: "text-success",
+    bgColor: "bg-success",
+    gradient: "from-success to-success",
     features: [
       "HIPAA compliance",
       "Patient flow tracking",

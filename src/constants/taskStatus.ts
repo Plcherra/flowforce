@@ -26,16 +26,16 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
 };
 
 const FALLBACK_LABEL = "Unknown";
-const DEFAULT_BADGE_CLASS = "bg-gray-100 text-gray-800";
+const DEFAULT_BADGE_CLASS = "bg-muted text-foreground";
 
 const TASK_STATUS_BADGE_CLASS: Record<TaskStatus, string> = {
   todo: DEFAULT_BADGE_CLASS,
-  in_progress: "bg-blue-100 text-blue-800",
-  review: "bg-purple-100 text-purple-800",
-  blocked: "bg-amber-100 text-amber-800",
-  done: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-  completed: "bg-green-100 text-green-800",
+  in_progress: "bg-primary/10 text-primary",
+  review: "bg-secondary/10 text-secondary",
+  blocked: "bg-warning-muted text-warning-foreground",
+  done: "bg-success-muted text-success",
+  cancelled: "bg-destructive/10 text-destructive",
+  completed: "bg-success-muted text-success",
 };
 
 export const getTaskStatusLabel = (status?: string | null) => {

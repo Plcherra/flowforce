@@ -203,21 +203,21 @@ const normalizeRole = (role: string) => role.trim().toLowerCase();
 export const getRoleBadgeColor = (role: string) => {
   switch (normalizeRole(role)) {
     case "owner":
-      return "bg-purple-100 text-purple-800";
+      return "bg-secondary/10 text-secondary";
     case "company_admin":
     case "administrator":
-      return "bg-red-100 text-red-800";
+      return "bg-destructive/10 text-destructive";
     case "admin":
-      return "bg-red-100 text-red-800";
+      return "bg-destructive/10 text-destructive";
     case "manager":
-      return "bg-blue-100 text-blue-800";
+      return "bg-primary/10 text-primary";
     case "supervisor":
-      return "bg-green-100 text-green-800";
+      return "bg-success-muted text-success";
     case "staff":
     case "employee":
-      return "bg-gray-100 text-gray-800";
+      return "bg-muted text-foreground";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-muted text-foreground";
   }
 };
 

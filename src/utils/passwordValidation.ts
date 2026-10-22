@@ -180,12 +180,12 @@ export function getPasswordStrengthColor(
 ): string {
   switch (strength) {
     case "weak":
-      return "text-red-600";
+      return "text-destructive";
     case "medium":
-      return "text-yellow-600";
+      return "text-warning";
     case "strong":
-      return "text-green-600";
+      return "text-success";
     default:
-      return "text-gray-400";
+      return "text-muted-foreground";
   }
 }

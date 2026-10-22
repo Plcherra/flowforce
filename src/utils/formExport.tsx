@@ -28,7 +28,7 @@ export async function exportFormResponseToPdf(layout: FormReviewLayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         ${styleTags}
         <style>
-          body { background: #f8fafc; padding: 24px; }
+          body { background: hsl(0 0% 96%); padding: 24px; }
           @page { margin: 24px; }
         </style>
       </head>

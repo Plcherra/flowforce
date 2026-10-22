@@ -389,7 +389,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 21 — Remaining source
 
-- [ ] Clear the leftover hard-coded colors.
+- [x] Clear the leftover hard-coded colors.
 
 Rules:
 
@@ -765,5 +765,22 @@ Phone steps for Pedro:
 5. The browser status bar stays white until a later pass can give Dark its own bar color. The logo plate stays white.
 
 Blockers: none. No migration. The repair route relies on the database default for the color columns until phase 22 drops them.
+
+Questions: none.
+
+### 2026-10-22 — Phase 21 Remaining source
+
+Shipped: Task status, navigation, template, recognition, password, and setup-required classes now use the theme tokens. Printed schedules use the baked blue and neutral values, because that HTML does not load the app stylesheet. `scripts/theme-color-baseline.json` is empty. The color check allows the colors Decision 8 keeps: position colors, shift colors, the vendor list, rich-text color, post backgrounds, and signature ink. It also allows the viewport theme color, the logo plate, and the role colors that match the database.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. The company save payload test passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks. To do should be muted, in progress blue, review purple, blocked amber, done green, and cancelled red.
+2. Open a recognition feed if you have one. Goal badges should be blue, training purple, and manual recognition amber.
+3. On a password form, a weak password should read as red, a medium one as amber, and a strong one as green.
+4. Export or print a weekly schedule if that action is available. The day headers should be light gray and the shift marker blue.
+5. Open position colors, a shift color, a rich-text color, and a post gradient. Those pickers should still show their own colors.
+
+Blockers: none. No migration.
 
 Questions: none.

@@ -92,11 +92,11 @@ export const exportScheduleAsPDF = async (
         body { font-family: Arial, sans-serif; margin: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
         .day-section { margin-bottom: 20px; page-break-inside: avoid; }
-        .day-title { background-color: #f0f0f0; padding: 10px; font-weight: bold; }
-        .shift { padding: 5px 10px; border-left: 3px solid #007bff; margin: 5px 0; }
+        .day-title { background-color: hsl(0 0% 96%); padding: 10px; font-weight: bold; }
+        .shift { padding: 5px 10px; border-left: 3px solid hsl(217 91% 60%); margin: 5px 0; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        th, td { border: 1px solid hsl(214.3 31.8% 91.4%); padding: 8px; text-align: left; }
+        th { background-color: hsl(0 0% 96%); }
         @media print {
           body { margin: 0; }
           .no-print { display: none; }
@@ -136,7 +136,7 @@ export const exportScheduleAsPDF = async (
         .join("")}
       
       <button class="no-print" onclick="window.print()" 
-              style="margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+              style="margin-top: 20px; padding: 10px 20px; background-color: hsl(217 91% 60%); color: hsl(210 40% 98%); border: none; cursor: pointer;">
         Print Schedule
       </button>
     </body>
