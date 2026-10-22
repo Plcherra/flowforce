@@ -77,7 +77,7 @@ Color phases follow Decisions 3 and 7. Touch only the files named in that phase.
 
 ### Phase 1 — Three token sets
 
-- [ ] Put FlowForce, Light, and Dark in `app/globals.css`.
+- [x] Put FlowForce, Light, and Dark in `app/globals.css`.
 
 Rules:
 
@@ -442,5 +442,18 @@ Questions: Confirm the brand is the CSS palette, if the company blue is what sho
 Shipped: Decision 1 now bakes `#3b82f6` / `#1e40af` into `:root` before the picker is removed. Light and Dark derive from that blue. Mint and the old secondary lavender come out. The lavender accent and tertiary stay, because that is the hover accent still on screen after sign-in. No app code.
 
 Blockers: none.
+
+Questions: none.
+
+### 2026-10-22 — Phase 1 Three token sets
+
+Shipped: `:root` is the signed-in FlowForce blue. `[data-theme="light"]` matches that set except `--input` `214.3 31.8% 91.4%`. `.dark` keeps its surface tokens and uses the same blue, secondary, accent, and tertiary. Success, warning, `--brand-secondary`, and `--logo-background` are in the stylesheet and in `tailwind.config.ts`. The company color override is still in place.
+
+Proven: Unit test `src/lib/theme/themeTokens.test.ts` reads `app/globals.css` and asserts the baked strings. Run with jiti the same way as `scripts/test-tasks-page.mjs`. It passed. ESLint passed on `src/lib/theme/themeTokens.test.ts` and `tailwind.config.ts`.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk. The signed-in blue should look the same as before this deploy. This phase does not add a switch yet.
+
+Blockers: none. No migration.
 
 Questions: none.
