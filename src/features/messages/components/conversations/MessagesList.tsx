@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Trash2, Edit2, Check, X } from "lucide-react";
 import { MessageReactions } from "./MessageReactions";
+import { useMessageTranslations } from "@/features/messages/hooks/useMessageTranslations";
+import { MessageBody } from "@/features/messages/components/conversations/MessageBody";
 import { format } from "date-fns";
 import type { Message, ThreadMessage } from "@/types/messages";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,6 +48,16 @@ export function MessagesList({
   channelMembers = [],
 }: MessagesListProps) {
   const { t } = useTranslation();
+  const messageSources = useMemo(
+    () =>
+      messages.map((message) => ({
+        id: message.id,
+        content: message.content,
+        updated_at: message.updated_at,
+      })),
+    [messages],
+  );
+  const translations = useMessageTranslations(messageSources);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagePendingDelete, setMessagePendingDelete] =
     useState<Message | null>(null);
@@ -222,14 +234,15 @@ export function MessagesList({
                     </div>
                   ) : (
                     <>
-                      <p className="mt-1 text-sm text-foreground">
-                        {message.content}
-                        {message.edited_at && (
-                          <span className="ml-2 text-xs text-muted-foreground italic">
-                            (edited)
-                          </span>
-                        )}
-                      </p>
+                      <MessageBody
+                        content={message.content}
+                        translation={translations.get(message.id) ?? null}
+                      />
+                      {message.edited_at && (
+                        <span className="ml-2 text-xs text-muted-foreground italic">
+                          (edited)
+                        </span>
+                      )}
 
                       {/* Message Actions */}
                       <div className="mt-2 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">

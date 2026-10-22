@@ -1,9 +1,16 @@
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import type { MessageAttachment, SearchResult } from "@/types/messages";
 import { messagesRepository } from "@/features/messages/api/messagesRepository";
 
 export function useMessageOperations() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const sendMessage = async (
     channelId: string,
@@ -23,6 +30,8 @@ export function useMessageOperations() {
         {
           replyToId,
           attachments,
+          companyId: companyId ?? undefined,
+          sourceLocale,
         },
       );
       return { data, error: null };

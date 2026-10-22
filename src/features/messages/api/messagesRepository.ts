@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleMessageTranslation } from "@/features/messages/scheduleMessage";
 import { supabase } from "@/integrations/supabase/client";
 import type {
   CreateChannelData,
@@ -371,7 +373,12 @@ async function insertMessage(
   channelId: string,
   senderId: string,
   content: string,
-  options: { replyToId?: string; attachments?: MessageAttachment[] } = {},
+  options: {
+    replyToId?: string;
+    attachments?: MessageAttachment[];
+    companyId?: string;
+    sourceLocale?: AppLanguage;
+  } = {},
 ): Promise<Message> {
   // Phase 5: Validate inputs with Zod schemas
   const contentValidation = MessageContentSchema.safeParse(content);
@@ -457,6 +464,15 @@ async function insertMessage(
       : (parsed.reply_to_message ?? null),
   };
 
+  if (options.companyId && options.sourceLocale && content.trim()) {
+    scheduleMessageTranslation({
+      companyId: options.companyId,
+      sourceId: normalized.id,
+      sourceLocale: options.sourceLocale,
+      content,
+    });
+  }
+
   return normalized as Message;
 }
 
@@ -464,6 +480,7 @@ async function updateMessage(
   messageId: string,
   senderId: string,
   content: string,
+  source?: { companyId: string; sourceLocale: AppLanguage },
 ): Promise<Message> {
   const { data, error } = await supabase
     .from("messages")
@@ -490,6 +507,15 @@ async function updateMessage(
       ? (parsed.reply_to_message[0] ?? null)
       : (parsed.reply_to_message ?? null),
   };
+
+  if (source && content.trim()) {
+    scheduleMessageTranslation({
+      companyId: source.companyId,
+      sourceId: messageId,
+      sourceLocale: source.sourceLocale,
+      content,
+    });
+  }
 
   return normalized as Message;
 }

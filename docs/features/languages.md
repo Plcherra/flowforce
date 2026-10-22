@@ -678,7 +678,7 @@ Prove: Unit test the two field paths. Run it with the jiti runner.
 
 ### Phase 39 — Message bodies
 
-- [ ] Translate a message body.
+- [x] Translate a message body.
 
 Rules:
 
@@ -1358,6 +1358,22 @@ Phone steps for Pedro:
 2. Create an announcement with an English title and content. It should appear without waiting.
 3. Set your language to Español and reload. The banner title and content should be Spanish, with Traducido de English. The author's name should stay as stored.
 4. Set the language back to English. The banner should show the English title and content you typed, with no translated-from line.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 39 Message bodies
+
+Shipped: A message keeps the words that were sent. The cache path is `content` on `messages`. The send returns before the model runs. The conversation list shows the translation, with one see-original line when the languages differ. If the monthly budget blocks the model, the message stays the original and no translation row is written.
+
+Proven: `src/features/messages/messageTranslation.test.ts` passed through the jiti runner. A budget block returns the original sentence and writes no cache row. A later allowed run translates the body, and a second read uses the cache. A Spanish viewer sees `Traducido de English. Ver original`. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Messages and send an English sentence. It should appear without waiting.
+3. Set your language to Español and open the same conversation. The message should be Spanish, with Traducido de English and a control to see the original.
+4. Set the language back to English. The message should be the sentence you sent, with no translated-from line.
 
 Blockers: none. No new migration.
 
