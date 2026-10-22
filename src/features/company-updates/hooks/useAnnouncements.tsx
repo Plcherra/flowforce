@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleAnnouncementTranslation } from "@/features/messages/scheduleAnnouncement";
 import { logger } from "@/utils/logger";
 
 import type {
@@ -10,6 +14,10 @@ import type {
 
 export function useAnnouncements() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -162,6 +170,17 @@ export function useAnnouncements() {
         .single();
 
       if (error) throw error;
+      const savedCompanyId =
+        typeof data?.company_id === "string" ? data.company_id : companyId;
+      if (savedCompanyId && data?.id) {
+        scheduleAnnouncementTranslation({
+          companyId: savedCompanyId,
+          sourceId: data.id,
+          sourceLocale,
+          title: announcementData.title,
+          content: announcementData.content,
+        });
+      }
 
       await fetchAnnouncements(); // Refresh the list
       return { data, error: null };
@@ -183,6 +202,15 @@ export function useAnnouncements() {
         .eq("id", id);
 
       if (error) throw error;
+      if (companyId && (updates.title !== undefined || updates.content !== undefined)) {
+        scheduleAnnouncementTranslation({
+          companyId,
+          sourceId: id,
+          sourceLocale,
+          title: typeof updates.title === "string" ? updates.title : null,
+          content: typeof updates.content === "string" ? updates.content : null,
+        });
+      }
 
       await fetchAnnouncements(); // Refresh the list
       return { error: null };

@@ -29,7 +29,10 @@ import { CalendarIcon, Megaphone } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleAnnouncementTranslation } from "@/features/messages/scheduleAnnouncement";
 import { logger } from "@/utils/logger";
 
 function isBeforeNow(date: Date) {
@@ -47,8 +50,10 @@ export function CreateAnnouncement({
   onClose,
   onAnnouncementCreated,
 }: CreateAnnouncementProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -84,6 +89,19 @@ export function CreateAnnouncement({
         .single();
 
       if (error) throw error;
+      const savedCompanyId =
+        profile?.companyId ??
+        profile?.company_id ??
+        (typeof data?.company_id === "string" ? data.company_id : null);
+      if (savedCompanyId && data?.id) {
+        scheduleAnnouncementTranslation({
+          companyId: savedCompanyId,
+          sourceId: data.id,
+          sourceLocale,
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+        });
+      }
 
       toast({
         title: "Success",

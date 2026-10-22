@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { logger } from "@/utils/logger";
 
 import type { Announcement } from "@/types/announcements";
+import { useAnnouncementTranslations } from "@/features/messages/hooks/useAnnouncementTranslations";
+import { AnnouncementCopy } from "@/features/messages/components/announcements/AnnouncementCopy";
 
 interface AnnouncementBannerProps {
   className?: string;
@@ -178,6 +180,16 @@ export function AnnouncementBanner({
   };
 
   // Filter out dismissed and read announcements (except urgent ones)
+  const announcementSources = useMemo(
+    () =>
+      announcements.map((announcement) => ({
+        id: announcement.id,
+        title: announcement.title,
+        content: announcement.content,
+      })),
+    [announcements],
+  );
+  const translations = useAnnouncementTranslations(announcementSources);
   const visibleAnnouncements = announcements.filter(
     (announcement) =>
       !dismissedIds.has(announcement.id) &&
@@ -205,9 +217,7 @@ export function AnnouncementBanner({
               {getPriorityIcon(announcement.priority)}
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <AlertTitle className="mb-0 text-base">
-                    {announcement.title}
-                  </AlertTitle>
+                  <AlertTitle className="sr-only">{announcement.title}</AlertTitle>
                   <Badge
                     variant="outline"
                     className={`text-xs ${getPriorityBadgeColor(announcement.priority)}`}
@@ -220,9 +230,12 @@ export function AnnouncementBanner({
                   )}
                 </div>
 
-                <AlertDescription className="text-sm leading-relaxed">
-                  {announcement.content}
-                </AlertDescription>
+                <AnnouncementCopy
+                  announcementId={announcement.id}
+                  title={announcement.title}
+                  content={announcement.content}
+                  translation={translations.get(announcement.id) ?? null}
+                />
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>

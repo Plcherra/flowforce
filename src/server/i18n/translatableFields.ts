@@ -50,6 +50,10 @@ export const TRANSLATABLE_FIELDS: Record<
     reason: {},
     notes: {},
   },
+  announcements: {
+    title: {},
+    content: {},
+  },
 };
 
 export function translatableFieldRule(
