@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useCan } from "@/hooks/useCan";
+import { useProfile } from "@/hooks/useProfile";
+import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useCustomSections } from "@/hooks/useCustomSections";
 import { navigationSections } from "@/data/navigationData";
@@ -42,10 +44,25 @@ const canonicalizePath = (href: string) => {
 export function useNavigationStructure() {
   const { hasRole } = usePermissions();
   const { can } = useCan();
+  const { profile } = useProfile();
+  const leadership = isLeadershipLevel({ name: profile?.role });
   const featureFlags = useFeatureFlags();
   const { sections: customSections } = useCustomSections();
 
+  const isLeadershipItem = (item: { name?: string; href?: string }) => {
+    const name = (item.name || "").trim().toLowerCase();
+    const href = canonicalizePath(item.href || "");
+    return (
+      href === "employees" ||
+      href === "ai-insights" ||
+      name === "team directory" ||
+      name === "employee directory" ||
+      name === "ai insights"
+    );
+  };
+
   const isItemVisible = (item: any) => {
+    if (!leadership && isLeadershipItem(item)) return false;
     if (item.roles && !hasRole(item.roles)) return false;
     if (item.permission && !can(item.permission as any)) return false;
     if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag))
@@ -194,6 +211,7 @@ export function useNavigationStructure() {
               canonicalTail === "employee-directory" ||
               normalizedName === "employee directory"
             ) {
+              if (!leadership) return null;
               href = "/employees";
             }
 
@@ -251,6 +269,7 @@ export function useNavigationStructure() {
           ...customItems,
           ...fileItems,
         ].filter((item) => {
+          if (!leadership && isLeadershipItem(item)) return false;
           const canonical = canonicalizePath(item.href);
           if (!canonical) {
             return false;
@@ -271,7 +290,7 @@ export function useNavigationStructure() {
       })
       .filter((section) => section.items.length > 0); // Only include sections with visible items
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [customSections, hasRole, can, featureFlags]);
+  }, [customSections, hasRole, can, featureFlags, leadership]);
 
   const canManageSections =
     can("systemSettings") || hasRole(["company_admin", "owner", "admin"]);

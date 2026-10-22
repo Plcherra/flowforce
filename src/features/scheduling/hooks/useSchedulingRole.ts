@@ -11,6 +11,7 @@ import {
   isManagerLikeRole,
   normaliseRole,
 } from "@/utils/authRoles";
+import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 
 export interface SchedulingRole {
   isStaff: boolean;
@@ -36,10 +37,11 @@ export function useSchedulingRole(): SchedulingRole {
     const isOwner = role === "owner";
     const isStaff = !isManager;
     const canViewDrafts = canViewScheduleDrafts(user, profile?.role);
-    const canManageSchedule = isManager || can("editSchedules");
-    const canPublish = isManager || can("editSchedules");
+    const leadership = isLeadershipLevel({ name: profile?.role });
+    const canManageSchedule = leadership && (isManager || can("editSchedules"));
+    const canPublish = leadership && (isManager || can("editSchedules"));
     const canApproveRequests = isManager || can("approveTimeOff");
-    const canManageAvailability = isManager || can("editSchedules");
+    const canManageAvailability = leadership && (isManager || can("editSchedules"));
 
     return {
       isStaff,

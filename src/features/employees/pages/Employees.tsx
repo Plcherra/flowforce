@@ -4,6 +4,8 @@ import { useCommunicationBootstrap } from "@/hooks/useCommunicationBootstrap";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { Users } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 
 const TeamDirectory = lazy(async () =>
   import("@/features/employees/components/TeamDirectory").then((module) => ({
@@ -12,9 +14,23 @@ const TeamDirectory = lazy(async () =>
 );
 
 export default function EmployeesPage() {
+  const { profile } = useProfile();
+  const leadership = isLeadershipLevel({ name: profile?.role });
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
+
+  if (profile && !leadership) {
+    return (
+      <div className="p-6">
+        <EmptyStateCard
+          title="Employee directory"
+          description="This page is for managers and above."
+          icon={<Users className="h-5 w-5" />}
+        />
+      </div>
+    );
+  }
 
   if (!bootstrap.userReady || bootstrap.loading) {
     return <PageLoader text="Loading employee directory..." />;

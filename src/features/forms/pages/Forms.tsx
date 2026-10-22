@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
+import { useProfile } from "@/hooks/useProfile";
+import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
 import { useForms } from "@/features/forms/hooks/useForms";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
@@ -49,6 +51,8 @@ const matchesQuery = (form: FormWithMeta, query: string) => {
 
 export default function Forms() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const leadership = isLeadershipLevel({ name: profile?.role });
   const { can: canUse, getSource } = useCan();
   const hideOtherSubmissions = submittedFormsHidden(
     getSource("forms.submissions.read"),
@@ -245,11 +249,13 @@ export default function Forms() {
           </div>
         </div>
 
-        <FormsReadinessPanel
-          forms={forms}
-          canCreateForms={canCreateForms}
-          onCreateForm={() => setCreateDialogOpen(true)}
-        />
+        {leadership ? (
+          <FormsReadinessPanel
+            forms={forms}
+            canCreateForms={canCreateForms}
+            onCreateForm={() => setCreateDialogOpen(true)}
+          />
+        ) : null}
 
         <Tabs
           value={statusFilter}

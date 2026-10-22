@@ -1,4 +1,4 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
@@ -22,12 +22,18 @@ import {
   isRequestedOffDay,
   type TimeOffSpan,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
+import {
+  groupGridRows,
+  personStoreAndRole,
+} from "@/features/scheduling/utils/scheduleGridGroups";
 
 interface EmployeeSummary {
   id: string;
   first_name: string | null;
   last_name: string | null;
   avatar_url: string | null;
+  store?: string;
+  role?: string;
 }
 
 interface UnassignedBucket {
@@ -399,15 +405,36 @@ export function WeekGrid({
     [unassignedShifts],
   );
 
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const labeledEmployees = useMemo(
+    () =>
+      employees.map((employee) => {
+        const shifts = [...(shiftsByEmployeeDay.get(employee.id)?.values() ?? [])].flat();
+        const label = personStoreAndRole(shifts);
+        return { ...employee, store: employee.store ?? label.store, role: employee.role ?? label.role };
+      }),
+    [employees, shiftsByEmployeeDay],
+  );
+  const gridRows = useMemo(
+    () => groupGridRows(labeledEmployees, collapsedSections),
+    [collapsedSections, labeledEmployees],
+  );
   const useVirtualization =
     employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD;
 
   const virtualizer = useVirtualizer({
-    count: employees.length,
+    count: gridRows.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => (minimizedView ? 28 : EMPLOYEE_ROW_HEIGHT),
+    estimateSize: (index) =>
+      gridRows[index]?.kind === "section"
+        ? 36
+        : minimizedView
+          ? 28
+          : EMPLOYEE_ROW_HEIGHT,
     overscan: 5,
-    enabled: employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD,
+    enabled: useVirtualization,
   });
 
   const html5DropForCell = useCallback(
@@ -507,7 +534,7 @@ export function WeekGrid({
         </div>
 
         <div className="relative">
-          {employees.length >= VIRTUALIZE_EMPLOYEE_THRESHOLD ? (
+          {useVirtualization ? (
             <div
               data-testid="schedule-grid-virtual-body"
               style={{
@@ -517,11 +544,11 @@ export function WeekGrid({
               }}
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {
-                const employee = employees[virtualRow.index];
-                if (!employee) return null;
+                const row = gridRows[virtualRow.index];
+                if (!row) return null;
                 return (
                   <div
-                    key={employee.id}
+                    key={row.kind === "section" ? row.id : row.employee.id}
                     data-index={virtualRow.index}
                     ref={virtualizer.measureElement}
                     style={{
@@ -532,13 +559,52 @@ export function WeekGrid({
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                   >
-                    {renderEmployeeRow(employee)}
+                    {row.kind === "section" ? (
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between border-b bg-muted/40 px-3 py-2 text-left text-sm font-medium"
+                        data-testid="schedule-grid-section"
+                        onClick={() =>
+                          setCollapsedSections((current) => {
+                            const next = new Set(current);
+                            if (next.has(row.id)) next.delete(row.id);
+                            else next.add(row.id);
+                            return next;
+                          })
+                        }
+                      >
+                        {row.store} · {row.role} ({row.count})
+                      </button>
+                    ) : (
+                      renderEmployeeRow(row.employee)
+                    )}
                   </div>
                 );
               })}
             </div>
           ) : (
-            employees.map(renderEmployeeRow)
+            gridRows.map((row) =>
+              row.kind === "section" ? (
+                <button
+                  key={row.id}
+                  type="button"
+                  className="flex w-full items-center justify-between border-b bg-muted/40 px-3 py-2 text-left text-sm font-medium"
+                  data-testid="schedule-grid-section"
+                  onClick={() =>
+                    setCollapsedSections((current) => {
+                      const next = new Set(current);
+                      if (next.has(row.id)) next.delete(row.id);
+                      else next.add(row.id);
+                      return next;
+                    })
+                  }
+                >
+                  {row.store} · {row.role} ({row.count})
+                </button>
+              ) : (
+                renderEmployeeRow(row.employee)
+              ),
+            )
           )}
         </div>
 

@@ -568,7 +568,7 @@ Prove: Unit test `src/features/scheduling/utils/repeatPattern.test.ts`, plus the
 
 ### Phase 25 — Leadership schedule and a grouped grid
 
-- [ ] Level 2 and above sees leadership schedule tools. The grid groups by store and role.
+- [x] Level 2 and above sees leadership schedule tools. The grid groups by store and role.
 
 Rules:
 
@@ -990,5 +990,21 @@ Phone steps for Pedro:
 4. Open availability for yourself, set a weekday, set Repeats to Weekly, and save. Open a later week. That weekday should still be available. Set Repeats to Does not repeat and save. A later week should not keep that row.
 
 Blockers: none for this phase. Migration `20261022015446_staff_availability_recurrence.sql` was applied to the linked project.
+
+Questions: none.
+
+### 2026-10-22 — Phase 25 Leadership schedule and a grouped grid
+
+Shipped: Schedule modifications, forms insights, AI insights, and the employee directory stay with level 2 and above. A staff class stays below that even when its hierarchy number is 5. A staff person with shift edit still does not see schedule modifications. From 25 people up, the week grid groups rows by store and then by role. Each section collapses. Fifty or more people keep that grouping inside the virtual list.
+
+Proven: Unit tests `src/features/scheduling/utils/leadershipLevel.test.ts` and `src/features/scheduling/utils/scheduleGridGroups.test.ts`, run with `node scripts/test-schedule-availability-engine.mjs`, cover staff, level 2, level 3, owner, and groups of 25, 50, 100, and 500. They passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. Playwright was not run: this environment has no `SUPABASE_SERVICE_ROLE_KEY`.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as a staff person. Open Schedule. Add shift and the other schedule modification controls should be hidden. Forms should not show the insights panel. AI Insights and the employee directory should not be in the menu.
+2. Open the employee directory address directly. It should say the page is for managers and above.
+3. Sign in as a manager (level 2) and as an admin (level 3). Schedule modifications, the forms insights panel, AI Insights, and the employee directory should be there.
+4. On a schedule with 25 or more people, the week grid should group people by store and then by role. Tap a section header. That section should collapse and open again.
+
+Blockers: none for this phase. No migration.
 
 Questions: none.

@@ -8,11 +8,11 @@ Read this index and open only the feature file marked active.
 | --- | --- | --- |
 | Theme | active | [docs/features/theme.md](features/theme.md) |
 | Languages | next, after Theme | [docs/features/languages.md](features/languages.md) |
-| Tasks | phases 23–24 still open; phases 9–12 still skipped | [docs/features/tasks.md](features/tasks.md) |
-| Schedule | phases 23–25 specified, not started | [docs/features/schedule.md](features/schedule.md) |
+| Tasks | phases 23–24 shipped; phases 9–12 still skipped | [docs/features/tasks.md](features/tasks.md) |
+| Schedule | phases 23–25 shipped | [docs/features/schedule.md](features/schedule.md) |
 
 The next run starts Theme. Do not start Languages until Theme's phases are checked or skipped.
 
-Tasks phase 22 is checked. Phases 23 and 24 are unchecked and are not blocked. They can still land on `main` from the run that was already shipping them. Phases 9, 10, 11, and 12 are checked as skipped. Their skip lines still name "Next opening checklist or shift", "Recurring shift tasks", "AI draft tasks from form notes", and "Where the task-type level is edited". Phase 21 already edits the task level on the employee card. The Tasks open-question section is empty.
+Tasks phases 23 and 24 are checked. Phases 9, 10, 11, and 12 stay skipped. The Tasks open-question section is empty.
 
-Schedule phases 23, 24, and 25 are unchecked. The Schedule open-question section is empty. This plan does not make Schedule the active feature.
+Schedule phases 23, 24, and 25 are checked. The Schedule open-question section is empty. This plan does not make Schedule the active feature.

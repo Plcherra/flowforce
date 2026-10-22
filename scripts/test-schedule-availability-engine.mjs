@@ -21,6 +21,12 @@ const { runScheduleReadinessTests } = importTs(
 const { runRepeatPatternTests } = importTs(
   "../src/features/scheduling/utils/repeatPattern.test.ts",
 );
+const { runLeadershipLevelTests } = importTs(
+  "../src/features/scheduling/utils/leadershipLevel.test.ts",
+);
+const { runScheduleGridGroupsTests } = importTs(
+  "../src/features/scheduling/utils/scheduleGridGroups.test.ts",
+);
 
 runScheduleAvailabilityEngineTests();
 console.log("scheduleAvailabilityEngine tests passed");
@@ -30,3 +36,7 @@ runScheduleReadinessTests();
 console.log("scheduleReadiness tests passed");
 runRepeatPatternTests();
 console.log("repeatPattern tests passed");
+runLeadershipLevelTests();
+console.log("leadershipLevel tests passed");
+runScheduleGridGroupsTests();
+console.log("scheduleGridGroups tests passed");
